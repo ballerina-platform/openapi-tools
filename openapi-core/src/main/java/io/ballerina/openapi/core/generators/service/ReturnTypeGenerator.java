@@ -77,7 +77,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.PIPE;
 import static io.ballerina.openapi.core.GeneratorConstants.RESPONSE_RECORD_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.RETURNS;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_107;
-import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.getMediaTypeToken;
+import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.handleMediaType;
 
 /**
  * This class for generating return type definition node according to the OpenAPI specification response section.
@@ -196,12 +196,12 @@ public class ReturnTypeGenerator {
                     Iterator<Map.Entry<String, MediaType>> contentItr = responseContent.entrySet().iterator();
                     Map.Entry<String, MediaType> mediaTypeEntry = contentItr.next();
                     String recordName = getNewRecordName();
-                    ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> mediaTypeToken =
-                            getMediaTypeToken(mediaTypeEntry, recordName);
-                    TypeDefinitionNode rightNode = mediaTypeToken.right;
-                    if (rightNode != null) {
-                        typeInclusionRecords.put(recordName, rightNode);
-                        setCountForRecord(countForRecord + 1);
+                    ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>> mediaTypeToken =
+                            handleMediaType(mediaTypeEntry, recordName);
+                    Optional<TypeDefinitionNode> rightNode = mediaTypeToken.right;
+                    if (rightNode.isPresent()) {
+                        typeInclusionRecords.put(recordName, rightNode.get());
+                        setCountForRecord(countForRecord++);
                         type = createSimpleNameReferenceNode(createIdentifierToken(recordName));
                     } else {
                         type = mediaTypeToken.left.orElseGet(
@@ -236,15 +236,15 @@ public class ReturnTypeGenerator {
         } else {
             for (Map.Entry<String, MediaType> next : contentEntries) {
                 String recordName = getNewRecordName();
-                ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode>
-                        mediaTypeToken = getMediaTypeToken(next, recordName);
+                ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>>
+                        mediaTypeToken = handleMediaType(next, recordName);
                 // right node represents the newly generated node for if there is an inline record in the returned
                 // tuple.
-                TypeDefinitionNode rightNode = mediaTypeToken.right;
+                Optional<TypeDefinitionNode> rightNode = mediaTypeToken.right;
 
-                if (rightNode != null) {
-                    typeInclusionRecords.put(recordName, rightNode);
-                    setCountForRecord(countForRecord + 1);
+                if (rightNode.isPresent()) {
+                    typeInclusionRecords.put(recordName, rightNode.get());
+                    setCountForRecord(countForRecord++);
                     SimpleNameReferenceNode type = createSimpleNameReferenceNode(createIdentifierToken(recordName));
                     returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), type);
                 } else {
@@ -309,18 +309,18 @@ public class ReturnTypeGenerator {
         Set<String> qualifiedNodes = new LinkedHashSet<>();
         for (Map.Entry<String, MediaType> contentType : contentEntries) {
             String recordName = getNewRecordName();
-            ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> mediaTypeToken =
-                    getMediaTypeToken(contentType, recordName);
+            ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>> mediaTypeToken =
+                    handleMediaType(contentType, recordName);
 
             Optional<TypeDescriptorNode> leftNode = mediaTypeToken.left;
-            TypeDefinitionNode rightNode = mediaTypeToken.right;
+            Optional<TypeDefinitionNode> rightNode = mediaTypeToken.right;
 
             if (leftNode.isEmpty()) {
                 SimpleNameReferenceNode httpResponse = createSimpleNameReferenceNode(createIdentifierToken(ANYDATA));
                 qualifiedNodes.add(httpResponse.name().text());
-            } else if (rightNode != null) {
-                typeInclusionRecords.put(recordName, rightNode);
-                setCountForRecord(countForRecord + 1);
+            } else if (rightNode.isPresent()) {
+                typeInclusionRecords.put(recordName, rightNode.get());
+                setCountForRecord(countForRecord++);
                 qualifiedNodes.add(createSimpleNameReferenceNode(createIdentifierToken(recordName)).toSourceCode());
             } else {
                 TypeDescriptorNode typeDescriptorNode = leftNode.get();

@@ -64,7 +64,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.HTTP_REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.PAYLOAD;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.getAnnotationNode;
-import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.getMediaTypeToken;
+import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.handleMediaType;
 
 /**
  * This class for generating request body payload for OAS requestBody section.
@@ -174,8 +174,8 @@ public class RequestBodyGenerator {
                     typeName = Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
             }
         } else {
-            ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> mediaTypeTokens =
-                    getMediaTypeToken(mediaType, null);
+            ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>> mediaTypeTokens =
+                    handleMediaType(mediaType, null);
             typeName = mediaTypeTokens.left;
         }
         return typeName;

@@ -213,17 +213,22 @@ public class ServiceGenerationUtils {
      * (Value) of the return tuple represents the newly generated TypeDefinitionNode for return type if it has inline
      * objects.
      */
-    public static ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> getMediaTypeToken(
-            Map.Entry<String, MediaType> mediaType, String recordName) throws BallerinaOpenApiException {
 
+    public static ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>> handleMediaType(
+            Map.Entry<String, MediaType> mediaType, String recordName) throws BallerinaOpenApiException {
         String mediaTypeContent = mediaType.getKey().trim();
         if (mediaTypeContent.matches("text/.*")) {
             mediaTypeContent = GeneratorConstants.TEXT;
-        } else if (mediaTypeContent.matches("application/.*.json")) {
+        } else if (mediaTypeContent.matches("application/.*\\+json")) {
             mediaTypeContent = GeneratorConstants.APPLICATION_JSON;
-        } else if (mediaTypeContent.matches("application/.*.xml")) {
+        } else if (mediaTypeContent.matches("application/.*\\+xml")) {
             mediaTypeContent = GeneratorConstants.APPLICATION_XML;
+        } else if (mediaTypeContent.matches("application/.*\\+octet-stream")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_OCTET_STREAM;
+        } else if (mediaTypeContent.matches("application/.*\\+x-www-form-urlencoded")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_URL_ENCODE;
         }
+
         MediaType value = mediaType.getValue();
         Schema<?> schema = value.getSchema();
         IdentifierToken identifierToken;
@@ -232,7 +237,7 @@ public class ServiceGenerationUtils {
                 Optional<TypeDescriptorNode> returnTypeDecNode = generateTypeDescNodeForOASSchema(schema);
                 if (returnTypeDecNode.isEmpty()) {
                     return ImmutablePair.of(Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(
-                            JSON))), null);
+                            JSON))), Optional.empty());
                 } else if (returnTypeDecNode.get() instanceof RecordTypeDescriptorNode) {
                     RecordTypeDescriptorNode recordNode = (RecordTypeDescriptorNode) returnTypeDecNode.get();
                     TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
@@ -241,19 +246,22 @@ public class ServiceGenerationUtils {
                             createIdentifierToken(recordName),
                             recordNode,
                             createToken(SEMICOLON_TOKEN));
-                    return ImmutablePair.of(returnTypeDecNode, typeDefinitionNode);
+                    return ImmutablePair.of(returnTypeDecNode, Optional.of(typeDefinitionNode));
                 } else {
-                    return ImmutablePair.of(returnTypeDecNode, null);
+                    return ImmutablePair.of(returnTypeDecNode, Optional.empty());
                 }
             case GeneratorConstants.APPLICATION_XML:
                 identifierToken = createIdentifierToken(GeneratorConstants.XML);
-                return ImmutablePair.of(Optional.ofNullable(createSimpleNameReferenceNode(identifierToken)), null);
+                return ImmutablePair.of(Optional.ofNullable(createSimpleNameReferenceNode(identifierToken)),
+                        Optional.empty());
             case GeneratorConstants.APPLICATION_URL_ENCODE:
                 identifierToken = createIdentifierToken(GeneratorConstants.MAP_STRING);
-                return ImmutablePair.of(Optional.ofNullable(createSimpleNameReferenceNode(identifierToken)), null);
+                return ImmutablePair.of(Optional.ofNullable(createSimpleNameReferenceNode(identifierToken)),
+                        Optional.empty());
             case GeneratorConstants.TEXT:
                 identifierToken = createIdentifierToken(GeneratorConstants.STRING);
-                return ImmutablePair.of(Optional.ofNullable(createSimpleNameReferenceNode(identifierToken)), null);
+                return ImmutablePair.of(Optional.ofNullable(createSimpleNameReferenceNode(identifierToken)),
+                        Optional.empty());
             case GeneratorConstants.APPLICATION_OCTET_STREAM:
                 ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
                         createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
@@ -261,9 +269,9 @@ public class ServiceGenerationUtils {
                 return ImmutablePair.of(Optional.ofNullable(
                         createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
                                         createIdentifierToken(GeneratorConstants.BYTE)),
-                        NodeFactory.createNodeList(dimensionNode))), null);
+                        NodeFactory.createNodeList(dimensionNode))), Optional.empty());
             default:
-                return ImmutablePair.of(Optional.empty(), null);
+                return ImmutablePair.of(Optional.empty(), Optional.empty());
         }
     }
 
