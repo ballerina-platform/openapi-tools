@@ -128,6 +128,7 @@ public class CodeGeneratorTest {
             deleteGeneratedFiles("openapipetstore_service.bal");
         }
     }
+
     @Test(description = "Test Ballerina client generation for OAS 2.0")
     public void generateClientForOAS2() {
         String definitionPath = RES_DIR.resolve("petstore_swagger.yaml").toString();

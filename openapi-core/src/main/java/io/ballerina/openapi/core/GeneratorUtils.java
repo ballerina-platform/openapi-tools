@@ -410,9 +410,7 @@ public class GeneratorUtils {
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
         parseOptions.setFlatten(true);
-
         SwaggerParseResult parseResult = new OpenAPIParser().readContents(openAPIFileContent, null, parseOptions);
-//        SwaggerParseResult parseResultx = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
             if (parseResult.getMessages().size() == 1 && parseResult.getMessages().get(0).
                     contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
