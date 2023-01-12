@@ -371,7 +371,7 @@ public class GeneratorConstants {
     public static final String YAML_EXTENSION = ".yaml";
     public static final String YML_EXTENSION = ".yml";
     public static final String JSON_EXTENSION = ".json";
-    public static final String UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE = "attribute openapi is missing";
+    public static final String UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE = "attribute swaggerVersion is unexpected";
     public static final String PIPE = "|";
 
 }

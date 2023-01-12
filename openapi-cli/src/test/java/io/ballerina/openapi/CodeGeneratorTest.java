@@ -550,6 +550,17 @@ public class CodeGeneratorTest {
         generator.generateClient(definitionPath, "", filter, false, false);
     }
 
+    @Test(description = "Functionality tests when swagger 1.2 contract is given as input",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Provided OpenAPI contract version is not supported in the tool. " +
+                    "Use OpenAPI specification version 2 or higher")
+    public void testGenerationForUnsupportedOpenAPIVersion() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        String definitionPath = RES_DIR.resolve("petstore_swagger_1.2.json").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+        generator.generateClient(definitionPath, "", filter, false, false);
+    }
+
     @Test
     public void escapeIdentifierTest() {
         Assert.assertEquals(GeneratorUtils.escapeIdentifier("abc"), "abc");
