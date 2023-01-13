@@ -103,6 +103,55 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test(description = "Test Ballerina service skeleton generation for OAS 2.0")
+    public void generateServiceForOAS2() {
+        final String serviceName = "openapipetstore";
+        String definitionPath = RES_DIR.resolve("petstore_swagger.yaml").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+
+        try {
+            String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile,
+                    "petstore_service_swagger.bal");
+            generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter, false);
+            if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
+                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
+                generatedService = (generatedService.trim()).replaceAll("\\s+", "");
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedService.contains(expectedServiceContent),
+                        "GeneratedService = " + generatedService);
+            } else {
+                Assert.fail("Service was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore_service.bal");
+        }
+    }
+
+    @Test(description = "Test Ballerina client generation for OAS 2.0")
+    public void generateClientForOAS2() {
+        String definitionPath = RES_DIR.resolve("petstore_swagger.yaml").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+        try {
+            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile,
+                    "petstore_client_swagger.bal");
+            generator.generateClient(definitionPath, resourcePath.toString(), filter, false, false);
+            if (Files.exists(resourcePath.resolve("client.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
+                generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
+                expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedClient.contains(expectedClientContent));
+            } else {
+                Assert.fail("Client was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            Assert.fail("Error while generating the client. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("client.bal");
+        }
+    }
+
     @Test(description = "Test duplicated files generation")
     public void generateDuplicatedFiles() {
         List<File> duplicatedFileList = new ArrayList<>();
@@ -497,6 +546,17 @@ public class CodeGeneratorTest {
     public void testForInvalidDefinition() throws IOException, BallerinaOpenApiException,
             FormatterException {
         String definitionPath = RES_DIR.resolve("invalid_petstore.yaml").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+        generator.generateClient(definitionPath, "", filter, false, false);
+    }
+
+    @Test(description = "Functionality tests when swagger 1.2 contract is given as input",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Provided OpenAPI contract version is not supported in the tool. " +
+                    "Use OpenAPI specification version 2 or higher")
+    public void testGenerationForUnsupportedOpenAPIVersion() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        String definitionPath = RES_DIR.resolve("petstore_swagger_1.2.json").toString();
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         generator.generateClient(definitionPath, "", filter, false, false);
     }
