@@ -167,7 +167,6 @@ public class ReturnTypeTests {
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_14_rs.bal", syntaxTree);
     }
 
@@ -282,5 +281,14 @@ public class ReturnTypeTests {
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/content_null.bal", syntaxTree);
+    }
+
+    @Test
+    public void testForPostMethod() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/response/post_method.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/post_method.bal", syntaxTree);
     }
 }
