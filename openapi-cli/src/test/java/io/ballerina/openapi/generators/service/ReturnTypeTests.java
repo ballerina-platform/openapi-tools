@@ -283,7 +283,8 @@ public class ReturnTypeTests {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/content_null.bal", syntaxTree);
     }
 
-    @Test
+    @Test(description = "Test for the POST method resource return generation. If 201 with schema type, then it " +
+            "generates only schema type without status code")
     public void testForPostMethod() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/post_method.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
