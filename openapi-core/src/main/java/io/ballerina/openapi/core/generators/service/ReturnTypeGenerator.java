@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -108,7 +109,7 @@ public class ReturnTypeGenerator {
             throws BallerinaOpenApiException {
 
         ReturnTypeDescriptorNode returnNode;
-        httpMethod = operation.getKey().name();
+        httpMethod = operation.getKey().name().toLowerCase(Locale.ENGLISH);
         if (operation.getValue().getResponses() != null) {
             ApiResponses responses = operation.getValue().getResponses();
             if (responses.size() > 1) {
@@ -292,8 +293,8 @@ public class ReturnTypeGenerator {
                         () -> createSimpleNameReferenceNode(createIdentifierToken(ANYDATA)));
                 //Check the default behaviour for return type according to POST method.
                 boolean isWithOutStatusCode =
-                        (httpMethod.equals("POST") && responseCode.equals(GeneratorConstants.HTTP_201)) ||
-                        (!httpMethod.equals("POST") && responseCode.equals(GeneratorConstants.HTTP_200));
+                        (httpMethod.equals(POST) && responseCode.equals(GeneratorConstants.HTTP_201)) ||
+                        (!httpMethod.equals(POST) && responseCode.equals(GeneratorConstants.HTTP_200));
                 if (isWithOutStatusCode) {
                     qualifiedNodes.add(record.toSourceCode());
                 } else {
