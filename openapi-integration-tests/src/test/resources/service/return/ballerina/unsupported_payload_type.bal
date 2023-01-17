@@ -5,8 +5,8 @@ public type InternalServerErrorString record {|
     string body;
 |};
 
-public type CreatedJson record {|
-    *http:Created;
+public type OkJson record {|
+    *http:Ok;
     json body;
 |};
 

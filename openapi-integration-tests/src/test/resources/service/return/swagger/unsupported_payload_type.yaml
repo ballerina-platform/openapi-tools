@@ -43,7 +43,7 @@ paths:
         - pet
       operationId: "id_02"
       responses:
-        "201":
+        "200":
           description: Unsupported schema type, when media type is support media type's subset
           content:
             application/snowflake+json:

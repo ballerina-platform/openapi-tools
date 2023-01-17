@@ -9,7 +9,7 @@ service / on ep0 {
     }
     resource function get pet/findByStatus(string status = "available") returns http:BadRequest|http:Response {
     }
-    resource function post user/createWithList(@http:Payload User[] payload) returns User|http:Response {
+    resource function post user/createWithList(@http:Payload User[] payload) returns OkUser|http:Response {
     }
     resource function get user/logout() returns User|http:Response {
     }

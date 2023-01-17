@@ -66,7 +66,8 @@ public class ServiceGeneratorReturnTypeTests extends OpenAPITest {
                 // same error code with same body type for return type.
                 {"unsupported_payload_type.yaml", "service/return/ballerina/unsupported_payload_type.bal"},
                 {"response_has_inline_additional_properties.yaml",
-                        "service/return/ballerina/response_has_inline_additional_properties.bal"}
+                        "service/return/ballerina/response_has_inline_additional_properties.bal"},
+                {"post_method.yaml", "service/return/ballerina/post_method.bal"}
         };
     }
 }

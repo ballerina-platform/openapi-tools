@@ -362,6 +362,7 @@ public class CodeGeneratorTest {
                     Paths.get(definitionPath), "", filter, false);
             if (generatedFileList.size() > 0) {
                 GenSrcFile actualGeneratedContent = generatedFileList.get(0);
+                System.out.println(actualGeneratedContent.getContent());
                 Assert.assertEquals((actualGeneratedContent.getContent().trim()).replaceAll("\\s+", ""),
                         (expectedContent.trim()).replaceAll("\\s+", ""),
                         "expected content and actual generated content is mismatched for: " + yamlFile);

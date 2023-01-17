@@ -7,7 +7,7 @@ service /v1 on ep0 {
     }
     resource function put store/inventory() returns json {
     }
-    resource function post store/inventory() returns json|xml|BadRequestAnydata|NotFoundAnydata|InternalServerErrorString {
+    resource function post store/inventory() returns OkJsonXml|BadRequestAnydata|NotFoundAnydata|InternalServerErrorString {
     }
     resource function delete store/inventory() returns anydata {
     }
