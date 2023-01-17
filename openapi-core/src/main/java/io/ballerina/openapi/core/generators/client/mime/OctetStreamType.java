@@ -40,13 +40,14 @@ public class OctetStreamType extends MimeType {
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
 
+        String payloadName = GeneratorConstants.PAYLOAD;
         Schema<?> mediaTypeSchema = mediaTypeEntry.getValue().getSchema();
         if (mediaTypeSchema.getFormat() != null && mediaTypeSchema.getFormat().equals(BYTE)) {
-            String payloadName = "encodedRequestBody";
+            payloadName = "encodedRequestBody";
             VariableDeclarationNode encodedVariable = GeneratorUtils.getSimpleStatement("string",
                     payloadName, "payload.toBase64()");
             statementsList.add(encodedVariable);
         }
-        setPayload(statementsList, GeneratorConstants.PAYLOAD, javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM);
+        setPayload(statementsList, payloadName, javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM);
     }
 }
