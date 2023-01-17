@@ -26,16 +26,12 @@ import io.swagger.v3.oas.models.media.MediaType;
 import java.util.List;
 import java.util.Map;
 
-import static io.ballerina.openapi.core.GeneratorConstants.PAYLOAD;
-
 /**
  * Abstract class that defines the mime type.
  *
  * @since 1.3.0
  */
 public abstract class MimeType {
-
-    String payloadName = PAYLOAD;
 
     /**
      * Generate statements of defining structure and setting payload.
