@@ -75,8 +75,8 @@ import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtil
 public class ParametersGenerator {
 
     private boolean isNullableRequired;
-    private List<Node> requiredParams;
-    private List<Node> defaultableParams;
+    private final List<Node> requiredParams;
+    private final List<Node> defaultableParams;
 
     public ParametersGenerator(boolean isNullableRequired) {
         this.isNullableRequired = isNullableRequired;
@@ -127,12 +127,14 @@ public class ParametersGenerator {
                     // type  BasicType boolean|int|float|decimal|string ;
                     // public type () |BasicType|BasicType []| map<json>;
                     Node param = createNodeForQueryParam(parameter);
-                    if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
-                        defaultableParams.add(param);
-                        defaultableParams.add(comma);
-                    } else {
-                        requiredParams.add(param);
-                        requiredParams.add(comma);
+                    if (param != null) {
+                        if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
+                            defaultableParams.add(param);
+                            defaultableParams.add(comma);
+                        } else {
+                            requiredParams.add(param);
+                            requiredParams.add(comma);
+                        }
                     }
                 }
             }
