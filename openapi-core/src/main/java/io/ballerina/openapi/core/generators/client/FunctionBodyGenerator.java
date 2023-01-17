@@ -100,7 +100,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
-import static io.ballerina.openapi.core.GeneratorConstants.ANY_TYPE;
 import static io.ballerina.openapi.core.GeneratorConstants.API_KEYS_CONFIG;
 import static io.ballerina.openapi.core.GeneratorConstants.API_KEY_CONFIG_PARAM;
 import static io.ballerina.openapi.core.GeneratorConstants.DELETE;
@@ -649,12 +648,12 @@ public class FunctionBodyGenerator {
 
         //Create Request statement
         Map.Entry<String, MediaType> next = iterator.next();
-        if (!next.getKey().contains(ANY_TYPE)) {
+        if (GeneratorUtils.isSupportedMediaType(next)) {
             VariableDeclarationNode requestVariable = GeneratorUtils.getSimpleStatement(HTTP_REQUEST,
                     REQUEST, NEW);
             statementsList.add(requestVariable);
         }
-        if (next.getValue() != null && !next.getKey().contains(ANY_TYPE)) {
+        if (next.getValue() != null && GeneratorUtils.isSupportedMediaType(next)) {
             genStatementsForRequestMediaType(statementsList, next);
             // TODO:Fill with other mime type
         } else {

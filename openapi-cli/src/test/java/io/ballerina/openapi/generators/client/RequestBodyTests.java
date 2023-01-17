@@ -126,9 +126,9 @@ public class RequestBodyTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
-    @Test(description = "Test client generation for unsupported request body media type",
-            expectedExceptions = BallerinaOpenApiException.class)
+    @Test(description = "Test client generation for unsupported request body media type")
     public void testRequestBodyWithUnsupportedMediaType() throws IOException, BallerinaOpenApiException {
+        Path expectedPath = RES_DIR.resolve("ballerina/unsupported_request_body.bal");
         Path definitionPath = RES_DIR.resolve("swagger/unsupported_request_body.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
@@ -137,7 +137,8 @@ public class RequestBodyTests {
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
-        ballerinaClientGenerator.generateSyntaxTree();
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "Test requestBody validation in GET/DELETE/HEAD operations",
@@ -229,6 +230,23 @@ public class RequestBodyTests {
         Path expectedPath = RES_DIR.resolve("ballerina/multipart_formdata.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("utils/swagger/multipart_formdata.yaml"), true);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI)
+                .withResourceMode(false).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
+    @Test(description = "Test for generating request body when operation has multipart form-data media type " +
+            "with no schema")
+    public void testRequestBodyWithMultipartMediaTypeAndNoSchema()
+            throws IOException, BallerinaOpenApiException {
+        Path expectedPath = RES_DIR.resolve("ballerina/multipart_formdata_empty.bal");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
+                RES_DIR.resolve("swagger/mutipart_formdata_empty.yaml"), true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)

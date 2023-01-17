@@ -32,7 +32,6 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
@@ -85,7 +84,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.openapi.core.ErrorMessages.invalidPathParamType;
-import static io.ballerina.openapi.core.GeneratorConstants.ANY_TYPE;
 import static io.ballerina.openapi.core.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.core.GeneratorConstants.BINARY;
 import static io.ballerina.openapi.core.GeneratorConstants.BOOLEAN;
@@ -99,7 +97,6 @@ import static io.ballerina.openapi.core.GeneratorConstants.PAYLOAD;
 import static io.ballerina.openapi.core.GeneratorConstants.REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.GeneratorConstants.STRING;
-import static io.ballerina.openapi.core.GeneratorConstants.VENDOR_SPECIFIC_TYPE;
 import static io.ballerina.openapi.core.GeneratorConstants.X_BALLERINA_DEPRECATED_REASON;
 import static io.ballerina.openapi.core.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.GeneratorUtils.escapeIdentifier;
@@ -118,7 +115,6 @@ public class FunctionSignatureGenerator {
     private final List<TypeDefinitionNode> typeDefinitionNodeList;
     private FunctionReturnTypeGenerator functionReturnType;
     private boolean deprecatedParamFound = false;
-
     private boolean isResource;
 
     public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
@@ -498,14 +494,9 @@ public class FunctionSignatureGenerator {
             Map.Entry<String, MediaType> next = iterator.next();
             Schema schema = next.getValue().getSchema();
             String paramType = "";
-            String paramName = next.getKey().equals(ANY_TYPE) ? REQUEST : PAYLOAD;
             //Take payload type
-            if (schema != null) {
-                if (next.getKey().equals(ANY_TYPE)) {
-                    paramType = HTTP_REQUEST;
-                } else if (next.getKey().contains(VENDOR_SPECIFIC_TYPE)) {
-                    paramType = SyntaxKind.BYTE_KEYWORD.stringValue() + SQUARE_BRACKETS;
-                } else if (schema.get$ref() != null) {
+            if (schema != null && GeneratorUtils.isSupportedMediaType(next)) {
+                if (schema.get$ref() != null) {
                     paramType = getValidName(extractReferenceType(schema.get$ref().trim()), true);
                 } else if (schema.getType() != null && !schema.getType().equals(ARRAY) && !schema.getType().equals(
                         OBJECT)) {
@@ -530,6 +521,8 @@ public class FunctionSignatureGenerator {
             } else {
                 paramType = GeneratorUtils.getBallerinaMediaType(next.getKey(), true);
             }
+
+            String paramName = paramType.equals(HTTP_REQUEST) ? REQUEST : PAYLOAD;
             if (!paramType.isBlank()) {
                 List<AnnotationNode> annotationNodes = new ArrayList<>();
                 DocCommentsGenerator.extractDisplayAnnotation(requestBody.getExtensions(), annotationNodes);

@@ -119,8 +119,7 @@ public class FunctionBodyNodeTests {
                         "json response = check self.clientEp->post(resourcePath, request);" +
                         "return response;}"},
                 {"swagger/pdf_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
-                        "http:Request request = new;" +
-                        "request.setPayload(payload, \"application/pdf\");" +
+                        "// TODO: Update the request as needed;\n" +
                         "http:Response response = check self.clientEp->post(resourcePath, request);" +
                         "return response;}"},
                 {"swagger/image_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
