@@ -19,7 +19,7 @@ service /v2 on ep0 {
     }
     resource function post pet/[int petId]/uploadImage(@http:Payload json payload) returns ApiResponse {
     }
-    resource function get store/inventory() returns json {
+    resource function get store/inventory() returns StoreInventoryResponse {
     }
     resource function post store/'order(@http:Payload json payload) returns Order|http:BadRequest {
     }

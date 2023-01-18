@@ -28,6 +28,7 @@ import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
+import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.core.model.GenSrcFile;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -101,7 +102,12 @@ public class BallerinaCodeGenerator {
         // Generate service
         String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
-        BallerinaServiceGenerator serviceGenerator = new BallerinaServiceGenerator(openAPIDef, filter);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPIDef)
+                .withFilters(filter)
+                .withNullable(nullable)
+                .build();
+        BallerinaServiceGenerator serviceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         String serviceContent = Formatter.format
                 (serviceGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, serviceContent));
@@ -391,7 +397,12 @@ public class BallerinaCodeGenerator {
                 openAPIDef.getInfo().getTitle().toLowerCase(Locale.ENGLISH) :
                 serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPIDef, filter);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPIDef)
+                .withFilters(filter)
+                .withNullable(nullable)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         String mainContent = Formatter.format(ballerinaServiceGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
         List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
