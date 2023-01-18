@@ -40,3 +40,24 @@ paths:
       responses:
         '201':
           description: Null response
+  /user:
+    post:
+      summary: Create an user
+      operationId: createUser
+      requestBody:
+        description: User
+        content:
+          multipart/form-data:
+            encoding: { }
+            schema:
+              required:
+                - File
+              type: object
+              properties:
+                File:
+                  type: string
+                  format: binary
+        required: false
+      responses:
+        '201':
+          description: Null response
