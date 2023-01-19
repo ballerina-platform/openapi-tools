@@ -57,6 +57,7 @@ import static io.ballerina.openapi.core.GeneratorUtils.createEncodingMap;
  * @since 1.3.0
  */
 public class UrlEncodedType extends MimeType {
+
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
 
     public UrlEncodedType(BallerinaUtilGenerator ballerinaUtilGenerator) {
@@ -69,16 +70,15 @@ public class UrlEncodedType extends MimeType {
         ballerinaUtilGenerator.setRequestBodyEncodingFound(true);
         VariableDeclarationNode requestBodyEncodingMap = getRequestBodyEncodingMap(
                 mediaTypeEntry.getValue().getEncoding());
-        payloadName = "encodedRequestBody";
+        String payloadName = "encodedRequestBody";
         if (requestBodyEncodingMap != null) {
             statementsList.add(requestBodyEncodingMap);
-            VariableDeclarationNode requestBodyVariable = GeneratorUtils.getSimpleStatement(STRING,
-                    payloadName,
+            VariableDeclarationNode requestBodyVariable = GeneratorUtils.getSimpleStatement(STRING, payloadName,
                     "createFormURLEncodedRequestBody(payload, requestBodyEncoding)");
             statementsList.add(requestBodyVariable);
         } else {
-            VariableDeclarationNode requestBodyVariable = GeneratorUtils.getSimpleStatement(STRING,
-                    payloadName, "createFormURLEncodedRequestBody(payload)");
+            VariableDeclarationNode requestBodyVariable = GeneratorUtils.getSimpleStatement(STRING, payloadName,
+                    "createFormURLEncodedRequestBody(payload)");
             statementsList.add(requestBodyVariable);
         }
         setPayload(statementsList, payloadName, mediaTypeEntry.getKey());

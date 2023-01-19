@@ -35,6 +35,18 @@ paths:
           application/octet-stream:
             schema:
               type: string
+  /payment:
+    post:
+      summary: Creates a new payment.
+      responses:
+        200:
+          description: OK
+      requestBody:
+        description: Details of the pet to be purchased
+        content:
+          application/octet-stream:
+            schema:
+              $ref: '#/components/schemas/Pet'
 components:
   schemas:
     User:
