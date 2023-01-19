@@ -28,7 +28,7 @@ paths:
     post:
       summary: Creates a new pets.
       responses:
-        '200':
+        '201':
           description: A User object
           content:
             image/jpeg:
