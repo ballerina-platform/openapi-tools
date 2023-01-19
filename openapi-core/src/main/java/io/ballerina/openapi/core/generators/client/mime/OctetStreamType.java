@@ -20,8 +20,10 @@ package io.ballerina.openapi.core.generators.client.mime;
 
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
 import java.util.Map;
@@ -33,12 +35,14 @@ import static io.ballerina.openapi.core.GeneratorConstants.BYTE;
  *
  * @since 1.3.0
  */
-public class OctedStreamType extends MimeType {
+public class OctetStreamType extends MimeType {
 
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
 
-        if (mediaTypeEntry.getValue().getSchema().getFormat().equals(BYTE)) {
+        String payloadName = GeneratorConstants.PAYLOAD;
+        Schema<?> mediaTypeSchema = mediaTypeEntry.getValue().getSchema();
+        if (mediaTypeSchema.getFormat() != null && mediaTypeSchema.getFormat().equals(BYTE)) {
             payloadName = "encodedRequestBody";
             VariableDeclarationNode encodedVariable = GeneratorUtils.getSimpleStatement("string",
                     payloadName, "payload.toBase64()");

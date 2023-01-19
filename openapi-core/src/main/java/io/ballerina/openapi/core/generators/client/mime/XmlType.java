@@ -36,7 +36,8 @@ import static io.ballerina.openapi.core.GeneratorUtils.addImport;
  * @since 1.3.0
  */
 public class XmlType extends MimeType {
-    private List<ImportDeclarationNode> imports;
+
+    private final List<ImportDeclarationNode> imports;
 
     public XmlType(List<ImportDeclarationNode> imports) {
         this.imports = imports;
@@ -44,11 +45,11 @@ public class XmlType extends MimeType {
 
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
-        payloadName = "xmlBody";
+        String payloadName = "xmlBody";
         addImport(imports, XML_DATA);
 
-        VariableDeclarationNode jsonVariable = GeneratorUtils.getSimpleStatement("json",
-                "jsonBody", "check payload.cloneWithType(json)");
+        VariableDeclarationNode jsonVariable = GeneratorUtils.getSimpleStatement("json", "jsonBody",
+                "check payload.cloneWithType(json)");
         statementsList.add(jsonVariable);
         VariableDeclarationNode xmlBody = GeneratorUtils.getSimpleStatement("xml?", payloadName,
                 "check xmldata:fromJson(jsonBody)");
