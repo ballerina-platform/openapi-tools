@@ -224,7 +224,6 @@ public class ReturnTypeTests {
                 .build();
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_14_rs.bal", syntaxTree);
     }
 
@@ -429,5 +428,19 @@ public class ReturnTypeTests {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "response/response_has_additional_properties.bal", syntaxTree);
+    }
+
+    @Test(description = "Test for the POST method resource return generation. If 201 with schema type, then it " +
+            "generates only schema type without status code")
+    public void testForPostMethod() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/response/post_method.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/post_method.bal", syntaxTree);
     }
 }

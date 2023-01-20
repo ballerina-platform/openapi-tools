@@ -17,11 +17,11 @@ service /v2 on ep0 {
     }
     resource function delete pet/[int petId](@http:Header string? api_key) returns http:BadRequest|http:NotFound {
     }
-    resource function post pet/[int petId]/uploadImage(@http:Payload json payload) returns ApiResponse {
+    resource function post pet/[int petId]/uploadImage(@http:Payload json payload) returns OkApiResponse {
     }
     resource function get store/inventory() returns StoreInventoryResponse {
     }
-    resource function post store/'order(@http:Payload json payload) returns Order|http:BadRequest {
+    resource function post store/'order(@http:Payload json payload) returns OkOrder|http:BadRequest {
     }
     resource function get store/'order/[int orderId]() returns Order|http:BadRequest|http:NotFound {
     }

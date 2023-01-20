@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -74,6 +75,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.core.GeneratorConstants.ANYDATA;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP_RESPONSE;
 import static io.ballerina.openapi.core.GeneratorConstants.PIPE;
+import static io.ballerina.openapi.core.GeneratorConstants.POST;
 import static io.ballerina.openapi.core.GeneratorConstants.RESPONSE_RECORD_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.RETURNS;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_107;
@@ -89,6 +91,7 @@ public class ReturnTypeGenerator {
     private final BallerinaTypesGenerator ballerinaSchemaGenerator;
     private final String pathRecord;
     private static int countForRecord = 0;
+    private String httpMethod;
 
     private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
 
@@ -123,6 +126,7 @@ public class ReturnTypeGenerator {
             throws BallerinaOpenApiException {
 
         ReturnTypeDescriptorNode returnNode;
+        httpMethod = operation.getKey().name().toLowerCase(Locale.ENGLISH);
         if (operation.getValue().getResponses() != null) {
             ApiResponses responses = operation.getValue().getResponses();
             if (responses.size() > 1) {
@@ -174,10 +178,14 @@ public class ReturnTypeGenerator {
             returnNode = createReturnTypeDescriptorNode(returnKeyWord, annotations, statues);
         } else if (responseContent != null) {
             // when the response has content values
-            if (response.getKey().trim().equals(GeneratorConstants.HTTP_200)) {
-                // handle 200 status code
+            String responseCode = response.getKey().trim();
+            boolean isWithOutStatusCode =
+                    (httpMethod.equals(POST) && responseCode.equals(GeneratorConstants.HTTP_201)) ||
+                            (!httpMethod.equals(POST) && responseCode.equals(GeneratorConstants.HTTP_200));
+            if (isWithOutStatusCode) {
+                // handle 200, 201 status code
                 Set<Map.Entry<String, MediaType>> contentEntries = responseContent.entrySet();
-                returnNode = getReturnNodeForStatusCode200WithContent(contentEntries);
+                returnNode = getReturnNodeForSchemaType(contentEntries);
             } else if (response.getKey().trim().equals(GeneratorConstants.DEFAULT)) {
                 // handle status code with `default`, this maps to `http:Response`
                 BuiltinSimpleNameReferenceNode type = createBuiltinSimpleNameReferenceNode(null,
@@ -223,8 +231,8 @@ public class ReturnTypeGenerator {
      *
      * @param contentEntries collection of content entries
      */
-    private ReturnTypeDescriptorNode getReturnNodeForStatusCode200WithContent(
-            Set<Map.Entry<String, MediaType>> contentEntries) throws BallerinaOpenApiException {
+    private ReturnTypeDescriptorNode getReturnNodeForSchemaType(Set<Map.Entry<String, MediaType>> contentEntries)
+            throws BallerinaOpenApiException {
 
         Token returnKeyWord = createToken(RETURNS_KEYWORD);
         ReturnTypeDescriptorNode returnNode = null;
@@ -285,7 +293,11 @@ public class ReturnTypeGenerator {
                 qualifiedNodes.add(node.toSourceCode());
             } else if (content != null) {
                 TypeDescriptorNode bodyType = handleMultipleContents(content.entrySet());
-                if (responseCode.equals(GeneratorConstants.HTTP_200)) {
+                //Check the default behaviour for return type according to POST method.
+                boolean isWithOutStatusCode =
+                        (httpMethod.equals(POST) && responseCode.equals(GeneratorConstants.HTTP_201)) ||
+                                (!httpMethod.equals(POST) && responseCode.equals(GeneratorConstants.HTTP_200));
+                if (isWithOutStatusCode) {
                     qualifiedNodes.add(bodyType.toSourceCode());
                 } else {
                     SimpleNameReferenceNode node = createReturnTypeInclusionRecord(code, bodyType);
