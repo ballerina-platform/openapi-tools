@@ -647,14 +647,14 @@ public class FunctionBodyGenerator {
             throws BallerinaOpenApiException {
 
         //Create Request statement
-        Map.Entry<String, MediaType> next = iterator.next();
-        if (GeneratorUtils.isSupportedMediaType(next)) {
+        Map.Entry<String, MediaType> mediaTypeEntry = iterator.next();
+        if (GeneratorUtils.isSupportedMediaType(mediaTypeEntry)) {
             VariableDeclarationNode requestVariable = GeneratorUtils.getSimpleStatement(HTTP_REQUEST,
                     REQUEST, NEW);
             statementsList.add(requestVariable);
         }
-        if (next.getValue() != null && GeneratorUtils.isSupportedMediaType(next)) {
-            genStatementsForRequestMediaType(statementsList, next);
+        if (mediaTypeEntry.getValue() != null && GeneratorUtils.isSupportedMediaType(mediaTypeEntry)) {
+            genStatementsForRequestMediaType(statementsList, mediaTypeEntry);
             // TODO:Fill with other mime type
         } else {
             // Add default value comment

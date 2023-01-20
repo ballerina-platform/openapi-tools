@@ -491,11 +491,11 @@ public class FunctionSignatureGenerator {
         Iterator<Map.Entry<String, MediaType>> iterator = requestBodyContent.entrySet().iterator();
         while (iterator.hasNext()) {
             // This implementation currently for first content type
-            Map.Entry<String, MediaType> next = iterator.next();
-            Schema schema = next.getValue().getSchema();
+            Map.Entry<String, MediaType> mediaTypeEntry = iterator.next();
+            Schema schema = mediaTypeEntry.getValue().getSchema();
             String paramType = "";
             //Take payload type
-            if (schema != null && GeneratorUtils.isSupportedMediaType(next)) {
+            if (schema != null && GeneratorUtils.isSupportedMediaType(mediaTypeEntry)) {
                 if (schema.get$ref() != null) {
                     paramType = getValidName(extractReferenceType(schema.get$ref().trim()), true);
                 } else if (schema.getType() != null && !schema.getType().equals(ARRAY) && !schema.getType().equals(
@@ -510,16 +510,16 @@ public class FunctionSignatureGenerator {
                 } else if (schema instanceof ArraySchema) {
                     //TODO: handle nested array - this is impossible to handle
                     ArraySchema arraySchema = (ArraySchema) schema;
-                    paramType = getRequestBodyParameterForArraySchema(operationId, next, arraySchema);
+                    paramType = getRequestBodyParameterForArraySchema(operationId, mediaTypeEntry, arraySchema);
                 } else if (schema instanceof ObjectSchema) {
                     ObjectSchema objectSchema = (ObjectSchema) schema;
                     paramType = referencedRequestBodyName.isBlank() ? paramType : referencedRequestBodyName;
                     getRequestBodyParameterForObjectSchema(referencedRequestBodyName, objectSchema);
                 } else { // composed and object schemas are handled by the flatten
-                    paramType = GeneratorUtils.getBallerinaMediaType(next.getKey(), true);
+                    paramType = GeneratorUtils.getBallerinaMediaType(mediaTypeEntry.getKey(), true);
                 }
             } else {
-                paramType = GeneratorUtils.getBallerinaMediaType(next.getKey(), true);
+                paramType = GeneratorUtils.getBallerinaMediaType(mediaTypeEntry.getKey(), true);
             }
 
             String paramName = paramType.equals(HTTP_REQUEST) ? REQUEST : PAYLOAD;
@@ -540,10 +540,10 @@ public class FunctionSignatureGenerator {
                 parameterList.add(createToken((COMMA_TOKEN)));
             }
 
-            if (next.getKey().equals(javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA)
-                    && next.getValue().getEncoding() != null) {
+            if (mediaTypeEntry.getKey().equals(javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA)
+                    && mediaTypeEntry.getValue().getEncoding() != null) {
                 List<String> headerList = new ArrayList<>();
-                for (Map.Entry<String, Encoding> entry : next.getValue().getEncoding().entrySet()) {
+                for (Map.Entry<String, Encoding> entry : mediaTypeEntry.getValue().getEncoding().entrySet()) {
                     if (entry.getValue().getHeaders() != null) {
                         for (Map.Entry<String, Header> header : entry.getValue().getHeaders().entrySet()) {
                             if (!headerList.contains(header.getKey())) {
