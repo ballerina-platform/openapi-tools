@@ -52,12 +52,17 @@ public class HttpMethodTests {
     public void testForCompilerWarningForDefault() {
         Path ballerinaFilePath = RES_DIR.resolve("default_bal.bal");
         OASContractGenerator openApiConverter = new OASContractGenerator();
-        openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
-                , false);
+        openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
         List<OpenAPIConverterDiagnostic> errors = openApiConverter.getErrors();
         Assert.assertFalse(errors.isEmpty());
         Assert.assertEquals(errors.get(0).getMessage(), "Generated OpenAPI definition does not " +
                 "contain details for the `default` resource method in the Ballerina service.");
+    }
+
+    @Test
+    public void testForPostMethodStatusCodeMapping() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("post_method.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "post_method.yaml");
     }
 
     @AfterMethod

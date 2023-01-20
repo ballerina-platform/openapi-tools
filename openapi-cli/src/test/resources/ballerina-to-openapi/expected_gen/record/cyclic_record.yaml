@@ -14,8 +14,8 @@ paths:
     post:
       operationId: postPet
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             application/json:
               schema:
@@ -26,8 +26,8 @@ paths:
     post:
       operationId: postPet02
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             application/json:
               schema:
@@ -38,8 +38,8 @@ paths:
     post:
       operationId: postPet03
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             application/json:
               schema:
@@ -50,8 +50,8 @@ paths:
     post:
       operationId: postPet04
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             application/json:
               schema:
@@ -62,8 +62,8 @@ paths:
     post:
       operationId: postPet05
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             application/json:
               schema:
@@ -74,8 +74,8 @@ paths:
     post:
       operationId: postPet06
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             application/json:
               schema:
@@ -86,8 +86,8 @@ paths:
     post:
       operationId: postPet07
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             application/json:
               schema:

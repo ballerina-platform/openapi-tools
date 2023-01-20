@@ -96,6 +96,8 @@ import static io.ballerina.openapi.converter.Constants.HTML_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.HTTP;
 import static io.ballerina.openapi.converter.Constants.HTTP_200;
 import static io.ballerina.openapi.converter.Constants.HTTP_200_DESCRIPTION;
+import static io.ballerina.openapi.converter.Constants.HTTP_201;
+import static io.ballerina.openapi.converter.Constants.HTTP_201_DESCRIPTION;
 import static io.ballerina.openapi.converter.Constants.HTTP_204;
 import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
 import static io.ballerina.openapi.converter.Constants.HTTP_PAYLOAD;
@@ -110,6 +112,7 @@ import static io.ballerina.openapi.converter.Constants.NO_STORE;
 import static io.ballerina.openapi.converter.Constants.NO_TRANSFORM;
 import static io.ballerina.openapi.converter.Constants.OCTECT_STREAM_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.PLUS;
+import static io.ballerina.openapi.converter.Constants.POST;
 import static io.ballerina.openapi.converter.Constants.PRIVATE;
 import static io.ballerina.openapi.converter.Constants.PROXY_REVALIDATE;
 import static io.ballerina.openapi.converter.Constants.PUBLIC;
@@ -138,6 +141,7 @@ public class OpenAPIResponseMapper {
     private final Components components;
     private final List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
     private final Location location;
+    private String httpMethod;
 
     public List<OpenAPIConverterDiagnostic> getErrors() {
         return errors;
@@ -157,6 +161,7 @@ public class OpenAPIResponseMapper {
      */
     public void getResourceOutput(FunctionDefinitionNode resource, OperationAdaptor operationAdaptor) {
 
+        httpMethod = operationAdaptor.getHttpOperation().toUpperCase(Locale.ENGLISH);
         FunctionSignatureNode functionSignature = resource.functionSignature();
         Optional<ReturnTypeDescriptorNode> returnTypeDescriptor = functionSignature.returnTypeDesc();
         io.swagger.v3.oas.models.Operation operation = operationAdaptor.getOperation();
@@ -415,6 +420,9 @@ public class OpenAPIResponseMapper {
                                                    Map<String, Header> headers) {
         ApiResponse apiResponse = new ApiResponse();
         io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
+        String statusCode = httpMethod.equals(POST) ? HTTP_201 : HTTP_200;
+        String description = httpMethod.equals(POST) ? HTTP_201_DESCRIPTION : HTTP_200_DESCRIPTION;
+
         String mediaTypeString;
         switch (typeNode.kind()) {
             case QUALIFIED_NAME_REFERENCE:
@@ -425,36 +433,36 @@ public class OpenAPIResponseMapper {
             case INT_TYPE_DESC:
             case STRING_TYPE_DESC:
             case BOOLEAN_TYPE_DESC:
-                apiResponse = setCacheHeader(headers, apiResponse, HTTP_200);
+                apiResponse = setCacheHeader(headers, apiResponse, statusCode);
                 String type = typeNode.toString().toLowerCase(Locale.ENGLISH).trim();
                 Schema<?> schema = ConverterCommonUtils.getOpenApiSchema(type);
                 Optional<String> media = convertBallerinaMIMEToOASMIMETypes(type, customMediaPrefix);
                 if (media.isPresent()) {
                     mediaType.setSchema(schema);
-                    apiResponse.description(HTTP_200_DESCRIPTION);
+                    apiResponse.description(description);
                     apiResponse.content(new Content().addMediaType(media.get(), mediaType));
-                    apiResponses.put(HTTP_200, apiResponse);
+                    apiResponses.put(statusCode, apiResponse);
                     return Optional.of(apiResponses);
                 } else {
                     return Optional.empty();
                 }
             case JSON_TYPE_DESC:
-                setCacheHeader(headers, apiResponse, HTTP_200);
+                setCacheHeader(headers, apiResponse, statusCode);
                 mediaType.setSchema(new ObjectSchema());
                 mediaTypeString = customMediaPrefix.map(s -> APPLICATION_PREFIX + s + JSON_POSTFIX)
                         .orElse(MediaType.APPLICATION_JSON);
                 apiResponse.content(new Content().addMediaType(mediaTypeString, mediaType));
-                apiResponse.description(HTTP_200_DESCRIPTION);
-                apiResponses.put(HTTP_200, apiResponse);
+                apiResponse.description(description);
+                apiResponses.put(statusCode, apiResponse);
                 return Optional.of(apiResponses);
             case XML_TYPE_DESC:
-                setCacheHeader(headers, apiResponse, HTTP_200);
+                setCacheHeader(headers, apiResponse, statusCode);
                 mediaType.setSchema(new ObjectSchema());
                 mediaTypeString = customMediaPrefix.map(s -> APPLICATION_PREFIX + s + XML_POSTFIX)
                         .orElse(MediaType.APPLICATION_XML);
                 apiResponse.content(new Content().addMediaType(mediaTypeString, mediaType));
-                apiResponse.description(HTTP_200_DESCRIPTION);
-                apiResponses.put(HTTP_200, apiResponse);
+                apiResponse.description(description);
+                apiResponses.put(statusCode, apiResponse);
                 return Optional.of(apiResponses);
             case SIMPLE_NAME_REFERENCE:
                 SimpleNameReferenceNode recordNode = (SimpleNameReferenceNode) typeNode;
@@ -482,7 +490,7 @@ public class OpenAPIResponseMapper {
                 return getAPIResponses(operationAdaptor, apiResponses,
                         ((OptionalTypeDescriptorNode) typeNode).typeDescriptor(), customMediaPrefix, headers);
             case MAP_TYPE_DESC:
-                setCacheHeader(headers, apiResponse, HTTP_200);
+                setCacheHeader(headers, apiResponse, statusCode);
                 MapTypeDescriptorNode mapNode = (MapTypeDescriptorNode) typeNode;
                 ObjectSchema objectSchema = new ObjectSchema();
                 Schema<?> apiSchema = getOpenApiSchema(mapNode.mapTypeParamsNode().typeNode().kind());
@@ -491,8 +499,8 @@ public class OpenAPIResponseMapper {
                 mediaTypeString = customMediaPrefix.map(s -> APPLICATION_PREFIX + s + JSON_POSTFIX)
                         .orElse(MediaType.APPLICATION_JSON);
                 apiResponse.content(new Content().addMediaType(mediaTypeString, mediaType));
-                apiResponse.description(HTTP_200_DESCRIPTION);
-                apiResponses.put(HTTP_200, apiResponse);
+                apiResponse.description(description);
+                apiResponses.put(statusCode, apiResponse);
                 return Optional.of(apiResponses);
             default:
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_101;
@@ -560,6 +568,9 @@ public class OpenAPIResponseMapper {
                                                                 io.swagger.v3.oas.models.media.MediaType mediaType,
                                                                 Optional<String> customMediaPrefix,
                                                                 Map<String, Header> headers) {
+        String statusCode = httpMethod.equals(POST) ? HTTP_201 : HTTP_200;
+        String description = httpMethod.equals(POST) ? HTTP_201_DESCRIPTION : HTTP_200_DESCRIPTION;
+
         Map<String, Schema> schemas02 = components.getSchemas();
         if (array.memberTypeDesc().kind() == SIMPLE_NAME_REFERENCE) {
             handleReferenceResponse(operationAdaptor, (SimpleNameReferenceNode) array.memberTypeDesc(),
@@ -584,9 +595,9 @@ public class OpenAPIResponseMapper {
             }
             arraySchema.setItems(openApiSchema);
             mediaType.setSchema(arraySchema);
-            apiResponse.description(HTTP_200_DESCRIPTION);
+            apiResponse.description(description);
             apiResponse.content(new Content().addMediaType(mimeType.get(), mediaType));
-            apiResponses.put(HTTP_200, apiResponse);
+            apiResponses.put(statusCode, apiResponse);
         }
         return Optional.of(apiResponses);
     }
@@ -624,11 +635,12 @@ public class OpenAPIResponseMapper {
                                                            io.swagger.v3.oas.models.media.MediaType mediaType,
                                                            Optional<String> customMediaPrefix,
                                                            Map<String, Header> headers) {
+        String statusCode = httpMethod.equals(POST) ? HTTP_201 : HTTP_200;
+        String description = httpMethod.equals(POST) ? HTTP_201_DESCRIPTION : HTTP_200_DESCRIPTION;
 
         NodeList<Node> fields = typeNode.fields();
-        Optional<String> httpCode = Optional.of(HTTP_200);
+        Optional<String> httpCode = Optional.of(statusCode);
         Schema<?> inlineSchema = new Schema<>();
-        String description = HTTP_200_DESCRIPTION;
         Optional<String> mediaTypeResponse = Optional.of(MediaType.APPLICATION_JSON);
         boolean ishttpTypeInclusion = false;
         Map<String, Schema> properties = new HashMap<>();
@@ -789,7 +801,10 @@ public class OpenAPIResponseMapper {
                                          Map<String, Schema> schema, ApiResponses apiResponses,
                                          Optional<String> customMediaPrefix, Map<String, Header> headers) {
         ApiResponse apiResponse = new ApiResponse();
-        setCacheHeader(headers, apiResponse, HTTP_200);
+        String statusCode = httpMethod.equals(POST) ? HTTP_201 : HTTP_200;
+        String description = httpMethod.equals(POST) ? HTTP_201_DESCRIPTION : HTTP_200_DESCRIPTION;
+
+        setCacheHeader(headers, apiResponse, statusCode);
         Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         //handle record for components
@@ -804,11 +819,11 @@ public class OpenAPIResponseMapper {
             arraySchema.setItems(new Schema<>().$ref(ConverterCommonUtils.unescapeIdentifier(
                     referenceNode.name().toString().trim())));
             media.setSchema(arraySchema);
-            apiResponse.description(HTTP_200_DESCRIPTION);
+            apiResponse.description(description);
             mediaTypeString = customMediaPrefix.isPresent() ? APPLICATION_PREFIX + customMediaPrefix + JSON_POSTFIX :
                     MediaType.APPLICATION_JSON;
             apiResponse.content(new Content().addMediaType(mediaTypeString, media));
-            apiResponses.put(HTTP_200, apiResponse);
+            apiResponses.put(statusCode, apiResponse);
 
         } else if (typeSymbol.typeKind() == TypeDescKind.TYPE_REFERENCE) {
             TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) typeSymbol;
@@ -864,6 +879,8 @@ public class OpenAPIResponseMapper {
                                                  OpenAPIComponentMapper componentMapper,
                                                  io.swagger.v3.oas.models.media.MediaType media,
                                                  Map<String, Header> headers) {
+        String statusCode = httpMethod.equals(POST) ? HTTP_201 : HTTP_200;
+        String description = httpMethod.equals(POST) ? HTTP_201_DESCRIPTION : HTTP_200_DESCRIPTION;
         ApiResponses apiResponses = new ApiResponses();
         String mediaTypeString;
         componentMapper.createComponentSchema(schema, typeSymbol);
@@ -874,10 +891,10 @@ public class OpenAPIResponseMapper {
             mediaTypeString = APPLICATION_PREFIX + customMediaPrefix.get() + JSON_POSTFIX;
         }
         ApiResponse apiResponse = new ApiResponse();
-        setCacheHeader(headers, apiResponse, HTTP_200);
+        setCacheHeader(headers, apiResponse, statusCode);
         apiResponse.content(new Content().addMediaType(mediaTypeString, media));
-        apiResponse.description(HTTP_200_DESCRIPTION);
-        apiResponses.put(HTTP_200, apiResponse);
+        apiResponse.description(description);
+        apiResponses.put(statusCode, apiResponse);
         return apiResponses;
     }
 
@@ -956,10 +973,13 @@ public class OpenAPIResponseMapper {
             if (customMediaPrefix.isPresent()) {
                 mediaTypeString = APPLICATION_PREFIX + customMediaPrefix.get() + JSON_POSTFIX;
             }
-            setCacheHeader(headers, apiResponse, HTTP_200);
+            String statusCode = httpMethod.equals(POST) ? HTTP_201 : HTTP_200;
+            String description = httpMethod.equals(POST) ? HTTP_201_DESCRIPTION : HTTP_200_DESCRIPTION;
+
+            setCacheHeader(headers, apiResponse, statusCode);
             apiResponse.content(new Content().addMediaType(mediaTypeString, media));
-            apiResponse.description(HTTP_200_DESCRIPTION);
-            apiResponses.put(HTTP_200, apiResponse);
+            apiResponse.description(description);
+            apiResponses.put(statusCode, apiResponse);
         }
         return Optional.of(apiResponses);
     }
