@@ -9,10 +9,10 @@ public type UserPlayListDetails record {|
     # The maximum number of items in the response (as set in the query or by default).
     int 'limit?;
     # URL to the next page of items. ( `null` if none)
-    string? next?;
+    string? next = ();
     # The offset of the items returned (as set in the query or by default)
     int offset?;
     # URL to the previous page of items. ( `null` if none) //anydata
-    anydata? previous?;
+    anydata? previous = ();
     ListObject total?;
 |};
