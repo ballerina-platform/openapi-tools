@@ -17,7 +17,6 @@
  */
 package io.ballerina.openapi.generators.openapi;
 
-import io.ballerina.openapi.converter.OpenApiConverterException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
@@ -41,21 +40,21 @@ public class EnumTypeTests {
         this.tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
     }
     @Test(description = "When the record field has reference to enum type")
-    public void testEnumType() throws OpenApiConverterException, IOException {
+    public void testEnumType() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("data_type/enum.bal");
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum.yaml");
     }
 
     @Test(description = "When the record field has reference to enum type array")
-    public void testEnumTypeInArray() throws OpenApiConverterException, IOException {
+    public void testEnumTypeInArray() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_array.bal");
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_array_type.yaml");
     }
 
     @Test(description = "When the record field has reference to enum with constant value")
-    public void testEnumWithConstantValue() throws OpenApiConverterException, IOException {
+    public void testEnumWithConstantValue() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_with_constant_value.bal");
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_with_value.yaml");

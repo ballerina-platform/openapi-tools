@@ -25,7 +25,6 @@ import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -66,7 +65,7 @@ public class FilterTests {
     }
 
     @Test(description = "With Operation filter")
-    public void testWithOperation() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void testWithOperation() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/operation.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/operation.bal");
         list1.clear();

@@ -24,7 +24,6 @@ import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -46,7 +45,7 @@ public class QueryParameterTests {
     SyntaxTree syntaxTree;
 
     @Test(description = "Generate Client for query parameter has default value")
-    public void generateQueryParamWithDefault() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateQueryParamWithDefault() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query_param_with_default_value.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_with_default_value.bal");
 

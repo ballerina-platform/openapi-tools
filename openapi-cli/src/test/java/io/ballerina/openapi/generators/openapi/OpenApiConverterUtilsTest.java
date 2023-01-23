@@ -173,7 +173,7 @@ public class OpenApiConverterUtilsTest {
         compareWithGeneratedFile(ballerinaFilePath, "compiler_warning.yaml");
     }
 
-    @Test(description = "Test for non http services", enabled = false)
+    @Test(description = "Test for non http services")
     public void testForNonHttpServices() {
         Path ballerinaFilePath = RES_DIR.resolve("non_service.bal");
         new OASContractGenerator().generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null

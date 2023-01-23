@@ -22,7 +22,6 @@ import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -71,7 +70,7 @@ public class ResourceFunctionTests {
     }
 
     @Test(description = "Generate Client for pathParameters")
-    public void generateForPathParameters() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateForPathParameters() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/pathParameters.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/pathParameters.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
