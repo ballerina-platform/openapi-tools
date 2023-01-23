@@ -24,7 +24,6 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
@@ -43,11 +42,10 @@ import org.testng.Assert;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,14 +57,12 @@ import java.util.stream.Stream;
  * This util class for keeping all the common functions that use to tests.
  */
 public class TestUtils {
+
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/").toAbsolutePath();
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
     private static final Path utilPath = RES_DIR.resolve("ballerina_project/utils.bal");
     private static final String LINE_SEPARATOR = System.lineSeparator();
-    List<String> list1 = new ArrayList<>();
-    List<String> list2 = new ArrayList<>();
-    Filter filter = new Filter(list1, list2);
 
     // Get diagnostics
     public static List<Diagnostic> getDiagnostics(SyntaxTree syntaxTree, OpenAPI openAPI,
@@ -109,21 +105,15 @@ public class TestUtils {
         generatedSyntaxTree = generatedSyntaxTree.replaceAll(LINE_SEPARATOR, "");
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
-        Assert.assertTrue(generatedSyntaxTree.equals(expectedBallerinaContent));
+        Assert.assertEquals(expectedBallerinaContent, generatedSyntaxTree);
     }
 
     /*
      * Write the generated syntax tree to file.
      */
     public static void writeFile(Path filePath, String content) throws IOException {
-        PrintWriter writer = null;
-        try {
-            writer = new PrintWriter(filePath.toString(), "UTF-8");
+        try (PrintWriter writer = new PrintWriter(filePath.toString(), StandardCharsets.UTF_8)) {
             writer.print(content);
-        } finally {
-            if (writer != null) {
-                writer.close();
-            }
         }
     }
 
@@ -132,7 +122,7 @@ public class TestUtils {
         Project project = null;
         try {
             project = ProjectLoader.loadProject(servicePath);
-        } catch (ProjectException e) {
+        } catch (ProjectException ignored) {
         }
 
         Package packageName = project.currentPackage();
@@ -152,11 +142,10 @@ public class TestUtils {
     public static OpenAPI getOpenAPI(Path definitionPath) throws IOException, BallerinaOpenApiException {
         String openAPIFileContent = Files.readString(definitionPath);
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
-        OpenAPI api = parseResult.getOpenAPI();
-        return api;
+        return parseResult.getOpenAPI();
     }
 
-    public static String  getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
+    public static String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
         String expectedServiceContent = expectedServiceLines.collect(Collectors.joining(LINE_SEPARATOR));
         expectedServiceLines.close();
@@ -179,9 +168,8 @@ public class TestUtils {
     public static void deleteGeneratedFiles() throws IOException {
         Path resourcesPath = RES_DIR.resolve("ballerina_project");
         if (Files.exists(resourcesPath)) {
-            List<File> listFiles = Arrays.asList(
-                    Objects.requireNonNull(new File(String.valueOf(resourcesPath)).listFiles()));
-            for (File existsFile: listFiles) {
+            File[] listFiles = Objects.requireNonNull(new File(String.valueOf(resourcesPath)).listFiles());
+            for (File existsFile : listFiles) {
                 String fileName = existsFile.getName();
                 if (fileName.endsWith(".bal")) {
                     existsFile.delete();

@@ -28,7 +28,7 @@ paths:
     post:
       summary: Creates a new user.
       responses:
-        200:
+        201:
           description: OK
           content:
             application/json:

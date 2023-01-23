@@ -33,6 +33,7 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
@@ -42,6 +43,7 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -62,7 +64,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.HTTP_REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.PAYLOAD;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.getAnnotationNode;
-import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.getMediaTypeToken;
+import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.handleMediaType;
 
 /**
  * This class for generating request body payload for OAS requestBody section.
@@ -172,7 +174,9 @@ public class RequestBodyGenerator {
                     typeName = Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
             }
         } else {
-            typeName = getMediaTypeToken(mediaType);
+            ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>> mediaTypeTokens =
+                    handleMediaType(mediaType, null);
+            typeName = mediaTypeTokens.left;
         }
         return typeName;
     }

@@ -38,7 +38,7 @@ public class ErrorMessages {
     }
 
     public static String unsupportedOpenAPIVersion() {
-        return String.format("provided openAPI contract version is not supported in openAPI tool. " +
-                "Use openAPI specification version 3 or higher");
+        return "Provided OpenAPI contract version is not supported in the tool. " +
+                "Use OpenAPI specification version 2 or higher";
     }
 }

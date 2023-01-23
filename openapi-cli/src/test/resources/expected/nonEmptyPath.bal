@@ -7,6 +7,6 @@ service / on ep0 {
     }
     resource function put user() returns json {
     }
-    resource function post user() returns json {
+    resource function post user() returns OkJson {
     }
 }
