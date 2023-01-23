@@ -43,6 +43,9 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
+import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
@@ -55,9 +58,12 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -72,6 +78,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionSignat
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.openapi.core.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.createImportDeclarationNodes;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.generateServiceConfigAnnotation;
 
@@ -84,12 +91,18 @@ public class BallerinaServiceGenerator {
     private boolean isNullableRequired;
     private final OpenAPI openAPI;
     private final Filter filter;
-    private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
+    private final BallerinaTypesGenerator ballerinaSchemaGenerator;
 
-    public BallerinaServiceGenerator(OpenAPI openAPI, Filter filter) {
-        this.openAPI = openAPI;
-        this.filter = filter;
+    private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
+    private final Set<String> paths = new LinkedHashSet<>();
+
+    public BallerinaServiceGenerator(OASServiceMetadata oasServiceMetadata) {
+        this.openAPI = oasServiceMetadata.getOpenAPI();
+        this.filter = oasServiceMetadata.getFilters();
         this.isNullableRequired = false;
+        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, oasServiceMetadata.isNullable(),
+                new LinkedList<>());
+        GeneratorMetaData.createInstance(openAPI, oasServiceMetadata.isNullable());
     }
 
     public List<TypeDefinitionNode> getTypeInclusionRecords() {
@@ -221,7 +234,6 @@ public class BallerinaServiceGenerator {
     private FunctionDefinitionNode getResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                        List<Node> pathNodes, String path)
             throws BallerinaOpenApiException {
-
         NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(GeneratorConstants.RESOURCE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
         Token functionKeyWord = createIdentifierToken(GeneratorConstants.FUNCTION, GeneratorUtils.SINGLE_WS_MINUTIAE,
@@ -257,7 +269,12 @@ public class BallerinaServiceGenerator {
             isNullableRequired = parametersGenerator.isNullableRequired();
         }
         SeparatedNodeList<ParameterNode> parameters = createSeparatedNodeList(params);
-        ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator();
+        String pathForRecord = Objects.equals(path, SLASH) ? "" : GeneratorUtils.getValidName(path, true);
+        ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator(ballerinaSchemaGenerator, pathForRecord);
+        if (!paths.contains(path)) {
+            returnTypeGenerator.setCountForRecord(0);
+            paths.add(path);
+        }
         ReturnTypeDescriptorNode returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation,
                 createEmptyNodeList(), path);
         typeInclusionRecords.putAll(returnTypeGenerator.getTypeInclusionRecords());

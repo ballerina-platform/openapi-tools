@@ -38,7 +38,6 @@ module io.ballerina.openapi.core {
     requires swagger.parser;
     requires swagger.models;
     requires swagger.parser.core;
-    requires swagger.parser.v2.converter;
     requires swagger.parser.v3;
     requires org.apache.commons.lang3;
     exports io.ballerina.openapi.core.generators.service;
@@ -48,5 +47,6 @@ module io.ballerina.openapi.core {
     exports io.ballerina.openapi.core.generators.schema;
     exports io.ballerina.openapi.core;
     exports io.ballerina.openapi.core.generators.client.model;
+    exports io.ballerina.openapi.core.generators.service.model;
 }
 

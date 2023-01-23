@@ -24,6 +24,7 @@ import io.ballerina.compiler.api.symbols.Documentable;
 import io.ballerina.compiler.api.symbols.Documentation;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.MapTypeSymbol;
+import io.ballerina.compiler.api.symbols.ReadonlyTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -539,6 +540,16 @@ public class OpenAPIResponseMapper {
             if (symbol instanceof TypeReferenceTypeSymbol) {
                 TypeReferenceTypeSymbol typeRef = (TypeReferenceTypeSymbol) symbol;
                 TypeSymbol typeSymbol = typeRef.typeDescriptor();
+                if (typeSymbol.typeKind() == TypeDescKind.INTERSECTION) {
+                    List<TypeSymbol> memberTypes = ((IntersectionTypeSymbol) typeSymbol).memberTypeDescriptors();
+                    for (TypeSymbol memberType : memberTypes) {
+                        if (!(memberType instanceof ReadonlyTypeSymbol)) {
+                            //TODO : address the rest of the simple name reference types
+                            typeSymbol = memberType;
+                            break;
+                        }
+                    }
+                }
                 if (typeSymbol.typeKind() == TypeDescKind.RECORD) {
                     ApiResponses responses = handleRecordTypeSymbol(qNode.identifier().text().trim(),
                             components.getSchemas(), customMediaPrefix, typeRef, new OpenAPIComponentMapper(components),

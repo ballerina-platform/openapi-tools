@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
+import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
@@ -47,7 +48,11 @@ public class RequestBodyTests {
     public void generateJsonPayload() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario01_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_01_rb.bal",
                 syntaxTree);
@@ -57,7 +62,11 @@ public class RequestBodyTests {
     public void generateOtherPayload() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario01_02_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_0102_rb.bal",
                 syntaxTree);
@@ -67,7 +76,11 @@ public class RequestBodyTests {
     public void generateRBsameDataBindingPayload() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario02_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_02_rb.bal",
                 syntaxTree);
@@ -77,7 +90,11 @@ public class RequestBodyTests {
     public void generateMultipleContent() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario03_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_03_rb.bal",
                 syntaxTree);
@@ -87,7 +104,11 @@ public class RequestBodyTests {
     public void generateRecordName() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/record_name_refactor.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/refactor_record_name.bal", syntaxTree);
@@ -97,7 +118,11 @@ public class RequestBodyTests {
     public void generateForMediaType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario04_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/scenario_04_rb.bal", syntaxTree);
@@ -106,8 +131,11 @@ public class RequestBodyTests {
     @Test(description = "RequestBody has oneOf scenarios")
     public void oneOfScenarios() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/oneOf_request_body.yaml");
-        BallerinaServiceGenerator ballerinaServiceGenerator =
-                new BallerinaServiceGenerator(GeneratorUtils.normalizeOpenAPI(definitionPath, false), filter);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(GeneratorUtils.normalizeOpenAPI(definitionPath, false))
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/oneof_requestBody.bal", syntaxTree);
@@ -117,7 +145,11 @@ public class RequestBodyTests {
     public void uRLEncode() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/url_form_encode.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/url_encode.bal", syntaxTree);
@@ -127,7 +159,11 @@ public class RequestBodyTests {
     public void referenceRequestBody() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/reference_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/reference_rb.bal", syntaxTree);

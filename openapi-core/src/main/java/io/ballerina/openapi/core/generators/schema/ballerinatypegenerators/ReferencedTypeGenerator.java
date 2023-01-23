@@ -59,8 +59,11 @@ public class ReferencedTypeGenerator extends TypeGenerator {
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
 
-        String typeName = GeneratorUtils.getValidName(GeneratorUtils.extractReferenceType(schema.get$ref()), true);
+        String extractName = GeneratorUtils.extractReferenceType(schema.get$ref());
+        String typeName = GeneratorUtils.getValidName(extractName, true);
         Schema<?> refSchema = GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(typeName);
+        refSchema = refSchema == null ?
+                GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(extractName) : refSchema;
         TypeDescriptorNode typeDescriptorNode = createSimpleNameReferenceNode(createIdentifierToken(typeName));
         if (refSchema == null) {
             throw new BallerinaOpenApiException(String.format("Undefined $ref: '%s' in openAPI contract.",

@@ -21,6 +21,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
+import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
@@ -48,7 +49,11 @@ public class HeaderTests {
     public void generateHeaderParameter() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/headers/multiHeaderParam.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_parameters.bal",
                 syntaxTree);

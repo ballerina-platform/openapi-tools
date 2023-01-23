@@ -37,11 +37,7 @@ paths:
           description: successful operation
           content:
             application/json:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
     put:
       tags:
         - store
@@ -52,11 +48,7 @@ paths:
           description: successful operation
           content:
             application/snowflake+json:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
     delete:
       tags:
         - store
@@ -67,35 +59,15 @@ paths:
           description: successful operation
           content:
             application/json:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
             application/snowflake+json:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
             application/snowflake+xml:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
             application/zip:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
             application/zip_0:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
     post:
       tags:
         - store
@@ -106,65 +78,29 @@ paths:
           description: successful operation
           content:
             application/json:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
             application/snowflake+json:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
             application/snowflake+xml:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
         "400":
           description: bad request operation
           content:
             application/json+v:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
             application/snowflake+json:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
             application/snowflake+xml:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
         "404":
           description: bad operation
           content:
             application/json+v:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
             application/snowflake+json:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
             application/snowflake+xml:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+              example:
         "500":
           description: error operation
           content:
