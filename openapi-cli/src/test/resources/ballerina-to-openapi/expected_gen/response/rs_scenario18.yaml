@@ -28,8 +28,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Pet'
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             text/vnd.wso2.sales+plain:
               schema:
@@ -48,8 +48,8 @@ paths:
     post:
       operationId: postHi
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             text/vnd.wso2.sales+plain:
               schema:
