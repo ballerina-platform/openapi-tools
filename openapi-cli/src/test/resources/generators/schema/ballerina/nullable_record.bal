@@ -13,6 +13,6 @@ public type UserPlayListDetails record {|
     # The offset of the items returned (as set in the query or by default)
     int offset?;
     # URL to the previous page of items. ( `null` if none) //anydata
-    anydata? previous?;
-    ListObject? total?;
+    anydata? previous = ();
+    ListObject? total = ();
 |};
