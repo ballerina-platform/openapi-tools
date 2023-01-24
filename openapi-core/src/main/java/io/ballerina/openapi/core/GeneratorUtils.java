@@ -446,13 +446,11 @@ public class GeneratorUtils {
      * Generate BallerinaMediaType for all the return mediaTypes.
      */
     public static String getBallerinaMediaType(String mediaType, boolean isRequest) {
-        if (mediaType.equals(MediaType.APPLICATION_JSON) || mediaType.matches("application/.*\\+json") ||
-                mediaType.matches(".*/json")) {
+        if (mediaType.matches(".*/json") || mediaType.matches("application/.*\\+json")) {
             return SyntaxKind.JSON_KEYWORD.stringValue();
-        } else if (mediaType.equals(MediaType.APPLICATION_XML) || mediaType.matches("application/.*\\+xml")) {
+        } else if (mediaType.matches(".*/xml")  || mediaType.matches("application/.*\\+xml")) {
             return SyntaxKind.XML_KEYWORD.stringValue();
-        } else if (mediaType.equals(MediaType.APPLICATION_FORM_URLENCODED) || mediaType.equals(MediaType.TEXT_HTML)
-                || mediaType.equals(MediaType.TEXT_PLAIN)) {
+        } else if (mediaType.equals(MediaType.APPLICATION_FORM_URLENCODED) || mediaType.matches("text/.*")) {
             return STRING_KEYWORD.stringValue();
         } else if (mediaType.equals(MediaType.APPLICATION_OCTET_STREAM) ||
                 mediaType.equals(IMAGE_PNG) || mediaType.matches("application/.*\\+octet-stream")) {

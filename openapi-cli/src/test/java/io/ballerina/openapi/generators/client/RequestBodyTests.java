@@ -240,6 +240,21 @@ public class RequestBodyTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
+    @Test(description = "Test for generating request body when operation has unsupported text/xx media type")
+    public void testRequestBodyWithUnsupportedTextMediaType() throws IOException, BallerinaOpenApiException {
+        Path expectedPath = RES_DIR.resolve("ballerina/unsupported_text_media_type.bal");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
+                RES_DIR.resolve("swagger/unsupported_text_media_type.yaml"), true);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI)
+                .withResourceMode(false).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
     @Test(description = "Test for generating request body when operation has multipart form-data media type")
     public void testRequestBodyWithMultipartMediaType()
             throws IOException, BallerinaOpenApiException {
