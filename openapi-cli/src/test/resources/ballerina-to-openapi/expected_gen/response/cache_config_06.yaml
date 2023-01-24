@@ -21,7 +21,7 @@ paths:
               schema:
                 type: string
         "500":
-          description: Found unexpected output
+          description: Internal server error
           content:
             text/plain:
               schema:
@@ -48,7 +48,7 @@ paths:
               schema:
                 type: string
         "500":
-          description: Found unexpected output
+          description: Internal server error
           content:
             text/plain:
               schema:
