@@ -473,7 +473,7 @@ public class OpenAPIResponseMapper {
                         (ArrayTypeDescriptorNode) typeNode, apiResponse, mediaType, customMediaPrefix, headers);
             case ERROR_TYPE_DESC:
                 // Return type is given as error or error? in the ballerina it will generate 500 response.
-                apiResponse.description("Found unexpected output");
+                apiResponse.description("Internal server error");
                 mediaType.setSchema(new StringSchema());
                 apiResponse.content(new Content().addMediaType(MediaType.TEXT_PLAIN, mediaType));
                 apiResponses.put("500", apiResponse);
