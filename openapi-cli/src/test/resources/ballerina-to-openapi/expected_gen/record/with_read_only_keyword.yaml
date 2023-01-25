@@ -30,8 +30,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Album'
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             application/json:
               schema:

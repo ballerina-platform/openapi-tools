@@ -60,6 +60,12 @@ public class HttpMethodTests {
                 "contain details for the `default` resource method in the Ballerina service.");
     }
 
+    @Test
+    public void testForPostMethodStatusCodeMapping() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("post_method.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "post_method.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
