@@ -100,7 +100,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
-import static io.ballerina.openapi.core.GeneratorConstants.ANY_TYPE;
 import static io.ballerina.openapi.core.GeneratorConstants.API_KEYS_CONFIG;
 import static io.ballerina.openapi.core.GeneratorConstants.API_KEY_CONFIG_PARAM;
 import static io.ballerina.openapi.core.GeneratorConstants.DELETE;
@@ -648,14 +647,14 @@ public class FunctionBodyGenerator {
             throws BallerinaOpenApiException {
 
         //Create Request statement
-        Map.Entry<String, MediaType> next = iterator.next();
-        if (!next.getKey().contains(ANY_TYPE)) {
+        Map.Entry<String, MediaType> mediaTypeEntry = iterator.next();
+        if (GeneratorUtils.isSupportedMediaType(mediaTypeEntry)) {
             VariableDeclarationNode requestVariable = GeneratorUtils.getSimpleStatement(HTTP_REQUEST,
                     REQUEST, NEW);
             statementsList.add(requestVariable);
         }
-        if (next.getValue() != null && !next.getKey().contains(ANY_TYPE)) {
-            genStatementsForRequestMediaType(statementsList, next);
+        if (mediaTypeEntry.getValue() != null && GeneratorUtils.isSupportedMediaType(mediaTypeEntry)) {
+            genStatementsForRequestMediaType(statementsList, mediaTypeEntry);
             // TODO:Fill with other mime type
         } else {
             // Add default value comment

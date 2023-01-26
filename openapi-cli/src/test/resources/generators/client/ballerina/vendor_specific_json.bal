@@ -36,11 +36,12 @@ public isolated client class Client {
     }
     # Create a pet
     #
-    # + return - Null response
-    remote isolated function createPet(http:Request request) returns http:Response|error {
+    # + return - List of existing pets
+    remote isolated function createPet(Pet payload) returns Pets|error {
         string resourcePath = string `/pets`;
-        // TODO: Update the request as needed;
-        http:Response response = check self.clientEp->post(resourcePath, request);
+        http:Request request = new;
+        request.setPayload(payload, "application/vnd.petstore.v3.diff+json");
+        Pets response = check self.clientEp->post(resourcePath, request);
         return response;
     }
 }
