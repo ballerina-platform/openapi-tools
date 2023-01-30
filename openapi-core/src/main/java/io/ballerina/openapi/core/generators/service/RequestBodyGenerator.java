@@ -174,11 +174,11 @@ public class RequestBodyGenerator {
                 default:
                     ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>> mediaTypeTokens =
                             handleMediaType(mediaType, null);
-                    if (mediaTypeTokens.left.isEmpty()) {
+                    if (mediaTypeTokens.getLeft().isPresent()) {
+                        typeName = mediaTypeTokens.getLeft();
+                    } else {
                         identifierToken = createIdentifierToken(HTTP_REQUEST);
                         typeName = Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
-                    } else {
-                        typeName = mediaTypeTokens.left;
                     }
             }
         } else {
