@@ -540,6 +540,42 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test(description = "Test service generation for request and responses with wildcard media type")
+    public void testServiceGenerationWhenWildCardMediaTypeGiven() {
+        final String serviceName = "openapipetstore";
+        String definitionPath = RES_DIR.resolve("petstore_wildcard.yaml").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+
+        try {
+            String expectedServiceContent = getStringFromGivenBalFile(
+                    expectedServiceFile, "petstore_wildcard_service.bal");
+            String expectedTypesContent = getStringFromGivenBalFile(
+                    expectedServiceFile, "petstore_wildcard_types.bal");
+            generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter, false);
+            if (Files.exists(resourcePath.resolve("openapipetstore_service.bal")) &&
+                    Files.exists(resourcePath.resolve("types.bal"))) {
+                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
+                generatedService = (generatedService.trim()).replaceAll("\\s+", "");
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedService.contains(expectedServiceContent),
+                        "Expected service and actual generated service is not matching");
+
+                String generatedTypes = getStringFromGivenBalFile(resourcePath, "types.bal");
+                generatedTypes = (generatedTypes.trim()).replaceAll("\\s+", "");
+                expectedTypesContent = (expectedTypesContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedTypes.contains(expectedTypesContent),
+                        "Expected types and actual generated types are not matching");
+
+            } else {
+                Assert.fail("Service was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore_service.bal");
+        }
+    }
+
     @Test(description = "Functionality tests when invalid OpenAPI definition is given",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OpenAPI definition has errors: .*")
