@@ -163,11 +163,14 @@ public class FunctionSignatureGenerator {
         ApiResponses responses = operation.getResponses();
         Collection<ApiResponse> values = responses.values();
         Iterator<ApiResponse> iteratorRes = values.iterator();
-        ApiResponse next = iteratorRes.next();
-        if (next.getDescription() != null && !next.getDescription().isBlank()) {
-            MarkdownParameterDocumentationLineNode returnDoc = DocCommentsGenerator.createAPIParamDoc("return",
-                    next.getDescription());
-            remoteFunctionDoc.add(returnDoc);
+        if (iteratorRes.hasNext()) {
+            ApiResponse response = iteratorRes.next();
+            if (response.getDescription() != null && !response.getDescription().isBlank()) {
+                MarkdownParameterDocumentationLineNode returnDoc =
+                        DocCommentsGenerator.createAPIParamDoc("return",
+                        response.getDescription());
+                remoteFunctionDoc.add(returnDoc);
+            }
         }
 
         // Return Type

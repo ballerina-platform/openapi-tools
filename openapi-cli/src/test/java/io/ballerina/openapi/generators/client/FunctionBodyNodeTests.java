@@ -153,6 +153,11 @@ public class FunctionBodyNodeTests {
                 {"swagger/any_type_response.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +
                         "        http:Response response = check self.clientEp->post(resourcePath, request);\n" +
+                        "        return response;}"},
+                {"swagger/return_type/no_response.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
+                        "        map<anydata> queryParam = {\"limit\": 'limit};\n" +
+                        "        resourcePath = resourcePath + check getPathForQueryParam(queryParam);\n" +
+                        "        http:Response response = check self.clientEp->get(resourcePath);\n" +
                         "        return response;}"}
         };
     }
