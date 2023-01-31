@@ -108,4 +108,14 @@ public class FunctionSignatureReturnTypeTests {
                 true);
         Assert.assertEquals(returnType, "json|error");
     }
+
+    @Test(description = "Tests for the empty response")
+    public void getReturnTypeForEmptyResponse() throws IOException, BallerinaOpenApiException {
+        OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/no_response.yaml"));
+        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(array,
+                new BallerinaTypesGenerator(array), new ArrayList<>());
+        String returnType = functionReturnType.getReturnType(array.getPaths().get("/pets").getGet(),
+                true);
+        Assert.assertEquals(returnType, "http:Response|error");
+    }
 }
