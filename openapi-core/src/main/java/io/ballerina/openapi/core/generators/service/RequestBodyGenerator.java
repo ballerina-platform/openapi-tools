@@ -62,6 +62,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParame
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP_REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.PAYLOAD;
+import static io.ballerina.openapi.core.GeneratorConstants.REQUEST;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.getAnnotationNode;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.handleMediaType;
@@ -109,14 +110,14 @@ public class RequestBodyGenerator {
         }
         AnnotationNode annotationNode = getAnnotationNode(GeneratorConstants.PAYLOAD_KEYWORD, annotValue);
         NodeList<AnnotationNode> annotation = NodeFactory.createNodeList(annotationNode);
-        Token paramName = createIdentifierToken(PAYLOAD, GeneratorUtils.SINGLE_WS_MINUTIAE,
-                GeneratorUtils.SINGLE_WS_MINUTIAE);
+        String paramName = typeName.isPresent() && typeName.get().toString().equals(HTTP_REQUEST) ? REQUEST : PAYLOAD;
 
         if (typeName.isEmpty()) {
             return createRequiredParameterNode(createEmptyNodeList(),
                     createSimpleNameReferenceNode(createIdentifierToken(HTTP_REQUEST)), createIdentifierToken(PAYLOAD));
         }
-        return createRequiredParameterNode(annotation, typeName.get(), paramName);
+        return createRequiredParameterNode(annotation, typeName.get(), createIdentifierToken(paramName,
+                GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
     }
 
     /**
@@ -127,7 +128,8 @@ public class RequestBodyGenerator {
             throws BallerinaOpenApiException {
 
         Optional<TypeDescriptorNode> typeName;
-        if (mediaType.getValue().getSchema().get$ref() != null) {
+        if (mediaType.getValue() != null && mediaType.getValue().getSchema() != null &&
+                mediaType.getValue().getSchema().get$ref() != null) {
             String schemaName = extractReferenceType(mediaType.getValue().getSchema().get$ref());
             Map<String, Schema> schemas = components.getSchemas();
             String mediaTypeContent = mediaType.getKey().trim();
@@ -170,8 +172,14 @@ public class RequestBodyGenerator {
                             GeneratorUtils.getValidName(schemaName, true))));
                     break;
                 default:
-                    identifierToken = createIdentifierToken(GeneratorConstants.JSON);
-                    typeName = Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
+                    ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>> mediaTypeTokens =
+                            handleMediaType(mediaType, null);
+                    if (mediaTypeTokens.getLeft().isPresent()) {
+                        typeName = mediaTypeTokens.getLeft();
+                    } else {
+                        identifierToken = createIdentifierToken(HTTP_REQUEST);
+                        typeName = Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
+                    }
             }
         } else {
             ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>> mediaTypeTokens =
