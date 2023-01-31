@@ -29,7 +29,7 @@ paths:
               schema:
                 type: string
         "500":
-          description: Found unexpected output
+          description: Internal server error
           content:
             text/plain:
               schema:
@@ -59,7 +59,7 @@ paths:
               schema:
                 type: string
         "500":
-          description: Found unexpected output
+          description: Internal server error
           content:
             text/plain:
               schema:
@@ -73,14 +73,14 @@ paths:
             schema:
               $ref: '#/components/schemas/Offset'
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             text/plain:
               schema:
                 type: string
         "500":
-          description: Found unexpected output
+          description: Internal server error
           content:
             text/plain:
               schema:

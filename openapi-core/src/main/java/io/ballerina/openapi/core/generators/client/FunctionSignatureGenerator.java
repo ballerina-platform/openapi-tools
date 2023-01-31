@@ -32,7 +32,6 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
@@ -85,7 +84,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.openapi.core.ErrorMessages.invalidPathParamType;
-import static io.ballerina.openapi.core.GeneratorConstants.ANY_TYPE;
 import static io.ballerina.openapi.core.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.core.GeneratorConstants.BINARY;
 import static io.ballerina.openapi.core.GeneratorConstants.BOOLEAN;
@@ -99,7 +97,6 @@ import static io.ballerina.openapi.core.GeneratorConstants.PAYLOAD;
 import static io.ballerina.openapi.core.GeneratorConstants.REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.GeneratorConstants.STRING;
-import static io.ballerina.openapi.core.GeneratorConstants.VENDOR_SPECIFIC_TYPE;
 import static io.ballerina.openapi.core.GeneratorConstants.X_BALLERINA_DEPRECATED_REASON;
 import static io.ballerina.openapi.core.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.GeneratorUtils.escapeIdentifier;
@@ -118,7 +115,6 @@ public class FunctionSignatureGenerator {
     private final List<TypeDefinitionNode> typeDefinitionNodeList;
     private FunctionReturnTypeGenerator functionReturnType;
     private boolean deprecatedParamFound = false;
-
     private boolean isResource;
 
     public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
@@ -495,17 +491,12 @@ public class FunctionSignatureGenerator {
         Iterator<Map.Entry<String, MediaType>> iterator = requestBodyContent.entrySet().iterator();
         while (iterator.hasNext()) {
             // This implementation currently for first content type
-            Map.Entry<String, MediaType> next = iterator.next();
-            Schema schema = next.getValue().getSchema();
+            Map.Entry<String, MediaType> mediaTypeEntry = iterator.next();
+            Schema schema = mediaTypeEntry.getValue().getSchema();
             String paramType = "";
-            String paramName = next.getKey().equals(ANY_TYPE) ? REQUEST : PAYLOAD;
             //Take payload type
-            if (schema != null) {
-                if (next.getKey().equals(ANY_TYPE)) {
-                    paramType = HTTP_REQUEST;
-                } else if (next.getKey().contains(VENDOR_SPECIFIC_TYPE)) {
-                    paramType = SyntaxKind.BYTE_KEYWORD.stringValue() + SQUARE_BRACKETS;
-                } else if (schema.get$ref() != null) {
+            if (schema != null && GeneratorUtils.isSupportedMediaType(mediaTypeEntry)) {
+                if (schema.get$ref() != null) {
                     paramType = getValidName(extractReferenceType(schema.get$ref().trim()), true);
                 } else if (schema.getType() != null && !schema.getType().equals(ARRAY) && !schema.getType().equals(
                         OBJECT)) {
@@ -519,17 +510,19 @@ public class FunctionSignatureGenerator {
                 } else if (schema instanceof ArraySchema) {
                     //TODO: handle nested array - this is impossible to handle
                     ArraySchema arraySchema = (ArraySchema) schema;
-                    paramType = getRequestBodyParameterForArraySchema(operationId, next, arraySchema);
+                    paramType = getRequestBodyParameterForArraySchema(operationId, mediaTypeEntry, arraySchema);
                 } else if (schema instanceof ObjectSchema) {
                     ObjectSchema objectSchema = (ObjectSchema) schema;
                     paramType = referencedRequestBodyName.isBlank() ? paramType : referencedRequestBodyName;
                     getRequestBodyParameterForObjectSchema(referencedRequestBodyName, objectSchema);
                 } else { // composed and object schemas are handled by the flatten
-                    paramType = GeneratorUtils.getBallerinaMediaType(next.getKey(), true);
+                    paramType = GeneratorUtils.getBallerinaMediaType(mediaTypeEntry.getKey(), true);
                 }
             } else {
-                paramType = GeneratorUtils.getBallerinaMediaType(next.getKey(), true);
+                paramType = GeneratorUtils.getBallerinaMediaType(mediaTypeEntry.getKey(), true);
             }
+
+            String paramName = paramType.equals(HTTP_REQUEST) ? REQUEST : PAYLOAD;
             if (!paramType.isBlank()) {
                 List<AnnotationNode> annotationNodes = new ArrayList<>();
                 DocCommentsGenerator.extractDisplayAnnotation(requestBody.getExtensions(), annotationNodes);
@@ -547,10 +540,10 @@ public class FunctionSignatureGenerator {
                 parameterList.add(createToken((COMMA_TOKEN)));
             }
 
-            if (next.getKey().equals(javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA)
-                    && next.getValue().getEncoding() != null) {
+            if (mediaTypeEntry.getKey().equals(javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA)
+                    && mediaTypeEntry.getValue().getEncoding() != null) {
                 List<String> headerList = new ArrayList<>();
-                for (Map.Entry<String, Encoding> entry : next.getValue().getEncoding().entrySet()) {
+                for (Map.Entry<String, Encoding> entry : mediaTypeEntry.getValue().getEncoding().entrySet()) {
                     if (entry.getValue().getHeaders() != null) {
                         for (Map.Entry<String, Header> header : entry.getValue().getHeaders().entrySet()) {
                             if (!headerList.contains(header.getKey())) {

@@ -36,6 +36,7 @@ public isolated client class Client {
     }
     # Create a pet
     #
+    # + request - Pet
     # + return - Null response
     remote isolated function createPet(http:Request request) returns http:Response|error {
         string resourcePath = string `/pets`;

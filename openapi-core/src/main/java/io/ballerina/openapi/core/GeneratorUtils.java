@@ -123,8 +123,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SLASH_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
-import static io.ballerina.openapi.core.GeneratorConstants.ANY_TYPE;
-import static io.ballerina.openapi.core.GeneratorConstants.APPLICATION_PDF;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML_CONTENT;
@@ -143,6 +141,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.OPEN_CURLY_BRACE;
 import static io.ballerina.openapi.core.GeneratorConstants.SERVICE_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.core.GeneratorConstants.SPECIAL_CHARACTERS_REGEX;
+import static io.ballerina.openapi.core.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.GeneratorConstants.STYLE;
 import static io.ballerina.openapi.core.GeneratorConstants.TYPE_FILE_NAME;
@@ -425,26 +424,38 @@ public class GeneratorUtils {
     }
 
     /**
+     * Check whether the given media type is currently supported in the tool.
+     *
+     * @param mediaTypeEntry
+     * @return
+     */
+    public static boolean isSupportedMediaType(Map.Entry<String,
+            io.swagger.v3.oas.models.media.MediaType> mediaTypeEntry) {
+        String mediaType = mediaTypeEntry.getKey();
+        String defaultBallerinaType = getBallerinaMediaType(mediaType, true);
+        if (defaultBallerinaType.equals(HTTP_REQUEST) &&
+                !(mediaTypeEntry.getValue().getSchema() != null && mediaType.equals(MediaType.MULTIPART_FORM_DATA))) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
      * Generate BallerinaMediaType for all the return mediaTypes.
      */
     public static String getBallerinaMediaType(String mediaType, boolean isRequest) {
-
-        switch (mediaType) {
-            case MediaType.APPLICATION_JSON:
-                return SyntaxKind.JSON_KEYWORD.stringValue();
-            case MediaType.APPLICATION_XML:
-                return SyntaxKind.XML_KEYWORD.stringValue();
-            case MediaType.APPLICATION_FORM_URLENCODED:
-            case MediaType.TEXT_HTML:
-            case MediaType.TEXT_PLAIN:
-                return STRING_KEYWORD.stringValue();
-            case IMAGE_PNG:
-            case MediaType.APPLICATION_OCTET_STREAM:
-            case APPLICATION_PDF:
-            case ANY_TYPE:
-                return isRequest ? HTTP_REQUEST : HTTP_RESPONSE;
-            default:
-                return SyntaxKind.JSON_KEYWORD.stringValue();
+        if (mediaType.matches(".*/json") || mediaType.matches("application/.*\\+json")) {
+            return SyntaxKind.JSON_KEYWORD.stringValue();
+        } else if (mediaType.matches(".*/xml")  || mediaType.matches("application/.*\\+xml")) {
+            return SyntaxKind.XML_KEYWORD.stringValue();
+        } else if (mediaType.equals(MediaType.APPLICATION_FORM_URLENCODED) || mediaType.matches("text/.*")) {
+            return STRING_KEYWORD.stringValue();
+        } else if (mediaType.equals(MediaType.APPLICATION_OCTET_STREAM) ||
+                mediaType.equals(IMAGE_PNG) || mediaType.matches("application/.*\\+octet-stream")) {
+            return SyntaxKind.BYTE_KEYWORD.stringValue() + SQUARE_BRACKETS;
+        } else {
+            return isRequest ? HTTP_REQUEST : HTTP_RESPONSE;
         }
     }
 

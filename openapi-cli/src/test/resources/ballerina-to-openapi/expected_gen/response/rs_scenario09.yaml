@@ -36,8 +36,8 @@ paths:
     post:
       operationId: postHi
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             application/json:
               schema:
@@ -60,7 +60,7 @@ paths:
             format: int64
       responses:
         "500":
-          description: Found unexpected output
+          description: Internal server error
           content:
             text/plain:
               schema:

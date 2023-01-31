@@ -1,5 +1,6 @@
 import ballerina/http;
 
+# The Stripe REST API. Please see https://stripe.com/docs/api for more details.
 public isolated client class Client {
     final http:Client clientEp;
     # Gets invoked to initialize the `connector`.
@@ -7,7 +8,7 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "http://petstore.{host}.io/v1") returns error? {
+    public isolated function init(string serviceUrl, ConnectionConfig config =  {}) returns error? {
         http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
@@ -34,13 +35,15 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    # Create a pet
+    # <p>Creates a new customer object.</p>
     #
-    # + return - Null response
-    remote isolated function createPet(http:Request request) returns http:Response|error {
-        string resourcePath = string `/pets`;
+    # + customer - Customer ID
+    # + request - Customer Details
+    # + return - Successful response.
+    remote isolated function postCustomers(string customer, http:Request request) returns Customer|error {
+        string resourcePath = string `/v1/customer/${getEncodedUri(customer)}`;
         // TODO: Update the request as needed;
-        http:Response response = check self.clientEp->post(resourcePath, request);
+        Customer response = check self.clientEp->post(resourcePath, request);
         return response;
     }
 }

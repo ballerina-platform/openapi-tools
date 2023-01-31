@@ -14,8 +14,8 @@ paths:
     post:
       operationId: postHi01
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             application/json:
               schema:
@@ -26,8 +26,8 @@ paths:
     post:
       operationId: postHi
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             text/plain:
               schema:

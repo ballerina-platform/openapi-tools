@@ -11,28 +11,6 @@ info:
   version: '2020-08-27'
   x-stripeSpecFilename: spec3
 paths:
-  "/v1/payment_methods/{payment_method}":
-    get:
-      description: "<p>Retrieves a PaymentMethod object.</p>"
-      operationId: GetPaymentMethodsPaymentMethod
-      tags:
-        - "Payment_Methods"
-      parameters:
-        - in: path
-          name: payment_method
-          description: Payment Method
-          required: true
-          schema:
-            maxLength: 5000
-            type: string
-          style: simple
-
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: {}
-          description: Successful response.
   "/v1/customer/{customer}":
     post:
       description: "<p>Creates a new customer object.</p>"

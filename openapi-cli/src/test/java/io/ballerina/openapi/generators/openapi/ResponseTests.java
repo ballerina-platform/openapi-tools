@@ -144,7 +144,8 @@ public class ResponseTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario17.yaml");
     }
 
-    @Test(description = "Generate OpenAPI spec for service configuration annotation in resource")
+    @Test(description = "Generate OpenAPI spec for resource function which has service configuration annotation " +
+            "including details with vendor specific media type")
     public void testWithAnnotationForAllType() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario18.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario18.yaml");
