@@ -168,4 +168,19 @@ public class RequestBodyTests {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/reference_rb.bal", syntaxTree);
     }
+
+    @Test
+    public void testForRequestBodyHasMultipartFormDataPayload()
+            throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/requestBody/multipart_form_data.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "requestBody/multipart_form_data.bal", syntaxTree);
+    }
 }

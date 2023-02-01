@@ -112,9 +112,9 @@ public class RequestBodyGenerator {
         NodeList<AnnotationNode> annotation = NodeFactory.createNodeList(annotationNode);
         String paramName = typeName.isPresent() && typeName.get().toString().equals(HTTP_REQUEST) ? REQUEST : PAYLOAD;
 
-        if (typeName.isEmpty()) {
+        if (typeName.isEmpty() || typeName.get().toString().equals(HTTP_REQUEST)) {
             return createRequiredParameterNode(createEmptyNodeList(),
-                    createSimpleNameReferenceNode(createIdentifierToken(HTTP_REQUEST)), createIdentifierToken(PAYLOAD));
+                    createSimpleNameReferenceNode(createIdentifierToken(HTTP_REQUEST)), createIdentifierToken(REQUEST));
         }
         return createRequiredParameterNode(annotation, typeName.get(), createIdentifierToken(paramName,
                 GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
