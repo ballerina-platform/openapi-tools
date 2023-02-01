@@ -66,4 +66,10 @@ public class ModuleReferenceTests {
         Path ballerinaFilePath = RES_DIR.resolve("response_annotation.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/response_annotation.yaml");
     }
+
+    @Test
+    public void testRecordReferenceWithReadOnly() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("readonly.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "readonly.yaml");
+    }
 }

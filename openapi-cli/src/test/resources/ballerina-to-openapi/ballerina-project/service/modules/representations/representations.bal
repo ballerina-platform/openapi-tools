@@ -147,3 +147,24 @@ public type PaymentConflict record {|
     *http:Conflict;
     string body = "Error occurred while updating the payment";
 |};
+
+public enum Status {
+    OPEN,
+    CLOSED,
+    HOLD
+}
+
+public type LiftRecord readonly & record {|
+    readonly string id;
+    string name;
+    Status status;
+    int capacity;
+    boolean night;
+    int elevationgain;
+|};
+
+public final readonly & table<LiftRecord> key(id) liftTable = table [
+    { id: "astra-express", name: "Astra Express", status: OPEN, capacity: 10, night: false, elevationgain: 20},
+    { id: "jazz-cat", name: "Jazz Cat", status: CLOSED, capacity: 5, night: true, elevationgain: 30},
+    { id: "jolly-roger", name: "Jolly Roger", status: CLOSED, capacity: 8, night: true, elevationgain: 10}
+];
