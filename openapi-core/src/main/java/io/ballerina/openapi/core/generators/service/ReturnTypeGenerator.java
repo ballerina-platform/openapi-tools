@@ -116,11 +116,14 @@ public class ReturnTypeGenerator {
                 //handle multiple response scenarios ex: status code 200, 400, 500
                 TypeDescriptorNode type = handleMultipleResponse(responses);
                 returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), annotations, type);
-            } else {
+            } else if (responses.size() == 1) {
                 //handle single response
                 Iterator<Map.Entry<String, ApiResponse>> responseIterator = responses.entrySet().iterator();
                 Map.Entry<String, ApiResponse> response = responseIterator.next();
                 returnNode = handleSingleResponse(annotations, response);
+            } else {
+                TypeDescriptorNode defaultType = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
+                returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), annotations, defaultType);
             }
         } else {
             // --error node TypeDescriptor
