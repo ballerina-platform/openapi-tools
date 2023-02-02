@@ -15,6 +15,6 @@ service / on ep0 {
     }
     resource function post storageSpaces03(@http:Payload xml payload) returns http:Ok {
     }
-    resource function post storageSpaces04(http:Request payload) returns http:Ok {
+    resource function post storageSpaces04(http:Request request) returns http:Ok {
     }
 }
