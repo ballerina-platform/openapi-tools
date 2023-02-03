@@ -216,18 +216,7 @@ public class ServiceGenerationUtils {
 
     public static ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>> handleMediaType(
             Map.Entry<String, MediaType> mediaType, String recordName) throws BallerinaOpenApiException {
-        String mediaTypeContent = mediaType.getKey().trim();
-        if (mediaTypeContent.matches("text/.*")) {
-            mediaTypeContent = GeneratorConstants.TEXT;
-        } else if (mediaTypeContent.matches("application/.*\\+json")) {
-            mediaTypeContent = GeneratorConstants.APPLICATION_JSON;
-        } else if (mediaTypeContent.matches("application/.*\\+xml")) {
-            mediaTypeContent = GeneratorConstants.APPLICATION_XML;
-        } else if (mediaTypeContent.matches("application/.*\\+octet-stream")) {
-            mediaTypeContent = GeneratorConstants.APPLICATION_OCTET_STREAM;
-        } else if (mediaTypeContent.matches("application/.*\\+x-www-form-urlencoded")) {
-            mediaTypeContent = GeneratorConstants.APPLICATION_URL_ENCODE;
-        }
+        String mediaTypeContent = seleteMediaType(mediaType.getKey().trim());
 
         MediaType value = mediaType.getValue();
         Schema<?> schema = value.getSchema();
@@ -273,6 +262,26 @@ public class ServiceGenerationUtils {
             default:
                 return ImmutablePair.of(Optional.empty(), Optional.empty());
         }
+    }
+
+    /**
+     *
+     * This util uses for selecting standard media type by looking at the user defined media type.
+     */
+    public static String seleteMediaType(String mediaTypeContent) {
+
+        if (mediaTypeContent.matches("text/.*")) {
+            mediaTypeContent = GeneratorConstants.TEXT;
+        } else if (mediaTypeContent.matches("application/.*\\+json")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_JSON;
+        } else if (mediaTypeContent.matches("application/.*\\+xml")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_XML;
+        } else if (mediaTypeContent.matches("application/.*\\+octet-stream")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_OCTET_STREAM;
+        } else if (mediaTypeContent.matches("application/.*\\+x-www-form-urlencoded")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_URL_ENCODE;
+        }
+        return mediaTypeContent;
     }
 
     /**
