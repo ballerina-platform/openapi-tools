@@ -38,7 +38,6 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -64,7 +63,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.REQUEST;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.getAnnotationNode;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.handleMediaType;
-import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.seleteMediaType;
+import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.selectMediaType;
 
 /**
  * This class for generating request body payload for OAS requestBody section.
@@ -72,11 +71,9 @@ import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtil
  * @since 1.3.0
  */
 public class RequestBodyGenerator {
-    private final Components components;
     private final RequestBody requestBody;
 
-    public RequestBodyGenerator(Components components, RequestBody requestBody) {
-        this.components = components;
+    public RequestBodyGenerator(RequestBody requestBody) {
         this.requestBody = requestBody;
     }
 
@@ -130,7 +127,7 @@ public class RequestBodyGenerator {
                 mediaType.getValue().getSchema().get$ref() != null) {
             String reference = mediaType.getValue().getSchema().get$ref();
             String schemaName = GeneratorUtils.getValidName(extractReferenceType(reference), true);
-            String mediaTypeContent = seleteMediaType(mediaType.getKey().trim());
+            String mediaTypeContent = selectMediaType(mediaType.getKey().trim());
             IdentifierToken identifierToken;
             switch (mediaTypeContent) {
                 case GeneratorConstants.APPLICATION_XML:

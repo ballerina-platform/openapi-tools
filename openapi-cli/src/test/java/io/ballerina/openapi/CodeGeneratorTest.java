@@ -16,8 +16,10 @@
 package io.ballerina.openapi;
 
 import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.service.ServiceGenerationUtils;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.core.model.GenSrcFile;
 import io.ballerina.openapi.generators.common.TestUtils;
@@ -610,6 +612,13 @@ public class CodeGeneratorTest {
         Assert.assertEquals(GeneratorUtils.escapeIdentifier("foo_bar$_baz"), "'foo_bar\\$_baz");
     }
 
+    @Test
+    public void testForSelectMediaType() {
+        Assert.assertEquals(ServiceGenerationUtils.selectMediaType("text/json"),
+                GeneratorConstants.APPLICATION_JSON);
+        Assert.assertEquals(ServiceGenerationUtils.selectMediaType("text/xml"),
+                GeneratorConstants.APPLICATION_XML);
+    }
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
 
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));

@@ -216,7 +216,7 @@ public class ServiceGenerationUtils {
 
     public static ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>> handleMediaType(
             Map.Entry<String, MediaType> mediaType, String recordName) throws BallerinaOpenApiException {
-        String mediaTypeContent = seleteMediaType(mediaType.getKey().trim());
+        String mediaTypeContent = selectMediaType(mediaType.getKey().trim());
 
         MediaType value = mediaType.getValue();
         Schema<?> schema = value.getSchema();
@@ -266,17 +266,17 @@ public class ServiceGenerationUtils {
 
     /**
      *
-     * This util uses for selecting standard media type by looking at the user defined media type.
+     * This util is used for selecting standard media type by looking at the user defined media type.
      */
-    public static String seleteMediaType(String mediaTypeContent) {
+    public static String selectMediaType(String mediaTypeContent) {
 
-        if (mediaTypeContent.matches("text/.*")) {
-            mediaTypeContent = GeneratorConstants.TEXT;
-        } else if (mediaTypeContent.matches("application/.*\\+json")) {
+        if (mediaTypeContent.matches("application/.*\\+json") || mediaTypeContent.matches(".*/json")) {
             mediaTypeContent = GeneratorConstants.APPLICATION_JSON;
-        } else if (mediaTypeContent.matches("application/.*\\+xml")) {
+        } else if (mediaTypeContent.matches("application/.*\\+xml") || mediaTypeContent.matches(".*/xml")) {
             mediaTypeContent = GeneratorConstants.APPLICATION_XML;
-        } else if (mediaTypeContent.matches("application/.*\\+octet-stream")) {
+        } else if (mediaTypeContent.matches("text/.*")) {
+            mediaTypeContent = GeneratorConstants.TEXT;
+        }  else if (mediaTypeContent.matches("application/.*\\+octet-stream")) {
             mediaTypeContent = GeneratorConstants.APPLICATION_OCTET_STREAM;
         } else if (mediaTypeContent.matches("application/.*\\+x-www-form-urlencoded")) {
             mediaTypeContent = GeneratorConstants.APPLICATION_URL_ENCODE;
