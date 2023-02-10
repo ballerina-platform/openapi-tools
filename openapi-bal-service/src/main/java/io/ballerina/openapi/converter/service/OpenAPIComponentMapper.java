@@ -70,12 +70,10 @@ public class OpenAPIComponentMapper {
     private final Components components;
     private final List<OpenAPIConverterDiagnostic> diagnostics;
 
-
     public OpenAPIComponentMapper(Components components) {
          this.components = components;
          this.diagnostics = new ArrayList<>();
     }
-
     public List<OpenAPIConverterDiagnostic> getDiagnostics() {
         return diagnostics;
     }
@@ -108,13 +106,26 @@ public class OpenAPIComponentMapper {
                 }
             }
         }
+
         switch (type.typeKind()) {
             case RECORD:
                 // Handle typeInclusions with allOf type binding
                 handleRecordTypeSymbol((RecordTypeSymbol) type, schema, componentName, apiDocs);
                 break;
+            case TYPE_REFERENCE:
+                schema.put(componentName, new ObjectSchema().$ref(ConverterCommonUtils.unescapeIdentifier(
+                        type.getName().orElseThrow().trim())));
+                components.setSchemas(schema);
+                TypeReferenceTypeSymbol referredType = (TypeReferenceTypeSymbol) type;
+                createComponentSchema(schema, referredType);
+                break;
             case STRING:
                 schema.put(componentName, new StringSchema().description(typeDoc));
+                components.setSchemas(schema);
+                break;
+            case JSON:
+            case XML:
+                schema.put(componentName, new ObjectSchema().description(typeDoc));
                 components.setSchemas(schema);
                 break;
             case INT:
@@ -142,12 +153,25 @@ public class OpenAPIComponentMapper {
                 break;
             case MAP:
                 MapTypeSymbol mapTypeSymbol = (MapTypeSymbol) type;
-                TypeDescKind typeDescKind = mapTypeSymbol.typeParam().typeKind();
-                Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(typeDescKind.getName());
-                schema.put(componentName,
-                        new ObjectSchema().additionalProperties(
-                                openApiSchema.getType() == null ? true : openApiSchema)
-                                .description(typeDoc));
+                TypeSymbol typeParam = mapTypeSymbol.typeParam();
+
+                if (typeParam.typeKind() == TypeDescKind.TYPE_REFERENCE) {
+                    TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) typeParam;
+                    schema.put(componentName, new ObjectSchema().additionalProperties(new ObjectSchema()
+                            .$ref(ConverterCommonUtils.unescapeIdentifier(
+                            typeReferenceTypeSymbol.getName().orElseThrow().trim()))));
+                    createComponentSchema(schema, typeReferenceTypeSymbol);
+                }
+
+                if (!schema.containsKey(componentName)) {
+                    TypeDescKind typeDescKind = mapTypeSymbol.typeParam().typeKind();
+                    Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(typeDescKind.getName());
+                    schema.put(componentName,
+                            new ObjectSchema().additionalProperties(
+                                            openApiSchema.getType() == null ? true : openApiSchema)
+                                    .description(typeDoc));
+                }
+
                 Map<String, Schema> schemas = components.getSchemas();
                 if (schemas != null) {
                     schemas.putAll(schema);

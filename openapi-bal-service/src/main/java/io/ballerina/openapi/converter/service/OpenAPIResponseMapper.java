@@ -100,6 +100,8 @@ import static io.ballerina.openapi.converter.Constants.HTTP_200_DESCRIPTION;
 import static io.ballerina.openapi.converter.Constants.HTTP_201;
 import static io.ballerina.openapi.converter.Constants.HTTP_201_DESCRIPTION;
 import static io.ballerina.openapi.converter.Constants.HTTP_204;
+import static io.ballerina.openapi.converter.Constants.HTTP_500;
+import static io.ballerina.openapi.converter.Constants.HTTP_500_DESCRIPTION;
 import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
 import static io.ballerina.openapi.converter.Constants.HTTP_PAYLOAD;
 import static io.ballerina.openapi.converter.Constants.HTTP_RESPONSE;
@@ -481,10 +483,10 @@ public class OpenAPIResponseMapper {
                         (ArrayTypeDescriptorNode) typeNode, apiResponse, mediaType, customMediaPrefix, headers);
             case ERROR_TYPE_DESC:
                 // Return type is given as error or error? in the ballerina it will generate 500 response.
-                apiResponse.description("Internal server error");
+                apiResponse.description(HTTP_500_DESCRIPTION);
                 mediaType.setSchema(new StringSchema());
                 apiResponse.content(new Content().addMediaType(MediaType.TEXT_PLAIN, mediaType));
-                apiResponses.put("500", apiResponse);
+                apiResponses.put(HTTP_500, apiResponse);
                 return Optional.of(apiResponses);
             case OPTIONAL_TYPE_DESC:
                 return getAPIResponses(operationAdaptor, apiResponses,
@@ -811,10 +813,6 @@ public class OpenAPIResponseMapper {
                                          Map<String, Schema> schema, ApiResponses apiResponses,
                                          Optional<String> customMediaPrefix, Map<String, Header> headers) {
         ApiResponse apiResponse = new ApiResponse();
-        String statusCode = httpMethod.equals(POST) ? HTTP_201 : HTTP_200;
-        String description = httpMethod.equals(POST) ? HTTP_201_DESCRIPTION : HTTP_200_DESCRIPTION;
-
-        setCacheHeader(headers, apiResponse, statusCode);
         Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         //handle record for components
@@ -822,6 +820,9 @@ public class OpenAPIResponseMapper {
         String mediaTypeString;
         // Check typeInclusion is related to the http status code
         if (referenceNode.parent().kind().equals(ARRAY_TYPE_DESC)) {
+            String statusCode = httpMethod.equals(POST) ? HTTP_201 : HTTP_200;
+            String description = httpMethod.equals(POST) ? HTTP_201_DESCRIPTION : HTTP_200_DESCRIPTION;
+            setCacheHeader(headers, apiResponse, statusCode);
             io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
             ArraySchema arraySchema = new ArraySchema();
             componentMapper.createComponentSchema(schema, typeSymbol);
@@ -837,10 +838,25 @@ public class OpenAPIResponseMapper {
 
         } else if (typeSymbol.typeKind() == TypeDescKind.TYPE_REFERENCE) {
             TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) typeSymbol;
+            TypeSymbol referredTypeSymbol = typeReferenceTypeSymbol.typeDescriptor();
             String referenceName = referenceNode.name().toString().trim();
-            ApiResponses responses = handleRecordTypeSymbol(referenceName, schema, customMediaPrefix,
-                    typeReferenceTypeSymbol, componentMapper, headers);
-            apiResponses.putAll(responses);
+
+            if (referredTypeSymbol.typeKind() == TypeDescKind.RECORD) {
+                ApiResponses responses = handleRecordTypeSymbol(referenceName, schema, customMediaPrefix,
+                        typeReferenceTypeSymbol, componentMapper, headers);
+                apiResponses.putAll(responses);
+            } else if (referredTypeSymbol.typeKind() == TypeDescKind.ERROR) {
+                io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
+                apiResponse.description(HTTP_500_DESCRIPTION);
+                mediaType.setSchema(new StringSchema());
+                apiResponse.content(new Content().addMediaType(MediaType.TEXT_PLAIN, mediaType));
+                apiResponses.put(HTTP_500, apiResponse);
+            } else {
+                ApiResponses responses = createResponseForPrimitiveTypeReferenceType(referenceName,
+                        referredTypeSymbol, typeReferenceTypeSymbol, schema, customMediaPrefix,
+                        componentMapper, headers);
+                apiResponses.putAll(responses);
+            }
         }
         //Check content and status code if it is in 200 range then add the header
         operationAdaptor.getOperation().setResponses(apiResponses);
@@ -884,6 +900,50 @@ public class OpenAPIResponseMapper {
         return apiResponses;
     }
 
+    private ApiResponses createResponseForPrimitiveTypeReferenceType(String referenceName,
+                                                                     TypeSymbol referredTypeSymbol,
+                                                                     TypeReferenceTypeSymbol typeReferenceTypeSymbol,
+                                                                     Map<String, Schema> schema,
+                                                                     Optional<String> customMediaPrefix,
+
+                                                                    OpenAPIComponentMapper componentMapper,
+                                                                    Map<String, Header> headers) {
+
+        TypeDescKind typeDescKind = referredTypeSymbol.typeKind();
+        io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
+
+        String statusCode = httpMethod.equals(POST) ? HTTP_201 : HTTP_200;
+        String description = httpMethod.equals(POST) ? HTTP_201_DESCRIPTION : HTTP_200_DESCRIPTION;
+
+        ApiResponses apiResponses = new ApiResponses();
+
+        if (typeDescKind == TypeDescKind.INTERSECTION) {
+            List<TypeSymbol> typeSymbols = ((IntersectionTypeSymbol) referredTypeSymbol).memberTypeDescriptors();
+            for (TypeSymbol symbol: typeSymbols) {
+                if (!(symbol instanceof ReadonlyTypeSymbol)) {
+                    typeDescKind = symbol.typeKind();
+                    break;
+                }
+            }
+        }
+
+        componentMapper.createComponentSchema(schema, typeReferenceTypeSymbol);
+        errors.addAll(componentMapper.getDiagnostics());
+        media.setSchema(new Schema<>().$ref(ConverterCommonUtils.unescapeIdentifier(referenceName)));
+        String mediaTypeString = MediaType.APPLICATION_JSON;
+        if (customMediaPrefix.isPresent()) {
+            mediaTypeString = APPLICATION_PREFIX + customMediaPrefix.get() + JSON_POSTFIX;
+        } else if (typeDescKind == TypeDescKind.XML) {
+            mediaTypeString = MediaType.APPLICATION_XML;
+        }
+        ApiResponse apiResponse = new ApiResponse();
+        setCacheHeader(headers, apiResponse, statusCode);
+        apiResponse.content(new Content().addMediaType(mediaTypeString, media));
+        apiResponse.description(description);
+        apiResponses.put(statusCode, apiResponse);
+
+        return apiResponses;
+    }
     private ApiResponses createResponseForRecord(String referenceName, Map<String, Schema> schema,
                                                  Optional<String> customMediaPrefix, TypeSymbol typeSymbol,
                                                  OpenAPIComponentMapper componentMapper,
