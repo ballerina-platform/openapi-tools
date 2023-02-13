@@ -1,0 +1,90 @@
+openapi: 3.0.1
+info:
+  title: Sample API
+  description: API description in Markdown.
+  version: 1.0.0
+servers:
+  - url: 'https://api.example.com'
+paths:
+  /users:
+    post:
+      summary: Returns a list of users.
+      description: Optional extended description in Markdown.
+      requestBody:
+        content:
+          multipart/mixed:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                address:
+                  type: object
+                  properties: { }
+                historyMetadata:
+                  description: metadata in XML format
+                  type: object
+                  properties: { }
+                profileImage:
+                  type: string
+                  format: binary
+            encoding:
+              historyMetadata:
+                # require XML Content-Type in utf-8 encoding
+                contentType: application/xml; charset=utf-8
+              profileImage:
+                # only accept png/jpeg
+                contentType: image/png, image/jpeg
+                headers:
+                  X-Rate-Limit-Limit:
+                    description: The number of allowed requests in the current period
+      responses:
+        '200':
+          description: OK
+    put:
+      summary: Update a user image.
+      requestBody:
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+      responses:
+        200:
+          description: OK
+
+
+  /users/{id}:
+    put:
+      summary: Returns a user by ID.
+      description: Optional extended description in Markdown.
+      parameters:
+        - name: id
+          in: path
+          description: ID of user to fetch
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/epub+zip:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: OK
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        address:
+          type: string

@@ -46,6 +46,27 @@ paths:
           text/plain:
             schema:
               type: string
+    put:
+      summary: Add a new pet
+      responses:
+        200:
+          description: OK
+      requestBody:
+        description: Optional description in *Markdown*
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/zip:
+            schema:
+              $ref: '#/components/schemas/PetForm'
+          text/plain:
+            schema:
+              type: string
 components:
   schemas:
     User:

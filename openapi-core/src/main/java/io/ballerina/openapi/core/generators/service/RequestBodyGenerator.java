@@ -28,6 +28,7 @@ import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
@@ -52,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -62,6 +64,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParame
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP_REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.PAYLOAD;
+import static io.ballerina.openapi.core.GeneratorConstants.PIPE;
 import static io.ballerina.openapi.core.GeneratorConstants.REQUEST;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.getAnnotationNode;
@@ -98,14 +101,18 @@ public class RequestBodyGenerator {
             annotValue = NodeFactory.createMappingConstructorExpressionNode(
                     createToken(SyntaxKind.OPEN_BRACE_TOKEN), fields, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
         } else {
-            Iterator<Map.Entry<String, MediaType>> content = requestBody.getContent().entrySet().iterator();
-            Map.Entry<String, MediaType> mime = content.next();
-            equalDataType.add(mime);
-            typeName = getNodeForPayloadType(components, mime);
-            if (mime.getKey().equals(GeneratorConstants.APPLICATION_URL_ENCODE)) {
-                SeparatedNodeList<MappingFieldNode> fields = fillRequestAnnotationValues(literals, equalDataType);
-                annotValue = NodeFactory.createMappingConstructorExpressionNode(
-                        createToken(SyntaxKind.OPEN_BRACE_TOKEN), fields, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+            List<String> types = new ArrayList<>();
+            for (Map.Entry<String, MediaType> mime : requestBody.getContent().entrySet()) {
+                typeName = getNodeForPayloadType(components, mime);
+                types.add(typeName.get().toString());
+            }
+            if (types.size() > 1 && !types.contains(HTTP_REQUEST)) {
+                String result = String.join(PIPE, types);
+                typeName = Optional.of(NodeParser.parseTypeDescriptor(result));
+            } else if (types.size() > 1 && types.contains(HTTP_REQUEST)) {
+                typeName = Optional.of(NodeParser.parseTypeDescriptor(HTTP_REQUEST));
+            } else {
+                typeName = Optional.of(NodeParser.parseTypeDescriptor(types.get(0)));
             }
         }
         AnnotationNode annotationNode = getAnnotationNode(GeneratorConstants.PAYLOAD_KEYWORD, annotValue);
