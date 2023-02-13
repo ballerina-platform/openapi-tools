@@ -33,6 +33,8 @@ public type ReturnValueRecUnion Pet|Dog;
 
 public type ErrorRes http:BadRequest;
 
+public type ErrorResUnion http:BadRequest|string|int;
+
 // public type ReturnValueStrNilArray string?[]?;
 
 // public type ReturnValuePrimitiveUnionArr (string|int)[];
@@ -96,7 +98,13 @@ service /payloadV on new http:Listener(9090) {
         };
     }
 
-    resource function get res1(string id) returns ErrorRes {
+    resource function get res13(string id) returns ErrorRes {
+        return {
+            mediaType: "json"
+        };
+    }
+
+    resource function get res14(string id) returns ErrorResUnion {
         return {
             mediaType: "json"
         };

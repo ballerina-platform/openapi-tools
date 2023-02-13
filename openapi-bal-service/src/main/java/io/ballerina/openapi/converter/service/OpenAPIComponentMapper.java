@@ -60,6 +60,8 @@ import java.util.Optional;
 
 import static io.ballerina.openapi.converter.Constants.DOUBLE;
 import static io.ballerina.openapi.converter.Constants.FLOAT;
+import static io.ballerina.openapi.converter.Constants.HTTP;
+import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
 
 /**
  * This util class for processing the mapping in between ballerina record and openAPI object schema.
@@ -215,15 +217,17 @@ public class OpenAPIComponentMapper {
             apiDocs.put(componentName, description.get().trim());
         }
         // Record field apidoc mapping
-        TypeDefinitionSymbol recordTypeDefinitionSymbol = (TypeDefinitionSymbol) ((typeSymbol).definition());
-        if (recordTypeDefinitionSymbol.typeDescriptor() instanceof RecordTypeSymbol) {
-            RecordTypeSymbol recordType = (RecordTypeSymbol) recordTypeDefinitionSymbol.typeDescriptor();
-            Map<String, RecordFieldSymbol> recordFieldSymbols = recordType.fieldDescriptors();
-            for (Map.Entry<String , RecordFieldSymbol> fields: recordFieldSymbols.entrySet()) {
-                Optional<Documentation> fieldDoc = ((Documentable) fields.getValue()).documentation();
-                if (fieldDoc.isPresent() && fieldDoc.get().description().isPresent()) {
-                    apiDocs.put(ConverterCommonUtils.unescapeIdentifier(fields.getKey()),
-                            fieldDoc.get().description().get());
+        if (((typeSymbol).definition() instanceof TypeDefinitionSymbol)) {
+            TypeDefinitionSymbol recordTypeDefinitionSymbol = (TypeDefinitionSymbol) ((typeSymbol).definition());
+            if (recordTypeDefinitionSymbol.typeDescriptor() instanceof RecordTypeSymbol) {
+                RecordTypeSymbol recordType = (RecordTypeSymbol) recordTypeDefinitionSymbol.typeDescriptor();
+                Map<String, RecordFieldSymbol> recordFieldSymbols = recordType.fieldDescriptors();
+                for (Map.Entry<String , RecordFieldSymbol> fields: recordFieldSymbols.entrySet()) {
+                    Optional<Documentation> fieldDoc = ((Documentable) fields.getValue()).documentation();
+                    if (fieldDoc.isPresent() && fieldDoc.get().description().isPresent()) {
+                        apiDocs.put(ConverterCommonUtils.unescapeIdentifier(fields.getKey()),
+                                fieldDoc.get().description().get());
+                    }
                 }
             }
         }
@@ -391,6 +395,10 @@ public class OpenAPIComponentMapper {
             if (union.typeKind() == TypeDescKind.NIL) {
                 nullable = true;
             } else if (union.typeKind() == TypeDescKind.TYPE_REFERENCE) {
+                if (union.getModule().isPresent() && union.getModule().get().id().modulePrefix().equals(HTTP) &&
+                        union.getName().isPresent() && HTTP_CODES.containsKey(union.getName().get())) {
+                    continue;
+                }
                 property = ConverterCommonUtils.getOpenApiSchema(union.typeKind().getName().trim());
                 TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) union;
                 property = handleTypeReference(this.components.getSchemas(), typeReferenceTypeSymbol, property,

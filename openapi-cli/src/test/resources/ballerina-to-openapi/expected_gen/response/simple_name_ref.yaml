@@ -186,9 +186,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReturnValueRecUnion'
-  /res1:
+  /res13:
     get:
-      operationId: getRes1
+      operationId: getRes13
       parameters:
         - name: id
           in: query
@@ -198,8 +198,39 @@ paths:
       responses:
         "400":
           description: BadRequest
+  /res14:
+    get:
+      operationId: getRes14
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "400":
+          description: BadRequest
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResUnion'
 components:
   schemas:
+    ReturnValueJson:
+      type: object
+    ReturnValueStrArray:
+      type: array
+      items:
+        type: string
+    ReturnValueStrNil:
+      type: string
+      nullable: true
+    ReturnValueRecUnion:
+      oneOf:
+        - $ref: '#/components/schemas/Pet'
+        - $ref: '#/components/schemas/Dog'
     ReturnValueMapString:
       type: object
       additionalProperties:
@@ -209,24 +240,15 @@ components:
         - type: string
         - type: integer
           format: int64
-    ReturnValueJson:
-      type: object
     ReturnValueMapJson:
       type: object
       additionalProperties: true
-    ReturnValueStrArray:
-      type: array
-      items:
-        type: string
     ReturnValueMapRec:
       type: object
       additionalProperties:
         $ref: '#/components/schemas/Pet'
     ReturnValueStr:
       type: string
-    ReturnValueStrNil:
-      type: string
-      nullable: true
     Dog:
       required:
         - breed
@@ -237,10 +259,6 @@ components:
           type: string
         isBark:
           type: boolean
-    ReturnValueRecUnion:
-      oneOf:
-        - $ref: '#/components/schemas/Pet'
-        - $ref: '#/components/schemas/Dog'
     Pet:
       required:
         - name
@@ -248,5 +266,10 @@ components:
       properties:
         name:
           type: string
+    ErrorResUnion:
+      oneOf:
+        - type: string
+        - type: integer
+          format: int64
     ReturnValueXML:
       type: object

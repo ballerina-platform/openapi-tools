@@ -31,6 +31,7 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -870,6 +871,30 @@ public class OpenAPIResponseMapper {
         operationAdaptor.getOperation().setResponses(apiResponses);
     }
 
+    /**
+     * Create responses when http errors are present in the union type.
+     * @param unionTypeSymbol union type symbol
+     * @param headers headers
+     * @return  api responses
+     */
+    public Optional<ApiResponses> createResponsesForErrorsInUnion(UnionTypeSymbol unionTypeSymbol,
+                                                                  Map<String, Header> headers) {
+        ApiResponses apiResponses = new ApiResponses();
+
+        for (TypeSymbol memberTypeDescriptor : unionTypeSymbol.memberTypeDescriptors()) {
+            memberTypeDescriptor.getName().ifPresent(name -> {
+                if (HTTP_CODES.containsKey(name)) {
+                    ApiResponse apiResponse = new ApiResponse();
+                    Optional<String> code = generateApiResponseCode(name);
+                    apiResponse.description(name);
+                    setCacheHeader(headers, apiResponse, code.get());
+                    apiResponses.put(code.get(), apiResponse);
+                }
+            });
+        }
+        return apiResponses.isEmpty() ? Optional.empty() : Optional.of(apiResponses);
+    }
+
     private ApiResponses handleRecordTypeSymbol(String referenceName, Map<String, Schema> schema,
                                                 Optional<String> customMediaPrefix, TypeReferenceTypeSymbol typeSymbol,
                                                 OpenAPIComponentMapper componentMapper,
@@ -908,6 +933,9 @@ public class OpenAPIResponseMapper {
         return apiResponses;
     }
 
+    /**
+     * Create API responses when return type is type reference.
+     */
     private ApiResponses createResponseForPrimitiveTypeReferenceType(String referenceName,
                                                                      TypeSymbol referredTypeSymbol,
                                                                      TypeReferenceTypeSymbol typeReferenceTypeSymbol,
@@ -933,6 +961,11 @@ public class OpenAPIResponseMapper {
                     break;
                 }
             }
+        }
+
+        if (typeDescKind == TypeDescKind.UNION) {
+            UnionTypeSymbol unionTypeSymbol = (UnionTypeSymbol) referredTypeSymbol;
+            createResponsesForErrorsInUnion(unionTypeSymbol, headers).ifPresent(apiResponses::putAll);
         }
 
         componentMapper.createComponentSchema(schema, typeReferenceTypeSymbol);
