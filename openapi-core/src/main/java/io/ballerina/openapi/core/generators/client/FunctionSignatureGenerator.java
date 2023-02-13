@@ -84,6 +84,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.openapi.core.ErrorMessages.invalidPathParamType;
+import static io.ballerina.openapi.core.GeneratorConstants.APPLICATION_OCTET_STREAM;
 import static io.ballerina.openapi.core.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.core.GeneratorConstants.BINARY;
 import static io.ballerina.openapi.core.GeneratorConstants.BOOLEAN;
@@ -101,6 +102,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.X_BALLERINA_DEPRECATE
 import static io.ballerina.openapi.core.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
+import static io.ballerina.openapi.core.GeneratorUtils.getBallerinaMediaType;
 import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 
 /**
@@ -499,30 +501,36 @@ public class FunctionSignatureGenerator {
             String paramType = "";
             //Take payload type
             if (schema != null && GeneratorUtils.isSupportedMediaType(mediaTypeEntry)) {
-                if (schema.get$ref() != null) {
-                    paramType = getValidName(extractReferenceType(schema.get$ref().trim()), true);
-                } else if (schema.getType() != null && !schema.getType().equals(ARRAY) && !schema.getType().equals(
-                        OBJECT)) {
-                    String typeOfPayload = schema.getType().trim();
-                    if (typeOfPayload.equals(STRING) && schema.getFormat() != null
-                            && (schema.getFormat().equals(BINARY) || schema.getFormat().equals(BYTE))) {
-                        paramType = convertOpenAPITypeToBallerina(schema.getFormat());
-                    } else {
-                        paramType = convertOpenAPITypeToBallerina(typeOfPayload);
+                String mediaTypeEntryKey = mediaTypeEntry.getKey();
+                if (mediaTypeEntryKey.equals(APPLICATION_OCTET_STREAM) ||
+                        mediaTypeEntryKey.matches("application/.*\\+octet-stream")) {
+                     paramType = getBallerinaMediaType(mediaTypeEntryKey, true);
+                } else {
+                    if (schema.get$ref() != null) {
+                        paramType = getValidName(extractReferenceType(schema.get$ref().trim()), true);
+                    } else if (schema.getType() != null && !schema.getType().equals(ARRAY) && !schema.getType().equals(
+                            OBJECT)) {
+                        String typeOfPayload = schema.getType().trim();
+                        if (typeOfPayload.equals(STRING) && schema.getFormat() != null
+                                && (schema.getFormat().equals(BINARY) || schema.getFormat().equals(BYTE))) {
+                            paramType = convertOpenAPITypeToBallerina(schema.getFormat());
+                        } else {
+                            paramType = convertOpenAPITypeToBallerina(typeOfPayload);
+                        }
+                    } else if (schema instanceof ArraySchema) {
+                        //TODO: handle nested array - this is impossible to handle
+                        ArraySchema arraySchema = (ArraySchema) schema;
+                        paramType = getRequestBodyParameterForArraySchema(operationId, mediaTypeEntry, arraySchema);
+                    } else if (schema instanceof ObjectSchema) {
+                        ObjectSchema objectSchema = (ObjectSchema) schema;
+                        paramType = referencedRequestBodyName.isBlank() ? paramType : referencedRequestBodyName;
+                        getRequestBodyParameterForObjectSchema(referencedRequestBodyName, objectSchema);
+                    } else { // composed and object schemas are handled by the flatten
+                        paramType = getBallerinaMediaType(mediaTypeEntryKey, true);
                     }
-                } else if (schema instanceof ArraySchema) {
-                    //TODO: handle nested array - this is impossible to handle
-                    ArraySchema arraySchema = (ArraySchema) schema;
-                    paramType = getRequestBodyParameterForArraySchema(operationId, mediaTypeEntry, arraySchema);
-                } else if (schema instanceof ObjectSchema) {
-                    ObjectSchema objectSchema = (ObjectSchema) schema;
-                    paramType = referencedRequestBodyName.isBlank() ? paramType : referencedRequestBodyName;
-                    getRequestBodyParameterForObjectSchema(referencedRequestBodyName, objectSchema);
-                } else { // composed and object schemas are handled by the flatten
-                    paramType = GeneratorUtils.getBallerinaMediaType(mediaTypeEntry.getKey(), true);
                 }
             } else {
-                paramType = GeneratorUtils.getBallerinaMediaType(mediaTypeEntry.getKey(), true);
+                paramType = getBallerinaMediaType(mediaTypeEntry.getKey(), true);
             }
 
             String paramName = paramType.equals(HTTP_REQUEST) ? REQUEST : PAYLOAD;
@@ -594,7 +602,7 @@ public class FunctionSignatureGenerator {
                     ballerinaSchemaGenerator.getTypeDefinitionNode(arraySchema, paramType, new ArrayList<>());
             GeneratorUtils.updateTypeDefNodeList(paramType, arrayTypeNode, typeDefinitionNodeList);
         } else {
-            paramType = GeneratorUtils.getBallerinaMediaType(next.getKey().trim(), true) + SQUARE_BRACKETS;
+            paramType = getBallerinaMediaType(next.getKey().trim(), true) + SQUARE_BRACKETS;
         }
         return paramType;
     }
