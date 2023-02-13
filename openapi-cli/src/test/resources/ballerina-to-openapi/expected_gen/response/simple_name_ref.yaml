@@ -186,6 +186,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReturnValueRecUnion'
+  /res1:
+    get:
+      operationId: getRes1
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "400":
+          description: BadRequest
 components:
   schemas:
     ReturnValueMapString:

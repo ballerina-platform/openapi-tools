@@ -840,6 +840,8 @@ public class OpenAPIResponseMapper {
             TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) typeSymbol;
             TypeSymbol referredTypeSymbol = typeReferenceTypeSymbol.typeDescriptor();
             String referenceName = referenceNode.name().toString().trim();
+            String referredTypeName = referredTypeSymbol.getName().isPresent() ?
+                    referredTypeSymbol.getName().get() : "";
 
             if (referredTypeSymbol.typeKind() == TypeDescKind.RECORD) {
                 ApiResponses responses = handleRecordTypeSymbol(referenceName, schema, customMediaPrefix,
@@ -851,6 +853,12 @@ public class OpenAPIResponseMapper {
                 mediaType.setSchema(new StringSchema());
                 apiResponse.content(new Content().addMediaType(MediaType.TEXT_PLAIN, mediaType));
                 apiResponses.put(HTTP_500, apiResponse);
+            } else if (referredTypeSymbol.typeKind() == TypeDescKind.TYPE_REFERENCE &&
+                    generateApiResponseCode(referredTypeName).isPresent()) {
+                Optional<String> code = generateApiResponseCode(referredTypeName);
+                apiResponse.description(referredTypeName);
+                setCacheHeader(headers, apiResponse, code.get());
+                apiResponses.put(code.get(), apiResponse);
             } else {
                 ApiResponses responses = createResponseForPrimitiveTypeReferenceType(referenceName,
                         referredTypeSymbol, typeReferenceTypeSymbol, schema, customMediaPrefix,

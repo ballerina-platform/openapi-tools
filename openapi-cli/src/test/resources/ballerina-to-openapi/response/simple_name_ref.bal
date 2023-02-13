@@ -31,6 +31,8 @@ public type Dog record {
 
 public type ReturnValueRecUnion Pet|Dog;
 
+public type ErrorRes http:BadRequest;
+
 // public type ReturnValueStrNilArray string?[]?;
 
 // public type ReturnValuePrimitiveUnionArr (string|int)[];
@@ -91,6 +93,12 @@ service /payloadV on new http:Listener(9090) {
     resource function get lift12(string id) returns ReturnValueRecUnion {
         return {
             name: "Kitty"
+        };
+    }
+
+    resource function get res1(string id) returns ErrorRes {
+        return {
+            mediaType: "json"
         };
     }
 
