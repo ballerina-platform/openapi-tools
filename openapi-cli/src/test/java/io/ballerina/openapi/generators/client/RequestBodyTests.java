@@ -318,7 +318,7 @@ public class RequestBodyTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
-    @Test
+    @Test(description = "Test for generating request body with octet-stream media type")
     public void testWithOctetStreamInRequestBody()
             throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/octet_stream_request_payload.bal");
