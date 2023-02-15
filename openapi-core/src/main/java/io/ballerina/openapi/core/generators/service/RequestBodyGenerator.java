@@ -53,7 +53,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.StringJoiner;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -173,7 +172,7 @@ public class RequestBodyGenerator {
                 case GeneratorConstants.APPLICATION_URL_ENCODE:
                     typeName = Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(MAP_STRING)));
                     //Commented due to the data binding issue in the ballerina http module
-                    //Related issue:https://github.com/ballerina-platform/ballerina-standard-library/issues/4090
+                    //TODO: Related issue:https://github.com/ballerina-platform/ballerina-standard-library/issues/4090
 //                    typeName = Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(
 //                            GeneratorUtils.getValidName(schemaName, true))));
                     break;
