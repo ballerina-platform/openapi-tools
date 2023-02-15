@@ -63,6 +63,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleN
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP_REQUEST;
+import static io.ballerina.openapi.core.GeneratorConstants.MAP_STRING;
 import static io.ballerina.openapi.core.GeneratorConstants.PAYLOAD;
 import static io.ballerina.openapi.core.GeneratorConstants.PIPE;
 import static io.ballerina.openapi.core.GeneratorConstants.REQUEST;
@@ -90,36 +91,31 @@ public class RequestBodyGenerator {
     public RequiredParameterNode createNodeForRequestBody() throws BallerinaOpenApiException {
         // type CustomRecord record {| anydata...; |};
         // public type PayloadType string|json|xml|byte[]|CustomRecord|CustomRecord[] ;
-        List<Node> literals = new ArrayList<>();
         MappingConstructorExpressionNode annotValue = null;
         Optional<TypeDescriptorNode> typeName;
         // Filter same data type
-        HashSet<Map.Entry<String, MediaType>> equalDataType = filterMediaTypes(requestBody);
-        if (!equalDataType.isEmpty()) {
-            typeName = getNodeForPayloadType(components, equalDataType.iterator().next());
-            SeparatedNodeList<MappingFieldNode> fields = fillRequestAnnotationValues(literals, equalDataType);
-            annotValue = NodeFactory.createMappingConstructorExpressionNode(
-                    createToken(SyntaxKind.OPEN_BRACE_TOKEN), fields, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
-        } else {
-            List<String> types = new ArrayList<>();
-            for (Map.Entry<String, MediaType> mime : requestBody.getContent().entrySet()) {
-                typeName = getNodeForPayloadType(components, mime);
+        List<String> types = new ArrayList<>();
+        for (Map.Entry<String, MediaType> mime : requestBody.getContent().entrySet()) {
+            typeName = getNodeForPayloadType(components, mime);
+            if (typeName.isPresent()) {
                 types.add(typeName.get().toString());
-            }
-            if (types.size() > 1 && !types.contains(HTTP_REQUEST)) {
-                String result = String.join(PIPE, types);
-                typeName = Optional.of(NodeParser.parseTypeDescriptor(result));
-            } else if (types.size() > 1 && types.contains(HTTP_REQUEST)) {
-                typeName = Optional.of(NodeParser.parseTypeDescriptor(HTTP_REQUEST));
             } else {
-                typeName = Optional.of(NodeParser.parseTypeDescriptor(types.get(0)));
+                types.add(HTTP_REQUEST);
             }
+        }
+        if (types.size() > 1 && !types.contains(HTTP_REQUEST)) {
+            String result = String.join(PIPE, types);
+            typeName = Optional.of(NodeParser.parseTypeDescriptor(result));
+        } else if (types.size() > 1 && types.contains(HTTP_REQUEST)) {
+            typeName = Optional.of(NodeParser.parseTypeDescriptor(HTTP_REQUEST));
+        } else {
+            typeName = Optional.of(NodeParser.parseTypeDescriptor(types.get(0)));
         }
         AnnotationNode annotationNode = getAnnotationNode(GeneratorConstants.PAYLOAD_KEYWORD, annotValue);
         NodeList<AnnotationNode> annotation = NodeFactory.createNodeList(annotationNode);
-        String paramName = typeName.isPresent() && typeName.get().toString().equals(HTTP_REQUEST) ? REQUEST : PAYLOAD;
+        String paramName = typeName.get().toString().equals(HTTP_REQUEST) ? REQUEST : PAYLOAD;
 
-        if (typeName.isEmpty() || typeName.get().toString().equals(HTTP_REQUEST)) {
+        if (typeName.get().toString().equals(HTTP_REQUEST)) {
             return createRequiredParameterNode(createEmptyNodeList(),
                     createSimpleNameReferenceNode(createIdentifierToken(HTTP_REQUEST)), createIdentifierToken(REQUEST));
         }
@@ -175,8 +171,11 @@ public class RequestBodyGenerator {
                     }
                     break;
                 case GeneratorConstants.APPLICATION_URL_ENCODE:
-                    typeName = Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(
-                            GeneratorUtils.getValidName(schemaName, true))));
+                    typeName = Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(MAP_STRING)));
+                    //Commented due to the data binding issue in the ballerina http module
+                    //Related issue:https://github.com/ballerina-platform/ballerina-standard-library/issues/4090
+//                    typeName = Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(
+//                            GeneratorUtils.getValidName(schemaName, true))));
                     break;
                 default:
                     ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>> mediaTypeTokens =

@@ -67,6 +67,22 @@ paths:
           text/plain:
             schema:
               type: string
+  /pets02:
+    post:
+      summary: List all pets
+      description: Show a list of pets in the system
+      operationId: listPets
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/Pet"
+          "application/xml":
+            schema:
+              $ref: "#/components/schemas/Pet"
+      responses:
+        "201":
+          description: OK
 components:
   schemas:
     User:
