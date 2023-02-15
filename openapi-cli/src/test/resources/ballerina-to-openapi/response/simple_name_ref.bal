@@ -4,11 +4,10 @@ public type Pet record {
     string name;
 };
 
-public type ReturnValueStr string;
 
-public type ReturnValueStrNil string?;
+public type ReturnValueIntNil int?;
 
-public type ReturnValueStrArray string[];
+public type ReturnValueIntArray int[];
 
 public type ReturnValueMapJson map<json>;
 
@@ -22,7 +21,7 @@ public type ReturnValueXML xml;
 
 public type ReturnValueError error;
 
-public type ReturnValuePrimitiveUnion string|int;
+public type ReturnValuePrimitiveUnion float|int;
 
 public type Dog record {
     string breed;
@@ -33,7 +32,17 @@ public type ReturnValueRecUnion Pet|Dog;
 
 public type ErrorRes http:BadRequest;
 
-public type ErrorResUnion http:BadRequest|string|int;
+public type ErrorResUnion http:BadRequest|float|int;
+
+public type ReturnValueStr string;
+
+public type StrNil string?;
+
+public type StrArray string[];
+
+public type StrIntUnion string|int;
+
+public type ByteArr byte[];
 
 // public type ReturnValueStrNilArray string?[]?;
 
@@ -49,12 +58,12 @@ service /payloadV on new http:Listener(9090) {
         return "Value";
     }
 
-    resource function get lift02(string id) returns ReturnValueStrNil {
+    resource function get lift02(string id) returns ReturnValueIntNil {
         return ();
     }
 
-    resource function get lift03(string id) returns ReturnValueStrArray {
-        string[] values = ["val1", "val2"];
+    resource function get lift03(string id) returns ReturnValueIntArray {
+        int[] values = [1, 2];
         return values;
     }
 
@@ -89,7 +98,7 @@ service /payloadV on new http:Listener(9090) {
     }
 
     resource function get lift11(string id) returns ReturnValuePrimitiveUnion {
-        return "value";
+        return 1;
     }
 
     resource function get lift12(string id) returns ReturnValueRecUnion {
@@ -108,6 +117,24 @@ service /payloadV on new http:Listener(9090) {
         return {
             mediaType: "json"
         };
+    }
+
+    resource function get res16(string id) returns StrNil {
+        return ();
+    }
+
+    resource function get res17(string id) returns StrArray {
+        string[] values = ["val1", "val2"];
+        return values;
+    }
+
+//    resource function get res18(string id) returns StrIntUnion {
+//        return 1;
+//    }
+
+    resource function get res19(string id) returns ByteArr {
+        byte[] values = [1, 2];
+        return values;
     }
 
     // // not working after new implementation //not supported in Ballerina
