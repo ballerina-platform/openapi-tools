@@ -165,7 +165,8 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Test for generating request body when operation has binary octet-stream media type")
-    public void testRequestBodyWithBinaryOctetStreamMediaType() throws IOException, BallerinaOpenApiException {
+    public void testRequestBodyWithBinaryOctetStreamMediaType()
+            throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/binary_format_octet_stream_payload.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/binary_format_octet_stream_payload.yaml"), true);
@@ -256,8 +257,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Test for generating request body when operation has multipart form-data media type")
-    public void testRequestBodyWithMultipartMediaType()
-            throws IOException, BallerinaOpenApiException {
+    public void testRequestBodyWithMultipartMediaType() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/multipart_formdata.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("utils/swagger/multipart_formdata.yaml"), true);
@@ -313,6 +313,22 @@ public class RequestBodyTests {
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
+    @Test(description = "Test for generating request body with octet-stream media type")
+    public void testWithOctetStreamInRequestBody()
+            throws IOException, BallerinaOpenApiException {
+        Path expectedPath = RES_DIR.resolve("ballerina/octet_stream_request_payload.bal");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
+                RES_DIR.resolve("swagger/octet_stream_request_payload.yaml"), true);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI)
+                .withResourceMode(true).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
