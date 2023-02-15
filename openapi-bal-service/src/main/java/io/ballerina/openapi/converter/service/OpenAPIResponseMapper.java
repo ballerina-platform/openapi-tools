@@ -861,7 +861,7 @@ public class OpenAPIResponseMapper {
                 setCacheHeader(headers, apiResponse, code.get());
                 apiResponses.put(code.get(), apiResponse);
             } else {
-                ApiResponses responses = createResponseForPrimitiveTypeReferenceType(referenceName,
+                ApiResponses responses = createResponseForTypeReferenceTypeReturns(referenceName,
                         referredTypeSymbol, typeReferenceTypeSymbol, schema, customMediaPrefix,
                         componentMapper, headers);
                 apiResponses.putAll(responses);
@@ -873,9 +873,10 @@ public class OpenAPIResponseMapper {
 
     /**
      * Create responses when http errors are present in the union type.
+     *
      * @param unionTypeSymbol union type symbol
-     * @param headers headers
-     * @return  api responses
+     * @param headers         headers
+     * @return api responses
      */
     public Optional<ApiResponses> createResponsesForErrorsInUnion(UnionTypeSymbol unionTypeSymbol,
                                                                   Map<String, Header> headers) {
@@ -936,14 +937,14 @@ public class OpenAPIResponseMapper {
     /**
      * Create API responses when return type is type reference.
      */
-    private ApiResponses createResponseForPrimitiveTypeReferenceType(String referenceName,
-                                                                     TypeSymbol referredTypeSymbol,
-                                                                     TypeReferenceTypeSymbol typeReferenceTypeSymbol,
-                                                                     Map<String, Schema> schema,
-                                                                     Optional<String> customMediaPrefix,
+    private ApiResponses createResponseForTypeReferenceTypeReturns(String referenceName,
+                                                                   TypeSymbol referredTypeSymbol,
+                                                                   TypeReferenceTypeSymbol typeReferenceTypeSymbol,
+                                                                   Map<String, Schema> schema,
+                                                                   Optional<String> customMediaPrefix,
 
-                                                                    OpenAPIComponentMapper componentMapper,
-                                                                    Map<String, Header> headers) {
+                                                                   OpenAPIComponentMapper componentMapper,
+                                                                   Map<String, Header> headers) {
 
         TypeDescKind typeDescKind = referredTypeSymbol.typeKind();
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
@@ -952,15 +953,9 @@ public class OpenAPIResponseMapper {
         String description = httpMethod.equals(POST) ? HTTP_201_DESCRIPTION : HTTP_200_DESCRIPTION;
 
         ApiResponses apiResponses = new ApiResponses();
-
-        if (typeDescKind == TypeDescKind.INTERSECTION) {
-            List<TypeSymbol> typeSymbols = ((IntersectionTypeSymbol) referredTypeSymbol).memberTypeDescriptors();
-            for (TypeSymbol symbol: typeSymbols) {
-                if (!(symbol instanceof ReadonlyTypeSymbol)) {
-                    typeDescKind = symbol.typeKind();
-                    break;
-                }
-            }
+        if (referredTypeSymbol.typeKind() == TypeDescKind.INTERSECTION) {
+            referredTypeSymbol = componentMapper.excludeReadonlyIfPresent(referredTypeSymbol);
+            typeDescKind = referredTypeSymbol.typeKind();
         }
 
         if (typeDescKind == TypeDescKind.UNION) {
@@ -985,6 +980,7 @@ public class OpenAPIResponseMapper {
 
         return apiResponses;
     }
+
     private ApiResponses createResponseForRecord(String referenceName, Map<String, Schema> schema,
                                                  Optional<String> customMediaPrefix, TypeSymbol typeSymbol,
                                                  OpenAPIComponentMapper componentMapper,
