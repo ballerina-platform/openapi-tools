@@ -619,6 +619,7 @@ public class CodeGeneratorTest {
         Assert.assertEquals(ServiceGenerationUtils.selectMediaType("text/xml"),
                 GeneratorConstants.APPLICATION_XML);
     }
+
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
 
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
