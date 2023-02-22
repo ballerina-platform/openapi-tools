@@ -256,7 +256,7 @@ public class ResponseTests {
     }
 
     @Test
-    public void testWithSameStatusCode() throws IOException {
+    public void testWithMultipleReturnPayloadSameStatusCode() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/same_status_code.bal");
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null

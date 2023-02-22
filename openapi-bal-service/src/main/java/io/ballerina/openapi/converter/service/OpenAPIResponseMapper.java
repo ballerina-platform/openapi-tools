@@ -1155,12 +1155,47 @@ public class OpenAPIResponseMapper {
                     media.setSchema(objectSchema);
                     apiResponse.content(new Content().addMediaType(mediaTypeString, media));
                 } else if (typeDescKind == TypeDescKind.UNION) {
-                    UnionTypeSymbol unionType = (UnionTypeSymbol) typeSymbol;
+                    UnionTypeSymbol unionType = (UnionTypeSymbol) body.typeDescriptor();
                     List<TypeSymbol> typeSymbols = unionType.memberTypeDescriptors();
-                    //select media type based on the members of the union type
+                    //store media type based on the members of the union type
                     Map<String, Schema> contentDetails = new LinkedHashMap<>();
-                    //TODO: ---
+                    for (TypeSymbol type : typeSymbols) {
+                        ImmutablePair<String, String> mediaTypes =
+                                getMediaTypeForTypeReferenceTypeReturns(type, type.typeKind(), customMediaPrefix);
+                        mediaTypeString = customMediaPrefix.map(s -> APPLICATION_PREFIX + s + mediaTypes.getRight())
+                                .orElseGet(mediaTypes::getLeft);
+                        Schema<?> mediaSchema = getOpenApiSchema(type.typeKind().getName());
+                        if (type.typeKind() == TypeDescKind.TYPE_REFERENCE) {
+                            componentMapper.createComponentSchema(schema, type);
+                            errors.addAll(componentMapper.getDiagnostics());
+                            String recordName = type.getName().orElseThrow().trim();
+                            mediaSchema.set$ref(ConverterCommonUtils.unescapeIdentifier(recordName));
+                        }
+                        if (contentDetails.containsKey(mediaTypeString)) {
+                            Schema<?> oldSchema = contentDetails.get(mediaTypeString);
+                            if (oldSchema instanceof ComposedSchema && oldSchema.getOneOf() != null) {
+                                oldSchema.getOneOf().add(mediaSchema);
+                                contentDetails.put(mediaTypeString, oldSchema);
+                            } else {
+                                ComposedSchema composedSchema = new ComposedSchema();
+                                composedSchema.addOneOfItem(oldSchema);
+                                composedSchema.addOneOfItem(mediaSchema);
+                                contentDetails.put(mediaTypeString, composedSchema);
+                            }
+                        } else {
+                            contentDetails.put(mediaTypeString, mediaSchema);
+                        }
+                    }
+                    Content content = new Content();
+                    for (Map.Entry<String, Schema> entry : contentDetails.entrySet()) {
+                        io.swagger.v3.oas.models.media.MediaType mediaType =
+                                new io.swagger.v3.oas.models.media.MediaType();
 
+                        mediaTypeString = entry.getKey();
+                        mediaType.setSchema(entry.getValue());
+                        content.addMediaType(mediaTypeString, mediaType);
+                    }
+                    apiResponse.content(content);
                 }
                 apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
                 apiResponses.put(code.get(), apiResponse);
