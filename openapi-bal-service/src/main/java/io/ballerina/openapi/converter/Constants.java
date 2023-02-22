@@ -198,8 +198,10 @@ public class Constants {
     }
     public static final String HTTP_200 = "200";
     public static final String HTTP_201 = "201";
+    public static final String HTTP_500 = "500";
     public static final String HTTP_200_DESCRIPTION = "Ok";
     public static final String HTTP_201_DESCRIPTION = "Created";
+    public static final String HTTP_500_DESCRIPTION = "Internal server error";
     public static final String HTTP_204 = "204";
     public static final String SPECIAL_CHAR_REGEX = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
 

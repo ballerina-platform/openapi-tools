@@ -19,8 +19,10 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.model.Filter;
@@ -135,10 +137,18 @@ public class RequestBodyTests {
                 .withOpenAPI(GeneratorUtils.normalizeOpenAPI(definitionPath, false))
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        BallerinaServiceGenerator serviceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        syntaxTree = serviceGenerator.generateSyntaxTree();
+        //Generate records according to schemas
+        List<TypeDefinitionNode> typeInclusionRecords = serviceGenerator.getTypeInclusionRecords();
+        BallerinaTypesGenerator recordGenerator = new BallerinaTypesGenerator(
+                oasServiceMetadata.getOpenAPI(), oasServiceMetadata.isNullable(), typeInclusionRecords);
+        SyntaxTree typeSyntaxTree = recordGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/oneof_requestBody.bal", syntaxTree);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "requestBody/oneof_request_body_types.bal", typeSyntaxTree);
+
     }
 
     @Test(description = "RequestBody has url encode media type  scenarios")

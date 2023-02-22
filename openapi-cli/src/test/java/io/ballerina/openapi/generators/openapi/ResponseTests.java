@@ -265,6 +265,26 @@ public class ResponseTests {
         compareWithGeneratedFile(ballerinaFilePath, "response/same_status_code.yaml");
     }
 
+    @Test(description = "Test scenarios where return type is a SimpleNameReference")
+    public void testResponseWithSimpleNameReferenceReturnType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/simple_name_ref.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/simple_name_ref.yaml");
+    }
+
+    @Test(description = "Test scenarios where return type is a SimpleNameReference with readonly")
+    public void testResponseWithReadOnlySimpleNameReferenceReturnType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/readonly.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/readonly.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
