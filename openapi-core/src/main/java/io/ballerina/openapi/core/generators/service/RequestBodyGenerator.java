@@ -38,10 +38,7 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -66,6 +63,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.REQUEST;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.getAnnotationNode;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.handleMediaType;
+import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.selectMediaType;
 
 /**
  * This class for generating request body payload for OAS requestBody section.
@@ -73,11 +71,9 @@ import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtil
  * @since 1.3.0
  */
 public class RequestBodyGenerator {
-    private final Components components;
     private final RequestBody requestBody;
 
-    public RequestBodyGenerator(Components components, RequestBody requestBody) {
-        this.components = components;
+    public RequestBodyGenerator(RequestBody requestBody) {
         this.requestBody = requestBody;
     }
 
@@ -93,7 +89,7 @@ public class RequestBodyGenerator {
         // Filter same data type
         HashSet<Map.Entry<String, MediaType>> equalDataType = filterMediaTypes(requestBody);
         if (!equalDataType.isEmpty()) {
-            typeName = getNodeForPayloadType(components, equalDataType.iterator().next());
+            typeName = getNodeForPayloadType(equalDataType.iterator().next());
             SeparatedNodeList<MappingFieldNode> fields = fillRequestAnnotationValues(literals, equalDataType);
             annotValue = NodeFactory.createMappingConstructorExpressionNode(
                     createToken(SyntaxKind.OPEN_BRACE_TOKEN), fields, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
@@ -101,7 +97,7 @@ public class RequestBodyGenerator {
             Iterator<Map.Entry<String, MediaType>> content = requestBody.getContent().entrySet().iterator();
             Map.Entry<String, MediaType> mime = content.next();
             equalDataType.add(mime);
-            typeName = getNodeForPayloadType(components, mime);
+            typeName = getNodeForPayloadType(mime);
             if (mime.getKey().equals(GeneratorConstants.APPLICATION_URL_ENCODE)) {
                 SeparatedNodeList<MappingFieldNode> fields = fillRequestAnnotationValues(literals, equalDataType);
                 annotValue = NodeFactory.createMappingConstructorExpressionNode(
@@ -123,19 +119,15 @@ public class RequestBodyGenerator {
     /**
      * This util function is for generating type node for request payload in resource function.
      */
-    private Optional<TypeDescriptorNode> getNodeForPayloadType(Components components,
-                                                              Map.Entry<String, MediaType> mediaType)
+    private Optional<TypeDescriptorNode> getNodeForPayloadType(Map.Entry<String, MediaType> mediaType)
             throws BallerinaOpenApiException {
 
         Optional<TypeDescriptorNode> typeName;
         if (mediaType.getValue() != null && mediaType.getValue().getSchema() != null &&
                 mediaType.getValue().getSchema().get$ref() != null) {
-            String schemaName = extractReferenceType(mediaType.getValue().getSchema().get$ref());
-            Map<String, Schema> schemas = components.getSchemas();
-            String mediaTypeContent = mediaType.getKey().trim();
-            if (mediaTypeContent.matches(GeneratorConstants.TEXT_WILDCARD_REGEX)) {
-                mediaTypeContent = GeneratorConstants.TEXT;
-            }
+            String reference = mediaType.getValue().getSchema().get$ref();
+            String schemaName = GeneratorUtils.getValidName(extractReferenceType(reference), true);
+            String mediaTypeContent = selectMediaType(mediaType.getKey().trim());
             IdentifierToken identifierToken;
             switch (mediaTypeContent) {
                 case GeneratorConstants.APPLICATION_XML:
@@ -143,7 +135,7 @@ public class RequestBodyGenerator {
                     typeName = Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
                     break;
                 case GeneratorConstants.TEXT:
-                    identifierToken = createIdentifierToken(GeneratorConstants.STRING);
+                    identifierToken = createIdentifierToken(schemaName);
                     typeName = Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
                     break;
                 case GeneratorConstants.APPLICATION_OCTET_STREAM:
@@ -155,17 +147,7 @@ public class RequestBodyGenerator {
                             NodeFactory.createNodeList(dimensionNode)));
                     break;
                 case GeneratorConstants.APPLICATION_JSON:
-                    Schema<?> schema = schemas.get(GeneratorUtils.getValidName(schemaName, true));
-                    // This condition is to avoid wrong code generation for union type request body. If given schema
-                    // has oneOf type , then it will not be able to support via ballerina. We need to pick it mime
-                    // type instead of schema type.
-                    if ((schema instanceof ComposedSchema) && (((ComposedSchema) schema).getOneOf() != null)) {
-                        identifierToken = createIdentifierToken(GeneratorConstants.JSON);
-                        typeName = Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
-                    } else {
-                        typeName = Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(
-                                GeneratorUtils.getValidName(schemaName, true))));
-                    }
+                    typeName = Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(schemaName)));
                     break;
                 case GeneratorConstants.APPLICATION_URL_ENCODE:
                     typeName = Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(

@@ -42,7 +42,7 @@ public class GenSrcFile {
         UTIL_SRC;
 
         public boolean isOverwritable() {
-            if (this == GEN_SRC || this == RES || this == MODEL_SRC) {
+            if (this == GEN_SRC || this == RES || this == MODEL_SRC || this == UTIL_SRC) {
                 return true;
             }
 

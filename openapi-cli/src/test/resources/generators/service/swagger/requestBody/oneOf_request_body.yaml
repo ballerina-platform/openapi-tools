@@ -1,25 +1,27 @@
 openapi: 3.0.1
 info:
-  title:  Storage Space
+  title:  Pets store
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.0
 paths:
-  /storageSpaces01:
+  /pet:
     put:
-      summary: "Unsupported scenario 01: Customised request body with empty schema"
+      summary: "scenario 01: Request body is with oneOf schema for application/json"
       operationId: putKey
       requestBody:
-        description: "Customised request body with empty schema"
         content:
-          application/snowflake+json:
-            schema: {}
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/Dog"
+                - $ref: "#/components/schemas/Cat"
       responses:
         200:
           description: Successful operation.
     post:
-      summary: "Unsupported scenario 02: Customised request body with oneOf schema"
+      summary: "scenario 02: Customised request body with oneOf schema"
       operationId: post
       requestBody:
         description: "Customised request body"
@@ -27,14 +29,14 @@ paths:
           application/snowflake+json:
             schema:
               oneOf:
-                - $ref: "#/components/schemas/HandleRequest_RequestBody"
-                - $ref: "#/components/schemas/HandleRequest_RequestBody02"
+                - $ref: "#/components/schemas/Dog"
+                - $ref: "#/components/schemas/Bird"
       responses:
         200:
           description: Successful operation.
-  /storageSpaces02:
+  /pet02:
     post:
-      summary: "Unsupported scenario 03: Request body with oneOf schema"
+      summary: "scenario 03: Request body with oneOf schema with application/xml"
       operationId: postKey
       requestBody:
         description: "Ballerina not support for oneOf data type in request body"
@@ -42,13 +44,13 @@ paths:
           application/xml:
             schema:
               oneOf:
-                - $ref: "#/components/schemas/HandleRequest_RequestBody"
-                - $ref: "#/components/schemas/HandleRequest_RequestBody02"
+                - $ref: "#/components/schemas/Dog"
+                - $ref: "#/components/schemas/Cat"
       responses:
         200:
           description: Successful operation.
     put:
-      summary: "Unsupported scenario 04: Request body with oneOf schema with integer, number"
+      summary: "scenario 04: Request body with oneOf schema with integer, number (primitives)"
       operationId: put
       requestBody:
         description: "Ballerina not support for oneOf data type in request body"
@@ -62,75 +64,68 @@ paths:
       responses:
         200:
           description: Successful operation.
-  /storageSpaces/{name}:
+  /pet/{name}:
     put:
-      summary: Put key value
+      summary: "scenarios05: requestBody is with oneOf array type"
       operationId: key
       parameters:
         - name: name
           in: path
-          description: name of the storage space
           required: true
           schema:
             type: string
       requestBody:
-        description: Value to be added
+        description: ""
         content:
-          application/json:
+          text/plain:
             schema:
               oneOf:
-                - type: string
-                - type: integer
-                - type: number
-                - type: object
+                - type: array
+                  items:
+                    oneOf:
+                      - type: string
+                      - type: integer
+                      - type: number
       responses:
         200:
           description: Successful operation.
         400:
           description: Invalid storage space name supplied
-  /storageSpaces03:
-    post:
-      summary: "Request body content type is with subset of xml"
-      operationId: postKey03
-      requestBody:
-        content:
-          application/snowflake+xml:
-            schema:
-              type: object
-              additionalProperties:
-                type: string
-      responses:
-        200:
-          description: Successful operation.
-  /storageSpaces04:
+  /pet04:
     post:
       operationId: postKey04
       requestBody:
-        description: "Media type is with not main standard type. "
+        description: "scenario04: Media type is with not main standard type. "
         content:
           application/zip:
             schema:
-              type: object
-              additionalProperties:
-                type: string
+              oneOf:
+                - type: string
+                - type: integer
+                - type: number
       responses:
         200:
           description: Successful operation.
 components:
   schemas:
-    HandleRequest_RequestBody:
-      title: Request/Response handler
+    Dog:
       type: object
       properties:
-        headers:
+        name:
           type: string
-        body:
+        age:
           type: string
-    HandleRequest_RequestBody02:
-      title: Request/Response handler
+    Cat:
       type: object
       properties:
-        headers:
+        name:
           type: string
-        body:
+        kind:
           type: string
+    Bird:
+      type: object
+      properties:
+        name:
+          type: string
+        isFly:
+          type: boolean
