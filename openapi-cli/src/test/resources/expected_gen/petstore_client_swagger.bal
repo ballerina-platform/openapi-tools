@@ -131,7 +131,7 @@ public isolated client class Client {
         http:Response response = check self.clientEp->delete(resourcePath, headers = httpHeaders);
         return response;
     }
-    # uploads an image
+    # Uploads an image
     #
     # + petId - ID of pet to update
     # + return - successful operation

@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.core.generators.service;
 
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyBlockNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -25,12 +26,14 @@ import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
+import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
@@ -43,6 +46,7 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
@@ -75,10 +79,13 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionBodyBlockNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionSignatureNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.core.GeneratorConstants.SLASH;
+import static io.ballerina.openapi.core.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.createImportDeclarationNodes;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.generateServiceConfigAnnotation;
 
@@ -234,6 +241,9 @@ public class BallerinaServiceGenerator {
     private FunctionDefinitionNode getResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                        List<Node> pathNodes, String path)
             throws BallerinaOpenApiException {
+        List<Node> resourceFunctionDocs = new ArrayList<>();
+        addFunctionDesctToAPIDocs(operation, resourceFunctionDocs);
+
         NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(GeneratorConstants.RESOURCE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
         Token functionKeyWord = createIdentifierToken(GeneratorConstants.FUNCTION, GeneratorUtils.SINGLE_WS_MINUTIAE,
@@ -242,18 +252,30 @@ public class BallerinaServiceGenerator {
                 .toLowerCase(Locale.ENGLISH), GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
         NodeList<Node> relativeResourcePath = createNodeList(pathNodes);
         ParametersGenerator parametersGenerator = new ParametersGenerator(false);
-        parametersGenerator.generateResourcesInputs(operation);
+        parametersGenerator.generateResourcesInputs(operation, resourceFunctionDocs);
         List<Node> params = new ArrayList<>(parametersGenerator.getRequiredParams());
 
         // Handle request Body (Payload)
         if (operation.getValue().getRequestBody() != null) {
             RequestBody requestBody = operation.getValue().getRequestBody();
             requestBody = resolveRequestBodyReference(requestBody);
+            RequiredParameterNode nodeForRequestBody = null;
             if (requestBody.getContent() != null) {
                 RequestBodyGenerator requestBodyGen = new RequestBodyGenerator(this.openAPI.getComponents(),
                         requestBody);
-                params.add(requestBodyGen.createNodeForRequestBody());
+                nodeForRequestBody = requestBodyGen.createNodeForRequestBody();
+                params.add(nodeForRequestBody);
                 params.add(createToken(SyntaxKind.COMMA_TOKEN));
+            }
+
+            if (nodeForRequestBody != null && nodeForRequestBody.paramName().isPresent()) {
+                String description = requestBody.getDescription() != null && !requestBody.getDescription().isBlank()
+                        ? requestBody.getDescription() : "request payload";
+                MarkdownParameterDocumentationLineNode paramAPIDoc =
+                        DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(
+                                nodeForRequestBody.paramName().get().text()),
+                                description.split("\n")[0]);
+                resourceFunctionDocs.add(paramAPIDoc);
             }
         }
 
@@ -276,7 +298,7 @@ public class BallerinaServiceGenerator {
             paths.add(path);
         }
         ReturnTypeDescriptorNode returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation,
-                createEmptyNodeList(), path);
+                createEmptyNodeList(), path, resourceFunctionDocs);
         typeInclusionRecords.putAll(returnTypeGenerator.getTypeInclusionRecords());
 
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(
@@ -294,10 +316,33 @@ public class BallerinaServiceGenerator {
                         createNodeList(bodyStatements),
                 createToken(SyntaxKind.CLOSE_BRACE_TOKEN), null);
 
-        return createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, null,
+        List<AnnotationNode> annotationNodes = new ArrayList<>();
+        MetadataNode metadataNode = createMetadataNode(createMarkdownDocumentationNode(
+                createNodeList(resourceFunctionDocs)), createNodeList(annotationNodes));
+
+        return createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, metadataNode,
                 qualifiersList, functionKeyWord, functionName, relativeResourcePath, functionSignatureNode,
                 functionBodyBlockNode);
     }
+
+    private static void addFunctionDesctToAPIDocs(Map.Entry<PathItem.HttpMethod, Operation> operation,
+                                                  List<Node> resourceFunctionDocs) {
+        // Add function description
+        if (operation.getValue().getSummary() != null) {
+            resourceFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                    operation.getValue().getSummary(), true));
+        } else if (operation.getValue().getDescription() != null && !operation.getValue().getDescription().isBlank()) {
+            resourceFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                    operation.getValue().getDescription(), true));
+        }
+        // An empty hash token is generated for missing function description in client generation.
+//        else {
+//            MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(null,
+//                    createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
+//            resourceFunctionDocs.add(newLine);
+//        }
+    }
+
 
     /**
      * Resolve requestBody reference.

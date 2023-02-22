@@ -21,6 +21,7 @@ package io.ballerina.openapi.core.generators.service;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
@@ -37,6 +38,7 @@ import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -70,9 +72,12 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeReferenceN
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURN_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.core.GeneratorConstants.ANYDATA;
+import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_RETURN_COMMENT;
+import static io.ballerina.openapi.core.GeneratorConstants.ERROR;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP_RESPONSE;
 import static io.ballerina.openapi.core.GeneratorConstants.PIPE;
 import static io.ballerina.openapi.core.GeneratorConstants.POST;
@@ -122,31 +127,47 @@ public class ReturnTypeGenerator {
      * @throws BallerinaOpenApiException
      */
     public ReturnTypeDescriptorNode getReturnTypeDescriptorNode(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                                NodeList<AnnotationNode> annotations, String path)
+                                                                NodeList<AnnotationNode> annotations, String path,
+                                                                List<Node> resourceFunctionDocs)
             throws BallerinaOpenApiException {
 
         ReturnTypeDescriptorNode returnNode;
+        StringBuilder returnDescription = new StringBuilder();
         httpMethod = operation.getKey().name().toLowerCase(Locale.ENGLISH);
         if (operation.getValue().getResponses() != null) {
             ApiResponses responses = operation.getValue().getResponses();
             if (responses.size() > 1) {
                 //handle multiple response scenarios ex: status code 200, 400, 500
-                TypeDescriptorNode type = handleMultipleResponse(responses);
+                TypeDescriptorNode type = handleMultipleResponse(responses, returnDescription);
                 returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), annotations, type);
             } else if (responses.size() == 1) {
                 //handle single response
                 Iterator<Map.Entry<String, ApiResponse>> responseIterator = responses.entrySet().iterator();
                 Map.Entry<String, ApiResponse> response = responseIterator.next();
                 returnNode = handleSingleResponse(annotations, response);
+                // checks `ifEmpty` not `ifBlank` because user can intentionally set the description to empty string
+                if (response.getValue().getDescription() != null && !response.getValue().getDescription().isEmpty()) {
+                    returnDescription.append(response.getValue().getDescription());
+                } else {
+                    // need to discuss
+                    returnDescription.append(DEFAULT_RETURN_COMMENT);
+                }
             } else {
                 TypeDescriptorNode defaultType = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
                 returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), annotations, defaultType);
+                returnDescription.append(HTTP_RESPONSE);
             }
         } else {
             // --error node TypeDescriptor
             returnNode = createReturnTypeDescriptorNode(createToken(SyntaxKind.RETURNS_KEYWORD), createEmptyNodeList(),
                     createSimpleNameReferenceNode(createIdentifierToken("error?")));
+            returnDescription.append(ERROR);
         }
+
+        MarkdownParameterDocumentationLineNode returnDoc =
+                DocCommentsGenerator.createAPIParamDoc(RETURN_KEYWORD.stringValue(), returnDescription.toString());
+        resourceFunctionDocs.add(returnDoc);
+
         if (GeneratorUtils.isComplexURL(path)) {
             assert returnNode != null;
             String returnStatement = returnNode.toString().trim().replace(RETURNS, "") + "|error";
@@ -272,7 +293,8 @@ public class ReturnTypeGenerator {
     /**
      * Generate union type node when operation has multiple responses.
      */
-    private TypeDescriptorNode handleMultipleResponse(ApiResponses responses) throws BallerinaOpenApiException {
+    private TypeDescriptorNode handleMultipleResponse(ApiResponses responses, StringBuilder returnDescription)
+            throws BallerinaOpenApiException {
 
         Set<String> qualifiedNodes = new LinkedHashSet<>();
 
@@ -307,6 +329,16 @@ public class ReturnTypeGenerator {
                     qualifiedNodes.add(node.name().text());
                 }
             }
+            if (response.getValue().getDescription() != null && !response.getValue().getDescription().isEmpty()) {
+                returnDescription.append(response.getValue().getDescription());
+                returnDescription.append(" or ");
+            }
+        }
+
+        if (returnDescription.length() > 0) {
+            returnDescription.delete(returnDescription.length() - 4, returnDescription.length());
+        } else {
+            returnDescription.append(DEFAULT_RETURN_COMMENT);
         }
 
         String unionType = String.join(PIPE, qualifiedNodes);
