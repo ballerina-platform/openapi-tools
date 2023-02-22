@@ -147,7 +147,8 @@ public class DocCommentsGenerator {
     public static List<MarkdownDocumentationLineNode> createAPIDescriptionDoc(String description,
                                                                               boolean addExtraLine) {
         // Capitalize the first letter of the description. This is to maintain consistency
-        description = description.substring(0, 1).toUpperCase(Locale.ENGLISH) + description.substring(1);
+        description = !description.isBlank() ? description.substring(0, 1)
+                .toUpperCase(Locale.ENGLISH) + description.substring(1) : description;
         String[] descriptionLines = description.split("\n");
         List<MarkdownDocumentationLineNode> documentElements = new ArrayList<>();
         Token hashToken = createToken(HASH_TOKEN, createEmptyMinutiaeList(), GeneratorUtils.SINGLE_WS_MINUTIAE);

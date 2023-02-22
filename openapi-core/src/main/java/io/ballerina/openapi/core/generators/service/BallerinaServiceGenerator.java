@@ -261,8 +261,7 @@ public class BallerinaServiceGenerator {
             requestBody = resolveRequestBodyReference(requestBody);
             RequiredParameterNode nodeForRequestBody = null;
             if (requestBody.getContent() != null) {
-                RequestBodyGenerator requestBodyGen = new RequestBodyGenerator(this.openAPI.getComponents(),
-                        requestBody);
+                RequestBodyGenerator requestBodyGen = new RequestBodyGenerator(requestBody);
                 nodeForRequestBody = requestBodyGen.createNodeForRequestBody();
                 params.add(nodeForRequestBody);
                 params.add(createToken(SyntaxKind.COMMA_TOKEN));
