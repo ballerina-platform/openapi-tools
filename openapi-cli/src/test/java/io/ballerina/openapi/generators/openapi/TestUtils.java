@@ -40,6 +40,7 @@ public class TestUtils {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
         String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
         expectedServiceLines.close();
+        System.out.println(expectedServiceContent);
         return expectedServiceContent;
     }
 
