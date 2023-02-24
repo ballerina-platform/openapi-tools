@@ -69,7 +69,7 @@ import static io.ballerina.openapi.converter.Constants.FLOAT;
 public class OpenAPIComponentMapper {
     private final Components components;
     private final List<OpenAPIConverterDiagnostic> diagnostics;
-    private final List<String> cyclicReferences = new ArrayList<>();
+    private final List<String> visitedTypeDefinitionNames = new ArrayList<>();
 
 
     public OpenAPIComponentMapper(Components components) {
@@ -169,7 +169,7 @@ public class OpenAPIComponentMapper {
     private void handleRecordTypeSymbol(RecordTypeSymbol recordTypeSymbol, Map<String, Schema> schema,
                                         String componentName, Map<String, String> apiDocs) {
         // Handle typeInclusions with allOf type binding
-        cyclicReferences.add(componentName);
+        visitedTypeDefinitionNames.add(componentName);
         List<TypeSymbol> typeInclusions = recordTypeSymbol.typeInclusions();
         Map<String, RecordFieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
         HashSet<String> unionKeys = new HashSet<>(rfields.keySet());
@@ -412,7 +412,7 @@ public class OpenAPIComponentMapper {
         if (parentComponentName == null) {
             return false;
         }
-        return cyclicReferences.contains(typeReferenceTypeSymbol.getName().get().trim());
+        return visitedTypeDefinitionNames.contains(typeReferenceTypeSymbol.getName().get().trim());
     }
 
     /**
