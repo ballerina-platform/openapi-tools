@@ -86,7 +86,6 @@ public class RequestBodyGenerator {
     public RequiredParameterNode createNodeForRequestBody() throws BallerinaOpenApiException {
         // type CustomRecord record {| anydata...; |};
         // public type PayloadType string|json|xml|byte[]|CustomRecord|CustomRecord[] ;
-        MappingConstructorExpressionNode annotValue = null;
         Optional<TypeDescriptorNode> typeName;
         // Filter same data type
         List<String> types = new ArrayList<>();
@@ -106,7 +105,7 @@ public class RequestBodyGenerator {
         } else {
             typeName = Optional.of(NodeParser.parseTypeDescriptor(types.get(0)));
         }
-        AnnotationNode annotationNode = getAnnotationNode(GeneratorConstants.PAYLOAD_KEYWORD, annotValue);
+        AnnotationNode annotationNode = getAnnotationNode(GeneratorConstants.PAYLOAD_KEYWORD, null);
         NodeList<AnnotationNode> annotation = NodeFactory.createNodeList(annotationNode);
         String paramName = typeName.get().toString().equals(HTTP_REQUEST) ? REQUEST : PAYLOAD;
 
@@ -176,83 +175,4 @@ public class RequestBodyGenerator {
         return typeName;
     }
 
-    /**
-     * This function fill the annotation values.
-     * <p>
-     * 01. when field has some override media type
-     * <pre> @http:Payload{mediaType: "application/x-www-form-urlencoded"} User payload</pre>
-     * 02. when field has list media value
-     * <pre> @http:Payload{mediaType: ["application/json", "application/snowflake+json"]} User payload</pre>
-     */
-    private SeparatedNodeList<MappingFieldNode> fillRequestAnnotationValues(List<Node> literals,
-                                                                            HashSet<Map.Entry<String,
-                                                                                    MediaType>> equalDataTypes) {
-
-        Token comma = createToken(SyntaxKind.COMMA_TOKEN);
-        IdentifierToken mediaType = createIdentifierToken(GeneratorConstants.MEDIA_TYPE_KEYWORD);
-
-        Iterator<Map.Entry<String, MediaType>> iter = equalDataTypes.iterator();
-        SpecificFieldNode specificFieldNode;
-        while (iter.hasNext()) {
-            Map.Entry<String, MediaType> next = iter.next();
-            literals.add(createIdentifierToken('"' + next.getKey().trim() + '"', GeneratorUtils.SINGLE_WS_MINUTIAE,
-                    GeneratorUtils.SINGLE_WS_MINUTIAE));
-            literals.add(comma);
-        }
-        literals.remove(literals.size() - 1);
-        SeparatedNodeList<Node> expression = NodeFactory.createSeparatedNodeList(literals);
-        if (equalDataTypes.size() == 1) {
-            BasicLiteralNode valueExpr = NodeFactory.createBasicLiteralNode(SyntaxKind.STRING_LITERAL,
-                    createIdentifierToken('"' + equalDataTypes.iterator().next().getKey() + '"'));
-            specificFieldNode = NodeFactory.createSpecificFieldNode(null, mediaType,
-                    createToken(SyntaxKind.COLON_TOKEN), valueExpr);
-        } else {
-            ListConstructorExpressionNode valueExpr = NodeFactory.createListConstructorExpressionNode(
-                    createToken(SyntaxKind.OPEN_BRACKET_TOKEN), expression,
-                    createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-            specificFieldNode = NodeFactory.createSpecificFieldNode(null, mediaType,
-                    createToken(SyntaxKind.COLON_TOKEN), valueExpr);
-        }
-        return NodeFactory.createSeparatedNodeList(specificFieldNode);
-    }
-
-    //Extract same datatype
-    private HashSet<Map.Entry<String, MediaType>> filterMediaTypes(RequestBody requestBody)
-            throws BallerinaOpenApiException {
-
-        HashSet<Map.Entry<String, MediaType>> equalDataType = new HashSet<>();
-        Set<Map.Entry<String, MediaType>> entries = requestBody.getContent().entrySet();
-        Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
-        List<Map.Entry<String, MediaType>> updatedEntries = new ArrayList<>(entries);
-        while (iterator.hasNext()) {
-            // Remove element from updateEntries
-            Map.Entry<String, MediaType> mediaTypeEntry = iterator.next();
-            updatedEntries.remove(mediaTypeEntry);
-            if (!updatedEntries.isEmpty()) {
-                getSameDataTypeMedia(equalDataType, updatedEntries, mediaTypeEntry);
-                if (!equalDataType.isEmpty()) {
-                    equalDataType.add(mediaTypeEntry);
-                    break;
-                }
-            }
-        }
-        return equalDataType;
-    }
-
-    private void getSameDataTypeMedia(HashSet<Map.Entry<String, MediaType>> equalDataType,
-                                      List<Map.Entry<String, MediaType>> updatedEntries,
-                                      Map.Entry<String, MediaType> mediaTypeEntry) throws BallerinaOpenApiException {
-
-        for (Map.Entry<String, MediaType> updateNext : updatedEntries) {
-            MediaType parentValue = mediaTypeEntry.getValue();
-            MediaType childValue = updateNext.getValue();
-            if (parentValue.getSchema().get$ref() != null && childValue.getSchema().get$ref() != null) {
-                String parentRef = parentValue.getSchema().get$ref().trim();
-                String childRef = childValue.getSchema().get$ref().trim();
-                if (extractReferenceType(parentRef).equals(extractReferenceType(childRef))) {
-                    equalDataType.add(updateNext);
-                }
-            }
-        }
-    }
 }
