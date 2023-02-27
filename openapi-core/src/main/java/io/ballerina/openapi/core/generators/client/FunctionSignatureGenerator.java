@@ -104,7 +104,6 @@ import static io.ballerina.openapi.core.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.GeneratorUtils.getBallerinaMediaType;
 import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
-import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 
 /**
  * This util class uses for generating {@link FunctionSignatureNode} for given OAS
@@ -512,20 +511,13 @@ public class FunctionSignatureGenerator {
                     } else if (schema.getType() != null && !schema.getType().equals(ARRAY) && !schema.getType().equals(
                             OBJECT)) {
                         String typeOfPayload = schema.getType().trim();
-                        // for multipart/formdata media type schema should be an object to support entity mapping
-                        if (mediaTypeEntry.getKey().equals(MULTIPART_FORM_DATA)) {
-                            paramType = getBallerinaMediaType(mediaTypeEntry.getKey(), true);
-                        } else if (typeOfPayload.equals(STRING) && schema.getFormat() != null
+                        if (typeOfPayload.equals(STRING) && schema.getFormat() != null
                                 && (schema.getFormat().equals(BINARY) || schema.getFormat().equals(BYTE))) {
-                            if (mediaTypeEntry.getKey().equals(MULTIPART_FORM_DATA)) {
-                                paramType = getBallerinaMediaType(mediaTypeEntry.getKey(), true);
-                            } else {
-                                paramType = convertOpenAPITypeToBallerina(schema.getFormat());
-                            }
+                            paramType = convertOpenAPITypeToBallerina(schema.getFormat());
                         } else {
                             paramType = convertOpenAPITypeToBallerina(typeOfPayload);
                         }
-                    } else if (schema instanceof ArraySchema && !mediaTypeEntry.getKey().equals(MULTIPART_FORM_DATA)) {
+                    } else if (schema instanceof ArraySchema) {
                         //TODO: handle nested array - this is impossible to handle
                         ArraySchema arraySchema = (ArraySchema) schema;
                         paramType = getRequestBodyParameterForArraySchema(operationId, mediaTypeEntry, arraySchema);
@@ -559,7 +551,7 @@ public class FunctionSignatureGenerator {
                 parameterList.add(createToken((COMMA_TOKEN)));
             }
 
-            if (mediaTypeEntry.getKey().equals(MULTIPART_FORM_DATA)
+            if (mediaTypeEntry.getKey().equals(javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA)
                     && mediaTypeEntry.getValue().getEncoding() != null) {
                 List<String> headerList = new ArrayList<>();
                 for (Map.Entry<String, Encoding> entry : mediaTypeEntry.getValue().getEncoding().entrySet()) {
