@@ -35,6 +35,16 @@ type ResponseError07 record {|
     ResponseError07[]? resError;
 |};
 
+type AidPackage record {|
+    string status;
+    AidPackageItem[] aidPackageItems?;
+|};
+
+type AidPackageItem record {|
+    decimal totalAmount =0;
+    AidPackage aidPackage?;
+|};
+
 listener http:Listener ep0 = new (443, config = {host: "petstore.swagger.io"});
 
 service /payloadV on ep0 {
@@ -65,5 +75,9 @@ service /payloadV on ep0 {
     resource function post pet07() returns ResponseError07|http:Accepted {
         http:Accepted accept = {body: ()};
         return accept;
+    }
+    resource function get items() returns  AidPackage[] {
+        AidPackage aidPackage = {status:"Test"};
+        return [aidPackage];
     }
 }
