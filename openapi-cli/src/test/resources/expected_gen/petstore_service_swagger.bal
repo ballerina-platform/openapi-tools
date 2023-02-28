@@ -3,9 +3,9 @@ import ballerina/http;
 listener http:Listener ep0 = new (443, config = {host: "petstore.swagger.io"});
 
 service /v2 on ep0 {
-    resource function put pet(@http:Payload {mediaType: ["application/json", "application/xml"]} Pet payload) returns http:BadRequest|http:NotFound|http:MethodNotAllowed {
+    resource function put pet(@http:Payload Pet|xml payload) returns http:BadRequest|http:NotFound|http:MethodNotAllowed {
     }
-    resource function post pet(@http:Payload {mediaType: ["application/json", "application/xml"]} Pet payload) returns http:MethodNotAllowed {
+    resource function post pet(@http:Payload Pet|xml payload) returns http:MethodNotAllowed {
     }
     resource function get pet/findByStatus(string[] status) returns Pet[]|http:BadRequest {
     }
@@ -13,7 +13,7 @@ service /v2 on ep0 {
     }
     resource function get pet/[int petId]() returns Pet|http:BadRequest|http:NotFound {
     }
-    resource function post pet/[int petId](@http:Payload {mediaType: "application/x-www-form-urlencoded"} Pet_petId_body payload) returns http:MethodNotAllowed {
+    resource function post pet/[int petId](@http:Payload map<string> payload) returns http:MethodNotAllowed {
     }
     resource function delete pet/[int petId](@http:Header string? api_key) returns http:BadRequest|http:NotFound {
     }
