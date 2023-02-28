@@ -94,6 +94,18 @@ paths:
                 $ref: '#/components/schemas/ResponseError07'
         "202":
           description: Accepted
+  /items:
+    get:
+      operationId: getItems
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AidPackage'
 components:
   schemas:
     ResponseError:
@@ -190,3 +202,24 @@ components:
           nullable: true
           items:
             $ref: '#/components/schemas/ResponseError07'
+    AidPackageItem:
+      required:
+        - totalAmount
+      type: object
+      properties:
+        totalAmount:
+          type: number
+          format: double
+        aidPackage:
+          $ref: '#/components/schemas/AidPackage'
+    AidPackage:
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          type: string
+        aidPackageItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/AidPackageItem'
