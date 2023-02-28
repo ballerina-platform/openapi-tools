@@ -209,8 +209,8 @@ public class RequestBodyTests {
                 "requestBody/unhandled_media_type.bal", syntaxTree);
     }
 
-    @Test(description = "RequestBody has anyOF type")
-    public void testForAnyOF() throws IOException, BallerinaOpenApiException {
+    @Test(description = "RequestBody has anyOf type")
+    public void testForAnyOf() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/any_of.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

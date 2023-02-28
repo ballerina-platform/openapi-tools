@@ -86,11 +86,11 @@ public class RequestBodyGenerator {
                 types.add(HTTP_REQUEST);
             }
         }
-        if (types.size() > 1 && !types.contains(HTTP_REQUEST)) {
+        if (types.size() > 1 && types.contains(HTTP_REQUEST)) {
+            typeName = Optional.of(NodeParser.parseTypeDescriptor(HTTP_REQUEST));
+        } else if (types.size() > 1) {
             String result = String.join(PIPE, types);
             typeName = Optional.of(NodeParser.parseTypeDescriptor(result));
-        } else if (types.size() > 1 && types.contains(HTTP_REQUEST)) {
-            typeName = Optional.of(NodeParser.parseTypeDescriptor(HTTP_REQUEST));
         } else {
             typeName = Optional.of(NodeParser.parseTypeDescriptor(types.get(0)));
         }
