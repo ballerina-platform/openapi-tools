@@ -137,6 +137,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.IDENTIFIER;
 import static io.ballerina.openapi.core.GeneratorConstants.IMAGE_PNG;
 import static io.ballerina.openapi.core.GeneratorConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.core.GeneratorConstants.LINE_SEPARATOR;
+import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.GeneratorConstants.OPEN_CURLY_BRACE;
 import static io.ballerina.openapi.core.GeneratorConstants.SERVICE_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.SLASH;
@@ -431,8 +432,12 @@ public class GeneratorUtils {
             io.swagger.v3.oas.models.media.MediaType> mediaTypeEntry) {
         String mediaType = mediaTypeEntry.getKey();
         String defaultBallerinaType = getBallerinaMediaType(mediaType, true);
-        if (defaultBallerinaType.equals(HTTP_REQUEST) &&
-                !(mediaTypeEntry.getValue().getSchema() != null && mediaType.equals(MediaType.MULTIPART_FORM_DATA))) {
+        Schema<?> schema = mediaTypeEntry.getValue().getSchema();
+
+        boolean isValidMultipartFormData = mediaType.equals(MediaType.MULTIPART_FORM_DATA) && schema != null &&
+                (schema.get$ref() != null || schema.getProperties() != null || schema.getType().equals(OBJECT));
+
+        if (defaultBallerinaType.equals(HTTP_REQUEST) && !isValidMultipartFormData) {
             return false;
         } else {
             return true;
@@ -445,7 +450,7 @@ public class GeneratorUtils {
     public static String getBallerinaMediaType(String mediaType, boolean isRequest) {
         if (mediaType.matches(".*/json") || mediaType.matches("application/.*\\+json")) {
             return SyntaxKind.JSON_KEYWORD.stringValue();
-        } else if (mediaType.matches(".*/xml")  || mediaType.matches("application/.*\\+xml")) {
+        } else if (mediaType.matches(".*/xml") || mediaType.matches("application/.*\\+xml")) {
             return SyntaxKind.XML_KEYWORD.stringValue();
         } else if (mediaType.equals(MediaType.APPLICATION_FORM_URLENCODED) || mediaType.matches("text/.*")) {
             return STRING_KEYWORD.stringValue();
