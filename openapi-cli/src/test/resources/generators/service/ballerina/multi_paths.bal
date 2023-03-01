@@ -33,10 +33,10 @@ service /v1 on ep0 {
     }
     # Retrieves a single customer.
     #
-    # + customer_id - Customer ID
+    # + customer_idJson - Customer ID
     # + fields - Show only certain fields, specified by a comma-separated list of field names.
     # + return - Requested customer
-    resource function get admin/api/'2021\-10/customers/[string customer_idJson](string? fields) returns http: Ok|error {
+    resource function get admin/api/'2021\-10/customers/[string customer_idJson](string? fields) returns http:Ok|error {
         if !customer_idJson.endsWith(".json") {
             return error("bad URL");
         }

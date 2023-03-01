@@ -1,6 +1,6 @@
 import ballerina/http;
 
-# RefComponent
+# refComponent
 public isolated client class Client {
     final http:Client clientEp;
     # Gets invoked to initialize the `connector`.

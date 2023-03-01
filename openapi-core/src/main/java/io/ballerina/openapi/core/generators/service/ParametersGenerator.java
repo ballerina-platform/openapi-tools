@@ -64,7 +64,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDe
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_PARAM_COMMENT;
-import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_103;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_104;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_105;
@@ -115,15 +114,9 @@ public class ParametersGenerator {
         if (operation.getValue().getParameters() != null) {
             List<Parameter> parameters = operation.getValue().getParameters();
             for (Parameter parameter : parameters) {
-                String paramComment = parameter.getDescription() != null && !parameter.getDescription().isBlank() ?
-                        parameter.getDescription() : DEFAULT_PARAM_COMMENT;
-                MarkdownParameterDocumentationLineNode paramAPIDoc =
-                        DocCommentsGenerator.createAPIParamDoc(getValidName(
-                                parameter.getName(), false), paramComment);
-                resourceFunctionDocs.add(paramAPIDoc);
-
+                Node param = null;
                 if (parameter.getIn().trim().equals(GeneratorConstants.HEADER)) {
-                    ParameterNode param = handleHeader(parameter);
+                    param = handleHeader(parameter);
                     if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
                         defaultableParams.add(param);
                         defaultableParams.add(comma);
@@ -138,7 +131,7 @@ public class ParametersGenerator {
                     }
                     // type  BasicType boolean|int|float|decimal|string ;
                     // public type () |BasicType|BasicType []| map<json>;
-                    Node param = createNodeForQueryParam(parameter);
+                    param = createNodeForQueryParam(parameter);
                     if (param != null) {
                         if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
                             defaultableParams.add(param);
@@ -149,6 +142,19 @@ public class ParametersGenerator {
                         }
                     }
                 }
+
+                if (param != null) {
+                    String parameterName = param instanceof RequiredParameterNode ?
+                            ((RequiredParameterNode) param).paramName().get().text() :
+                            ((DefaultableParameterNode) param).paramName().get().text();
+                    String paramComment = parameter.getDescription() != null && !parameter.getDescription().isBlank() ?
+                            parameter.getDescription() : DEFAULT_PARAM_COMMENT;
+                    MarkdownParameterDocumentationLineNode paramAPIDoc =
+                            DocCommentsGenerator.createAPIParamDoc(parameterName
+                                    , paramComment);
+                    resourceFunctionDocs.add(paramAPIDoc);
+                }
+
             }
         }
     }

@@ -52,14 +52,14 @@ service /v2 on ep0 {
     }
     # Deletes a pet
     #
-    # + api_key - parameter description
     # + petId - Pet id to delete
+    # + api_key - parameter description
     # + return - returns can be any of following types
     # http:BadRequest (Invalid ID supplied)
     # http:NotFound (Pet not found)
     resource function delete pet/[int petId](@http:Header string? api_key) returns http:BadRequest|http:NotFound {
     }
-    # Uploads an image
+    # uploads an image
     #
     # + petId - ID of pet to update
     # + request - parameter description

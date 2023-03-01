@@ -30,6 +30,7 @@ import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
+import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.Minutiae;
 import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
@@ -53,6 +54,7 @@ import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
+import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.model.GenSrcFile;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -128,6 +130,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML_CONTENT;
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.CLOSE_CURLY_BRACE;
+import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_PARAM_COMMENT;
 import static io.ballerina.openapi.core.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.core.GeneratorConstants.GET;
 import static io.ballerina.openapi.core.GeneratorConstants.HEAD;
@@ -194,7 +197,7 @@ public class GeneratorUtils {
      * @return - node lists
      * @throws BallerinaOpenApiException
      */
-    public static List<Node> getRelativeResourcePath(String path, Operation operation)
+    public static List<Node> getRelativeResourcePath(String path, Operation operation, List<Node> resourceFunctionDocs)
             throws BallerinaOpenApiException {
 
         List<Node> functionRelativeResourcePath = new ArrayList<>();
@@ -213,7 +216,8 @@ public class GeneratorUtils {
                      * <pre>resource function get onCall/[string id]\.json() returns string {}</>
                      */
                     if (operation.getParameters() != null) {
-                        extractPathParameterDetails(operation, functionRelativeResourcePath, pathNode, pathParam);
+                        extractPathParameterDetails(operation, functionRelativeResourcePath, pathNode,
+                                pathParam, resourceFunctionDocs);
                     }
                 } else if (!pathNode.isBlank()) {
                     IdentifierToken idToken = createIdentifierToken(escapeIdentifier(pathNode.trim()));
@@ -233,7 +237,7 @@ public class GeneratorUtils {
     }
 
     private static void extractPathParameterDetails(Operation operation, List<Node> functionRelativeResourcePath,
-                                                    String pathNode, String pathParam)
+                                                    String pathNode, String pathParam, List<Node> resourceFunctionDocs)
             throws BallerinaOpenApiException {
         // check whether path parameter segment has special character
         String[] split = pathNode.split(CLOSE_CURLY_BRACE, 2);
@@ -270,6 +274,17 @@ public class GeneratorUtils {
                                 createToken(CLOSE_BRACKET_TOKEN));
                 functionRelativeResourcePath.add(resourcePathParameterNode);
                 functionRelativeResourcePath.add(createToken(SLASH_TOKEN));
+
+                // Add documentation
+                if (resourceFunctionDocs != null) {
+                    String parameterName = paramName.text();
+                    String paramComment = parameter.getDescription() != null && !parameter.getDescription().isBlank() ?
+                            parameter.getDescription() : DEFAULT_PARAM_COMMENT;
+                    MarkdownParameterDocumentationLineNode paramAPIDoc =
+                            DocCommentsGenerator.createAPIParamDoc(parameterName
+                                    , paramComment);
+                    resourceFunctionDocs.add(paramAPIDoc);
+                }
                 break;
             }
         }

@@ -34,7 +34,6 @@ import io.ballerina.openapi.core.GeneratorUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
@@ -147,8 +146,6 @@ public class DocCommentsGenerator {
     public static List<MarkdownDocumentationLineNode> createAPIDescriptionDoc(String description,
                                                                               boolean addExtraLine) {
         // Capitalize the first letter of the description. This is to maintain consistency
-        description = !description.isBlank() ? description.substring(0, 1)
-                .toUpperCase(Locale.ENGLISH) + description.substring(1) : description;
         String[] descriptionLines = description.split("\n");
         List<MarkdownDocumentationLineNode> documentElements = new ArrayList<>();
         Token hashToken = createToken(HASH_TOKEN, createEmptyMinutiaeList(), GeneratorUtils.SINGLE_WS_MINUTIAE);

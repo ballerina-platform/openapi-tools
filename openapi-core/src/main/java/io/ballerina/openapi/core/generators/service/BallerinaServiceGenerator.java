@@ -199,6 +199,8 @@ public class BallerinaServiceGenerator {
 
         List<Node> functions = new ArrayList<>();
         for (Map.Entry<PathItem.HttpMethod, Operation> operation : operationMap.entrySet()) {
+            List<Node> resourceFunctionDocs = new ArrayList<>();
+            addFunctionDescToAPIDocs(operation, resourceFunctionDocs);
             //Add filter availability
             //1.Tag filter
             //2.Operation filter
@@ -214,18 +216,20 @@ public class BallerinaServiceGenerator {
                                     filterOperations.contains(operation.getValue().getOperationId().trim()))) {
                         // getRelative resource path
                         List<Node> functionRelativeResourcePath = GeneratorUtils.getRelativeResourcePath(path,
-                                operation.getValue());
+                                operation.getValue(), resourceFunctionDocs);
                         // function call
                         FunctionDefinitionNode functionDefinitionNode = getResourceFunction(operation,
-                                functionRelativeResourcePath, path);
+                                functionRelativeResourcePath, path, resourceFunctionDocs);
                         functions.add(functionDefinitionNode);
                     }
                 }
             } else {
                 // getRelative resource path
-                List<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue());
+                List<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
+                        resourceFunctionDocs);
                 // function call
-                FunctionDefinitionNode resourceFunction = getResourceFunction(operation, relativeResourcePath, path);
+                FunctionDefinitionNode resourceFunction = getResourceFunction(operation, relativeResourcePath,
+                        path, resourceFunctionDocs);
                 functions.add(resourceFunction);
             }
         }
@@ -241,10 +245,9 @@ public class BallerinaServiceGenerator {
      * @throws BallerinaOpenApiException when the process failure occur
      */
     private FunctionDefinitionNode getResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                       List<Node> pathNodes, String path)
+                                                       List<Node> pathNodes, String path,
+                                                       List<Node> resourceFunctionDocs)
             throws BallerinaOpenApiException {
-        List<Node> resourceFunctionDocs = new ArrayList<>();
-        addFunctionDescToAPIDocs(operation, resourceFunctionDocs);
 
         NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(GeneratorConstants.RESOURCE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
