@@ -84,6 +84,8 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_FUNC_COMMENT;
+import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_PARAM_COMMENT;
 import static io.ballerina.openapi.core.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.core.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.createImportDeclarationNodes;
@@ -242,7 +244,7 @@ public class BallerinaServiceGenerator {
                                                        List<Node> pathNodes, String path)
             throws BallerinaOpenApiException {
         List<Node> resourceFunctionDocs = new ArrayList<>();
-        addFunctionDesctToAPIDocs(operation, resourceFunctionDocs);
+        addFunctionDescToAPIDocs(operation, resourceFunctionDocs);
 
         NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(GeneratorConstants.RESOURCE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
@@ -269,7 +271,7 @@ public class BallerinaServiceGenerator {
 
             if (nodeForRequestBody != null && nodeForRequestBody.paramName().isPresent()) {
                 String description = requestBody.getDescription() != null && !requestBody.getDescription().isBlank()
-                        ? requestBody.getDescription() : "request payload";
+                        ? requestBody.getDescription() : DEFAULT_PARAM_COMMENT;
                 MarkdownParameterDocumentationLineNode paramAPIDoc =
                         DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(
                                 nodeForRequestBody.paramName().get().text()),
@@ -324,8 +326,8 @@ public class BallerinaServiceGenerator {
                 functionBodyBlockNode);
     }
 
-    private static void addFunctionDesctToAPIDocs(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                  List<Node> resourceFunctionDocs) {
+    private static void addFunctionDescToAPIDocs(Map.Entry<PathItem.HttpMethod, Operation> operation,
+                                                 List<Node> resourceFunctionDocs) {
         // Add function description
         if (operation.getValue().getSummary() != null) {
             resourceFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
@@ -333,13 +335,10 @@ public class BallerinaServiceGenerator {
         } else if (operation.getValue().getDescription() != null && !operation.getValue().getDescription().isBlank()) {
             resourceFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                     operation.getValue().getDescription(), true));
+        } else {
+            resourceFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                    DEFAULT_FUNC_COMMENT, true));
         }
-        // An empty hash token is generated for missing function description in client generation.
-//        else {
-//            MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(null,
-//                    createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
-//            resourceFunctionDocs.add(newLine);
-//        }
     }
 
 

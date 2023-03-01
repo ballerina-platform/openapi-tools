@@ -179,11 +179,9 @@ public class GeneratorUtils {
     }
 
     public static QualifiedNameReferenceNode getQualifiedNameReferenceNode(String modulePrefix, String identifier) {
-
         Token modulePrefixToken = AbstractNodeFactory.createIdentifierToken(modulePrefix);
         Token colon = AbstractNodeFactory.createIdentifierToken(":");
-        IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier, SINGLE_WS_MINUTIAE
-                , SINGLE_WS_MINUTIAE);
+        IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier);
         return NodeFactory.createQualifiedNameReferenceNode(modulePrefixToken, colon, identifierToken);
     }
 

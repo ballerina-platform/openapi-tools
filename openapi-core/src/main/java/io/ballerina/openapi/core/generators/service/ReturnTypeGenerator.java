@@ -21,7 +21,10 @@ package io.ballerina.openapi.core.generators.service;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
@@ -132,13 +135,13 @@ public class ReturnTypeGenerator {
             throws BallerinaOpenApiException {
 
         ReturnTypeDescriptorNode returnNode;
-        StringBuilder returnDescription = new StringBuilder();
+        List<String> returnDescriptions = new ArrayList<>();
         httpMethod = operation.getKey().name().toLowerCase(Locale.ENGLISH);
         if (operation.getValue().getResponses() != null) {
             ApiResponses responses = operation.getValue().getResponses();
             if (responses.size() > 1) {
                 //handle multiple response scenarios ex: status code 200, 400, 500
-                TypeDescriptorNode type = handleMultipleResponse(responses, returnDescription);
+                TypeDescriptorNode type = handleMultipleResponse(responses, returnDescriptions);
                 returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), annotations, type);
             } else if (responses.size() == 1) {
                 //handle single response
@@ -147,26 +150,46 @@ public class ReturnTypeGenerator {
                 returnNode = handleSingleResponse(annotations, response);
                 // checks `ifEmpty` not `ifBlank` because user can intentionally set the description to empty string
                 if (response.getValue().getDescription() != null && !response.getValue().getDescription().isEmpty()) {
-                    returnDescription.append(response.getValue().getDescription());
+                    returnDescriptions.add(response.getValue().getDescription());
                 } else {
                     // need to discuss
-                    returnDescription.append(DEFAULT_RETURN_COMMENT);
+                    returnDescriptions.add(DEFAULT_RETURN_COMMENT);
                 }
             } else {
                 TypeDescriptorNode defaultType = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
                 returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), annotations, defaultType);
-                returnDescription.append(HTTP_RESPONSE);
+                returnDescriptions.add(HTTP_RESPONSE);
             }
         } else {
             // --error node TypeDescriptor
             returnNode = createReturnTypeDescriptorNode(createToken(SyntaxKind.RETURNS_KEYWORD), createEmptyNodeList(),
                     createSimpleNameReferenceNode(createIdentifierToken("error?")));
-            returnDescription.append(ERROR);
+            returnDescriptions.add(ERROR);
         }
 
-        MarkdownParameterDocumentationLineNode returnDoc =
-                DocCommentsGenerator.createAPIParamDoc(RETURN_KEYWORD.stringValue(), returnDescription.toString());
-        resourceFunctionDocs.add(returnDoc);
+        // Add return description to the resource function
+        if (returnDescriptions.size() > 1) {
+            StringBuilder returnDescriptionForUnions = new StringBuilder(
+                    "# + return - returns can be any of following types\n");
+            String typeDescriptionTemplate = "#            %s (%s)%n";
+            for (String description : returnDescriptions) {
+                String[] values = description.split("\\|");
+                returnDescriptionForUnions.append(String.format(typeDescriptionTemplate,
+                        values[0], values[1]));
+            }
+            String dummyTypeWithDescription = returnDescriptionForUnions.toString() + "type a A;";
+            ModuleMemberDeclarationNode moduleMemberDeclarationNode = NodeParser.parseModuleMemberDeclaration(
+                    dummyTypeWithDescription);
+            TypeDefinitionNode typeDefinitionNode = (TypeDefinitionNode) moduleMemberDeclarationNode;
+            MetadataNode metadataNode = typeDefinitionNode.metadata().get();
+            MarkdownDocumentationNode returnDoc = (MarkdownDocumentationNode) metadataNode.children().get(0);
+            resourceFunctionDocs.add(returnDoc);
+
+        } else {
+            MarkdownParameterDocumentationLineNode returnDoc =
+                    DocCommentsGenerator.createAPIParamDoc(RETURN_KEYWORD.stringValue(), returnDescriptions.get(0));
+            resourceFunctionDocs.add(returnDoc);
+        }
 
         if (GeneratorUtils.isComplexURL(path)) {
             assert returnNode != null;
@@ -293,7 +316,7 @@ public class ReturnTypeGenerator {
     /**
      * Generate union type node when operation has multiple responses.
      */
-    private TypeDescriptorNode handleMultipleResponse(ApiResponses responses, StringBuilder returnDescription)
+    private TypeDescriptorNode handleMultipleResponse(ApiResponses responses, List<String> returnDescription)
             throws BallerinaOpenApiException {
 
         Set<String> qualifiedNodes = new LinkedHashSet<>();
@@ -302,6 +325,7 @@ public class ReturnTypeGenerator {
             String responseCode = response.getKey().trim();
             String code = GeneratorConstants.HTTP_CODES_DES.get(responseCode);
             Content content = response.getValue().getContent();
+            String typeName = null;
 
             if (code == null && !responseCode.equals(GeneratorConstants.DEFAULT)) {
                 throw new BallerinaOpenApiException(String.format(OAS_SERVICE_107.getDescription(), responseCode));
@@ -309,13 +333,13 @@ public class ReturnTypeGenerator {
 
             if (responseCode.equals(GeneratorConstants.DEFAULT)) {
                 TypeDescriptorNode record = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
-                qualifiedNodes.add(record.toSourceCode());
+                typeName = record.toSourceCode();
             } else if (content == null && response.getValue().get$ref() == null ||
                     content != null && content.size() == 0) {
                 //key and value
                 QualifiedNameReferenceNode node = GeneratorUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP,
                         code);
-                qualifiedNodes.add(node.toSourceCode());
+                typeName = node.toSourceCode();
             } else if (content != null) {
                 TypeDescriptorNode bodyType = handleMultipleContents(content.entrySet());
                 //Check the default behaviour for return type according to POST method.
@@ -323,22 +347,18 @@ public class ReturnTypeGenerator {
                         (httpMethod.equals(POST) && responseCode.equals(GeneratorConstants.HTTP_201)) ||
                                 (!httpMethod.equals(POST) && responseCode.equals(GeneratorConstants.HTTP_200));
                 if (isWithOutStatusCode) {
-                    qualifiedNodes.add(bodyType.toSourceCode());
+                    typeName = bodyType.toSourceCode();
                 } else {
                     SimpleNameReferenceNode node = createReturnTypeInclusionRecord(code, bodyType);
-                    qualifiedNodes.add(node.name().text());
+                    typeName = node.name().text();
                 }
             }
-            if (response.getValue().getDescription() != null && !response.getValue().getDescription().isEmpty()) {
-                returnDescription.append(response.getValue().getDescription());
-                returnDescription.append(" or ");
+            if (typeName != null) {
+                qualifiedNodes.add(typeName);
+                if (response.getValue().getDescription() != null && !response.getValue().getDescription().isEmpty()) {
+                    returnDescription.add(typeName.trim() + "|" + response.getValue().getDescription().trim());
+                }
             }
-        }
-
-        if (returnDescription.length() > 0) {
-            returnDescription.delete(returnDescription.length() - 4, returnDescription.length());
-        } else {
-            returnDescription.append(DEFAULT_RETURN_COMMENT);
         }
 
         String unionType = String.join(PIPE, qualifiedNodes);

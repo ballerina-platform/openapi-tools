@@ -63,6 +63,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultablePar
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_PARAM_COMMENT;
 import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_103;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_104;
@@ -114,12 +115,13 @@ public class ParametersGenerator {
         if (operation.getValue().getParameters() != null) {
             List<Parameter> parameters = operation.getValue().getParameters();
             for (Parameter parameter : parameters) {
-                if (parameter.getDescription() != null && !parameter.getDescription().isBlank()) {
-                    MarkdownParameterDocumentationLineNode paramAPIDoc =
-                            DocCommentsGenerator.createAPIParamDoc(getValidName(
-                                    parameter.getName(), false), parameter.getDescription());
-                    resourceFunctionDocs.add(paramAPIDoc);
-                }
+                String paramComment = parameter.getDescription() != null && !parameter.getDescription().isBlank() ?
+                        parameter.getDescription() : DEFAULT_PARAM_COMMENT;
+                MarkdownParameterDocumentationLineNode paramAPIDoc =
+                        DocCommentsGenerator.createAPIParamDoc(getValidName(
+                                parameter.getName(), false), paramComment);
+                resourceFunctionDocs.add(paramAPIDoc);
+
                 if (parameter.getIn().trim().equals(GeneratorConstants.HEADER)) {
                     ParameterNode param = handleHeader(parameter);
                     if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
