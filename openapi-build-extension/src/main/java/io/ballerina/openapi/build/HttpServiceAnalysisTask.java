@@ -45,9 +45,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static io.ballerina.openapi.build.PluginConstants.OAS_PATH_SEPARATOR;
 import static io.ballerina.openapi.build.PluginConstants.OPENAPI;
@@ -91,7 +93,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         Optional<Path> path = currentPackage.project().documentPath(context.documentId());
         Path inputPath = path.orElse(null);
         ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) context.node();
-        List<ListenerDeclarationNode> endpoints = new ArrayList<>();
+        Set<ListenerDeclarationNode> endpoints = new LinkedHashSet<>();
         Map<Integer, String> services = new HashMap<>();
         List<Diagnostic> diagnostics = new ArrayList<>();
 
@@ -102,7 +104,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
             Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
             if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
                 extractListenersAndServiceNodes(syntaxTree.rootNode(), endpoints, services, semanticModel);
-                OASResult oasResult = ServiceToOpenAPIConverterUtils.generateOAS(serviceNode, endpoints,
+                OASResult oasResult = ServiceToOpenAPIConverterUtils.generateOAS(project, serviceNode, endpoints,
                         semanticModel, services.get(serviceSymbol.get().hashCode()), inputPath);
                 oasResult.setServiceName(constructFileName(syntaxTree, services, serviceSymbol.get()));
                 writeOpenAPIYaml(outPath, oasResult, diagnostics);
@@ -160,7 +162,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
      * Filter all the end points and service nodes for avoiding the generated file name conflicts.
      */
     private static void extractListenersAndServiceNodes(ModulePartNode modulePartNode,
-                                                        List<ListenerDeclarationNode> endpoints,
+                                                        Set<ListenerDeclarationNode> endpoints,
                                                         Map<Integer, String> services,
                                                         SemanticModel semanticModel) {
         List<String> allServices = new ArrayList<>();
