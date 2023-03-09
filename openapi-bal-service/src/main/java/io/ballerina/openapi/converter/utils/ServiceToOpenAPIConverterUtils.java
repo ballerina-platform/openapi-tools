@@ -199,29 +199,6 @@ public class ServiceToOpenAPIConverterUtils {
     }
 
     /**
-     * Generate openAPI definition according to the given format JSON or YAML.
-     *
-     * @deprecated use {@link #generateOAS(ServiceDeclarationNode, List, SemanticModel, String, Path)} instead.
-     * The new API provides a list of {@code OASResult}, which contains all the diagnostic information collected
-     * while generating the openAPI contract.
-     */
-    @Deprecated
-    public static String generateOASForGivenFormat(Project project, ServiceDeclarationNode serviceDeclarationNode,
-                                                   boolean needJson, Set<ListenerDeclarationNode> endpoints,
-                                                   SemanticModel semanticModel, String openApiName) {
-        Optional<OpenAPI> openapi = generateOAS(project, serviceDeclarationNode, endpoints, semanticModel, openApiName,
-                null).getOpenAPI();
-        if (openapi.isPresent()) {
-            OpenAPI openAPI = openapi.get();
-            if (openAPI.getInfo().getTitle() == null || openAPI.getInfo().getTitle().equals(SLASH)) {
-                openAPI.getInfo().setTitle(normalizeTitle(openApiName));
-            }
-            return needJson ? Json.pretty(openAPI) : Yaml.pretty(openAPI);
-        }
-        return "Error while generating openAPI contract";
-    }
-
-    /**
      * Provides an instance of {@code OASResult}, which contains the generated contract as well as
      * all the diagnostics information.
      *
