@@ -344,7 +344,6 @@ public class BallerinaServiceGenerator {
         }
     }
 
-
     /**
      * Resolve requestBody reference.
      */

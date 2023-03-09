@@ -281,8 +281,7 @@ public class GeneratorUtils {
                     String paramComment = parameter.getDescription() != null && !parameter.getDescription().isBlank() ?
                             parameter.getDescription() : DEFAULT_PARAM_COMMENT;
                     MarkdownParameterDocumentationLineNode paramAPIDoc =
-                            DocCommentsGenerator.createAPIParamDoc(parameterName
-                                    , paramComment);
+                            DocCommentsGenerator.createAPIParamDoc(parameterName, paramComment);
                     resourceFunctionDocs.add(paramAPIDoc);
                 }
                 break;

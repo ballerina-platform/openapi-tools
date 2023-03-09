@@ -184,7 +184,6 @@ public class ReturnTypeGenerator {
             MetadataNode metadataNode = typeDefinitionNode.metadata().get();
             MarkdownDocumentationNode returnDoc = (MarkdownDocumentationNode) metadataNode.children().get(0);
             resourceFunctionDocs.add(returnDoc);
-
         } else {
             MarkdownParameterDocumentationLineNode returnDoc =
                     DocCommentsGenerator.createAPIParamDoc(RETURN_KEYWORD.stringValue(), returnDescriptions.get(0));
@@ -356,7 +355,7 @@ public class ReturnTypeGenerator {
             if (typeName != null) {
                 qualifiedNodes.add(typeName);
                 if (response.getValue().getDescription() != null && !response.getValue().getDescription().isEmpty()) {
-                    returnDescription.add(typeName.trim() + "|" + response.getValue().getDescription().trim());
+                    returnDescription.add(typeName.trim() + PIPE + response.getValue().getDescription().trim());
                 }
             }
         }

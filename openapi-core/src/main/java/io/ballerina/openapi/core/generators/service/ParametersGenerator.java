@@ -154,7 +154,6 @@ public class ParametersGenerator {
                                     , paramComment);
                     resourceFunctionDocs.add(paramAPIDoc);
                 }
-
             }
         }
     }
