@@ -77,10 +77,10 @@ public class OpenAPIQueryParameterMapper {
     /**
      * Handle function query parameters for required parameters.
      */
-    public Parameter createQueryParameter(RequiredParameterNode queryParam) {
+    public Parameter createQueryParameter(RequiredParameterNode queryParam, String assignedAnnotation) {
         String queryParamName = unescapeIdentifier(queryParam.paramName().get().text());
         boolean isQuery = !queryParam.paramName().get().text().equals(Constants.PATH)
-                && queryParam.annotations().isEmpty();
+                && (queryParam.annotations().isEmpty() || assignedAnnotation.equals(Constants.HTTP_QUERY));
         if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode && isQuery) {
             QueryParameter queryParameter = new QueryParameter();
             queryParameter.setName(ConverterCommonUtils.unescapeIdentifier(queryParamName));
@@ -135,11 +135,11 @@ public class OpenAPIQueryParameterMapper {
     /**
      * Create OAS query parameter for default query parameters.
      */
-    public Parameter createQueryParameter(DefaultableParameterNode defaultableQueryParam) {
+    public Parameter createQueryParameter(DefaultableParameterNode defaultableQueryParam, String assignedAnnotation) {
 
         String queryParamName = defaultableQueryParam.paramName().get().text();
         boolean isQuery = !defaultableQueryParam.paramName().get().text().equals(Constants.PATH) &&
-                defaultableQueryParam.annotations().isEmpty();
+                (defaultableQueryParam.annotations().isEmpty() || assignedAnnotation.equals(Constants.HTTP_QUERY));
 
         QueryParameter queryParameter = new QueryParameter();
         if (defaultableQueryParam.typeName() instanceof BuiltinSimpleNameReferenceNode && isQuery) {

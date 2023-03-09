@@ -116,33 +116,32 @@ public class OpenAPIRequestBodyMapper {
     public void handlePayloadAnnotation(RequiredParameterNode payloadNode, Map<String, Schema> schema,
                                         AnnotationNode annotation, Map<String, String> apiDocs) {
 
-        if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD)) {
-            // Creating request body - required.
-            RequestBody bodyParameter = new RequestBody();
-            MappingConstructorExpressionNode mapMime = annotation.annotValue().orElse(null);
-            SeparatedNodeList<MappingFieldNode> fields = null;
-            // Add api doc to request body description
-            if (!apiDocs.isEmpty() && payloadNode.paramName().isPresent()
-                    && apiDocs.containsKey(payloadNode.paramName().get().text().trim())) {
-                bodyParameter.setDescription(apiDocs.get(payloadNode.paramName().get().text().trim()));
-            }
-            if (mapMime != null) {
-                fields = mapMime.fields();
-            }
+        // Creating request body - required.
+        RequestBody bodyParameter = new RequestBody();
+        MappingConstructorExpressionNode mapMime = annotation != null ?
+                annotation.annotValue().orElse(null) : null;
+        SeparatedNodeList<MappingFieldNode> fields = null;
+        // Add api doc to request body description
+        if (!apiDocs.isEmpty() && payloadNode.paramName().isPresent()
+                && apiDocs.containsKey(payloadNode.paramName().get().text().trim())) {
+            bodyParameter.setDescription(apiDocs.get(payloadNode.paramName().get().text().trim()));
+        }
+        if (mapMime != null) {
+            fields = mapMime.fields();
+        }
 
-            // Handle multiple mime type when attached with request payload annotation.
-            // ex: <pre> @http:Payload { mediaType:["application/json", "application/xml"] } Pet payload </pre>
-            if (fields != null && !fields.isEmpty()) {
-                List<String> mimeTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, MEDIA_TYPE, annotation,
-                        semanticModel);
-                RequestBody requestBody = new RequestBody();
-                for (String mimeType: mimeTypes) {
-                    createRequestBody(bodyParameter, payloadNode, schema, requestBody, mimeType);
-                }
-            }  else {
-                //TODO : fill with rest of media types
-                handleSinglePayloadType(payloadNode, schema, bodyParameter, customMediaType);
+        // Handle multiple mime type when attached with request payload annotation.
+        // ex: <pre> @http:Payload { mediaType:["application/json", "application/xml"] } Pet payload </pre>
+        if (fields != null && !fields.isEmpty()) {
+            List<String> mimeTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, MEDIA_TYPE, annotation,
+                    semanticModel);
+            RequestBody requestBody = new RequestBody();
+            for (String mimeType: mimeTypes) {
+                createRequestBody(bodyParameter, payloadNode, schema, requestBody, mimeType);
             }
+        }  else {
+            //TODO : fill with rest of media types
+            handleSinglePayloadType(payloadNode, schema, bodyParameter, customMediaType);
         }
     }
 

@@ -19,6 +19,7 @@
 package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
@@ -48,12 +49,17 @@ import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static io.ballerina.openapi.converter.Constants.HTTP_HEADER;
+import static io.ballerina.openapi.converter.Constants.HTTP_PAYLOAD;
+import static io.ballerina.openapi.converter.Constants.HTTP_QUERY;
 import static io.ballerina.openapi.converter.Constants.HTTP_REQUEST;
 import static io.ballerina.openapi.converter.Constants.WILD_CARD_CONTENT_KEY;
 import static io.ballerina.openapi.converter.Constants.WILD_CARD_SUMMARY;
@@ -63,6 +69,7 @@ import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractC
  * OpenAPIParameterMapper provides functionality for converting ballerina parameter to OAS parameter model.
  */
 public class OpenAPIParameterMapper {
+
     private final FunctionDefinitionNode functionDefinitionNode;
     private final OperationAdaptor operationAdaptor;
     private final Map<String, String> apidocs;
@@ -85,7 +92,40 @@ public class OpenAPIParameterMapper {
         this.semanticModel = semanticModel;
     }
 
-
+    private HashMap<String, String> sortParameters(SeparatedNodeList<ParameterNode> parameterList) {
+        HashMap<String, String> sortedParams = new HashMap<>();
+        for (ParameterNode parameterNode : parameterList) {
+            Optional<Symbol> paramSymbol = semanticModel.symbol(parameterNode);
+            NodeList<AnnotationNode> annotations = null;
+            String paramName = "";
+            if (parameterNode.kind() == SyntaxKind.REQUIRED_PARAM) {
+                RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
+                annotations = requiredParameterNode.annotations();
+                paramName = requiredParameterNode.paramName().isPresent() ?
+                        requiredParameterNode.paramName().get().text() : "";
+            } else if (parameterNode.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
+                DefaultableParameterNode defaultableParameterNode = (DefaultableParameterNode) parameterNode;
+                annotations = defaultableParameterNode.annotations();
+                paramName = defaultableParameterNode.paramName().isPresent() ?
+                        defaultableParameterNode.paramName().get().text() : "";
+            }
+            if (!paramName.isBlank()) {
+                if (annotations != null && !annotations.isEmpty()) {
+                    for (AnnotationNode annotation : annotations) {
+                        String annotationName = annotation.annotReference().toString().trim();
+                        if (annotationName.equals(HTTP_PAYLOAD) || annotationName.equals(HTTP_HEADER) ||
+                                annotationName.equals(HTTP_QUERY))  {
+                            sortedParams.put(paramName, annotationName);
+                        }
+                    }
+                } else if (paramSymbol.isPresent() && paramSymbol.get().getName().isPresent() &&
+                        paramSymbol.get().getName().get().equals("Payload")) {
+                    sortedParams.put(paramName, HTTP_PAYLOAD);
+                }
+            }
+        }
+        return sortedParams;
+    }
 
     /**
      * Create {@code Parameters} model for openAPI operation.
@@ -97,12 +137,16 @@ public class OpenAPIParameterMapper {
         createPathParameters(parameters, pathParams);
         // Set query parameters, headers and requestBody
         FunctionSignatureNode functionSignature = functionDefinitionNode.functionSignature();
+        // need to check the order of parameters is correct here
         SeparatedNodeList<ParameterNode> parameterList = functionSignature.parameters();
+        HashMap<String, String> annotatedParams = sortParameters(parameterList);
         for (ParameterNode parameterNode : parameterList) {
             OpenAPIQueryParameterMapper queryParameterMapper = new OpenAPIQueryParameterMapper(apidocs, components,
                     semanticModel);
             if (parameterNode.kind() == SyntaxKind.REQUIRED_PARAM) {
                 RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
+                // is there instance without param name. Ex:res types
+                boolean isAnnotated = annotatedParams.containsKey(requiredParameterNode.paramName().get().text());
                 // Handle query parameter
                 if (requiredParameterNode.typeName().kind() == SyntaxKind.QUALIFIED_NAME_REFERENCE) {
                     QualifiedNameReferenceNode referenceNode =
@@ -122,23 +166,28 @@ public class OpenAPIParameterMapper {
                         operationAdaptor.getOperation().setRequestBody(requestBody);
                     }
                 }
-                if (requiredParameterNode.typeName().kind() != SyntaxKind.QUALIFIED_NAME_REFERENCE &&
-                        requiredParameterNode.annotations().isEmpty()) {
-                    parameters.add(queryParameterMapper.createQueryParameter(requiredParameterNode));
+                if (requiredParameterNode.typeName().kind() != SyntaxKind.QUALIFIED_NAME_REFERENCE && !isAnnotated) {
+                    parameters.add(queryParameterMapper.createQueryParameter(requiredParameterNode, ""));
                 }
                 // Handle header, payload parameter
-                if (requiredParameterNode.typeName() instanceof TypeDescriptorNode &&
-                        !requiredParameterNode.annotations().isEmpty()) {
-                    handleAnnotationParameters(components, semanticModel, parameters, requiredParameterNode);
+                if (requiredParameterNode.typeName() instanceof TypeDescriptorNode && isAnnotated) {
+                    // TODO: need to check what happens when the key is not there
+                    String assignedAnnotation = annotatedParams.get(requiredParameterNode.paramName().get().text());
+                    handleAnnotationParameters(components, semanticModel, parameters, requiredParameterNode,
+                            assignedAnnotation, queryParameterMapper);
                 }
             } else if (parameterNode.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
                 DefaultableParameterNode defaultableParameterNode = (DefaultableParameterNode) parameterNode;
+                boolean isAnnotated = annotatedParams.containsKey(defaultableParameterNode.paramName().get().text());
                 // Handle header parameter
-                if (defaultableParameterNode.typeName() instanceof TypeDescriptorNode &&
-                        !defaultableParameterNode.annotations().isEmpty()) {
-                    parameters.addAll(handleDefaultableAnnotationParameters(defaultableParameterNode));
+                if (defaultableParameterNode.typeName() instanceof TypeDescriptorNode && isAnnotated) {
+                    String annotation = annotatedParams.get(defaultableParameterNode.paramName().get().text());
+                    parameters.addAll(handleDefaultableAnnotationParameters(defaultableParameterNode, annotation));
                 } else {
-                    parameters.add(queryParameterMapper.createQueryParameter(defaultableParameterNode));
+                    String assignedAnnotation = isAnnotated ?
+                            annotatedParams.get(defaultableParameterNode.paramName().get().text()) : "";
+                    parameters.add(queryParameterMapper.createQueryParameter(
+                            defaultableParameterNode, assignedAnnotation));
                 }
             }
         }
@@ -153,7 +202,7 @@ public class OpenAPIParameterMapper {
      * Map path parameter data to OAS path parameter.
      */
     private void createPathParameters(List<Parameter> parameters, NodeList<Node> pathParams) {
-        for (Node param: pathParams) {
+        for (Node param : pathParams) {
             if (param instanceof ResourcePathParameterNode) {
                 PathParameter pathParameterOAS = new PathParameter();
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) param;
@@ -189,15 +238,26 @@ public class OpenAPIParameterMapper {
     private void handleAnnotationParameters(Components components,
                                             SemanticModel semanticModel,
                                             List<Parameter> parameters,
-                                            RequiredParameterNode requiredParameterNode) {
+                                            RequiredParameterNode requiredParameterNode,
+                                            String assignedAnnotation,
+                                            OpenAPIQueryParameterMapper queryParameterMapper) {
 
         NodeList<AnnotationNode> annotations = requiredParameterNode.annotations();
-        for (AnnotationNode annotation: annotations) {
-            if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
+        List<AnnotationNode> relevantAnnotations = annotations.stream().filter(annotationNode ->
+                annotationNode.annotReference().toString().trim().equals(HTTP_HEADER) ||
+                        annotationNode.annotReference().toString().trim().equals(HTTP_PAYLOAD) ||
+                        annotationNode.annotReference().toString().trim().equals(HTTP_QUERY))
+                .collect(Collectors.toList());
+
+//        for (AnnotationNode annotation : annotations) {
+            if (assignedAnnotation.equals(Constants.HTTP_HEADER)) {
                 // Handle headers.
                 OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(apidocs);
                 parameters.addAll(openAPIHeaderMapper.setHeaderParameter(requiredParameterNode));
-            } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
+            } else if (assignedAnnotation.equals(Constants.HTTP_QUERY)) {
+                // Handle query parameter.
+                parameters.add(queryParameterMapper.createQueryParameter(requiredParameterNode, assignedAnnotation));
+            } else if ((assignedAnnotation.equals(Constants.HTTP_PAYLOAD)) &&
                     (!Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(
                             operationAdaptor.getHttpOperation()))) {
                 Map<String, Schema> schema = components.getSchemas();
@@ -205,32 +265,34 @@ public class OpenAPIParameterMapper {
                 Optional<String> customMediaType = extractCustomMediaType(functionDefinitionNode);
                 OpenAPIRequestBodyMapper openAPIRequestBodyMapper = customMediaType.map(
                         value -> new OpenAPIRequestBodyMapper(components,
-                        operationAdaptor, semanticModel, value)).orElse(new OpenAPIRequestBodyMapper(components,
+                                operationAdaptor, semanticModel, value)).orElse(new OpenAPIRequestBodyMapper(components,
                         operationAdaptor, semanticModel));
-                openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema, annotation, apidocs);
+                // assuming that there is only one such annotation
+                AnnotationNode annotationNode = relevantAnnotations.isEmpty() ? null : relevantAnnotations.get(0);
+                openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema,
+                        annotationNode, apidocs);
                 errors.addAll(openAPIRequestBodyMapper.getDiagnostics());
-            } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
+            } else if ((assignedAnnotation.equals(Constants.HTTP_PAYLOAD)) &&
                     (Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
+                // TODO : Check the error message
                 IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
-                        annotation.location());
+                        requiredParameterNode.location());
                 errors.add(error);
             }
-        }
+//        }
     }
 
     /**
      * This function for handle the payload and header parameters with annotation @http:Payload, @http:Header.
      */
-    private List<Parameter> handleDefaultableAnnotationParameters(DefaultableParameterNode defaultableParameterNode) {
+    private List<Parameter> handleDefaultableAnnotationParameters(DefaultableParameterNode defaultableParameterNode,
+                                                                  String assignedAnnotation) {
         List<Parameter> parameters = new ArrayList<>();
-        NodeList<AnnotationNode> annotations = defaultableParameterNode.annotations();
-        for (AnnotationNode annotation: annotations) {
-            if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
-                // Handle headers.
-                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(apidocs);
-                parameters = openAPIHeaderMapper.setHeaderParameter(defaultableParameterNode);
-            }
+        if (assignedAnnotation.equals(Constants.HTTP_HEADER)) {
+            // Handle headers.
+            OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(apidocs);
+            parameters = openAPIHeaderMapper.setHeaderParameter(defaultableParameterNode);
         }
         return parameters;
     }
