@@ -49,8 +49,6 @@ import io.ballerina.openapi.converter.service.OpenAPIServiceMapper;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Project;
 import io.ballerina.tools.diagnostics.Location;
-import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 
@@ -213,8 +211,7 @@ public class ServiceToOpenAPIConverterUtils {
                                         Set<ListenerDeclarationNode> endpoints, SemanticModel semanticModel,
                                         String openApiFileName, Path ballerinaFilePath) {
         // Filter listener endpoints.
-        // TODO: Filter endpoints by service add project
-        final TypeDefVisitor typeDefVisitor = new TypeDefVisitor();
+        final OASNodeVisitor typeDefVisitor = new OASNodeVisitor();
         // Travers every syntax tree and collect all the type definition nodes.
         project.currentPackage().moduleIds().forEach(moduleId -> {
             Module module = project.currentPackage().module(moduleId);
@@ -492,9 +489,9 @@ public class ServiceToOpenAPIConverterUtils {
     }
 
     /**
-     * Visitor to get the TypeDefinitionNode.
+     * Visitor to get the TypeDefinitionNode and ListenerDeclarationNodes.
      */
-    private static class TypeDefVisitor extends NodeVisitor {
+    private static class OASNodeVisitor extends NodeVisitor {
 
         List<TypeDefinitionNode> typeDefinitionNodes = new ArrayList<>();
         List<ListenerDeclarationNode> listenerDeclarationNodes = new ArrayList<>();

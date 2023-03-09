@@ -31,6 +31,7 @@ import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
+import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
@@ -73,6 +74,14 @@ public class OpenAPIEndpointMapper {
             for (ListenerDeclarationNode ep : endpoints) {
                 SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
                 for (ExpressionNode node : exprNodes) {
+                    if (node instanceof QualifiedNameReferenceNode) {
+                        QualifiedNameReferenceNode refNode = (QualifiedNameReferenceNode) node;
+                        if (refNode.identifier().text().trim().equals(ep.variableName().text().trim())) {
+                            String serviceBasePath = getServiceBasePath(service);
+                            Server server = extractServer(ep, serviceBasePath);
+                            servers.add(server);
+                        }
+                    }
                     if (node.toString().trim().equals(ep.variableName().text().trim())) {
                         String serviceBasePath = getServiceBasePath(service);
                         Server server = extractServer(ep, serviceBasePath);
