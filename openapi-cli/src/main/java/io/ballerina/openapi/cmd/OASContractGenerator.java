@@ -30,11 +30,13 @@ import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.ModuleId;
-import io.ballerina.projects.Package;
 import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.Project;
+import io.ballerina.projects.ProjectEnvironmentBuilder;
 import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
+import io.ballerina.projects.environment.Environment;
+import io.ballerina.projects.environment.EnvironmentBuilder;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 import java.io.IOException;
@@ -81,8 +83,13 @@ public class OASContractGenerator {
     public void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, String serviceName,
                                                   Boolean needJson) {
         // Load project instance for single ballerina file
-        project = ProjectLoader.loadProject(servicePath);
-        Package packageName = project.currentPackage();
+        String customBallerinaHome = System.getProperty("ballerina.home");
+        Path ballerinaHome = customBallerinaHome == null ? null : Path.of(customBallerinaHome);
+        Environment environment = EnvironmentBuilder.getBuilder().setBallerinaHome(ballerinaHome).build();
+        ProjectEnvironmentBuilder projectEnvironmentBuilder = ProjectEnvironmentBuilder.getBuilder(environment);
+        project = ProjectLoader.loadProject(servicePath, projectEnvironmentBuilder);
+        project.currentPackage().runCodeGenAndModifyPlugins();
+
         DocumentId docId;
         Document doc;
         if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
@@ -91,7 +98,7 @@ public class OASContractGenerator {
             doc = project.currentPackage().module(moduleId).document(docId);
         } else {
             // Take module instance for traversing the syntax tree
-            Module currentModule = packageName.getDefaultModule();
+            Module currentModule = project.currentPackage().getDefaultModule();
             Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
 
             docId = documentIterator.next();
