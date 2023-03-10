@@ -125,6 +125,25 @@ public class BallerinaToOpenAPITests {
         Assert.assertFalse(Files.exists(TEST_RESOURCE.resolve("query_openapi.yaml")));
     }
 
+    @Test(description = "Service is with non openapi annotation")
+    public void nonOpenAPIAnnotation() throws IOException, InterruptedException {
+        executeCommand("project_non_openapi_annotation/service.bal", "service_openapi.yaml",
+                "project_non_openapi_annotation/result.yaml");
+    }
+
+    @Test(description = "Service is with non openapi annotation and slash as base path")
+    public void nonOpenAPIAnnotationWithSlash() throws IOException, InterruptedException {
+        executeCommand("project_non_openapi_annotation_with_base_path/service.bal", "payload_openapi.yaml",
+                "project_non_openapi_annotation_with_base_path/result.yaml");
+    }
+
+    @Test(description = "Service is with non openapi annotation and without a base path")
+    public void nonOpenAPIAnnotationWithWithoutBasePath() throws IOException, InterruptedException {
+        executeCommand("project_non_openapi_annotation_without_base_path/service_file.bal",
+                "service_file_openapi.yaml",
+                "project_non_openapi_annotation_without_base_path/result.yaml");
+    }
+
     @AfterClass
     public void cleanUp() throws IOException {
         TestUtil.cleanDistribution();
