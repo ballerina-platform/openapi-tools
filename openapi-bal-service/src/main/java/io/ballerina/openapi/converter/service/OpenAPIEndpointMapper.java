@@ -70,11 +70,13 @@ public class OpenAPIEndpointMapper {
                               ServiceDeclarationNode service) {
         openAPI = extractServerForExpressionNode(openAPI, service.expressions(), service);
         List<Server> servers = openAPI.getServers();
+        //Handle ImplicitNewExpressionNode in listener
         if (!endpoints.isEmpty()) {
             for (ListenerDeclarationNode ep : endpoints) {
                 SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
                 for (ExpressionNode node : exprNodes) {
                     if (node instanceof QualifiedNameReferenceNode) {
+                        //Handle QualifiedNameReferenceNode in listener
                         QualifiedNameReferenceNode refNode = (QualifiedNameReferenceNode) node;
                         if (refNode.identifier().text().trim().equals(ep.variableName().text().trim())) {
                             String serviceBasePath = getServiceBasePath(service);
@@ -146,7 +148,7 @@ public class OpenAPIEndpointMapper {
         return list;
     }
 
-    // Function for handle both ExplicitNewExpressionNode and ImplicitNewExpressionNode in listener.
+    // Function to handle ExplicitNewExpressionNode in listener.
     private OpenAPI extractServerForExpressionNode(OpenAPI openAPI, SeparatedNodeList<ExpressionNode> bTypeExplicit,
                                                                     ServiceDeclarationNode service) {
         String serviceBasePath = getServiceBasePath(service);
@@ -156,11 +158,6 @@ public class OpenAPIEndpointMapper {
             if (expressionNode.kind().equals(SyntaxKind.EXPLICIT_NEW_EXPRESSION)) {
                 ExplicitNewExpressionNode explicit = (ExplicitNewExpressionNode) expressionNode;
                 list = Optional.ofNullable(explicit.parenthesizedArgList());
-                Server server = generateServer(serviceBasePath, list);
-                servers.add(server);
-            } else if (expressionNode.kind().equals(SyntaxKind.IMPLICIT_NEW_EXPRESSION)) {
-                ImplicitNewExpressionNode implicit = (ImplicitNewExpressionNode) expressionNode;
-                list = implicit.parenthesizedArgList();
                 Server server = generateServer(serviceBasePath, list);
                 servers.add(server);
             }

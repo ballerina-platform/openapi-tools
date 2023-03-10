@@ -26,6 +26,7 @@ import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.openapi.converter.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.converter.model.OASResult;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.openapi.extension.Constants;
@@ -48,6 +49,7 @@ import java.util.stream.Collectors;
 
 import static io.ballerina.openapi.converter.Constants.SLASH;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.normalizeTitle;
+import static io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils.collectListeners;
 import static io.ballerina.openapi.extension.context.OpenApiDocContextHandler.getContextHandler;
 import static io.ballerina.openapi.extension.doc.DocGenerationUtils.getDiagnostics;
 
@@ -157,8 +159,15 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
         String targetFile = String.format(FILE_NAME_FORMAT, serviceId);
         ModulePartNode modulePartNode = config.getSyntaxTree().rootNode();
         Set<ListenerDeclarationNode> listenerNodes = extractListenerNodes(modulePartNode);
-        OASResult oasResult = ServiceToOpenAPIConverterUtils.generateOAS(project,
-                config.getServiceNode(), listenerNodes, config.getSemanticModel(), targetFile, null);
+        collectListeners(project, listenerNodes);
+        OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder = new
+                OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
+        builder.setServiceDeclarationNode(config.getServiceNode())
+                .setEndpoints(listenerNodes)
+                .setSemanticModel(config.getSemanticModel())
+                .setOpenApiFileName(targetFile)
+                .setBallerinaFilePath(null);
+        OASResult oasResult = ServiceToOpenAPIConverterUtils.generateOAS(builder.build());
         Optional<OpenAPI> openApiOpt = oasResult.getOpenAPI();
         if (!oasResult.getDiagnostics().isEmpty() || openApiOpt.isEmpty()) {
             OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;

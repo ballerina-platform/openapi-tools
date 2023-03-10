@@ -28,6 +28,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
+import io.ballerina.openapi.converter.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.converter.model.OASResult;
 import io.ballerina.openapi.converter.service.OpenAPIEndpointMapper;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
@@ -63,6 +64,7 @@ import static io.ballerina.openapi.converter.utils.CodegenUtils.writeFile;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.containErrors;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getNormalizedFileName;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.isHttpService;
+import static io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils.collectListeners;
 
 /**
  * SyntaxNodeAnalyzer for getting all service node.
@@ -104,8 +106,13 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
             Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
             if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
                 extractListenersAndServiceNodes(syntaxTree.rootNode(), endpoints, services, semanticModel);
-                OASResult oasResult = ServiceToOpenAPIConverterUtils.generateOAS(project, serviceNode, endpoints,
-                        semanticModel, services.get(serviceSymbol.get().hashCode()), inputPath);
+                collectListeners(project, endpoints);
+                OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder =
+                        new OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
+                builder.setServiceDeclarationNode(serviceNode).setEndpoints(endpoints).setSemanticModel(semanticModel)
+                        .setOpenApiFileName(services.get(serviceSymbol.get().hashCode()))
+                        .setBallerinaFilePath(inputPath);
+                OASResult oasResult = ServiceToOpenAPIConverterUtils.generateOAS(builder.build());
                 oasResult.setServiceName(constructFileName(syntaxTree, services, serviceSymbol.get()));
                 writeOpenAPIYaml(outPath, oasResult, diagnostics);
             }
