@@ -18,6 +18,8 @@
 
 package io.ballerina.openapi.generators.openapi;
 
+import io.ballerina.openapi.cmd.OASContractGenerator;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -61,5 +63,16 @@ public class ParameterAnnotationTests {
         Path ballerinaFilePath = RES_DIR.resolve("parameter_annotation/annotated_query.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath,
                 "parameter_annotation/annotated_query.yaml");
+    }
+
+    @Test(description = "Test OpenAPI generation when invalid parameters")
+    public void testInvalidParameters() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("parameter_annotation/invalid_payload.bal");
+        Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
+        OASContractGenerator openApiConverter = new OASContractGenerator();
+        openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
+        Assert.assertTrue(Files.notExists(tempDir.resolve("payloadV_openapi.yaml")),
+                "OpenAPI file is generated for a bal file with errors due to invalid " +
+                        "resource function parameters.");
     }
 }

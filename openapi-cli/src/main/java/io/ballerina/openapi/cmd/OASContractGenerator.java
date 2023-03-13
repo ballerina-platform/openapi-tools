@@ -26,6 +26,7 @@ import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.model.OASResult;
 import io.ballerina.openapi.converter.utils.CodegenUtils;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
+import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -81,7 +82,9 @@ public class OASContractGenerator {
                                                   Boolean needJson) {
         // Load project instance for single ballerina file
         project = ProjectLoader.loadProject(servicePath);
-        project.currentPackage().runCodeGenAndModifyPlugins();
+        DiagnosticResult diagnosticsFromCodeGenAndModify = project.currentPackage().runCodeGenAndModifyPlugins();
+        boolean hasErrorsFromCodeGenAndModify = diagnosticsFromCodeGenAndModify.diagnostics().stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         DocumentId docId;
         Document doc;
         if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
@@ -101,10 +104,10 @@ public class OASContractGenerator {
 
         syntaxTree = doc.syntaxTree();
         PackageCompilation compilation = project.currentPackage().getCompilation();
-        boolean hasErrors = compilation.diagnosticResult()
+        boolean hasCompilationErrors = compilation.diagnosticResult()
                 .diagnostics().stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
-        if (hasErrors) {
+        if (hasCompilationErrors || hasErrorsFromCodeGenAndModify) {
             // if there are any compilation errors, do not proceed
             return;
         }
