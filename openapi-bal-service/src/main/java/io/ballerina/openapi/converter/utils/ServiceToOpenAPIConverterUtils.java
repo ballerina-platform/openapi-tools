@@ -219,17 +219,14 @@ public class ServiceToOpenAPIConverterUtils {
         }
     }
 
-//    /**
-//     * Provides an instance of {@code OASResult}, which contains the generated contract as well as
-//     * all the diagnostics information.
-//     *
-//     * @param serviceDefinition     Service Node related to ballerina service
-//     * @param endpoints             Listener endpoints that bind to service
-//     * @param semanticModel         Semantic model for given ballerina file
-//     * @param openApiFileName       OpenAPI file name
-//     * @param ballerinaFilePath     Input ballerina file Path
-//     * @return {@code OASResult}
-//     */
+    /**
+     * Provides an instance of {@code OASResult}, which contains the generated contract as well as
+     * all the diagnostics information.
+     *
+     * @param oasGenerationMetaInfo    Includes the service definition node, endpoints, semantic model, openapi file
+     *                                 name and ballerina file path
+     * @return {@code OASResult}
+     */
     public static OASResult generateOAS(OASGenerationMetaInfo oasGenerationMetaInfo) {
         // 01.Fill the openAPI info section
         return ensembleOASResult(oasGenerationMetaInfo.getServiceDeclarationNode(),
