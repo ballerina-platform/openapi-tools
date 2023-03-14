@@ -49,6 +49,7 @@ import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.Union
 import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.MapSchema;
@@ -255,8 +256,9 @@ public class TypeGeneratorUtils {
                 defaultValueToken = AbstractNodeFactory.createIdentifierToken("\"" +
                         fieldSchema.getDefault().toString() + "\"");
             }
-        } else if (!defaultValue.matches("^[0-9]*$") &&
-                !(defaultValue.startsWith("[") && defaultValue.endsWith("]"))) {
+        } else if (!defaultValue.matches("^[0-9]*$") && !defaultValue.matches("^(\\d*\\.)?\\d+$")
+                && !(defaultValue.startsWith("[") && defaultValue.endsWith("]")) &&
+                !(fieldSchema instanceof BooleanSchema)) {
             //This regex was added due to avoid adding quotes for default values which are numbers and array values.
             //Ex: default: 123
             defaultValueToken = AbstractNodeFactory.createIdentifierToken("\"" +
