@@ -96,13 +96,9 @@ import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
  */
 public class RecordTypeGenerator extends TypeGenerator {
 
-    private final List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
     public static final PrintStream OUT_STREAM = System.err;
     public RecordTypeGenerator(Schema schema, String typeName) {
         super(schema, typeName);
-    }
-    public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
-        return typeDefinitionNodeList;
     }
 
     /**
@@ -255,8 +251,8 @@ public class RecordTypeGenerator extends TypeGenerator {
             TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(fieldSchema, fieldNameStr, recordName);
             TypeDescriptorNode fieldTypeName = typeGenerator.generateTypeDescriptorNode();
             if (typeGenerator instanceof ArrayTypeGenerator &&
-                    ((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint() != null) {
-                typeDefinitionNodeList.add(((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint());
+                    !((ArrayTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
+                typeDefinitionNodeList.addAll(((ArrayTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
             } else if (typeGenerator instanceof UnionTypeGenerator &&
                     !((UnionTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
                 List<TypeDefinitionNode> newConstraintNode =
