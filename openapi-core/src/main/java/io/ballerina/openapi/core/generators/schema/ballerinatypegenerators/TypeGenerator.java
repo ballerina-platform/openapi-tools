@@ -28,6 +28,7 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.media.Schema;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
@@ -48,10 +49,15 @@ public abstract class TypeGenerator {
 
     Schema schema;
     String typeName;
+    final List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
 
     public TypeGenerator(Schema schema, String typeName) {
         this.schema = schema;
         this.typeName = typeName;
+    }
+
+    public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
+        return typeDefinitionNodeList;
     }
 
     /**
