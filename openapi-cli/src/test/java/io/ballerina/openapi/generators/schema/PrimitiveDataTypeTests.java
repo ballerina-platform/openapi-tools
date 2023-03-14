@@ -89,6 +89,16 @@ public class PrimitiveDataTypeTests {
                 syntaxTree);
     }
 
+    @Test(description = "When the component schema `type: string, format: binary` field")
+    public void generateSchemaForBinary() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/string_binary_type.yaml");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/string_binary_type.bal",
+                syntaxTree);
+    }
+
     @AfterTest
     public void clean() {
         System.setErr(null);
