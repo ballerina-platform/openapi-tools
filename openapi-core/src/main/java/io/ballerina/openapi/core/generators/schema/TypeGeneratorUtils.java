@@ -245,19 +245,26 @@ public class TypeGeneratorUtils {
                                                                                       TypeDescriptorNode fieldTypeName,
                                                                                       MetadataNode metadataNode) {
 
-        Token defaultValue;
+        Token defaultValueToken;
+        String defaultValue = fieldSchema.getDefault().toString().trim();
         if (fieldSchema instanceof StringSchema) {
-            if (fieldSchema.getDefault().toString().trim().equals("\"")) {
-                defaultValue = AbstractNodeFactory.createIdentifierToken("\"" + "\\" +
+            if (defaultValue.equals("\"")) {
+                defaultValueToken = AbstractNodeFactory.createIdentifierToken("\"" + "\\" +
                         fieldSchema.getDefault().toString() + "\"");
             } else {
-                defaultValue = AbstractNodeFactory.createIdentifierToken("\"" +
+                defaultValueToken = AbstractNodeFactory.createIdentifierToken("\"" +
                         fieldSchema.getDefault().toString() + "\"");
             }
+        } else if (!defaultValue.matches("^[0-9]*$") &&
+                !(defaultValue.startsWith("[") && defaultValue.endsWith("]"))) {
+            //This regex was added due to avoid adding quotes for default values which are numbers and array values.
+            //Ex: default: 123
+            defaultValueToken = AbstractNodeFactory.createIdentifierToken("\"" +
+                    fieldSchema.getDefault().toString() + "\"");
         } else {
-            defaultValue = AbstractNodeFactory.createIdentifierToken(fieldSchema.getDefault().toString());
+            defaultValueToken = AbstractNodeFactory.createIdentifierToken(fieldSchema.getDefault().toString());
         }
-        ExpressionNode expressionNode = createRequiredExpressionNode(defaultValue);
+        ExpressionNode expressionNode = createRequiredExpressionNode(defaultValueToken);
         return NodeFactory.createRecordFieldWithDefaultValueNode
                 (metadataNode, null, fieldTypeName, fieldName, createToken(EQUAL_TOKEN),
                         expressionNode, createToken(SEMICOLON_TOKEN));
