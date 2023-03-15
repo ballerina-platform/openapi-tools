@@ -250,6 +250,9 @@ public class RecordTypeGenerator extends TypeGenerator {
             IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldNameStr);
             TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(fieldSchema, fieldNameStr, recordName);
             TypeDescriptorNode fieldTypeName = typeGenerator.generateTypeDescriptorNode();
+            if (typeGenerator instanceof RecordTypeGenerator) {
+                fieldTypeName = TypeGeneratorUtils.getNullableType(fieldSchema, fieldTypeName);
+            }
             if (typeGenerator instanceof ArrayTypeGenerator &&
                     !((ArrayTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
                 typeDefinitionNodeList.addAll(((ArrayTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
