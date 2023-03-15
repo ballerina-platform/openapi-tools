@@ -22,6 +22,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.SymbolKind;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.ChildNodeEntry;
@@ -31,6 +32,7 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
 import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Minutiae;
 import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
@@ -131,6 +133,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML_CONTEN
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.CLOSE_CURLY_BRACE;
 import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_PARAM_COMMENT;
+import static io.ballerina.openapi.core.GeneratorConstants.CONSTRAINT;
 import static io.ballerina.openapi.core.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.core.GeneratorConstants.GET;
 import static io.ballerina.openapi.core.GeneratorConstants.HEAD;
@@ -841,7 +844,51 @@ public class GeneratorUtils {
             tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);
             unusedTypeDefinitionNameList = getUnusedTypeDefinitionNameList(tempSourceFiles);
         }
+        ModulePartNode rootNode = schemaSyntaxTree.rootNode();
+        NodeList<ImportDeclarationNode> imports = rootNode.imports();
+        imports = removeUnusedImports(rootNode, imports);
+
+        ModulePartNode modiedModulePartNode = rootNode.modify(imports, rootNode.members(), rootNode.eofToken());
+        schemaSyntaxTree = schemaSyntaxTree.modifyWith(modiedModulePartNode);
+        schemaContent = Formatter.format(schemaSyntaxTree).toString();
         return schemaContent;
+    }
+
+    private static NodeList<ImportDeclarationNode> removeUnusedImports(ModulePartNode rootNode,
+                                                                       NodeList<ImportDeclarationNode> imports) {
+        //TODO: This function can be extended to check all the unused imports, for this time only handle constraint
+        // imports
+        boolean hasConstraint = false;
+        NodeList<ModuleMemberDeclarationNode> members = rootNode.members();
+        for (ModuleMemberDeclarationNode member:members) {
+            if (member.kind().equals(SyntaxKind.TYPE_DEFINITION)) {
+                TypeDefinitionNode typeDefNode = (TypeDefinitionNode) member;
+                if (typeDefNode.metadata().isPresent()) {
+                    MetadataNode metadata = typeDefNode.metadata().get();
+                    for (AnnotationNode annotation : metadata.annotations()) {
+                        String annotationRef = annotation.annotReference().toString();
+                        if (annotationRef.equals(CONSTRAINT)) {
+                            hasConstraint = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (hasConstraint) {
+                break;
+            }
+        }
+        if (!hasConstraint) {
+            for (ImportDeclarationNode importNode: imports) {
+                if (importNode.orgName().isPresent()) {
+                    if (importNode.orgName().get().toString().equals("ballerina/") &&
+                            importNode.moduleName().get(0).text().equals(CONSTRAINT)) {
+                        imports = imports.remove(importNode);
+                    }
+                }
+            }
+        }
+        return imports;
     }
 
     private static List<String> getUnusedTypeDefinitionNameList(Map<String, String> srcFiles) throws IOException {
