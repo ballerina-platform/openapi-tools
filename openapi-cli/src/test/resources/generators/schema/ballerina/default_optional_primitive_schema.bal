@@ -3,4 +3,8 @@ public type Pet record {|
     string name;
     int tagNumber = 10;
     string 'type?;
+    boolean isTrue = true;
+    decimal decimalValue = 0.05;
+    float floatValue = 11.5;
+    string stringDecimalValue = "00.05";
 |};
