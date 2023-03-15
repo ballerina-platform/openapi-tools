@@ -158,7 +158,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     public void testForRemovedUnusedConstraintImport() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("non_constraint_import.yaml"));
         String[] args = {"--input", petstoreYaml.toString(),
-                "--mode", "client", "--tags","pets", "-o", this.tmpDir.toString()};
+                "--mode", "client", "--tags", "pets", "-o", this.tmpDir.toString()};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
@@ -181,12 +181,8 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             }
             generatedSchema = (generatedSchema.trim()).replaceAll("\\s+", "");
             expectedSchemaContent = (expectedSchemaContent.trim()).replaceAll("\\s+", "");
-            if (expectedSchemaContent.equals(generatedSchema)) {
-                Assert.assertTrue(true);
-            } else {
-                Assert.fail("Expected content and actual generated content is mismatched for: "
-                        + petstoreYaml.toString());
-            }
+            Assert.assertEquals(generatedSchema, expectedSchemaContent,
+                    "Expected content and actual generated content is mismatched for: " + petstoreYaml);
             deleteGeneratedFiles(false);
         } else {
             Assert.fail("Type generation failed. : " + readOutput(true));
