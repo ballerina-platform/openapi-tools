@@ -1,4 +1,4 @@
-import  ballerina/http;
+import ballerina/http;
 
 # refComponent
 public isolated client class Client {
@@ -43,7 +43,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        http:Response response = check self.clientEp-> post(resourcePath, request);
+        http:Response response = check self.clientEp->post(resourcePath, request);
         return response;
     }
 }
