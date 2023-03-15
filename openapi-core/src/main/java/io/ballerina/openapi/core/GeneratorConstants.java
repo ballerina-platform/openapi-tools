@@ -361,4 +361,6 @@ public class GeneratorConstants {
     public static final String RETURNS = "returns";
     public static final String ANYDATA = "anydata";
     public static final String RESPONSE_RECORD_NAME = "Response";
+    public static final String SERVICE_TYPE_NAME = "OASServiceType";
+
 }

@@ -51,7 +51,7 @@ public class OneOfDataTypeTests {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
-        GeneratorMetaData.createInstance(openAPI, false);
+        GeneratorMetaData.createInstance(openAPI, false, false);
         UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error");
         String oneOfUnionType = unionTypeGenerator.generateTypeDescriptorNode().toString().trim();
 
@@ -64,7 +64,7 @@ public class OneOfDataTypeTests {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
-        GeneratorMetaData.createInstance(openAPI, false);
+        GeneratorMetaData.createInstance(openAPI, false, false);
         UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error");
         String oneOfUnionType = unionTypeGenerator.generateTypeDescriptorNode().toString().trim();
         Assert.assertEquals(oneOfUnionType, "Activity|Profile01");
@@ -75,7 +75,7 @@ public class OneOfDataTypeTests {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario12.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
-        GeneratorMetaData.createInstance(openAPI, true);
+        GeneratorMetaData.createInstance(openAPI, true, false);
         TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, "Error", null);
         String oneOfUnionType = typeGenerator.generateTypeDescriptorNode().toString().trim();
         Assert.assertEquals(oneOfUnionType, "Activity|Profile?");
