@@ -1,5 +1,5 @@
 # Test description
-public type Pet record {|
+public type Pet record {
     # tests
     int id;
     # tests
@@ -8,4 +8,4 @@ public type Pet record {|
     decimal tag?;
     # tests
     string 'type?;
-|};
+};

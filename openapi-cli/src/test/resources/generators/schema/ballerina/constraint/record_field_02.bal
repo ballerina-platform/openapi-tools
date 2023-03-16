@@ -12,7 +12,7 @@ public type TaxratesanyofarrayItemsNull int|string;
 
 public type Address string;
 
-public type Person record {|
+public type Person record {
     @constraint:String {maxLength: 14}
     string name?;
     @constraint:Array {maxLength: 5}
@@ -34,4 +34,4 @@ public type Person record {|
     (string|int)[]|string tax_rates_oneOF_array?;
     # scenario 04 - field with a anyOf type array items has anyOf.
     (int|string)[]|int tax_rates_anyOf_array?;
-|};
+};
