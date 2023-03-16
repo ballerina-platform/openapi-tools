@@ -56,7 +56,7 @@ public type ProxyConfig record {|
     string password = "";
 |};
 
-public type Pet record {|
+public type Pet record {
     string name?;
     string owned_by?;
-|};
+};
