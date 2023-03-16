@@ -40,6 +40,7 @@ public class Constants {
     public static final String PATH = "path";
     public static final String BODY = "body";
     public static final String HTTP_PAYLOAD = "http:Payload";
+    public static final String HTTP_QUERY = "http:Query";
     public static final String HTTP = "http";
     public static final String BALLERINA = "ballerina";
     public static final String TYPEREFERENCE = "typeReference";
