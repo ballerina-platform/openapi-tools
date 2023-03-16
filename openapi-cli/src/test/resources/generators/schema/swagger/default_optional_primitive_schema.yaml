@@ -68,3 +68,16 @@ components:
           default: 10
         type:
           type: string
+        isTrue:
+          type: boolean
+          default: true
+        decimalValue:
+          type: number
+          default: 00.05
+        floatValue:
+          type: number
+          format: float
+          default: 11.5
+        stringDecimalValue:
+          type: string
+          default: "00.05"

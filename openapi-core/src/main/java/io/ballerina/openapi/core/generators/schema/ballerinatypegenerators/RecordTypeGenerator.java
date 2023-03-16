@@ -95,13 +95,9 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
  */
 public class RecordTypeGenerator extends TypeGenerator {
 
-    private final List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
     public static final PrintStream OUT_STREAM = System.err;
     public RecordTypeGenerator(Schema schema, String typeName) {
         super(schema, typeName);
-    }
-    public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
-        return typeDefinitionNodeList;
     }
 
     /**
@@ -249,9 +245,12 @@ public class RecordTypeGenerator extends TypeGenerator {
             IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldNameStr);
             TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(fieldSchema, fieldNameStr, recordName);
             TypeDescriptorNode fieldTypeName = typeGenerator.generateTypeDescriptorNode();
+            if (typeGenerator instanceof RecordTypeGenerator) {
+                fieldTypeName = TypeGeneratorUtils.getNullableType(fieldSchema, fieldTypeName);
+            }
             if (typeGenerator instanceof ArrayTypeGenerator &&
-                    ((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint() != null) {
-                typeDefinitionNodeList.add(((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint());
+                    !((ArrayTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
+                typeDefinitionNodeList.addAll(((ArrayTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
             } else if (typeGenerator instanceof UnionTypeGenerator &&
                     !((UnionTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
                 List<TypeDefinitionNode> newConstraintNode =
