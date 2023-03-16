@@ -1,7 +1,7 @@
 public type ListObject record {
 };
 
-public type UserPlayListDetails record {|
+public type UserPlayListDetails record {
     # A link to the Web API endpoint returning the full result of the request
     string? href= ();
     # The requested data.
@@ -15,4 +15,4 @@ public type UserPlayListDetails record {|
     # URL to the previous page of items. ( `null` if none) //anydata
     anydata previous?;
     ListObject total?;
-|};
+};

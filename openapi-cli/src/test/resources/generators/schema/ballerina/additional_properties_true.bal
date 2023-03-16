@@ -27,16 +27,16 @@ public type User07 record {|
 |};
 
 # Mock record
-public type User record {|
+public type User record {
     string? name = ();
     int? age = ();
-|};
+};
 
 # Additional properties with object with property fields
 public type User08 record {|
     string? name = ();
     int? id = ();
-    record {|string? country = (); string? state = ();|}?...;
+    record {string? country = (); string? state = ();}?...;
 |};
 
 # Additional properties with object with additional fields
@@ -83,16 +83,16 @@ public type User13 record {
 };
 
 # Without additional properties
-public type User03 record {|
+public type User03 record {
     string? name = ();
     int? id = ();
-|};
+};
 
 # Additional properties with object with additional fields type with inline object
 public type User14 record {|
     string? name = ();
     int? id = ();
-    record {|record {|string? name = (); string? place = ();|}?...;|}?...;
+    record {|record {string? name = (); string? place = ();}?...;|}?...;
 |};
 
 # Additional properties with type string

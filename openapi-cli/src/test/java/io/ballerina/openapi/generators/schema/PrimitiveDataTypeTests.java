@@ -73,8 +73,8 @@ public class PrimitiveDataTypeTests {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        String expected = "public type Pet record {| #this is missing dataType anydata id; string name; decimal tag?;" +
-                " string 'type?;|};";
+        String expected = "public type Pet record { #this is missing dataType anydata id; string name; decimal tag?;" +
+                " string 'type?;};";
         Assert.assertTrue(syntaxTree.toString().trim().replaceAll("\\s+", "").
                 contains(expected.trim().replaceAll("\\s+", "")));
     }

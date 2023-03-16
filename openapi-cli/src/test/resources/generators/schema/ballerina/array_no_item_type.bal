@@ -1,8 +1,8 @@
-public type Address record {|
+public type Address record {
     int streetNo?;
     anydata[] street?;
     string country?;
-|};
+};
 
 public type UserAddress anydata[];
 
