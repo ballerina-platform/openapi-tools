@@ -15,22 +15,22 @@ public type Nestedarray02examplesitemsarrayItemsString string;
 public type NoconstraintExamplesItemsArray int[];
 
 # Every array items has constraint validation
-public type NestedArray record {|
+public type NestedArray record {
     string name?;
     @constraint:Array {maxLength: 200, minLength: 2}
     NestedarrayExamplesItemsArray[] examples?;
-|};
+};
 
 # Some array items have constraint
-public type NestedArray02 record {|
+public type NestedArray02 record {
     string name?;
     @constraint:Array {maxLength: 200, minLength: 2}
     Nestedarray02ExamplesItemsArray[] examples?;
-|};
+};
 
 # Last array item hasn't constraint values
-public type NoConstraint record {|
+public type NoConstraint record {
     string name?;
     @constraint:Array {maxLength: 200, minLength: 2}
     NoconstraintExamplesItemsArray[] examples?;
-|};
+};

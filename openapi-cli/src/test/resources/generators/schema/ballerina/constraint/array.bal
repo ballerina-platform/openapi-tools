@@ -15,7 +15,7 @@ public type PersonLimitItemsInteger int;
 @constraint:Array {maxLength: 5, minLength: 2}
 public type Hobby HobbyItemsString[];
 
-public type Person record {|
+public type Person record {
     Hobby hobby?;
     @constraint:Array {maxLength: 5}
     PersonDetailsItemsString[] Details?;
@@ -23,4 +23,4 @@ public type Person record {|
     PersonFeeItemsNumber[] fee?;
     # The maximum number of items in the response (as set in the query or by default).
     PersonLimitItemsInteger[] 'limit?;
-|};
+};

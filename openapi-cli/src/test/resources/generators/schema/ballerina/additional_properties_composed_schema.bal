@@ -19,7 +19,7 @@ public type User07 record {|
     *Pet;
     string? name = ();
     int? id = ();
-    record {|string? country = (); string? state = ();|}?...;
+    record {string? country = (); string? state = ();}?...;
 |};
 
 # Reference has additional properties.
@@ -46,11 +46,11 @@ public type Pet02 record {|
 |};
 
 # Without any additional field it maps to closed record.
-public type User01 record {|
+public type User01 record {
     *Pet;
     string? name = ();
     int? id = ();
-|};
+};
 
 # Additional properties with `true` enable
 public type User02 record {
@@ -60,10 +60,10 @@ public type User02 record {
 };
 
 # Mock record
-public type Pet record {|
+public type Pet record {
     string? name = ();
     int? age = ();
-|};
+};
 
 # Additional properties with {}
 public type User03 record {
