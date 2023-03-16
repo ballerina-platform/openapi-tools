@@ -220,8 +220,8 @@ public class BallerinaTypesGenerator {
                 typeGenerator.generateTypeDefinitionNode(typeNameToken, schemaDocs, typeAnnotations);
 
         if (typeGenerator instanceof ArrayTypeGenerator &&
-                ((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint() != null) {
-            typeDefinitionNodeList.add(((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint());
+                !((ArrayTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
+            typeDefinitionNodeList.addAll(((ArrayTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
         } else if (typeGenerator instanceof RecordTypeGenerator &&
                 !((RecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
             removeDuplicateNode(((RecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList());

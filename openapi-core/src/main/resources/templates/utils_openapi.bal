@@ -251,17 +251,22 @@ isolated function getMapForHeaders(map<any> headerParam) returns map<string|stri
     return headerMap;
 }
 
-isolated function createBodyParts(record {|anydata...; |} anyRecord, map<Encoding> encodingMap = {})
-returns mime:Entity[]|error {
+isolated function createBodyParts(record {|anydata...;|} anyRecord, map<Encoding> encodingMap = {}) returns mime:Entity[]|error {
     mime:Entity[] entities = [];
     foreach [string, anydata] [key, value] in anyRecord.entries() {
-       Encoding encodingData = encodingMap.hasKey(key) ? encodingMap.get(key) : {};
+        Encoding encodingData = encodingMap.hasKey(key) ? encodingMap.get(key) : {};
         mime:Entity entity = new mime:Entity();
-        if value is byte[] {
+        if value is record {byte[] fileContent; string fileName;} {
+            entity.setContentDisposition(mime:getContentDispositionObject(string `form-data; name=${key};  filename=${value.fileName}`));
+            entity.setByteArray(value.fileContent);
+        } else if value is byte[] {
+            entity.setContentDisposition(mime:getContentDispositionObject(string `form-data; name=${key};`));
             entity.setByteArray(value);
         } else if value is SimpleBasicType|SimpleBasicType[] {
+            entity.setContentDisposition(mime:getContentDispositionObject(string `form-data; name=${key};`));
             entity.setText(value.toString());
         } else if value is record {}|record {}[] {
+            entity.setContentDisposition(mime:getContentDispositionObject(string `form-data; name=${key};`));
             entity.setJson(value.toJson());
         }
         if (encodingData?.contentType is string) {

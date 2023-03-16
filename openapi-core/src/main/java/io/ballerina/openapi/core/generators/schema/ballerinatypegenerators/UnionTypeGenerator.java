@@ -19,7 +19,6 @@ package io.ballerina.openapi.core.generators.schema.ballerinatypegenerators;
 
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
@@ -64,12 +63,6 @@ public class UnionTypeGenerator extends TypeGenerator {
         super(schema, typeName);
     }
 
-    private final List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
-
-    public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
-        return typeDefinitionNodeList;
-    }
-
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
 
@@ -106,10 +99,8 @@ public class UnionTypeGenerator extends TypeGenerator {
             }
             typeDescriptorNodes.add(typeDescNode);
             if (typeGenerator instanceof ArrayTypeGenerator &&
-                    ((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint() != null) {
-                TypeDefinitionNode arrayItemWithConstraint =
-                        ((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint();
-                typeDefinitionNodeList.add(arrayItemWithConstraint);
+                    !((ArrayTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
+                typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
             }
         }
 
