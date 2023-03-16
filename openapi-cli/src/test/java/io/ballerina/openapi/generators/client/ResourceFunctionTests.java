@@ -22,6 +22,7 @@ import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -87,6 +88,20 @@ public class ResourceFunctionTests {
     public void generateForRequestBody() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/request_body.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/request_body.bal");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
+    @Test(description = "Generate Client for reference path parameters")
+    public void generateReferenceResolvePath() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RESDIR.resolve("swagger/reference_path.yaml");
+        Path expectedPath = RESDIR.resolve("ballerina/reference_path.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
