@@ -189,7 +189,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
     }
 
-    @Test
+    @Test(description = "This test for checking the constraint import when the type uses the constraint")
     public void testWithConstraintImport() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("constraint_import.yaml"));
         String[] args = {"--input", petstoreYaml.toString(),
@@ -223,6 +223,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             Assert.fail("Type generation failed. : " + readOutput(true));
         }
     }
+
     @Test(description = "Test openapi to ballerina generation with license headers")
     public void testGenerationWithLicenseHeaders() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
