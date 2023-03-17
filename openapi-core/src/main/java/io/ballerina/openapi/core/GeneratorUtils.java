@@ -869,12 +869,12 @@ public class GeneratorUtils {
                 if (typeDefNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
                     RecordTypeDescriptorNode record = (RecordTypeDescriptorNode) typeDefNode.typeDescriptor();
                     NodeList<Node> fields = record.fields();
-                    //Travers record fields to check constraint
+                    //Traverse record fields to check for constraints
                     for (Node node: fields) {
                         if (node instanceof RecordFieldNode) {
                             RecordFieldNode recField = (RecordFieldNode) node;
                             if (recField.metadata().isPresent()) {
-                                hasConstraint = traversAnnotationNode(recField.metadata(), hasConstraint);
+                                hasConstraint = traverseAnnotationNode(recField.metadata(), hasConstraint);
                             }
                         }
                         if (hasConstraint) {
@@ -884,7 +884,7 @@ public class GeneratorUtils {
                 }
 
                 if (typeDefNode.metadata().isPresent()) {
-                    hasConstraint = traversAnnotationNode(typeDefNode.metadata(), hasConstraint);
+                    hasConstraint = traverseAnnotationNode(typeDefNode.metadata(), hasConstraint);
                 }
             }
             if (hasConstraint) {
@@ -904,11 +904,11 @@ public class GeneratorUtils {
         return imports;
     }
 
-    private static boolean traversAnnotationNode(Optional<MetadataNode> recField, boolean hasConstraint) {
+    private static boolean traverseAnnotationNode(Optional<MetadataNode> recField, boolean hasConstraint) {
         MetadataNode metadata = recField.get();
         for (AnnotationNode annotation : metadata.annotations()) {
             String annotationRef = annotation.annotReference().toString();
-            if (annotationRef.contains(CONSTRAINT)) {
+            if (annotationRef.startsWith(CONSTRAINT)) {
                 hasConstraint = true;
                 break;
             }
