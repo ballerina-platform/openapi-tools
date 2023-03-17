@@ -85,7 +85,8 @@ public class ArrayTypeGenerator extends TypeGenerator {
         assert schema instanceof ArraySchema;
         ArraySchema arraySchema = (ArraySchema) schema;
         Schema<?> items = arraySchema.getItems();
-        boolean isConstraintsAvailable = !GeneratorMetaData.getInstance().isNullable() && hasConstraints(items);
+        boolean isConstraintsAvailable =
+                !GeneratorMetaData.getInstance().isNullable() && hasConstraints(items) && typeName != null;
         TypeGenerator typeGenerator;
         if (isConstraintsAvailable) {
             String normalizedTypeName = typeName.replaceAll(GeneratorConstants.SPECIAL_CHARACTER_REGEX, "").trim();
