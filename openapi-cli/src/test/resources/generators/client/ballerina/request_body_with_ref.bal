@@ -41,7 +41,7 @@ public isolated client class Client {
     remote isolated function createPet(CreatedPet payload) returns http:Response|error {
         string resourcePath = string `/pets`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         http:Response response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -53,7 +53,7 @@ public isolated client class Client {
     remote isolated function createMyPet(Pet payload) returns http:Response|error {
         string resourcePath = string `/my/pets`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         http:Response response = check self.clientEp->post(resourcePath, request);
         return response;

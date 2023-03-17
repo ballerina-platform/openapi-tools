@@ -630,7 +630,7 @@ public class FunctionBodyGenerator {
      * -- ex: Request body with json payload.
      * <pre>
      *    http:Request request = new;
-     *    json jsonBody = check payload.cloneWithType(json);
+     *    json jsonBody = payload.toJson();
      *    request.setPayload(jsonBody, "application/json");
      *    json response = check self.clientEp->put(path, request);
      * </pre>
