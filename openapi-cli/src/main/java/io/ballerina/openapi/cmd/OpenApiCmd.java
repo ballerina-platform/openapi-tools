@@ -104,7 +104,7 @@ public class OpenApiCmd implements BLauncherCmd {
     private boolean includeTestFiles;
 
     @CommandLine.Option(names = {"--client-methods"}, hidden = true, description = "Generate the client methods" +
-            " with provided type . Only \"remote\"(default) and \"resource\" options are supported.")
+            " with provided type . Only \"resource\"(default) and \"remote\" options are supported.")
     private String generateClientMethods;
 
     @CommandLine.Option(names = {"--with-service-type"}, hidden = true, description = "Generate service type")
