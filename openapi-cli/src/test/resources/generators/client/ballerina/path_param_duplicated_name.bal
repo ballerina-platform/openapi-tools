@@ -35,11 +35,11 @@ public isolated client class Client {
         return;
     }
     #
-    # + 'version - Version Id
+    # + version - Version Id
     # + versionName - Version Name
     # + return - Ok
-    remote isolated function operationId04(int 'version, string versionName) returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri('version)}/version-name/${getEncodedUri(versionName)}`;
+    remote isolated function operationId04(int version, string versionName) returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(version)}/version-name/${getEncodedUri(versionName)}`;
         string response = check self.clientEp-> get(resourcePath);
         return response;
     }

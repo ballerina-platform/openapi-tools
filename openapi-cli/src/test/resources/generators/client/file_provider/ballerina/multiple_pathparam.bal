@@ -1,4 +1,4 @@
-import  ballerina/http;
+import ballerina/http;
 
 # Title
 public isolated client class Client {
@@ -36,12 +36,12 @@ public isolated client class Client {
         return;
     }
     #
-    # + 'version - test
+    # + version - test
     # + name - test
     # + return - Ok
-    remote isolated function pathParameter(int 'version, string name) returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri('version)}/v2/${getEncodedUri(name)}`;
-        string response = check self.clientEp-> get(resourcePath);
+    remote isolated function pathParameter(int version, string name) returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri(name)}`;
+        string response = check self.clientEp->get(resourcePath);
         return response;
     }
 }
