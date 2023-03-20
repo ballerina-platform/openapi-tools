@@ -1,0 +1,235 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /res1:
+    get:
+      operationId: getRes1
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadOnlyPet'
+  /res2:
+    get:
+      operationId: getRes2
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ReadOnlyStr'
+  /res3:
+    get:
+      operationId: getRes3
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ReadOnlyStrNil'
+  /res4:
+    get:
+      operationId: getRes4
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ReadOnlyStrArray'
+  /res5:
+    get:
+      operationId: getRes5
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadOnlyMapJson'
+  /res6:
+    get:
+      operationId: getRes6
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadOnlyJson'
+  /res7:
+    get:
+      operationId: getRes7
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ReadOnlyXML'
+  /res8:
+    get:
+      operationId: getRes8
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "500":
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+  /res9:
+    get:
+      operationId: getRes9
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadOnlyPrimitiveUnion'
+  /res10:
+    get:
+      operationId: getRes10
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadOnlyBracedUnion'
+  /res11:
+    get:
+      operationId: getRes11
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadOnlyRec'
+components:
+  schemas:
+    ReadOnlyPet:
+      $ref: '#/components/schemas/Pet'
+    ReadOnlyRec:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    ReadOnlyStr:
+      type: string
+    ReadOnlyPrimitiveUnion:
+      oneOf:
+        - type: string
+        - type: integer
+          format: int64
+    ReadOnlyMapJson:
+      type: object
+      additionalProperties: true
+    ReadOnlyJson:
+      type: object
+    ReadOnlyStrArray:
+      type: array
+      items:
+        type: string
+    ReadOnlyStrNil:
+      type: string
+      nullable: true
+    ReadOnlyBracedUnion:
+      oneOf:
+        - type: string
+        - type: integer
+          format: int64
+    Pet:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+    ReadOnlyXML:
+      type: object

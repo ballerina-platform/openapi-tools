@@ -24,6 +24,7 @@ import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -36,6 +37,7 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -61,6 +63,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultablePar
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_PARAM_COMMENT;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_103;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_104;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_105;
@@ -102,7 +105,8 @@ public class ParametersGenerator {
      * @param operation OAS operation
      * @throws BallerinaOpenApiException when the parameter generation fails.
      */
-    public void generateResourcesInputs(Map.Entry<PathItem.HttpMethod, Operation> operation)
+    public void generateResourcesInputs(Map.Entry<PathItem.HttpMethod, Operation> operation,
+                                        List<Node> resourceFunctionDocs)
             throws BallerinaOpenApiException {
 
         Token comma = createToken(SyntaxKind.COMMA_TOKEN);
@@ -110,8 +114,9 @@ public class ParametersGenerator {
         if (operation.getValue().getParameters() != null) {
             List<Parameter> parameters = operation.getValue().getParameters();
             for (Parameter parameter : parameters) {
+                Node param = null;
                 if (parameter.getIn().trim().equals(GeneratorConstants.HEADER)) {
-                    ParameterNode param = handleHeader(parameter);
+                    param = handleHeader(parameter);
                     if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
                         defaultableParams.add(param);
                         defaultableParams.add(comma);
@@ -126,7 +131,7 @@ public class ParametersGenerator {
                     }
                     // type  BasicType boolean|int|float|decimal|string ;
                     // public type () |BasicType|BasicType []| map<json>;
-                    Node param = createNodeForQueryParam(parameter);
+                    param = createNodeForQueryParam(parameter);
                     if (param != null) {
                         if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
                             defaultableParams.add(param);
@@ -136,6 +141,18 @@ public class ParametersGenerator {
                             requiredParams.add(comma);
                         }
                     }
+                }
+
+                if (param != null) {
+                    String parameterName = param instanceof RequiredParameterNode ?
+                            ((RequiredParameterNode) param).paramName().get().text() :
+                            ((DefaultableParameterNode) param).paramName().get().text();
+                    String paramComment = parameter.getDescription() != null && !parameter.getDescription().isBlank() ?
+                            parameter.getDescription() : DEFAULT_PARAM_COMMENT;
+                    MarkdownParameterDocumentationLineNode paramAPIDoc =
+                            DocCommentsGenerator.createAPIParamDoc(parameterName
+                                    , paramComment);
+                    resourceFunctionDocs.add(paramAPIDoc);
                 }
             }
         }
