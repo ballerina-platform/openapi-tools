@@ -41,6 +41,8 @@ import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.RecordFieldNode;
+import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
@@ -95,6 +97,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -846,15 +849,25 @@ public class GeneratorUtils {
         for (ModuleMemberDeclarationNode member:members) {
             if (member.kind().equals(SyntaxKind.TYPE_DEFINITION)) {
                 TypeDefinitionNode typeDefNode = (TypeDefinitionNode) member;
-                if (typeDefNode.metadata().isPresent()) {
-                    MetadataNode metadata = typeDefNode.metadata().get();
-                    for (AnnotationNode annotation : metadata.annotations()) {
-                        String annotationRef = annotation.annotReference().toString();
-                        if (annotationRef.equals(CONSTRAINT)) {
-                            hasConstraint = true;
+                if (typeDefNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
+                    RecordTypeDescriptorNode record = (RecordTypeDescriptorNode) typeDefNode.typeDescriptor();
+                    NodeList<Node> fields = record.fields();
+                    //Traverse record fields to check for constraints
+                    for (Node node: fields) {
+                        if (node instanceof RecordFieldNode) {
+                            RecordFieldNode recField = (RecordFieldNode) node;
+                            if (recField.metadata().isPresent()) {
+                                hasConstraint = traverseAnnotationNode(recField.metadata(), hasConstraint);
+                            }
+                        }
+                        if (hasConstraint) {
                             break;
                         }
                     }
+                }
+
+                if (typeDefNode.metadata().isPresent()) {
+                    hasConstraint = traverseAnnotationNode(typeDefNode.metadata(), hasConstraint);
                 }
             }
             if (hasConstraint) {
@@ -872,6 +885,18 @@ public class GeneratorUtils {
             }
         }
         return imports;
+    }
+
+    private static boolean traverseAnnotationNode(Optional<MetadataNode> recField, boolean hasConstraint) {
+        MetadataNode metadata = recField.get();
+        for (AnnotationNode annotation : metadata.annotations()) {
+            String annotationRef = annotation.annotReference().toString();
+            if (annotationRef.startsWith(CONSTRAINT)) {
+                hasConstraint = true;
+                break;
+            }
+        }
+        return hasConstraint;
     }
 
     private static List<String> getUnusedTypeDefinitionNameList(Map<String, String> srcFiles) throws IOException {
