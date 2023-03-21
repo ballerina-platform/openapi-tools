@@ -361,7 +361,4 @@ public class GeneratorConstants {
     public static final String RETURNS = "returns";
     public static final String ANYDATA = "anydata";
     public static final String RESPONSE_RECORD_NAME = "Response";
-    public static final String DEFAULT_RETURN_COMMENT = "return value description";
-    public static final String DEFAULT_FUNC_COMMENT = "Description";
-    public static final String DEFAULT_PARAM_COMMENT = "parameter description";
 }

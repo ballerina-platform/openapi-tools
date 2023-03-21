@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.core.generators.service;
 
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyBlockNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -26,14 +25,12 @@ import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
-import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
@@ -46,7 +43,6 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
@@ -79,15 +75,10 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionBodyBlockNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionSignatureNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_FUNC_COMMENT;
-import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_PARAM_COMMENT;
 import static io.ballerina.openapi.core.GeneratorConstants.SLASH;
-import static io.ballerina.openapi.core.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.createImportDeclarationNodes;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.generateServiceConfigAnnotation;
 
@@ -199,8 +190,6 @@ public class BallerinaServiceGenerator {
 
         List<Node> functions = new ArrayList<>();
         for (Map.Entry<PathItem.HttpMethod, Operation> operation : operationMap.entrySet()) {
-            List<Node> resourceFunctionDocs = new ArrayList<>();
-            addFunctionDescToAPIDocs(operation, resourceFunctionDocs);
             //Add filter availability
             //1.Tag filter
             //2.Operation filter
@@ -216,20 +205,18 @@ public class BallerinaServiceGenerator {
                                     filterOperations.contains(operation.getValue().getOperationId().trim()))) {
                         // getRelative resource path
                         List<Node> functionRelativeResourcePath = GeneratorUtils.getRelativeResourcePath(path,
-                                operation.getValue(), resourceFunctionDocs);
+                                operation.getValue());
                         // function call
                         FunctionDefinitionNode functionDefinitionNode = getResourceFunction(operation,
-                                functionRelativeResourcePath, path, resourceFunctionDocs);
+                                functionRelativeResourcePath, path);
                         functions.add(functionDefinitionNode);
                     }
                 }
             } else {
                 // getRelative resource path
-                List<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
-                        resourceFunctionDocs);
+                List<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue());
                 // function call
-                FunctionDefinitionNode resourceFunction = getResourceFunction(operation, relativeResourcePath,
-                        path, resourceFunctionDocs);
+                FunctionDefinitionNode resourceFunction = getResourceFunction(operation, relativeResourcePath, path);
                 functions.add(resourceFunction);
             }
         }
@@ -245,10 +232,8 @@ public class BallerinaServiceGenerator {
      * @throws BallerinaOpenApiException when the process failure occur
      */
     private FunctionDefinitionNode getResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                       List<Node> pathNodes, String path,
-                                                       List<Node> resourceFunctionDocs)
+                                                       List<Node> pathNodes, String path)
             throws BallerinaOpenApiException {
-
         NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(GeneratorConstants.RESOURCE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
         Token functionKeyWord = createIdentifierToken(GeneratorConstants.FUNCTION, GeneratorUtils.SINGLE_WS_MINUTIAE,
@@ -257,29 +242,17 @@ public class BallerinaServiceGenerator {
                 .toLowerCase(Locale.ENGLISH), GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
         NodeList<Node> relativeResourcePath = createNodeList(pathNodes);
         ParametersGenerator parametersGenerator = new ParametersGenerator(false);
-        parametersGenerator.generateResourcesInputs(operation, resourceFunctionDocs);
+        parametersGenerator.generateResourcesInputs(operation);
         List<Node> params = new ArrayList<>(parametersGenerator.getRequiredParams());
 
         // Handle request Body (Payload)
         if (operation.getValue().getRequestBody() != null) {
             RequestBody requestBody = operation.getValue().getRequestBody();
             requestBody = resolveRequestBodyReference(requestBody);
-            RequiredParameterNode nodeForRequestBody = null;
             if (requestBody.getContent() != null) {
                 RequestBodyGenerator requestBodyGen = new RequestBodyGenerator(requestBody);
-                nodeForRequestBody = requestBodyGen.createNodeForRequestBody();
-                params.add(nodeForRequestBody);
+                params.add(requestBodyGen.createNodeForRequestBody());
                 params.add(createToken(SyntaxKind.COMMA_TOKEN));
-            }
-
-            if (nodeForRequestBody != null && nodeForRequestBody.paramName().isPresent()) {
-                String description = requestBody.getDescription() != null && !requestBody.getDescription().isBlank()
-                        ? requestBody.getDescription() : DEFAULT_PARAM_COMMENT;
-                MarkdownParameterDocumentationLineNode paramAPIDoc =
-                        DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(
-                                nodeForRequestBody.paramName().get().text()),
-                                description.split("\n")[0]);
-                resourceFunctionDocs.add(paramAPIDoc);
             }
         }
 
@@ -302,7 +275,7 @@ public class BallerinaServiceGenerator {
             paths.add(path);
         }
         ReturnTypeDescriptorNode returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation,
-                createEmptyNodeList(), path, resourceFunctionDocs);
+                createEmptyNodeList(), path);
         typeInclusionRecords.putAll(returnTypeGenerator.getTypeInclusionRecords());
 
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(
@@ -320,28 +293,9 @@ public class BallerinaServiceGenerator {
                         createNodeList(bodyStatements),
                 createToken(SyntaxKind.CLOSE_BRACE_TOKEN), null);
 
-        List<AnnotationNode> annotationNodes = new ArrayList<>();
-        MetadataNode metadataNode = createMetadataNode(createMarkdownDocumentationNode(
-                createNodeList(resourceFunctionDocs)), createNodeList(annotationNodes));
-
-        return createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, metadataNode,
+        return createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, null,
                 qualifiersList, functionKeyWord, functionName, relativeResourcePath, functionSignatureNode,
                 functionBodyBlockNode);
-    }
-
-    private static void addFunctionDescToAPIDocs(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                 List<Node> resourceFunctionDocs) {
-        // Add function description
-        if (operation.getValue().getSummary() != null) {
-            resourceFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
-                    operation.getValue().getSummary(), true));
-        } else if (operation.getValue().getDescription() != null && !operation.getValue().getDescription().isBlank()) {
-            resourceFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
-                    operation.getValue().getDescription(), true));
-        } else {
-            resourceFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
-                    DEFAULT_FUNC_COMMENT, true));
-        }
     }
 
     /**
