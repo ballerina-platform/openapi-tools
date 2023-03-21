@@ -101,7 +101,7 @@ public class ServiceToOpenAPIConverterUtils {
         if (containErrors(semanticModel.diagnostics())) {
             DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_106;
             ExceptionDiagnostic error = new ExceptionDiagnostic(messages.getCode(), messages.getDescription(),
-                    null);
+                    null, messages.getSeverity());
             diagnostics.add(error);
         } else {
             ModulePartNode modulePartNode = syntaxTree.rootNode();
@@ -111,7 +111,7 @@ public class ServiceToOpenAPIConverterUtils {
             if (serviceName != null && servicesToGenerate.isEmpty()) {
                 DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_107;
                 ExceptionDiagnostic error = new ExceptionDiagnostic(messages.getCode(), messages.getDescription(),
-                        null, serviceName, availableService.toString());
+                        null, messages.getSeverity(), serviceName, availableService.toString());
                 diagnostics.add(error);
             }
             // Generating openapi specification for selected services
@@ -466,7 +466,7 @@ public class ServiceToOpenAPIConverterUtils {
         if (openapiPath.toString().isBlank()) {
             DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
             ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
-                    error.getDescription(), location);
+                    error.getDescription(), location, error.getSeverity());
             diagnostics.add(diagnostic);
         } else if (Paths.get(openapiPath.toString()).isAbsolute()) {
             relativePath = Paths.get(openapiPath.toString());
@@ -479,7 +479,7 @@ public class ServiceToOpenAPIConverterUtils {
             } catch (IOException e) {
                 DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
                 ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode()
-                        , error.getDescription(), location, e.toString());
+                        , error.getDescription(), location, error.getSeverity(), e.toString());
                 diagnostics.add(diagnostic);
             }
         }

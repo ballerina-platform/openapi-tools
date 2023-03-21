@@ -145,7 +145,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
             } catch (IOException e) {
                 DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
                 ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
-                        error.getDescription(), null, e.toString());
+                        error.getDescription(), null, error.getSeverity(), e.toString());
                 diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
             }
         }

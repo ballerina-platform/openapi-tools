@@ -135,7 +135,7 @@ public class OASContractGenerator {
                     DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_108;
                     ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
                             message.getDescription() + e.getLocalizedMessage(),
-                            null);
+                            null, message.getSeverity());
                     this.errors.add(error);
                 }
             }
@@ -147,6 +147,11 @@ public class OASContractGenerator {
             while (iterator.hasNext()) {
                 outStream.println("-- " + iterator.next());
             }
+        } else {
+            DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_115;
+            ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
+                    message.getDescription(), null, message.getSeverity());
+            this.errors.add(error);
         }
     }
 }
