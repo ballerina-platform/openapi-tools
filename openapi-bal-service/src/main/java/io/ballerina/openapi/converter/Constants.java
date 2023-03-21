@@ -40,7 +40,6 @@ public class Constants {
     public static final String PATH = "path";
     public static final String BODY = "body";
     public static final String HTTP_PAYLOAD = "http:Payload";
-    public static final String HTTP_QUERY = "http:Query";
     public static final String HTTP = "http";
     public static final String BALLERINA = "ballerina";
     public static final String TYPEREFERENCE = "typeReference";
@@ -199,10 +198,8 @@ public class Constants {
     }
     public static final String HTTP_200 = "200";
     public static final String HTTP_201 = "201";
-    public static final String HTTP_500 = "500";
     public static final String HTTP_200_DESCRIPTION = "Ok";
     public static final String HTTP_201_DESCRIPTION = "Created";
-    public static final String HTTP_500_DESCRIPTION = "Internal server error";
     public static final String HTTP_204 = "204";
     public static final String SPECIAL_CHAR_REGEX = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
 
