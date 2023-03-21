@@ -109,7 +109,7 @@ paths:
         "431":
           description: RequestHeaderFieldsTooLarge
         "451":
-          description: UnavailableDueToLegalReasons
+          description: UnavailableForLegalReasons
         "500":
           description: InternalServerError
         "501":
@@ -129,5 +129,5 @@ paths:
         "510":
           description: NotExtended
         "511":
-          description: NetworkAuthorizationRequired
+          description: NetworkAuthenticationRequired
 components: {}
