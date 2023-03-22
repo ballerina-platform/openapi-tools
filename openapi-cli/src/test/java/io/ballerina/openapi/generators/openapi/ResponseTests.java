@@ -253,6 +253,16 @@ public class ResponseTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/decimal.yaml");
     }
 
+    @Test(description = "When the service has config without mediaType attribute")
+    public void testResponseHasServiceConfigWithCors() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/service_config_with_cors.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/service_config_with_cors.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
