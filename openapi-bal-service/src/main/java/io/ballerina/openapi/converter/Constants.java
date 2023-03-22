@@ -195,6 +195,8 @@ public class Constants {
         httpCodeMap.put("LoopDetected", "508");
         httpCodeMap.put("NotExtended", "510");
         httpCodeMap.put("NetworkAuthenticationRequired", "511");
+        httpCodeMap.put("NetworkAuthorizationRequired", "511"); //This status code was added since it is deprecated.
+        // TODO: remove this after fixing https://github.com/ballerina-platform/ballerina-standard-library/issues/4245
         HTTP_CODES = Collections.unmodifiableMap(httpCodeMap);
     }
     public static final String HTTP_200 = "200";
