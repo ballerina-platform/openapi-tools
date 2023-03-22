@@ -126,7 +126,7 @@ public class Constants {
         httpCodes.put("PreconditionRequired", "428");
         httpCodes.put("TooManyRequests", "429");
         httpCodes.put("RequestHeaderFieldsTooLarge", "431");
-        httpCodes.put("UnavailableDueToLegalReasonsError", "451");
+        httpCodes.put("UnavailableDueToLegalReasons", "451");
         httpCodes.put("InternalServerError", "500");
         httpCodes.put("NotImplemented", "501");
         httpCodes.put("BadGateway", "502");
