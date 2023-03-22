@@ -263,7 +263,7 @@ public class ConverterCommonUtils {
             MappingConstructorExpressionNode listOfAnnotValue = annotation.annotValue().get();
             for (MappingFieldNode field : listOfAnnotValue.fields()) {
                 SpecificFieldNode fieldNode = (SpecificFieldNode) field;
-                if (!((fieldNode).fieldName().toString().trim().equals(annotationField)) &&
+                if (!((fieldNode).fieldName().toString().trim().equals(annotationField)) ||
                         fieldNode.valueExpr().isEmpty()) {
                     continue;
                 }
