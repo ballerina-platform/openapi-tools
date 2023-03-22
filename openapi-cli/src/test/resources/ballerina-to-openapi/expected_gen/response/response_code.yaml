@@ -109,7 +109,7 @@ paths:
         "431":
           description: RequestHeaderFieldsTooLarge
         "451":
-          description: UnavailableForLegalReasons
+          description: UnavailableDueToLegalReasons
         "500":
           description: InternalServerError
         "501":

@@ -183,7 +183,7 @@ public class Constants {
         httpCodeMap.put("PreconditionRequired", "428");
         httpCodeMap.put("TooManyRequests", "429");
         httpCodeMap.put("RequestHeaderFieldsTooLarge", "431");
-        httpCodeMap.put("UnavailableForLegalReasons", "451");
+        httpCodeMap.put("UnavailableDueToLegalReasonsError", "451");
         httpCodeMap.put("InternalServerError", "500");
         httpCodeMap.put("NotImplemented", "501");
         httpCodeMap.put("BadGateway", "502");
