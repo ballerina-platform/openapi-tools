@@ -183,7 +183,7 @@ public class Constants {
         httpCodeMap.put("PreconditionRequired", "428");
         httpCodeMap.put("TooManyRequests", "429");
         httpCodeMap.put("RequestHeaderFieldsTooLarge", "431");
-        httpCodeMap.put("UnavailableDueToLegalReasons", "451");
+        httpCodeMap.put("UnavailableForLegalReasons", "451");
         httpCodeMap.put("InternalServerError", "500");
         httpCodeMap.put("NotImplemented", "501");
         httpCodeMap.put("BadGateway", "502");
@@ -194,7 +194,7 @@ public class Constants {
         httpCodeMap.put("InsufficientStorage", "507");
         httpCodeMap.put("LoopDetected", "508");
         httpCodeMap.put("NotExtended", "510");
-        httpCodeMap.put("NetworkAuthorizationRequired", "511");
+        httpCodeMap.put("NetworkAuthenticationRequired", "511");
         HTTP_CODES = Collections.unmodifiableMap(httpCodeMap);
     }
     public static final String HTTP_200 = "200";
