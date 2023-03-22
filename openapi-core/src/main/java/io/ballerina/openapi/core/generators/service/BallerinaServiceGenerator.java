@@ -43,6 +43,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
@@ -86,6 +87,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclara
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_FUNC_COMMENT;
 import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_PARAM_COMMENT;
+import static io.ballerina.openapi.core.GeneratorConstants.SERVICE_TYPE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.core.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.createImportDeclarationNodes;
@@ -100,8 +102,9 @@ public class BallerinaServiceGenerator {
     private boolean isNullableRequired;
     private final OpenAPI openAPI;
     private final Filter filter;
+    private final boolean isServiceTypeRequired;
     private final BallerinaTypesGenerator ballerinaSchemaGenerator;
-
+    private List<Node> functionList = new ArrayList<>();
     private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
     private final Set<String> paths = new LinkedHashSet<>();
 
@@ -109,9 +112,19 @@ public class BallerinaServiceGenerator {
         this.openAPI = oasServiceMetadata.getOpenAPI();
         this.filter = oasServiceMetadata.getFilters();
         this.isNullableRequired = false;
+        this.isServiceTypeRequired = oasServiceMetadata.isServiceTypeRequired();
         this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, oasServiceMetadata.isNullable(),
                 new LinkedList<>());
-        GeneratorMetaData.createInstance(openAPI, oasServiceMetadata.isNullable());
+        GeneratorMetaData.createInstance(openAPI, oasServiceMetadata.isNullable(),
+                oasServiceMetadata.isServiceTypeRequired());
+    }
+
+    public List<Node> getFunctionList() {
+        return functionList;
+    }
+
+    public void setFunctionList(List<Node> functionList) {
+        this.functionList = functionList;
     }
 
     public List<TypeDefinitionNode> getTypeInclusionRecords() {
@@ -135,6 +148,7 @@ public class BallerinaServiceGenerator {
 
         // Fill the members with function
         List<Node> functions = createResourceFunctions(openAPI, filter);
+        this.setFunctionList(functions);
 
         NodeList<Node> members = createNodeList(functions);
         // Create annotation if nullable property is enabled
@@ -145,10 +159,14 @@ public class BallerinaServiceGenerator {
         if (isNullableRequired) {
             metadataNode = generateServiceConfigAnnotation();
         }
+        TypeDescriptorNode serviceType = null;
+        if (isServiceTypeRequired) {
+            serviceType = createSimpleNameReferenceNode(createIdentifierToken(SERVICE_TYPE_NAME));
+        }
         ServiceDeclarationNode serviceDeclarationNode = createServiceDeclarationNode(
                 metadataNode, createEmptyNodeList(), createToken(SyntaxKind.SERVICE_KEYWORD,
                         GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE),
-                null, absoluteResourcePath, createToken(SyntaxKind.ON_KEYWORD,
+                serviceType, absoluteResourcePath, createToken(SyntaxKind.ON_KEYWORD,
                         GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE), expressions,
                 createToken(SyntaxKind.OPEN_BRACE_TOKEN), members, createToken(SyntaxKind.CLOSE_BRACE_TOKEN), null);
 
