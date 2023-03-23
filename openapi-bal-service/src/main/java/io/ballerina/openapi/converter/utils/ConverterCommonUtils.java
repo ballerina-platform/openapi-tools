@@ -364,14 +364,14 @@ public class ConverterCommonUtils {
         if (!Files.exists(contractPath)) {
             DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
             ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
-                    error.getDescription(), null, error.getSeverity());
+                    error.getDescription(), null);
             diagnostics.add(diagnostic);
         }
         if (!(definitionURI.endsWith(Constants.YAML_EXTENSION) || definitionURI.endsWith(Constants.JSON_EXTENSION)
                 || definitionURI.endsWith(Constants.YML_EXTENSION))) {
             DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
             ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
-                    error.getDescription(), null, error.getSeverity());
+                    error.getDescription(), null);
             diagnostics.add(diagnostic);
         }
         String openAPIFileContent = null;
@@ -380,14 +380,13 @@ public class ConverterCommonUtils {
         } catch (IOException e) {
             DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
             ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(), error.getDescription(), null,
-                    error.getSeverity(), e.toString());
+                    e.toString());
             diagnostics.add(diagnostic);
         }
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
             DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_112;
-            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(), error.getDescription(),
-                    null, error.getSeverity());
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(), error.getDescription(), null);
             diagnostics.add(diagnostic);
             return new OASResult(null, diagnostics);
         }
