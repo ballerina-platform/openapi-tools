@@ -7,13 +7,12 @@ public type Error record {
 
 public type Dog record {
     *Pet;
-    boolean? bark = ();
-
+    boolean? bark?;
 };
 
 public type Pet record {
     int? id;
     string? name;
-    string? tag = ();
-    string? 'type = ();
+    string? tag?;
+    string? 'type?;
 };
