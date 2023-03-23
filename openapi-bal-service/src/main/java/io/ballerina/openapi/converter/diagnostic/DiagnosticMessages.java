@@ -63,7 +63,7 @@ public enum DiagnosticMessages {
             "for Ballerina type '%s'. ", DiagnosticSeverity.WARNING),
 
     OAS_CONVERTOR_115("OAS_CONVERTOR_115", "Given Ballerina file does not contain any HTTP service.",
-            DiagnosticSeverity.WARNING);
+            DiagnosticSeverity.ERROR);
 
     private final String code;
     private final String description;
