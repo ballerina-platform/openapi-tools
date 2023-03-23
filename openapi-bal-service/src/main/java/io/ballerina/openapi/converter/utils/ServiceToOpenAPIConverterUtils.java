@@ -289,6 +289,8 @@ public class ServiceToOpenAPIConverterUtils {
                         OASResult oasResult = parseServiceInfoAnnotationAttachmentDetails(diagnostics, annotation,
                                 ballerinaFilePath);
                         return normalizeInfoSection(openapiFileName, currentServiceName, version, oasResult);
+                    } else if (currentServiceName.equals(SLASH) || currentServiceName.isBlank()) {
+                        openAPI.setInfo(new Info().version(version).title(normalizeTitle(openapiFileName)));
                     } else {
                         openAPI.setInfo(new Info().version(version).title(normalizeTitle(currentServiceName)));
                     }
