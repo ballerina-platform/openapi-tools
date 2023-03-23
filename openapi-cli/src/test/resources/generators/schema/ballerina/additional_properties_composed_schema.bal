@@ -19,8 +19,8 @@ public type User07 record {|
     *Pet;
     string? name?;
     int? id?;
-    record {|string? country?; string? state?;|}?...;
-};
+    record {string? country?; string? state?;}?...;
+|};
 
 # Reference has additional properties.
 public type User08 record {|
