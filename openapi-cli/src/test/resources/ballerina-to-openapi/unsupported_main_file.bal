@@ -1,3 +1,5 @@
+import ballerina/io;
+
 public function main() {
-    string name = "Test";
+    io:print("Hello, World!");
 }
