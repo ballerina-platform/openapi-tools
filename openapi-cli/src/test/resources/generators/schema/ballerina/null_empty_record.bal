@@ -3,5 +3,5 @@ public type Pet record {
     string name;
     string tag?;
     string 'type?;
-    record {}? details = ();
+    record {}? details?;
 };
