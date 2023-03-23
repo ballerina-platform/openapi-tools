@@ -25,7 +25,7 @@ public type Person record {
     @constraint:Int {minValue: 1, maxValue: 100}
     int maxDeliveryCount?;
     # scenario 01 - field with nullable.
-    string? service_class = ();
+    string? service_class?;
     # scenario 02 - field with oneOf type.
     TaxratesItemsString[]|int tax_rates?;
     # scenario 03 - field with anyOf.

@@ -53,7 +53,7 @@ public class FieldGenWithNullableOption {
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
-                "schema/ballerina/nullable_option_array_schema.bal", syntaxTree);
+                "schema/ballerina/nullale_option_array_schema.bal", syntaxTree);
     }
 
     @Test(description = "Test for nullable record fields")
