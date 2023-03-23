@@ -289,24 +289,30 @@ public class ServiceToOpenAPIConverterUtils {
                         OASResult oasResult = parseServiceInfoAnnotationAttachmentDetails(diagnostics, annotation,
                                 ballerinaFilePath);
                         return normalizeInfoSection(openapiFileName, currentServiceName, version, oasResult);
-                    } else if (currentServiceName.equals(SLASH) || currentServiceName.isBlank()) {
-                        openAPI.setInfo(new Info().version(version).title(normalizeTitle(openapiFileName)));
                     } else {
-                        openAPI.setInfo(new Info().version(version).title(normalizeTitle(currentServiceName)));
+                        setInfoDetailsIfServiceNameAbsent(openapiFileName, openAPI, currentServiceName, version);
                     }
-                } else if (currentServiceName.equals(SLASH) || currentServiceName.isBlank()) {
-                    openAPI.setInfo(new Info().version(version).title(normalizeTitle(openapiFileName)));
                 } else {
-                    openAPI.setInfo(new Info().version(version).title(normalizeTitle(currentServiceName)));
+                    setInfoDetailsIfServiceNameAbsent(openapiFileName, openAPI, currentServiceName, version);
                 }
             }
-        } else if (currentServiceName.equals(SLASH) || currentServiceName.isBlank()) {
+        } else {
+            setInfoDetailsIfServiceNameAbsent(openapiFileName, openAPI, currentServiceName, version);
+        }
+
+        return new OASResult(openAPI, diagnostics);
+    }
+
+    /**
+     * This function may fill the details for openAPI Info section when the service base path is absent or `/`.
+     */
+    private static void setInfoDetailsIfServiceNameAbsent(String openapiFileName, OpenAPI openAPI,
+                                                          String currentServiceName, String version) {
+        if (currentServiceName.equals(SLASH) || currentServiceName.isBlank()) {
             openAPI.setInfo(new Info().version(version).title(normalizeTitle(openapiFileName)));
         } else {
             openAPI.setInfo(new Info().version(version).title(normalizeTitle(currentServiceName)));
         }
-
-        return new OASResult(openAPI, diagnostics);
     }
 
     // Finalize the openAPI info section
