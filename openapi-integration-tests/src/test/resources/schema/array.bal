@@ -57,6 +57,6 @@ public type ProxyConfig record {|
 |};
 
 public type User record {
-    string? id = ();
-    string[]? address = ();
+    string? id?;
+    string[]? address?;
 };
