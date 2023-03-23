@@ -21,6 +21,8 @@ package io.ballerina.openapi.generators.openapi;
 import io.ballerina.openapi.cmd.OASContractGenerator;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -54,7 +56,7 @@ public class UnSupportedBallerinaFileTests {
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                 , false);
         List<OpenAPIConverterDiagnostic> errors = openApiConverter.getErrors();
-        Assert.assertFalse(errors.isEmpty());
+        Assert.assertFalse(errors.isEmpty(), "Error list is empty");
         Assert.assertEquals(errors.get(0).getMessage(),
                 "Given Ballerina file does not contain any HTTP service.");
     }
@@ -69,5 +71,16 @@ public class UnSupportedBallerinaFileTests {
         Assert.assertFalse(errors.isEmpty());
         Assert.assertEquals(errors.get(0).getMessage(),
                 "Given Ballerina file does not contain any HTTP service.");
+    }
+
+    @AfterMethod
+    public void cleanUp() {
+        TestUtils.deleteDirectory(this.tempDir);
+    }
+
+    @AfterTest
+    public void clean() {
+        System.setErr(null);
+        System.setOut(null);
     }
 }
