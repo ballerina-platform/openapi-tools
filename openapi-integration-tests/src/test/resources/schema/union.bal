@@ -67,7 +67,7 @@ public type TaxratesoneofarrayItemsNull string|int;
 
 public type TaxratesanyofarrayItemsNull int|string;
 
-public type Person record {|
+public type Person record {
     # scenario 01 - field with nullable.
     string? service_class;
     # scenario 02 - field with oneOf type.
@@ -78,4 +78,4 @@ public type Person record {|
     (string|int)[]|string tax_rates_oneOF_array?;
     # scenario 04 - field with a anyOf type array items has anyOf.
     (int|string)[]|int tax_rates_anyOf_array?;
-|};
+};

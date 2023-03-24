@@ -22,6 +22,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.SymbolKind;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.ChildNodeEntry;
@@ -30,7 +31,7 @@ import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
-import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Minutiae;
 import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
@@ -40,6 +41,8 @@ import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.RecordFieldNode;
+import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
@@ -54,7 +57,6 @@ import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
-import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.model.GenSrcFile;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -95,6 +97,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -130,7 +133,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML_CONTENT;
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.CLOSE_CURLY_BRACE;
-import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_PARAM_COMMENT;
+import static io.ballerina.openapi.core.GeneratorConstants.CONSTRAINT;
 import static io.ballerina.openapi.core.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.core.GeneratorConstants.GET;
 import static io.ballerina.openapi.core.GeneratorConstants.HEAD;
@@ -140,7 +143,6 @@ import static io.ballerina.openapi.core.GeneratorConstants.IDENTIFIER;
 import static io.ballerina.openapi.core.GeneratorConstants.IMAGE_PNG;
 import static io.ballerina.openapi.core.GeneratorConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.core.GeneratorConstants.LINE_SEPARATOR;
-import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.GeneratorConstants.OPEN_CURLY_BRACE;
 import static io.ballerina.openapi.core.GeneratorConstants.SERVICE_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.SLASH;
@@ -183,9 +185,11 @@ public class GeneratorUtils {
     }
 
     public static QualifiedNameReferenceNode getQualifiedNameReferenceNode(String modulePrefix, String identifier) {
+
         Token modulePrefixToken = AbstractNodeFactory.createIdentifierToken(modulePrefix);
         Token colon = AbstractNodeFactory.createIdentifierToken(":");
-        IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier);
+        IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier, SINGLE_WS_MINUTIAE
+                , SINGLE_WS_MINUTIAE);
         return NodeFactory.createQualifiedNameReferenceNode(modulePrefixToken, colon, identifierToken);
     }
 
@@ -197,7 +201,7 @@ public class GeneratorUtils {
      * @return - node lists
      * @throws BallerinaOpenApiException
      */
-    public static List<Node> getRelativeResourcePath(String path, Operation operation, List<Node> resourceFunctionDocs)
+    public static List<Node> getRelativeResourcePath(String path, Operation operation)
             throws BallerinaOpenApiException {
 
         List<Node> functionRelativeResourcePath = new ArrayList<>();
@@ -216,8 +220,7 @@ public class GeneratorUtils {
                      * <pre>resource function get onCall/[string id]\.json() returns string {}</>
                      */
                     if (operation.getParameters() != null) {
-                        extractPathParameterDetails(operation, functionRelativeResourcePath, pathNode,
-                                pathParam, resourceFunctionDocs);
+                        extractPathParameterDetails(operation, functionRelativeResourcePath, pathNode, pathParam);
                     }
                 } else if (!pathNode.isBlank()) {
                     IdentifierToken idToken = createIdentifierToken(escapeIdentifier(pathNode.trim()));
@@ -237,7 +240,7 @@ public class GeneratorUtils {
     }
 
     private static void extractPathParameterDetails(Operation operation, List<Node> functionRelativeResourcePath,
-                                                    String pathNode, String pathParam, List<Node> resourceFunctionDocs)
+                                                    String pathNode, String pathParam)
             throws BallerinaOpenApiException {
         // check whether path parameter segment has special character
         String[] split = pathNode.split(CLOSE_CURLY_BRACE, 2);
@@ -274,16 +277,6 @@ public class GeneratorUtils {
                                 createToken(CLOSE_BRACKET_TOKEN));
                 functionRelativeResourcePath.add(resourcePathParameterNode);
                 functionRelativeResourcePath.add(createToken(SLASH_TOKEN));
-
-                // Add documentation
-                if (resourceFunctionDocs != null) {
-                    String parameterName = paramName.text();
-                    String paramComment = parameter.getDescription() != null && !parameter.getDescription().isBlank() ?
-                            parameter.getDescription() : DEFAULT_PARAM_COMMENT;
-                    MarkdownParameterDocumentationLineNode paramAPIDoc =
-                            DocCommentsGenerator.createAPIParamDoc(parameterName, paramComment);
-                    resourceFunctionDocs.add(paramAPIDoc);
-                }
                 break;
             }
         }
@@ -446,12 +439,8 @@ public class GeneratorUtils {
             io.swagger.v3.oas.models.media.MediaType> mediaTypeEntry) {
         String mediaType = mediaTypeEntry.getKey();
         String defaultBallerinaType = getBallerinaMediaType(mediaType, true);
-        Schema<?> schema = mediaTypeEntry.getValue().getSchema();
-
-        boolean isValidMultipartFormData = mediaType.equals(MediaType.MULTIPART_FORM_DATA) && schema != null &&
-                (schema.get$ref() != null || schema.getProperties() != null || schema.getType().equals(OBJECT));
-
-        if (defaultBallerinaType.equals(HTTP_REQUEST) && !isValidMultipartFormData) {
+        if (defaultBallerinaType.equals(HTTP_REQUEST) &&
+                !(mediaTypeEntry.getValue().getSchema() != null && mediaType.equals(MediaType.MULTIPART_FORM_DATA))) {
             return false;
         } else {
             return true;
@@ -464,7 +453,7 @@ public class GeneratorUtils {
     public static String getBallerinaMediaType(String mediaType, boolean isRequest) {
         if (mediaType.matches(".*/json") || mediaType.matches("application/.*\\+json")) {
             return SyntaxKind.JSON_KEYWORD.stringValue();
-        } else if (mediaType.matches(".*/xml") || mediaType.matches("application/.*\\+xml")) {
+        } else if (mediaType.matches(".*/xml")  || mediaType.matches("application/.*\\+xml")) {
             return SyntaxKind.XML_KEYWORD.stringValue();
         } else if (mediaType.equals(MediaType.APPLICATION_FORM_URLENCODED) || mediaType.matches("text/.*")) {
             return STRING_KEYWORD.stringValue();
@@ -841,7 +830,73 @@ public class GeneratorUtils {
             tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);
             unusedTypeDefinitionNameList = getUnusedTypeDefinitionNameList(tempSourceFiles);
         }
+        ModulePartNode rootNode = schemaSyntaxTree.rootNode();
+        NodeList<ImportDeclarationNode> imports = rootNode.imports();
+        imports = removeUnusedImports(rootNode, imports);
+
+        ModulePartNode modiedModulePartNode = rootNode.modify(imports, rootNode.members(), rootNode.eofToken());
+        schemaSyntaxTree = schemaSyntaxTree.modifyWith(modiedModulePartNode);
+        schemaContent = Formatter.format(schemaSyntaxTree).toString();
         return schemaContent;
+    }
+
+    private static NodeList<ImportDeclarationNode> removeUnusedImports(ModulePartNode rootNode,
+                                                                       NodeList<ImportDeclarationNode> imports) {
+        //TODO: This function can be extended to check all the unused imports, for this time only handle constraint
+        // imports
+        boolean hasConstraint = false;
+        NodeList<ModuleMemberDeclarationNode> members = rootNode.members();
+        for (ModuleMemberDeclarationNode member:members) {
+            if (member.kind().equals(SyntaxKind.TYPE_DEFINITION)) {
+                TypeDefinitionNode typeDefNode = (TypeDefinitionNode) member;
+                if (typeDefNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
+                    RecordTypeDescriptorNode record = (RecordTypeDescriptorNode) typeDefNode.typeDescriptor();
+                    NodeList<Node> fields = record.fields();
+                    //Traverse record fields to check for constraints
+                    for (Node node: fields) {
+                        if (node instanceof RecordFieldNode) {
+                            RecordFieldNode recField = (RecordFieldNode) node;
+                            if (recField.metadata().isPresent()) {
+                                hasConstraint = traverseAnnotationNode(recField.metadata(), hasConstraint);
+                            }
+                        }
+                        if (hasConstraint) {
+                            break;
+                        }
+                    }
+                }
+
+                if (typeDefNode.metadata().isPresent()) {
+                    hasConstraint = traverseAnnotationNode(typeDefNode.metadata(), hasConstraint);
+                }
+            }
+            if (hasConstraint) {
+                break;
+            }
+        }
+        if (!hasConstraint) {
+            for (ImportDeclarationNode importNode: imports) {
+                if (importNode.orgName().isPresent()) {
+                    if (importNode.orgName().get().toString().equals("ballerina/") &&
+                            importNode.moduleName().get(0).text().equals(CONSTRAINT)) {
+                        imports = imports.remove(importNode);
+                    }
+                }
+            }
+        }
+        return imports;
+    }
+
+    private static boolean traverseAnnotationNode(Optional<MetadataNode> recField, boolean hasConstraint) {
+        MetadataNode metadata = recField.get();
+        for (AnnotationNode annotation : metadata.annotations()) {
+            String annotationRef = annotation.annotReference().toString();
+            if (annotationRef.startsWith(CONSTRAINT)) {
+                hasConstraint = true;
+                break;
+            }
+        }
+        return hasConstraint;
     }
 
     private static List<String> getUnusedTypeDefinitionNameList(Map<String, String> srcFiles) throws IOException {

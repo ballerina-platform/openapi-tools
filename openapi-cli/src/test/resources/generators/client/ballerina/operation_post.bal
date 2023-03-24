@@ -38,7 +38,7 @@ public isolated client class Client {
     remote isolated function  pet(Pet payload) returns http:Response | error {
         string resourcePath = string `/pet`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
         http:Response  response = check self.clientEp->post(resourcePath, request);

@@ -42,7 +42,7 @@ public isolated client class Client {
     remote isolated function updateXMLUser(Path01_body payload) returns http:Response|error {
         string resourcePath = string `/path01`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
         http:Response response = check self.clientEp->put(resourcePath, request);
@@ -54,7 +54,7 @@ public isolated client class Client {
     remote isolated function postXMLUser(Path01_body_1 payload) returns http:Response|error {
         string resourcePath = string `/path01`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         http:Response response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -65,7 +65,7 @@ public isolated client class Client {
     remote isolated function postXMLUserInLineArray(CompoundArrayItemPostXMLUserInLineArrayRequest payload) returns http:Response|error {
         string resourcePath = string `/path02`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
         http:Response response = check self.clientEp->post(resourcePath, request);
