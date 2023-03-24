@@ -42,7 +42,7 @@ public isolated client class Client {
     remote isolated function postXMLUser(Path01_body payload) returns http:Response|error {
         string resourcePath = string `/path01`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         http:Response response = check self.clientEp->post(resourcePath, request);
         return response;

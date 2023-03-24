@@ -103,7 +103,7 @@ public class FunctionBodyNodeTests {
                         "return response;}"},
                 {"diagnostic_files/xml_payload_with_ref.yaml", "/pets", "{string resourcePath = string `/pets`;" +
                         "http:Request request = new;" +
-                        "json jsonBody = check payload.cloneWithType(json);" +
+                        "json jsonBody = payload.toJson();" +
                         "xml? xmlBody = check xmldata:fromJson(jsonBody);" +
                         "request.setPayload(xmlBody, \"application/xml\");" +
                         "http:Response response = check self.clientEp->post(resourcePath, request);" +
@@ -114,7 +114,7 @@ public class FunctionBodyNodeTests {
                         "return response;}"},
                 {"swagger/text_request_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
                         "http:Request request = new;" +
-                        "json jsonBody = check payload.cloneWithType(json);" +
+                        "json jsonBody = payload.toJson();" +
                         "request.setPayload(jsonBody, \"text/json\");" +
                         "json response = check self.clientEp->post(resourcePath, request);" +
                         "return response;}"},
