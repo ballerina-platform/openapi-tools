@@ -367,7 +367,7 @@ public class FunctionSignatureGenerator {
         if (parameterSchema.get$ref() != null) {
             type = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
             Schema schema = openAPI.getComponents().getSchemas().get(type.trim());
-            if (schema instanceof ObjectSchema) {
+            if (schema instanceof ObjectSchema || (schema instanceof ComposedSchema && schema.getAllOf() != null)) {
                 throw new BallerinaOpenApiException("Ballerina does not support object type path parameters.");
             }
         } else {
