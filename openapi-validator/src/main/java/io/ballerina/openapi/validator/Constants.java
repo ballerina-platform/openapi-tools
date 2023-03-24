@@ -126,7 +126,7 @@ public class Constants {
         httpCodes.put("PreconditionRequired", "428");
         httpCodes.put("TooManyRequests", "429");
         httpCodes.put("RequestHeaderFieldsTooLarge", "431");
-        httpCodes.put("UnavailableForLegalReasons", "451");
+        httpCodes.put("UnavailableDueToLegalReasons", "451");
         httpCodes.put("InternalServerError", "500");
         httpCodes.put("NotImplemented", "501");
         httpCodes.put("BadGateway", "502");
@@ -138,6 +138,8 @@ public class Constants {
         httpCodes.put("LoopDetected", "508");
         httpCodes.put("NotExtended", "510");
         httpCodes.put("NetworkAuthenticationRequired", "511");
+        httpCodes.put("NetworkAuthorizationRequired", "511"); //This status code was added since it is deprecated.
+        // TODO: remove this after fixing https://github.com/ballerina-platform/ballerina-standard-library/issues/4245
         HTTP_CODES = Collections.unmodifiableMap(httpCodes);
     }
     public static final String HTTP_200 = "200";

@@ -285,6 +285,17 @@ public class ResponseTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/readonly.yaml");
     }
 
+    @Test(description = "Test scenarios where return type is a deprecated status code 'NetworkAuthorizationRequired'")
+    public void testUsingDeprecatedStatusCode() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/deprecated_status_code.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/deprecated_status_code.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

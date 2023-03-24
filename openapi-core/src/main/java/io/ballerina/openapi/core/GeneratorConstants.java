@@ -271,7 +271,7 @@ public class GeneratorConstants {
         httpCodeMap.put("428", "PreconditionRequired");
         httpCodeMap.put("429", "TooManyRequests");
         httpCodeMap.put("431", "RequestHeaderFieldsTooLarge");
-        httpCodeMap.put("451", "UnavailableForLegalReasons");
+        httpCodeMap.put("451", "UnavailableDueToLegalReasons");
         httpCodeMap.put("500", "InternalServerError");
         httpCodeMap.put("501", "NotImplemented");
         httpCodeMap.put("502", "BadGateway");
