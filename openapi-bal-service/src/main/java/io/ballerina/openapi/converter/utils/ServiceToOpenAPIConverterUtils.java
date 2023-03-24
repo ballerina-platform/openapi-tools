@@ -304,7 +304,7 @@ public class ServiceToOpenAPIConverterUtils {
     }
 
     /**
-     * This function may fill the details for openAPI Info section when the service base path is absent or `/`.
+     * Generates openAPI Info section when the service base path is absent or `/`.
      */
     private static void setInfoDetailsIfServiceNameAbsent(String openapiFileName, OpenAPI openAPI,
                                                           String currentServiceName, String version) {

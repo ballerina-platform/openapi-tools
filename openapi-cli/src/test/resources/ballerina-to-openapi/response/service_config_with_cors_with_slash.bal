@@ -5,7 +5,6 @@ import ballerina/http;
         allowOrigins: ["*"]
     }
 }
-
 service / on new http:Listener(9090) {
 
     # A resource for generating greetings
