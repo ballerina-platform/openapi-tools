@@ -72,7 +72,6 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordFieldWithDefaultValueNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.AT_TOKEN;
@@ -80,7 +79,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
 
 /**
  * Contains util functions needed for schema generation.
@@ -195,23 +193,11 @@ public class TypeGeneratorUtils {
 
         if (required != null) {
             setRequiredFields(required, recordFieldList, field, fieldSchema, fieldName, fieldTypeName, metadataNode);
-        } else if (fieldTypeName.toString().endsWith(NILLABLE)) {
-            recordFieldList.add(getRecordFieldWithDefaultValue(fieldName, fieldTypeName, metadataNode));
         } else {
             RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
                     fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
             recordFieldList.add(recordFieldNode);
         }
-    }
-
-    private static RecordFieldWithDefaultValueNode getRecordFieldWithDefaultValue(IdentifierToken fieldName,
-                                                                                  TypeDescriptorNode fieldType,
-                                                                                  MetadataNode metadataNode) {
-        SimpleNameReferenceNode nilExpression = createSimpleNameReferenceNode(
-                createIdentifierToken("()"));
-        return createRecordFieldWithDefaultValueNode(metadataNode,
-                null, fieldType, fieldName, createToken(EQUAL_TOKEN),
-                nilExpression, createToken(SEMICOLON_TOKEN));
     }
 
     private static void setRequiredFields(List<String> required, List<Node> recordFieldList,
@@ -226,8 +212,6 @@ public class TypeGeneratorUtils {
                 RecordFieldWithDefaultValueNode defaultNode =
                         getRecordFieldWithDefaultValueNode(fieldSchema, fieldName, fieldTypeName, metadataNode);
                 recordFieldList.add(defaultNode);
-            } else if (fieldTypeName.toString().endsWith(NILLABLE)) {
-                recordFieldList.add(getRecordFieldWithDefaultValue(fieldName, fieldTypeName, metadataNode));
             } else {
                 RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
                         fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN),

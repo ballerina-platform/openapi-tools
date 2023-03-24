@@ -1,7 +1,7 @@
-public type Pet record {|
+public type Pet record {
     int id;
     string name;
     string tag?;
     string 'type?;
-    record {}? details = ();
-|};
+    record {}? details?;
+};

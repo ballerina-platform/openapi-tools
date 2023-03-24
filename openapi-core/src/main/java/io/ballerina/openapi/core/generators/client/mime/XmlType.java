@@ -49,7 +49,7 @@ public class XmlType extends MimeType {
         addImport(imports, XML_DATA);
 
         VariableDeclarationNode jsonVariable = GeneratorUtils.getSimpleStatement("json", "jsonBody",
-                "check payload.cloneWithType(json)");
+                "payload.toJson()");
         statementsList.add(jsonVariable);
         VariableDeclarationNode xmlBody = GeneratorUtils.getSimpleStatement("xml?", payloadName,
                 "check xmldata:fromJson(jsonBody)");

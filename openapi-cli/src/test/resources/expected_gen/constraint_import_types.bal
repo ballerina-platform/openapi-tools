@@ -1,4 +1,5 @@
 import ballerina/http;
+import ballerina/constraint;
 
 # Provides a set of configurations for controlling the behaviours when communicating with a remote HTTP endpoint.
 @display {label: "Connection Config"}
@@ -56,10 +57,8 @@ public type ProxyConfig record {|
     string password = "";
 |};
 
-public type PetArr Pet[];
-
-public type Pet record {
-    int petId;
-    string name;
-    string petType?;
+public type User record {
+    @constraint:String {maxLength: 10}
+    string name?;
+    int age?;
 };

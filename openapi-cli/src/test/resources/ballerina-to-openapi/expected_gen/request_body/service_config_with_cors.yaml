@@ -1,0 +1,36 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /greeting:
+    post:
+      summary: A resource for generating greetings
+      operationId: postGreeting
+      requestBody:
+        description: the input string name
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        "201":
+          description: Created
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+components: {}

@@ -1,5 +1,5 @@
 # Successful response
-public type CurrentWeatherDataResponse record {|
+public type CurrentWeatherDataResponse record {
     # coord
     Coord coord?;
     # (more info Weather condition codes)
@@ -28,4 +28,4 @@ public type CurrentWeatherDataResponse record {|
     string name?;
     # Internal parameter
     int cod?;
-|};
+};

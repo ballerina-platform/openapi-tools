@@ -58,7 +58,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_PIPE_TOKEN
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for object type schema.
@@ -138,41 +137,37 @@ public class RecordTypeGenerator extends TypeGenerator {
      * @throws BallerinaOpenApiException throws when process has some failure.
      */
     public RecordMetadata getRecordMetadata() throws BallerinaOpenApiException {
-        boolean isOpenRecord = false;
+        boolean isOpenRecord = true;
         RecordRestDescriptorNode recordRestDescNode = null;
 
         if (schema.getAdditionalProperties() != null) {
             Object additionalProperties = schema.getAdditionalProperties();
-            if (additionalProperties.equals(true)) {
-                isOpenRecord = true;
-            } else if (additionalProperties instanceof Schema) {
+            if (additionalProperties instanceof Schema) {
                 Schema<?> additionalPropSchema = (Schema<?>) additionalProperties;
                 if (GeneratorUtils.hasConstraints(additionalPropSchema)) {
                     // use printStream to echo the error, because current openapi to ballerina implementation doesn't
                     // handle diagnostic message.
+                    isOpenRecord = false;
                     OUT_STREAM.println("WARNING: constraints in the OpenAPI contract will be ignored for the " +
                             "additionalProperties field, as constraints are not supported on Ballerina rest record " +
                             "field.");
                 }
                 if (additionalPropSchema.get$ref() != null) {
+                    isOpenRecord = false;
                     recordRestDescNode = getRestDescriptorNodeForReference(additionalPropSchema);
                 } else if (additionalPropSchema.getType() != null) {
+                    isOpenRecord = false;
                     recordRestDescNode = getRecordRestDescriptorNode(additionalPropSchema);
                 } else if (additionalPropSchema instanceof ComposedSchema) {
-                    isOpenRecord = true;
                     OUT_STREAM.println("WARNING: generating Ballerina rest record field will be ignored for the " +
                             "OpenAPI contract additionalProperties type `ComposedSchema`, as it is not supported on " +
                             "Ballerina rest record field.");
-                } else {
-                    isOpenRecord = true;
                 }
+            } else if (additionalProperties.equals(false)) {
+                isOpenRecord = false;
             }
-        } else if (schema.getType() != null && schema.getType().equals(OBJECT) && schema.getProperties() == null &&
-                schema.getAdditionalProperties() == null) {
-            // this above condition is to check the free-form object [ex: type:object without any fields or
-            // additional fields], that object should be mapped to the open record.
-            isOpenRecord = true;
         }
+
         return new RecordMetadata.Builder()
                         .withIsOpenRecord(isOpenRecord)
                         .withRestDescriptorNode(recordRestDescNode).build();
