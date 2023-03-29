@@ -68,16 +68,12 @@ import static io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils.get
  */
 public class ArrayTypeGenerator extends TypeGenerator {
     private String parentType = null;
-    private TypeDefinitionNode arrayItemWithConstraint = null;
 
     public ArrayTypeGenerator(Schema schema, String typeName, String parentType) {
         super(schema, typeName);
         this.parentType = parentType;
     }
 
-    public TypeDefinitionNode getArrayItemWithConstraint() {
-        return arrayItemWithConstraint;
-    }
 
     /**
      * Generate TypeDescriptorNode for array type schemas. If array type is not given, type will be `AnyData`
@@ -89,7 +85,8 @@ public class ArrayTypeGenerator extends TypeGenerator {
         assert schema instanceof ArraySchema;
         ArraySchema arraySchema = (ArraySchema) schema;
         Schema<?> items = arraySchema.getItems();
-        boolean isConstraintsAvailable = !GeneratorMetaData.getInstance().isNullable() && hasConstraints(items);
+        boolean isConstraintsAvailable =
+                !GeneratorMetaData.getInstance().isNullable() && hasConstraints(items) && typeName != null;
         TypeGenerator typeGenerator;
         if (isConstraintsAvailable) {
             String normalizedTypeName = typeName.replaceAll(GeneratorConstants.SPECIAL_CHARACTER_REGEX, "").trim();
@@ -104,16 +101,19 @@ public class ArrayTypeGenerator extends TypeGenerator {
             if (constraintNode != null) {
                 typeAnnotations.add(constraintNode);
             }
-            arrayItemWithConstraint = typeGenerator.generateTypeDefinitionNode(
+            TypeDefinitionNode arrayItemWithConstraint = typeGenerator.generateTypeDefinitionNode(
                     createIdentifierToken(typeName),
                     new ArrayList<>(),
                     typeAnnotations);
+            typeDefinitionNodeList.add(arrayItemWithConstraint);
         } else {
             typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
         }
 
         TypeDescriptorNode typeDescriptorNode;
-        if (typeGenerator instanceof PrimitiveTypeGenerator && isConstraintsAvailable) {
+        typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
+        if ((typeGenerator instanceof PrimitiveTypeGenerator ||
+                typeGenerator instanceof ArrayTypeGenerator) && isConstraintsAvailable) {
             typeDescriptorNode = NodeParser.parseTypeDescriptor(typeName);
         } else {
             typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();

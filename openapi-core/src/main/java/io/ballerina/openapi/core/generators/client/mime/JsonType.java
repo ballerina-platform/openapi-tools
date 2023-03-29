@@ -37,7 +37,7 @@ public class JsonType extends MimeType {
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
         String payloadName = "jsonBody";
         VariableDeclarationNode jsonVariable = GeneratorUtils.getSimpleStatement("json", payloadName
-                , "check payload.cloneWithType(json)");
+                , "payload.toJson()");
         statementsList.add(jsonVariable);
         setPayload(statementsList, payloadName, mediaTypeEntry.getKey());
     }

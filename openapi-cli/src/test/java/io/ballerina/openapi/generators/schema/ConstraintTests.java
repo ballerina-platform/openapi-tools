@@ -23,6 +23,7 @@ import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
@@ -33,6 +34,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -101,6 +103,35 @@ public class ConstraintTests {
         assertTrue(diagnostics.isEmpty());
     }
 
+    @Test(description = "Tests with nested array field has constraint.")
+    public void testNestedArrayWithConstraint() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
+                        "/nested_array_with_constraint.yaml"), true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/nested_array.bal",
+                syntaxTree);
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
+        boolean hasErrors = diagnostics.stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        assertFalse(hasErrors);
+    }
+
+    @Test
+    public void testAdditionalPropertiesWithConstraint() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
+                "/additional_properties_with_constraint.yaml"), true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/constraint/additional_properties_with_constraint.bal", syntaxTree);
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
+        boolean hasErrors = diagnostics.stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        assertFalse(hasErrors);
+    }
     //TODO current tool doesn't handle union type: therefore union type constraint will handle once union type
     // generation available in tool.
 }

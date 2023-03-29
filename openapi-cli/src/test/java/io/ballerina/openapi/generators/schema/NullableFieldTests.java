@@ -118,4 +118,14 @@ public class NullableFieldTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/" +
                         "nullable_anyof_array_schema.bal", syntaxTree);
     }
+
+    @Test(description = "Test for type generation for object schema with no properties")
+    public void testNullableEmptyObjectSchema() throws IOException, BallerinaOpenApiException, FormatterException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+                "/null_empty_record.yaml"), true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/" +
+                "null_empty_record.bal", syntaxTree);
+    }
 }

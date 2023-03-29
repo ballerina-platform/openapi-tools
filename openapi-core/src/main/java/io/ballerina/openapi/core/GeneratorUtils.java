@@ -22,6 +22,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.SymbolKind;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.ChildNodeEntry;
@@ -31,6 +32,7 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
 import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Minutiae;
 import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
@@ -40,6 +42,8 @@ import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.RecordFieldNode;
+import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
@@ -95,6 +99,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -130,6 +135,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML_CONTENT;
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.CLOSE_CURLY_BRACE;
+import static io.ballerina.openapi.core.GeneratorConstants.CONSTRAINT;
 import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_PARAM_COMMENT;
 import static io.ballerina.openapi.core.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.core.GeneratorConstants.GET;
@@ -841,7 +847,73 @@ public class GeneratorUtils {
             tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);
             unusedTypeDefinitionNameList = getUnusedTypeDefinitionNameList(tempSourceFiles);
         }
+        ModulePartNode rootNode = schemaSyntaxTree.rootNode();
+        NodeList<ImportDeclarationNode> imports = rootNode.imports();
+        imports = removeUnusedImports(rootNode, imports);
+
+        ModulePartNode modiedModulePartNode = rootNode.modify(imports, rootNode.members(), rootNode.eofToken());
+        schemaSyntaxTree = schemaSyntaxTree.modifyWith(modiedModulePartNode);
+        schemaContent = Formatter.format(schemaSyntaxTree).toString();
         return schemaContent;
+    }
+
+    private static NodeList<ImportDeclarationNode> removeUnusedImports(ModulePartNode rootNode,
+                                                                       NodeList<ImportDeclarationNode> imports) {
+        //TODO: This function can be extended to check all the unused imports, for this time only handle constraint
+        // imports
+        boolean hasConstraint = false;
+        NodeList<ModuleMemberDeclarationNode> members = rootNode.members();
+        for (ModuleMemberDeclarationNode member:members) {
+            if (member.kind().equals(SyntaxKind.TYPE_DEFINITION)) {
+                TypeDefinitionNode typeDefNode = (TypeDefinitionNode) member;
+                if (typeDefNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
+                    RecordTypeDescriptorNode record = (RecordTypeDescriptorNode) typeDefNode.typeDescriptor();
+                    NodeList<Node> fields = record.fields();
+                    //Traverse record fields to check for constraints
+                    for (Node node: fields) {
+                        if (node instanceof RecordFieldNode) {
+                            RecordFieldNode recField = (RecordFieldNode) node;
+                            if (recField.metadata().isPresent()) {
+                                hasConstraint = traverseAnnotationNode(recField.metadata(), hasConstraint);
+                            }
+                        }
+                        if (hasConstraint) {
+                            break;
+                        }
+                    }
+                }
+
+                if (typeDefNode.metadata().isPresent()) {
+                    hasConstraint = traverseAnnotationNode(typeDefNode.metadata(), hasConstraint);
+                }
+            }
+            if (hasConstraint) {
+                break;
+            }
+        }
+        if (!hasConstraint) {
+            for (ImportDeclarationNode importNode: imports) {
+                if (importNode.orgName().isPresent()) {
+                    if (importNode.orgName().get().toString().equals("ballerina/") &&
+                            importNode.moduleName().get(0).text().equals(CONSTRAINT)) {
+                        imports = imports.remove(importNode);
+                    }
+                }
+            }
+        }
+        return imports;
+    }
+
+    private static boolean traverseAnnotationNode(Optional<MetadataNode> recField, boolean hasConstraint) {
+        MetadataNode metadata = recField.get();
+        for (AnnotationNode annotation : metadata.annotations()) {
+            String annotationRef = annotation.annotReference().toString();
+            if (annotationRef.startsWith(CONSTRAINT)) {
+                hasConstraint = true;
+                break;
+            }
+        }
+        return hasConstraint;
     }
 
     private static List<String> getUnusedTypeDefinitionNameList(Map<String, String> srcFiles) throws IOException {

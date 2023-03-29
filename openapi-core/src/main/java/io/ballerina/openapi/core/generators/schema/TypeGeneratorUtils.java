@@ -49,6 +49,7 @@ import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.Union
 import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.MapSchema;
@@ -71,7 +72,6 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordFieldWithDefaultValueNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.AT_TOKEN;
@@ -79,7 +79,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
 
 /**
  * Contains util functions needed for schema generation.
@@ -194,23 +193,11 @@ public class TypeGeneratorUtils {
 
         if (required != null) {
             setRequiredFields(required, recordFieldList, field, fieldSchema, fieldName, fieldTypeName, metadataNode);
-        } else if (fieldTypeName.toString().endsWith(NILLABLE)) {
-            recordFieldList.add(getRecordFieldWithDefaultValue(fieldName, fieldTypeName, metadataNode));
         } else {
             RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
                     fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
             recordFieldList.add(recordFieldNode);
         }
-    }
-
-    private static RecordFieldWithDefaultValueNode getRecordFieldWithDefaultValue(IdentifierToken fieldName,
-                                                                                  TypeDescriptorNode fieldType,
-                                                                                  MetadataNode metadataNode) {
-        SimpleNameReferenceNode nilExpression = createSimpleNameReferenceNode(
-                createIdentifierToken("()"));
-        return createRecordFieldWithDefaultValueNode(metadataNode,
-                null, fieldType, fieldName, createToken(EQUAL_TOKEN),
-                nilExpression, createToken(SEMICOLON_TOKEN));
     }
 
     private static void setRequiredFields(List<String> required, List<Node> recordFieldList,
@@ -225,8 +212,6 @@ public class TypeGeneratorUtils {
                 RecordFieldWithDefaultValueNode defaultNode =
                         getRecordFieldWithDefaultValueNode(fieldSchema, fieldName, fieldTypeName, metadataNode);
                 recordFieldList.add(defaultNode);
-            } else if (fieldTypeName.toString().endsWith(NILLABLE)) {
-                recordFieldList.add(getRecordFieldWithDefaultValue(fieldName, fieldTypeName, metadataNode));
             } else {
                 RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
                         fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN),
@@ -245,19 +230,27 @@ public class TypeGeneratorUtils {
                                                                                       TypeDescriptorNode fieldTypeName,
                                                                                       MetadataNode metadataNode) {
 
-        Token defaultValue;
+        Token defaultValueToken;
+        String defaultValue = fieldSchema.getDefault().toString().trim();
         if (fieldSchema instanceof StringSchema) {
-            if (fieldSchema.getDefault().toString().trim().equals("\"")) {
-                defaultValue = AbstractNodeFactory.createIdentifierToken("\"" + "\\" +
+            if (defaultValue.equals("\"")) {
+                defaultValueToken = AbstractNodeFactory.createIdentifierToken("\"" + "\\" +
                         fieldSchema.getDefault().toString() + "\"");
             } else {
-                defaultValue = AbstractNodeFactory.createIdentifierToken("\"" +
+                defaultValueToken = AbstractNodeFactory.createIdentifierToken("\"" +
                         fieldSchema.getDefault().toString() + "\"");
             }
+        } else if (!defaultValue.matches("^[0-9]*$") && !defaultValue.matches("^(\\d*\\.)?\\d+$")
+                && !(defaultValue.startsWith("[") && defaultValue.endsWith("]")) &&
+                !(fieldSchema instanceof BooleanSchema)) {
+            //This regex was added due to avoid adding quotes for default values which are numbers and array values.
+            //Ex: default: 123
+            defaultValueToken = AbstractNodeFactory.createIdentifierToken("\"" +
+                    fieldSchema.getDefault().toString() + "\"");
         } else {
-            defaultValue = AbstractNodeFactory.createIdentifierToken(fieldSchema.getDefault().toString());
+            defaultValueToken = AbstractNodeFactory.createIdentifierToken(fieldSchema.getDefault().toString());
         }
-        ExpressionNode expressionNode = createRequiredExpressionNode(defaultValue);
+        ExpressionNode expressionNode = createRequiredExpressionNode(defaultValueToken);
         return NodeFactory.createRecordFieldWithDefaultValueNode
                 (metadataNode, null, fieldTypeName, fieldName, createToken(EQUAL_TOKEN),
                         expressionNode, createToken(SEMICOLON_TOKEN));
