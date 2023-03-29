@@ -1,0 +1,704 @@
+openapi: "3.0.1"
+
+info:
+  title: "OpenWeatherMap API"
+  description: >
+    This is a generated connector from [Open Weather Map API version 2.5](https://openweathermap.org/) OpenAPI Specification. 
+
+    The Open Weather Map API provides access to current weather data and weather forecast of any location worldwide including 200,000 cities by consuming the [`Current Weather Data`](https://openweathermap.org/current) and [`One Call`](https://openweathermap.org/api/one-call-api) API endpoints.
+  version: "2.5.2"
+  termsOfService: "https://openweathermap.org/terms"
+  contact:
+    name: "OpenWeatherMap API"
+    url: "https://openweathermap.org/api"
+  license:
+    name: "CC Attribution-ShareAlike 4.0 (CC BY-SA 4.0)"
+    url: "https://openweathermap.org/price"
+  x-ballerina-display:
+    label: OpenWeatherMap
+    iconPath: "icon.png"
+  x-ballerina-init-description: >
+    The connector initialization requires setting the API credentials. 
+    
+    Please create an account at https://openweathermap.org and an API key following [this guide](https://openweathermap.org/appid).  Choose a subscription that matches with your requirements.
+servers:
+  - url: "http://api.openweathermap.org/data/2.5/"
+
+paths:
+  /weather:
+    get:
+      tags:
+        - Current Weather Data
+      summary: "Access current weather data for any location. **Note**: All parameters are optional, but you must provide at least one parameter. Calling the API by city ID (using the `id` parameter) will provide the most precise location results."
+      description: "Access current weather data for any location. **Note**: All parameters are optional, but you must provide at least one parameter. Calling the API by city ID (using the `id` parameter) will provide the most precise location results."
+      operationId: getCurretWeatherData
+      parameters:
+        - $ref: '#/components/parameters/cityName'
+        - $ref: '#/components/parameters/id'
+        - $ref: '#/components/parameters/lat'
+        - $ref: '#/components/parameters/lon'
+        - $ref: '#/components/parameters/zip'
+        - $ref: '#/components/parameters/units'
+        - $ref: '#/components/parameters/lang'
+        - $ref: '#/components/parameters/mode'
+      x-ballerina-display:
+        label: "Current Weather"
+      responses:
+        200:
+          description: Current weather data of the given location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentWeatherData'
+        404:
+          description: Not found response
+          content:
+            text/plain:
+              schema:
+                title: Weather not found
+                type: string
+                example: Not found
+  /onecall:
+    get:
+      tags:
+        - Weather Forecast
+      summary: "Access to current weather, minute forecast for 1 hour, hourly forecast for 48 hours, daily forecast for 7 days and government weather alerts."
+      description: "Access to current weather, minute forecast for 1 hour, hourly forecast for 48 hours, daily forecast for 7 days and government weather alerts."
+      operationId: getWeatherForecast
+      parameters:
+        - description: "Latitude"
+          in: query
+          name: lat
+          required: true
+          schema:
+            type: string
+          x-ballerina-display:
+            label: Latitude
+        - description: "Longtitude"
+          in: query
+          name: lon
+          required: true
+          schema:
+            type: string
+          x-ballerina-display:
+            label: Longtitude
+        - description: "Exclude parts of the weather data from the API response. It should be a comma-delimited list (without spaces)."
+          in: query
+          name: exclude
+          required: false
+          schema:
+            enum:
+              - 'current'
+              - 'minutely'
+              - 'hourly'
+              - 'daily'
+              - 'alerts'
+            type: string
+          x-ballerina-display:
+            label: Exclude
+        - description: "For temperature in Fahrenheit and wind speed in miles/hour, use `units=imperial`. For temperature in Celsius and wind speed in meter/sec, use `units=metric`. Temperature in Kelvin and wind speed in meter/sec is used by default, so there is no need to use the units parameter in the API call if you want this."
+          in: query
+          name: units
+          required: false
+          schema:
+            type: string
+          x-ballerina-display:
+            label: Units
+        - description: 'Language'
+          in: query
+          name: lang
+          required: false
+          schema:
+            type: string
+          x-ballerina-display:
+            label: Language
+      x-ballerina-display:
+        label: "Weather Forecast"
+      responses:
+        200:
+          description: Weather forecast of the given location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherForecast'
+        404:
+          description: Not found response
+          content:
+            text/plain:
+              schema:
+                title: Weather not found
+                type: string
+                example: Not found
+
+security:
+  - app_id: []
+
+tags:
+  - name: Current Weather Data
+    description: "Get current weather details"
+  - name: Weather Forecast
+    description: "Get data related to weather forecast"
+
+externalDocs:
+  description: API Documentation
+  url: https://openweathermap.org/api
+
+components:
+  parameters:
+    cityName:
+      name: q
+      in: query
+      description: "City name, or city name and country code. For the query value, type the city name and optionally the country code divided by comma; use ISO 3166 country codes."
+      schema:
+        type: string
+      x-ballerina-display:
+        label: "CityName or StateCode or CountryCode"
+    id:
+      name: id
+      in: query
+      description: "City ID. Example: `2172797`. The List of city IDs can be downloaded [here](http://bulk.openweathermap.o/sample/)."
+      schema:
+        type: string
+      x-ballerina-display:
+        label: "City Id"
+    lat:
+      name: lat
+      in: query
+      description: "Latitude"
+      schema:
+        type: string
+      x-ballerina-display:
+        label: "Latitude"
+
+    lon:
+      name: lon
+      in: query
+      description: "Longtitude"
+      schema:
+        type: string
+      x-ballerina-display:
+        label: "Longitude"
+
+    zip:
+      name: zip
+      in: query
+      description: "Zip code. Search by zip code. Example: 95050,us."
+      schema:
+        type: string
+      x-ballerina-display:
+        label: "Zip Code"
+
+    units:
+      name: units
+      in: query
+      description: 'Temperature in Fahrenheit use `units=imperial`, temperature in Celsius use `units=metric`, temperature in `Kelvin` is used by default.'
+      schema:
+        type: string
+        enum: [standard, metric, imperial]
+        default: "imperial"
+      x-ballerina-display:
+        label: "Units"
+
+    lang:
+      name: lang
+      in: query
+      description: 'Language'
+      schema:
+        type: string
+        enum: [ar, bg, ca, cz, de, el, en, fa, fi, fr, gl, hr, hu, it, ja, kr, la, lt, mk, nl, pl, pt, ro, ru, se, sk, sl, es, tr, ua, vi, zh_cn, zh_tw]
+        default: "en"
+      x-ballerina-display:
+        label: "Language"
+
+    mode:
+      name: mode
+      in: query
+      description: "Format of response. Possible values are `xml` and `html`. If mode parameter is empty the format is `json` by default."
+      schema:
+        type: string
+        enum: [json, xml, html]
+        default: "json"
+      x-ballerina-display:
+        label: "Mode"
+  schemas:
+    WeatherForecast:
+      type: object
+      description: "Weather forecast data"
+      properties:
+        lat:
+          type: number
+          description: Latitude
+        lon:
+          type: number
+          description: Longtitude
+        timezone:
+          type: string
+          description: Timezone name for the requested location
+        timezone_offset:
+          type: number
+          description: Shift in seconds from UTC
+        current:
+          $ref: '#/components/schemas/ForecastCurrent'
+          description: Current weather data
+        minutely:
+          type: array
+          items:
+            $ref: '#/components/schemas/Minutely'
+          description: Minutely weather forecast
+        hourly:
+          type: array
+          items:
+            $ref: '#/components/schemas/Hourly'
+          description: Hourly weather forecast
+        daily:
+          type: array
+          items:
+            $ref: '#/components/schemas/Daily'
+          description: Daily weather forecast
+        alerts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Alerts'
+          description: Government weather alerts
+    Alerts:
+      description: Government weather alerts
+      type: object
+      properties:
+        sender_name:
+          type: string
+          description:  Name of the alert source.
+        event:
+          type: string
+          description: Alert event name
+        description:
+          type: string
+          description: Description of the alert
+        start:
+          type: number
+          description: Date and time of the start of the alert, Unix, UTC
+        end:
+          type: number
+          description: Date and time of the end of the alert, Unix, UTC
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags related to alerts
+    Temp:
+      type: object
+      description: Temperature data
+      properties:
+        day:
+          type: number
+          description: Day temperature.
+        min:
+          type: number
+          description: Min daily temperature.
+        max:
+          type: number
+          description: Max daily temperature.
+        night:
+          type: number
+          description: Night temperature.
+        eve:
+          type: number
+          description: Evening temperature.
+        morn:
+          type: number
+          description: Morning temperature
+    FeelsLike:
+      type: object
+      description: "Human perception of temperature each time of the day"
+      properties:
+        day:
+          type: number
+          description: Day temperature.
+        night:
+          type: number
+          description: Night temperature.
+        eve:
+          type: number
+          description: Evening temperature.
+        morn:
+          type: number
+          description: Morning temperature.
+    Daily:
+      type: object
+      description: "Daily forecast weather data API response"
+      properties:
+        dt:
+          type: number
+          description: Time of the forecasted data, Unix, UTC
+        temp:
+          $ref: '#/components/schemas/Temp'
+          description: Temperature data
+        feels_like:
+          $ref: '#/components/schemas/FeelsLike'
+          description: "Temperature. This accounts for the human perception of weather."
+        moonrise:
+          type: number
+          description: The time of when the moon rises for this day, Unix, UTC
+        moonset:
+          type: number
+          description: The time of when the moon sets for this day, Unix, UTC
+        moon_phase:
+          type: number
+          description: "Moon phase. 0 and 1 are 'new moon', 0.25 is 'first quarter moon', 0.5 is 'full moon' and 0.75 is 'last quarter moon."
+        pressure:
+          type: number
+          description: "Atmospheric pressure on the sea level, hPa"
+        humidity:
+          type: number
+          description: Humidity, %
+        dew_point:
+          type: number
+          description: "Atmospheric temperature below which water droplets begin to condense and dew can form."
+        uvi:
+          type: number
+          description:  The maximum value of UV index for the day
+        clouds:
+          type: number
+          description: Cloudiness, %
+        visibility:
+          type: number
+          description: Visibility of the atmosphere
+        wind_deg:
+          type: number
+          description: Wind direction, degrees (meteorological)
+        wind_gust:
+          type: number
+          description: "(where available) Wind gust. Units – default: metre/sec, metric: metre/sec, imperial: miles/hour."
+        pop:
+          type: number
+          description: Probability of precipitation
+        weather:
+          type: array
+          items:
+            $ref: '#/components/schemas/Weather'
+          description: More info Weather condition codes
+        rain:
+          type: number
+          description: where available) Precipitation volume, mm
+    Hourly:
+      type: object
+      description: "Hourly forecast weather data API response"
+      properties:
+        dt:
+          type: number
+          description: Time of the forecasted data, Unix, UTC
+        temp:
+          type: number
+          description: "Temperature. Units – default: kelvin, metric: Celsius, imperial: Fahrenheit."
+        feels_like:
+          type: number
+          description: "Temperature. This accounts for the human perception of weather."
+        pressure:
+          type: number
+          description: "Atmospheric pressure on the sea level, hPa"
+        humidity:
+          type: number
+          description: "Humidity, %"
+        dew_point:
+          type: number
+          description: "Atmospheric temperature below which water droplets begin to condense and dew can form."
+        uvi:
+          type: number
+          description: "UV index"
+        clouds:
+          type: number
+          description: "Cloudiness, %"
+        visibility:
+          type: number
+          description: "Average visibility, metres"
+        wind_deg:
+          type: number
+          description: "Wind direction, degrees (meteorological)"
+        wind_gust:
+          type: number
+          description: "(where available) Wind gust. Units – default: metre/sec, metric: metre/sec, imperial: miles/hour."
+        pop:
+          type: number
+          description: "Probability of precipitatio"
+        weather:
+          type: array
+          items:
+            $ref: '#/components/schemas/Weather'
+          description: More info Weather condition codes
+        rain:
+          $ref: '#/components/schemas/Rain'
+          description: Nature of the rain
+    Minutely:
+      type: object
+      properties:
+        dt:
+          type: number
+          description: Time of the forecasted data, unix, UTC
+        precipitation:
+          type: number
+          description: Precipitation volume, mm
+      description: "Minute forecast weather data API response"
+    ForecastCurrent:
+      type: object
+      description: Current weather data API response
+      properties:
+        dt:
+          type: number
+          description: Current time, Unix, UTC
+        sunrise:
+          type: number
+          description: Sunrise time, Unix, UTC
+        sunset:
+          type: number
+          description: Sunset time, Unix, UTC
+        temp:
+          type: number
+          description: "Temperature. Units - default: kelvin, metric: Celsius, imperial: Fahrenheit."
+        feels_like:
+          type: number
+          description: "Temperature. This temperature parameter accounts for the human perception of weather."
+        pressure:
+          type: number
+          description: "Atmospheric pressure on the sea level, hPa"
+        humidity:
+          type: number
+          description: "Humidity, %"
+        dew_point:
+          type: number
+          description: "Atmospheric temperature below which water droplets begin to condense and dew can form."
+        uvi:
+          type: number
+          description: "Current UV index"
+        clouds:
+          type: number
+          description: "Cloudiness, %"
+        visibility:
+          type: number
+          description: Average visibility, metres
+        wind_speed:
+          type: number
+          description: "Wind speed. Wind speed. Units – default: metre/sec, metric: metre/sec, imperial: miles/hour."
+        wind_deg:
+          type: number
+          description: Wind direction, degrees (meteorological)
+        weather:
+          type: array
+          items:
+            $ref: '#/components/schemas/Weather'
+          description: More info Weather condition codes
+        rain:
+          $ref: '#/components/schemas/Rain'
+          description: Nature of the rain
+        snow:
+          $ref: '#/components/schemas/Snow'
+          description: Nature of the Snow
+    CurrentWeatherData:
+      title: Successful response
+      description: Current weather data
+      type: object
+      properties:
+        coord:
+          $ref: '#/components/schemas/Coord'
+          description: City geo location
+        weather:
+          type: array
+          items:
+            $ref: '#/components/schemas/Weather'
+          description: More info Weather condition codes
+        base:
+          type: string
+          description: Internal parameter
+          example: cmc stations
+        main:
+          $ref: '#/components/schemas/Main'
+          description: Basic weather data
+        visibility:
+          type: integer
+          description: Visibility, meter
+          example: 16093
+        wind:
+          $ref: '#/components/schemas/Wind'
+          description: Nature of the wind
+        clouds:
+          $ref: '#/components/schemas/Clouds'
+          description: Nature of the clouds
+        rain:
+          $ref: '#/components/schemas/Rain'
+          description: Nature of the rain
+        snow:
+          $ref: '#/components/schemas/Snow'
+          description: Nature of the snow
+        dt:
+          type: integer
+          description: Time of data calculation, unix, UTC
+          format: int32
+          example: 1435658272
+        sys:
+          $ref: '#/components/schemas/Sys'
+          description: Internal data
+        id:
+          type: integer
+          description: City ID
+          format: int32
+          example: 2172797
+        name:
+          type: string
+          example: Cairns
+          description: City name
+        cod:
+          type: integer
+          description: Internal parameter
+          format: int32
+          example: 200
+    Coord:
+      title: Coord
+      type: object
+      description: City geo location
+      properties:
+        lon:
+          type: number
+          description: Longitude
+          example: 145.77000000000001
+        lat:
+          type: number
+          description: Latitude
+          example: -16.920000000000002
+    Weather:
+      title: Weather
+      type: object
+      description: Weather metadata
+      properties:
+        id:
+          type: integer
+          description: Weather condition id
+          format: int32
+          example: 803
+        main:
+          type: string
+          description: Group of weather parameters (Rain, Snow, Extreme etc.)
+          example: Clouds
+        description:
+          type: string
+          description: Weather condition within the group
+          example: broken clouds
+        icon:
+          type: string
+          description: Weather icon id
+          example: 04n
+    Main:
+      title: Main
+      type: object
+      description: Basic weather data
+      properties:
+        temp:
+          type: number
+          description: 'Temperature. Unit Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.'
+          example: 293.25
+        pressure:
+          type: integer
+          description: Atmospheric pressure (on the sea level, if there is no sea_level or grnd_level data), hPa
+          format: int32
+          example: 1019
+        humidity:
+          type: integer
+          description: Humidity, %
+          format: int32
+          example: 83
+        temp_min:
+          type: number
+          description: 'Minimum temperature at the moment.'
+          example: 289.81999999999999
+        temp_max:
+          type: number
+          description: 'Maximum temperature at the moment.'
+          example: 295.37
+        sea_level:
+          type: number
+          description: Atmospheric pressure on the sea level, hPa
+          example: 984
+        grnd_level:
+          type: number
+          description: Atmospheric pressure on the ground level, hPa
+          example: 990
+    Wind:
+      title: Wind
+      type: object
+      description: Nature of the wind
+      properties:
+        speed:
+          type: number
+          description: 'Wind speed. Unit Default: meter/sec, Metric: meter/sec, Imperial: miles/hour.'
+          example: 5.0999999999999996
+        deg:
+          type: integer
+          description: Wind direction, degrees (meteorological)
+          format: int32
+          example: 150
+    Clouds:
+      title: Clouds
+      type: object
+      description: Nature of the clouds
+      properties:
+        all:
+          type: integer
+          description: Cloudiness, %
+          format: int32
+          example: 75
+    Rain:
+      title: Rain
+      type: object
+      description: Nature of the rain
+      properties:
+        3h:
+          type: integer
+          description: Rain volume for the last 3 hours
+          format: int32
+          example: 3
+    Snow:
+      title: Snow
+      type: object
+      description: Snow volume information
+      properties:
+        3h:
+          type: number
+          description: Snow volume for the last 3 hours
+          example: 6
+    Sys:
+      title: Sys
+      type: object
+      description: System data
+      properties:
+        type:
+          type: integer
+          description: Internal parameter
+          format: int32
+          example: 1
+        id:
+          type: integer
+          description: Internal parameter
+          format: int32
+          example: 8166
+        message:
+          type: number
+          description: Internal parameter
+          example: 0.0166
+        country:
+          type: string
+          description: Country code (GB, JP etc.)
+          example: AU
+        sunrise:
+          type: integer
+          description: Sunrise time, unix, UTC
+          format: int32
+          example: 1435610796
+        sunset:
+          type: integer
+          description: Sunset time, unix, UTC
+          format: int32
+          example: 1435650870
+
+  securitySchemes:
+    app_id:
+      type: apiKey
+      description: Represents API Key `appid`
+      name: appid
+      in: query
