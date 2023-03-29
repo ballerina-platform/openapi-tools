@@ -254,14 +254,19 @@ public class GeneratorUtils {
             }
             if (pathParam.trim().equals(getValidName(parameter.getName().trim(), false))
                     && parameter.getIn().equals("path")) {
+                String paramType;
+                if (parameter.getSchema().get$ref() != null) {
+                    paramType = getValidName(extractReferenceType(parameter.getSchema().get$ref()), true);
+                } else {
+                    paramType = convertOpenAPITypeToBallerina(parameter.getSchema().getType());
+                }
 
                 // TypeDescriptor
                 BuiltinSimpleNameReferenceNode builtSNRNode = createBuiltinSimpleNameReferenceNode(
                         null,
                         parameter.getSchema() == null ?
                                 createIdentifierToken(STRING) :
-                                createIdentifierToken(
-                                        convertOpenAPITypeToBallerina(parameter.getSchema().getType())));
+                                createIdentifierToken(paramType));
                 IdentifierToken paramName = createIdentifierToken(
                         hasSpecialCharacter ?
                                 getValidName(pathNode, false) :
