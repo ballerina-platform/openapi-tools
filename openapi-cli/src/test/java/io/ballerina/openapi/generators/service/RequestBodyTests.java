@@ -132,4 +132,14 @@ public class RequestBodyTests {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/reference_rb.bal", syntaxTree);
     }
+
+    @Test(description = "RequestBody has content schema is null")
+    public void contentSchemaIsNull() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/requestBody/content_schema_null.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "requestBody/content_schema_null.bal", syntaxTree);
+    }
 }
