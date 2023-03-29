@@ -403,6 +403,32 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test(description = "Test Ballerina service skeleton generation for catch-all path")
+    public void generateServiceForResourceWithCatchAllPath() {
+        final String serviceName = "openapipetstore";
+        String definitionPath = RES_DIR.resolve("petstore_catch_all_path.yaml").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+
+        try {
+            String expectedServiceContent = getStringFromGivenBalFile(
+                    expectedServiceFile, "petstore_catch_all_path.bal");
+            generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter, false);
+            if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
+                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
+                generatedService = (generatedService.trim()).replaceAll("\\s+", "");
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
+
+                Assert.assertTrue(generatedService.contains(expectedServiceContent));
+            } else {
+                Assert.fail("Service was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore_service.bal");
+        }
+    }
+
     @Test(description = "Test openapi definition to ballerina source code generation",
             dataProvider = "fileProvider")
     public void openApiToBallerinaCodeGenTest(String yamlFile, String expectedFile) {
