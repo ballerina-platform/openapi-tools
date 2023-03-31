@@ -72,6 +72,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -174,7 +175,9 @@ import static io.ballerina.openapi.core.GeneratorConstants.HTTP;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP2_SETTINGS;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP2_SETTINGS_FIELD;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP_CLIENT_CONFIG;
+import static io.ballerina.openapi.core.GeneratorConstants.HTTP_VERIONS_EXT;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP_VERSION;
+import static io.ballerina.openapi.core.GeneratorConstants.HTTP_VERSION_MAP;
 import static io.ballerina.openapi.core.GeneratorConstants.KEEP_ALIVE;
 import static io.ballerina.openapi.core.GeneratorConstants.OAUTH2;
 import static io.ballerina.openapi.core.GeneratorConstants.PASSWORD;
@@ -190,6 +193,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.SETTINGS;
 import static io.ballerina.openapi.core.GeneratorConstants.SSL_FIELD_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.GeneratorConstants.VALIDATION;
+import static io.ballerina.openapi.core.GeneratorConstants.X_BALLERINA_HTTP_CONFIGURATIONS;
 import static io.ballerina.openapi.core.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 
@@ -208,6 +212,7 @@ public class BallerinaAuthConfigGenerator {
     private String clientCredGrantTokenUrl;
     private String passwordGrantTokenUrl;
     private String refreshTokenUrl;
+    private String httpVersion = "http:HTTP_2_0";
     private final Set<String> authTypes = new LinkedHashSet<>();
 
     private List<TypeDefinitionNode> authRelatedTypeDefinitionNodes = new ArrayList<>();
@@ -282,6 +287,21 @@ public class BallerinaAuthConfigGenerator {
             if (openAPI.getComponents().getSecuritySchemes() != null) {
                 Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
                 setAuthTypes(securitySchemeMap);
+            }
+
+            // TODO: Handle the scenarion when invalid http version is given.
+            //  No diagnosics available at this level to send a warning.
+            //  Currently ignore the values and gen with default.
+            if (openAPI.getExtensions() != null &&
+                    openAPI.getExtensions().containsKey(X_BALLERINA_HTTP_CONFIGURATIONS)) {
+                LinkedHashMap<String, String> extFields =
+                        (LinkedHashMap<String, String>) openAPI.getExtensions().get(X_BALLERINA_HTTP_CONFIGURATIONS);
+                if (extFields.containsKey(HTTP_VERIONS_EXT)) {
+                    String httpVersion = extFields.get(HTTP_VERIONS_EXT);
+                    if (httpVersion != null && HTTP_VERSION_MAP.containsKey(httpVersion)) {
+                        this.httpVersion = HTTP_VERSION_MAP.get(httpVersion);
+                    }
+                }
             }
 
             // generate related records
@@ -1181,7 +1201,7 @@ public class BallerinaAuthConfigGenerator {
         TypeDescriptorNode httpVersionFieldType = createSimpleNameReferenceNode(createIdentifierToken(HTTP_VERSION));
         IdentifierToken httpVersionFieldName = createIdentifierToken("httpVersion");
         RequiredExpressionNode httpVersionExpression =
-                createRequiredExpressionNode(createIdentifierToken("http:HTTP_2_0"));
+                createRequiredExpressionNode(createIdentifierToken(this.httpVersion));
         RecordFieldWithDefaultValueNode httpVersionFieldNode = NodeFactory.createRecordFieldWithDefaultValueNode(
                 httpVersionMetadata, null, httpVersionFieldType, httpVersionFieldName,
                 equalToken, httpVersionExpression, semicolonToken);
