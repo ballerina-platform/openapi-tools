@@ -251,4 +251,40 @@ public class TestConstants {
             "Enabled by default\n" +
             "    boolean validation = true;\n" +
             "|};";
+
+    public static final String CONNECTION_CONFIG_HTTP_VERSION_1_1 = "" +
+            "# Provides a set of configurations for controlling the behaviours when communicating " +
+            "with a remote HTTP endpoint.\n" +
+            "@display {label: \"Connection Config\"}\n" +
+            "public type ConnectionConfig record {|\n" +
+            "    # The HTTP version understood by the client\n" +
+            "    http:HttpVersion httpVersion = http:HTTP_1_1;\n" +
+            "    # Configurations related to HTTP/1.x protocol\n" +
+            "    ClientHttp1Settings http1Settings?;\n" +
+            "    # Configurations related to HTTP/2 protocol\n" +
+            "    http:ClientHttp2Settings http2Settings?;\n" +
+            "    # The maximum time to wait (in seconds) for a response before closing the connection\n" +
+            "    decimal timeout = 60;\n" +
+            "    # The choice of setting `forwarded`/`x-forwarded` header\n" +
+            "    string forwarded = \"disable\";\n" +
+            "    # Configurations associated with request pooling\n" +
+            "    http:PoolConfiguration poolConfig?;\n" +
+            "    # HTTP caching related configurations\n" +
+            "    http:CacheConfig cache?;\n" +
+            "    # Specifies the way of handling compression (`accept-encoding`) header\n" +
+            "    http:Compression compression = http:COMPRESSION_AUTO;\n" +
+            "    # Configurations associated with the behaviour of the Circuit Breaker\n" +
+            "    http:CircuitBreakerConfig circuitBreaker?;\n" +
+            "    # Configurations associated with retrying\n" +
+            "    http:RetryConfig retryConfig?;\n" +
+            "    # Configurations associated with inbound response size limits\n" +
+            "    http:ResponseLimitConfigs responseLimits?;\n" +
+            "    # SSL/TLS-related options\n" +
+            "    http:ClientSecureSocket secureSocket?;\n" +
+            "    # Proxy server related options\n" +
+            "    http:ProxyConfig proxy?;\n" +
+            "    # Enables the inbound payload validation functionality which provided by the constraint package. " +
+            "    Enabled by default\n" +
+            "    boolean validation = true;\n" +
+            "|};";
 }
