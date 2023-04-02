@@ -63,6 +63,9 @@ public class PrimitiveTypeGenerator extends TypeGenerator {
             if (schema.getFormat() != null) {
                 typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(schema.getFormat().trim());
             }
+        } else if (schema.getType().equals(GeneratorConstants.STRING) && schema.getFormat() != null &&
+                schema.getFormat().equals(GeneratorConstants.BINARY)) {
+            typeDescriptorName = "record {byte[] fileContent; string fileName;}";
         }
         TypeDescriptorNode typeDescriptorNode = createSimpleNameReferenceNode(
                 createIdentifierToken(typeDescriptorName));

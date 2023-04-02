@@ -42,7 +42,7 @@ public isolated client class Client {
     remote isolated function updateUser(Path01_body payload) returns http:Response|error {
         string resourcePath = string `/path01`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         http:Response response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -53,7 +53,7 @@ public isolated client class Client {
     remote isolated function postUser(User payload) returns http:Response|error {
         string resourcePath = string `/path01`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         http:Response response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -65,7 +65,7 @@ public isolated client class Client {
     remote isolated function updateNewUser(User payload) returns http:Response|error {
         string resourcePath = string `/path02`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         http:Response response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -76,7 +76,7 @@ public isolated client class Client {
     remote isolated function postNewUser(User[] payload) returns http:Response|error {
         string resourcePath = string `/path02`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         http:Response response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -87,7 +87,7 @@ public isolated client class Client {
     remote isolated function updateXMLUser(Path03_body payload) returns http:Response|error {
         string resourcePath = string `/path03`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
         http:Response response = check self.clientEp->put(resourcePath, request);
@@ -99,7 +99,7 @@ public isolated client class Client {
     remote isolated function postXMLUser(Path03_body_1 payload) returns http:Response|error {
         string resourcePath = string `/path03`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
         http:Response response = check self.clientEp->post(resourcePath, request);
@@ -111,7 +111,7 @@ public isolated client class Client {
     remote isolated function postXMLUserInLineArray(Path04_body[] payload) returns http:Response|error {
         string resourcePath = string `/path04`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
         http:Response response = check self.clientEp->post(resourcePath, request);

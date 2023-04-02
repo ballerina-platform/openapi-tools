@@ -68,3 +68,18 @@ components:
           default: TagName
         type:
           type: string
+          default: <|endoftext|>
+          nullable: true
+        prompt:
+          default: <|endoftext|>
+          nullable: true
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+        anyOfField:
+          default: <|endoftext|>
+          anyOf:
+            - type: integer
+            - type: string

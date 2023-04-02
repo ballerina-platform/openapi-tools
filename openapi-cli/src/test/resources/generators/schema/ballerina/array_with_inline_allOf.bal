@@ -1,6 +1,6 @@
 # List of addresses
-public type Owner record {|
-    record {|
+public type Owner record {
+    record {
         # Street No
         string streetNo?;
         # House number
@@ -12,11 +12,11 @@ public type Owner record {|
         # Zip code
         int zipCode?;
         *NameData;
-    |}[] AdressList?;
+    }[] AdressList?;
     string[] Pets?;
-|};
+};
 
-public type NameData record {|
+public type NameData record {
     string FirstName?;
     string LastName?;
-|};
+};
