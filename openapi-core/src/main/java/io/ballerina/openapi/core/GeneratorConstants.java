@@ -315,6 +315,7 @@ public class GeneratorConstants {
         TYPE_MAP = Collections.unmodifiableMap(typeMap);
     }
 
+    public static final String DEFAULT_HTTP_VERSION = "2.0";
     public static final Map<String, String> HTTP_VERSION_MAP;
 
     static {
@@ -324,7 +325,6 @@ public class GeneratorConstants {
         httpVersionMap.put("2.0", "http:HTTP_2_0");
         HTTP_VERSION_MAP = Collections.unmodifiableMap(httpVersionMap);
     }
-
 
     //Error related
     public static final String UNSUPPORTED_MEDIA_ERROR = "Unsupported media type '%s' is given in the request body";
