@@ -40,7 +40,8 @@ public isolated client class Client {
     remote isolated function createPet(Pet payload) returns Pets|error {
         string resourcePath = string `/pets`;
         http:Request request = new;
-        request.setPayload(payload, "application/vnd.petstore.v3.diff+json");
+        json jsonBody = payload.toJson();
+        request.setPayload(jsonBody, "application/vnd.petstore.v3.diff+json");
         Pets response = check self.clientEp->post(resourcePath, request);
         return response;
     }
