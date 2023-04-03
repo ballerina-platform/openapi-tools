@@ -170,6 +170,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_HTTP1_SETTINGS
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_HTTP1_SETTINGS_FIELD;
 import static io.ballerina.openapi.core.GeneratorConstants.CONFIG;
 import static io.ballerina.openapi.core.GeneratorConstants.CONNECTION_CONFIG;
+import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_HTTP_VERSION;
 import static io.ballerina.openapi.core.GeneratorConstants.ENSURE_TYPE;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP2_SETTINGS;
@@ -212,7 +213,7 @@ public class BallerinaAuthConfigGenerator {
     private String clientCredGrantTokenUrl;
     private String passwordGrantTokenUrl;
     private String refreshTokenUrl;
-    private String httpVersion = "http:HTTP_2_0";
+    private String httpVersion = HTTP_VERSION_MAP.get(DEFAULT_HTTP_VERSION);
     private final Set<String> authTypes = new LinkedHashSet<>();
 
     private List<TypeDefinitionNode> authRelatedTypeDefinitionNodes = new ArrayList<>();
