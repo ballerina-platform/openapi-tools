@@ -95,6 +95,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.GeneratorConstants.PAYLOAD;
+import static io.ballerina.openapi.core.GeneratorConstants.RECORD;
 import static io.ballerina.openapi.core.GeneratorConstants.REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.GeneratorConstants.STRING;
@@ -523,8 +524,8 @@ public class FunctionSignatureGenerator {
                         paramType = getRequestBodyParameterForArraySchema(operationId, mediaTypeEntry, arraySchema);
                     } else if (schema instanceof ObjectSchema) {
                         ObjectSchema objectSchema = (ObjectSchema) schema;
-                        paramType = referencedRequestBodyName.isBlank() ? paramType : referencedRequestBodyName;
-                        getRequestBodyParameterForObjectSchema(referencedRequestBodyName, objectSchema);
+//                        paramType = referencedRequestBodyName.isBlank() ? paramType : referencedRequestBodyName;
+                        paramType = getRequestBodyParameterForObjectSchema(referencedRequestBodyName, objectSchema);
                     } else { // composed and object schemas are handled by the flatten
                         paramType = getBallerinaMediaType(mediaTypeEntryKey, true);
                     }
@@ -576,11 +577,15 @@ public class FunctionSignatureGenerator {
         }
     }
 
-    private void getRequestBodyParameterForObjectSchema (String recordName, ObjectSchema objectSchema)
+    private String getRequestBodyParameterForObjectSchema (String recordName, ObjectSchema objectSchema)
             throws BallerinaOpenApiException {
+        if (objectSchema.getProperties() == null) {
+            return RECORD;
+        }
         TypeDefinitionNode record =
                 ballerinaSchemaGenerator.getTypeDefinitionNode(objectSchema, recordName, new ArrayList<>());
         GeneratorUtils.updateTypeDefNodeList(recordName, record, typeDefinitionNodeList);
+        return recordName;
     }
 
     /**
