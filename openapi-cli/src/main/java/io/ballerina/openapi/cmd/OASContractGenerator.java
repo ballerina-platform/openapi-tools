@@ -26,11 +26,11 @@ import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.model.OASResult;
 import io.ballerina.openapi.converter.utils.CodegenUtils;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
-import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.ModuleId;
+import io.ballerina.projects.Package;
 import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.ProjectKind;
@@ -82,9 +82,7 @@ public class OASContractGenerator {
                                                   Boolean needJson) {
         // Load project instance for single ballerina file
         project = ProjectLoader.loadProject(servicePath);
-        DiagnosticResult diagnosticsFromCodeGenAndModify = project.currentPackage().runCodeGenAndModifyPlugins();
-        boolean hasErrorsFromCodeGenAndModify = diagnosticsFromCodeGenAndModify.diagnostics().stream()
-                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        Package packageName = project.currentPackage();
         DocumentId docId;
         Document doc;
         if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
@@ -93,7 +91,7 @@ public class OASContractGenerator {
             doc = project.currentPackage().module(moduleId).document(docId);
         } else {
             // Take module instance for traversing the syntax tree
-            Module currentModule = project.currentPackage().getDefaultModule();
+            Module currentModule = packageName.getDefaultModule();
             Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
 
             docId = documentIterator.next();
@@ -104,10 +102,10 @@ public class OASContractGenerator {
 
         syntaxTree = doc.syntaxTree();
         PackageCompilation compilation = project.currentPackage().getCompilation();
-        boolean hasCompilationErrors = compilation.diagnosticResult()
+        boolean hasErrors = compilation.diagnosticResult()
                 .diagnostics().stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
-        if (hasCompilationErrors || hasErrorsFromCodeGenAndModify) {
+        if (hasErrors) {
             // if there are any compilation errors, do not proceed
             return;
         }

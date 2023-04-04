@@ -21,10 +21,6 @@ package io.ballerina.openapi.core.generators.service;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
-import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
-import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
-import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
@@ -41,7 +37,6 @@ import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -75,12 +70,9 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeReferenceN
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURN_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.core.GeneratorConstants.ANYDATA;
-import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_RETURN_COMMENT;
-import static io.ballerina.openapi.core.GeneratorConstants.ERROR;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP_RESPONSE;
 import static io.ballerina.openapi.core.GeneratorConstants.PIPE;
 import static io.ballerina.openapi.core.GeneratorConstants.POST;
@@ -130,66 +122,31 @@ public class ReturnTypeGenerator {
      * @throws BallerinaOpenApiException
      */
     public ReturnTypeDescriptorNode getReturnTypeDescriptorNode(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                                NodeList<AnnotationNode> annotations, String path,
-                                                                List<Node> resourceFunctionDocs)
+                                                                NodeList<AnnotationNode> annotations, String path)
             throws BallerinaOpenApiException {
 
         ReturnTypeDescriptorNode returnNode;
-        List<String> returnDescriptions = new ArrayList<>();
         httpMethod = operation.getKey().name().toLowerCase(Locale.ENGLISH);
         if (operation.getValue().getResponses() != null) {
             ApiResponses responses = operation.getValue().getResponses();
             if (responses.size() > 1) {
                 //handle multiple response scenarios ex: status code 200, 400, 500
-                TypeDescriptorNode type = handleMultipleResponse(responses, returnDescriptions);
+                TypeDescriptorNode type = handleMultipleResponse(responses);
                 returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), annotations, type);
             } else if (responses.size() == 1) {
                 //handle single response
                 Iterator<Map.Entry<String, ApiResponse>> responseIterator = responses.entrySet().iterator();
                 Map.Entry<String, ApiResponse> response = responseIterator.next();
                 returnNode = handleSingleResponse(annotations, response);
-                // checks `ifEmpty` not `ifBlank` because user can intentionally set the description to empty string
-                if (response.getValue().getDescription() != null && !response.getValue().getDescription().isEmpty()) {
-                    returnDescriptions.add(response.getValue().getDescription());
-                } else {
-                    // need to discuss
-                    returnDescriptions.add(DEFAULT_RETURN_COMMENT);
-                }
             } else {
                 TypeDescriptorNode defaultType = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
                 returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), annotations, defaultType);
-                returnDescriptions.add(HTTP_RESPONSE);
             }
         } else {
             // --error node TypeDescriptor
             returnNode = createReturnTypeDescriptorNode(createToken(SyntaxKind.RETURNS_KEYWORD), createEmptyNodeList(),
                     createSimpleNameReferenceNode(createIdentifierToken("error?")));
-            returnDescriptions.add(ERROR);
         }
-
-        // Add return description to the resource function
-        if (returnDescriptions.size() > 1) {
-            StringBuilder returnDescriptionForUnions = new StringBuilder(
-                    "# + return - returns can be any of following types\n");
-            String typeDescriptionTemplate = "#            %s (%s)%n";
-            for (String description : returnDescriptions) {
-                String[] values = description.split("\\|");
-                returnDescriptionForUnions.append(String.format(typeDescriptionTemplate,
-                        values[0], values[1]));
-            }
-            String dummyTypeWithDescription = returnDescriptionForUnions.toString() + "type a A;";
-            ModuleMemberDeclarationNode moduleMemberDeclarationNode = NodeParser.parseModuleMemberDeclaration(
-                    dummyTypeWithDescription);
-            TypeDefinitionNode typeDefinitionNode = (TypeDefinitionNode) moduleMemberDeclarationNode;
-            MetadataNode metadataNode = typeDefinitionNode.metadata().get();
-            MarkdownDocumentationNode returnDoc = (MarkdownDocumentationNode) metadataNode.children().get(0);
-            resourceFunctionDocs.add(returnDoc);
-        } else {
-            MarkdownParameterDocumentationLineNode returnDoc =
-                    DocCommentsGenerator.createAPIParamDoc(RETURN_KEYWORD.stringValue(), returnDescriptions.get(0));
-            resourceFunctionDocs.add(returnDoc);
-        }
-
         if (GeneratorUtils.isComplexURL(path)) {
             assert returnNode != null;
             String returnStatement = returnNode.toString().trim().replace(RETURNS, "") + "|error";
@@ -315,8 +272,7 @@ public class ReturnTypeGenerator {
     /**
      * Generate union type node when operation has multiple responses.
      */
-    private TypeDescriptorNode handleMultipleResponse(ApiResponses responses, List<String> returnDescription)
-            throws BallerinaOpenApiException {
+    private TypeDescriptorNode handleMultipleResponse(ApiResponses responses) throws BallerinaOpenApiException {
 
         Set<String> qualifiedNodes = new LinkedHashSet<>();
 
@@ -324,7 +280,6 @@ public class ReturnTypeGenerator {
             String responseCode = response.getKey().trim();
             String code = GeneratorConstants.HTTP_CODES_DES.get(responseCode);
             Content content = response.getValue().getContent();
-            String typeName = null;
 
             if (code == null && !responseCode.equals(GeneratorConstants.DEFAULT)) {
                 throw new BallerinaOpenApiException(String.format(OAS_SERVICE_107.getDescription(), responseCode));
@@ -332,13 +287,13 @@ public class ReturnTypeGenerator {
 
             if (responseCode.equals(GeneratorConstants.DEFAULT)) {
                 TypeDescriptorNode record = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
-                typeName = record.toSourceCode();
+                qualifiedNodes.add(record.toSourceCode());
             } else if (content == null && response.getValue().get$ref() == null ||
                     content != null && content.size() == 0) {
                 //key and value
                 QualifiedNameReferenceNode node = GeneratorUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP,
                         code);
-                typeName = node.toSourceCode();
+                qualifiedNodes.add(node.toSourceCode());
             } else if (content != null) {
                 TypeDescriptorNode bodyType = handleMultipleContents(content.entrySet());
                 //Check the default behaviour for return type according to POST method.
@@ -346,16 +301,10 @@ public class ReturnTypeGenerator {
                         (httpMethod.equals(POST) && responseCode.equals(GeneratorConstants.HTTP_201)) ||
                                 (!httpMethod.equals(POST) && responseCode.equals(GeneratorConstants.HTTP_200));
                 if (isWithOutStatusCode) {
-                    typeName = bodyType.toSourceCode();
+                    qualifiedNodes.add(bodyType.toSourceCode());
                 } else {
                     SimpleNameReferenceNode node = createReturnTypeInclusionRecord(code, bodyType);
-                    typeName = node.name().text();
-                }
-            }
-            if (typeName != null) {
-                qualifiedNodes.add(typeName);
-                if (response.getValue().getDescription() != null && !response.getValue().getDescription().isEmpty()) {
-                    returnDescription.add(typeName.trim() + PIPE + response.getValue().getDescription().trim());
+                    qualifiedNodes.add(node.name().text());
                 }
             }
         }

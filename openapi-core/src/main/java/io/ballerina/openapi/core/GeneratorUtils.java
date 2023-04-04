@@ -31,7 +31,6 @@ import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
-import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Minutiae;
 import io.ballerina.compiler.syntax.tree.MinutiaeList;
@@ -58,7 +57,6 @@ import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
-import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.model.GenSrcFile;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -136,7 +134,6 @@ import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML_CONTEN
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.CLOSE_CURLY_BRACE;
 import static io.ballerina.openapi.core.GeneratorConstants.CONSTRAINT;
-import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_PARAM_COMMENT;
 import static io.ballerina.openapi.core.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.core.GeneratorConstants.GET;
 import static io.ballerina.openapi.core.GeneratorConstants.HEAD;
@@ -146,7 +143,6 @@ import static io.ballerina.openapi.core.GeneratorConstants.IDENTIFIER;
 import static io.ballerina.openapi.core.GeneratorConstants.IMAGE_PNG;
 import static io.ballerina.openapi.core.GeneratorConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.core.GeneratorConstants.LINE_SEPARATOR;
-import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.GeneratorConstants.OPEN_CURLY_BRACE;
 import static io.ballerina.openapi.core.GeneratorConstants.SERVICE_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.SLASH;
@@ -189,9 +185,11 @@ public class GeneratorUtils {
     }
 
     public static QualifiedNameReferenceNode getQualifiedNameReferenceNode(String modulePrefix, String identifier) {
+
         Token modulePrefixToken = AbstractNodeFactory.createIdentifierToken(modulePrefix);
         Token colon = AbstractNodeFactory.createIdentifierToken(":");
-        IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier);
+        IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier, SINGLE_WS_MINUTIAE
+                , SINGLE_WS_MINUTIAE);
         return NodeFactory.createQualifiedNameReferenceNode(modulePrefixToken, colon, identifierToken);
     }
 
@@ -203,7 +201,7 @@ public class GeneratorUtils {
      * @return - node lists
      * @throws BallerinaOpenApiException
      */
-    public static List<Node> getRelativeResourcePath(String path, Operation operation, List<Node> resourceFunctionDocs)
+    public static List<Node> getRelativeResourcePath(String path, Operation operation)
             throws BallerinaOpenApiException {
 
         List<Node> functionRelativeResourcePath = new ArrayList<>();
@@ -222,8 +220,7 @@ public class GeneratorUtils {
                      * <pre>resource function get onCall/[string id]\.json() returns string {}</>
                      */
                     if (operation.getParameters() != null) {
-                        extractPathParameterDetails(operation, functionRelativeResourcePath, pathNode,
-                                pathParam, resourceFunctionDocs);
+                        extractPathParameterDetails(operation, functionRelativeResourcePath, pathNode, pathParam);
                     }
                 } else if (!pathNode.isBlank()) {
                     IdentifierToken idToken = createIdentifierToken(escapeIdentifier(pathNode.trim()));
@@ -243,7 +240,7 @@ public class GeneratorUtils {
     }
 
     private static void extractPathParameterDetails(Operation operation, List<Node> functionRelativeResourcePath,
-                                                    String pathNode, String pathParam, List<Node> resourceFunctionDocs)
+                                                    String pathNode, String pathParam)
             throws BallerinaOpenApiException {
         // check whether path parameter segment has special character
         String[] split = pathNode.split(CLOSE_CURLY_BRACE, 2);
@@ -257,14 +254,19 @@ public class GeneratorUtils {
             }
             if (pathParam.trim().equals(getValidName(parameter.getName().trim(), false))
                     && parameter.getIn().equals("path")) {
+                String paramType;
+                if (parameter.getSchema().get$ref() != null) {
+                    paramType = getValidName(extractReferenceType(parameter.getSchema().get$ref()), true);
+                } else {
+                    paramType = convertOpenAPITypeToBallerina(parameter.getSchema().getType());
+                }
 
                 // TypeDescriptor
                 BuiltinSimpleNameReferenceNode builtSNRNode = createBuiltinSimpleNameReferenceNode(
                         null,
                         parameter.getSchema() == null ?
                                 createIdentifierToken(STRING) :
-                                createIdentifierToken(
-                                        convertOpenAPITypeToBallerina(parameter.getSchema().getType())));
+                                createIdentifierToken(paramType));
                 IdentifierToken paramName = createIdentifierToken(
                         hasSpecialCharacter ?
                                 getValidName(pathNode, false) :
@@ -280,16 +282,6 @@ public class GeneratorUtils {
                                 createToken(CLOSE_BRACKET_TOKEN));
                 functionRelativeResourcePath.add(resourcePathParameterNode);
                 functionRelativeResourcePath.add(createToken(SLASH_TOKEN));
-
-                // Add documentation
-                if (resourceFunctionDocs != null) {
-                    String parameterName = paramName.text();
-                    String paramComment = parameter.getDescription() != null && !parameter.getDescription().isBlank() ?
-                            parameter.getDescription() : DEFAULT_PARAM_COMMENT;
-                    MarkdownParameterDocumentationLineNode paramAPIDoc =
-                            DocCommentsGenerator.createAPIParamDoc(parameterName, paramComment);
-                    resourceFunctionDocs.add(paramAPIDoc);
-                }
                 break;
             }
         }
@@ -452,12 +444,8 @@ public class GeneratorUtils {
             io.swagger.v3.oas.models.media.MediaType> mediaTypeEntry) {
         String mediaType = mediaTypeEntry.getKey();
         String defaultBallerinaType = getBallerinaMediaType(mediaType, true);
-        Schema<?> schema = mediaTypeEntry.getValue().getSchema();
-
-        boolean isValidMultipartFormData = mediaType.equals(MediaType.MULTIPART_FORM_DATA) && schema != null &&
-                (schema.get$ref() != null || schema.getProperties() != null || schema.getType().equals(OBJECT));
-
-        if (defaultBallerinaType.equals(HTTP_REQUEST) && !isValidMultipartFormData) {
+        if (defaultBallerinaType.equals(HTTP_REQUEST) &&
+                !(mediaTypeEntry.getValue().getSchema() != null && mediaType.equals(MediaType.MULTIPART_FORM_DATA))) {
             return false;
         } else {
             return true;
@@ -470,7 +458,7 @@ public class GeneratorUtils {
     public static String getBallerinaMediaType(String mediaType, boolean isRequest) {
         if (mediaType.matches(".*/json") || mediaType.matches("application/.*\\+json")) {
             return SyntaxKind.JSON_KEYWORD.stringValue();
-        } else if (mediaType.matches(".*/xml") || mediaType.matches("application/.*\\+xml")) {
+        } else if (mediaType.matches(".*/xml")  || mediaType.matches("application/.*\\+xml")) {
             return SyntaxKind.XML_KEYWORD.stringValue();
         } else if (mediaType.equals(MediaType.APPLICATION_FORM_URLENCODED) || mediaType.matches("text/.*")) {
             return STRING_KEYWORD.stringValue();
