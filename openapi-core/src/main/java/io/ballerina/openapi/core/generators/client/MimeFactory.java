@@ -34,12 +34,10 @@ import java.util.List;
 import java.util.Map;
 
 import static io.ballerina.openapi.core.GeneratorConstants.IMAGE;
-import static io.ballerina.openapi.core.GeneratorConstants.JSON;
 import static io.ballerina.openapi.core.GeneratorConstants.PDF;
 import static io.ballerina.openapi.core.GeneratorConstants.TEXT_PREFIX;
 import static io.ballerina.openapi.core.GeneratorConstants.UNSUPPORTED_MEDIA_ERROR;
 import static io.ballerina.openapi.core.GeneratorConstants.VENDOR_SPECIFIC_TYPE;
-import static io.ballerina.openapi.core.GeneratorConstants.XML;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
@@ -68,20 +66,21 @@ public class MimeFactory {
         if (requestBodySchema != null && (requestBodySchema.get$ref() != null || requestBodySchema.getType() != null
                 || requestBodySchema.getProperties() != null)) {
             String mediaType = mediaTypeEntry.getKey();
-            if (mediaType.contains(VENDOR_SPECIFIC_TYPE)) {
-                return new CustomType();
-            } else if (mediaType.contains(JSON)) {
+            if (mediaType.matches(".*/json") || mediaType.matches("application/.*\\+json")) {
                 return new JsonType();
             } else if (mediaType.startsWith(TEXT_PREFIX) || mediaType.contains(PDF) || mediaType.startsWith(IMAGE)) {
                 return new CustomType();
-            } else if (mediaType.contains(XML)) {
+            } else if (mediaType.matches(".*/xml")  || mediaType.matches("application/.*\\+xml")) {
                 return new XmlType(imports);
             } else if (mediaType.equals(APPLICATION_FORM_URLENCODED)) {
                 return new UrlEncodedType(ballerinaUtilGenerator);
-            } else if (mediaType.equals(APPLICATION_OCTET_STREAM)) {
+            } else if (mediaType.equals(APPLICATION_OCTET_STREAM) ||
+                    mediaType.matches("application/.*\\+octet-stream")) {
                 return new OctetStreamType();
             } else if (mediaType.equals(MULTIPART_FORM_DATA)) {
                 return new MultipartFormData(imports, ballerinaUtilGenerator);
+            } else if (mediaType.contains(VENDOR_SPECIFIC_TYPE)) {
+                return new CustomType();
             } else {
                 throw new BallerinaOpenApiException(String.format(UNSUPPORTED_MEDIA_ERROR, mediaType));
             }
