@@ -24,6 +24,22 @@ paths:
             application/vnd.petstore.v3.diff+json:
               schema:
                 $ref: "#/components/schemas/Pets"
+  /v0/pets:
+    post:
+      summary: Create a pet
+      operationId: createPetV0
+      requestBody:
+        content:
+          application/vnd.petstore.v3.diff+xml:
+            schema:
+              $ref: "#/components/schemas/Pet"
+      responses:
+        '200':
+          description: List of existing pets
+          content:
+            application/vnd.petstore.v3.diff+xml:
+              schema:
+                $ref: "#/components/schemas/Pets"
 components:
   schemas:
     Pet:

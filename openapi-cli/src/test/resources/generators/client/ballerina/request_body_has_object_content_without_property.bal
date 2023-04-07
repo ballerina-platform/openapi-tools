@@ -64,7 +64,8 @@ public isolated client class Client {
     resource isolated function put greeting02(record{} payload) returns string|error {
         string resourcePath = string `/greeting02`;
         http:Request request = new;
-        request.setPayload(payload, "application/vnd.petstore.v3.diff+json");
+        json jsonBody = payload.toJson();
+        request.setPayload(jsonBody, "application/vnd.petstore.v3.diff+json");
         string response = check self.clientEp->put(resourcePath, request);
         return response;
     }
@@ -78,6 +79,17 @@ public isolated client class Client {
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
         string response = check self.clientEp->post(resourcePath, request);
+        return response;
+    }
+    # Request body has properties with {} value
+    #
+    # + return - Ok
+    resource isolated function put greeting03(record{} payload) returns http:Response|error {
+        string resourcePath = string `/greeting03`;
+        http:Request request = new;
+        json jsonBody = payload.toJson();
+        request.setPayload(jsonBody, "application/json");
+        http:Response response = check self.clientEp->put(resourcePath, request);
         return response;
     }
     # Request body has non-standard media type application/zip with object content without properties

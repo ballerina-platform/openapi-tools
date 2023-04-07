@@ -71,9 +71,22 @@ paths:
               schema:
                 type: string
   /greeting03:
+    put:
+      summary: Request body has properties with {} value
+      operationId: op05
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+
+      responses:
+        "200":
+          description: Ok
     post:
       summary: Request body has non-standard media type application/zip with object content without properties
-      operationId: op05
+      operationId: op06
       requestBody:
         content:
           application/zip:

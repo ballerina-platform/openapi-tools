@@ -89,13 +89,13 @@ import static io.ballerina.openapi.core.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.core.GeneratorConstants.BINARY;
 import static io.ballerina.openapi.core.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.core.GeneratorConstants.BYTE;
+import static io.ballerina.openapi.core.GeneratorConstants.EMPTY_RECORD;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP_REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.INTEGER;
 import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.GeneratorConstants.PAYLOAD;
-import static io.ballerina.openapi.core.GeneratorConstants.EMPTY_RECORD;
 import static io.ballerina.openapi.core.GeneratorConstants.REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.GeneratorConstants.STRING;
@@ -578,7 +578,7 @@ public class FunctionSignatureGenerator {
 
     private String getRequestBodyParameterForObjectSchema (String recordName, ObjectSchema objectSchema)
             throws BallerinaOpenApiException {
-        if (objectSchema.getProperties() == null) {
+        if (objectSchema.getProperties() == null || objectSchema.getProperties().isEmpty()) {
             return EMPTY_RECORD;
         }
         TypeDefinitionNode record =
