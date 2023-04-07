@@ -1,0 +1,136 @@
+openapi: 3.0.1
+info:
+  title: Service Openapi Yaml
+  version: 2.0.0
+servers:
+  - url: "{server}:{port}/"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /greeting:
+    post:
+      summary: The Request body is with reference to the reusable requestBody with content type has object without properties
+      operationId: op01
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+    put:
+      summary: Request body has object schema content without the properties field
+      operationId: op02
+      requestBody:
+        $ref: "#/components/requestBodies/PetBody"
+
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/Person"
+  /greeting02:
+    post:
+      summary: RequestBody has object content without properties with application/xml
+      operationId: op03
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+    put:
+      summary: RequestBody has object content without properties with vendor-specific media type vnd.petstore.v3.diff+json
+      operationId: op04
+      requestBody:
+        content:
+          application/vnd.petstore.v3.diff+json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+  /greeting03:
+    post:
+      summary: Request body has non-standard media type application/zip with object content without properties
+      operationId: op05
+      requestBody:
+        content:
+          application/zip:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Ok
+components:
+  requestBodies:
+    PetBody:
+      description: A JSON object containing pet information
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+  schemas:
+    Street:
+      type: object
+      properties:
+        laneNo:
+          oneOf:
+            - type: string
+            - type: integer
+        laneType:
+          anyOf:
+            - type: string
+            - type: integer
+    Address:
+      allOf:
+        - $ref: "#/components/schemas/Street"
+        - type: object
+          properties:
+            no:
+              type: integer
+    Person:
+      type: object
+      required:
+        - id
+      properties:
+        name:
+          type: string
+        hobby:
+          type: array
+          items:
+            type: string
+        id:
+          type: integer
+          maximum: 5
+        salary:
+          type: number
+          format: float
+        net:
+          type: number
+        count:
+          type: integer
+          format: int32
+        address:
+          $ref: "#/components/schemas/Address"
