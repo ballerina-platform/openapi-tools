@@ -1,0 +1,46 @@
+openapi: 3.0.3
+info:
+  title: Swagger Petstore - OpenAPI 3.0
+  description: |-
+    This is a sample Pet Store Server based on the OpenAPI 3.0 specification.
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: https://petstore3.swagger.io/api/v3
+paths:
+  /marks:
+    post:
+      tags:
+        - pet
+      summary: Add marks
+      description: Add marks
+      operationId: addMarks
+      requestBody:
+        description: Add mark
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Mark'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mark'
+components:
+  schemas:
+    Mark:
+      type: object
+      additionalProperties:
+        format: double
+        type: number
