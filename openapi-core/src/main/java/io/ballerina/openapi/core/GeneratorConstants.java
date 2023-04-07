@@ -204,6 +204,7 @@ public class GeneratorConstants {
     public static final String X_BALLERINA_INIT_DESCRIPTION = "x-ballerina-init-description";
     public static final String X_BALLERINA_DISPLAY = "x-ballerina-display";
     public static final String X_BALLERINA_DEPRECATED_REASON = "x-ballerina-deprecated-reason";
+    public static final String X_BALLERINA_HTTP_CONFIGURATIONS = "x-ballerina-http-configurations";
 
     //Service related
     public static final String HOST = "host";
@@ -314,6 +315,17 @@ public class GeneratorConstants {
         TYPE_MAP = Collections.unmodifiableMap(typeMap);
     }
 
+    public static final String DEFAULT_HTTP_VERSION = "2.0";
+    public static final Map<String, String> HTTP_VERSION_MAP;
+
+    static {
+        Map<String, String> httpVersionMap = new HashMap<>();
+        httpVersionMap.put("1.0", "http:HTTP_1_0");
+        httpVersionMap.put("1.1", "http:HTTP_1_1");
+        httpVersionMap.put("2.0", "http:HTTP_2_0");
+        HTTP_VERSION_MAP = Collections.unmodifiableMap(httpVersionMap);
+    }
+
     //Error related
     public static final String UNSUPPORTED_MEDIA_ERROR = "Unsupported media type '%s' is given in the request body";
 
@@ -362,4 +374,5 @@ public class GeneratorConstants {
     public static final String RETURNS = "returns";
     public static final String ANYDATA = "anydata";
     public static final String RESPONSE_RECORD_NAME = "Response";
+    public static final String HTTP_VERIONS_EXT = "httpVersion";
 }
