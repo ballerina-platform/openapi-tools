@@ -362,5 +362,5 @@ public class GeneratorConstants {
     public static final String ANYDATA = "anydata";
     public static final String RESPONSE_RECORD_NAME = "Response";
 
-    public static final String RECORD = "record{}";
+    public static final String EMPTY_RECORD = "record{}";
 }
