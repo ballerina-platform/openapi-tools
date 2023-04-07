@@ -89,6 +89,17 @@ public class PrimitiveDataTypeTests {
                 syntaxTree);
     }
 
+    @Test(description = "Test for unsupported primitive type additional properties")
+    public void generateSchemaForInvalidAdditionalProperty() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/additional_properties_invalid_format.yaml");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/" +
+                        "additional_properties_invalid_format.bal",
+                syntaxTree);
+    }
+
     @AfterTest
     public void clean() {
         System.setErr(null);
