@@ -25,7 +25,6 @@ import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
@@ -143,7 +142,7 @@ public class ConstraintTests {
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
-                "schema/ballerina/constraint/invalidConstraintFieldWithDataType.bal", syntaxTree);
+                "schema/ballerina/constraint/invalidConstraintFieldWithDtaType.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
@@ -157,7 +156,21 @@ public class ConstraintTests {
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
-                "schema/ballerina/constraint/invalidAndValidConstraintFieldWithDataType.bal", syntaxTree);
+                "schema/ballerina/constraint/invalidAndValidConstraintFieldWithDtaType.bal", syntaxTree);
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
+        boolean hasErrors = diagnostics.stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        assertFalse(hasErrors);
+    }
+
+    @Test(description = "Test for allowing zero value for number and integer type")
+    public void allowedZeroValuesForNumber() throws IOException, BallerinaOpenApiException, FormatterException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
+                "/allow_zero_values_for_number_constraint.yaml"), true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/constraint/allow_zero_values_for_number_constraint.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
