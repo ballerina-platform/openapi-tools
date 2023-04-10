@@ -177,7 +177,7 @@ public class RecordTypeGenerator extends TypeGenerator {
     /**
      * Creates reference rest node when additional property has reference.
      */
-    public static RecordRestDescriptorNode getRestDescriptorNodeForReference(Schema<?> additionalPropSchema)
+    public RecordRestDescriptorNode getRestDescriptorNodeForReference(Schema<?> additionalPropSchema)
             throws BallerinaOpenApiException {
         ReferencedTypeGenerator referencedTypeGenerator = new ReferencedTypeGenerator(additionalPropSchema, null);
         TypeDescriptorNode refNode = referencedTypeGenerator.generateTypeDescriptorNode();
@@ -249,13 +249,14 @@ public class RecordTypeGenerator extends TypeGenerator {
             if (typeGenerator instanceof RecordTypeGenerator) {
                 fieldTypeName = TypeGeneratorUtils.getNullableType(fieldSchema, fieldTypeName);
             }
-            if (typeGenerator instanceof ArrayTypeGenerator && !(typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
-                typeDefinitionNodeList.addAll((typeGenerator).getTypeDefinitionNodeList());
+            if (typeGenerator instanceof ArrayTypeGenerator && !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
+                typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
             } else if (typeGenerator instanceof UnionTypeGenerator &&
-                    !(typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
+                    !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
                 List<TypeDefinitionNode> newConstraintNode = typeGenerator.getTypeDefinitionNodeList();
                 typeDefinitionNodeList.addAll(newConstraintNode);
             }
+            imports.addAll(typeGenerator.getImports());
             ImmutablePair<List<Node>, Set<String>> fieldListWithImports =
                     TypeGeneratorUtils.updateRecordFieldListWithImports(required, recordFieldList, field, fieldSchema,
                             schemaDocNodes, fieldName, fieldTypeName);

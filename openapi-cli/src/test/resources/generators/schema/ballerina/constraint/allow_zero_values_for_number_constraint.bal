@@ -1,3 +1,5 @@
+import ballerina/constraint;
+
 public type Address string;
 
 public type Person record {

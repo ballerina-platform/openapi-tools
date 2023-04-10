@@ -234,18 +234,17 @@ public class BallerinaTypesGenerator {
         TypeDefinitionNode typeDefinitionNode =
                 typeGenerator.generateTypeDefinitionNode(typeNameToken, schemaDocs, typeAnnotations);
 
-        if (typeGenerator instanceof ArrayTypeGenerator &&
-                !(typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
-            typeDefinitionNodeList.addAll((typeGenerator).getTypeDefinitionNodeList());
+        if (typeGenerator instanceof ArrayTypeGenerator && !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
+            typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
         } else if (typeGenerator instanceof RecordTypeGenerator &&
-                !(typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
-            removeDuplicateNode((typeGenerator).getTypeDefinitionNodeList());
+                !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
+            removeDuplicateNode(typeGenerator.getTypeDefinitionNodeList());
         } else if (typeGenerator instanceof AllOfRecordTypeGenerator &&
-                !(typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
-            removeDuplicateNode((typeGenerator).getTypeDefinitionNodeList());
+                !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
+            removeDuplicateNode(typeGenerator.getTypeDefinitionNodeList());
         } else if (typeGenerator instanceof UnionTypeGenerator &&
-                !(typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
-            removeDuplicateNode((typeGenerator).getTypeDefinitionNodeList());
+                !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
+            removeDuplicateNode(typeGenerator.getTypeDefinitionNodeList());
         }
         imports.addAll(typeGenerator.getImports());
         return typeDefinitionNode;
