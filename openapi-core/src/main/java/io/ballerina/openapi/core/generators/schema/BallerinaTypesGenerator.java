@@ -160,22 +160,22 @@ public class BallerinaTypesGenerator {
     }
 
     private NodeList<ImportDeclarationNode> generateImportNodes() {
-        Set<ImportDeclarationNode> finalImports = new LinkedHashSet<>();
+        Set<ImportDeclarationNode> importDeclarationNodes = new LinkedHashSet<>();
         // Imports for the http module, when record has http type inclusions.
         if (!typeDefinitionNodeList.isEmpty()) {
-            importsForTypeDefinitions(finalImports);
+            importsForTypeDefinitions(importDeclarationNodes);
         }
         //Imports for constraints
         if (!imports.isEmpty()) {
             for (String importValue : imports) {
                 ImportDeclarationNode importDeclarationNode = NodeParser.parseImportDeclaration(importValue);
-                finalImports.add(importDeclarationNode);
+                importDeclarationNodes.add(importDeclarationNode);
             }
         }
-        if (finalImports.isEmpty()) {
+        if (importDeclarationNodes.isEmpty()) {
             return createEmptyNodeList();
         }
-        return createNodeList(finalImports);
+        return createNodeList(importDeclarationNodes);
     }
 
     private void importsForTypeDefinitions(Set<ImportDeclarationNode> imports) {
