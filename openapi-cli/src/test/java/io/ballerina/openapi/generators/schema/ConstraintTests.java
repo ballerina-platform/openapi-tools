@@ -136,7 +136,7 @@ public class ConstraintTests {
     // generation available in tool.
 
     @Test
-    public void testNullableArrayRefTypeWithConstraint() throws IOException, BallerinaOpenApiException,
+    public void testNullableRefTypesWithConstraint() throws IOException, BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/constraint_with_nullable.yaml"), true);
