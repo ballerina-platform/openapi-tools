@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
@@ -57,13 +58,16 @@ import io.swagger.v3.oas.models.media.NumberSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -79,6 +83,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
+import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA;
+import static io.ballerina.openapi.core.GeneratorConstants.CONSTRAINT;
 
 /**
  * Contains util functions needed for schema generation.
@@ -147,35 +153,35 @@ public class TypeGeneratorUtils {
         return nillableType;
     }
 
-    public static void updateRecordFieldList(List<String> required,
-                                             List<Node> recordFieldList,
-                                             Map.Entry<String, Schema<?>> field,
-                                             Schema<?> fieldSchema,
-                                             NodeList<Node> schemaDocNodes,
-                                             IdentifierToken fieldName,
-                                             TypeDescriptorNode fieldTypeName) {
+    /**
+     * This function returns record field list with its relevant imports as set of string.
+     * Ex: If the record field has a constraint annotation node, then the type.bal needs its constraint imports
+     * therefore this function makes sure to add relevant imports to the type.bal.
+     */
+    public static ImmutablePair<List<Node>, Set<String>> updateRecordFieldListWithImports(
+            List<String> required, List<Node> recordFieldList, Map.Entry<String, Schema<?>> field,
+            Schema<?> fieldSchema, NodeList<Node> schemaDocNodes, IdentifierToken fieldName,
+            TypeDescriptorNode fieldTypeName) {
 
-        updateRecordFieldList(required, recordFieldList, field, fieldSchema, schemaDocNodes, fieldName,
+        return updateRecordFieldListWithImports(required, recordFieldList, field, fieldSchema, schemaDocNodes,
+                fieldName,
                 fieldTypeName, System.err);
     }
 
-    public static void updateRecordFieldList(List<String> required,
-                                             List<Node> recordFieldList,
-                                             Map.Entry<String, Schema<?>> field,
-                                             Schema<?> fieldSchema,
-                                             NodeList<Node> schemaDocNodes,
-                                             IdentifierToken fieldName,
-                                             TypeDescriptorNode fieldTypeName,
-                                             PrintStream outStream) {
+    public static ImmutablePair<List<Node>, Set<String>> updateRecordFieldListWithImports(
+            List<String> required, List<Node> recordFieldList, Map.Entry<String, Schema<?>> field,
+            Schema<?> fieldSchema, NodeList<Node> schemaDocNodes, IdentifierToken fieldName,
+            TypeDescriptorNode fieldTypeName, PrintStream outStream) {
 
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
+        Set<String> imports = new HashSet<>();
         //Generate constraint annotation.
         AnnotationNode constraintNode = generateConstraintNode(fieldSchema);
         MetadataNode metadataNode;
         boolean isConstraintSupport =
                 constraintNode != null && fieldSchema.getNullable() != null && fieldSchema.getNullable() ||
-                        (fieldSchema instanceof ComposedSchema && (((ComposedSchema) fieldSchema).getOneOf() != null ||
-                                ((ComposedSchema) fieldSchema).getAnyOf() != null));
+                        (fieldSchema instanceof ComposedSchema && ((fieldSchema).getOneOf() != null ||
+                                (fieldSchema).getAnyOf() != null));
         boolean nullable = GeneratorMetaData.getInstance().isNullable();
         if (nullable) {
             constraintNode = null;
@@ -198,6 +204,12 @@ public class TypeGeneratorUtils {
                     fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
             recordFieldList.add(recordFieldNode);
         }
+        if (constraintNode != null) {
+            ImportDeclarationNode constraintImport = GeneratorUtils.getImportDeclarationNode(BALLERINA, CONSTRAINT);
+            constraintImport.toSourceCode();
+            imports.add(constraintImport.toSourceCode());
+        }
+        return new ImmutablePair<>(recordFieldList, imports);
     }
 
     private static void setRequiredFields(List<String> required, List<Node> recordFieldList,
