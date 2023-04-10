@@ -76,6 +76,7 @@ public class UnSupportedBallerinaFileTests {
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
+        System.gc();
     }
 
     @AfterTest
