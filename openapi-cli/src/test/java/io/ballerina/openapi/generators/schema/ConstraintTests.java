@@ -136,7 +136,7 @@ public class ConstraintTests {
     // generation available in tool.
 
     @Test(description = "Test for invalid constraint value")
-    public void invalidConstraintUses() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void testInvalidConstraintUses() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/invalidConstraintFieldWithDataType.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -150,7 +150,8 @@ public class ConstraintTests {
     }
 
     @Test(description = "Test for invalid constraint value with valid constraint value")
-    public void invalidAndValidBothConstraintUses() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void testInvalidAndValidBothConstraintUses() throws IOException, BallerinaOpenApiException,
+            FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/invalidAndValidConstraintFieldWithDataType.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -164,7 +165,7 @@ public class ConstraintTests {
     }
 
     @Test(description = "Test for allowing zero value for number and integer type")
-    public void allowedZeroValuesForNumber() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void testAllowedZeroValuesForNumber() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/allow_zero_values_for_number_constraint.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
