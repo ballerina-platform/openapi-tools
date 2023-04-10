@@ -294,7 +294,8 @@ public class TypeGeneratorUtils {
             return false;
         } else if (isConstraintSupport) {
             OUT_STREAM.printf("WARNING: constraints in the OpenAPI contract will be ignored for the " +
-                    "type `%s`%n", typeName);
+                            "type `%s`, as constraints are not supported on Ballerina union types%n",
+                    typeName.trim());
             return false;
         }
         return true;

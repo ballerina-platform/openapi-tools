@@ -28,7 +28,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NullableNumberInterval'
+              $ref: '#/components/schemas/Scores'
         required: true
       responses:
         '200':
@@ -36,10 +36,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NullableNumberInterval'
+                $ref: '#/components/schemas/Scores'
 components:
   schemas:
-    NullableNumberInterval:
+    Scores:
       type: array
       items:
         type: number
@@ -48,6 +48,17 @@ components:
       minItems: 2
       nullable: true
       description: At least one entry should be non-null.
+    Name:
+      type: string
+      maxLength: 0
+      minLength: 10
+      nullable: true
+    Average:
+      type: number
+      format: float
+      minimum: 0.0
+      maximum: 12.0
+      nullable: true
     Pet:
       required:
         - id
@@ -56,7 +67,6 @@ components:
         id:
           type: integer
           format: int64
-
         name:
           type: string
         tag:
