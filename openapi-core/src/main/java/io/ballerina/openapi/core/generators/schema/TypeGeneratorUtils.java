@@ -61,7 +61,6 @@ import io.swagger.v3.oas.models.media.StringSchema;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.io.PrintStream;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -348,33 +347,27 @@ public class TypeGeneratorUtils {
 
         List<String> fields = new ArrayList<>();
         boolean isInt = numberSchema instanceof IntegerSchema;
-        if (numberSchema.getMinimum() != null &&
-                BigDecimal.ZERO.compareTo(numberSchema.getMinimum()) != 0
-                && numberSchema.getExclusiveMinimum() == null) {
+        if (numberSchema.getMinimum() != null && numberSchema.getExclusiveMinimum() == null) {
             String value = numberSchema.getMinimum().toString();
             String fieldRef = GeneratorConstants.MINIMUM + GeneratorConstants.COLON +
                     (isInt ? numberSchema.getMinimum().intValue() : value);
             fields.add(fieldRef);
         }
-        if (numberSchema.getMaximum() != null &&
-                BigDecimal.ZERO.compareTo(numberSchema.getMaximum()) != 0
-                && numberSchema.getExclusiveMaximum() == null) {
+        if (numberSchema.getMaximum() != null && numberSchema.getExclusiveMaximum() == null) {
             String value = numberSchema.getMaximum().toString();
             String fieldRef = GeneratorConstants.MAXIMUM + GeneratorConstants.COLON +
                     (isInt ? numberSchema.getMaximum().intValue() : value);
             fields.add(fieldRef);
         }
         if (numberSchema.getExclusiveMinimum() != null &&
-                numberSchema.getExclusiveMinimum() && numberSchema.getMinimum() != null &&
-                BigDecimal.ZERO.compareTo(numberSchema.getMinimum()) != 0) {
+                numberSchema.getExclusiveMinimum() && numberSchema.getMinimum() != null) {
             String value = numberSchema.getMinimum().toString();
             String fieldRef = GeneratorConstants.EXCLUSIVE_MIN + GeneratorConstants.COLON +
                     (isInt ? numberSchema.getMinimum().intValue() : value);
             fields.add(fieldRef);
         }
         if (numberSchema.getExclusiveMaximum() != null &&
-                numberSchema.getExclusiveMaximum() &&
-                numberSchema.getMaximum() != null && BigDecimal.ZERO.compareTo(numberSchema.getMaximum()) != 0) {
+                numberSchema.getExclusiveMaximum() && numberSchema.getMaximum() != null) {
             String value = numberSchema.getMaximum().toString();
             String fieldRef = GeneratorConstants.EXCLUSIVE_MAX + GeneratorConstants.COLON +
                     (isInt ? numberSchema.getMaximum().intValue() : value);
