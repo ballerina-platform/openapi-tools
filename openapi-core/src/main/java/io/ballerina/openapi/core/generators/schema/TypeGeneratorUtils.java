@@ -265,7 +265,7 @@ public class TypeGeneratorUtils {
      * @return {@link MetadataNode}
      */
     public static AnnotationNode generateConstraintNode(String typeName, Schema<?> fieldSchema) {
-        if (allowsConstraints(typeName, fieldSchema)) {
+        if (isConstraintAllowed(typeName, fieldSchema)) {
             if (fieldSchema instanceof StringSchema) {
                 StringSchema stringSchema = (StringSchema) fieldSchema;
                 // Attributes : maxLength, minLength
@@ -284,7 +284,7 @@ public class TypeGeneratorUtils {
         return null;
     }
 
-    public static boolean allowsConstraints(String typeName, Schema schema) {
+    public static boolean isConstraintAllowed(String typeName, Schema schema) {
 
         boolean isConstraintAllowed = schema.getNullable() != null && schema.getNullable() ||
                 (schema instanceof ComposedSchema && (((ComposedSchema) schema).getOneOf() != null ||

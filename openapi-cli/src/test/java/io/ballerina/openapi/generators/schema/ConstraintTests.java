@@ -135,7 +135,7 @@ public class ConstraintTests {
     //TODO current tool doesn't handle union type: therefore union type constraint will handle once union type
     // generation available in tool.
 
-    @Test
+    @Test(description = "Tests for nullable reference types with constraint.")
     public void testNullableRefTypesWithConstraint() throws IOException, BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
