@@ -90,7 +90,7 @@ public abstract class TypeGenerator {
             String annotationRef = annotation.annotReference().toString();
             if (annotationRef.startsWith(CONSTRAINT) && !nullable) {
                 ImportDeclarationNode constraintImport = GeneratorUtils.getImportDeclarationNode(BALLERINA, CONSTRAINT);
-                //Here we are unable to add ImportDeclarationNode since newly generate node has different hashcode.
+                //Here we are unable to add ImportDeclarationNode since newly generated node has different hashcode.
                 imports.add(constraintImport.toSourceCode());
             }
         }

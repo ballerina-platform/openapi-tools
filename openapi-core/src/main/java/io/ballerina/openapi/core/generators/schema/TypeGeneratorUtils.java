@@ -179,8 +179,8 @@ public class TypeGeneratorUtils {
         MetadataNode metadataNode;
         boolean isConstraintSupport =
                 constraintNode != null && fieldSchema.getNullable() != null && fieldSchema.getNullable() ||
-                        (fieldSchema instanceof ComposedSchema && ((fieldSchema).getOneOf() != null ||
-                                (fieldSchema).getAnyOf() != null));
+                        (fieldSchema instanceof ComposedSchema && (fieldSchema.getOneOf() != null ||
+                                fieldSchema.getAnyOf() != null));
         boolean nullable = GeneratorMetaData.getInstance().isNullable();
         if (nullable) {
             constraintNode = null;
