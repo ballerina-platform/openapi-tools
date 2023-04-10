@@ -265,7 +265,7 @@ public class TypeGeneratorUtils {
      * @return {@link MetadataNode}
      */
     public static AnnotationNode generateConstraintNode(String typeName, Schema<?> fieldSchema) {
-        if (isSupportConstraint(typeName, fieldSchema)) {
+        if (allowsConstraints(typeName, fieldSchema)) {
             if (fieldSchema instanceof StringSchema) {
                 StringSchema stringSchema = (StringSchema) fieldSchema;
                 // Attributes : maxLength, minLength
@@ -284,15 +284,15 @@ public class TypeGeneratorUtils {
         return null;
     }
 
-    public static boolean isSupportConstraint(String typeName, Schema schema) {
+    public static boolean allowsConstraints(String typeName, Schema schema) {
 
-        boolean isConstraintSupport = schema.getNullable() != null && schema.getNullable() ||
+        boolean isConstraintAllowed = schema.getNullable() != null && schema.getNullable() ||
                 (schema instanceof ComposedSchema && (((ComposedSchema) schema).getOneOf() != null ||
                         ((ComposedSchema) schema).getAnyOf() != null));
         boolean nullable = GeneratorMetaData.getInstance().isNullable();
         if (nullable) {
             return false;
-        } else if (isConstraintSupport) {
+        } else if (isConstraintAllowed) {
             OUT_STREAM.printf("WARNING: constraints in the OpenAPI contract will be ignored for the " +
                             "type `%s`, as constraints are not supported on Ballerina union types%n",
                     typeName.trim());

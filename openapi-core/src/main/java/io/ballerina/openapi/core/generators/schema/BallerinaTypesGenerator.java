@@ -211,7 +211,7 @@ public class BallerinaTypesGenerator {
         TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, GeneratorUtils.getValidName(
                 typeName.trim(), true), null);
         List<AnnotationNode> typeAnnotations = new ArrayList<>();
-        if (TypeGeneratorUtils.isSupportConstraint(typeName, schema)) {
+        if (TypeGeneratorUtils.allowsConstraints(typeName, schema)) {
             AnnotationNode constraintNode = TypeGeneratorUtils.generateConstraintNode(typeName, schema);
             if (constraintNode != null) {
                 typeAnnotations.add(constraintNode);
