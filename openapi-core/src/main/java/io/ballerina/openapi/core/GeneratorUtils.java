@@ -59,7 +59,6 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
-import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
 import io.ballerina.openapi.core.model.GenSrcFile;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -711,11 +710,6 @@ public class GeneratorUtils {
 
     private static boolean isConstraintExists(Schema<?> propertyValue) {
 
-        boolean isConstraintSupport = propertyValue.getNullable() != null && propertyValue.getNullable();
-        boolean nullable = GeneratorMetaData.getInstance().isNullable();
-        if (nullable || isConstraintSupport) {
-            return false;
-        }
         return propertyValue.getMaximum() != null ||
                 propertyValue.getMinimum() != null ||
                 propertyValue.getMaxLength() != null ||
