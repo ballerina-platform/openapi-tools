@@ -120,7 +120,6 @@ public class BallerinaTypesGenerator {
                                    boolean generateServiceType) {
         GeneratorMetaData.createInstance(openAPI, isNullable, generateServiceType);
         this.typeDefinitionNodeList = typeDefinitionNodeList;
-        this.hasConstraints = false;
     }
 
     /**

@@ -365,6 +365,7 @@ public class GeneratorConstants {
     public static final String DEFAULT_RETURN_COMMENT = "return value description";
     public static final String DEFAULT_FUNC_COMMENT = "Description";
     public static final String DEFAULT_PARAM_COMMENT = "parameter description";
+    public static final String HTTP_VERIONS_EXT = "httpVersion";
 
     public static final String EMPTY_RECORD = "record{}";
 }

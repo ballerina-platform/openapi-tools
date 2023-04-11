@@ -352,7 +352,8 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Test for generating request body with object schema content without properties")
-    public void testWithRBContentHasObjectSchemaWithoutProperties() throws IOException, BallerinaOpenApiException {
+    public void testWithRBContentHasObjectSchemaWithoutProperties()
+            throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_has_object_content_without_property.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_has_object_content_without_property.yaml"), true);
