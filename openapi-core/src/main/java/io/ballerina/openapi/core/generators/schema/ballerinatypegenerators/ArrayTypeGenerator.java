@@ -90,17 +90,17 @@ public class ArrayTypeGenerator extends TypeGenerator {
         TypeGenerator typeGenerator;
         if (isConstraintsAvailable) {
             String normalizedTypeName = typeName.replaceAll(GeneratorConstants.SPECIAL_CHARACTER_REGEX, "").trim();
+            List<AnnotationNode> typeAnnotations = new ArrayList<>();
+            AnnotationNode constraintNode = TypeGeneratorUtils.generateConstraintNode(typeName, items);
+            if (constraintNode != null) {
+                typeAnnotations.add(constraintNode);
+            }
             typeName = GeneratorUtils.getValidName(
                     parentType != null ?
                             parentType + "-" + normalizedTypeName + "-Items-" + items.getType() :
                             normalizedTypeName + "-Items-" + items.getType(),
                     true);
             typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
-            List<AnnotationNode> typeAnnotations = new ArrayList<>();
-            AnnotationNode constraintNode = TypeGeneratorUtils.generateConstraintNode(items);
-            if (constraintNode != null) {
-                typeAnnotations.add(constraintNode);
-            }
             TypeDefinitionNode arrayItemWithConstraint = typeGenerator.generateTypeDefinitionNode(
                     createIdentifierToken(typeName),
                     new ArrayList<>(),
