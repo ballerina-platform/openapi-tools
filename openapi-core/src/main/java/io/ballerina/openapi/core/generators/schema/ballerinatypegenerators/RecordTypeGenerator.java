@@ -40,6 +40,7 @@ import io.swagger.v3.oas.models.media.NumberSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -176,7 +177,7 @@ public class RecordTypeGenerator extends TypeGenerator {
     /**
      * Creates reference rest node when additional property has reference.
      */
-    public static RecordRestDescriptorNode getRestDescriptorNodeForReference(Schema<?> additionalPropSchema)
+    public RecordRestDescriptorNode getRestDescriptorNodeForReference(Schema<?> additionalPropSchema)
             throws BallerinaOpenApiException {
         ReferencedTypeGenerator referencedTypeGenerator = new ReferencedTypeGenerator(additionalPropSchema, null);
         TypeDescriptorNode refNode = referencedTypeGenerator.generateTypeDescriptorNode();
@@ -249,17 +250,19 @@ public class RecordTypeGenerator extends TypeGenerator {
             if (typeGenerator instanceof RecordTypeGenerator) {
                 fieldTypeName = TypeGeneratorUtils.getNullableType(fieldSchema, fieldTypeName);
             }
-            if (typeGenerator instanceof ArrayTypeGenerator &&
-                    !((ArrayTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
-                typeDefinitionNodeList.addAll(((ArrayTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
+            if (typeGenerator instanceof ArrayTypeGenerator && !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
+                typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
             } else if (typeGenerator instanceof UnionTypeGenerator &&
-                    !((UnionTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
-                List<TypeDefinitionNode> newConstraintNode =
-                        ((UnionTypeGenerator) typeGenerator).getTypeDefinitionNodeList();
+                    !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
+                List<TypeDefinitionNode> newConstraintNode = typeGenerator.getTypeDefinitionNodeList();
                 typeDefinitionNodeList.addAll(newConstraintNode);
             }
-            TypeGeneratorUtils.updateRecordFieldList(required, recordFieldList, field, fieldSchema, schemaDocNodes,
-                    fieldName, fieldTypeName);
+            imports.addAll(typeGenerator.getImports());
+            ImmutablePair<List<Node>, Set<String>> fieldListWithImports =
+                    TypeGeneratorUtils.updateRecordFieldListWithImports(required, recordFieldList, field, fieldSchema,
+                            schemaDocNodes, fieldName, fieldTypeName);
+            recordFieldList = fieldListWithImports.getLeft();
+            imports.addAll(fieldListWithImports.getRight());
         }
         return recordFieldList;
     }
