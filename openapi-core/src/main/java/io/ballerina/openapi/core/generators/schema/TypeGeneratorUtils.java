@@ -286,13 +286,13 @@ public class TypeGeneratorUtils {
 
     public static boolean isConstraintAllowed(String typeName, Schema schema) {
 
-        boolean isConstraintAllowed = schema.getNullable() != null && schema.getNullable() ||
+        boolean isConstraintNotAllowed = schema.getNullable() != null && schema.getNullable() ||
                 (schema instanceof ComposedSchema && (((ComposedSchema) schema).getOneOf() != null ||
                         ((ComposedSchema) schema).getAnyOf() != null));
         boolean nullable = GeneratorMetaData.getInstance().isNullable();
         if (nullable) {
             return false;
-        } else if (isConstraintAllowed) {
+        } else if (isConstraintNotAllowed) {
             OUT_STREAM.printf("WARNING: constraints in the OpenAPI contract will be ignored for the " +
                             "type `%s`, as constraints are not supported on Ballerina union types%n",
                     typeName.trim());
