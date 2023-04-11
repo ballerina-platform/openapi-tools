@@ -90,21 +90,22 @@ public class ArrayTypeGenerator extends TypeGenerator {
         TypeGenerator typeGenerator;
         if (isConstraintsAvailable) {
             String normalizedTypeName = typeName.replaceAll(GeneratorConstants.SPECIAL_CHARACTER_REGEX, "").trim();
+            List<AnnotationNode> typeAnnotations = new ArrayList<>();
+            AnnotationNode constraintNode = TypeGeneratorUtils.generateConstraintNode(typeName, items);
+            if (constraintNode != null) {
+                typeAnnotations.add(constraintNode);
+            }
             typeName = GeneratorUtils.getValidName(
                     parentType != null ?
                             parentType + "-" + normalizedTypeName + "-Items-" + items.getType() :
                             normalizedTypeName + "-Items-" + items.getType(),
                     true);
             typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
-            List<AnnotationNode> typeAnnotations = new ArrayList<>();
-            AnnotationNode constraintNode = TypeGeneratorUtils.generateConstraintNode(items);
-            if (constraintNode != null) {
-                typeAnnotations.add(constraintNode);
-            }
             TypeDefinitionNode arrayItemWithConstraint = typeGenerator.generateTypeDefinitionNode(
                     createIdentifierToken(typeName),
                     new ArrayList<>(),
                     typeAnnotations);
+            imports.addAll(typeGenerator.getImports());
             typeDefinitionNodeList.add(arrayItemWithConstraint);
         } else {
             typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
@@ -147,7 +148,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         arrayDimensions = arrayDimensions.add(arrayDimension);
         ArrayTypeDescriptorNode arrayTypeDescriptorNode = createArrayTypeDescriptorNode(typeDescriptorNode
                 , arrayDimensions);
-
+        imports.addAll(typeGenerator.getImports());
         return getNullableType(arraySchema, arrayTypeDescriptorNode);
     }
 }
