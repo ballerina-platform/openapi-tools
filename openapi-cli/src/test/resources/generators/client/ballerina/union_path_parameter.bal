@@ -7,7 +7,7 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "http://petstore.{host}.io/v1") returns error? {
+    public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "localhost:9090/payloadV") returns error? {
         http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
@@ -34,14 +34,22 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    # Create a pet
     #
-    # + return - List of existing pets
-    remote isolated function createPet(Pet payload) returns Pets|error {
-        string resourcePath = string `/pets`;
+    # + id - id anyOf
+    # + return - Ok
+    resource isolated function get v1/[Id id]() returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(id)}`;
+        string response = check self.clientEp->get(resourcePath);
+        return response;
+    }
+    #
+    # + id - id oneOf
+    # + return - Ok
+    resource isolated function post v1/[Id_1 id]() returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(id)}`;
         http:Request request = new;
-        request.setPayload(payload, "application/vnd.petstore.v3.diff+json");
-        Pets response = check self.clientEp->post(resourcePath, request);
+        //TODO: Update the request as needed;
+        string response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
 }

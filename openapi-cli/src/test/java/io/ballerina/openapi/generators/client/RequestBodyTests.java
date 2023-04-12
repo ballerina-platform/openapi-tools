@@ -228,9 +228,9 @@ public class RequestBodyTests {
     @Test(description = "Test for generating request body when operation has vendor specific media type " +
             "which is a subtype of JSON")
     public void testRequestBodyWithVendorSpecificMimeTypeWithJSON() throws IOException, BallerinaOpenApiException {
-        Path expectedPath = RES_DIR.resolve("ballerina/vendor_specific_json.bal");
+        Path expectedPath = RES_DIR.resolve("ballerina/vendor_specific_with_subtype.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
-                RES_DIR.resolve("swagger/vendor_specific_json.yaml"), true);
+                RES_DIR.resolve("swagger/vendor_specific_with_subtype.yaml"), true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
