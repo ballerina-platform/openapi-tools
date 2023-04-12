@@ -65,6 +65,12 @@ public class HttpMethodTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "post_method.yaml");
     }
 
+    @Test
+    public void testForResourceWithCatchAllPath() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("catch_all_path_service.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "catch_all_path_service.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
