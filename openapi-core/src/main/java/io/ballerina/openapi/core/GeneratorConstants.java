@@ -346,6 +346,7 @@ public class GeneratorConstants {
     public static final String OPEN_CURLY_BRACE = "{";
     public static final String CLOSE_CURLY_BRACE = "}";
     public static final String SLASH = "/";
+    public static final String CATCH_ALL_PATH = "/*";
 
     public static final String CONSTRAINT = "constraint";
     public static final String CONSTRAINT_STRING = "constraint:String";
