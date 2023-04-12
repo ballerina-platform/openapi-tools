@@ -23,6 +23,7 @@ import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
@@ -137,6 +138,41 @@ public class PathParameterTests {
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        ballerinaClientGenerator.generateSyntaxTree();
+    }
+
+    @Test (description = "Generate Client for path parameter with anyOf, oneOf type")
+    public void unionPathParameter() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RESDIR.resolve("swagger/union_path_parameter.yaml");
+        Path expectedPath = RESDIR.resolve("ballerina/union_path_parameter.bal");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI)
+                .withResourceMode(true).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+
+        Path expectedTypePath = RESDIR.resolve("ballerina/union_path_types.bal");
+        BallerinaTypesGenerator ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI);
+        SyntaxTree typeSyntaxTree = ballerinaTypesGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedTypePath, typeSyntaxTree);
+    }
+
+    @Test(description = "When path parameter has given allOf data type in ballerina",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Ballerina does not support object type path .*")
+    public void allOfPathParameter() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RESDIR.resolve("swagger/allOf_path_parameter.yaml");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI)
+                .withResourceMode(true).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         ballerinaClientGenerator.generateSyntaxTree();
     }

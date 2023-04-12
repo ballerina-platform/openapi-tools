@@ -1,0 +1,33 @@
+openapi: 3.1.0
+info:
+  title: V4
+  version: 0.1.0
+servers:
+  - url: http://localhost
+paths:
+  /pet/{id}:
+    post:
+      operationId: operation_post_/pet
+      parameters:
+        - name: id
+          in: path
+          description: Id of the point
+          required: true
+          schema:
+            $ref: "#/components/schemas/Param"
+      responses:
+        "202":
+          description: Accepted
+components:
+  schemas:
+    Param:
+      anyOf:
+        - type: integer
+        - type: string
+    Pet:
+      type: object
+      properties:
+        name:
+          type: string
+        owned_by:
+          type: string
