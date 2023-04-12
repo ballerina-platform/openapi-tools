@@ -360,5 +360,6 @@ public class GeneratorConstants {
     public static final String PIPE = "|";
     public static final String RETURNS = "returns";
     public static final String ANYDATA = "anydata";
+    public static final String EMPTY_RECORD = "record{}";
 
 }
