@@ -65,19 +65,19 @@ public isolated client class Client {
     resource isolated function put pet(Pet payload) returns Pet|error {
         string resourcePath = string `/pet`;
         http:Request request = new;
-        json jsonBody = payload.toJson();
+        json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
         Pet response = check self.clientEp->put(resourcePath, request);
         return response;
     }
     # Add a new pet to the store
     #
-    # + payload - Create a new pet in the store 
-    # + return - Successful operation 
+    # + payload - Create a new pet in the store
+    # + return - Successful operation
     resource isolated function post pet(Pet payload) returns Pet|error {
         string resourcePath = string `/pet`;
         http:Request request = new;
-        json jsonBody = payload.toJson();
+        json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
         Pet response = check self.clientEp->post(resourcePath, request);
         return response;
