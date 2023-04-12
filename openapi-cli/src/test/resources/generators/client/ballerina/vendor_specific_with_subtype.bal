@@ -1,4 +1,5 @@
 import ballerina/http;
+import ballerina/xmldata;
 
 public isolated client class Client {
     final http:Client clientEp;
@@ -40,7 +41,20 @@ public isolated client class Client {
     remote isolated function createPet(Pet payload) returns Pets|error {
         string resourcePath = string `/pets`;
         http:Request request = new;
-        request.setPayload(payload, "application/vnd.petstore.v3.diff+json");
+        json jsonBody = payload.toJson();
+        request.setPayload(jsonBody, "application/vnd.petstore.v3.diff+json");
+        Pets response = check self.clientEp->post(resourcePath, request);
+        return response;
+    }
+    # Create a pet
+    #
+    # + return - List of existing pets
+    remote isolated function createPetV0(Pet payload) returns Pets|error {
+        string resourcePath = string `/v0/pets`;
+        http:Request request = new;
+        json jsonBody = payload.toJson();
+        xml? xmlBody = check xmldata:fromJson(jsonBody);
+        request.setPayload(xmlBody, "application/vnd.petstore.v3.diff+xml");
         Pets response = check self.clientEp->post(resourcePath, request);
         return response;
     }
