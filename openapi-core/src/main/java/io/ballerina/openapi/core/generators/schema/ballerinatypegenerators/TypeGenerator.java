@@ -20,15 +20,19 @@ package io.ballerina.openapi.core.generators.schema.ballerinatypegenerators;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
@@ -39,6 +43,8 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinition
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
+import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA;
+import static io.ballerina.openapi.core.GeneratorConstants.CONSTRAINT;
 
 /**
  * Abstract class for schema types.
@@ -50,6 +56,7 @@ public abstract class TypeGenerator {
     Schema schema;
     String typeName;
     final List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
+    final LinkedHashSet<String> imports = new LinkedHashSet<>();
 
     public TypeGenerator(Schema schema, String typeName) {
         this.schema = schema;
@@ -58,6 +65,10 @@ public abstract class TypeGenerator {
 
     public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
         return typeDefinitionNodeList;
+    }
+
+    public LinkedHashSet<String> getImports() {
+        return imports;
     }
 
     /**
@@ -72,6 +83,17 @@ public abstract class TypeGenerator {
     public TypeDefinitionNode generateTypeDefinitionNode(IdentifierToken typeName, List<Node> schemaDoc,
                                                          List<AnnotationNode> typeAnnotations)
             throws BallerinaOpenApiException {
+
+        //Check the annotation for constraint support
+        boolean nullable = GeneratorMetaData.getInstance().isNullable();
+        for (AnnotationNode annotation : typeAnnotations) {
+            String annotationRef = annotation.annotReference().toString();
+            if (annotationRef.startsWith(CONSTRAINT) && !nullable) {
+                ImportDeclarationNode constraintImport = GeneratorUtils.getImportDeclarationNode(BALLERINA, CONSTRAINT);
+                //Here we are unable to add ImportDeclarationNode since newly generated node has different hashcode.
+                imports.add(constraintImport.toSourceCode());
+            }
+        }
 
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
         MetadataNode metadataNode = createMetadataNode(documentationNode, createNodeList(typeAnnotations));
