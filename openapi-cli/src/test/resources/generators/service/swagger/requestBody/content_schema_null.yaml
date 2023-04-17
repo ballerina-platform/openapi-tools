@@ -1,0 +1,45 @@
+openapi: 3.0.0
+info:
+  title: PizzaShackAPI
+  version: 1.0.0
+servers:
+  - url: https://localhost:9090/pizzashack/1.0.0/
+paths:
+  /order:
+    post:
+      description: Create a new Order
+      operationId: "postOrder"
+      requestBody:
+        $ref: '#/components/requestBodies/Order'
+      responses:
+        '201':
+          description: Created
+    put:
+      description: Create a new Order
+      operationId: "putOrder"
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        '201':
+          description: Created
+  /order02:
+    put:
+      description: Create a new Order
+      operationId: "putOrder02"
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '200':
+          description: Ok
+
+components:
+  requestBodies:
+    Order:
+      description: Order object that needs to be added
+      content:
+        application/json: {}
+      required: true
+

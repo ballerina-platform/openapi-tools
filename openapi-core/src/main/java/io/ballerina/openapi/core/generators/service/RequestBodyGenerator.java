@@ -125,8 +125,9 @@ public class RequestBodyGenerator {
             throws BallerinaOpenApiException {
 
         Optional<TypeDescriptorNode> typeName;
-        if (mediaType.getValue().getSchema().get$ref() != null) {
-            String schemaName = extractReferenceType(mediaType.getValue().getSchema().get$ref());
+        Schema requestBodySchema = mediaType.getValue().getSchema();
+        if (requestBodySchema != null && requestBodySchema.get$ref() != null) {
+            String schemaName = extractReferenceType(requestBodySchema.get$ref());
             Map<String, Schema> schemas = components.getSchemas();
             String mediaTypeContent = mediaType.getKey().trim();
             if (mediaTypeContent.matches(GeneratorConstants.TEXT_WILDCARD_REGEX)) {
