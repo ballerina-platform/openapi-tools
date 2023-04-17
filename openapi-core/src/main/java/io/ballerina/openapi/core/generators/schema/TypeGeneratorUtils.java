@@ -95,6 +95,8 @@ public class TypeGeneratorUtils {
             new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
                     GeneratorConstants.STRING, GeneratorConstants.BOOLEAN));
 
+    public static final PrintStream OUT_STREAM = System.err;
+
     /**
      * Get SchemaType object relevant to the schema given.
      *
@@ -175,7 +177,7 @@ public class TypeGeneratorUtils {
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
         Set<String> imports = new HashSet<>();
         //Generate constraint annotation.
-        AnnotationNode constraintNode = generateConstraintNode(fieldSchema);
+        AnnotationNode constraintNode = generateConstraintNode(fieldName.text(), fieldSchema);
         MetadataNode metadataNode;
         boolean isConstraintSupport =
                 constraintNode != null && fieldSchema.getNullable() != null && fieldSchema.getNullable() ||
@@ -273,24 +275,42 @@ public class TypeGeneratorUtils {
      * @param fieldSchema Schema for data type
      * @return {@link MetadataNode}
      */
-    public static AnnotationNode generateConstraintNode(Schema<?> fieldSchema) {
-
-        if (fieldSchema instanceof StringSchema) {
-            StringSchema stringSchema = (StringSchema) fieldSchema;
-            // Attributes : maxLength, minLength
-            return generateStringConstraint(stringSchema);
-        } else if (fieldSchema instanceof IntegerSchema || fieldSchema instanceof NumberSchema) {
-            // Attribute : minimum, maximum, exclusiveMinimum, exclusiveMaximum
-            return generateNumberConstraint(fieldSchema);
-        } else if (fieldSchema instanceof ArraySchema) {
-            ArraySchema arraySchema = (ArraySchema) fieldSchema;
-            // Attributes: maxItems, minItems
-            return generateArrayConstraint(arraySchema);
+    public static AnnotationNode generateConstraintNode(String typeName, Schema<?> fieldSchema) {
+        if (isConstraintAllowed(typeName, fieldSchema)) {
+            if (fieldSchema instanceof StringSchema) {
+                StringSchema stringSchema = (StringSchema) fieldSchema;
+                // Attributes : maxLength, minLength
+                return generateStringConstraint(stringSchema);
+            } else if (fieldSchema instanceof IntegerSchema || fieldSchema instanceof NumberSchema) {
+                // Attribute : minimum, maximum, exclusiveMinimum, exclusiveMaximum
+                return generateNumberConstraint(fieldSchema);
+            } else if (fieldSchema instanceof ArraySchema) {
+                ArraySchema arraySchema = (ArraySchema) fieldSchema;
+                // Attributes: maxItems, minItems
+                return generateArrayConstraint(arraySchema);
+            }
+            // Ignore Object, Map and Composed schemas.
+            return null;
         }
-        // Ignore Object, Map and Composed schemas.
         return null;
     }
 
+    public static boolean isConstraintAllowed(String typeName, Schema schema) {
+
+        boolean isConstraintNotAllowed = schema.getNullable() != null && schema.getNullable() ||
+                (schema instanceof ComposedSchema && (((ComposedSchema) schema).getOneOf() != null ||
+                        ((ComposedSchema) schema).getAnyOf() != null));
+        boolean nullable = GeneratorMetaData.getInstance().isNullable();
+        if (nullable) {
+            return false;
+        } else if (isConstraintNotAllowed) {
+            OUT_STREAM.printf("WARNING: constraints in the OpenAPI contract will be ignored for the " +
+                            "type `%s`, as constraints are not supported on Ballerina union types%n",
+                    typeName.trim());
+            return false;
+        }
+        return true;
+    }
     /**
      * Generate constraint for numbers : int, float, decimal.
      */
