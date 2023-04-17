@@ -27,6 +27,7 @@ import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
@@ -49,9 +50,11 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
@@ -67,7 +70,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.CONNECTION_CONFIG;
 public class BallerinaTypesGenerator {
 
     private final List<TypeDefinitionNode> typeDefinitionNodeList;
-    private boolean hasConstraints;
+    private final Set<String> imports = new LinkedHashSet<>();
 
     /**
      * This public constructor is used to generate record and other relevant data type when the nullable flag is
@@ -81,7 +84,6 @@ public class BallerinaTypesGenerator {
                                    List<TypeDefinitionNode> typeDefinitionNodeList) {
         GeneratorMetaData.createInstance(openAPI, isNullable, false);
         this.typeDefinitionNodeList = typeDefinitionNodeList;
-        this.hasConstraints = false;
     }
 
     /**
@@ -118,7 +120,6 @@ public class BallerinaTypesGenerator {
                                    boolean generateServiceType) {
         GeneratorMetaData.createInstance(openAPI, isNullable, generateServiceType);
         this.typeDefinitionNodeList = typeDefinitionNodeList;
-        this.hasConstraints = false;
     }
 
     /**
@@ -134,13 +135,10 @@ public class BallerinaTypesGenerator {
             if (schemas != null) {
                 for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
                     String schemaKey = schema.getKey().trim();
-                    if (!hasConstraints) {
-                        hasConstraints = GeneratorUtils.hasConstraints(schema.getValue());
-                    }
                     if (GeneratorUtils.isValidSchemaName(schemaKey)) {
                         List<Node> schemaDoc = new ArrayList<>();
-                        typeDefinitionNodeListForSchema.add(getTypeDefinitionNode
-                                (schema.getValue(), schemaKey, schemaDoc));
+                        typeDefinitionNodeListForSchema.add(getTypeDefinitionNode(schema.getValue(), schemaKey,
+                                schemaDoc));
                     }
                 }
             }
@@ -161,25 +159,25 @@ public class BallerinaTypesGenerator {
     }
 
     private NodeList<ImportDeclarationNode> generateImportNodes() {
-        List<ImportDeclarationNode> imports = new ArrayList<>();
+        Set<ImportDeclarationNode> importDeclarationNodes = new LinkedHashSet<>();
+        // Imports for the http module, when record has http type inclusions.
         if (!typeDefinitionNodeList.isEmpty()) {
-            importsForTypeDefinitions(imports);
+            importsForTypeDefinitions(importDeclarationNodes);
         }
-        boolean nullable = GeneratorMetaData.getInstance().isNullable();
-        if (hasConstraints && !nullable) {
-            //import for constraint
-            ImportDeclarationNode importForConstraint = GeneratorUtils.getImportDeclarationNode(
-                    GeneratorConstants.BALLERINA,
-                    GeneratorConstants.CONSTRAINT);
-            imports.add(importForConstraint);
+        //Imports for constraints
+        if (!imports.isEmpty()) {
+            for (String importValue : imports) {
+                ImportDeclarationNode importDeclarationNode = NodeParser.parseImportDeclaration(importValue);
+                importDeclarationNodes.add(importDeclarationNode);
+            }
         }
-        if (imports.isEmpty()) {
+        if (importDeclarationNodes.isEmpty()) {
             return createEmptyNodeList();
         }
-        return createNodeList(imports);
+        return createNodeList(importDeclarationNodes);
     }
 
-    private void importsForTypeDefinitions(List<ImportDeclarationNode> imports) {
+    private void importsForTypeDefinitions(Set<ImportDeclarationNode> imports) {
         for (TypeDefinitionNode node : typeDefinitionNodeList) {
             if (!(node.typeDescriptor() instanceof RecordTypeDescriptorNode)) {
                 continue;
@@ -235,19 +233,19 @@ public class BallerinaTypesGenerator {
         TypeDefinitionNode typeDefinitionNode =
                 typeGenerator.generateTypeDefinitionNode(typeNameToken, schemaDocs, typeAnnotations);
 
-        if (typeGenerator instanceof ArrayTypeGenerator &&
-                !((ArrayTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
-            typeDefinitionNodeList.addAll(((ArrayTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
+        if (typeGenerator instanceof ArrayTypeGenerator && !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
+            typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
         } else if (typeGenerator instanceof RecordTypeGenerator &&
-                !((RecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
-            removeDuplicateNode(((RecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
+                !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
+            removeDuplicateNode(typeGenerator.getTypeDefinitionNodeList());
         } else if (typeGenerator instanceof AllOfRecordTypeGenerator &&
-                !((AllOfRecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
-            removeDuplicateNode(((AllOfRecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
+                !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
+            removeDuplicateNode(typeGenerator.getTypeDefinitionNodeList());
         } else if (typeGenerator instanceof UnionTypeGenerator &&
-                !((UnionTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
-            removeDuplicateNode(((UnionTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
+                !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
+            removeDuplicateNode(typeGenerator.getTypeDefinitionNodeList());
         }
+        imports.addAll(typeGenerator.getImports());
         return typeDefinitionNode;
     }
 

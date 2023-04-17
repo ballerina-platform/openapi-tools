@@ -105,6 +105,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
                     createIdentifierToken(typeName),
                     new ArrayList<>(),
                     typeAnnotations);
+            imports.addAll(typeGenerator.getImports());
             typeDefinitionNodeList.add(arrayItemWithConstraint);
         } else {
             typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
@@ -147,7 +148,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         arrayDimensions = arrayDimensions.add(arrayDimension);
         ArrayTypeDescriptorNode arrayTypeDescriptorNode = createArrayTypeDescriptorNode(typeDescriptorNode
                 , arrayDimensions);
-
+        imports.addAll(typeGenerator.getImports());
         return getNullableType(arraySchema, arrayTypeDescriptorNode);
     }
 }

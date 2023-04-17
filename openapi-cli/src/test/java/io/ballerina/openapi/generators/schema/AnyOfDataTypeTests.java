@@ -27,7 +27,6 @@ import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -58,7 +57,7 @@ public class AnyOfDataTypeTests {
     }
 
     @Test(description = "Test for the schema generations")
-    public void testAnyOfSchema() throws BallerinaOpenApiException, IOException, FormatterException {
+    public void testAnyOfSchema() throws BallerinaOpenApiException, IOException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/schema15.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);

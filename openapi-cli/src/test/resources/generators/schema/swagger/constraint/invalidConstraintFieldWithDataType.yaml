@@ -1,0 +1,39 @@
+openapi: 3.0.0
+info:
+  title: Shopify Admin API
+  version: "2021-10"
+tags:
+  - name: customers
+  - name: products
+  - name: orders
+  - name: fulfillments
+  - name: order_risks
+paths:
+  /admin:
+    post:
+      operationId: "test1"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/Address"
+      responses:
+        200:
+          description: Status OK
+
+components:
+  schemas:
+    Address:  # 01 : string type has invalid constraint `maximum`
+      type: string
+      maximum: 5
+    Person:
+      type: object
+      required:
+        - id
+      properties:
+        name:
+          type: string
+          maximum: 14 # 02 : string type has invalid constraint `maximum` in record field
+        id:
+          type: integer
+          maxItems: 5  # 03 : integer type has invalid constraint `maxItems`
