@@ -64,7 +64,8 @@ public isolated client class Client {
     resource isolated function put greeting02(record{} payload) returns string|error {
         string resourcePath = string `/greeting02`;
         http:Request request = new;
-        request.setPayload(payload, "application/vnd.petstore.v3.diff+json");
+        json jsonBody = payload.toJson();
+        request.setPayload(jsonBody, "application/vnd.petstore.v3.diff+json");
         string response = check self.clientEp->put(resourcePath, request);
         return response;
     }
