@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static io.ballerina.openapi.generators.common.TestUtils.getStringFromGivenBalFile;
 import static io.ballerina.openapi.generators.openapi.TestUtils.compareWithGeneratedFile;
 
 /**
@@ -272,7 +273,7 @@ public class ResponseTests {
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
         Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/simple_name_ref.yaml");
+        compareWithGeneratedFile(ballerinaFilePath, "response/simple_name_ref.yaml");
     }
 
     @Test(description = "Test scenarios where return type is a SimpleNameReference with readonly")
@@ -282,7 +283,7 @@ public class ResponseTests {
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
         Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/readonly.yaml");
+        compareWithGeneratedFile(ballerinaFilePath, "response/readonly.yaml");
     }
 
     @Test(description = "Test scenarios where return type is a deprecated status code 'NetworkAuthorizationRequired'")
@@ -293,7 +294,7 @@ public class ResponseTests {
                 , false);
         Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
 
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/deprecated_status_code.yaml");
+        compareWithGeneratedFile(ballerinaFilePath, "response/deprecated_status_code.yaml");
     }
 
     @Test(description = "When the service has config without mediaType attribute")
@@ -303,7 +304,43 @@ public class ResponseTests {
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
         Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/service_config_with_cors.yaml");
+        compareWithGeneratedFile(ballerinaFilePath, "response/service_config_with_cors.yaml");
+    }
+
+    @Test(description = "When the service has config without mediaType attribute, and with slash path")
+    public void testResponseHasServiceConfigWithCorsWithSlash() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/service_config_with_cors_with_slash.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"),
+                "response/service_config_with_cors_with_slash.yaml");
+        OASContractGenerator openApiConverter = new OASContractGenerator();
+        openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
+        String generatedYaml = getStringFromGivenBalFile(tempDir,
+                "service_config_with_cors_with_slash_openapi.yaml");
+        generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
+        expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
+        Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
+    }
+
+    @Test(description = "When the service has config without mediaType attribute, and without base path")
+    public void testResponseHasServiceConfigWithCorsWithoutBasePath() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/service_config_with_cors_without_base_path.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"),
+                "response/service_config_with_cors_without_base_path.yaml");
+        OASContractGenerator openApiConverter = new OASContractGenerator();
+        openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
+        String generatedYaml = getStringFromGivenBalFile(tempDir,
+                "service_config_with_cors_without_base_path_openapi.yaml");
+        generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
+        expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
+        Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
     }
 
     @AfterMethod

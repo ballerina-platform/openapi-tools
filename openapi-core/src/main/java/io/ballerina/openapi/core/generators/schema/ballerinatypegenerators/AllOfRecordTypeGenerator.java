@@ -159,7 +159,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
      * ex: string|int...
      * @return
      */
-    private static RecordRestDescriptorNode getRestDescriptorNodeForAllOf(List<Schema<?>> restSchemas)
+    private RecordRestDescriptorNode getRestDescriptorNodeForAllOf(List<Schema<?>> restSchemas)
             throws BallerinaOpenApiException {
         TypeDescriptorNode unionType = getUnionType(restSchemas);
         return NodeFactory.createRecordRestDescriptorNode(unionType, createToken(ELLIPSIS_TOKEN),
@@ -173,7 +173,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
      * @return Union type
      * @throws BallerinaOpenApiException when unsupported combination of schemas found
      */
-    private static TypeDescriptorNode getUnionType(List<Schema<?>> schemas) throws BallerinaOpenApiException {
+    private TypeDescriptorNode getUnionType(List<Schema<?>> schemas) throws BallerinaOpenApiException {
 
         // TODO: this has issue with generating union type with `string?|int?...
         // this will be tracked via https://github.com/ballerina-platform/openapi-tools/issues/810
@@ -181,6 +181,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
         for (Schema schema : schemas) {
             TypeGenerator typeGenerator = getTypeGenerator(schema, null, null);
             TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
+            imports.addAll(typeGenerator.getImports());
             typeDescriptorNodes.add(typeDescriptorNode);
             // error for rest field unhandled constraint support
             if (GeneratorUtils.hasConstraints(schema)) {

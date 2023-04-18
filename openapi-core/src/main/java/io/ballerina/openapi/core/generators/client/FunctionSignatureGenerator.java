@@ -89,6 +89,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.core.GeneratorConstants.BINARY;
 import static io.ballerina.openapi.core.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.core.GeneratorConstants.BYTE;
+import static io.ballerina.openapi.core.GeneratorConstants.EMPTY_RECORD;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP_REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.INTEGER;
 import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
@@ -367,7 +368,7 @@ public class FunctionSignatureGenerator {
         if (parameterSchema.get$ref() != null) {
             type = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
             Schema schema = openAPI.getComponents().getSchemas().get(type.trim());
-            if (schema instanceof ObjectSchema) {
+            if (schema instanceof ObjectSchema || (schema instanceof ComposedSchema && schema.getAllOf() != null)) {
                 throw new BallerinaOpenApiException("Ballerina does not support object type path parameters.");
             }
         } else {
@@ -523,8 +524,7 @@ public class FunctionSignatureGenerator {
                         paramType = getRequestBodyParameterForArraySchema(operationId, mediaTypeEntry, arraySchema);
                     } else if (schema instanceof ObjectSchema) {
                         ObjectSchema objectSchema = (ObjectSchema) schema;
-                        paramType = referencedRequestBodyName.isBlank() ? paramType : referencedRequestBodyName;
-                        getRequestBodyParameterForObjectSchema(referencedRequestBodyName, objectSchema);
+                        paramType = getRequestBodyParameterForObjectSchema(referencedRequestBodyName, objectSchema);
                     } else { // composed and object schemas are handled by the flatten
                         paramType = getBallerinaMediaType(mediaTypeEntryKey, true);
                     }
@@ -576,11 +576,15 @@ public class FunctionSignatureGenerator {
         }
     }
 
-    private void getRequestBodyParameterForObjectSchema (String recordName, ObjectSchema objectSchema)
+    private String getRequestBodyParameterForObjectSchema (String recordName, ObjectSchema objectSchema)
             throws BallerinaOpenApiException {
+        if (objectSchema.getProperties() == null || objectSchema.getProperties().isEmpty()) {
+            return EMPTY_RECORD;
+        }
         TypeDefinitionNode record =
                 ballerinaSchemaGenerator.getTypeDefinitionNode(objectSchema, recordName, new ArrayList<>());
         GeneratorUtils.updateTypeDefNodeList(recordName, record, typeDefinitionNodeList);
+        return recordName;
     }
 
     /**
