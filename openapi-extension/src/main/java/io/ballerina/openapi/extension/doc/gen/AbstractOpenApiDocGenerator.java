@@ -44,7 +44,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.ballerina.openapi.converter.Constants.SLASH;
@@ -158,7 +157,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
         int serviceId = config.getSemanticModel().hashCode();
         String targetFile = String.format(FILE_NAME_FORMAT, serviceId);
         ModulePartNode modulePartNode = config.getSyntaxTree().rootNode();
-        Set<ListenerDeclarationNode> listenerNodes = extractListenerNodes(modulePartNode);
+        LinkedHashSet<ListenerDeclarationNode> listenerNodes = extractListenerNodes(modulePartNode);
         collectListeners(project, listenerNodes);
         OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder = new
                 OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
@@ -182,7 +181,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
         updateOpenApiContext(context, serviceId, openApiDefinition, embed);
     }
 
-    private Set<ListenerDeclarationNode> extractListenerNodes(ModulePartNode modulePartNode) {
+    private LinkedHashSet<ListenerDeclarationNode> extractListenerNodes(ModulePartNode modulePartNode) {
         return modulePartNode.members().stream()
                 .filter(n -> SyntaxKind.LISTENER_DECLARATION.equals(n.kind()))
                 .map(n -> (ListenerDeclarationNode) n)

@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import static io.ballerina.openapi.converter.Constants.CONTRACT;
 import static io.ballerina.openapi.converter.Constants.HYPHEN;
@@ -99,7 +98,7 @@ public class ServiceToOpenAPIConverterUtils {
                                                          SemanticModel semanticModel,
                                                          String serviceName, Boolean needJson,
                                                          Path inputPath) {
-        Set<ListenerDeclarationNode> endpoints = new LinkedHashSet<>();
+        LinkedHashSet<ListenerDeclarationNode> endpoints = new LinkedHashSet<>();
         Map<String, ServiceDeclarationNode> servicesToGenerate = new HashMap<>();
         List<String> availableService = new ArrayList<>();
         List<OpenAPIConverterDiagnostic> diagnostics = new ArrayList<>();
@@ -145,26 +144,13 @@ public class ServiceToOpenAPIConverterUtils {
         return outputs;
     }
 
-    public static void collectListeners(Project project, Set<ListenerDeclarationNode> endpoints) {
-        final BallerinaNodeVisitor balNodeVisitor = new BallerinaNodeVisitor();
-        // Travers every syntax tree and collect all the type definition nodes.
-        project.currentPackage().moduleIds().forEach(moduleId -> {
-            Module module = project.currentPackage().module(moduleId);
-            module.documentIds().forEach(documentId -> {
-                SyntaxTree syntaxTreeDoc = module.document(documentId).syntaxTree();
-                syntaxTreeDoc.rootNode().accept(balNodeVisitor);
-                endpoints.addAll(balNodeVisitor.getListenerDeclarationNodes());
-            });
-        });
-    }
-
     /**
      * Filter all the end points and service nodes.
      */
     private static void extractListenersAndServiceNodes(String serviceName, List<String> availableService,
                                                         Map<String, ServiceDeclarationNode> servicesToGenerate,
                                                         ModulePartNode modulePartNode,
-                                                        Set<ListenerDeclarationNode> endpoints,
+                                                        LinkedHashSet<ListenerDeclarationNode> endpoints,
                                                         SemanticModel semanticModel) {
         for (Node node : modulePartNode.members()) {
             SyntaxKind syntaxKind = node.kind();
@@ -510,6 +496,8 @@ public class ServiceToOpenAPIConverterUtils {
 
     /**
      * Visitor to get the TypeDefinitionNode and ListenerDeclarationNodes.
+     *
+     * @since 1.6.0
      */
     private static class BallerinaNodeVisitor extends NodeVisitor {
 
@@ -533,5 +521,19 @@ public class ServiceToOpenAPIConverterUtils {
         public List<ListenerDeclarationNode> getListenerDeclarationNodes() {
             return listenerDeclarationNodes;
         }
+    }
+
+
+    public static void collectListeners(Project project, LinkedHashSet<ListenerDeclarationNode> endpoints) {
+        final BallerinaNodeVisitor balNodeVisitor = new BallerinaNodeVisitor();
+        // Travers every syntax tree and collect all the listener nodes.
+        project.currentPackage().moduleIds().forEach(moduleId -> {
+            Module module = project.currentPackage().module(moduleId);
+            module.documentIds().forEach(documentId -> {
+                SyntaxTree syntaxTreeDoc = module.document(documentId).syntaxTree();
+                syntaxTreeDoc.rootNode().accept(balNodeVisitor);
+                endpoints.addAll(balNodeVisitor.getListenerDeclarationNodes());
+            });
+        });
     }
 }

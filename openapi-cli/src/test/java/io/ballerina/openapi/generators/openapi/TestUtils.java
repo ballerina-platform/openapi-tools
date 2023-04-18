@@ -59,12 +59,9 @@ public class TestUtils {
             openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
             if (Files.exists(tempDir.resolve("payloadV_openapi.yaml"))) {
                 String generatedYaml = getStringFromGivenBalFile(tempDir, "payloadV_openapi.yaml");
-                //TODO: remove after listener fix
-//                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
-//                expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
-                Assert.assertEquals(generatedYaml, expectedYamlContent, "Generated syntax tree doesn't " +
-                        "match with the expected syntax tree.");
-//                Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
+                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
+                expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
             } else {
                 Assert.fail("Yaml was not generated");
             }

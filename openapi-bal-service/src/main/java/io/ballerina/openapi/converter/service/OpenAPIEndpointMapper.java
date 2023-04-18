@@ -48,7 +48,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static io.ballerina.openapi.converter.Constants.PORT;
 import static io.ballerina.openapi.converter.Constants.SERVER;
@@ -84,8 +83,7 @@ public class OpenAPIEndpointMapper {
                             Server server = extractServer(ep, serviceBasePath);
                             servers.add(server);
                         }
-                    }
-                    if (node.toString().trim().equals(ep.variableName().text().trim())) {
+                    } else if (node.toString().trim().equals(ep.variableName().text().trim())) {
                         String serviceBasePath = getServiceBasePath(service);
                         Server server = extractServer(ep, serviceBasePath);
                         servers.add(server);

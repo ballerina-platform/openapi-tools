@@ -24,12 +24,11 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
-import java.util.Set;
 
 /**
  * This {@code OASGenerationMetaInfo} contains details related to openAPI specification.
  *
- * @since 1.5.0
+ * @since 1.6.0
  */
 public class OASGenerationMetaInfo {
 
@@ -114,5 +113,4 @@ public class OASGenerationMetaInfo {
             return new OASGenerationMetaInfo(this);
         }
     }
-
 }
