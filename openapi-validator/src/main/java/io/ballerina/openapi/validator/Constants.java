@@ -137,7 +137,9 @@ public class Constants {
         httpCodes.put("InsufficientStorage", "507");
         httpCodes.put("LoopDetected", "508");
         httpCodes.put("NotExtended", "510");
-        httpCodes.put("NetworkAuthorizationRequired", "511");
+        httpCodes.put("NetworkAuthenticationRequired", "511");
+        httpCodes.put("NetworkAuthorizationRequired", "511"); //This status code was added since it is deprecated.
+        // TODO: remove this after fixing https://github.com/ballerina-platform/ballerina-standard-library/issues/4245
         HTTP_CODES = Collections.unmodifiableMap(httpCodes);
     }
     public static final String HTTP_200 = "200";

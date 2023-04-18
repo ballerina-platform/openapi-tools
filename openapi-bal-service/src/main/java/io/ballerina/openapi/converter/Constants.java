@@ -40,6 +40,7 @@ public class Constants {
     public static final String PATH = "path";
     public static final String BODY = "body";
     public static final String HTTP_PAYLOAD = "http:Payload";
+    public static final String HTTP_QUERY = "http:Query";
     public static final String HTTP = "http";
     public static final String BALLERINA = "ballerina";
     public static final String TYPEREFERENCE = "typeReference";
@@ -193,7 +194,9 @@ public class Constants {
         httpCodeMap.put("InsufficientStorage", "507");
         httpCodeMap.put("LoopDetected", "508");
         httpCodeMap.put("NotExtended", "510");
-        httpCodeMap.put("NetworkAuthorizationRequired", "511");
+        httpCodeMap.put("NetworkAuthenticationRequired", "511");
+        httpCodeMap.put("NetworkAuthorizationRequired", "511"); //This status code was added since it is deprecated.
+        // TODO: remove this after fixing https://github.com/ballerina-platform/ballerina-standard-library/issues/4245
         HTTP_CODES = Collections.unmodifiableMap(httpCodeMap);
     }
     public static final String HTTP_200 = "200";

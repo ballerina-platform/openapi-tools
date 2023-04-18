@@ -111,8 +111,7 @@ public class AllOfDataTypeTests {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
-                "schema/ballerina/nested_all_of.bal", syntaxTree);
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/nested_all_of.bal", syntaxTree);
     }
 
     @Test(description = "Tests record generation for nested OneOf schema inside AllOf schema",

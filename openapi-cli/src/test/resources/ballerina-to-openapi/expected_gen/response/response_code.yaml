@@ -129,5 +129,5 @@ paths:
         "510":
           description: NotExtended
         "511":
-          description: NetworkAuthorizationRequired
+          description: NetworkAuthenticationRequired
 components: {}

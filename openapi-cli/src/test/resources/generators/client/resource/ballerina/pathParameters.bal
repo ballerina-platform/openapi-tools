@@ -62,15 +62,15 @@ public isolated client class Client {
     }
     #
     # + return - Ok
-    resource isolated function get v1/[int 'version]/v2/[string name]() returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri('version)}/v2/${getEncodedUri(name)}`;
+    resource isolated function get v1/[int version]/v2/[string name]() returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri(name)}`;
         string response = check self.clientEp->get(resourcePath);
         return response;
     }
     #
     # + return - Ok
-    resource isolated function get v1/[int 'version]/v2/[int 'limit]() returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri('version)}/v2/${getEncodedUri('limit)}`;
+    resource isolated function get v1/[int version]/v2/[int 'limit]() returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri('limit)}`;
         string response = check self.clientEp->get(resourcePath);
         return response;
     }

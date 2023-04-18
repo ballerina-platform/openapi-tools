@@ -254,6 +254,16 @@ public class RequestBodyTest {
         }
     }
 
+    @Test(description = "When the service has config without mediaType attribute")
+    public void testForServiceConfigOnlyWithCors() {
+        Path ballerinaFilePath = RES_DIR.resolve("request_body/service_config_with_cors.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , true);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "service_config_with_cors.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         deleteDirectory(this.tempDir);

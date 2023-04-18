@@ -302,6 +302,10 @@ public class ServiceToOpenAPIConverterUtils {
                     } else {
                         openAPI.setInfo(new Info().version(version).title(normalizeTitle(currentServiceName)));
                     }
+                } else if (currentServiceName.equals(SLASH) || currentServiceName.isBlank()) {
+                    openAPI.setInfo(new Info().version(version).title(normalizeTitle(openapiFileName)));
+                } else {
+                    openAPI.setInfo(new Info().version(version).title(normalizeTitle(currentServiceName)));
                 }
             }
         } else if (currentServiceName.equals(SLASH) || currentServiceName.isBlank()) {

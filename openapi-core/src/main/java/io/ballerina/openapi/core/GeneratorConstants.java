@@ -282,7 +282,7 @@ public class GeneratorConstants {
         httpCodeMap.put("507", "InsufficientStorage");
         httpCodeMap.put("508", "LoopDetected");
         httpCodeMap.put("510", "NotExtended");
-        httpCodeMap.put("511", "NetworkAuthorizationRequired");
+        httpCodeMap.put("511", "NetworkAuthenticationRequired");
         HTTP_CODES_DES = Collections.unmodifiableMap(httpCodeMap);
     }
 
@@ -361,4 +361,8 @@ public class GeneratorConstants {
     public static final String RETURNS = "returns";
     public static final String ANYDATA = "anydata";
     public static final String RESPONSE_RECORD_NAME = "Response";
+    public static final String SERVICE_TYPE_NAME = "OASServiceType";
+    public static final String DEFAULT_RETURN_COMMENT = "return value description";
+    public static final String DEFAULT_FUNC_COMMENT = "Description";
+    public static final String DEFAULT_PARAM_COMMENT = "parameter description";
 }

@@ -90,7 +90,7 @@ public class RequestBodyTests {
 
     @Test(description = "Scenario 03 - Request Body has multiple content types with Different dataBind schema types.")
     public void generateMultipleContent() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario03_rb.yaml");
+        Path definitionPath = RES_DIR.resolve("swagger/requestBody/multiple_content.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
@@ -192,5 +192,34 @@ public class RequestBodyTests {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/multipart_form_data.bal", syntaxTree);
+    }
+
+
+    @Test(description = "RequestBody has unhandled media type ex: application/zip")
+    public void testForUnhandledMediaType() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/requestBody/unhandled_media_type.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "requestBody/unhandled_media_type.bal", syntaxTree);
+    }
+
+    @Test(description = "RequestBody has anyOf type")
+    public void testForAnyOf() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/requestBody/any_of.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "requestBody/any_of.bal", syntaxTree);
     }
 }
