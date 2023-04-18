@@ -236,7 +236,8 @@ public class ServiceToOpenAPIConverterUtils {
     }
 
     private static OASResult ensembleOASResult(ServiceDeclarationNode serviceDefinition,
-                                               Set<ListenerDeclarationNode> endpoints, SemanticModel semanticModel,
+                                               LinkedHashSet<ListenerDeclarationNode> endpoints,
+                                               SemanticModel semanticModel,
                                                String openApiFileName, Path ballerinaFilePath) {
 
         OASResult oasResult = fillOpenAPIInfoSection(serviceDefinition, semanticModel, openApiFileName,

@@ -23,6 +23,7 @@ import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 
 import java.nio.file.Path;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -36,7 +37,7 @@ public class OASGenerationMetaInfo {
     private final Path ballerinaFilePath;
     private final SemanticModel semanticModel;
     private final ServiceDeclarationNode serviceDeclarationNode;
-    private final Set<ListenerDeclarationNode> endpoints;
+    private final LinkedHashSet<ListenerDeclarationNode> endpoints;
     //TODO: enable when complete constraint support
 //    private final Set<TypeDefinitionNode> typeDefinitionNodes;
 
@@ -65,7 +66,7 @@ public class OASGenerationMetaInfo {
         return serviceDeclarationNode;
     }
 
-    public Set<ListenerDeclarationNode> getEndpoints() {
+    public LinkedHashSet<ListenerDeclarationNode> getEndpoints() {
         return endpoints;
     }
 
@@ -79,7 +80,7 @@ public class OASGenerationMetaInfo {
         private Path ballerinaFilePath;
         private SemanticModel semanticModel;
         private ServiceDeclarationNode serviceDeclarationNode;
-        private Set<ListenerDeclarationNode> endpoints;
+        private LinkedHashSet<ListenerDeclarationNode> endpoints;
 //        private Set<TypeDefinitionNode> typeDefinitionNodes;
 
         public OASGenerationMetaInfoBuilder setBallerinaFilePath(Path ballerinaFilePath) {
@@ -99,7 +100,7 @@ public class OASGenerationMetaInfo {
             return this;
         }
 
-        public OASGenerationMetaInfoBuilder setEndpoints(Set<ListenerDeclarationNode> endpoints) {
+        public OASGenerationMetaInfoBuilder setEndpoints(LinkedHashSet<ListenerDeclarationNode> endpoints) {
             this.endpoints = endpoints;
             return this;
         }
