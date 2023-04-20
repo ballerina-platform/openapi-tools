@@ -75,28 +75,36 @@ public class OpenAPIEndpointMapper {
             for (ListenerDeclarationNode ep : endpoints) {
                 SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
                 for (ExpressionNode node : exprNodes) {
-                    if (node instanceof QualifiedNameReferenceNode) {
-                        //Handle QualifiedNameReferenceNode in listener
-                        QualifiedNameReferenceNode refNode = (QualifiedNameReferenceNode) node;
-                        if (refNode.identifier().text().trim().equals(ep.variableName().text().trim())) {
-                            String serviceBasePath = getServiceBasePath(service);
-                            Server server = extractServer(ep, serviceBasePath);
-                            servers.add(server);
-                        }
-                    } else if (node.toString().trim().equals(ep.variableName().text().trim())) {
-                        String serviceBasePath = getServiceBasePath(service);
-                        Server server = extractServer(ep, serviceBasePath);
-                        servers.add(server);
-                    }
+                    updateServerDetails(service, servers, ep, node);
                 }
             }
-
         }
         if (servers.size() > 1) {
             Server mainServer = addEnumValues(servers);
             openAPI.setServers(Collections.singletonList(mainServer));
         }
         return openAPI;
+    }
+
+    /**
+     * This usitl for extract server details from endpoints and update server list.
+     */
+    private void updateServerDetails(ServiceDeclarationNode service, List<Server> servers,
+                                     ListenerDeclarationNode endPoint, ExpressionNode expNode) {
+
+        if (expNode instanceof QualifiedNameReferenceNode) {
+            //Handle QualifiedNameReferenceNode in listener
+            QualifiedNameReferenceNode refNode = (QualifiedNameReferenceNode) expNode;
+            if (refNode.identifier().text().trim().equals(endPoint.variableName().text().trim())) {
+                String serviceBasePath = getServiceBasePath(service);
+                Server server = extractServer(endPoint, serviceBasePath);
+                servers.add(server);
+            }
+        } else if (expNode.toString().trim().equals(endPoint.variableName().text().trim())) {
+            String serviceBasePath = getServiceBasePath(service);
+            Server server = extractServer(endPoint, serviceBasePath);
+            servers.add(server);
+        }
     }
 
     private Server addEnumValues(List<Server> servers) {

@@ -76,12 +76,14 @@ public class ModuleReferenceTests {
     @Test
     public void testListenersInSeparateModule() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("listeners_in_separate_module.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners_in_separate_module.yaml");
+        TestUtils.compareWithGeneratedFileWithWindowsANdLinux(ballerinaFilePath,
+                "listeners_in_separate_module.yaml", "windows_listeners_in_separate_module.yaml");
     }
 
     @Test
     public void testListenersInSeparateFiles() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("listeners_in_separate_file.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners_in_separate_file.yaml");
+        TestUtils.compareWithGeneratedFileWithWindowsANdLinux(ballerinaFilePath,
+                "listeners_in_separate_file.yaml", "windows_listeners_in_separate_file.yaml");
     }
 }

@@ -17,7 +17,6 @@
  */
 package io.ballerina.openapi.converter.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
@@ -56,8 +55,8 @@ public class OASResult {
         return this.serviceName;
     }
 
-    public Optional<String> getYaml() throws JsonProcessingException {
-        return Optional.ofNullable(Yaml.pretty().writeValueAsString(this.openAPI));
+    public Optional<String> getYaml() {
+        return Optional.ofNullable(Yaml.pretty(this.openAPI));
     }
 
     public Optional<String> getJson() {
