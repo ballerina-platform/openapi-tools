@@ -16,6 +16,7 @@
 
 package io.ballerina.openapi.build;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -142,20 +143,27 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
     }
 
     private void writeOpenAPIYaml(Path outPath, OASResult oasResult, List<Diagnostic> diagnostics) {
-        if (oasResult.getYaml().isPresent()) {
-            try {
-                // Create openapi directory if not exists in the path. If exists do not throw an error
-                Files.createDirectories(Paths.get(outPath + OAS_PATH_SEPARATOR + OPENAPI));
-                String serviceName = oasResult.getServiceName();
-                String fileName = resolveContractFileName(outPath.resolve(OPENAPI),
-                        serviceName, false);
-                writeFile(outPath.resolve(OPENAPI + OAS_PATH_SEPARATOR + fileName), oasResult.getYaml().get());
-            } catch (IOException e) {
-                DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
-                ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
-                        error.getDescription(), null, e.toString());
-                diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
+
+        try {
+            if (oasResult.getYaml().isPresent()) {
+                try {
+                    // Create openapi directory if not exists in the path. If exists do not throw an error
+                    Files.createDirectories(Paths.get(outPath + OAS_PATH_SEPARATOR + OPENAPI));
+                    String serviceName = oasResult.getServiceName();
+                    String fileName = resolveContractFileName(outPath.resolve(OPENAPI),
+                            serviceName, false);
+                    writeFile(outPath.resolve(OPENAPI + OAS_PATH_SEPARATOR + fileName), oasResult.getYaml().get());
+                } catch (IOException e) {
+                    DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
+                    ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
+                            error.getDescription(), null, e.toString());
+                    diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
+                }
             }
+        } catch (JsonProcessingException e) {
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_108.getCode(),
+                    DiagnosticMessages.OAS_CONVERTOR_108.getDescription(), null, e.toString());
+            diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
         }
         if (!oasResult.getDiagnostics().isEmpty()) {
             for (OpenAPIConverterDiagnostic diagnostic : oasResult.getDiagnostics()) {

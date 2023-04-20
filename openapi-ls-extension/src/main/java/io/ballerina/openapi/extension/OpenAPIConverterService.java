@@ -19,6 +19,7 @@
 
 package io.ballerina.openapi.extension;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -107,8 +108,13 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                         Path.of(request.getDocumentFilePath()));
                 //Response should handle
                 if (!yamlContent.isEmpty() && (yamlContent.get(0).getOpenAPI().isPresent())) {
-                    Optional<String> yaml = yamlContent.get(0).getYaml();
-                    yaml.ifPresent(response::setYamlContent);
+                    Optional<String> yaml = null;
+                    try {
+                        yaml = yamlContent.get(0).getYaml();
+                        yaml.ifPresent(response::setYamlContent);
+                    } catch (JsonProcessingException e) {
+                        response.setError("Error occurred while generating yaml.");
+                    }
                 } else {
                     response.setError("Error occurred while generating yaml.");
                 }
