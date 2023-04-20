@@ -142,7 +142,6 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
     }
 
     private void writeOpenAPIYaml(Path outPath, OASResult oasResult, List<Diagnostic> diagnostics) {
-
         if (oasResult.getYaml().isPresent()) {
             try {
                 // Create openapi directory if not exists in the path. If exists do not throw an error
@@ -158,7 +157,6 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
             }
         }
-
         if (!oasResult.getDiagnostics().isEmpty()) {
             for (OpenAPIConverterDiagnostic diagnostic : oasResult.getDiagnostics()) {
                 diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));

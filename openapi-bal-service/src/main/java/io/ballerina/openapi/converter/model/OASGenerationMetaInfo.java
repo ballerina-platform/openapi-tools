@@ -38,7 +38,7 @@ public class OASGenerationMetaInfo {
     private final ServiceDeclarationNode serviceDeclarationNode;
     private final LinkedHashSet<ListenerDeclarationNode> endpoints;
     //TODO: enable when complete constraint support
-//    private final Set<TypeDefinitionNode> typeDefinitionNodes;
+    //private final Set<TypeDefinitionNode> typeDefinitionNodes;
 
     public OASGenerationMetaInfo(OASGenerationMetaInfoBuilder builder) {
         this.openApiFileName = builder.openApiFileName;
@@ -46,7 +46,7 @@ public class OASGenerationMetaInfo {
         this.semanticModel = builder.semanticModel;
         this.serviceDeclarationNode = builder.serviceDeclarationNode;
         this.endpoints = builder.endpoints;
-        //        this.typeDefinitionNodes = builder.typeDefinitionNodes;
+        //this.typeDefinitionNodes = builder.typeDefinitionNodes;
     }
 
     public String getOpenApiFileName() {
@@ -69,7 +69,6 @@ public class OASGenerationMetaInfo {
         return endpoints;
     }
 
-
     /**
      * This method is used to create a new {@link OASGenerationMetaInfoBuilder} instance.
      */
@@ -80,16 +79,14 @@ public class OASGenerationMetaInfo {
         private SemanticModel semanticModel;
         private ServiceDeclarationNode serviceDeclarationNode;
         private LinkedHashSet<ListenerDeclarationNode> endpoints;
-//        private Set<TypeDefinitionNode> typeDefinitionNodes;
+        //private Set<TypeDefinitionNode> typeDefinitionNodes;
 
         public OASGenerationMetaInfoBuilder setBallerinaFilePath(Path ballerinaFilePath) {
-
             this.ballerinaFilePath = ballerinaFilePath;
             return this;
         }
 
         public OASGenerationMetaInfoBuilder setSemanticModel(SemanticModel semanticModel) {
-
             this.semanticModel = semanticModel;
             return this;
         }

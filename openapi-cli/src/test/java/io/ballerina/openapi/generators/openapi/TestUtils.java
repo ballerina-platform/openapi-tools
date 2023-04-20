@@ -93,7 +93,7 @@ public class TestUtils {
                 Assert.fail("Yaml was not generated");
             }
         } catch (IOException e) {
-            Assert.fail("Error while generating the service. " + e.getMessage());
+            Assert.fail("Error while generating the yaml file. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("payloadV_openapi.yaml", tempDir);
             deleteDirectory(tempDir);

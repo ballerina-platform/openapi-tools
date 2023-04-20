@@ -87,7 +87,7 @@ public class OpenAPIEndpointMapper {
     }
 
     /**
-     * This util is for extract server details from endpoints and update server list.
+     * This util is for extracting the server details from endpoints and update server list.
      */
     private void updateServerDetails(ServiceDeclarationNode service, List<Server> servers,
                                      ListenerDeclarationNode endPoint, ExpressionNode expNode) {
