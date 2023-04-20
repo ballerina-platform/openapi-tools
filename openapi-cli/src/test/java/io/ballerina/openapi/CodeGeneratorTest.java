@@ -54,7 +54,7 @@ public class CodeGeneratorTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
     public static final String USER_DIR = "user.dir";
     Path resourcePath = Paths.get(System.getProperty(USER_DIR));
-    Path expectedServiceFile = RES_DIR.resolve(Paths.get("expected_gen"));
+    Path expectedDirPath = RES_DIR.resolve(Paths.get("expected_gen"));
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
@@ -66,8 +66,9 @@ public class CodeGeneratorTest {
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
 
         try {
-            String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "generateSkeleton.bal");
-            generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter, false, false);
+            String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath, "generateSkeleton.bal");
+            generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter,
+                    false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
@@ -88,8 +89,9 @@ public class CodeGeneratorTest {
         String definitionPath = RES_DIR.resolve("petstore.yaml").toString();
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
-            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "generate_client.bal");
-            generator.generateClient(definitionPath, resourcePath.toString(), filter, false, false);
+            String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "generate_client.bal");
+            generator.generateClient(definitionPath, resourcePath.toString(), filter,
+                    false, false);
             if (Files.exists(resourcePath.resolve("client.bal"))) {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
                 generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
@@ -112,7 +114,7 @@ public class CodeGeneratorTest {
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
 
         try {
-            String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile,
+            String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath,
                     "petstore_service_swagger.bal");
             generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter,
                     false, false);
@@ -137,7 +139,7 @@ public class CodeGeneratorTest {
         String definitionPath = RES_DIR.resolve("petstore_swagger.yaml").toString();
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
-            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile,
+            String expectedClientContent = getStringFromGivenBalFile(expectedDirPath,
                     "petstore_client_swagger.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter, false, false);
             if (Files.exists(resourcePath.resolve("client.bal"))) {
@@ -189,7 +191,7 @@ public class CodeGeneratorTest {
         String definitionPath = RES_DIR.resolve("x_init_description.yaml").toString();
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
-            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "x_init_description.bal");
+            String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "x_init_description.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter, false, false);
 
             if (Files.exists(resourcePath.resolve("client.bal"))) {
@@ -212,7 +214,7 @@ public class CodeGeneratorTest {
         String definitionPath = RES_DIR.resolve("petstore.yaml").toString();
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
-            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "nullable_types.bal");
+            String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "nullable_types.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter, true, false);
 
             if (Files.exists(resourcePath.resolve("types.bal"))) {
@@ -235,7 +237,7 @@ public class CodeGeneratorTest {
         String definitionPath = RES_DIR.resolve("petstore_nullable_false.yaml").toString();
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
-            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "nullable_false_types.bal");
+            String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "nullable_false_types.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter, true, false);
 
             if (Files.exists(resourcePath.resolve("types.bal"))) {
@@ -258,7 +260,7 @@ public class CodeGeneratorTest {
         String definitionPath = RES_DIR.resolve("petstore.yaml").toString();
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
-            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "utils.bal");
+            String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "utils.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter, true, false);
 
             if (Files.exists(resourcePath.resolve("utils.bal"))) {
@@ -281,7 +283,7 @@ public class CodeGeneratorTest {
         String definitionPath = RES_DIR.resolve("petstore_with_apikey_auth.yaml").toString();
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
-            String expectedConfigContent = getStringFromGivenBalFile(expectedServiceFile, "api_key_config.toml");
+            String expectedConfigContent = getStringFromGivenBalFile(expectedDirPath, "api_key_config.toml");
             generator.setIncludeTestFiles(true);
             generator.generateClient(definitionPath, resourcePath.toString(), filter, true, false);
 
@@ -309,10 +311,12 @@ public class CodeGeneratorTest {
         listTags.add("dogs");
         Filter filterCustom = new Filter(listTags, list2);
         try {
-            String expectedSchemaContent = getStringFromGivenBalFile(expectedServiceFile, 
+            String expectedSchemaContent = getStringFromGivenBalFile(expectedDirPath,
                 "type_filtered_by_tags.bal");          
-            generator.generateClient(definitionPath, resourcePath.toString(), filterCustom, false, false);
-            if (Files.exists(resourcePath.resolve("client.bal")) && Files.exists(resourcePath.resolve("types.bal"))) {
+            generator.generateClient(definitionPath, resourcePath.toString(), filterCustom,
+                    false, false);
+            if (Files.exists(resourcePath.resolve("client.bal")) &&
+                    Files.exists(resourcePath.resolve("types.bal"))) {
                 String generatedSchema = getStringFromGivenBalFile(resourcePath, "types.bal");
                 generatedSchema = (generatedSchema.trim()).replaceAll("\\s+", "");
                 expectedSchemaContent = (expectedSchemaContent.trim()).replaceAll("\\s+", "");
@@ -332,7 +336,7 @@ public class CodeGeneratorTest {
         String definitionPath = RES_DIR.resolve("openapi-client-rb.yaml").toString();
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
-            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile,
+            String expectedClientContent = getStringFromGivenBalFile(expectedDirPath,
                     "generate_client_requestbody.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter, false, false);
 
@@ -358,7 +362,7 @@ public class CodeGeneratorTest {
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
 
         try {
-            String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "generatedRB.bal");
+            String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath, "generatedRB.bal");
             generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter,
                     false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
@@ -384,9 +388,9 @@ public class CodeGeneratorTest {
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
 
         try {
-            String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "generated_bal.bal");       
-            generator.generateService(definitionPath, serviceName, resourcePath.toString(),
-                    filter, false, false);
+            String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath, "generated_bal.bal");
+            generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter,
+                    false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
@@ -400,6 +404,29 @@ public class CodeGeneratorTest {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
+        }
+    }
+
+    @Test(description = "Test Ballerina client generation for catch-all path")
+    public void generateClientForResourceWithCatchAllPath() {
+        String definitionPath = RES_DIR.resolve("petstore_catch_all_path.yaml").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+        try {
+            String expectedClientContent = getStringFromGivenBalFile(
+                    expectedDirPath, "petstore_catch_all_path_client.bal");
+            generator.generateClient(definitionPath, resourcePath.toString(), filter, false, true);
+            if (Files.exists(resourcePath.resolve("client.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
+                generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
+                expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedClient.contains(expectedClientContent));
+            } else {
+                Assert.fail("Client was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            Assert.fail("Error while generating the client. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("client.bal");
         }
     }
 
@@ -433,9 +460,9 @@ public class CodeGeneratorTest {
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
 
         try {
-            String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "multi_query_para.bal");
-            generator.generateService(definitionPath, serviceName, resourcePath.toString(),
-                    filter, false, false);
+            String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath, "multi_query_para.bal");
+            generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter,
+                    false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
@@ -463,9 +490,9 @@ public class CodeGeneratorTest {
         Filter filter01 = new Filter(list1, list2);
 
         try {
-            String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "petstoreTag.bal");
-            generator.generateService(definitionPath, serviceName, resourcePath.toString(),
-                    filter01, false, false);
+            String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath, "petstoreTag.bal");
+            generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter01,
+                    false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
@@ -494,9 +521,9 @@ public class CodeGeneratorTest {
         Filter filter01 = new Filter(list1, list2);
 
         try {
-            String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "petstoreOperation.bal");
-            generator.generateService(definitionPath,  serviceName, resourcePath.toString(),
-                    filter01, false, false);
+            String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath, "petstoreOperation.bal");
+            generator.generateService(definitionPath,  serviceName, resourcePath.toString(), filter01,
+                    false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
@@ -558,9 +585,9 @@ public class CodeGeneratorTest {
 
         try {
             String expectedServiceContent = getStringFromGivenBalFile(
-                    expectedServiceFile, "petstore_wildcard_service.bal");
+                    expectedDirPath, "petstore_wildcard_service.bal");
             String expectedTypesContent = getStringFromGivenBalFile(
-                    expectedServiceFile, "petstore_wildcard_types.bal");
+                    expectedDirPath, "petstore_wildcard_types.bal");
             generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter,
                     false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal")) &&
@@ -659,6 +686,7 @@ public class CodeGeneratorTest {
                 {"multiMethodResources.yaml", "multiMethodResources.bal"},
                 {"nonEmptyPath.yaml", "nonEmptyPath.bal"},
                 {"petstore.yaml", "petstore.bal"},
+                {"petstore_catch_all_path.yaml", "petstore_catch_all_path.bal"}
         };
     }
 

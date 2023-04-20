@@ -93,13 +93,13 @@ public class UnionTypeGenerator extends TypeGenerator {
         for (Schema<?> schema : schemas) {
             TypeGenerator typeGenerator = getTypeGenerator(schema, typeName, null);
             TypeDescriptorNode typeDescNode = typeGenerator.generateTypeDescriptorNode();
+            imports.addAll(typeGenerator.getImports());
             if (typeDescNode instanceof OptionalTypeDescriptorNode && GeneratorMetaData.getInstance().isNullable()) {
                 Node internalTypeDesc = ((OptionalTypeDescriptorNode) typeDescNode).typeDescriptor();
                 typeDescNode = (TypeDescriptorNode) internalTypeDesc;
             }
             typeDescriptorNodes.add(typeDescNode);
-            if (typeGenerator instanceof ArrayTypeGenerator &&
-                    !((ArrayTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
+            if (typeGenerator instanceof ArrayTypeGenerator && !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
                 typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
             }
         }

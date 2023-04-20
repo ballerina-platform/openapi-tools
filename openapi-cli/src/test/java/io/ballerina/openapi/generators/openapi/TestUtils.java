@@ -74,7 +74,7 @@ public class TestUtils {
         }
     }
 
-    public static void compareWithGeneratedFileWithWindowsANdLinux(Path ballerinaFilePath, String linuxYaml,
+    public static void compareWithGeneratedFileWithWindowsAndLinux(Path ballerinaFilePath, String linuxYaml,
                                                                    String windowsYaml) throws IOException {
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
         try {

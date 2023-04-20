@@ -287,21 +287,29 @@ public class ServiceToOpenAPIConverterUtils {
                                 ballerinaFilePath);
                         return normalizeInfoSection(openapiFileName, currentServiceName, version, oasResult);
                     } else {
-                        openAPI.setInfo(new Info().version(version).title(normalizeTitle(currentServiceName)));
+                        setInfoDetailsIfServiceNameAbsent(openapiFileName, openAPI, currentServiceName, version);
                     }
-                } else if (currentServiceName.equals(SLASH) || currentServiceName.isBlank()) {
-                    openAPI.setInfo(new Info().version(version).title(normalizeTitle(openapiFileName)));
                 } else {
-                    openAPI.setInfo(new Info().version(version).title(normalizeTitle(currentServiceName)));
+                    setInfoDetailsIfServiceNameAbsent(openapiFileName, openAPI, currentServiceName, version);
                 }
             }
-        } else if (currentServiceName.equals(SLASH) || currentServiceName.isBlank()) {
+        } else {
+            setInfoDetailsIfServiceNameAbsent(openapiFileName, openAPI, currentServiceName, version);
+        }
+
+        return new OASResult(openAPI, diagnostics);
+    }
+
+    /**
+     * Generates openAPI Info section when the service base path is absent or `/`.
+     */
+    private static void setInfoDetailsIfServiceNameAbsent(String openapiFileName, OpenAPI openAPI,
+                                                          String currentServiceName, String version) {
+        if (currentServiceName.equals(SLASH) || currentServiceName.isBlank()) {
             openAPI.setInfo(new Info().version(version).title(normalizeTitle(openapiFileName)));
         } else {
             openAPI.setInfo(new Info().version(version).title(normalizeTitle(currentServiceName)));
         }
-
-        return new OASResult(openAPI, diagnostics);
     }
 
     // Finalize the openAPI info section
@@ -523,10 +531,14 @@ public class ServiceToOpenAPIConverterUtils {
         }
     }
 
-
+    /**
+     * Travers every syntax tree and collect all the listener nodes.
+     *
+     * @param project - current project
+     * @param endpoints - set of endpoints
+     */
     public static void collectListeners(Project project, LinkedHashSet<ListenerDeclarationNode> endpoints) {
         final BallerinaNodeVisitor balNodeVisitor = new BallerinaNodeVisitor();
-        // Travers every syntax tree and collect all the listener nodes.
         project.currentPackage().moduleIds().forEach(moduleId -> {
             Module module = project.currentPackage().module(moduleId);
             module.documentIds().forEach(documentId -> {

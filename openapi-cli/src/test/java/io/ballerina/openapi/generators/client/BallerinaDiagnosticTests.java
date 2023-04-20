@@ -90,6 +90,7 @@ public class BallerinaDiagnosticTests {
                 {"duplicated_response.yaml"},
                 {"complex_oneOf_schema.yaml"},
                 {"request_body_ref.yaml"},
+                {"vendor_specific_mime_types.yaml"},
                 {"ballerinax_connector_tests/ably.yaml"},
                 {"ballerinax_connector_tests/azure.iot.yaml"},
 //                {"ballerinax_connector_tests/beezup.yaml"}, Disabled due to the issue openapi-tools/issues/1257
@@ -97,7 +98,7 @@ public class BallerinaDiagnosticTests {
                 {"ballerinax_connector_tests/openweathermap.yaml"},
                 {"ballerinax_connector_tests/soundcloud.yaml"},
                 {"ballerinax_connector_tests/stripe.yaml"},
-//                {"ballerinax_connector_tests/vimeo.yaml"}, Disabled due to the issue openapi-tools/issues/1265
+                {"ballerinax_connector_tests/vimeo.yaml"},
                 {"ballerinax_connector_tests/ynab.yaml"},
                 {"ballerinax_connector_tests/zoom.yaml"}
         };
