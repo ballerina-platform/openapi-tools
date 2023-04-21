@@ -31,20 +31,19 @@ import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.converter.model.OASResult;
 import io.ballerina.openapi.converter.model.OpenAPIInfo;
+import io.ballerina.openapi.converter.service.BallerinaNodeVisitor;
 import io.ballerina.openapi.converter.service.OpenAPIEndpointMapper;
 import io.ballerina.openapi.converter.service.OpenAPIServiceMapper;
 import io.ballerina.projects.Module;
@@ -98,7 +97,6 @@ public class ServiceToOpenAPIConverterUtils {
                                                          SemanticModel semanticModel,
                                                          String serviceName, Boolean needJson,
                                                          Path inputPath) {
-        LinkedHashSet<ListenerDeclarationNode> endpoints = new LinkedHashSet<>();
         Map<String, ServiceDeclarationNode> servicesToGenerate = new HashMap<>();
         List<String> availableService = new ArrayList<>();
         List<OpenAPIConverterDiagnostic> diagnostics = new ArrayList<>();
@@ -110,8 +108,7 @@ public class ServiceToOpenAPIConverterUtils {
             diagnostics.add(error);
         } else {
             ModulePartNode modulePartNode = syntaxTree.rootNode();
-            extractListenersAndServiceNodes(serviceName, availableService, servicesToGenerate, modulePartNode,
-                    endpoints, semanticModel);
+            extractServiceNodes(serviceName, availableService, servicesToGenerate, modulePartNode, semanticModel);
             // If there are no services found for a given service name.
             if (serviceName != null && servicesToGenerate.isEmpty()) {
                 DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_107;
@@ -119,18 +116,16 @@ public class ServiceToOpenAPIConverterUtils {
                         null, serviceName, availableService.toString());
                 diagnostics.add(error);
             }
-            // Filter listener endpoints.
-            collectListeners(project, endpoints);
             // Generating openapi specification for selected services
             for (Map.Entry<String, ServiceDeclarationNode> serviceNode : servicesToGenerate.entrySet()) {
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNode.getKey(), needJson);
                 OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder =
                         new OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
                 builder.setServiceDeclarationNode(serviceNode.getValue())
-                        .setEndpoints(endpoints)
                         .setSemanticModel(semanticModel)
                         .setOpenApiFileName(openApiName)
-                        .setBallerinaFilePath(inputPath);
+                        .setBallerinaFilePath(inputPath)
+                        .setProject(project);
                 OASGenerationMetaInfo oasGenerationMetaInfo = builder.build();
                 OASResult oasDefinition = generateOAS(oasGenerationMetaInfo);
                 oasDefinition.setServiceName(openApiName);
@@ -147,18 +142,11 @@ public class ServiceToOpenAPIConverterUtils {
     /**
      * Filter all the end points and service nodes.
      */
-    private static void extractListenersAndServiceNodes(String serviceName, List<String> availableService,
-                                                        Map<String, ServiceDeclarationNode> servicesToGenerate,
-                                                        ModulePartNode modulePartNode,
-                                                        LinkedHashSet<ListenerDeclarationNode> endpoints,
-                                                        SemanticModel semanticModel) {
+    private static void extractServiceNodes(String serviceName, List<String> availableService,
+                                            Map<String, ServiceDeclarationNode> servicesToGenerate,
+                                            ModulePartNode modulePartNode, SemanticModel semanticModel) {
         for (Node node : modulePartNode.members()) {
             SyntaxKind syntaxKind = node.kind();
-            // Load a listen_declaration for the server part in the yaml spec
-            if (syntaxKind.equals(SyntaxKind.LISTENER_DECLARATION)) {
-                ListenerDeclarationNode listener = (ListenerDeclarationNode) node;
-                endpoints.add(listener);
-            }
             if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
                 ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
                 if (isHttpService(serviceNode, semanticModel)) {
@@ -214,18 +202,12 @@ public class ServiceToOpenAPIConverterUtils {
      * @return {@code OASResult}
      */
     public static OASResult generateOAS(OASGenerationMetaInfo oasGenerationMetaInfo) {
+        ServiceDeclarationNode serviceDefinition = oasGenerationMetaInfo.getServiceDeclarationNode();
+        LinkedHashSet<ListenerDeclarationNode> endpoints = collectListeners(oasGenerationMetaInfo.getProject());;
+        SemanticModel semanticModel = oasGenerationMetaInfo.getSemanticModel();
+        String openApiFileName = oasGenerationMetaInfo.getOpenApiFileName();
+        Path ballerinaFilePath = oasGenerationMetaInfo.getBallerinaFilePath();
         // 01.Fill the openAPI info section
-        return ensembleOASResult(oasGenerationMetaInfo.getServiceDeclarationNode(),
-                oasGenerationMetaInfo.getEndpoints(),
-                oasGenerationMetaInfo.getSemanticModel(), oasGenerationMetaInfo.getOpenApiFileName(),
-                oasGenerationMetaInfo.getBallerinaFilePath());
-    }
-
-    private static OASResult ensembleOASResult(ServiceDeclarationNode serviceDefinition,
-                                               LinkedHashSet<ListenerDeclarationNode> endpoints,
-                                               SemanticModel semanticModel,
-                                               String openApiFileName, Path ballerinaFilePath) {
-
         OASResult oasResult = fillOpenAPIInfoSection(serviceDefinition, semanticModel, openApiFileName,
                 ballerinaFilePath);
         if (oasResult.getOpenAPI().isPresent() && oasResult.getDiagnostics().isEmpty()) {
@@ -503,42 +485,13 @@ public class ServiceToOpenAPIConverterUtils {
     }
 
     /**
-     * Visitor to get the TypeDefinitionNode and ListenerDeclarationNodes.
-     *
-     * @since 1.6.0
-     */
-    private static class BallerinaNodeVisitor extends NodeVisitor {
-
-        List<TypeDefinitionNode> typeDefinitionNodes = new ArrayList<>();
-        List<ListenerDeclarationNode> listenerDeclarationNodes = new ArrayList<>();
-
-        @Override
-        public void visit(TypeDefinitionNode typeDefinitionNode) {
-            typeDefinitionNodes.add(typeDefinitionNode);
-        }
-
-        @Override
-        public void visit(ListenerDeclarationNode listenerDeclarationNode) {
-            listenerDeclarationNodes.add(listenerDeclarationNode);
-        }
-
-        public List<TypeDefinitionNode> getTypeDefinitionNodes() {
-            return typeDefinitionNodes;
-        }
-
-        public List<ListenerDeclarationNode> getListenerDeclarationNodes() {
-            return listenerDeclarationNodes;
-        }
-    }
-
-    /**
      * Travers every syntax tree and collect all the listener nodes.
      *
      * @param project - current project
-     * @param endpoints - set of endpoints
      */
-    public static void collectListeners(Project project, LinkedHashSet<ListenerDeclarationNode> endpoints) {
-        final BallerinaNodeVisitor balNodeVisitor = new BallerinaNodeVisitor();
+    public static LinkedHashSet<ListenerDeclarationNode> collectListeners(Project project) {
+        BallerinaNodeVisitor balNodeVisitor = new BallerinaNodeVisitor();
+        LinkedHashSet<ListenerDeclarationNode> endpoints = new LinkedHashSet<>();
         project.currentPackage().moduleIds().forEach(moduleId -> {
             Module module = project.currentPackage().module(moduleId);
             module.documentIds().forEach(documentId -> {
@@ -547,5 +500,6 @@ public class ServiceToOpenAPIConverterUtils {
                 endpoints.addAll(balNodeVisitor.getListenerDeclarationNodes());
             });
         });
+        return endpoints;
     }
 }

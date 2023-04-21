@@ -19,7 +19,6 @@ package io.ballerina.openapi.build;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
@@ -46,7 +45,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,7 +61,6 @@ import static io.ballerina.openapi.converter.utils.CodegenUtils.writeFile;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.containErrors;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getNormalizedFileName;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.isHttpService;
-import static io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils.collectListeners;
 
 /**
  * SyntaxNodeAnalyzer for getting all service node.
@@ -94,7 +91,6 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         Optional<Path> path = currentPackage.project().documentPath(context.documentId());
         Path inputPath = path.orElse(null);
         ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) context.node();
-        LinkedHashSet<ListenerDeclarationNode> endpoints = new LinkedHashSet<>();
         Map<Integer, String> services = new HashMap<>();
         List<Diagnostic> diagnostics = new ArrayList<>();
 
@@ -104,13 +100,12 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         } else if (isHttpService(serviceNode, semanticModel)) {
             Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
             if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
-                extractListenersAndServiceNodes(syntaxTree.rootNode(), endpoints, services, semanticModel);
-                collectListeners(project, endpoints);
+                extractServiceNodes(syntaxTree.rootNode(), services, semanticModel);
                 OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder =
                         new OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
-                builder.setServiceDeclarationNode(serviceNode).setEndpoints(endpoints).setSemanticModel(semanticModel)
+                builder.setServiceDeclarationNode(serviceNode).setSemanticModel(semanticModel)
                         .setOpenApiFileName(services.get(serviceSymbol.get().hashCode()))
-                        .setBallerinaFilePath(inputPath);
+                        .setBallerinaFilePath(inputPath).setProject(project);
                 OASResult oasResult = ServiceToOpenAPIConverterUtils.generateOAS(builder.build());
                 oasResult.setServiceName(constructFileName(syntaxTree, services, serviceSymbol.get()));
                 writeOpenAPIYaml(outPath, oasResult, diagnostics);
@@ -167,18 +162,11 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
     /**
      * Filter all the end points and service nodes for avoiding the generated file name conflicts.
      */
-    private static void extractListenersAndServiceNodes(ModulePartNode modulePartNode,
-                                                        LinkedHashSet<ListenerDeclarationNode> endpoints,
-                                                        Map<Integer, String> services,
-                                                        SemanticModel semanticModel) {
+    private static void extractServiceNodes(ModulePartNode modulePartNode, Map<Integer, String> services,
+                                            SemanticModel semanticModel) {
         List<String> allServices = new ArrayList<>();
         for (Node node : modulePartNode.members()) {
             SyntaxKind syntaxKind = node.kind();
-            // Load a listen_declaration for the server part in the yaml spec
-            if (syntaxKind.equals(SyntaxKind.LISTENER_DECLARATION)) {
-                ListenerDeclarationNode listener = (ListenerDeclarationNode) node;
-                endpoints.add(listener);
-            }
             if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
                 ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
                 if (isHttpService(serviceNode, semanticModel)) {

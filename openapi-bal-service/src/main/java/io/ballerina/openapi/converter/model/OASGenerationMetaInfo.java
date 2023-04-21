@@ -21,6 +21,7 @@ package io.ballerina.openapi.converter.model;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.projects.Project;
 
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
@@ -36,6 +37,7 @@ public class OASGenerationMetaInfo {
     private final Path ballerinaFilePath;
     private final SemanticModel semanticModel;
     private final ServiceDeclarationNode serviceDeclarationNode;
+    private final Project project;
     private final LinkedHashSet<ListenerDeclarationNode> endpoints;
     //TODO: enable when complete constraint support
     //private final Set<TypeDefinitionNode> typeDefinitionNodes;
@@ -45,6 +47,7 @@ public class OASGenerationMetaInfo {
         this.ballerinaFilePath = builder.ballerinaFilePath;
         this.semanticModel = builder.semanticModel;
         this.serviceDeclarationNode = builder.serviceDeclarationNode;
+        this.project = builder.project;
         this.endpoints = builder.endpoints;
         //this.typeDefinitionNodes = builder.typeDefinitionNodes;
     }
@@ -69,6 +72,10 @@ public class OASGenerationMetaInfo {
         return endpoints;
     }
 
+    public Project getProject() {
+        return project;
+    }
+
     /**
      * This method is used to create a new {@link OASGenerationMetaInfoBuilder} instance.
      */
@@ -78,6 +85,7 @@ public class OASGenerationMetaInfo {
         private Path ballerinaFilePath;
         private SemanticModel semanticModel;
         private ServiceDeclarationNode serviceDeclarationNode;
+        private Project project;
         private LinkedHashSet<ListenerDeclarationNode> endpoints;
         //private Set<TypeDefinitionNode> typeDefinitionNodes;
 
@@ -96,6 +104,7 @@ public class OASGenerationMetaInfo {
             return this;
         }
 
+        //rename to listeners
         public OASGenerationMetaInfoBuilder setEndpoints(LinkedHashSet<ListenerDeclarationNode> endpoints) {
             this.endpoints = endpoints;
             return this;
@@ -104,6 +113,11 @@ public class OASGenerationMetaInfo {
         public OASGenerationMetaInfoBuilder setOpenApiFileName(String openApiFileName) {
             this.openApiFileName = openApiFileName;
             return this;
+        }
+
+        public Project setProject(Project project) {
+            this.project = project;
+            return project;
         }
 
         public OASGenerationMetaInfo build() {

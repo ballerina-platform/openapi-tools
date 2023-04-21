@@ -7,14 +7,14 @@ servers:
     variables:
       server:
         enum:
-          - http://petstore.openapi.io
           - http://localhost
-        default: http://localhost
+          - http://petstore.openapi.io
+        default: http://petstore.openapi.io
       port:
         enum:
-          - "443"
           - "80"
-        default: "80"
+          - "443"
+        default: "443"
 paths:
   /pets:
     get:

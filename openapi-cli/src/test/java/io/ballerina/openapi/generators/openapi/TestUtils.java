@@ -74,6 +74,7 @@ public class TestUtils {
         }
     }
 
+    // check the OS and switch the file separator accordingly
     public static void compareWithGeneratedFileWithWindowsAndLinux(Path ballerinaFilePath, String linuxYaml,
                                                                    String windowsYaml) throws IOException {
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());

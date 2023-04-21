@@ -17,15 +17,12 @@
 package io.ballerina.openapi.extension.doc.gen;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
-import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.converter.model.OASResult;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
@@ -42,13 +39,10 @@ import io.swagger.v3.oas.models.OpenAPI;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashSet;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static io.ballerina.openapi.converter.Constants.SLASH;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.normalizeTitle;
-import static io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils.collectListeners;
 import static io.ballerina.openapi.extension.context.OpenApiDocContextHandler.getContextHandler;
 import static io.ballerina.openapi.extension.doc.DocGenerationUtils.getDiagnostics;
 
@@ -149,23 +143,19 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
     }
 
     private void generateOpenApiDoc(Project project, OpenApiDocConfig config, SyntaxNodeAnalysisContext context,
-                                    NodeLocation location,
-                                    boolean embed) {
+                                    NodeLocation location, boolean embed) {
         if (!embed) {
             return;
         }
         int serviceId = config.getSemanticModel().hashCode();
         String targetFile = String.format(FILE_NAME_FORMAT, serviceId);
-        ModulePartNode modulePartNode = config.getSyntaxTree().rootNode();
-        LinkedHashSet<ListenerDeclarationNode> listenerNodes = extractListenerNodes(modulePartNode);
-        collectListeners(project, listenerNodes);
         OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder = new
                 OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
         builder.setServiceDeclarationNode(config.getServiceNode())
-                .setEndpoints(listenerNodes)
                 .setSemanticModel(config.getSemanticModel())
                 .setOpenApiFileName(targetFile)
-                .setBallerinaFilePath(null);
+                .setBallerinaFilePath(null)
+                .setProject(project);
         OASResult oasResult = ServiceToOpenAPIConverterUtils.generateOAS(builder.build());
         Optional<OpenAPI> openApiOpt = oasResult.getOpenAPI();
         if (!oasResult.getDiagnostics().isEmpty() || openApiOpt.isEmpty()) {
@@ -179,13 +169,6 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
         }
         String openApiDefinition = Json.pretty(openApi);
         updateOpenApiContext(context, serviceId, openApiDefinition, embed);
-    }
-
-    private LinkedHashSet<ListenerDeclarationNode> extractListenerNodes(ModulePartNode modulePartNode) {
-        return modulePartNode.members().stream()
-                .filter(n -> SyntaxKind.LISTENER_DECLARATION.equals(n.kind()))
-                .map(n -> (ListenerDeclarationNode) n)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     protected Path retrieveProjectRoot(Path projectRoot) {
