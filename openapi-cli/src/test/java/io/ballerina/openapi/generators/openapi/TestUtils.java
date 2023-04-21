@@ -74,34 +74,6 @@ public class TestUtils {
         }
     }
 
-    // check the OS and switch the file separator accordingly
-    public static void compareWithGeneratedFileWithWindowsAndLinux(Path ballerinaFilePath, String linuxYaml,
-                                                                   String windowsYaml) throws IOException {
-        Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
-        try {
-            String expectedLinuxYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), linuxYaml);
-            String expectedWindowsYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), windowsYaml);
-            OASContractGenerator openApiConverter = new OASContractGenerator();
-            openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
-            if (Files.exists(tempDir.resolve("payloadV_openapi.yaml"))) {
-                String generatedYaml = getStringFromGivenBalFile(tempDir, "payloadV_openapi.yaml");
-                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
-                expectedLinuxYamlContent = (expectedLinuxYamlContent.trim()).replaceAll("\\s+", "");
-                expectedWindowsYamlContent = (expectedWindowsYamlContent.trim()).replaceAll("\\s+", "");
-                Assert.assertTrue(generatedYaml.contains(expectedLinuxYamlContent)
-                        || generatedYaml.contains(expectedWindowsYamlContent));
-            } else {
-                Assert.fail("Yaml was not generated");
-            }
-        } catch (IOException e) {
-            Assert.fail("Error while generating the yaml file. " + e.getMessage());
-        } finally {
-            deleteGeneratedFiles("payloadV_openapi.yaml", tempDir);
-            deleteDirectory(tempDir);
-            System.gc();
-        }
-    }
-
     public static void deleteDirectory(Path path) {
         if (!Files.exists(path)) {
             return;

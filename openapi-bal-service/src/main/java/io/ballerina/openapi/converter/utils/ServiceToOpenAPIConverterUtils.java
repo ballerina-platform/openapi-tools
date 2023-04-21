@@ -203,7 +203,7 @@ public class ServiceToOpenAPIConverterUtils {
      */
     public static OASResult generateOAS(OASGenerationMetaInfo oasGenerationMetaInfo) {
         ServiceDeclarationNode serviceDefinition = oasGenerationMetaInfo.getServiceDeclarationNode();
-        LinkedHashSet<ListenerDeclarationNode> endpoints = collectListeners(oasGenerationMetaInfo.getProject());;
+        LinkedHashSet<ListenerDeclarationNode> listeners = collectListeners(oasGenerationMetaInfo.getProject());;
         SemanticModel semanticModel = oasGenerationMetaInfo.getSemanticModel();
         String openApiFileName = oasGenerationMetaInfo.getOpenApiFileName();
         Path ballerinaFilePath = oasGenerationMetaInfo.getBallerinaFilePath();
@@ -216,7 +216,7 @@ public class ServiceToOpenAPIConverterUtils {
                 // Take base path of service
                 OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel);
                 // 02. Filter and set the ServerURLs according to endpoints. Complete the server section in OAS
-                openapi = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServers(openapi, endpoints, serviceDefinition);
+                openapi = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServers(openapi, listeners, serviceDefinition);
                 // 03. Filter path and component sections in OAS.
                 // Generate openApi string for the mentioned service name.
                 openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi);
@@ -491,15 +491,15 @@ public class ServiceToOpenAPIConverterUtils {
      */
     public static LinkedHashSet<ListenerDeclarationNode> collectListeners(Project project) {
         BallerinaNodeVisitor balNodeVisitor = new BallerinaNodeVisitor();
-        LinkedHashSet<ListenerDeclarationNode> endpoints = new LinkedHashSet<>();
+        LinkedHashSet<ListenerDeclarationNode> listeners = new LinkedHashSet<>();
         project.currentPackage().moduleIds().forEach(moduleId -> {
             Module module = project.currentPackage().module(moduleId);
             module.documentIds().forEach(documentId -> {
                 SyntaxTree syntaxTreeDoc = module.document(documentId).syntaxTree();
                 syntaxTreeDoc.rootNode().accept(balNodeVisitor);
-                endpoints.addAll(balNodeVisitor.getListenerDeclarationNodes());
+                listeners.addAll(balNodeVisitor.getListenerDeclarationNodes());
             });
         });
-        return endpoints;
+        return listeners;
     }
 }

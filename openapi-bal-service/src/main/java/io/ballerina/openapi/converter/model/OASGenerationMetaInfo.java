@@ -19,12 +19,10 @@
 package io.ballerina.openapi.converter.model;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.projects.Project;
 
 import java.nio.file.Path;
-import java.util.LinkedHashSet;
 
 /**
  * This {@code OASGenerationMetaInfo} contains details related to openAPI specification.
@@ -38,9 +36,6 @@ public class OASGenerationMetaInfo {
     private final SemanticModel semanticModel;
     private final ServiceDeclarationNode serviceDeclarationNode;
     private final Project project;
-    private final LinkedHashSet<ListenerDeclarationNode> endpoints;
-    //TODO: enable when complete constraint support
-    //private final Set<TypeDefinitionNode> typeDefinitionNodes;
 
     public OASGenerationMetaInfo(OASGenerationMetaInfoBuilder builder) {
         this.openApiFileName = builder.openApiFileName;
@@ -48,8 +43,6 @@ public class OASGenerationMetaInfo {
         this.semanticModel = builder.semanticModel;
         this.serviceDeclarationNode = builder.serviceDeclarationNode;
         this.project = builder.project;
-        this.endpoints = builder.endpoints;
-        //this.typeDefinitionNodes = builder.typeDefinitionNodes;
     }
 
     public String getOpenApiFileName() {
@@ -68,10 +61,6 @@ public class OASGenerationMetaInfo {
         return serviceDeclarationNode;
     }
 
-    public LinkedHashSet<ListenerDeclarationNode> getEndpoints() {
-        return endpoints;
-    }
-
     public Project getProject() {
         return project;
     }
@@ -86,8 +75,6 @@ public class OASGenerationMetaInfo {
         private SemanticModel semanticModel;
         private ServiceDeclarationNode serviceDeclarationNode;
         private Project project;
-        private LinkedHashSet<ListenerDeclarationNode> endpoints;
-        //private Set<TypeDefinitionNode> typeDefinitionNodes;
 
         public OASGenerationMetaInfoBuilder setBallerinaFilePath(Path ballerinaFilePath) {
             this.ballerinaFilePath = ballerinaFilePath;
@@ -101,12 +88,6 @@ public class OASGenerationMetaInfo {
 
         public OASGenerationMetaInfoBuilder setServiceDeclarationNode(ServiceDeclarationNode serviceDeclarationNode) {
             this.serviceDeclarationNode = serviceDeclarationNode;
-            return this;
-        }
-
-        //rename to listeners
-        public OASGenerationMetaInfoBuilder setEndpoints(LinkedHashSet<ListenerDeclarationNode> endpoints) {
-            this.endpoints = endpoints;
             return this;
         }
 

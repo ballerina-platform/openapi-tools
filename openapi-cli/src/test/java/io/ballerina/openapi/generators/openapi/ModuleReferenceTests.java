@@ -76,14 +76,18 @@ public class ModuleReferenceTests {
     @Test
     public void testListenersInSeparateModule() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("listeners_in_separate_module.bal");
-        TestUtils.compareWithGeneratedFileWithWindowsAndLinux(ballerinaFilePath,
-                "listeners_in_separate_module.yaml", "windows_listeners_in_separate_module.yaml");
+        String osName = System.getProperty("os.name");
+        String yamlFile = osName.toLowerCase().contains("windows") ? "windows_listeners_in_separate_module.yaml"
+                : "listeners_in_separate_module.yaml";
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, yamlFile);
     }
 
     @Test
     public void testListenersInSeparateFiles() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("listeners_in_separate_file.bal");
-        TestUtils.compareWithGeneratedFileWithWindowsAndLinux(ballerinaFilePath,
-                "listeners_in_separate_file.yaml", "windows_listeners_in_separate_file.yaml");
+        String osName = System.getProperty("os.name");
+        String yamlFile = osName.toLowerCase().contains("windows") ? "windows_listeners_in_separate_file.yaml"
+                : "listeners_in_separate_file.yaml";
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, yamlFile);
     }
 }

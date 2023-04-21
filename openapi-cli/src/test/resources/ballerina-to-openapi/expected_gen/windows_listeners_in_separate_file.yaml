@@ -6,15 +6,15 @@ servers:
   - url: "{server}:{port}/payloadV"
     variables:
       server:
-        default: http://localhost
+        default: http://petstore.openapi.io
         enum:
-          - http://petstore.openapi.io
           - http://localhost
+          - http://petstore.openapi.io
       port:
-        default: "80"
+        default: "443"
         enum:
-          - "443"
           - "80"
+          - "443"
 paths:
   /pets:
     get:
