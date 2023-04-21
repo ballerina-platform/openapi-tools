@@ -59,6 +59,7 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
+import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.EnumConstantGenerator;
 import io.ballerina.openapi.core.model.GenSrcFile;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -93,6 +94,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -133,6 +135,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML_CONTENT;
+import static io.ballerina.openapi.core.GeneratorConstants.BINARY;
+import static io.ballerina.openapi.core.GeneratorConstants.BYTE;
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.CLOSE_CURLY_BRACE;
 import static io.ballerina.openapi.core.GeneratorConstants.CONSTRAINT;
@@ -146,6 +150,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.IDENTIFIER;
 import static io.ballerina.openapi.core.GeneratorConstants.IMAGE_PNG;
 import static io.ballerina.openapi.core.GeneratorConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.core.GeneratorConstants.LINE_SEPARATOR;
+import static io.ballerina.openapi.core.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.GeneratorConstants.OPEN_CURLY_BRACE;
 import static io.ballerina.openapi.core.GeneratorConstants.SERVICE_FILE_NAME;
@@ -171,6 +176,10 @@ public class GeneratorUtils {
     public static final List<String> BAL_KEYWORDS = SyntaxInfo.keywords();
     public static final MinutiaeList SINGLE_END_OF_LINE_MINUTIAE = getEndOfLineMinutiae();
     private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
+
+    private static final List<String> primitiveTypeList =
+            new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
+                    GeneratorConstants.STRING, GeneratorConstants.BOOLEAN));
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
 
@@ -261,7 +270,7 @@ public class GeneratorUtils {
                 if (parameter.getSchema().get$ref() != null) {
                     paramType = getValidName(extractReferenceType(parameter.getSchema().get$ref()), true);
                 } else {
-                    paramType = convertOpenAPITypeToBallerina(parameter.getSchema().getType());
+                    paramType = convertOpenAPITypeToBallerina(parameter.getSchema());
                 }
 
                 // TypeDescriptor
@@ -308,7 +317,24 @@ public class GeneratorUtils {
      */
     public static String convertOpenAPITypeToBallerina(String type) throws BallerinaOpenApiException {
 
+
         if (GeneratorConstants.TYPE_MAP.containsKey(type)) {
+            return GeneratorConstants.TYPE_MAP.get(type);
+        } else {
+            throw new BallerinaOpenApiException("Unsupported OAS data type `" + type + "`");
+        }
+    }
+
+    public static String convertOpenAPITypeToBallerina(Schema schema) throws BallerinaOpenApiException {
+        String type = schema.getType().trim();
+        if ((type.equals(NUMBER) && schema.getFormat() != null) || (type.equals(STRING) && schema.getFormat() != null
+                && (schema.getFormat().equals(BINARY) || schema.getFormat().equals(BYTE)))) {
+            type = schema.getFormat().trim();
+        }
+        if (schema.getEnum() != null && !schema.getEnum().isEmpty() && primitiveTypeList.contains(type)) {
+            EnumConstantGenerator enumConstantGenerator = new EnumConstantGenerator(schema, null);
+            return enumConstantGenerator.generateTypeDescriptorNode().toString();
+        } else if (GeneratorConstants.TYPE_MAP.containsKey(type)) {
             return GeneratorConstants.TYPE_MAP.get(type);
         } else {
             throw new BallerinaOpenApiException("Unsupported OAS data type `" + type + "`");

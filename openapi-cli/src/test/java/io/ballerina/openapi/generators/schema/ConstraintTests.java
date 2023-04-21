@@ -26,6 +26,8 @@ import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -118,7 +120,7 @@ public class ConstraintTests {
         assertFalse(hasErrors);
     }
 
-    @Test
+    @Test(description = "Tests with additional properties field has constraint.")
     public void testAdditionalPropertiesWithConstraint() throws IOException, BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
@@ -130,7 +132,7 @@ public class ConstraintTests {
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
-        assertFalse(hasErrors);
+        assertFalse(hasErrors, "Errors : " + diagnostics.get(0).toString());
     }
     //TODO current tool doesn't handle union type: therefore union type constraint will handle once union type
     // generation available in tool.
@@ -191,5 +193,22 @@ public class ConstraintTests {
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         assertFalse(hasErrors);
+    }
+
+    @AfterMethod
+    private void deleteGeneratedFiles() {
+        try {
+            TestUtils.deleteGeneratedFiles();
+            System.gc();
+        } catch (IOException ignored) {
+        }
+    }
+
+    @AfterTest
+    public void clean() throws IOException {
+        TestUtils.deleteGeneratedFiles();
+        System.gc();
+        System.setErr(null);
+        System.setOut(null);
     }
 }
