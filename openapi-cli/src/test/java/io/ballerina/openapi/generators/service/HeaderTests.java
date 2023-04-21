@@ -58,4 +58,18 @@ public class HeaderTests {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_parameters.bal",
                 syntaxTree);
     }
+
+    @Test(description = "Generate int format values for Header parameters")
+    public void testIntegerFormatHeaderParameter() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("generators/service/swagger/headers/header_integer_signed32.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_integer_signed32.bal",
+                syntaxTree);
+    }
 }

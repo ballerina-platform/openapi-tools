@@ -17,7 +17,7 @@ The `openapi` command in Ballerina is used for OpenAPI to Ballerina and Ballerin
 The OpenAPI compiler plugin will allow you to validate a service implementation against an OpenAPI contract during
  compile time. 
 This plugin ensures that the implementation of a service does not deviate from its OpenAPI contract.
-For more information on the supported operations, go to [Using the OpenAPI Tools](https://ballerina.io/swan-lake/learn/using-the-openapi-tools/)
+For more information on the supported operations, go to [Using the OpenAPI Tools](https://ballerina.io/learn/openapi-tool/)
 ## Building from the Source
 
 ### Setting Up the Prerequisites

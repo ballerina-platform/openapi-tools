@@ -1,0 +1,156 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: OpenApi Pet Store
+  license:
+    name: MIT
+servers:
+  - url: http://petstore.{host}.io/v1
+    description: The production API server
+    variables:
+      host:
+        default: openapi
+        description: this value is assigned by the service provider
+  - url: https://{subdomain}.swagger.io:{port}/{basePath}
+    description: The production API server
+    variables:
+      subdomain:
+        default: pet-store
+        description: this value is assigned by the service provider
+      port:
+        enum:
+          - '8443'
+          - '443'
+        default: '443'
+      basePath:
+        default: v2
+tags:
+  - name: pets
+    description: Pets Tag
+  - name: list
+    description: List Tag
+
+paths:
+  /pets:
+    get:
+      summary: List all pets
+      description: Show a list of pets in the system
+      operationId: listPets
+      tags:
+        - pets
+        - list
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+            maximum: 100
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+  /pets/{petId}:
+    get:
+      summary: Info for a specific pet
+      description: Show a list of pets in the system
+      operationId: showPetById
+      tags:
+        - pets
+      parameters:
+        - name: petId
+          in: path
+          description: The id of the pet to retrieve
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+components:
+  schemas:
+    PetId:
+      type: integer
+      format: int32
+      example: 10
+      description: Unique identifier for the pet
+      minimum: 1
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+          description: Unique identifier for the category
+        name:
+          type: string
+          example: dog
+          description: Name of the category
+    Pet:
+     type: object
+     required:
+       - id
+       - age
+       - name
+       - ownerId
+       - microchipId
+     properties:
+       id:
+         $ref: '#/components/schemas/PetId'
+       age:
+         type: integer
+         format: int32
+         example: 12
+         description: Age of the pet in years
+         minimum: 1
+       weight:
+         type: integer
+         format: int32
+         example: 15
+         description: Weight of the pet in KG
+       height:
+         type: integer
+         format: int32
+         example: 100
+         description: Height of the pet in CM
+         maximum: 10000
+       name:
+         type: string
+         example: doggy
+         description: Name of the pet
+       ownerId:
+         type: integer
+         format: int64
+         example: 123456789012
+         description: Unique identifier for the owner
+       microchipId:
+         type: integer
+         format: int64
+         example: 123456789012
+         description: Unique identifier of the microchip of the pet
+         minimum: 500
+       insurancePolicyId:
+         type: integer
+         format: int64
+         example: 9876543210
+         description: Unique identifier of the insurance policy of the pet
+       registrationNumber:
+         type: integer
+         format: int64
+         example: 1648851902
+         description: Gov registration number of the pet
+         minimum: 1000
+       category:
+         $ref: '#/components/schemas/Category'

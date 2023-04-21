@@ -178,9 +178,11 @@ public class ParametersGenerator {
             //  </pre>
             throw new BallerinaOpenApiException(String.format(OAS_SERVICE_106.getDescription(), parameter.getName()));
         } else {
-            if (!schema.getType().equals(GeneratorConstants.STRING) && !(schema instanceof ArraySchema)) {
-                throw new BallerinaOpenApiException(String.format(OAS_SERVICE_105.getDescription(),
-                        parameter.getName(), schema.getType()));
+            if (GeneratorConstants.STRING.equals(schema.getType())) {
+                // Handle string headers
+                headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
+                        GeneratorUtils.convertOpenAPITypeToBallerina(schema.getType().trim()),
+                        GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
             } else if (schema instanceof ArraySchema) {
                 Schema<?> items = ((ArraySchema) schema).getItems();
                 if (items.getType() == null) {
@@ -197,10 +199,15 @@ public class ParametersGenerator {
                                 createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
                 NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
                 headerTypeName = createArrayTypeDescriptorNode(headerArrayItemTypeName, nodeList);
-            } else {
+            } else if (GeneratorConstants.INTEGER.equals(schema.getType())) {
+                // Handle integer headers
+                final String schemaType = schema.getFormat() != null ? schema.getFormat() : schema.getType();
                 headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
-                        GeneratorUtils.convertOpenAPITypeToBallerina(schema.getType().trim()),
+                        GeneratorUtils.convertOpenAPITypeToBallerina(schemaType.trim()),
                         GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
+            } else {
+                throw new BallerinaOpenApiException(String.format(OAS_SERVICE_105.getDescription(),
+                        parameter.getName(), schema.getType()));
             }
             // Create annotation for header
             // TODO: This code block is to be enabled when handle the headers handle additional parameters

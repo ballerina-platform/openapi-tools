@@ -59,7 +59,7 @@ public class PrimitiveTypeGenerator extends TypeGenerator {
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
         String typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(schema.getType().trim());
         // TODO: Need to the format of other primitive types too
-        if (schema.getType().equals(GeneratorConstants.NUMBER)) {
+        if (GeneratorConstants.NUMBER.equals(schema.getType()) || GeneratorConstants.INTEGER.equals(schema.getType())) {
             if (schema.getFormat() != null) {
                 typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(schema.getFormat().trim());
             }
