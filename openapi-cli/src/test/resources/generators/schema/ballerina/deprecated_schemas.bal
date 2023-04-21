@@ -8,7 +8,7 @@ public type Owner record {
 };
 
 public type Error record {
-    int code;
+    int:Signed32 code;
     string message;
 };
 

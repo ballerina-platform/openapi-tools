@@ -25,7 +25,7 @@ public type Person record {
     @constraint:Number {minValueExclusive: 0}
     decimal net?;
     @constraint:Int {minValue: 1, maxValue: 100}
-    int maxDeliveryCount?;
+    int:Signed32 maxDeliveryCount?;
     # scenario 01 - field with nullable.
     string? service_class?;
     # scenario 02 - field with oneOf type.
