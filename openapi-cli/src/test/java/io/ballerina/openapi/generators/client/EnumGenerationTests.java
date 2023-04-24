@@ -11,7 +11,8 @@ import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -80,11 +81,16 @@ public class EnumGenerationTests {
     }
 
 
-    @AfterTest
+    @AfterMethod
     private void deleteGeneratedFiles() {
         try {
             TestUtils.deleteGeneratedFiles();
         } catch (IOException ignored) {
         }
+    }
+
+    @AfterClass
+    public void cleanUp() throws IOException {
+        TestUtils.deleteGeneratedFiles();
     }
 }

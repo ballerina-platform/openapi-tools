@@ -92,11 +92,11 @@ paths:
               - OFFSET
               - EPOCH
               - LEET
-#        - description: "Meeting location"
-#          in: query
-#          name: location
-#          schema:
-#            $ref: '#/components/schemas/RoomNo'
+        - description: "Meeting location"
+          in: query
+          name: location
+          schema:
+            $ref: '#/components/schemas/RoomNo'
         - $ref: "#/components/parameters/responseFormat"
       responses:
         "200":

@@ -26,8 +26,9 @@ import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -44,6 +45,11 @@ import static org.testng.Assert.assertTrue;
  */
 public class ConstraintTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
+
+    @BeforeMethod
+    public void setUp() throws IOException {
+        TestUtils.deleteGeneratedFiles();
+    }
 
     @Test(description = "Tests with record field has constraint and record field type can be user defined datatype " +
             "with constraint.")
@@ -127,7 +133,7 @@ public class ConstraintTests {
                 "/additional_properties_with_constraint.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        TestUtils.deleteGeneratedFiles();
+//        TestUtils.deleteGeneratedFiles();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/additional_properties_with_constraint.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -200,16 +206,12 @@ public class ConstraintTests {
     private void deleteGeneratedFiles() {
         try {
             TestUtils.deleteGeneratedFiles();
-            System.gc();
         } catch (IOException ignored) {
         }
     }
 
-    @AfterTest
-    public void clean() throws IOException {
+    @AfterClass
+    public void cleanUp() throws IOException {
         TestUtils.deleteGeneratedFiles();
-        System.gc();
-        System.setErr(null);
-        System.setOut(null);
     }
 }

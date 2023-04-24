@@ -354,6 +354,10 @@ public class ParametersGenerator {
                 throw new BallerinaOpenApiException(String.format(messages.getDescription(), "object"));
             }
         } else {
+            //TODO: Uncomment after the fix from http module is provided
+//            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(schema),
+//                    GeneratorUtils.SINGLE_WS_MINUTIAE,
+//                    GeneratorUtils.SINGLE_WS_MINUTIAE);
             Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
                             schema.getType().toLowerCase(Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
@@ -385,6 +389,10 @@ public class ParametersGenerator {
                 throw new BallerinaOpenApiException(messages.getDescription());
             }
         } else {
+            //TODO: Uncomment after the fix from http module is provided
+//            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
+//                            schema), GeneratorUtils.SINGLE_WS_MINUTIAE,
+//                    GeneratorUtils.SINGLE_WS_MINUTIAE);
             Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
                             schema.getType().toLowerCase(Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
@@ -429,6 +437,10 @@ public class ParametersGenerator {
                 throw new BallerinaOpenApiException(messages.getDescription());
             }
         } else {
+            //TODO: Uncomment after the fix from http module is provided
+//            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
+//                            schema), GeneratorUtils.SINGLE_WS_MINUTIAE,
+//                    GeneratorUtils.SINGLE_WS_MINUTIAE);
             Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
                             schema.getType().toLowerCase(Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
@@ -447,7 +459,10 @@ public class ParametersGenerator {
 
     // Create ArrayTypeDescriptorNode using Schema
     private ArrayTypeDescriptorNode getArrayTypeDescriptorNode(Schema<?> items) throws BallerinaOpenApiException {
-
+        //TODO: Uncomment after the fix from http module is provided
+//        Token arrayName = createIdentifierToken(
+//                GeneratorUtils.convertOpenAPITypeToBallerina(items),
+//                GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
         Token arrayName = createIdentifierToken(
                 GeneratorUtils.convertOpenAPITypeToBallerina(items.getType().toLowerCase(
                         Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
