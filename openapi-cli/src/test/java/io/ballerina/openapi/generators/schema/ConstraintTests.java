@@ -127,12 +127,13 @@ public class ConstraintTests {
                 "/additional_properties_with_constraint.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.deleteGeneratedFiles();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/additional_properties_with_constraint.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
-        assertFalse(hasErrors, "Errors : " + diagnostics.get(0).toString());
+        assertFalse(hasErrors);
     }
     //TODO current tool doesn't handle union type: therefore union type constraint will handle once union type
     // generation available in tool.

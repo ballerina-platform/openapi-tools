@@ -88,7 +88,12 @@ public class EnumGenerationTests {
 
     @AfterTest
     public void clean() {
-        System.setErr(null);
-        System.setOut(null);
+        try {
+            TestUtils.deleteGeneratedFiles();
+            System.gc();
+            System.setErr(null);
+            System.setOut(null);
+        } catch (IOException ignored) {
+        }
     }
 }
