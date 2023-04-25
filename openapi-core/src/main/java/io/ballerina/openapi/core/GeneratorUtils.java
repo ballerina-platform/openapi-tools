@@ -717,7 +717,8 @@ public class GeneratorUtils {
                 propertyValue.getMaxItems() != null ||
                 propertyValue.getMinItems() != null ||
                 propertyValue.getExclusiveMinimum() != null ||
-                propertyValue.getExclusiveMaximum() != null;
+                propertyValue.getExclusiveMaximum() != null ||
+                propertyValue.getPattern() != null;
     }
 
     /**

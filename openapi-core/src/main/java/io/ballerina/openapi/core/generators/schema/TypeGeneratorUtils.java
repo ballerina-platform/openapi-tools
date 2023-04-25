@@ -67,6 +67,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -415,12 +417,22 @@ public class TypeGeneratorUtils {
             String fieldRef = GeneratorConstants.MIN_LENGTH + GeneratorConstants.COLON + value;
             fields.add(fieldRef);
         }
-        //TODO: This will be enable once constraint package gives this support.
-//        if (stringSchema.getPattern() != null) {
-//            String value = stringSchema.getPattern();
-//            String fieldRef = "pattern:" + "\"" + value + "\"";
-//            fields.add(fieldRef);
-//        }
+        if (stringSchema.getPattern() != null) {
+            String value = stringSchema.getPattern();
+            // This is to check whether the pattern is valid or not.
+            PatternSyntaxException exc = null;
+            try {
+                Pattern.compile(value);
+            } catch (PatternSyntaxException e) {
+                exc = e;
+            }
+            if (exc == null) {
+                String fieldRef = "pattern: re" + "`" + value + "`";
+                fields.add(fieldRef);
+            } else {
+                OUT_STREAM.printf("WARNING: Invalid pattern: " + value);
+            }
+        }
         return fields;
     }
 
