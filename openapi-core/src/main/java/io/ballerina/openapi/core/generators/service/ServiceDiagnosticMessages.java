@@ -47,7 +47,9 @@ public enum ServiceDiagnosticMessages {
             "Header '%s' with no header type can not be mapped to the Ballerina headers.",
             DiagnosticSeverity.ERROR),
     OAS_SERVICE_107("OAS_SERVICE_107", "HTTP status code '%s' is not supported in Ballerina.",
-            DiagnosticSeverity.ERROR);
+            DiagnosticSeverity.ERROR),
+    OAS_SERVICE_108("OAS_SERVICE_108", "Only array types of string, int, float, boolean, " +
+            "and decimal are allowed to be used in query parameters in Ballerina.", DiagnosticSeverity.ERROR);
 
     private final String code;
     private final String description;
