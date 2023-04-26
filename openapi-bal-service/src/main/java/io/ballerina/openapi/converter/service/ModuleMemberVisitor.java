@@ -30,7 +30,7 @@ import java.util.List;
  *
  * @since 1.6.0
  */
-public class BallerinaNodeVisitor extends NodeVisitor {
+public class ModuleMemberVisitor extends NodeVisitor {
 
     LinkedList<TypeDefinitionNode> typeDefinitionNodes = new LinkedList<>();
     LinkedList<ListenerDeclarationNode> listenerDeclarationNodes = new LinkedList<>();

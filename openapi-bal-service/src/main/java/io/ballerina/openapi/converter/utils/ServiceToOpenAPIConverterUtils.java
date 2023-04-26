@@ -43,7 +43,7 @@ import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.converter.model.OASResult;
 import io.ballerina.openapi.converter.model.OpenAPIInfo;
-import io.ballerina.openapi.converter.service.BallerinaNodeVisitor;
+import io.ballerina.openapi.converter.service.ModuleMemberVisitor;
 import io.ballerina.openapi.converter.service.OpenAPIEndpointMapper;
 import io.ballerina.openapi.converter.service.OpenAPIServiceMapper;
 import io.ballerina.projects.Module;
@@ -490,7 +490,7 @@ public class ServiceToOpenAPIConverterUtils {
      * @param project - current project
      */
     public static LinkedHashSet<ListenerDeclarationNode> collectListeners(Project project) {
-        BallerinaNodeVisitor balNodeVisitor = new BallerinaNodeVisitor();
+        ModuleMemberVisitor balNodeVisitor = new ModuleMemberVisitor();
         LinkedHashSet<ListenerDeclarationNode> listeners = new LinkedHashSet<>();
         project.currentPackage().moduleIds().forEach(moduleId -> {
             Module module = project.currentPackage().module(moduleId);
