@@ -49,7 +49,7 @@ public enum ServiceDiagnosticMessages {
     OAS_SERVICE_107("OAS_SERVICE_107", "HTTP status code '%s' is not supported in Ballerina.",
             DiagnosticSeverity.ERROR),
     OAS_SERVICE_108("OAS_SERVICE_108", "Only array types of string, int, float, boolean, " +
-            "and decimal are allowed to be used in query parameters in Ballerina.", DiagnosticSeverity.ERROR);
+            "and decimal are allowed to be used as query parameters in Ballerina.", DiagnosticSeverity.ERROR);
 
     private final String code;
     private final String description;

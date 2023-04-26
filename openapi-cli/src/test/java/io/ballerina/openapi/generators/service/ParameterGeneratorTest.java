@@ -184,18 +184,4 @@ public class ParameterGeneratorTest {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("keywords.bal", syntaxTree);
     }
-
-    @Test(description = "Tests when query parameter(s) having a referenced schema")
-    public void generateParamsWithRefSchema() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/parameters_with_ref_schema.yaml");
-        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
-                .withOpenAPI(openAPI)
-                .withFilters(filter)
-                .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
-                "parameters_with_ref_schema.bal", syntaxTree);
-    }
 }

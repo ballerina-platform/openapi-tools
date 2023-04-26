@@ -43,6 +43,12 @@ paths:
       description: List all the meetings that were scheduled
       operationId: listMeetings
       parameters:
+        - description: "Meeting organizer"
+          in: query
+          name: organizer
+          required: true
+          schema:
+            $ref: '#/components/schemas/Organizer'
         - description: "Meeting location"
           in: query
           name: location
@@ -91,6 +97,8 @@ components:
           - html
         type: string
   schemas:
+    Organizer:
+      type: string
     Audience:
       enum:
         - "students"
