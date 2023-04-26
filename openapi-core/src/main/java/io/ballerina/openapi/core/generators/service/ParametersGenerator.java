@@ -90,6 +90,7 @@ public class ParametersGenerator {
     private static final List<String> queryParamSupportedTypes =
             new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
                     GeneratorConstants.STRING, GeneratorConstants.BOOLEAN));
+
     public ParametersGenerator(boolean isNullableRequired, OpenAPI openAPI) {
         this.isNullableRequired = isNullableRequired;
         this.openAPI = openAPI;
@@ -353,11 +354,16 @@ public class ParametersGenerator {
 
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
-            if (items.getType() == null) {
+            if (items.getType() == null && items.get$ref() == null) {
                 // Resource function doesn't support to query parameters with array type which doesn't have an
                 // item type.
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_101;
                 throw new BallerinaOpenApiException(messages.getDescription());
+            } else if (items.get$ref() != null) {
+                ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
+                OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(arrayTypeName,
+                        createToken(SyntaxKind.QUESTION_MARK_TOKEN));
+                return createRequiredParameterNode(annotations, optionalNode, parameterName);
             } else if (!(items instanceof ObjectSchema) && !(items.getType().equals(GeneratorConstants.ARRAY))) {
                 // create arrayTypeDescriptor
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
@@ -452,7 +458,7 @@ public class ParametersGenerator {
 
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
-            if (!(items instanceof ArraySchema) && items.getType() != null) {
+            if (!(items instanceof ArraySchema) && (items.getType() != null || (items.get$ref() != null))) {
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
                 return createDefaultableParameterNode(annotations, arrayTypeName, parameterName,
                         createToken(SyntaxKind.EQUAL_TOKEN),

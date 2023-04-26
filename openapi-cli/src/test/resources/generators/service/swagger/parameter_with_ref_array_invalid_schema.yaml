@@ -1,0 +1,90 @@
+openapi: 3.0.3
+info:
+  title: Swagger Petstore - OpenAPI 3.0
+  description: |-
+    This is a sample Pet Store Server based on the OpenAPI 3.0 specification.
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: https://petstore3.swagger.io/api/v3
+tags:
+  - name: pet
+    description: Everything about your Pets
+    externalDocs:
+      description: Find out more
+      url: http://swagger.io
+  - name: store
+    description: Access to Petstore orders
+    externalDocs:
+      description: Find out more about our store
+      url: http://swagger.io
+  - name: user
+    description: Operations about user
+paths:
+  /users/meetings:
+    get:
+      description: List all the meetings that were scheduled
+      operationId: listMeetings
+      parameters:
+        - description: "Meeting location"
+          in: query
+          name: location
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Room'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingList'
+          description: "HTTP Status Code:200. List of meetings returned."
+components:
+  parameters:
+    responseFormat:
+      description: The response format you would like
+      in: query
+      name: format
+      schema:
+        enum:
+          - json
+          - jsonp
+          - msgpack
+          - html
+        type: string
+  schemas:
+    Room:
+      type: object
+      properties:
+        roomNo:
+          type: string
+        seats:
+          type: integer
+    MeetingList:
+      description: List of meetings
+      title: Group List
+      type: object
+      properties:
+        meetings:
+          description: List of Meeting objects.
+          items:
+            $ref: '#/components/schemas/MeetingObject'
+          type: array
+    MeetingObject:
+      properties:
+        topic:
+          description: Meeting topic.
+          type: string
+        type:
+          description: "Meeting Type: 1 - Instant meeting. 2 - Scheduled meeting. 3 - Recurring meeting with no fixed time. 8 - Recurring meeting with fixed time."
+          type: integer
+      type: object
