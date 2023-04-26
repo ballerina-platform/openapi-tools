@@ -201,10 +201,12 @@ public class ParametersGenerator {
                 headerTypeName = createArrayTypeDescriptorNode(headerArrayItemTypeName, nodeList);
             } else if (GeneratorConstants.INTEGER.equals(schema.getType())) {
                 // Handle integer headers
-                final String schemaType = schema.getFormat() != null ? schema.getFormat() : schema.getType();
+                String typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(schema.getType().trim());
+                typeDescriptorName = GeneratorUtils.
+                        generateTypeDescriptorNameFromNumberFormats(typeDescriptorName, schema);
+
                 headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
-                        GeneratorUtils.convertOpenAPITypeToBallerina(schemaType.trim()),
-                        GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
+                        typeDescriptorName, GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
             } else {
                 throw new BallerinaOpenApiException(String.format(OAS_SERVICE_105.getDescription(),
                         parameter.getName(), schema.getType()));
@@ -361,8 +363,10 @@ public class ParametersGenerator {
                 throw new BallerinaOpenApiException(String.format(messages.getDescription(), "object"));
             }
         } else {
-            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
-                            schema.getType().toLowerCase(Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE,
+            String typeDescriptorName = GeneratorUtils
+                    .convertOpenAPITypeToBallerina(schema.getType().toLowerCase(Locale.ENGLISH).trim());
+            typeDescriptorName = GeneratorUtils.generateTypeDescriptorNameFromNumberFormats(typeDescriptorName, schema);
+            Token name = createIdentifierToken(typeDescriptorName, GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
             BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
             OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(rTypeName,
@@ -392,8 +396,11 @@ public class ParametersGenerator {
                 throw new BallerinaOpenApiException(messages.getDescription());
             }
         } else {
-            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
-                            schema.getType().toLowerCase(Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE,
+            String typeDescriptorName = GeneratorUtils
+                    .convertOpenAPITypeToBallerina(schema.getType().toLowerCase(Locale.ENGLISH).trim());
+            typeDescriptorName = GeneratorUtils.generateTypeDescriptorNameFromNumberFormats(typeDescriptorName, schema);
+
+            Token name = createIdentifierToken(typeDescriptorName, GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
             BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
             return createRequiredParameterNode(annotations, rTypeName, parameterName);

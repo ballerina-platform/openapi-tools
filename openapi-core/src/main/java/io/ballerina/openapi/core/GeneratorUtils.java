@@ -985,4 +985,24 @@ public class GeneratorUtils {
             throw new ProjectException(e.getMessage());
         }
     }
+
+    /**
+     * Generate type descriptor name using format for the numeric data types.
+     *
+     * @param typeDescriptorName name of the data type. ex: number, integer
+     * @param schema uses to generate the type descriptor name
+     * @return typeDescriptorName for invalid numeric data formats
+     */
+    public static String generateTypeDescriptorNameFromNumberFormats(final String typeDescriptorName,
+                                                                     final Schema<?> schema) {
+        try {
+            if (schema.getFormat() != null) {
+                return GeneratorUtils.convertOpenAPITypeToBallerina(schema.getFormat().trim());
+            }
+        } catch (BallerinaOpenApiException e) {
+            LOGGER.error(String.format("WARNING: the Ballerina schemas do not support with the `%s` format " +
+                    "for the `%s` data type", schema.getFormat(), schema.getType()));
+        }
+        return typeDescriptorName;
+    }
 }

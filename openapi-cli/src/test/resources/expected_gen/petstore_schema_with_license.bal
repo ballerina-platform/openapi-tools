@@ -61,7 +61,7 @@ public type ProxyConfig record {|
 public type Pets Pet[];
 
 public type Error record {
-    int code;
+    int:Signed32 code;
     string message;
 };
 

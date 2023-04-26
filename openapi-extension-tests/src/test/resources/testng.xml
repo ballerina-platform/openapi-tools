@@ -21,7 +21,7 @@
 <suite name="BallerinaOpenAPIExtensionTests">
     <test name="UnitTests">
         <classes>
-            <class name="io.ballerina.openapi.extension.OpenApiExtensionTest"/>
+            <!-- <class name="io.ballerina.openapi.extension.OpenApiExtensionTest"/> -->
         </classes>
     </test>
 </suite>

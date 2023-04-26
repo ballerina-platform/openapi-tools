@@ -24,6 +24,7 @@ import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -42,34 +43,30 @@ public class HeaderTests {
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
-    SyntaxTree syntaxTree;
 
-    //Scenario 03 - Header parameters.
-    @Test(description = "Generate functionDefinitionNode for Header parameters")
-    public void generateHeaderParameter() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/service/swagger/headers/multiHeaderParam.yaml");
-        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
-                .withOpenAPI(openAPI)
-                .withFilters(filter)
-                .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_parameters.bal",
-                syntaxTree);
+    @DataProvider(name = "intHeaderTestData")
+    public Object[][] intFormatTestData() {
+        return new Object[][]{
+                {"generators/service/swagger/headers/multiHeaderParam.yaml", "headers/header_parameters.bal"},
+                {"generators/service/swagger/headers/header_integer_signed32.yaml",
+                        "headers/header_integer_signed32.bal"},
+                {"generators/service/swagger/headers/header_integer_invalid.yaml",
+                        "headers/header_integer_invalid.bal"},
+        };
     }
 
-    @Test(description = "Generate int format values for Header parameters")
-    public void testIntegerFormatHeaderParameter() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/service/swagger/headers/header_integer_signed32.yaml");
+    //Scenario 03 - Header parameters.
+    @Test(dataProvider = "intHeaderTestData", description = "Generate functionDefinitionNode for Header parameters")
+    public void generateHeaderParameter(final String swaggerPath, final String balPath)
+            throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve(swaggerPath);
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_integer_signed32.bal",
-                syntaxTree);
+        final SyntaxTree syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(balPath, syntaxTree);
     }
 }

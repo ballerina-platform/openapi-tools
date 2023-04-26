@@ -18,6 +18,17 @@ paths:
           required: true
           schema:
             type: integer
+            format: int_invalid
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            format: int_invalid
+        - name: next
+          in: query
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: An paged array of pets

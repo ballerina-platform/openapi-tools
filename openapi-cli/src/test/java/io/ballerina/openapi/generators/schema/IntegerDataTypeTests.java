@@ -43,6 +43,7 @@ public class IntegerDataTypeTests {
                 {"swagger/schema_integer_signed32.yaml", "schema/ballerina/schema_integer_signed32.bal"},
                 {"swagger/schema_integer_signed32_ref.yaml", "schema/ballerina/schema_integer_signed32_ref.bal"},
                 {"swagger/schema_integer_signed64.yaml", "schema/ballerina/schema_integer_signed64.bal"},
+                {"swagger/schema_integer_invalid_format.yaml", "schema/ballerina/schema_integer_invalid_format.bal"},
         };
     }
 
@@ -55,14 +56,5 @@ public class IntegerDataTypeTests {
         final BallerinaTypesGenerator ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI);
         final SyntaxTree syntaxTree = ballerinaTypesGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(balPath, syntaxTree);
-    }
-
-    @Test(description = "Tests an invalid integer value formats", expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Unsupported OAS data type .*")
-    public void testInvalidIntegerFormatTypeSchema() throws IOException, BallerinaOpenApiException {
-
-        final Path definitionPath = RES_DIR.resolve("swagger/schema_integer_invalid_format.yaml");
-        final OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        new BallerinaTypesGenerator(openAPI).generateSyntaxTree();
     }
 }

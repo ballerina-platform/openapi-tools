@@ -25,6 +25,8 @@ import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.Schema;
 
+import java.io.PrintStream;
+
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 
@@ -60,9 +62,7 @@ public class PrimitiveTypeGenerator extends TypeGenerator {
         String typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(schema.getType().trim());
         // TODO: Need to the format of other primitive types too
         if (GeneratorConstants.NUMBER.equals(schema.getType()) || GeneratorConstants.INTEGER.equals(schema.getType())) {
-            if (schema.getFormat() != null) {
-                typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(schema.getFormat().trim());
-            }
+            typeDescriptorName = GeneratorUtils.generateTypeDescriptorNameFromNumberFormats(typeDescriptorName, schema);
         } else if (schema.getType().equals(GeneratorConstants.STRING) && schema.getFormat() != null &&
                 schema.getFormat().equals(GeneratorConstants.BINARY)) {
             typeDescriptorName = "record {byte[] fileContent; string fileName;}";

@@ -59,7 +59,7 @@ public type ProxyConfig record {|
 public type PetArr Pet[];
 
 public type Pet record {
-    int petId;
+    int:Signed32 petId;
     string name;
     string petType?;
 };
