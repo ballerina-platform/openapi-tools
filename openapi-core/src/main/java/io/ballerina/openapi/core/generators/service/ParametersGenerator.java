@@ -137,7 +137,8 @@ public class ParametersGenerator {
                     }
                 } else if (parameter.getIn().trim().equals(GeneratorConstants.QUERY)) {
                     if (parameter.getRequired() != null && parameter.getRequired() &&
-                            (parameter.getSchema().getNullable() != null && parameter.getSchema().getNullable())) {
+                            (parameter.getSchema() != null && parameter.getSchema().getNullable() != null &&
+                                    parameter.getSchema().getNullable())) {
                         isNullableRequired = true;
                     }
                     // type  BasicType boolean|int|float|decimal|string ;
@@ -328,8 +329,17 @@ public class ParametersGenerator {
                                                               Map.Entry<String, MediaType> mediaTypeEntry)
             throws BallerinaOpenApiException {
 
+        Schema<?> parameterSchema;
+        if (mediaTypeEntry.getValue().getSchema() != null &&
+                mediaTypeEntry.getValue().getSchema().get$ref() != null) {
+            String type = getValidName(extractReferenceType(mediaTypeEntry.getValue().getSchema().get$ref()), true);
+            parameterSchema = (Schema<?>) openAPI.getComponents().getSchemas().get(type.trim());
+        } else {
+            parameterSchema = mediaTypeEntry.getValue().getSchema();
+        }
+
         if (mediaTypeEntry.getKey().equals(GeneratorConstants.APPLICATION_JSON) &&
-                mediaTypeEntry.getValue().getSchema() instanceof MapSchema) {
+                parameterSchema instanceof MapSchema) {
             if (parameter.getRequired()) {
                 BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null,
                         createIdentifierToken(GeneratorConstants.MAP_JSON));
