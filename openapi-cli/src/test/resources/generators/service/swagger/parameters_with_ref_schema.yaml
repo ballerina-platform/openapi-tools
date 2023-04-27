@@ -67,11 +67,11 @@ paths:
           name: audience
           schema:
             $ref: '#/components/schemas/Audience'
-        - description: "Meeting timezone"
-          in: query
-          name: timezone
-          schema:
-            $ref: '#/components/schemas/TimeZone'
+#        - description: "Meeting timezone"
+#          in: query
+#          name: timezone
+#          schema:
+#            $ref: '#/components/schemas/TimeZone'
       responses:
         "200":
           content:
@@ -103,10 +103,10 @@ components:
       enum:
         - "students"
         - "professionals"
-    #    # not supported currently by the http module
-    TimeZone:
-      type: string
-      nullable: true
+    # not supported currently by the http module
+#    TimeZone:
+#      type: string
+#      nullable: true
     RoomNo:
       default: "R5"
       enum:

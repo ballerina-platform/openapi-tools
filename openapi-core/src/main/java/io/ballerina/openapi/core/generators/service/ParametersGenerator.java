@@ -279,7 +279,9 @@ public class ParametersGenerator {
         if (schema != null && schema.get$ref() != null) {
             String type = getValidName(extractReferenceType(schema.get$ref()), true);
             Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
-            if (queryParamSupportedTypes.contains(refSchema.getType())) {
+            // TODO : Due to bug in http module, reference params with `nullable: true` are not allowed
+            if (queryParamSupportedTypes.contains(refSchema.getType()) &&
+                    !((refSchema.getNullable() != null) && refSchema.getNullable())) {
                 return handleReferencedQueryParameter(parameter, type, refSchema, annotations, parameterName);
             } else {
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
@@ -359,12 +361,9 @@ public class ParametersGenerator {
                 // item type.
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_101;
                 throw new BallerinaOpenApiException(messages.getDescription());
-            } else if (items.get$ref() != null) {
-                ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
-                OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(arrayTypeName,
-                        createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-                return createRequiredParameterNode(annotations, optionalNode, parameterName);
-            } else if (!(items instanceof ObjectSchema) && !(items.getType().equals(GeneratorConstants.ARRAY))) {
+            } else if ((!(items instanceof ObjectSchema) && !(items.getType() != null &&
+                    items.getType().equals(GeneratorConstants.ARRAY)))
+                    || items.get$ref() != null) {
                 // create arrayTypeDescriptor
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
                 OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(arrayTypeName,
@@ -402,7 +401,6 @@ public class ParametersGenerator {
         } else if (parameter.getRequired() && (refSchema.getNullable() == null || (!refSchema.getNullable()))) {
             return createRequiredParameterNode(annotations, rTypeName, parameterName);
         } else {
-            // TODO: Generates a code with compiler errors due to a issue with Ballerina. Recheck in Update 6
             OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(rTypeName,
                     createToken(SyntaxKind.QUESTION_MARK_TOKEN));
             return createRequiredParameterNode(annotations, optionalNode, parameterName);
