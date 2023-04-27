@@ -67,6 +67,14 @@ paths:
           name: audience
           schema:
             $ref: '#/components/schemas/Audience'
+        - description: "Meeting remarks"
+          in: query
+          name: remarks
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Remarks'
 #        - description: "Meeting timezone"
 #          in: query
 #          name: timezone
@@ -103,6 +111,9 @@ components:
       enum:
         - "students"
         - "professionals"
+    Remarks:
+      type: object
+      additionalProperties: true
     # not supported currently by the http module
 #    TimeZone:
 #      type: string

@@ -9,9 +9,10 @@ service /api/v3 on ep0 {
     # + location - Meeting location
     # + types - Meeting Types
     # + audience - Meeting audience
+    # + remarks - Meeting remarks
     # + return - returns can be any of following types
     # MeetingList (HTTP Status Code:200. List of meetings returned.)
     # http:NotFound (HTTP Status Code:404 User ID not found. Error Code:1001, User not exist or not belong to this account.)
-    resource function get users/meetings(Organizer organizer, MeetingTypes[] types, Audience? audience, RoomNo location = "R5") returns MeetingList|http:NotFound {
+    resource function get users/meetings(Organizer organizer, MeetingTypes[] types, Audience? audience, map<json> remarks, RoomNo location = "R5") returns MeetingList|http:NotFound {
     }
 }
