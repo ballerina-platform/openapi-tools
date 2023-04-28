@@ -44,6 +44,7 @@ public class IntegerDataTypeTests {
                 {"swagger/schema_integer_signed32_ref.yaml", "schema/ballerina/schema_integer_signed32_ref.bal"},
                 {"swagger/schema_integer_signed64.yaml", "schema/ballerina/schema_integer_signed64.bal"},
                 {"swagger/schema_integer_invalid_format.yaml", "schema/ballerina/schema_integer_invalid_format.bal"},
+                {"swagger/schema_integer_array.yaml", "schema/ballerina/schema_integer_array.bal"},
         };
     }
 

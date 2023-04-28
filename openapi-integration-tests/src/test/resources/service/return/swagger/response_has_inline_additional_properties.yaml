@@ -26,7 +26,6 @@ paths:
                     type: integer
                 additionalProperties:
                   type: integer
-                  format: int32
   /:
     get:
       tags:

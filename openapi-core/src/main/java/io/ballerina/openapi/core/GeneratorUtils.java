@@ -262,6 +262,10 @@ public class GeneratorUtils {
                     paramType = getValidName(extractReferenceType(parameter.getSchema().get$ref()), true);
                 } else {
                     paramType = convertOpenAPITypeToBallerina(parameter.getSchema().getType());
+                    if (GeneratorConstants.INTEGER.equals(parameter.getSchema().getType().trim())) {
+                        paramType = GeneratorUtils
+                                .generateTypeDescriptorNameFromNumberFormats(paramType, parameter.getSchema());
+                    }
                 }
 
                 // TypeDescriptor

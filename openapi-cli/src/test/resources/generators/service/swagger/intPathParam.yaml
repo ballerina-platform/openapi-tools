@@ -11,52 +11,41 @@ servers:
       host:
         default: openapi
         description: this value is assigned by the service provider
-  - url: https://{subdomain}.swagger.io:{port}/{basePath}
-    description: The production API server
-    variables:
-      subdomain:
-        default: petstore
-        description: this value is assigned by the service provider
-      port:
-        enum:
-          - '8443'
-          - '443'
-        default: '443'
-      basePath:
-        default: v2
 tags:
   - name: pets
     description: Pets Tag
-  - name: list
-    description: List Tag
-security:
-- petstore_auth:
-  - write:pets
-  - read:pets
-- user_auth:
-  - read:user
-
 paths:
-  /pets:
+  /store/{storeId}/users/{userId}/pets/{petId}:
     get:
-      summary: List all pets
-      description: Show a list of pets in the system
-      operationId: listPets
+      summary: Info for a specific pet
+      operationId: showPetById
+      tags:
+        - pets
       parameters:
-        - name: limit
-          in: query
-          description: How many items to return at one time (max 100)
-          required: false
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
           schema:
             type: integer
+            format: int32
+        - name: userId
+          in: path
+          required: true
+          description: The id of the user to retrieve
+          schema:
+            type: integer
+            format: int64
+        - name: storeId
+          in: path
+          required: true
+          description: The id of the store to retrieve
+          schema:
+            type: integer
+            format: invalid_int
       responses:
         '200':
-          description: An paged array of pets
-          headers:
-            x-next:
-              description: A link to the next page of responses
-              schema:
-                type: string
+          description: Expected response to a valid request
           content:
             application/json:
               schema:
@@ -83,13 +72,6 @@ components:
           type: string
         type:
           type: string
-    Dog:
-      allOf:
-        - $ref: "#/components/schemas/Pet"
-        - type: object
-          properties:
-            bark:
-              type: boolean
     Pets:
       type: array
       items:
