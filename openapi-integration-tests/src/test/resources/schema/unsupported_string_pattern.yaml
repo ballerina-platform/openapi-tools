@@ -38,21 +38,25 @@ components:
       properties:
         name:
           type: string
-          pattern: ^(?!(.*[\"\*\\\>\<\?\/\:\|]+.*)|(.*[\.]?.*[\.]+$)|(.*[ ]+$)) # Use case 01 : This pattern can not support via Ballerina regex
+          pattern: ^(?!(.*[\"\*\\\>\<\?\/\:\|]+.*)|(.*[\.]?.*[\.]+$)|(.*[ ]+$))
           maxLength: 14
         hobby:
           type: array
           items:
             type: string
-            pattern: '[ a-zA-Z0-9/.+!@#$%^&*()+\- ]*'
-        id:
-          type: integer
-          maximum: 5
-        salary:
+            pattern: ^(?![0-9]+$)(?!-)[a-zA-Z0-9-]{2,49}[a-zA-Z0-9]$
+        url:
           type: string
-          pattern: ^[a-zA-Z0-9_]+$
+          pattern: (https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$
+        street:
+          type: string
+          pattern: ^[A-Za-z\-\_\/]+$
         net:
           type: string
-          pattern: ^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$ # Use case 02 : This pattern can not support via Ballerina regex
-        count:
-          type: integer
+          pattern: ^.*(?=.{6,1000})(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*$
+        doi:
+          type: string
+          pattern: ^[\x09\x0A\x0D\x20\x23\x2D\x30-\x39\x40-\x5A\x5E-\x5F\x61-\x7A\x7E-\uD7FF\uE000-\uFFFD\u10000-\u10FFFF]{1,100}$
+        task:
+          type: string
+          pattern: ^[a-z0-9\-\_\.]+$

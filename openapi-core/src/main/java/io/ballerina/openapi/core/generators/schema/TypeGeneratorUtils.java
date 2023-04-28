@@ -48,6 +48,8 @@ import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.Refer
 import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.TypeGenerator;
 import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.UnionTypeGenerator;
 import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
+import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.internal.regexp.RegExpFactory;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
@@ -421,16 +423,24 @@ public class TypeGeneratorUtils {
             String value = stringSchema.getPattern();
             // This is to check whether the pattern is valid or not.
             PatternSyntaxException exc = null;
+            // TODO: This temp fix will be removed with available with the new Regex API.
+            // https://github.com/ballerina-platform/ballerina-lang/issues/40328
+            // https://github.com/ballerina-platform/ballerina-lang/issues/40318
             try {
                 Pattern.compile(value);
+                RegExpFactory.parse(value);
             } catch (PatternSyntaxException e) {
                 exc = e;
+            } catch (BError err) {
+                //The value was assigned as 0 to the index due to the creation of a PatternSyntaxException.
+                //This will be resolved with the availability of the new Regex API.
+                exc = new PatternSyntaxException(err.getMessage(), value, 0);
             }
             if (exc == null) {
                 String fieldRef = "pattern: re" + "`" + value + "`";
                 fields.add(fieldRef);
             } else {
-                OUT_STREAM.printf("WARNING: Invalid pattern: " + value);
+                OUT_STREAM.printf("WARNING: ballerina can not support pattern: %s %n", value);
             }
         }
         return fields;
