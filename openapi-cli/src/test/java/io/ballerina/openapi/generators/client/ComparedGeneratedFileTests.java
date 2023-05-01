@@ -95,6 +95,8 @@ public class ComparedGeneratedFileTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
+
+
     @DataProvider(name = "fileProviderForFilesComparison")
     public Object[][] fileProviderForFilesComparison() {
         return new Object[][]{

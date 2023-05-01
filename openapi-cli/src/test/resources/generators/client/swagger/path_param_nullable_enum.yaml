@@ -38,7 +38,7 @@ tags:
   - name: user
     description: Operations about user
 paths:
-  /users/meetings:
+  /users/meetings/{group}:
     get:
       description: >-
         List all the meetings that were scheduled for a user (meeting
@@ -51,45 +51,18 @@ paths:
       summary: List meetings
       operationId: listMeetings
       parameters:
-        - description: "The meeting types. Scheduled, live or upcoming"
-          in: query
-          name: type
+        - description: "Employee group"
+          in: path
+          name: group
           schema:
-#            default: live
-            enum:
-              - scheduled
-              - live
-              - upcoming
-              - null
             type: string
-        - description: "Status values that need to be considered for filter"
-          in: query
-          name: status
-          schema:
-            type: array
-            items:
-              type: string
-              enum:
-                - "available"
-                - "pending"
-                - null
-        - description: Date time format (cf. [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) & [leettime.de](http://leettime.de/))
-          in: header
-          name: X-Date-Format
-          schema:
             enum:
-              - UTC
-              - LOCAL
-              - OFFSET
-              - EPOCH
-              - LEET
+              - "Admin"
+              - "HR"
+              - "Engineering"
               - null
-        - description: "Meeting location"
-          in: query
-          name: location
-          schema:
-            $ref: '#/components/schemas/RoomNo'
-        - $ref: "#/components/parameters/responseFormat"
+            nullable: true
+          required: true
       responses:
         "200":
           content:
@@ -102,36 +75,7 @@ paths:
       tags:
         - Meetings
 components:
-  parameters:
-    responseFormat:
-      description: The response format you would like
-      in: query
-      name: format
-      schema:
-        enum:
-          - json
-          - jsonp
-          - msgpack
-          - html
-          - null
-        type: string
   schemas:
-    RoomNo:
-#      How can we address when default value is there in a reusable enum
-      default: R5
-      enum:
-        - R1
-        - R3
-        - R5
-        - null
-      type: string
-    MeetingTypes:
-      type: string
-      default: live
-      enum:
-        - "scheduled"
-        - "live"
-        - "upcoming"
     MeetingList:
       description: List of meetings
       title: Group List

@@ -52,7 +52,7 @@ public isolated client class Client {
     # + location - Meeting location
     # + format - The response format you would like
     # + return - HTTP Status Code:200. List of meetings returned.
-    remote isolated function listMeetings("scheduled"|"live"|"upcoming"? 'type = (), ("available"|"pending"?)[]? status = (), "UTC"|"LOCAL"|"OFFSET"|"EPOCH"|"LEET"? xDateFormat = (), RoomNo location = "R5", "json"|"jsonp"|"msgpack"|"html"? format = ()) returns MeetingList|error {
+    resource isolated function get users/meetings("scheduled"|"live"|"upcoming"? 'type = (), ("available"|"pending"?)[]? status = (), "UTC"|"LOCAL"|"OFFSET"|"EPOCH"|"LEET"? xDateFormat = (), RoomNo location = "R5", "json"|"jsonp"|"msgpack"|"html"? format = ()) returns MeetingList|error {
         string resourcePath = string `/users/meetings`;
         map<anydata> queryParam = {"type": 'type, "status": status, "location": location, "format": format};
         map<Encoding> queryParamEncoding = {"status": {style: FORM, explode: true}};

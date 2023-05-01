@@ -48,12 +48,13 @@ public isolated client class Client {
     #
     # + 'type - The meeting types. Scheduled, live or upcoming
     # + status - Status values that need to be considered for filter
+    # + group - Employee group
     # + xDateFormat - Date time format (cf. [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) & [leettime.de](http://leettime.de/))
     # + location - Meeting location
     # + format - The response format you would like
     # + return - HTTP Status Code:200. List of meetings returned.
-    remote isolated function listMeetings("scheduled"|"live"|"upcoming"? 'type = (), ("available"|"pending"?)[]? status = (), "UTC"|"LOCAL"|"OFFSET"|"EPOCH"|"LEET"? xDateFormat = (), RoomNo location = "R5", "json"|"jsonp"|"msgpack"|"html"? format = ()) returns MeetingList|error {
-        string resourcePath = string `/users/meetings`;
+    resource isolated function get users/meetings/["Admin"|"HR"|"Engineering" group]("scheduled"|"live"|"upcoming" 'type = "live", ("available"|"pending")[]? status = (), "UTC"|"LOCAL"|"OFFSET"|"EPOCH"|"LEET"? xDateFormat = (), RoomNo location = "R5", "json"|"jsonp"|"msgpack"|"html"? format = ()) returns MeetingList|error {
+        string resourcePath = string `/users/meetings/${getEncodedUri(group)}`;
         map<anydata> queryParam = {"type": 'type, "status": status, "location": location, "format": format};
         map<Encoding> queryParamEncoding = {"status": {style: FORM, explode: true}};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam, queryParamEncoding);

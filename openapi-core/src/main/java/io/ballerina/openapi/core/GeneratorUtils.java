@@ -150,6 +150,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.IDENTIFIER;
 import static io.ballerina.openapi.core.GeneratorConstants.IMAGE_PNG;
 import static io.ballerina.openapi.core.GeneratorConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.core.GeneratorConstants.LINE_SEPARATOR;
+import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.GeneratorConstants.OPEN_CURLY_BRACE;
@@ -271,6 +272,9 @@ public class GeneratorUtils {
                     paramType = getValidName(extractReferenceType(parameter.getSchema().get$ref()), true);
                 } else {
                     paramType = convertOpenAPITypeToBallerina(parameter.getSchema());
+                    if (paramType.endsWith(NILLABLE)) {
+                        throw new BallerinaOpenApiException("Path parameter value cannot be null.");
+                    }
                 }
 
                 // TypeDescriptor
@@ -316,8 +320,6 @@ public class GeneratorUtils {
      * @return ballerina type
      */
     public static String convertOpenAPITypeToBallerina(String type) throws BallerinaOpenApiException {
-
-
         if (GeneratorConstants.TYPE_MAP.containsKey(type)) {
             return GeneratorConstants.TYPE_MAP.get(type);
         } else {
