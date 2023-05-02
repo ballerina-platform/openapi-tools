@@ -336,10 +336,8 @@ public class GeneratorUtils {
         if (schema.getEnum() != null && !schema.getEnum().isEmpty() && primitiveTypeList.contains(type)) {
             EnumConstantGenerator enumConstantGenerator = new EnumConstantGenerator(schema, null);
             return enumConstantGenerator.generateTypeDescriptorNode().toString();
-        } else if (GeneratorConstants.TYPE_MAP.containsKey(type)) {
-            return GeneratorConstants.TYPE_MAP.get(type);
         } else {
-            throw new BallerinaOpenApiException("Unsupported OAS data type `" + type + "`");
+            return convertOpenAPITypeToBallerina(type);
         }
     }
 

@@ -133,7 +133,6 @@ public class ConstraintTests {
                 "/additional_properties_with_constraint.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-//        TestUtils.deleteGeneratedFiles();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/additional_properties_with_constraint.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
