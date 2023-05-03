@@ -33,7 +33,9 @@ public enum ServiceDiagnosticMessages {
             "Query parameters with no array item type can not be mapped to Ballerina resource" +
                     " query parameters.", DiagnosticSeverity.ERROR),
     OAS_SERVICE_102("OAS_SERVICE_102",
-            "Query parameters with type '%s' can not be mapped to the Ballerina query parameters.",
+            "Type '%s' is not a valid query parameter type in Ballerina. " +
+                    "The supported types are string, int, float, boolean, decimal, array types of the aforementioned " +
+                    "types and map<json>.",
             DiagnosticSeverity.ERROR),
     OAS_SERVICE_103("OAS_SERVICE_103", "Header '%s' with array item type: '%s' is not " +
             "supported in Ballerina.", DiagnosticSeverity.ERROR),
@@ -47,9 +49,7 @@ public enum ServiceDiagnosticMessages {
             "Header '%s' with no header type can not be mapped to the Ballerina headers.",
             DiagnosticSeverity.ERROR),
     OAS_SERVICE_107("OAS_SERVICE_107", "HTTP status code '%s' is not supported in Ballerina.",
-            DiagnosticSeverity.ERROR),
-    OAS_SERVICE_108("OAS_SERVICE_108", "Only array types of string, int, float, boolean, " +
-            "and decimal are allowed to be used as query parameters in Ballerina.", DiagnosticSeverity.ERROR);
+            DiagnosticSeverity.ERROR);
 
     private final String code;
     private final String description;
