@@ -169,3 +169,5 @@ public final readonly & table<LiftRecord> key(id) liftTable = table [
     { id: "jolly-roger", name: "Jolly Roger", status: CLOSED, capacity: 8, night: true, elevationgain: 10}
 ];
 
+public listener http:Listener ep01 = new (80);
+public listener http:Listener ep02 = new (443, config = {host: "http://petstore.openapi.io"});
