@@ -20,7 +20,9 @@ public type Person record {
     @constraint:Int {maxValue: 5}
     int id;
     Address address?;
+    @constraint:Float {maxValue: 0}
     float salary?;
+    @constraint:Number {minValueExclusive: 0}
     decimal net?;
     @constraint:Int {minValue: 1, maxValue: 100}
     int maxDeliveryCount?;

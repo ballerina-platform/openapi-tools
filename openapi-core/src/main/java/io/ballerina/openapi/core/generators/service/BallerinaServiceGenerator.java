@@ -78,6 +78,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionSignat
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.openapi.core.GeneratorConstants.CATCH_ALL_PATH;
 import static io.ballerina.openapi.core.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.createImportDeclarationNodes;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.generateServiceConfigAnnotation;
@@ -268,7 +269,8 @@ public class BallerinaServiceGenerator {
             isNullableRequired = parametersGenerator.isNullableRequired();
         }
         SeparatedNodeList<ParameterNode> parameters = createSeparatedNodeList(params);
-        String pathForRecord = Objects.equals(path, SLASH) ? "" : GeneratorUtils.getValidName(path, true);
+        String pathForRecord = Objects.equals(path, SLASH) || Objects.equals(path, CATCH_ALL_PATH) ? "" :
+                GeneratorUtils.getValidName(path, true);
         ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator(ballerinaSchemaGenerator, pathForRecord);
         if (!paths.contains(path)) {
             returnTypeGenerator.setCountForRecord(0);

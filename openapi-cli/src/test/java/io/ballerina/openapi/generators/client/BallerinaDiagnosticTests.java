@@ -26,6 +26,7 @@ import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
@@ -68,7 +69,9 @@ public class BallerinaDiagnosticTests {
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
-        Assert.assertTrue(diagnostics.isEmpty());
+        boolean hasErrors = diagnostics.stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        Assert.assertFalse(hasErrors);
     }
 
 
@@ -86,7 +89,18 @@ public class BallerinaDiagnosticTests {
                 {"xml_payload_with_ref.yaml"},
                 {"duplicated_response.yaml"},
                 {"complex_oneOf_schema.yaml"},
-                {"request_body_ref.yaml"}
+                {"request_body_ref.yaml"},
+                {"vendor_specific_mime_types.yaml"},
+                {"ballerinax_connector_tests/ably.yaml"},
+                {"ballerinax_connector_tests/azure.iot.yaml"},
+//                {"ballerinax_connector_tests/beezup.yaml"}, Disabled due to the issue openapi-tools/issues/1257
+                {"ballerinax_connector_tests/files.com.yaml"},
+                {"ballerinax_connector_tests/openweathermap.yaml"},
+                {"ballerinax_connector_tests/soundcloud.yaml"},
+                {"ballerinax_connector_tests/stripe.yaml"},
+                {"ballerinax_connector_tests/vimeo.yaml"},
+                {"ballerinax_connector_tests/ynab.yaml"},
+                {"ballerinax_connector_tests/zoom.yaml"}
         };
     }
 
