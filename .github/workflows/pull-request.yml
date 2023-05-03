@@ -46,4 +46,4 @@ jobs:
           packageUser: ${{ github.actor }}
           packagePAT: ${{ secrets.GITHUB_TOKEN }}
           JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8
-        run: ./gradlew :openapi-cli:test --rerun-tasks --no-build-cache --tests "io.ballerina.openapi.generators.client.BallerinaDiagnosticTests" --stacktrace --scan --console=plain --no-daemon
+        run: ./gradlew.bat build --stacktrace --scan --console=plain --no-daemon
