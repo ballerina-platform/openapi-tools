@@ -26,6 +26,7 @@ import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
+import io.ballerina.compiler.syntax.tree.ModuleVariableDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
@@ -170,12 +171,11 @@ public class DocCommentsGenerator {
     }
 
     public static MarkdownDocumentationNode createAPIParamDocFromSring(String paramName, String description) {
-        String[] paramDescriptionLines = description.split(System.lineSeparator());
+        String[] paramDescriptionLines = description.split("\n");
         StringBuilder docComment = new StringBuilder("# + " + paramName + " - " +
                 paramDescriptionLines[0] + System.lineSeparator());
-        for (int i = 1; i < paramDescriptionLines.length; i++) {
+        for (String line : paramDescriptionLines) {
 //            String line = paramDescriptionLines[i].replaceAll("[\\r\\n\\t]", "");
-            String line = paramDescriptionLines[i];
             if (!line.isBlank()) {
                 docComment.append("# ").append(line + System.lineSeparator());
             }
@@ -183,6 +183,9 @@ public class DocCommentsGenerator {
         docComment.append(System.lineSeparator()).append("type a A;");
         ModuleMemberDeclarationNode moduleMemberDeclarationNode =
                 NodeParser.parseModuleMemberDeclaration(docComment.toString());
+        if (moduleMemberDeclarationNode instanceof ModuleVariableDeclarationNode) {
+            System.out.println(docComment.toString());
+        }
         TypeDefinitionNode typeDefinitionNode = (TypeDefinitionNode) moduleMemberDeclarationNode;
         MetadataNode metadataNode = typeDefinitionNode.metadata().get();
         return (MarkdownDocumentationNode) metadataNode.children().get(0);

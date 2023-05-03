@@ -93,6 +93,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.BYTE;
 import static io.ballerina.openapi.core.GeneratorConstants.EMPTY_RECORD;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP_REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.INTEGER;
+import static io.ballerina.openapi.core.GeneratorConstants.LINE_SEPARATOR;
 import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
@@ -545,7 +546,7 @@ public class FunctionSignatureGenerator {
                 if (requestBody.getDescription() != null && !requestBody.getDescription().isBlank()) {
                     MarkdownDocumentationNode paramAPIDoc =
                             DocCommentsGenerator.createAPIParamDocFromSring(escapeIdentifier(paramName),
-                                    requestBody.getDescription().split("\n")[0]);
+                                    requestBody.getDescription().split(LINE_SEPARATOR)[0]);
                     requestBodyDoc.add(paramAPIDoc);
                 }
                 parameterList.add(payload);
