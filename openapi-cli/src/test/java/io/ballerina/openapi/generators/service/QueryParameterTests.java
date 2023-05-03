@@ -290,8 +290,9 @@ public class QueryParameterTests {
 
     @Test(description = "17. Query parameter(s) having a referenced schema of unsupported type",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Query parameters with type 'Room' " +
-                    "can not be mapped to the Ballerina query parameters.")
+            expectedExceptionsMessageRegExp = "Type 'Room' is not a valid query parameter type in Ballerina. " +
+            "The supported types are string, int, float, boolean, decimal, array types of the aforementioned " +
+            "types and map<json>.")
     public void generateParamsWithInvalidRefSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_invalid_ref_schema.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -305,8 +306,9 @@ public class QueryParameterTests {
 
     @Test(description = "18. Query parameter(s) having a referenced schema of array of unsupported type",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Only array types of string, int, float, boolean, and decimal are " +
-                    "allowed to be used as query parameters in Ballerina.")
+            expectedExceptionsMessageRegExp = "Type 'Room' is not a valid query parameter type in Ballerina. " +
+                    "The supported types are string, int, float, boolean, decimal, array types of the aforementioned " +
+                    "types and map<json>.")
     public void generateParamsWithInvalidArrayRefSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameter_with_ref_array_invalid_schema.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);

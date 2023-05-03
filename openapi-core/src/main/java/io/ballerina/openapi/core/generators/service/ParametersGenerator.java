@@ -400,22 +400,23 @@ public class ParametersGenerator {
 
     private Node handleReferencedQueryParameter(Parameter parameter, String refTypeName, Schema<?> refSchema,
                                                 NodeList<AnnotationNode> annotations, IdentifierToken parameterName) {
-        BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null,
+        BuiltinSimpleNameReferenceNode refTypeNameNode = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken(refTypeName));
         if (refSchema.getDefault() != null) {
             String defaultValue = refSchema.getType().equals(GeneratorConstants.STRING) ?
                     String.format("\"%s\"", refSchema.getDefault().toString()) : refSchema.getDefault().toString();
-            return createDefaultableParameterNode(annotations, rTypeName, parameterName,
+            return createDefaultableParameterNode(annotations, refTypeNameNode, parameterName,
                     createToken(SyntaxKind.EQUAL_TOKEN),
                     createSimpleNameReferenceNode(createIdentifierToken(defaultValue)));
         } else if (parameter.getRequired() && (refSchema.getNullable() == null || (!refSchema.getNullable()))) {
-            return createRequiredParameterNode(annotations, rTypeName, parameterName);
+            return createRequiredParameterNode(annotations, refTypeNameNode, parameterName);
         } else {
-            OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(rTypeName,
+            OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(refTypeNameNode,
                     createToken(SyntaxKind.QUESTION_MARK_TOKEN));
             return createRequiredParameterNode(annotations, optionalNode, parameterName);
         }
     }
+
     private Node handleRequiredQueryParameter(Schema<?> schema, NodeList<AnnotationNode> annotations,
                                               IdentifierToken parameterName) throws BallerinaOpenApiException {
 
@@ -507,8 +508,8 @@ public class ParametersGenerator {
             if (queryParamSupportedTypes.contains(refSchema.getType())) {
                 arrayName = type;
             } else {
-                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_108;
-                throw new BallerinaOpenApiException(messages.getDescription());
+                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
+                throw new BallerinaOpenApiException(String.format(messages.getDescription(), type));
             }
         } else {
             arrayName = GeneratorUtils.convertOpenAPITypeToBallerina(items.getType().toLowerCase(
