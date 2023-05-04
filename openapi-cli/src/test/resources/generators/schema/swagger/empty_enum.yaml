@@ -51,64 +51,12 @@ paths:
       summary: List meetings
       operationId: listMeetings
       parameters:
-        - description: "The meeting types. Scheduled, live or upcoming"
-          in: query
-          name: type
-          schema:
-            default: live
-            enum:
-              - scheduled
-              - live
-              - upcoming
-            type: string
-        - description: "Status values that need to be considered for filter"
-          in: query
-          name: status
-          schema:
-            type: array
-            items:
-              type: string
-              enum:
-                - "available"
-                - "pending"
-              default: "available"
         - description: "Employee group"
           in: path
           name: group
           schema:
             type: string
-            enum:
-              - "Admin"
-              - "HR"
-              - "Engineering"
           required: true
-        - description: Date time format (cf. [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) & [leettime.de](http://leettime.de/))
-          in: header
-          name: X-Date-Format
-          schema:
-            enum:
-              - UTC
-              - LOCAL
-              - OFFSET
-              - EPOCH
-              - LEET
-        - description: Time Zones of attendees
-          in: header
-          required: true
-          name: X-Time-Zones
-          schema:
-            type: array
-            items:
-              enum:
-                - IST
-                - GMT
-                - UTC
-        - description: "Meeting location"
-          in: query
-          name: location
-          schema:
-            $ref: '#/components/schemas/RoomNo'
-        - $ref: "#/components/parameters/responseFormat"
       responses:
         "200":
           content:
@@ -121,33 +69,11 @@ paths:
       tags:
         - Meetings
 components:
-  parameters:
-    responseFormat:
-      description: The response format you would like
-      in: query
-      name: format
-      schema:
-        enum:
-          - json
-          - jsonp
-          - msgpack
-          - html
-        type: string
   schemas:
-    RoomNo:
-      default: "R5"
-      enum:
-        - R1
-        - R3
-        - R5
-      type: string
     MeetingTypes:
       type: string
-      default: live
       enum:
-        - "scheduled"
-        - "live"
-        - "upcoming"
+        - null
     MeetingList:
       description: List of meetings
       title: Group List

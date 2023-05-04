@@ -49,9 +49,9 @@ import static io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils.PRI
  *
  * @since 1.6.0
  */
-public class EnumConstantGenerator extends TypeGenerator {
+public class EnumGenerator extends TypeGenerator {
 
-    public EnumConstantGenerator(Schema schema, String typeName) {
+    public EnumGenerator(Schema schema, String typeName) {
         super(schema, typeName);
     }
 
@@ -72,13 +72,17 @@ public class EnumConstantGenerator extends TypeGenerator {
                     enumBuilder.append(enumValue).append("|");
                 }
             }
+            if (enumBuilder.length() > 0) {
+                enumBuilder.deleteCharAt(enumBuilder.length() - 1);
+                String enumString = isNull ? enumBuilder.toString() + "?" : enumBuilder.toString();
+                return NodeParser.parseTypeDescriptor(enumString);
+            } else {
+                throw new BallerinaOpenApiException(String.format("Enum list of the type '%s' is empty.",
+                        schema.getType()));
+            }
+        } else {
+            throw new BallerinaOpenApiException(String.format("The data type '%s' is not a valid enum type." +
+                    "The supported types are string, integer, number and boolean", schema.getType()));
         }
-
-        if (enumBuilder.length() > 0) {
-            enumBuilder.deleteCharAt(enumBuilder.length() - 1);
-            String enumString = isNull ? enumBuilder.toString() + "?" : enumBuilder.toString();
-            return NodeParser.parseTypeDescriptor(enumString);
-        }
-        return null;
     }
 }

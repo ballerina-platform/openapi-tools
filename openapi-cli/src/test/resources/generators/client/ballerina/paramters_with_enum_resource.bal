@@ -50,15 +50,16 @@ public isolated client class Client {
     # + status - Status values that need to be considered for filter
     # + group - Employee group
     # + xDateFormat - Date time format (cf. [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) & [leettime.de](http://leettime.de/))
+    # + xTimeZones - Time Zones of attendees
     # + location - Meeting location
     # + format - The response format you would like
     # + return - HTTP Status Code:200. List of meetings returned.
-    resource isolated function get users/meetings/["Admin"|"HR"|"Engineering" group]("scheduled"|"live"|"upcoming" 'type = "live", ("available"|"pending")[]? status = (), "UTC"|"LOCAL"|"OFFSET"|"EPOCH"|"LEET"? xDateFormat = (), RoomNo location = "R5", "json"|"jsonp"|"msgpack"|"html"? format = ()) returns MeetingList|error {
+    resource isolated function get users/meetings/["Admin"|"HR"|"Engineering" group](("IST"|"GMT"|"UTC")[] xTimeZones, "scheduled"|"live"|"upcoming" 'type = "live", ("available"|"pending")[]? status = (), "UTC"|"LOCAL"|"OFFSET"|"EPOCH"|"LEET"? xDateFormat = (), RoomNo location = "R5", "json"|"jsonp"|"msgpack"|"html"? format = ()) returns MeetingList|error {
         string resourcePath = string `/users/meetings/${getEncodedUri(group)}`;
         map<anydata> queryParam = {"type": 'type, "status": status, "location": location, "format": format};
         map<Encoding> queryParamEncoding = {"status": {style: FORM, explode: true}};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam, queryParamEncoding);
-        map<any> headerValues = {"X-Date-Format": xDateFormat};
+        map<any> headerValues = {"X-Date-Format": xDateFormat, "X-Time-Zones": xTimeZones};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         MeetingList response = check self.clientEp->get(resourcePath, httpHeaders);
         return response;

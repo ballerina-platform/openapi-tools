@@ -59,7 +59,7 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
-import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.EnumConstantGenerator;
+import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.EnumGenerator;
 import io.ballerina.openapi.core.model.GenSrcFile;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -334,8 +334,8 @@ public class GeneratorUtils {
             type = schema.getFormat().trim();
         }
         if (schema.getEnum() != null && !schema.getEnum().isEmpty() && primitiveTypeList.contains(type)) {
-            EnumConstantGenerator enumConstantGenerator = new EnumConstantGenerator(schema, null);
-            return enumConstantGenerator.generateTypeDescriptorNode().toString();
+            EnumGenerator enumGenerator = new EnumGenerator(schema, null);
+            return enumGenerator.generateTypeDescriptorNode().toString();
         } else {
             return convertOpenAPITypeToBallerina(type);
         }

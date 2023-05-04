@@ -60,8 +60,8 @@ public class PrimitiveTypeGenerator extends TypeGenerator {
         String typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(schema.getType().trim());
         // TODO: Need to the format of other primitive types too
         if (schema.getEnum() != null && schema.getEnum().size() > 0) {
-            EnumConstantGenerator enumConstantGenerator = new EnumConstantGenerator(schema, typeName);
-            typeDescriptorName = enumConstantGenerator.generateTypeDescriptorNode().toString();
+            EnumGenerator enumGenerator = new EnumGenerator(schema, typeName);
+            typeDescriptorName = enumGenerator.generateTypeDescriptorNode().toString();
             return createSimpleNameReferenceNode(
                     createIdentifierToken(typeDescriptorName));
         } else if (schema.getType().equals(GeneratorConstants.NUMBER)) {
