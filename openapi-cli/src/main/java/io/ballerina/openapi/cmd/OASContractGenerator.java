@@ -112,7 +112,7 @@ public class OASContractGenerator {
             return;
         }
         semanticModel = compilation.getSemanticModel(docId.moduleId());
-        List<OASResult> openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
+        List<OASResult> openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(project, syntaxTree,
                 semanticModel, serviceName, needJson, inputPath);
 
         if (!openAPIDefinitions.isEmpty()) {
@@ -147,6 +147,11 @@ public class OASContractGenerator {
             while (iterator.hasNext()) {
                 outStream.println("-- " + iterator.next());
             }
+        } else {
+            DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_115;
+            ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
+                    message.getDescription(), null);
+            this.errors.add(error);
         }
     }
 }

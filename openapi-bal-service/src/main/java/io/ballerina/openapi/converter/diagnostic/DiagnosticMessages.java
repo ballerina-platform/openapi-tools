@@ -41,7 +41,7 @@ public enum DiagnosticMessages {
             DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_106("OAS_CONVERTOR_106", "Given Ballerina file contains compilation error(s).",
             DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_107("OAS_CONVERTOR_107", "No Ballerina services found with name '%s' to" +
+    OAS_CONVERTOR_107("OAS_CONVERTOR_107", "No Ballerina HTTP services found with name '%s' to" +
             " generate an OpenAPI specification. These services are available in ballerina file. %s",
             DiagnosticSeverity.ERROR),
     OAS_CONVERTOR_108("OAS_CONVERTOR_108", "Failed to generate OpenAPI definition due to: %s",
@@ -60,7 +60,10 @@ public enum DiagnosticMessages {
                     " as it's not supported by the OpenAPI specification.",
             DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_114("OAS_CONVERTOR_114", "Generated OpenAPI definition does not contain information " +
-            "for Ballerina type '%s'. ", DiagnosticSeverity.WARNING);
+            "for Ballerina type '%s'. ", DiagnosticSeverity.WARNING),
+
+    OAS_CONVERTOR_115("OAS_CONVERTOR_115", "Given Ballerina file does not contain any HTTP service.",
+            DiagnosticSeverity.ERROR);
 
     private final String code;
     private final String description;

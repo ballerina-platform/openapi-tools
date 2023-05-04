@@ -38,6 +38,7 @@ import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -49,6 +50,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -64,6 +66,8 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDe
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_PARAM_COMMENT;
+import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
+import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_103;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_104;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_105;
@@ -81,8 +85,15 @@ public class ParametersGenerator {
     private final List<Node> requiredParams;
     private final List<Node> defaultableParams;
 
-    public ParametersGenerator(boolean isNullableRequired) {
+    private final OpenAPI openAPI;
+
+    private static final List<String> queryParamSupportedTypes =
+            new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
+                    GeneratorConstants.STRING, GeneratorConstants.BOOLEAN));
+
+    public ParametersGenerator(boolean isNullableRequired, OpenAPI openAPI) {
         this.isNullableRequired = isNullableRequired;
+        this.openAPI = openAPI;
         this.requiredParams = new ArrayList<>();
         this.defaultableParams = new ArrayList<>();
     }
@@ -126,7 +137,8 @@ public class ParametersGenerator {
                     }
                 } else if (parameter.getIn().trim().equals(GeneratorConstants.QUERY)) {
                     if (parameter.getRequired() != null && parameter.getRequired() &&
-                            (parameter.getSchema().getNullable() != null && parameter.getSchema().getNullable())) {
+                            (parameter.getSchema() != null && parameter.getSchema().getNullable() != null &&
+                                    parameter.getSchema().getNullable())) {
                         isNullableRequired = true;
                     }
                     // type  BasicType boolean|int|float|decimal|string ;
@@ -262,15 +274,26 @@ public class ParametersGenerator {
         IdentifierToken parameterName = createIdentifierToken(
                 GeneratorUtils.escapeIdentifier(parameter.getName().trim()),
                 AbstractNodeFactory.createEmptyMinutiaeList(), GeneratorUtils.SINGLE_WS_MINUTIAE);
-        boolean isSchemaSupported = schema == null || schema.get$ref() != null || schema.getType() == null
+        boolean isSchemaNotSupported = schema == null || schema.getType() == null
                 || schema.getType().equals(
                 GeneratorConstants.OBJECT) || schema instanceof ObjectSchema || schema.getProperties() != null;
-        if (parameter.getContent() != null) {
+        if (schema != null && schema.get$ref() != null) {
+            String type = getValidName(extractReferenceType(schema.get$ref()), true);
+            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
+            // TODO : Due to bug in http module, reference params with `nullable: true` are not allowed
+            if (queryParamSupportedTypes.contains(refSchema.getType()) &&
+                    !((refSchema.getNullable() != null) && refSchema.getNullable())) {
+                return handleReferencedQueryParameter(parameter, type, refSchema, annotations, parameterName);
+            } else {
+                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
+                throw new BallerinaOpenApiException(String.format(messages.getDescription(), type));
+            }
+        } else if (parameter.getContent() != null) {
             Content content = parameter.getContent();
             for (Map.Entry<String, MediaType> mediaTypeEntry : content.entrySet()) {
                 return handleMapJsonQueryParameter(parameter, annotations, parameterName, mediaTypeEntry);
             }
-        } else if (isSchemaSupported) {
+        } else if (isSchemaNotSupported) {
             ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
             throw new BallerinaOpenApiException(String.format(messages.getDescription(),
                     parameter.getSchema().getType()));
@@ -306,8 +329,17 @@ public class ParametersGenerator {
                                                               Map.Entry<String, MediaType> mediaTypeEntry)
             throws BallerinaOpenApiException {
 
+        Schema<?> parameterSchema;
+        if (mediaTypeEntry.getValue().getSchema() != null &&
+                mediaTypeEntry.getValue().getSchema().get$ref() != null) {
+            String type = getValidName(extractReferenceType(mediaTypeEntry.getValue().getSchema().get$ref()), true);
+            parameterSchema = (Schema<?>) openAPI.getComponents().getSchemas().get(type.trim());
+        } else {
+            parameterSchema = mediaTypeEntry.getValue().getSchema();
+        }
+
         if (mediaTypeEntry.getKey().equals(GeneratorConstants.APPLICATION_JSON) &&
-                mediaTypeEntry.getValue().getSchema() instanceof MapSchema) {
+                parameterSchema instanceof MapSchema) {
             if (parameter.getRequired()) {
                 BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null,
                         createIdentifierToken(GeneratorConstants.MAP_JSON));
@@ -334,12 +366,14 @@ public class ParametersGenerator {
 
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
-            if (items.getType() == null) {
+            if (items.getType() == null && items.get$ref() == null) {
                 // Resource function doesn't support to query parameters with array type which doesn't have an
                 // item type.
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_101;
                 throw new BallerinaOpenApiException(messages.getDescription());
-            } else if (!(items instanceof ObjectSchema) && !(items.getType().equals(GeneratorConstants.ARRAY))) {
+            } else if ((!(items instanceof ObjectSchema) && !(items.getType() != null &&
+                    items.getType().equals(GeneratorConstants.ARRAY)))
+                    || items.get$ref() != null) {
                 // create arrayTypeDescriptor
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
                 OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(arrayTypeName,
@@ -368,12 +402,31 @@ public class ParametersGenerator {
         }
     }
 
+    private Node handleReferencedQueryParameter(Parameter parameter, String refTypeName, Schema<?> refSchema,
+                                                NodeList<AnnotationNode> annotations, IdentifierToken parameterName) {
+        BuiltinSimpleNameReferenceNode refTypeNameNode = createBuiltinSimpleNameReferenceNode(null,
+                createIdentifierToken(refTypeName));
+        if (refSchema.getDefault() != null) {
+            String defaultValue = refSchema.getType().equals(GeneratorConstants.STRING) ?
+                    String.format("\"%s\"", refSchema.getDefault().toString()) : refSchema.getDefault().toString();
+            return createDefaultableParameterNode(annotations, refTypeNameNode, parameterName,
+                    createToken(SyntaxKind.EQUAL_TOKEN),
+                    createSimpleNameReferenceNode(createIdentifierToken(defaultValue)));
+        } else if (parameter.getRequired() && (refSchema.getNullable() == null || (!refSchema.getNullable()))) {
+            return createRequiredParameterNode(annotations, refTypeNameNode, parameterName);
+        } else {
+            OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(refTypeNameNode,
+                    createToken(SyntaxKind.QUESTION_MARK_TOKEN));
+            return createRequiredParameterNode(annotations, optionalNode, parameterName);
+        }
+    }
+
     private Node handleRequiredQueryParameter(Schema<?> schema, NodeList<AnnotationNode> annotations,
                                               IdentifierToken parameterName) throws BallerinaOpenApiException {
 
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
-            if (!(items instanceof ArraySchema) && items.getType() != null) {
+            if (!(items instanceof ArraySchema) && (items.getType() != null || (items.get$ref() != null))) {
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
                 return createRequiredParameterNode(annotations, arrayTypeName, parameterName);
             } else if (items.getType() == null) {
@@ -422,7 +475,7 @@ public class ParametersGenerator {
 
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
-            if (!(items instanceof ArraySchema) && items.getType() != null) {
+            if (!(items instanceof ArraySchema) && (items.getType() != null || (items.get$ref() != null))) {
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
                 return createDefaultableParameterNode(annotations, arrayTypeName, parameterName,
                         createToken(SyntaxKind.EQUAL_TOKEN),
@@ -459,14 +512,25 @@ public class ParametersGenerator {
 
     // Create ArrayTypeDescriptorNode using Schema
     private ArrayTypeDescriptorNode getArrayTypeDescriptorNode(Schema<?> items) throws BallerinaOpenApiException {
-        //TODO: Uncomment after the fix from http module is provided
-//        Token arrayName = createIdentifierToken(
-//                GeneratorUtils.convertOpenAPITypeToBallerina(items),
-//                GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
-        Token arrayName = createIdentifierToken(
-                GeneratorUtils.convertOpenAPITypeToBallerina(items.getType().toLowerCase(
-                        Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
-        BuiltinSimpleNameReferenceNode memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, arrayName);
+
+        String arrayName;
+        if (items.get$ref() != null) {
+            String type = getValidName(extractReferenceType(items.get$ref()), true);
+            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
+            if (queryParamSupportedTypes.contains(refSchema.getType())) {
+                arrayName = type;
+            } else {
+                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
+                throw new BallerinaOpenApiException(String.format(messages.getDescription(), type));
+            }
+        } else {
+            //TODO: Need to consider enum
+            arrayName = GeneratorUtils.convertOpenAPITypeToBallerina(items.getType().toLowerCase(
+                    Locale.ENGLISH).trim());
+        }
+        Token arrayNameToken = createIdentifierToken(arrayName, GeneratorUtils.SINGLE_WS_MINUTIAE,
+                GeneratorUtils.SINGLE_WS_MINUTIAE);
+        BuiltinSimpleNameReferenceNode memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, arrayNameToken);
         ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
                 createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                 createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
