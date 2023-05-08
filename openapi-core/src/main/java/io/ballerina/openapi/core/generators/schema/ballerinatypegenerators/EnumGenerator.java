@@ -20,11 +20,16 @@ package io.ballerina.openapi.core.generators.schema.ballerinatypegenerators;
 
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils.PRIMITIVE_TYPE_LIST;
 
 /**
@@ -74,11 +79,17 @@ public class EnumGenerator extends TypeGenerator {
             }
             if (enumBuilder.length() > 0) {
                 enumBuilder.deleteCharAt(enumBuilder.length() - 1);
-                String enumString = isNull ? enumBuilder.toString() + "?" : enumBuilder.toString();
+                String enumString = isNull ? enumBuilder.toString() + NILLABLE : enumBuilder.toString();
                 return NodeParser.parseTypeDescriptor(enumString);
             } else {
-                throw new BallerinaOpenApiException(String.format("Enum list of the type '%s' is empty.",
-                        schema.getType()));
+                String typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(schema.getType().trim());
+                if (isNull) {
+                    return createSimpleNameReferenceNode(createIdentifierToken(typeDescriptorName + NILLABLE));
+                } else {
+                    TypeDescriptorNode typeDescriptorNode = createSimpleNameReferenceNode(
+                            createIdentifierToken(typeDescriptorName));
+                    return TypeGeneratorUtils.getNullableType(schema, typeDescriptorNode);
+                }
             }
         } else {
             throw new BallerinaOpenApiException(String.format("The data type '%s' is not a valid enum type." +

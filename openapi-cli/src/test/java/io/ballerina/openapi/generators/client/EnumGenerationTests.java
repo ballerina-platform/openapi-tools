@@ -148,7 +148,7 @@ public class EnumGenerationTests {
     @Test(description = "Test unsupported nullable path parameter with enums",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Path parameter value cannot be null.")
-    public void testNestedArrayQueryParamGeneration() throws IOException, BallerinaOpenApiException {
+    public void testNullablePathParamWithEnum() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RES_DIR.resolve("swagger/path_param_nullable_enum.yaml"));
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder

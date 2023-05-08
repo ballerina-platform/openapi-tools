@@ -83,14 +83,16 @@ public class EnumGenerationTests {
         assertTrue(diagnostics.isEmpty());
     }
 
-    @Test(description = "Test enum with no values",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Enum list of the type 'string' is empty.")
-    public void testNestedArrayQueryParamGeneration() throws IOException, BallerinaOpenApiException {
+    @Test(description = "Test enum with no values")
+    public void testForEmptyEnums() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve(
                 "swagger/empty_enum.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/empty_enum.bal",
+                syntaxTree);
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
+        assertTrue(diagnostics.isEmpty());
     }
     @AfterTest
     private void deleteGeneratedFiles() {
