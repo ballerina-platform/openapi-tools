@@ -17,7 +17,7 @@ public type User record {
     string first_name?;
     # Last name of the Uber user.
     string last_name?;
-    TaxratesItemsString[]|string tax_rates?;
+    TaxratesItemsString[]|"" tax_rates?;
 };
 
 public type AnyOF User|Activity;
@@ -27,4 +27,4 @@ public type Activity record {
     string uuid?;
 };
 
-public type Subscription_default_tax_rates SubscriptiondefaulttaxratesItemsString[]|string;
+public type Subscription_default_tax_rates SubscriptiondefaulttaxratesItemsString[]|"";

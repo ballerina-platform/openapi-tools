@@ -72,6 +72,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.client.RequestBodyTests"/>
             <class name="io.ballerina.openapi.generators.client.UtilGenerationTests"/>
             <class name="io.ballerina.openapi.generators.client.ResourceFunctionTests"/>
+            <class name="io.ballerina.openapi.generators.client.EnumGenerationTests"/>
             <class name="io.ballerina.openapi.generators.auth.HttpAuthTests"/>
             <class name="io.ballerina.openapi.generators.auth.OAuth2Tests"/>
             <class name="io.ballerina.openapi.generators.auth.ApiKeyAuthTests"/>
@@ -95,6 +96,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.schema.ConstraintTests"/>
             <class name="io.ballerina.openapi.generators.schema.MapSchemaTests"/>
             <class name="io.ballerina.openapi.generators.schema.MapSchemaNegativeTests"/>
+            <class name="io.ballerina.openapi.generators.schema.EnumGenerationTests"/>
             <class name="io.ballerina.openapi.generators.testcases.BallerinaTestGeneratorTests"/>
             <class name="io.ballerina.openapi.generators.client.OneOfResponsesTests"/>
             <class name="io.ballerina.openapi.generators.openapi.DataTypeTests"/>
