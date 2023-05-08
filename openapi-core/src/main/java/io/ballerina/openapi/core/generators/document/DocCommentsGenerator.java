@@ -174,8 +174,7 @@ public class DocCommentsGenerator {
         StringBuilder docComment = new StringBuilder("# + " + paramName + " - " +
                 paramDescriptionLines[0] + System.lineSeparator());
         for (int i = 1; i < paramDescriptionLines.length; i++) {
-//            String line = paramDescriptionLines[i].replaceAll("[\\r\\n\\t]", "");
-            String line = paramDescriptionLines[i];
+            String line = paramDescriptionLines[i].replaceAll("[\\r\\n\\t]", "");
             if (!line.isBlank()) {
                 docComment.append("# ").append(line).append(System.lineSeparator());
             }
