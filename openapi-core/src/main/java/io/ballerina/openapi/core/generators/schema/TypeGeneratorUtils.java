@@ -65,6 +65,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -94,11 +95,12 @@ import static io.ballerina.openapi.core.GeneratorConstants.CONSTRAINT;
  * @since 1.3.0
  */
 public class TypeGeneratorUtils {
-    private static final List<String> primitiveTypeList =
-            new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
+    public static final List<String> PRIMITIVE_TYPE_LIST =
+            Collections.unmodifiableList(Arrays.asList(
+                    GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
                     GeneratorConstants.STRING, GeneratorConstants.BOOLEAN));
 
-    public static final PrintStream OUT_STREAM = System.err;
+    private static final PrintStream OUT_STREAM = System.err;
 
     /**
      * Get SchemaType object relevant to the schema given.
@@ -124,7 +126,7 @@ public class TypeGeneratorUtils {
             return new RecordTypeGenerator(schemaValue, typeName);
         } else if (schemaValue instanceof ArraySchema) {
             return new ArrayTypeGenerator(schemaValue, typeName, parentName);
-        } else if (schemaValue.getType() != null && primitiveTypeList.contains(schemaValue.getType())) {
+        } else if (schemaValue.getType() != null && PRIMITIVE_TYPE_LIST.contains(schemaValue.getType())) {
             return new PrimitiveTypeGenerator(schemaValue, typeName);
         } else { // when schemaValue.type == null
             return new AnyDataTypeGenerator(schemaValue, typeName);

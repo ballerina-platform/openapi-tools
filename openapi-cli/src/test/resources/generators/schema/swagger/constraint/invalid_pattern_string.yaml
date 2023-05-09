@@ -38,7 +38,7 @@ components:
       properties:
         name:
           type: string
-          pattern:
+          pattern: [a-zA-Z0-9,\\.\']
         hobby:
           type: string
         id:

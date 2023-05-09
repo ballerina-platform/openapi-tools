@@ -43,7 +43,8 @@ import static org.testng.Assert.assertTrue;
 public class NegativeConstraintTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
 
-    @Test(description = "Tests for string type record field has invalid pattern constraint.")
+    //TODO: Made this disable till the Ballerina lang API received
+    @Test(description = "Tests for string type record field has invalid pattern constraint.", enabled = false)
     public void testForRecordStringHasInvalidPattern() throws IOException, BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +

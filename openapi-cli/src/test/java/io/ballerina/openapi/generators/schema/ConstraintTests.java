@@ -26,6 +26,9 @@ import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -42,6 +45,11 @@ import static org.testng.Assert.assertTrue;
  */
 public class ConstraintTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
+
+    @BeforeMethod
+    public void setUp() throws IOException {
+        TestUtils.deleteGeneratedFiles();
+    }
 
     @Test(description = "Tests with record field has constraint and record field type can be user defined datatype " +
             "with constraint.")
@@ -118,7 +126,7 @@ public class ConstraintTests {
         assertFalse(hasErrors);
     }
 
-    @Test
+    @Test(description = "Tests with additional properties field has constraint.")
     public void testAdditionalPropertiesWithConstraint() throws IOException, BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
@@ -205,5 +213,18 @@ public class ConstraintTests {
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         assertFalse(hasErrors);
+    }
+
+    @AfterMethod
+    private void deleteGeneratedFiles() {
+        try {
+            TestUtils.deleteGeneratedFiles();
+        } catch (IOException ignored) {
+        }
+    }
+
+    @AfterClass
+    public void cleanUp() throws IOException {
+        TestUtils.deleteGeneratedFiles();
     }
 }
