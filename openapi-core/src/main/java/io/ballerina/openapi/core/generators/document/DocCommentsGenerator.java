@@ -22,12 +22,17 @@ import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationLineNode;
+import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 
@@ -162,6 +167,24 @@ public class DocCommentsGenerator {
             documentElements.add(newLine);
         }
         return documentElements;
+    }
+
+    public static MarkdownDocumentationNode createAPIParamDocFromSring(String paramName, String description) {
+        String[] paramDescriptionLines = description.split("\n");
+        StringBuilder docComment = new StringBuilder("# + " + paramName + " - " +
+                paramDescriptionLines[0] + System.lineSeparator());
+        for (int i = 1; i < paramDescriptionLines.length; i++) {
+            String line = paramDescriptionLines[i].replaceAll("[\\r\\n\\t]", "");
+            if (!line.isBlank()) {
+                docComment.append("# ").append(line).append(System.lineSeparator());
+            }
+        }
+        docComment.append(System.lineSeparator()).append("type a A;");
+        ModuleMemberDeclarationNode moduleMemberDeclarationNode =
+                NodeParser.parseModuleMemberDeclaration(docComment.toString());
+        TypeDefinitionNode typeDefinitionNode = (TypeDefinitionNode) moduleMemberDeclarationNode;
+        MetadataNode metadataNode = typeDefinitionNode.metadata().get();
+        return (MarkdownDocumentationNode) metadataNode.children().get(0);
     }
 
     public static MarkdownParameterDocumentationLineNode createAPIParamDoc(String paramName, String description) {
