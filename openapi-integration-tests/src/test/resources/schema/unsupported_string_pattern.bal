@@ -68,4 +68,6 @@ public type Person record {
     string net?;
     string doi?;
     string task?;
+    string ob_01?;
+    string ob_02?;
 };

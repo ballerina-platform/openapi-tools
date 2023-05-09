@@ -35,7 +35,6 @@ import java.util.List;
 
 import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 /**
  * This test class is to contain the test related to constraint validation.
