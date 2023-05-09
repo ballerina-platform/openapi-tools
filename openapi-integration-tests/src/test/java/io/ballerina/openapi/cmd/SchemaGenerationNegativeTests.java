@@ -71,15 +71,18 @@ public class SchemaGenerationNegativeTests extends OpenAPITest {
         pb.directory(TEST_RESOURCE.toFile());
         Process process = pb.start();
 
-        String out = "WARNING: ballerina can not support pattern: ^(?!(.*[\\\"\\*\\\\\\>\\<\\?\\/\\:\\|]+.*)|" +
-                "(.*[\\.]?.*[\\.]+$)|(.*[ ]+$)) \n" +
+        String out = "WARNING: ballerina can not support pattern: " +
+                "^(?!(.*[\\\"\\*\\\\\\>\\<\\?\\/\\:\\|]+.*)|(.*[\\.]?.*[\\.]+$)|(.*[ ]+$)) \n" +
                 "WARNING: ballerina can not support pattern: ^(?![0-9]+$)(?!-)[a-zA-Z0-9-]{2,49}[a-zA-Z0-9]$ \n" +
-                "WARNING: ballerina can not support pattern: (https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})" +
-                "([\\/\\w \\.-]*)*\\/?$ \n" +
+                "WARNING: ballerina can not support pattern: (https?:\\/\\/)?([\\da-z\\.-]+)\\." +
+                "([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$ \n" +
                 "WARNING: ballerina can not support pattern: ^[A-Za-z\\-\\_\\/]+$ \n" +
                 "WARNING: ballerina can not support pattern: ^.*(?=.{6,1000})(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).*$ \n" +
-                "WARNING: ballerina can not support pattern: ^[\\x09\\x0A\\x0D\\x20\\x23\\x2D\\x30-\\x39\\x40-\\x5A" +
-                "\\x5E-\\x5F\\x61-\\x7A\\x7E-\\uD7FF\\uE000-\\uFFFD\\u10000-\\u10FFFF]{1,100}$ ";
+                "WARNING: ballerina can not support pattern: ^[\\x09\\x0A\\x0D\\x20\\x23\\x2D\\x30" +
+                "-\\x39\\x40-\\x5A\\x5E-\\x5F\\x61-\\x7A\\x7E-\\uD7FF\\uE000-\\uFFFD\\u10000-\\u10FFFF]{1,100}$ \n" +
+                "WARNING: ballerina can not support pattern: ^[a-z0-9\\-\\_\\.]+$ \n" +
+                "WARNING: ballerina can not support pattern: ^(?!\\s)(.*)(\\S)$ \n" +
+                "WARNING: ballerina can not support pattern: \\+[0-9]{1,3}\\-[0-9()+\\-]{1,30} ";
         //Thread for wait out put generate
         Thread.sleep(5000);
         // compare generated file has not included constraint annotation for scenario record field.

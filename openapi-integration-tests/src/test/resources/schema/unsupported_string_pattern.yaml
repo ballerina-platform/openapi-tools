@@ -60,3 +60,9 @@ components:
         task:
           type: string
           pattern: ^[a-z0-9\-\_\.]+$
+        ob_01:
+          type: string
+          pattern: "^(?!\\s)(.*)(\\S)$"
+        ob_02:
+          type: string
+          pattern: '\+[0-9]{1,3}\-[0-9()+\-]{1,30}'
