@@ -120,7 +120,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
             typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
         }
 
-        if (typeGenerator instanceof UnionTypeGenerator) {
+        if (typeGenerator instanceof UnionTypeGenerator || (items.getEnum() != null && items.getEnum().size() > 0)) {
             typeDescriptorNode = createParenthesisedTypeDescriptorNode(
                     createToken(OPEN_PAREN_TOKEN), typeDescriptorNode, createToken(CLOSE_PAREN_TOKEN));
         }

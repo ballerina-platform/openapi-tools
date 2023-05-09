@@ -71,7 +71,7 @@ public isolated client class Client {
     #
     # + status - Status values that need to be considered for filter
     # + return - successful operation
-    remote isolated function findPetsByStatus(string[] status) returns Pet[]|error {
+    remote isolated function findPetsByStatus(("available"|"pending"|"sold")[] status) returns Pet[]|error {
         string resourcePath = string `/pet/findByStatus`;
         map<anydata> queryParam = {"status": status};
         map<Encoding> queryParamEncoding = {"status": {style: FORM, explode: true}};

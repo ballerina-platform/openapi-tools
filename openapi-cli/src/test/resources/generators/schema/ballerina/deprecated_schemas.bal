@@ -4,7 +4,7 @@ public type Pets Pet[];
 @deprecated
 public type Owner record {
     string Name?;
-    string Address?;
+    "admin"|"contributor"|"member"|"owner" Address?;
 };
 
 public type Error record {

@@ -112,7 +112,7 @@ public class OASContractGenerator {
             return;
         }
         semanticModel = compilation.getSemanticModel(docId.moduleId());
-        List<OASResult> openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
+        List<OASResult> openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(project, syntaxTree,
                 semanticModel, serviceName, needJson, inputPath);
 
         if (!openAPIDefinitions.isEmpty()) {
