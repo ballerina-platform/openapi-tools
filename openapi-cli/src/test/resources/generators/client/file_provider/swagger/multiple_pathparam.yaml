@@ -16,7 +16,6 @@ paths:
           description: test
           schema:
             type: integer
-            format: int32
         - name: name
           in: path
           required: true

@@ -19,7 +19,7 @@ paths:
         - in: header
           name: x-request-id
           schema:
-            type: integer
+            type: invalid_type
           required: true
       responses:
         '200':

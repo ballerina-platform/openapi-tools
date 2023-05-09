@@ -169,7 +169,7 @@ public class FunctionReturnTypeGenerator {
             // TODO: Nested array when response has
             type = generateReturnTypeForArraySchema(media, arraySchema, isSignature);
         } else if (schema.getType() != null) {
-            type = convertOpenAPITypeToBallerina(schema.getType());
+            type = convertOpenAPITypeToBallerina(schema);
         } else if (media.getKey().trim().equals("application/xml")) {
             type = generateCustomTypeDefine("xml", "XML", isSignature);
         } else {

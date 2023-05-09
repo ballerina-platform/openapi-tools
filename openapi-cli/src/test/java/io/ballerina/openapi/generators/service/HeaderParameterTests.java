@@ -70,10 +70,10 @@ public class HeaderParameterTests {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header.bal", syntaxTree);
     }
 
-//    @Test(description = "03. Header parameter with unsupported header data type",
-//            expectedExceptions = BallerinaOpenApiException.class,
-//            expectedExceptionsMessageRegExp = "Header 'x-request-id' with type 'integer' can not be mapped" +
-//                    " as a valid Ballerina.*")
+    @Test(description = "03. Header parameter with unsupported header data type",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Header 'x-request-id' with type 'invalid_type' can not be mapped" +
+                    " as a valid Ballerina.*")
     public void headerWithNoSupportType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_03.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);

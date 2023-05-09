@@ -331,7 +331,7 @@ public class GeneratorUtils {
     public static String convertOpenAPITypeToBallerina(Schema<?> schema) throws BallerinaOpenApiException {
         String type = schema.getType().toLowerCase(Locale.ENGLISH).trim();
         if (INTEGER.equals(type)) {
-            return convertOpenAPINumericTypeToBallerina(type, schema);
+            return convertOpenAPINumericTypeToBallerina(convertOpenAPITypeToBallerina(type), schema);
         }
         if ((type.equals(NUMBER) && schema.getFormat() != null) || (type.equals(STRING) && schema.getFormat() != null
                 && (schema.getFormat().equals(BINARY) || schema.getFormat().equals(BYTE)))) {

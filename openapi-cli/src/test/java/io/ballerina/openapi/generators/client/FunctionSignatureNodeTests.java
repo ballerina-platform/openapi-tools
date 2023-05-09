@@ -222,6 +222,24 @@ public class FunctionSignatureNodeTests {
                 .get("/dogs").getGet(), new ArrayList<>());
     }
 
+    @Test(description = "Test for generate function signature for an integer request")
+    public void testNumericFunctionSignatureJSONPayload() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/integer_request_payload.yaml"));
+        FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
+                new BallerinaTypesGenerator(openAPI), new ArrayList<>(), false);
+        FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
+                .get("/pets").getPost(), new ArrayList<>());
+        SeparatedNodeList<ParameterNode> parameters = signature.parameters();
+        Assert.assertFalse(parameters.isEmpty());
+        RequiredParameterNode param01 = (RequiredParameterNode) parameters.get(0);
+
+        Assert.assertEquals(param01.paramName().orElseThrow().text(), "payload");
+        Assert.assertEquals(param01.typeName().toString(), "int:Signed32");
+
+        ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
+        Assert.assertEquals(returnTypeNode.type().toString(), "int:Signed32|error");
+    }
+
     @AfterTest
     private void deleteGeneratedFiles() {
         try {
