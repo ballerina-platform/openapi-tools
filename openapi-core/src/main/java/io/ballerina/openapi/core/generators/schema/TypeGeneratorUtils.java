@@ -70,7 +70,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -422,25 +421,28 @@ public class TypeGeneratorUtils {
         if (stringSchema.getPattern() != null) {
             String value = stringSchema.getPattern();
             // This is to check whether the pattern is valid or not.
-            PatternSyntaxException exc = null;
+            Exception exc = null;
             // TODO: This temp fix will be removed with available with the new Regex API.
             // https://github.com/ballerina-platform/ballerina-lang/issues/40328
             // https://github.com/ballerina-platform/ballerina-lang/issues/40318
             try {
-                Pattern.compile(value);
-                RegExpFactory.parse(value);
-            } catch (PatternSyntaxException e) {
+                Pattern.compile(value, Pattern.UNICODE_CHARACTER_CLASS);
+            } catch (Exception e) {
                 exc = e;
-            } catch (BError err) {
-                //The value was assigned as 0 to the index due to the creation of a PatternSyntaxException.
-                //This will be resolved with the availability of the new Regex API.
-                exc = new PatternSyntaxException(err.getMessage(), value, 0);
+                // This try catch is to check whether the pattern is valid or not. Swagger parser doesn't provide any
+                // error for invalid patterns. Therefore, we need to check it within code. (ex: syntax errors)
+                OUT_STREAM.printf("WARNING: invalid flag in regular expression: %s %n", value);
             }
+
             if (exc == null) {
-                String fieldRef = "pattern: re" + "`" + value + "`";
-                fields.add(fieldRef);
-            } else {
-                OUT_STREAM.printf("WARNING: ballerina can not support pattern: %s %n", value);
+                try {
+                    RegExpFactory.parse(value);
+                    String fieldRef = "pattern: re" + "`" + value + "`";
+                    fields.add(fieldRef);
+                } catch (BError err) {
+                    //This handle a case which Ballerina doesn't support
+                    OUT_STREAM.printf("WARNING: ballerina can not support pattern: %s %n", value);
+                }
             }
         }
         return fields;

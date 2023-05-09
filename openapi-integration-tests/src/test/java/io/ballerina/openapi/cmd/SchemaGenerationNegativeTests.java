@@ -87,4 +87,45 @@ public class SchemaGenerationNegativeTests extends OpenAPITest {
         process.waitFor();
         assertOnErrorStream(process, out);
     }
+
+    @Test(description = "Tests with record field has constraint value with string type with invalid patterns.")
+    public void constraintWithStringInvalidPattern() throws IOException, InterruptedException {
+        String openapiFilePath = "invalid_pattern_string.yaml";
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add(0, "openapi");
+        buildArgs.add("-i");
+        buildArgs.add(openapiFilePath);
+        buildArgs.add("--mode");
+        buildArgs.add("client");
+        buildArgs.add("-o");
+        buildArgs.add(tmpDir.toString());
+
+        String balFile = "bal";
+
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            balFile = "bal.bat";
+        }
+        buildArgs.add(0, TEST_DISTRIBUTION_PATH.resolve(DISTRIBUTION_FILE_NAME).resolve("bin")
+                .resolve(balFile).toString());
+        OUT.println("Executing: " + StringUtils.join(buildArgs, ' '));
+        ProcessBuilder pb = new ProcessBuilder(buildArgs);
+        pb.directory(TEST_RESOURCE.toFile());
+        Process process = pb.start();
+
+        String out = "WARNING: ballerina can not support pattern: ^(?!(.*[\\\"\\*\\\\\\>\\<\\?\\/\\:\\|]+.*)|" +
+                "(.*[\\.]?.*[\\.]+$)|(.*[ ]+$)) \n" +
+                "WARNING: ballerina can not support pattern: ^(?![0-9]+$)(?!-)[a-zA-Z0-9-]{2,49}[a-zA-Z0-9]$ \n" +
+                "WARNING: ballerina can not support pattern: (https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})" +
+                "([\\/\\w \\.-]*)*\\/?$ \n" +
+                "WARNING: ballerina can not support pattern: ^[A-Za-z\\-\\_\\/]+$ \n" +
+                "WARNING: ballerina can not support pattern: ^.*(?=.{6,1000})(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).*$ \n" +
+                "WARNING: ballerina can not support pattern: ^[\\x09\\x0A\\x0D\\x20\\x23\\x2D\\x30-\\x39\\x40-\\x5A" +
+                "\\x5E-\\x5F\\x61-\\x7A\\x7E-\\uD7FF\\uE000-\\uFFFD\\u10000-\\u10FFFF]{1,100}$ ";
+        //Thread for wait out put generate
+        Thread.sleep(5000);
+        // compare generated file has not included constraint annotation for scenario record field.
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("types.bal", "schema/unsupported_string_pattern.bal");
+        process.waitFor();
+        assertOnErrorStream(process, out);
+    }
 }
