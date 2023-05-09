@@ -341,6 +341,7 @@ public class BallerinaCodeGenerator {
                 .withResourceMode(isResource)
                 .withLicense(licenseHeader)
                 .build();
+        licenseHeader = oasClientConfig.getLicense();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME, mainContent));
