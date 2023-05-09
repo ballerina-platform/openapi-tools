@@ -105,7 +105,8 @@ public class ComparedGeneratedFileTests {
                 {"api2pdf.yaml", "api2pdf.bal"},
                 {"nillable_response.yaml", "nillable_response.bal"},
                 {"nillable_union_response.yaml", "nillable_union_response.bal"},
-                {"duplicated_response.yaml", "duplicated_response.bal"}
+                {"duplicated_response.yaml", "duplicated_response.bal"},
+                {"multiline_param_comment.yaml", "multiline_param_comment.bal"}
         };
     }
 
