@@ -14,8 +14,8 @@ servers:
 tags:
   - name: pets
     description: Pets Tag
-  - name: list
-    description: List Tag
+  - name: owners
+    description: Owners Tag
 paths:
   /pets:
     post:
@@ -38,3 +38,24 @@ paths:
               schema:
                 type: integer
                 format: int32
+  /owners:
+    post:
+      summary: Create an owner
+      operationId: createOwner
+      tags:
+        - owners
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: integer
+              format: invalid_format
+        required: true
+      responses:
+        '201':
+          description: Owner response
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64

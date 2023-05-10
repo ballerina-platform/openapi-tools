@@ -5,7 +5,7 @@ info:
 servers:
   - url: localhost:9090/payloadV
 paths:
-  /v1/{id}:
+  /v1/{id}/payload/{payloadId}:
     get:
       operationId: operationId01
       description: "op1"
@@ -17,6 +17,13 @@ paths:
           schema:
             type: integer
             format: int32
+        - name: payloadId
+          description: "payload id value"
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: invalid_format
       responses:
         "200":
           description: Ok

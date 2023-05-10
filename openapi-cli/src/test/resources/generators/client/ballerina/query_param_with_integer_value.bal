@@ -1,6 +1,7 @@
 import ballerina/http;
 
-
+# Get current weather, daily forecast for 16 days, and 3-hourly forecast 5 days for your city.
+@display {label: "Open Weather Client"}
 public isolated client class Client {
     final http:Client clientEp;
     final readonly & ApiKeysConfig apiKeyConfig;
@@ -10,7 +11,7 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-        public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config = {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
+        public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config = {}, string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {
         http:ClientConfiguration httpClientConfig = {
             httpVersion: config.httpVersion,
             timeout: config.timeout,
@@ -47,18 +48,19 @@ public isolated client class Client {
         self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
         return;
     }
-    # Info for a specific pet
+    # Provide weather forecast for any geographical coordinates
     #
-    # + xRequestId - Tests header 01
-    # + xRequestClient - Tests header 02
-    # + xRequestPet - Tests header 03
-    # + xRequestHeader - Tests header 04
-    # + return - Expected response to a valid request
-    remote isolated function showPetById(int:Signed32 xRequestId, int:Signed32[] xRequestClient, Pet[] xRequestPet, int? xRequestHeader=()) returns http:Response|error {
-        string resourcePath = string `/pets`;
-        map<any> headerValues = {"X-Request-ID": xRequestId, "X-Request-Client": xRequestClient, "X-Request-Pet": xRequestPet, "X-Request-Header": xRequestHeader, "X-API-KEY": self.apiKeyConfig.xApiKey};
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        http:Response response = check self.clientEp-> get(resourcePath, httpHeaders);
+    # + lat - Latitude
+    # + lon - Longtitude
+    # + exclude - test
+    # + units - units
+    # + return - Successful response
+    @display {label: "Weather Forecast"}
+    remote isolated function getWeatherForecast(@display {label: "Latitude"} int:Signed32 lat, @display {label:"Units"} int units, @display {label:"Longtitude"} int:Signed32? lon=(), @display {label:"Exclude"} int exclude=100) returns WeatherForecast|error {
+        string resourcePath = string `/onecall`;
+        map<anydata> queryParam = {"lat": lat, "lon": lon, "exclude": exclude, "units": units, "appid": self.apiKeyConfig.appid};
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        WeatherForecast response = check self.clientEp-> get(resourcePath);
         return response;
     }
 }

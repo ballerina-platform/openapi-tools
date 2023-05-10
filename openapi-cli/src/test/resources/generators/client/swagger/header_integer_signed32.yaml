@@ -50,6 +50,13 @@ paths:
             items:
               $ref: "#/components/schemas/Pet"
           required: true
+        - in: header
+          description: Tests header 04
+          name: X-Request-Header
+          schema:
+            type: integer
+            format: invalid_format
+          required: false
       responses:
         '200':
           description: Expected response to a valid request

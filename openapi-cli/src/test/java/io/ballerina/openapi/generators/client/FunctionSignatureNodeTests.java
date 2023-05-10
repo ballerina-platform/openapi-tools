@@ -227,17 +227,23 @@ public class FunctionSignatureNodeTests {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/integer_request_payload.yaml"));
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
                 new BallerinaTypesGenerator(openAPI), new ArrayList<>(), false);
-        FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
+        FunctionSignatureNode petSignature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/pets").getPost(), new ArrayList<>());
-        SeparatedNodeList<ParameterNode> parameters = signature.parameters();
+        FunctionSignatureNode ownerSignature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
+                .get("/owners").getPost(), new ArrayList<>());
+        SeparatedNodeList<ParameterNode> parameters = petSignature.parameters();
         Assert.assertFalse(parameters.isEmpty());
-        RequiredParameterNode param01 = (RequiredParameterNode) parameters.get(0);
+        RequiredParameterNode petParams = (RequiredParameterNode) parameters.get(0);
+        RequiredParameterNode ownerParams = (RequiredParameterNode) ownerSignature.parameters().get(0);
 
-        Assert.assertEquals(param01.paramName().orElseThrow().text(), "payload");
-        Assert.assertEquals(param01.typeName().toString(), "int:Signed32");
+        Assert.assertEquals(petParams.paramName().orElseThrow().text(), "payload");
+        Assert.assertEquals(petParams.typeName().toString(), "int:Signed32");
+        Assert.assertEquals(ownerParams.typeName().toString(), "int");
 
-        ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
-        Assert.assertEquals(returnTypeNode.type().toString(), "int:Signed32|error");
+        ReturnTypeDescriptorNode petReturnTypeNode = petSignature.returnTypeDesc().orElseThrow();
+        Assert.assertEquals(petReturnTypeNode.type().toString(), "int:Signed32|error");
+        ReturnTypeDescriptorNode ownerReturnTypeNode = ownerSignature.returnTypeDesc().orElseThrow();
+        Assert.assertEquals(ownerReturnTypeNode.type().toString(), "int|error");
     }
 
     @AfterTest
