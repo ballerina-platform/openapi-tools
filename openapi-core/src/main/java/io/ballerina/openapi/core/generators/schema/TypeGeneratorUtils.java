@@ -423,7 +423,6 @@ public class TypeGeneratorUtils {
         if (stringSchema.getPattern() != null) {
             String value = stringSchema.getPattern();
             // This is to check whether the pattern is valid or not.
-            Exception exc = null;
             // TODO: This temp fix will be removed with available with the new Regex API.
             // https://github.com/ballerina-platform/ballerina-lang/issues/40328
             // https://github.com/ballerina-platform/ballerina-lang/issues/40318
@@ -431,21 +430,15 @@ public class TypeGeneratorUtils {
                 Pattern.compile(value, Pattern.UNICODE_CHARACTER_CLASS);
                 // Ballerina parser
                 RegExpFactory.parse(value);
-
+                String fieldRef = "pattern: re" + "`" + value + "`";
+                fields.add(fieldRef);
             } catch (BError err) {
-                exc = err;
                 //This handle a case which Ballerina doesn't support
-                OUT_STREAM.printf("WARNING: ballerina can not support pattern: %s %n", value);
+                OUT_STREAM.printf("WARNING: skipped generation for unsupported pattern in ballerina: %s %n", value);
             } catch (Exception e) {
-                exc = e;
                 // This try catch is to check whether the pattern is valid or not. Swagger parser doesn't provide any
                 // error for invalid patterns. Therefore, we need to check it within code. (ex: syntax errors)
                 OUT_STREAM.printf("WARNING: invalid flag in regular expression: %s %n", value);
-            }
-
-            if (exc == null) {
-                String fieldRef = "pattern: re" + "`" + value + "`";
-                fields.add(fieldRef);
             }
         }
         return fields;

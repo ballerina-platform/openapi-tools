@@ -160,8 +160,6 @@ import static io.ballerina.openapi.core.GeneratorConstants.SPECIAL_CHARACTERS_RE
 import static io.ballerina.openapi.core.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.GeneratorConstants.STYLE;
-import static io.ballerina.openapi.core.GeneratorConstants.SYNTAX_ERROR_STRING_PATTERN;
-import static io.ballerina.openapi.core.GeneratorConstants.SYNTAX_ERROR_STRING_PATTERN_MESSAGE;
 import static io.ballerina.openapi.core.GeneratorConstants.TYPE_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.TYPE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE;
@@ -466,13 +464,6 @@ public class GeneratorUtils {
             if (parseResult.getMessages().contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
                 throw new BallerinaOpenApiException(ErrorMessages.unsupportedOpenAPIVersion());
             }
-
-            // This is for handing some syntax errors in pattern in the openAPI definition. but through this we can not
-            // handle because this stack trace warning return as log output, those details do not include in parser
-            // messages that we used to check. (need to discuss)
-            //if (parseResult.getMessages().contains(SYNTAX_ERROR_STRING_PATTERN)) {
-            //    throw new BallerinaOpenApiException(SYNTAX_ERROR_STRING_PATTERN_MESSAGE);
-            //}
 
             StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n");
             for (String message : parseResult.getMessages()) {
