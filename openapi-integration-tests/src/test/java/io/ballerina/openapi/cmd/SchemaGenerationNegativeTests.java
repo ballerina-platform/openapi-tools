@@ -91,8 +91,7 @@ public class SchemaGenerationNegativeTests extends OpenAPITest {
         assertOnErrorStream(process, out);
     }
 
-    @Test(description = "Tests with record field has constraint value with string type with invalid patterns.",
-            enabled = false)
+    @Test(description = "Tests with record field has constraint value with string type with invalid patterns.")
     public void constraintWithStringInvalidPattern() throws IOException, InterruptedException {
         String openapiFilePath = "invalid_pattern_string.yaml";
         List<String> buildArgs = new LinkedList<>();
@@ -116,11 +115,11 @@ public class SchemaGenerationNegativeTests extends OpenAPITest {
         pb.directory(TEST_RESOURCE.toFile());
         Process process = pb.start();
 
-        String out = "";
+        String out = "WARNING: invalid flag in regular expression: (A)?(?(1)B|C) ";
         //Thread for wait out put generate
         Thread.sleep(5000);
         // compare generated file has not included constraint annotation for scenario record field.
-        compareGeneratedSyntaxTreewithExpectedSyntaxTree("types.bal", "schema/unsupported_string_pattern.bal");
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("types.bal", "schema/invalid_string_pattern.bal");
         process.waitFor();
         assertOnErrorStream(process, out);
     }

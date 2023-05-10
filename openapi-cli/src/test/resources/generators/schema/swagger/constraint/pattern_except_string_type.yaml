@@ -37,13 +37,16 @@ components:
         - id
       properties:
         name:
-          type: string
+          type: integer
+          pattern: '[ a-zA-Z0-9/.+!@#$%^&*()+\- ]*'
         hobby:
-          type: string
+          type: array
+          items:
+            type: integer
+            pattern: '[ a-zA-Z0-9/.+!@#$%^&*()+\- ]*'
         id:
           type: integer
           maximum: 5
-        pcre:
-          description: PCRE regex pattern that doesn't support in ECMA
-          type: string
-          pattern: (A)?(?(1)B|C)
+        salary:
+          type: number
+          pattern: ^[a-zA-Z0-9_]+$

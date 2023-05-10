@@ -429,6 +429,13 @@ public class TypeGeneratorUtils {
             // https://github.com/ballerina-platform/ballerina-lang/issues/40318
             try {
                 Pattern.compile(value, Pattern.UNICODE_CHARACTER_CLASS);
+                // Ballerina parser
+                RegExpFactory.parse(value);
+
+            } catch (BError err) {
+                exc = err;
+                //This handle a case which Ballerina doesn't support
+                OUT_STREAM.printf("WARNING: ballerina can not support pattern: %s %n", value);
             } catch (Exception e) {
                 exc = e;
                 // This try catch is to check whether the pattern is valid or not. Swagger parser doesn't provide any
@@ -437,14 +444,8 @@ public class TypeGeneratorUtils {
             }
 
             if (exc == null) {
-                try {
-                    RegExpFactory.parse(value);
-                    String fieldRef = "pattern: re" + "`" + value + "`";
-                    fields.add(fieldRef);
-                } catch (BError err) {
-                    //This handle a case which Ballerina doesn't support
-                    OUT_STREAM.printf("WARNING: ballerina can not support pattern: %s %n", value);
-                }
+                String fieldRef = "pattern: re" + "`" + value + "`";
+                fields.add(fieldRef);
             }
         }
         return fields;
