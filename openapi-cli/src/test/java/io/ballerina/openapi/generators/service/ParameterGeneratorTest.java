@@ -185,4 +185,54 @@ public class ParameterGeneratorTest {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("keywords.bal", syntaxTree);
     }
+
+    @Test(description = "Tests for all the enum scenarios in resource function parameter generation:" +
+            "Use case 01 : Enum in query parameter" +
+            "Use case 02 : Enums in path parameter" +
+            "Use case 03 : Enum in header parameter" +
+            "Use case 04 : Enum in reusable parameter" +
+            "Use case 05 : Enum in parameter with referenced schema")
+    public void generateParametersWithEnums() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/parameters_with_enum.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("parameters_with_enum.bal", syntaxTree);
+    }
+
+    @Test(description = "Tests for all the nullable enum scenarios in resource function parameter generation:" +
+            "Use case 01 : Nullable enum in query parameter" +
+            "Use case 02 : Nullable enum in header parameter" +
+            "Use case 03 : Nullable enum in reusable parameter" +
+            "Use case 04 : Nullable enum in parameter with referenced schema")
+    public void generateParametersWithNullableEnums() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/parameters_with_nullable_enums.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "parameters_with_nullable_enums.bal", syntaxTree);
+    }
+
+    @Test(description = "Test unsupported nullable path parameter with enums",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Path parameter value cannot be null.")
+    public void testNullablePathParamWithEnum() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/path_param_nullable.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+    }
 }
