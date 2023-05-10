@@ -478,8 +478,7 @@ public class GeneratorUtils {
             for (String message : parseResult.getMessages()) {
                 errorMessage.append(message).append(LINE_SEPARATOR);
             }
-            // Todo swagger parser error for syntax error patterns
-            // pattern with other typ
+
             throw new BallerinaOpenApiException(errorMessage.toString());
         }
         return parseResult.getOpenAPI();

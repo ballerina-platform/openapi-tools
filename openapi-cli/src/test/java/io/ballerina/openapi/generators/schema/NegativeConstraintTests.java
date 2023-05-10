@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
+ * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -37,7 +37,7 @@ import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
 import static org.testng.Assert.assertFalse;
 
 /**
- * This test class is to contain the test related to constraint validation.
+ * This test class contains negative tests related to constraint validation.
  */
 public class NegativeConstraintTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
@@ -46,9 +46,9 @@ public class NegativeConstraintTests {
             "There is no pattern validation within swagger parser although swagger support for only string value to " +
             "have regular pattern" +
             "(https://swagger.io/docs/specification/data-models/data-types/#string:~:text=The%20pattern%20keyword%20)" +
-            "Therefore here code generation for pattern with non-string type silently ignored. This willl handle " +
+            "Therefore here code generation for pattern with non-string type silently ignored. This will handle " +
             "separate PR in future.")
-    public void testForRecordStringHasInvalidPattern() throws IOException, BallerinaOpenApiException,
+    public void testNonStringSchemaPropertyWithPattern() throws IOException, BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/pattern_except_string_type.yaml"), true);

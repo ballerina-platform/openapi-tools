@@ -201,8 +201,9 @@ public class ConstraintTests {
         assertFalse(hasErrors);
     }
 
-    @Test(description = "Tests for string type record field has pattern constraint.")
-    public void testForRecordStringHasPattern() throws IOException, BallerinaOpenApiException, FormatterException {
+    @Test(description = "Test for schema properties having pattern constraint.")
+    public void testStringSchemaPropertyWithPattern() throws IOException, BallerinaOpenApiException,
+            FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/pattern_string.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
