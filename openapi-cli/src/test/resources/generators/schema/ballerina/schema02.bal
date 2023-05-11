@@ -1,5 +1,5 @@
 public type Error record {
-    int:Signed32 code;
+    int code;
     string message;
 };
 

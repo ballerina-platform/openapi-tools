@@ -7,11 +7,11 @@ public type UserPlayListDetails record {
     # The requested data.
     ListObject[]? items?;
     # The maximum number of items in the response (as set in the query or by default).
-    int:Signed32[]? 'limit?;
+    int[]? 'limit?;
     # URL to the next page of items. ( `null` if none)
     string? next?;
     # The offset of the items returned (as set in the query or by default)
-    int:Signed32? offset?;
+    int? offset?;
     # URL to the previous page of items. ( `null` if none) //anydata
     anydata[]? previous?;
     ListObject? total?;

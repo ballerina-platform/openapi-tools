@@ -8,7 +8,7 @@ public type OkAnydata record {|
 public type Pets Pet[];
 
 public type Error record {
-    int:Signed32 code;
+    int code;
     string message;
 };
 

@@ -9,7 +9,7 @@ public type TestDog Dog;
 public type ReferredSimpleType SimpleType;
 
 public type Error record {
-    int:Signed32 code;
+    int code;
     string message;
 };
 

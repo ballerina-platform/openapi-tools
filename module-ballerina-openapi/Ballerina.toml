@@ -1,10 +1,10 @@
 [package]
 org= "ballerina"
 name= "openapi"
-version = "@project.version@"
+version = "@toml.version@"
 
 [[platform.java11.dependency]]
 path = "../openapi-validator/build/libs/openapi-validator-@project.version@.jar"
 groupId = "ballerina"
 artifactId = "openapi"
-version= "@toml.version@"
+version= "@project.version@"

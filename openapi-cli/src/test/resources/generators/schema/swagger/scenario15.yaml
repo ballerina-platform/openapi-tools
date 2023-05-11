@@ -64,7 +64,6 @@ components:
       properties:
         offset:
           type: integer
-          format: int32
           description: Position in pagination.
         history:
           type: array

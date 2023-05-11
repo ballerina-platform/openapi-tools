@@ -8,7 +8,7 @@ public type SubscriptiondefaulttaxratesItemsString string;
 
 public type Activities record {
     # Position in pagination.
-    int:Signed32 offset?;
+    int offset?;
     Activity[] history?;
 };
 

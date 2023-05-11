@@ -1,6 +1,6 @@
 public type Activities record {
     # Position in pagination.
-    int:Signed32 offset?;
+    int offset?;
     Activity[] history?;
 };
 
