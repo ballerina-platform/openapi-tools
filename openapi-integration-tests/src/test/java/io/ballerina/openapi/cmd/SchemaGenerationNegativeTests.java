@@ -80,8 +80,8 @@ public class SchemaGenerationNegativeTests extends OpenAPITest {
                 "WARNING: skipped generation for unsupported pattern in ballerina: ^[A-Za-z\\-\\_\\/]+$ \n" +
                 "WARNING: skipped generation for unsupported pattern in ballerina: ^.*(?=.{6,1000})(?=.*\\d)" +
                 "(?=.*[a-z])(?=.*[A-Z]).*$ \n" +
-                "WARNING: skipped generation for unsupported pattern in ballerina: ^[\\x09\\x0A\\x0D\\x20\\x23\\x2D\\x30" +
-                "-\\x39\\x40-\\x5A\\x5E-\\x5F\\x61-\\x7A\\x7E-\\uD7FF\\uE000-\\uFFFD\\u10000-\\u10FFFF]{1,100}$ \n" +
+                "WARNING: skipped generation for unsupported pattern in ballerina: ^[\\x09\\x0A\\x0D\\x20\\x23\\x2D\\" +
+                "x30-\\x39\\x40-\\x5A\\x5E-\\x5F\\x61-\\x7A\\x7E-\\uD7FF\\uE000-\\uFFFD\\u10000-\\u10FFFF]{1,100}$ \n" +
                 "WARNING: skipped generation for unsupported pattern in ballerina: ^[a-z0-9\\-\\_\\.]+$ \n" +
                 "WARNING: skipped generation for unsupported pattern in ballerina: ^(?!\\s)(.*)(\\S)$ \n" +
                 "WARNING: skipped generation for unsupported pattern in ballerina: \\+[0-9]{1,3}\\-[0-9()+\\-]{1,30} ";

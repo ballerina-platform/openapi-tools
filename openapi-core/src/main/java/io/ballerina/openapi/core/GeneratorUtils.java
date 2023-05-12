@@ -80,6 +80,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.FileUtils;
@@ -177,6 +178,8 @@ public class GeneratorUtils {
     public static final List<String> BAL_KEYWORDS = SyntaxInfo.keywords();
     public static final MinutiaeList SINGLE_END_OF_LINE_MINUTIAE = getEndOfLineMinutiae();
     private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
+    private static final Logger LOGGER_OPENAPI_V3_PARSER = LoggerFactory.getLogger(OpenAPIV3Parser.class.getName());
+
 
     private static final List<String> primitiveTypeList =
             new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
@@ -460,6 +463,12 @@ public class GeneratorUtils {
         parseOptions.setResolve(true);
         parseOptions.setFlatten(true);
         SwaggerParseResult parseResult = new OpenAPIParser().readContents(openAPIFileContent, null, parseOptions);
+//        LOGGER_OPENAPI_V3_PARSER.setLevel(System.Logger.Level.OFF);
+        // assume SLF4J is bound to logback-classic in the current environment
+//        if (LOGGER_OPENAPI_V3_PARSER.isWarnEnabled()) {
+//            LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+//            loggerContext.stop();
+//        }
         if (!parseResult.getMessages().isEmpty()) {
             if (parseResult.getMessages().contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
                 throw new BallerinaOpenApiException(ErrorMessages.unsupportedOpenAPIVersion());

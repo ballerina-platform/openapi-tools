@@ -51,6 +51,9 @@ dependencies {
     implementation "io.ballerina.stdlib:http-native"
     implementation "com.google.code.findbugs:jsr305"
     testImplementation "org.testng:testng"
+    // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
+    implementation 'ch.qos.logback:logback-classic:1.4.7'
+    implementation 'ch.qos.logback:logback-core:1.4.7'
 
     balTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
