@@ -72,7 +72,7 @@ public class HeaderParameterTests {
 
     @Test(description = "03. Header parameter with unsupported header data type",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Header 'x-request-id' with type 'invalid_type' can not be mapped" +
+            expectedExceptionsMessageRegExp = "Header 'x-request-id' with type 'number' can not be mapped" +
                     " as a valid Ballerina.*")
     public void headerWithNoSupportType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_03.yaml");
