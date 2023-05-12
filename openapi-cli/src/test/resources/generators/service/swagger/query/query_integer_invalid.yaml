@@ -32,3 +32,9 @@ paths:
       responses:
         '200':
           description: An paged array of pets
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+

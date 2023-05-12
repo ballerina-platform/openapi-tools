@@ -9,6 +9,6 @@ service /v1 on ep0 {
     # + offset - parameter description
     # + next - parameter description
     # + return - An paged array of pets
-    resource function get pets(int 'limit, int? offset, int next) returns http:Ok {
+    resource function get pets(int 'limit, int? offset, int next) returns int:Signed32 {
     }
 }
