@@ -1017,10 +1017,10 @@ public class GeneratorUtils {
     }
 
     /**
-     * Generate type descriptor name using format for the numeric data types.
+     * Prints a warning log, if passed numeric data format is not supported
      *
      * @param typeDescriptorName name of the data type. ex: number, integer
-     * @param schema uses to generate the type descriptor name
+     * @param schema uses to generate the type descriptor name ex: int32, int64
      * @return typeDescriptorName for invalid numeric data formats
      */
     public static String convertOpenAPINumericTypeToBallerina(final String typeDescriptorName,
