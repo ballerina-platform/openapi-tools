@@ -1017,7 +1017,7 @@ public class GeneratorUtils {
     }
 
     /**
-     * Prints a warning log, if passed numeric data format is not supported
+     * Prints a warning log, if passed numeric data format is not supported.
      *
      * @param typeDescriptorName name of the data type. ex: number, integer
      * @param schema uses to generate the type descriptor name ex: int32, int64
