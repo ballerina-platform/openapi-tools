@@ -27,9 +27,8 @@ import io.ballerina.openapi.core.model.Filter;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,8 +52,7 @@ import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
  */
 @CommandLine.Command(
         name = "openapi",
-        description = "Generates Ballerina service/client for OpenAPI contract and OpenAPI contract for Ballerina" +
-                "Service."
+        description = "Generate the Ballerina sources for a given OpenAPI definition and vice versa."
 )
 public class OpenApiCmd implements BLauncherCmd {
     private static final String CMD_NAME = "openapi";
@@ -411,6 +409,18 @@ public class OpenApiCmd implements BLauncherCmd {
 
     @Override
     public void printLongDesc(StringBuilder out) {
+        InputStream inputStream = ClassLoader.getSystemResourceAsStream("ballerina-openapi.help");
+        try {
+            InputStreamReader inputStreamREader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            BufferedReader br = new BufferedReader(inputStreamREader);
+            String content = br.readLine();
+            out.append(content);
+
+            while ((content = br.readLine()) != null) {
+                out.append('\n').append(content);
+            }
+        } catch (IOException ignored) {
+        }
     }
 
     @Override
