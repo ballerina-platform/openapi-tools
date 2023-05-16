@@ -270,6 +270,61 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
     }
 
+    @Test(description = "Test openapi to ballerina generation with license headers")
+    public void testClientGenerationWithAutoLicenseHeaders() throws IOException {
+        Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
+//        Path licenseHeader = resourceDir.resolve(Paths.get("license.txt"));
+        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString()};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+
+//        Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen",
+//                "petstore_schema_type_with_auto_generated_license.bal"));
+//        Path expectedClientFile = resourceDir.resolve(Paths.get("expected_gen",
+//                "petstore_client_with_auto_generated_license.bal"));
+//        Path expectedUtilFile = resourceDir.resolve(Paths.get("expected_gen",
+//                "petstore_utils_with_auto_generated_license.bal"));
+
+
+        String expectedSchemaContent = "";
+        String expectedClientContent = "";
+        String expectedUtilContent = "";
+
+        if (Files.exists(this.tmpDir.resolve("client.bal")) &&
+                Files.exists(this.tmpDir.resolve("utils.bal")) &&
+                Files.exists(this.tmpDir.resolve("types.bal"))) {
+            //Compare schema contents
+            String generatedSchema = "";
+            String generatedClient = "";
+            String generatedUtil = "";
+            try {
+//                Stream<String> types = Files.lines(this.tmpDir.resolve("types.bal"));
+                Stream<String> client = Files.lines(this.tmpDir.resolve("client.bal"));
+//                Stream<String> utils = Files.lines(this.tmpDir.resolve("service.bal"));
+
+//                generatedSchema = types.collect(Collectors.joining(LINE_SEPARATOR));
+//                generatedSchema = (generatedSchema.trim()).replaceAll("\\s+", "");
+//                expectedSchemaContent = (expectedSchemaContent.trim()).replaceAll("\\s+", "");
+
+
+                generatedClient = client.collect(Collectors.joining(LINE_SEPARATOR));
+                generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
+                expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
+                System.out.println(generatedClient);
+
+//                generatedUtil = utils.collect(Collectors.joining(LINE_SEPARATOR));
+//                generatedUtil = (generatedUtil.trim()).replaceAll("\\s+", "");
+//                expectedUtilContent = (expectedUtilContent.trim()).replaceAll("\\s+", "");
+
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+        } else {
+            Assert.fail("Code generation failed. : " + readOutput(true));
+        }
+    }
+
     @Test(description = "Test openapi to ballerina generation with no new line license headers")
     public void testGenerationWithLicenseHeadersWithOneNewLine() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
