@@ -430,7 +430,7 @@ public class TypeGeneratorUtils {
                 Pattern.compile(value, Pattern.UNICODE_CHARACTER_CLASS);
                 // Ballerina parser
                 RegExpFactory.parse(value);
-                String fieldRef = "pattern: re" + "`" + value + "`";
+                String fieldRef = String.format("pattern: re`%s`", value);
                 fields.add(fieldRef);
             } catch (BError err) {
                 //This handle a case which Ballerina doesn't support
@@ -438,7 +438,7 @@ public class TypeGeneratorUtils {
             } catch (Exception e) {
                 // This try catch is to check whether the pattern is valid or not. Swagger parser doesn't provide any
                 // error for invalid patterns. Therefore, we need to check it within code. (ex: syntax errors)
-                OUT_STREAM.printf("WARNING: invalid flag in regular expression: %s %n", value);
+                OUT_STREAM.printf("WARNING: skipped generation for non-ECMA flavoured pattern: %s %n", value);
             }
         }
         return fields;

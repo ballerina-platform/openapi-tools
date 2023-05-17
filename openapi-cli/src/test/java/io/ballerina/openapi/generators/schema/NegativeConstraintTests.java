@@ -46,8 +46,8 @@ public class NegativeConstraintTests {
             "There is no pattern validation within swagger parser although swagger support for only string value to " +
             "have regular pattern" +
             "(https://swagger.io/docs/specification/data-models/data-types/#string:~:text=The%20pattern%20keyword%20)" +
-            "Therefore here code generation for pattern with non-string type silently ignored. This will handle " +
-            "separate PR in future.")
+            "Therefore, code generation for patterns with non-string types is silently ignored here. This will be" +
+            " handled in a separate PR in the future.")
     public void testNonStringSchemaPropertyWithPattern() throws IOException, BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
