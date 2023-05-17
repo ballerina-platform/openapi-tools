@@ -35,8 +35,6 @@ module io.ballerina.openapi.core {
     requires jsr305;
     requires org.apache.commons.io;
     requires org.slf4j;
-    requires ch.qos.logback.core;
-    requires ch.qos.logback.classic;
     requires swagger.core;
     requires swagger.parser;
     requires swagger.models;

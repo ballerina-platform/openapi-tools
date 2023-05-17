@@ -60,9 +60,6 @@ dependencies {
         implementation "org.ballerinalang:ballerina-runtime:${ballerinaLangVersion}"
         implementation "io.ballerina.stdlib:http-native:${stdlibHttpVersion}"
         implementation "org.ballerinalang:language-server-commons:${ballerinaLangVersion}"
-        // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
-        implementation 'ch.qos.logback:logback-classic:1.4.7'
-        implementation 'ch.qos.logback:logback-core:1.4.7'
         testImplementation "org.testng:testng:${testngVersion}"
     }
 

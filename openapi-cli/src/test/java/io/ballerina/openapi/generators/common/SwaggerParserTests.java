@@ -52,8 +52,7 @@ public class SwaggerParserTests {
 
     @Test(description = "Functionality tests for swagger parser behaviour when the regex is having syntax errors",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "OpenAPI definition has errors: .*"
-            )
+            expectedExceptionsMessageRegExp = "OpenAPI definition has errors: .*")
     public void testInvalidRegexPatterns() throws  IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/invalid_pattern_string.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
