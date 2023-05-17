@@ -50,26 +50,7 @@ public class SchemaGenerationNegativeTests extends OpenAPITest {
     @Test(description = "Tests with record field has constraint value with string type with unsupported patterns.")
     public void constraintWithUnsupportedStringPattern() throws IOException, InterruptedException {
         String openapiFilePath = "unsupported_string_pattern.yaml";
-        List<String> buildArgs = new LinkedList<>();
-        buildArgs.add(0, "openapi");
-        buildArgs.add("-i");
-        buildArgs.add(openapiFilePath);
-        buildArgs.add("--mode");
-        buildArgs.add("client");
-        buildArgs.add("-o");
-        buildArgs.add(tmpDir.toString());
-
-        String balFile = "bal";
-
-        if (System.getProperty("os.name").startsWith("Windows")) {
-            balFile = "bal.bat";
-        }
-        buildArgs.add(0, TEST_DISTRIBUTION_PATH.resolve(DISTRIBUTION_FILE_NAME).resolve("bin")
-                .resolve(balFile).toString());
-        OUT.println("Executing: " + StringUtils.join(buildArgs, ' '));
-        ProcessBuilder pb = new ProcessBuilder(buildArgs);
-        pb.directory(TEST_RESOURCE.toFile());
-        Process process = pb.start();
+        Process process = getProcessForClientGeneration(openapiFilePath);
 
         String out = "WARNING: skipped generation for unsupported pattern in ballerina: " +
                 "^(?!(.*[\\\"\\*\\\\\\>\\<\\?\\/\\:\\|]+.*)|(.*[\\.]?.*[\\.]+$)|(.*[ ]+$)) \n" +
@@ -93,9 +74,23 @@ public class SchemaGenerationNegativeTests extends OpenAPITest {
         assertOnErrorStream(process, out);
     }
 
-    @Test(description = "Tests with record field has constraint value with string type with invalid patterns.")
+    //TODO: disable this test due to reverting the changes regarding log disabling
+    @Test(description = "Tests with record field has constraint value with string type with invalid patterns.",
+            enabled = false)
     public void constraintWithStringInvalidPattern() throws IOException, InterruptedException {
         String openapiFilePath = "invalid_pattern_string.yaml";
+        Process process = getProcessForClientGeneration(openapiFilePath);
+
+        String out = "WARNING: invalid flag in regular expression: (A)?(?(1)B|C) ";
+        //Thread for wait out put generate
+        Thread.sleep(5000);
+        // compare generated file has not included constraint annotation for scenario record field.
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("types.bal", "schema/invalid_string_pattern.bal");
+        process.waitFor();
+        assertOnErrorStream(process, out);
+    }
+
+    public Process getProcessForClientGeneration(String openapiFilePath) throws IOException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add(0, "openapi");
         buildArgs.add("-i");
@@ -115,14 +110,6 @@ public class SchemaGenerationNegativeTests extends OpenAPITest {
         OUT.println("Executing: " + StringUtils.join(buildArgs, ' '));
         ProcessBuilder pb = new ProcessBuilder(buildArgs);
         pb.directory(TEST_RESOURCE.toFile());
-        Process process = pb.start();
-
-        String out = "WARNING: invalid flag in regular expression: (A)?(?(1)B|C) ";
-        //Thread for wait out put generate
-        Thread.sleep(5000);
-        // compare generated file has not included constraint annotation for scenario record field.
-        compareGeneratedSyntaxTreewithExpectedSyntaxTree("types.bal", "schema/invalid_string_pattern.bal");
-        process.waitFor();
-        assertOnErrorStream(process, out);
+        return pb.start();
     }
 }

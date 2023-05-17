@@ -370,8 +370,6 @@ public class GeneratorConstants {
     public static final String YML_EXTENSION = ".yml";
     public static final String JSON_EXTENSION = ".json";
     public static final String UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE = "attribute swaggerVersion is unexpected";
-    public static final String SYNTAX_ERROR_STRING_PATTERN = "WARNING: Error snake-parsing yaml content";
-    public static final String SYNTAX_ERROR_STRING_PATTERN_MESSAGE = "There is a syntax error in the yaml content";
     public static final String PIPE = "|";
     public static final String RETURNS = "returns";
     public static final String ANYDATA = "anydata";
