@@ -1,0 +1,72 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: OpenApi Petstore
+servers:
+  - url: http://petstore.{host}.io/v1
+    description: The production API server
+    variables:
+      host:
+        default: openapi
+paths:
+  /ping:
+    get:
+      operationId: operation_get_/ping
+      parameters:
+        - name: x-client
+          in: header
+          schema:
+            $ref: '#/components/schemas/XClient'
+          required: true
+        - name: x-content
+          in: header
+          schema:
+            $ref: '#/components/schemas/XContent'
+        - $ref: '#/components/parameters/XAPIName'
+        - name: x-count
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/XCount'
+        - name: x-valid
+          in: header
+          schema:
+            $ref: '#/components/schemas/XValid'
+        - name: x-sequence
+          in: header
+          schema:
+            $ref: '#/components/schemas/XSequence'
+        - name: X-Rate
+          in: header
+          schema:
+            type: number
+            format: float
+        - name: X-Modified
+          in: header
+          schema:
+            type: boolean
+            nullable: true
+      responses:
+        "200":
+          description: Ok
+components:
+  parameters:
+    XAPIName:
+      name: Consent-ID
+      in: header
+      schema:
+        type: string
+  schemas:
+    XClient:
+      type: string
+    XContent:
+      type: string
+      default: 'JSON'
+    XCount:
+      type: integer
+    XValid:
+      type: boolean
+    XSequence:
+      type: array
+      items:
+        type: integer
