@@ -27,7 +27,12 @@ import io.ballerina.openapi.core.model.Filter;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -410,16 +415,14 @@ public class OpenApiCmd implements BLauncherCmd {
     @Override
     public void printLongDesc(StringBuilder out) {
         InputStream inputStream = ClassLoader.getSystemResourceAsStream("ballerina-openapi.help");
-        try {
-            InputStreamReader inputStreamREader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-            BufferedReader br = new BufferedReader(inputStreamREader);
+        try (InputStreamReader inputStreamREader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+             BufferedReader br = new BufferedReader(inputStreamREader)) {
             String content = br.readLine();
             out.append(content);
-
             while ((content = br.readLine()) != null) {
                 out.append('\n').append(content);
             }
-        } catch (IOException ignored) {
+        } catch (IOException ignore) {
         }
     }
 
