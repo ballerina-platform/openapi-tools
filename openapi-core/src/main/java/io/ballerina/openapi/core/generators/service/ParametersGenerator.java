@@ -199,7 +199,7 @@ public class ParametersGenerator {
                 headerType = type;
             } else {
                 throw new BallerinaOpenApiException(String.format(OAS_SERVICE_105.getDescription(),
-                        parameter.getName(), type));
+                        parameter.getName(), refSchema.getType()));
             }
         } else if (paramSupportedTypes.contains(schema.getType()) || schema instanceof ArraySchema) {
             headerType = convertOpenAPITypeToBallerina(schema.getType()).trim();

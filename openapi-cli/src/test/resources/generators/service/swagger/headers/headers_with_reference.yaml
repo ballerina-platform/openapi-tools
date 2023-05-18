@@ -46,6 +46,12 @@ paths:
           schema:
             type: boolean
             nullable: true
+        - name: X-Client-Profiles
+          in: header
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/XClient'
       responses:
         "200":
           description: Ok
