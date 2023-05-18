@@ -196,7 +196,7 @@ public class ParametersGenerator {
             if (GeneratorConstants.STRING.equals(schema.getType())) {
                 // Handle string headers
                 headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
-                        GeneratorUtils.convertOpenAPITypeToBallerina(schema.getType().trim()),
+                        GeneratorUtils.convertOpenAPITypeToBallerina(schema),
                         GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
             } else if (schema instanceof ArraySchema) {
                 BuiltinSimpleNameReferenceNode headerArrayItemTypeName;
