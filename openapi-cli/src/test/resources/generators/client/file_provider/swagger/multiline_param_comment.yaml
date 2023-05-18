@@ -1,0 +1,165 @@
+openapi: 3.0.1
+info:
+  title: Azure OpenAI API version 2022-12-01
+  description: APIs for fine-tuning and managing deployments of OpenAI models.
+  version: 2022-12-01
+servers:
+  - url: /
+security:
+  - api-key: []
+paths:
+  /fine-tunes/{fine-tune-id}/events:
+    get:
+      tags:
+        - 'Fine-tunes:'
+      summary: "Gets the events for the fine-tune job specified by the given fine-tune-id.\r\
+        \nEvents are created when the job status changes, e.g. running or complete,\
+        \ and when results are uploaded."
+      operationId: FineTunes_GetEvents
+      parameters:
+        - name: fine-tune-id
+          in: path
+          description: The identifier of the fine-tune job.
+          required: true
+          schema:
+            type: string
+        - name: stream
+          in: query
+          description: "A flag indicating whether to stream events for the fine-tune\
+          \ job. If set to true,\r\n            events will be sent as data-only server-sent\
+          \ events as they become available. The stream will terminate with\r\n  \
+          \          a data: [DONE] message when the job is finished (succeeded, cancelled,\
+          \ or failed).\r\n            If set to false, only events generated so far\
+          \ will be returned.."
+          schema:
+            type: boolean
+        - name: api-version
+          in: query
+          description: The requested API version.
+          required: true
+          schema:
+            type: string
+            x-ms-client-default: 2022-12-01
+            x-ms-parameter-location: client
+          x-ms-client-default: 2022-12-01
+          x-ms-parameter-location: client
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventList'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/EventList'
+components:
+  schemas:
+    Event:
+      title: Event
+      required:
+        - created_at
+        - level
+        - message
+      type: object
+      properties:
+        object:
+          $ref: '#/components/schemas/TypeDiscriminator'
+        created_at:
+          type: integer
+          description: A timestamp when this event was created (in unix epochs).
+          format: unixtime
+        level:
+          $ref: '#/components/schemas/LogLevel'
+        message:
+          minLength: 1
+          type: string
+          description: The message describing the event. This can be a change of state,
+            e.g., enqueued, started, failed or completed, or other events like uploaded
+            results.
+    EventList:
+      title: EventList
+      type: object
+      properties:
+        object:
+          $ref: '#/components/schemas/TypeDiscriminator'
+        data:
+          type: array
+          description: The list of items.
+          items:
+            $ref: '#/components/schemas/Event'
+      description: Represents a list of events.
+    InnerError:
+      title: InnerError
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/InnerErrorCode'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+      description: "Inner error as defined in the Microsoft REST guidelines\r\n(https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses)."
+    InnerErrorCode:
+      title: InnerErrorCode
+      type: string
+      description: "Inner error codes as defined in the Microsoft REST guidelines\r\
+        \n(https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses)."
+      enum:
+        - invalidPayload
+      x-ms-enum:
+        name: InnerErrorCode
+        modelAsString: true
+        values:
+          - value: invalidPayload
+            description: The request data is invalid for this operation.
+    LogLevel:
+      title: LogLevel
+      type: string
+      description: The verbosity level of an event.
+      enum:
+        - info
+        - warning
+        - error
+      x-ms-enum:
+        name: LogLevel
+        modelAsString: true
+        values:
+          - value: info
+            description: This event is for information only.
+          - value: warning
+            description: This event represents a mitigated issue.
+          - value: error
+            description: This message represents a non recoverable issue.
+    TypeDiscriminator:
+      title: TypeDiscriminator
+      type: string
+      description: Defines the type of an object.
+      enum:
+        - list
+        - fine-tune
+        - file
+        - fine-tune-event
+        - model
+        - deployment
+      x-ms-enum:
+        name: TypeDiscriminator
+        modelAsString: true
+        values:
+          - value: list
+            description: This object represents a list of other objects.
+          - value: fine-tune
+            description: This object represents a fine tune job.
+          - value: file
+            description: This object represents a file.
+          - value: fine-tune-event
+            description: This object represents an event of a fine tune job.
+          - value: model
+            description: This object represents a model (can be a base models or fine
+              tune job result).
+          - value: deployment
+            description: This object represents a deployment.
+  securitySchemes:
+    api-key:
+      type: apiKey
+      description: Provide your Cognitive Services Azure OpenAI account key here.
+      name: api-key
+      in: header
