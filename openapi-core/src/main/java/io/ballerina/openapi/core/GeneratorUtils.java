@@ -90,6 +90,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -178,6 +179,7 @@ public class GeneratorUtils {
     public static final List<String> BAL_KEYWORDS = SyntaxInfo.keywords();
     public static final MinutiaeList SINGLE_END_OF_LINE_MINUTIAE = getEndOfLineMinutiae();
     private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
+    private static final PrintStream OUT_STREAM = System.err;
 
     private static final List<String> primitiveTypeList =
             new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
@@ -1017,22 +1019,21 @@ public class GeneratorUtils {
     }
 
     /**
-     * Prints a warning log, if passed numeric data format is not supported.
+     * This utility is used to select the Ballerina data type for a given numeric format type.
      *
-     * @param typeDescriptorName name of the data type. ex: number, integer
+     * @param dataType name of the data type. ex: number, integer
      * @param schema uses to generate the type descriptor name ex: int32, int64
-     * @return typeDescriptorName for invalid numeric data formats
+     * @return data type for invalid numeric data formats
      */
-    public static String convertOpenAPINumericTypeToBallerina(final String typeDescriptorName,
-                                                                     final Schema<?> schema) {
+    public static String convertOpenAPINumericTypeToBallerina(final String dataType, final Schema<?> schema) {
         try {
             if (schema.getFormat() != null) {
                 return GeneratorUtils.convertOpenAPITypeToBallerina(schema.getFormat().trim());
             }
         } catch (BallerinaOpenApiException e) {
-            LOGGER.error(String.format("WARNING: the Ballerina schemas do not support with the `%s` format " +
-                    "for the `%s` data type", schema.getFormat(), schema.getType()));
+            OUT_STREAM.printf("WARNING: schemas with type ` %s` and format `%s` are not supported in Ballerina " +
+                    "client and service generation.%n", schema.getType(), schema.getFormat());
         }
-        return typeDescriptorName;
+        return dataType;
     }
 }
