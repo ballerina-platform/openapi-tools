@@ -258,8 +258,10 @@ public class ParametersGenerator {
         // Handle optional values in headers
         if (!parameter.getRequired()) {
             // If optional it behaves like default value with null ex:(string? header)
-            headerTypeName = createOptionalTypeDescriptorNode(headerTypeName,
-                    createToken(SyntaxKind.QUESTION_MARK_TOKEN));
+            // If schema has an enum and that has a null values then the type is already nill. Hence, the check.
+            headerTypeName = headerTypeName.toString().trim().endsWith(NILLABLE) ? headerTypeName :
+                    createOptionalTypeDescriptorNode(headerTypeName,
+                            createToken(SyntaxKind.QUESTION_MARK_TOKEN));
         }
         // Handle default values in headers
         if (schema.getDefault() != null) {
@@ -268,8 +270,9 @@ public class ParametersGenerator {
         // Handle header with parameter required true and nullable ture ex: (string? header)
         if (parameter.getRequired() && schema.getNullable() != null && schema.getNullable().equals(true)) {
             isNullableRequired = true;
-            headerTypeName = createOptionalTypeDescriptorNode(headerTypeName,
-                    createToken(SyntaxKind.QUESTION_MARK_TOKEN));
+            headerTypeName = headerTypeName.toString().trim().endsWith(NILLABLE) ? headerTypeName :
+                    createOptionalTypeDescriptorNode(headerTypeName,
+                            createToken(SyntaxKind.QUESTION_MARK_TOKEN));
         }
         return createRequiredParameterNode(headerAnnotations, headerTypeName, parameterName);
     }
