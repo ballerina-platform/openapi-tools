@@ -1,0 +1,49 @@
+openapi: 3.0.1
+info:
+  title: Service Openapi Yaml
+  version: 2.0.0
+servers:
+  - url: "{server}:{port}/"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /greeting:
+    put:
+      summary: A resource for generating greetings
+      operationId: getGreeting
+      parameters:
+        - name: name
+          in: query
+          description: the input string name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              $ref: "#/components/schemas/Person"
+      responses:
+        "200":
+          description: Ok
+components:
+  schemas:
+    Person:
+      type: object
+      required:
+        - id
+      properties:
+        name:
+          type: string
+        hobby:
+          type: string
+        id:
+          type: integer
+          maximum: 5
+        pcre:
+          description: PCRE regex pattern that doesn't support in ECMA
+          type: string
+          pattern: (A)?(?(1)B|C)
