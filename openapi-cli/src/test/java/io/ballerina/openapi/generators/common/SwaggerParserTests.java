@@ -50,6 +50,16 @@ public class SwaggerParserTests {
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
     }
 
+    @Test(description = "Functionality tests for swagger parser behaviour when the regex is having syntax errors",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "OpenAPI definition has errors: .*")
+    public void testInvalidRegexPatterns() throws  IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/invalid_pattern_string.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+    }
+
     //Get string as a content of ballerina file
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
