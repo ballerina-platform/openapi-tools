@@ -470,10 +470,12 @@ public class GeneratorUtils {
             if (parseResult.getMessages().contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
                 throw new BallerinaOpenApiException(ErrorMessages.unsupportedOpenAPIVersion());
             }
+
             StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n");
             for (String message : parseResult.getMessages()) {
                 errorMessage.append(message).append(LINE_SEPARATOR);
             }
+
             throw new BallerinaOpenApiException(errorMessage.toString());
         }
         return parseResult.getOpenAPI();
@@ -749,7 +751,8 @@ public class GeneratorUtils {
                 propertyValue.getMaxItems() != null ||
                 propertyValue.getMinItems() != null ||
                 propertyValue.getExclusiveMinimum() != null ||
-                propertyValue.getExclusiveMaximum() != null;
+                propertyValue.getExclusiveMaximum() != null ||
+                propertyValue.getPattern() != null;
     }
 
     /**

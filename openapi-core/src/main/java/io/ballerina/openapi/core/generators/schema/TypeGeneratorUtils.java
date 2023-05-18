@@ -48,6 +48,8 @@ import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.Refer
 import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.TypeGenerator;
 import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.UnionTypeGenerator;
 import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
+import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.internal.regexp.RegExpFactory;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
@@ -68,6 +70,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -417,12 +420,27 @@ public class TypeGeneratorUtils {
             String fieldRef = GeneratorConstants.MIN_LENGTH + GeneratorConstants.COLON + value;
             fields.add(fieldRef);
         }
-        //TODO: This will be enable once constraint package gives this support.
-//        if (stringSchema.getPattern() != null) {
-//            String value = stringSchema.getPattern();
-//            String fieldRef = "pattern:" + "\"" + value + "\"";
-//            fields.add(fieldRef);
-//        }
+        if (stringSchema.getPattern() != null) {
+            String value = stringSchema.getPattern();
+            // This is to check whether the pattern is valid or not.
+            // TODO: This temp fix will be removed with available with the new Regex API.
+            // https://github.com/ballerina-platform/ballerina-lang/issues/40328
+            // https://github.com/ballerina-platform/ballerina-lang/issues/40318
+            try {
+                Pattern.compile(value, Pattern.UNICODE_CHARACTER_CLASS);
+                // Ballerina parser
+                RegExpFactory.parse(value);
+                String fieldRef = String.format("pattern: re`%s`", value);
+                fields.add(fieldRef);
+            } catch (BError err) {
+                //This handle a case which Ballerina doesn't support
+                OUT_STREAM.printf("WARNING: skipped generation for unsupported pattern in ballerina: %s %n", value);
+            } catch (Exception e) {
+                // This try catch is to check whether the pattern is valid or not. Swagger parser doesn't provide any
+                // error for invalid patterns. Therefore, we need to check it within code. (ex: syntax errors)
+                OUT_STREAM.printf("WARNING: skipped generation for non-ECMA flavoured pattern: %s %n", value);
+            }
+        }
         return fields;
     }
 

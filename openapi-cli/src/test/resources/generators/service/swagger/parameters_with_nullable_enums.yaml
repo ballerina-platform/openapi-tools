@@ -38,7 +38,7 @@ tags:
   - name: user
     description: Operations about user
 paths:
-  /users/meetings/{group}:
+  /users/meetings:
     get:
       description: >-
         List all the meetings that were scheduled for a user (meeting
@@ -55,12 +55,14 @@ paths:
           in: query
           name: type
           schema:
-            default: live
+#            default: live
             enum:
               - scheduled
               - live
               - upcoming
+              - null
             type: string
+            nullable: true
         - description: "Status values that need to be considered for filter"
           in: query
           name: status
@@ -71,17 +73,7 @@ paths:
               enum:
                 - "available"
                 - "pending"
-              default: "available"
-        - description: "Employee group"
-          in: path
-          name: group
-          schema:
-            type: string
-            enum:
-              - "Admin"
-              - "HR"
-              - "Engineering"
-          required: true
+                - null
         - description: Date time format (cf. [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) & [leettime.de](http://leettime.de/))
           in: header
           name: X-Date-Format
@@ -92,17 +84,7 @@ paths:
               - OFFSET
               - EPOCH
               - LEET
-        - description: Time Zones of attendees
-          in: header
-          required: true
-          name: X-Time-Zones
-          schema:
-            type: array
-            items:
-              enum:
-                - IST
-                - GMT
-                - UTC
+              - null
         - description: "Meeting location"
           in: query
           name: location
@@ -132,14 +114,17 @@ components:
           - jsonp
           - msgpack
           - html
+          - null
         type: string
   schemas:
     RoomNo:
-      default: "R5"
+#      How can we address when default value is there in a reusable enum
+      default: R5
       enum:
         - R1
         - R3
         - R5
+        - null
       type: string
     MeetingTypes:
       type: string

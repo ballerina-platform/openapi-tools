@@ -65,7 +65,11 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultablePar
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_PARAM_COMMENT;
+import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
+import static io.ballerina.openapi.core.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_103;
@@ -84,7 +88,6 @@ public class ParametersGenerator {
     private boolean isNullableRequired;
     private final List<Node> requiredParams;
     private final List<Node> defaultableParams;
-
     private final OpenAPI openAPI;
 
     private static final List<String> queryParamSupportedTypes =
@@ -196,6 +199,7 @@ public class ParametersGenerator {
                         GeneratorUtils.convertOpenAPITypeToBallerina(schema.getType().trim()),
                         GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
             } else if (schema instanceof ArraySchema) {
+                BuiltinSimpleNameReferenceNode headerArrayItemTypeName;
                 Schema<?> items = ((ArraySchema) schema).getItems();
                 if (items.getType() == null) {
                     throw new BallerinaOpenApiException(String.format(OAS_SERVICE_104.getDescription(),
@@ -203,9 +207,15 @@ public class ParametersGenerator {
                 } else if (!items.getType().equals(GeneratorConstants.STRING)) {
                     throw new BallerinaOpenApiException(String.format(OAS_SERVICE_103.getDescription(),
                             parameter.getName(), items.getType()));
+                } else if (items.getEnum() != null && !items.getEnum().isEmpty()) {
+                    String arrayItemType = OPEN_PAREN_TOKEN.stringValue() + convertOpenAPITypeToBallerina(items) +
+                            CLOSE_PAREN_TOKEN.stringValue();
+                    headerArrayItemTypeName = createBuiltinSimpleNameReferenceNode(
+                            null, createIdentifierToken(arrayItemType));
+                } else {
+                    headerArrayItemTypeName = createBuiltinSimpleNameReferenceNode(
+                            null, createIdentifierToken(GeneratorConstants.STRING));
                 }
-                BuiltinSimpleNameReferenceNode headerArrayItemTypeName = createBuiltinSimpleNameReferenceNode(
-                        null, createIdentifierToken(GeneratorConstants.STRING));
                 ArrayDimensionNode dimensionNode =
                         NodeFactory.createArrayDimensionNode(createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                                 createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
@@ -231,7 +241,9 @@ public class ParametersGenerator {
             // Handle optional values in headers
             if (!parameter.getRequired()) {
                 // If optional it behaves like default value with null ex:(string? header)
-                headerTypeName = createOptionalTypeDescriptorNode(headerTypeName,
+                // If schema has an enum and that has a null values then the type is already nill. Hence, the check.
+                headerTypeName = headerTypeName.toString().trim().endsWith(NILLABLE) ? headerTypeName :
+                        createOptionalTypeDescriptorNode(headerTypeName,
                         createToken(SyntaxKind.QUESTION_MARK_TOKEN));
             }
             // Handle default values in headers
@@ -241,7 +253,8 @@ public class ParametersGenerator {
             // Handle header with parameter required true and nullable ture ex: (string? header)
             if (parameter.getRequired() && schema.getNullable() != null && schema.getNullable().equals(true)) {
                 isNullableRequired = true;
-                headerTypeName = createOptionalTypeDescriptorNode(headerTypeName,
+                headerTypeName = headerTypeName.toString().trim().endsWith(NILLABLE) ? headerTypeName :
+                        createOptionalTypeDescriptorNode(headerTypeName,
                         createToken(SyntaxKind.QUESTION_MARK_TOKEN));
             }
             return createRequiredParameterNode(headerAnnotations, headerTypeName, parameterName);
@@ -395,11 +408,15 @@ public class ParametersGenerator {
             }
         } else {
             Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(schema),
-                    GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
-            BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
-            OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(rTypeName,
-                    createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-            return createRequiredParameterNode(annotations, optionalNode, parameterName);
+                    GeneratorUtils.SINGLE_WS_MINUTIAE,
+                    GeneratorUtils.SINGLE_WS_MINUTIAE);
+            TypeDescriptorNode queryParamType = createBuiltinSimpleNameReferenceNode(null, name);
+            // If schema has an enum with null value, the type is already nil. Hence, the check.
+            if (!name.text().trim().endsWith(NILLABLE)) {
+                queryParamType = createOptionalTypeDescriptorNode(queryParamType,
+                        createToken(SyntaxKind.QUESTION_MARK_TOKEN));
+            }
+            return createRequiredParameterNode(annotations, queryParamType, parameterName);
         }
     }
 
@@ -487,12 +504,8 @@ public class ParametersGenerator {
                 throw new BallerinaOpenApiException(messages.getDescription());
             }
         } else {
-            //TODO: Uncomment after the fix from http module is provided
-//            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
-//                            schema), GeneratorUtils.SINGLE_WS_MINUTIAE,
-//                    GeneratorUtils.SINGLE_WS_MINUTIAE);
-            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
-                            schema.getType().toLowerCase(Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE,
+            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(schema),
+                    GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
             BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
             if (schema.getType().equals(GeneratorConstants.STRING)) {
@@ -521,9 +534,10 @@ public class ParametersGenerator {
                 throw new BallerinaOpenApiException(String.format(messages.getDescription(), type));
             }
         } else {
-            //TODO: Need to consider enum
-            arrayName = GeneratorUtils.convertOpenAPITypeToBallerina(items.getType().toLowerCase(
-                    Locale.ENGLISH).trim());
+            arrayName = GeneratorUtils.convertOpenAPITypeToBallerina(items);
+            if (items.getEnum() != null && !items.getEnum().isEmpty()) {
+                arrayName = OPEN_PAREN_TOKEN.stringValue() + arrayName + CLOSE_PAREN_TOKEN.stringValue();
+            }
         }
         Token arrayNameToken = createIdentifierToken(arrayName, GeneratorUtils.SINGLE_WS_MINUTIAE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
@@ -533,7 +547,7 @@ public class ParametersGenerator {
                 createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
         NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
 
-        if (items.getNullable() != null && items.getNullable()) {
+        if (items.getNullable() != null && items.getNullable() && items.getEnum() == null) {
             // generate -> int?[]
             OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(memberTypeDesc,
                     createToken(SyntaxKind.QUESTION_MARK_TOKEN));

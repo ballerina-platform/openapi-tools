@@ -98,6 +98,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.schema.MapSchemaNegativeTests"/>
             <class name="io.ballerina.openapi.generators.schema.IntegerDataTypeTests"/>
             <class name="io.ballerina.openapi.generators.schema.EnumGenerationTests"/>
+            <class name="io.ballerina.openapi.generators.schema.NegativeConstraintTests"/>
             <class name="io.ballerina.openapi.generators.testcases.BallerinaTestGeneratorTests"/>
             <class name="io.ballerina.openapi.generators.client.OneOfResponsesTests"/>
             <class name="io.ballerina.openapi.generators.openapi.DataTypeTests"/>

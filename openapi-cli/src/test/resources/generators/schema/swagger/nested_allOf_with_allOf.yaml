@@ -89,7 +89,6 @@ components:
           type: object
           properties:
             username:
-              pattern: ^[a-zA-Z0-9_\-]+$
               type: string
               description: Username of the account
             nickname:
