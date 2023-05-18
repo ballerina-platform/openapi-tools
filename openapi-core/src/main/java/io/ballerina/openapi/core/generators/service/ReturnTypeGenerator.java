@@ -174,8 +174,10 @@ public class ReturnTypeGenerator {
             String typeDescriptionTemplate = "#            %s (%s)%n";
             for (String description : returnDescriptions) {
                 String[] values = description.split("\\|");
+                // Replace new lines and tabs in the description by space.
+                String responseDescription = values[1].replaceAll("[\\r\\n\\t]", " ");
                 returnDescriptionForUnions.append(String.format(typeDescriptionTemplate,
-                        values[0], values[1]));
+                        values[0], responseDescription));
             }
             String dummyTypeWithDescription = returnDescriptionForUnions.toString() + "type a A;";
             ModuleMemberDeclarationNode moduleMemberDeclarationNode = NodeParser.parseModuleMemberDeclaration(

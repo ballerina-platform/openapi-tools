@@ -26,6 +26,7 @@ module io.ballerina.openapi.core {
     requires io.ballerina.stdlib.http;
     requires io.ballerina.cli;
     requires io.ballerina.tools.api;
+    requires io.ballerina.runtime;
     requires io.ballerina.formatter.core;
     requires io.ballerina.openapi.converter;
     requires io.swagger.v3.core;
@@ -40,6 +41,7 @@ module io.ballerina.openapi.core {
     requires swagger.parser.core;
     requires swagger.parser.v3;
     requires org.apache.commons.lang3;
+
     exports io.ballerina.openapi.core.generators.service;
     exports io.ballerina.openapi.core.model;
     exports io.ballerina.openapi.core.exception;
