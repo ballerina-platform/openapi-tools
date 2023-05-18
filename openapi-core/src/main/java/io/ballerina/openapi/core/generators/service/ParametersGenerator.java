@@ -444,7 +444,8 @@ public class ParametersGenerator {
             }
         } else {
             Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(schema),
-                    GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
+                    GeneratorUtils.SINGLE_WS_MINUTIAE,
+                    GeneratorUtils.SINGLE_WS_MINUTIAE);
             BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
             return createRequiredParameterNode(annotations, rTypeName, parameterName);
         }
