@@ -19,7 +19,7 @@ paths:
         - in: header
           name: x-request-id
           schema:
-            type: boolean
+            type: integer
           required: true
       responses:
         '200':
