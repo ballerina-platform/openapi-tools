@@ -163,11 +163,11 @@ public isolated client class Client {
     # + height - Height of the barcode generated image
     # + width - Width of the barcode generated image
     # + return - An image of the generated barcode or QR code
-    remote isolated function zebraGET(string format, string value, boolean? showlabel = (), int? height = (), int? width = ()) returns string|error {
+    remote isolated function zebraGET(string format, string value, boolean? showlabel = (), int? height = (), int? width = ()) returns byte[]|error {
         string resourcePath = string `/zebra`;
         map<anydata> queryParam = {"format": format, "value": value, "showlabel": showlabel, "height": height, "width": width, "apikey": self.apiKeyConfig.apikey};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        string response = check self.clientEp-> get(resourcePath);
+        byte[] response = check self.clientEp-> get(resourcePath);
         return response;
     }
 }

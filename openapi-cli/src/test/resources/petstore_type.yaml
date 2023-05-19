@@ -71,7 +71,6 @@ components:
       properties:
         petId:
           type: integer
-          format: int32
         name:
           type: string
         petType:

@@ -41,7 +41,6 @@ components:
         limit:
           description: The maximum number of items in the response (as set in the query or by default).
           items:
-           format: int32
            type: integer
           nullable: true
         next:
@@ -49,7 +48,6 @@ components:
           type: string
         offset:
           description: The offset of the items returned (as set in the query or by default)
-          format: int32
           type: integer
         previous:
           description: URL to the previous page of items. ( `null` if none) //anydata

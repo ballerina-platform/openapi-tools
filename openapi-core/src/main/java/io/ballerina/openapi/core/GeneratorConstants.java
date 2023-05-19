@@ -312,6 +312,8 @@ public class GeneratorConstants {
         typeMap.put("float", "float");
         typeMap.put("binary", "byte[]");
         typeMap.put("byte", "byte[]");
+        typeMap.put("int32", "int:Signed32");
+        typeMap.put("int64", "int");
         TYPE_MAP = Collections.unmodifiableMap(typeMap);
     }
 

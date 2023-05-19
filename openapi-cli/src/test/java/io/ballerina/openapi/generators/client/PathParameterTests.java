@@ -176,4 +176,19 @@ public class PathParameterTests {
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         ballerinaClientGenerator.generateSyntaxTree();
     }
+
+    @Test (description = "Generate Client for path parameter with integer int32 and int64 types")
+    public void testIntegerPathParameters() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RESDIR.resolve("swagger/integer_signed32_path_parameter.yaml");
+        Path expectedPath = RESDIR.resolve("ballerina/integer_signed32_path_parameter.bal");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI)
+                .withResourceMode(false).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
 }
