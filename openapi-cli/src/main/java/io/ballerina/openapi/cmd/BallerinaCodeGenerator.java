@@ -62,6 +62,8 @@ import static io.ballerina.openapi.cmd.CmdConstants.GenType.GEN_BOTH;
 import static io.ballerina.openapi.cmd.CmdConstants.GenType.GEN_CLIENT;
 import static io.ballerina.openapi.cmd.CmdConstants.GenType.GEN_SERVICE;
 import static io.ballerina.openapi.cmd.CmdConstants.OAS_PATH_SEPARATOR;
+import static io.ballerina.openapi.cmd.CmdConstants.OPENAPI_DEFAULT_LICENSE_HEADER;
+import static io.ballerina.openapi.cmd.CmdConstants.SERVICE_TYPE_LICENSE_HEADER;
 import static io.ballerina.openapi.cmd.CmdConstants.TEST_DIR;
 import static io.ballerina.openapi.cmd.CmdConstants.TEST_FILE_NAME;
 import static io.ballerina.openapi.cmd.CmdConstants.TYPE_FILE_NAME;
@@ -114,14 +116,15 @@ public class BallerinaCodeGenerator {
         String serviceContent = Formatter.format
                 (serviceGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile,
-                licenseHeader + serviceContent));
+                (licenseHeader.equals("") ? oasServiceMetadata.getLicense() : licenseHeader) + serviceContent));
 
         if (generateServiceType) {
             BallerinaServiceObjectGenerator ballerinaServiceObjectGenerator = new
                     BallerinaServiceObjectGenerator(serviceGenerator.getFunctionList());
             String serviceType = Formatter.format(ballerinaServiceObjectGenerator.generateSyntaxTree()).toString();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
-                    "service_type.bal", licenseHeader + serviceType));
+                    "service_type.bal", (licenseHeader.equals("") ? SERVICE_TYPE_LICENSE_HEADER :
+                    licenseHeader) + serviceType));
         }
         // Generate client.
         // Generate ballerina client remote.
@@ -131,19 +134,18 @@ public class BallerinaCodeGenerator {
                 .withNullable(nullable)
                 .withPlugin(false)
                 .withOpenAPI(openAPIDef)
-//                .withLicense(licenseHeader)
                 .withResourceMode(isResource).build();
 
         BallerinaClientGenerator clientGenerator = new BallerinaClientGenerator(oasClientConfig);
         String clientContent = Formatter.format(clientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME,
-                oasClientConfig.getLicense() + clientContent));
+                (licenseHeader.equals("") ? oasClientConfig.getLicense() : licenseHeader) + clientContent));
         String utilContent = Formatter.format(clientGenerator
                 .getBallerinaUtilGenerator()
                 .generateUtilSyntaxTree()).toString();
         if (!utilContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, srcPackage, UTIL_FILE_NAME,
-                    licenseHeader + utilContent));
+                    (licenseHeader.equals("")? OPENAPI_DEFAULT_LICENSE_HEADER : licenseHeader) + utilContent));
         }
 
         //Update type definition list
@@ -169,7 +171,7 @@ public class BallerinaCodeGenerator {
         }
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
-                    licenseHeader + schemaContent));
+                    (licenseHeader.equals("") ? OPENAPI_DEFAULT_LICENSE_HEADER : licenseHeader) + schemaContent));
         }
 
         // Generate test boilerplate code for test cases
@@ -177,7 +179,7 @@ public class BallerinaCodeGenerator {
             BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(clientGenerator);
             String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME,
-                    licenseHeader + testContent));
+                    (licenseHeader.equals("") ? OPENAPI_DEFAULT_LICENSE_HEADER : licenseHeader) + testContent));
 
             String configContent = ballerinaTestGenerator.getConfigTomlFile();
             if (!configContent.isBlank()) {
@@ -346,7 +348,6 @@ public class BallerinaCodeGenerator {
                 .withPlugin(false)
                 .withOpenAPI(openAPIDef)
                 .withResourceMode(isResource)
-//                .withLicense(licenseHeader)
                 .build();
         //Take default DO NOT modify
         licenseHeader = licenseHeader.equals("") ? oasClientConfig.getLicense() : licenseHeader;
