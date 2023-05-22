@@ -222,6 +222,30 @@ public class FunctionSignatureNodeTests {
                 .get("/dogs").getGet(), new ArrayList<>());
     }
 
+    @Test(description = "Test for generate function signature for an integer request")
+    public void testNumericFunctionSignatureJSONPayload() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/integer_request_payload.yaml"));
+        FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
+                new BallerinaTypesGenerator(openAPI), new ArrayList<>(), false);
+        FunctionSignatureNode petSignature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
+                .get("/pets").getPost(), new ArrayList<>());
+        FunctionSignatureNode ownerSignature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
+                .get("/owners").getPost(), new ArrayList<>());
+        SeparatedNodeList<ParameterNode> parameters = petSignature.parameters();
+        Assert.assertFalse(parameters.isEmpty());
+        RequiredParameterNode petParams = (RequiredParameterNode) parameters.get(0);
+        RequiredParameterNode ownerParams = (RequiredParameterNode) ownerSignature.parameters().get(0);
+
+        Assert.assertEquals(petParams.paramName().orElseThrow().text(), "payload");
+        Assert.assertEquals(petParams.typeName().toString(), "int:Signed32");
+        Assert.assertEquals(ownerParams.typeName().toString(), "int");
+
+        ReturnTypeDescriptorNode petReturnTypeNode = petSignature.returnTypeDesc().orElseThrow();
+        Assert.assertEquals(petReturnTypeNode.type().toString(), "int:Signed32|error");
+        ReturnTypeDescriptorNode ownerReturnTypeNode = ownerSignature.returnTypeDesc().orElseThrow();
+        Assert.assertEquals(ownerReturnTypeNode.type().toString(), "int|error");
+    }
+
     @AfterTest
     private void deleteGeneratedFiles() {
         try {

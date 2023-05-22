@@ -22,7 +22,7 @@ service / on ep0 {
     # + return - returns can be any of following types
     # http:BadRequest (Invalid status value)
     # http:Response (successful operation)
-    resource function get pet/findByStatus(string status = "available") returns http:BadRequest|http:Response {
+    resource function get pet/findByStatus("available"|"pending"|"sold" status = "available") returns http:BadRequest|http:Response {
     }
     # Description
     #

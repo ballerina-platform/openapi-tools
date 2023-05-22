@@ -92,6 +92,17 @@ paths:
               - OFFSET
               - EPOCH
               - LEET
+        - description: Time Zones of attendees
+          in: header
+          required: true
+          name: X-Time-Zones
+          schema:
+            type: array
+            items:
+              enum:
+                - IST
+                - GMT
+                - UTC
         - description: "Meeting location"
           in: query
           name: location

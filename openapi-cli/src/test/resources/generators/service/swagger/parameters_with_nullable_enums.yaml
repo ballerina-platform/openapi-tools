@@ -1,0 +1,154 @@
+openapi: 3.0.3
+info:
+  title: Swagger Petstore - OpenAPI 3.0
+  description: |-
+    This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about
+    Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!
+    You can now help us improve the API whether it's by making changes to the definition itself or to the code.
+    That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
+
+    _If you're looking for the Swagger 2.0/OAS 2.0 version of Petstore, then click [here](https://editor.swagger.io/?url=https://petstore.swagger.io/v2/swagger.yaml). Alternatively, you can load via the `Edit > Load Petstore OAS 2.0` menu option!_
+    
+    Some useful links:
+    - [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)
+    - [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: https://petstore3.swagger.io/api/v3
+tags:
+  - name: pet
+    description: Everything about your Pets
+    externalDocs:
+      description: Find out more
+      url: http://swagger.io
+  - name: store
+    description: Access to Petstore orders
+    externalDocs:
+      description: Find out more about our store
+      url: http://swagger.io
+  - name: user
+    description: Operations about user
+paths:
+  /users/meetings:
+    get:
+      description: >-
+        List all the meetings that were scheduled for a user (meeting
+        host). This API only supports scheduled meetings and thus, details on
+        instant meetings are not returned via this API.
+
+        **Scopes:** `meeting:read:admin` `meeting:read`
+        
+         **[Rate Limit Label](https://marketplace.zoom.us/docs/api-reference/rate-limits#rate-limits):** `Medium`
+      summary: List meetings
+      operationId: listMeetings
+      parameters:
+        - description: "The meeting types. Scheduled, live or upcoming"
+          in: query
+          name: type
+          schema:
+#            default: live
+            enum:
+              - scheduled
+              - live
+              - upcoming
+              - null
+            type: string
+            nullable: true
+        - description: "Status values that need to be considered for filter"
+          in: query
+          name: status
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - "available"
+                - "pending"
+                - null
+        - description: Date time format (cf. [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) & [leettime.de](http://leettime.de/))
+          in: header
+          name: X-Date-Format
+          schema:
+            enum:
+              - UTC
+              - LOCAL
+              - OFFSET
+              - EPOCH
+              - LEET
+              - null
+        - description: "Meeting location"
+          in: query
+          name: location
+          schema:
+            $ref: '#/components/schemas/RoomNo'
+        - $ref: "#/components/parameters/responseFormat"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingList'
+          description: "HTTP Status Code:200. List of meetings returned."
+        "404":
+          description: "HTTP Status Code:404 User ID not found. Error Code:1001, User not exist or not belong to this account."
+      tags:
+        - Meetings
+components:
+  parameters:
+    responseFormat:
+      description: The response format you would like
+      in: query
+      name: format
+      schema:
+        enum:
+          - json
+          - jsonp
+          - msgpack
+          - html
+          - null
+        type: string
+  schemas:
+    RoomNo:
+#      How can we address when default value is there in a reusable enum
+      default: R5
+      enum:
+        - R1
+        - R3
+        - R5
+        - null
+      type: string
+    MeetingTypes:
+      type: string
+      default: live
+      enum:
+        - "scheduled"
+        - "live"
+        - "upcoming"
+    MeetingList:
+      description: List of meetings
+      title: Group List
+      type: object
+      properties:
+        meetings:
+          description: List of Meeting objects.
+          items:
+            $ref: '#/components/schemas/MeetingObject'
+          type: array
+    MeetingObject:
+      properties:
+        topic:
+          description: Meeting topic.
+          type: string
+        type:
+          description: "Meeting Type: 1 - Instant meeting. 2 - Scheduled meeting. 3 - Recurring meeting with no fixed time. 8 - Recurring meeting with fixed time."
+          type: integer
+      type: object

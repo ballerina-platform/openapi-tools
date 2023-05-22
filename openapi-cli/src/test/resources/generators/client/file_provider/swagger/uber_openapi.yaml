@@ -196,13 +196,11 @@ paths:
           description: Offset the list of returned results by this amount. Default is zero.
           schema:
             type: integer
-            format: int32
         - name: limit
           in: query
           description: Number of items to retrieve. Default is 5, maximum is 100.
           schema:
             type: integer
-            format: int32
       tags:
         - User
       responses:

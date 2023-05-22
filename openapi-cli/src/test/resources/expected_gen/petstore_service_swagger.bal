@@ -24,7 +24,7 @@ service /v2 on ep0 {
     # + return - returns can be any of following types
     # Pet[] (successful operation)
     # http:BadRequest (Invalid status value)
-    resource function get pet/findByStatus(string[] status) returns Pet[]|http:BadRequest {
+    resource function get pet/findByStatus(("available"|"pending"|"sold")[] status) returns Pet[]|http:BadRequest {
     }
     # Finds Pets by tags
     #

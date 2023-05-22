@@ -60,6 +60,17 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "       ballerina-openapi - Generate a Ballerina service"));
     }
 
+    @Test(description = "Test openapi command with help flag")
+    public void testOpenAPICmdHelpWithBalTools() throws IOException {
+        String[] args = {"help", "openapi"};
+        OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(openApiCommand).parseArgs(args);
+        openApiCommand.execute();
+        String output = readOutput(true);
+        Assert.assertTrue(output.contains("NAME\n" +
+                "       ballerina-openapi - Generate a Ballerina service"));
+    }
+
     @Test(description = "Test openapi command without help flag")
     public void testOpenAPICmdHelpWithoutFlag() throws IOException {
         OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir, false);

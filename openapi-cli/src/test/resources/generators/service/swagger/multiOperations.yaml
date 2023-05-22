@@ -52,7 +52,6 @@ paths:
           required: false
           schema:
             type: integer
-            format: int32
       responses:
         '200':
           description: An paged array of pets

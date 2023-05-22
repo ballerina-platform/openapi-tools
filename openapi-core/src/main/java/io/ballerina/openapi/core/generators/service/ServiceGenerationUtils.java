@@ -166,7 +166,8 @@ public class ServiceGenerationUtils {
                 return getTypeDescNodeForArraySchema((ArraySchema) schema);
             } else if (isPrimitiveType) {
                 //This returns identifier node for the types: int, float, decimal, boolean, string
-                IdentifierToken identifierToken = createIdentifierToken(schemaType,
+                IdentifierToken identifierToken = createIdentifierToken(
+                        GeneratorUtils.convertOpenAPITypeToBallerina(schema),
                         AbstractNodeFactory.createEmptyMinutiaeList(), GeneratorUtils.SINGLE_WS_MINUTIAE);
                 return Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
             } else {

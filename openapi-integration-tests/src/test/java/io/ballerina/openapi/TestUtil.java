@@ -36,7 +36,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static io.ballerina.openapi.extension.build.ValidatorTests.WHITESPACE_PATTERN;
 import static io.ballerina.openapi.idl.client.IDLClientGenPluginTests.DISTRIBUTION_FILE_NAME;
 import static io.ballerina.openapi.idl.client.IDLClientGenPluginTests.TEST_RESOURCE;
 
@@ -196,5 +199,18 @@ public class TestUtil {
             }
         });
         return matchingFiles;
+    }
+
+    public static void assertOnErrorStream(Process process, String msg) throws IOException {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+            Stream<String> logLines = br.lines();
+            String generatedLog = logLines.collect(Collectors.joining("\n"));
+            logLines.close();
+            String formattedGeneratedLog = (generatedLog.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            String formattedMessage = msg.trim().replaceAll(WHITESPACE_PATTERN, "");
+            Assert.assertTrue(formattedGeneratedLog.contains(formattedMessage),
+                    String.format("compiler output doesn't contain the expected" +
+                            " output: %s : generated output : %s", msg, generatedLog));
+        }
     }
 }

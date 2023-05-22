@@ -65,7 +65,11 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultablePar
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_PARAM_COMMENT;
+import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
+import static io.ballerina.openapi.core.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_103;
@@ -84,10 +88,9 @@ public class ParametersGenerator {
     private boolean isNullableRequired;
     private final List<Node> requiredParams;
     private final List<Node> defaultableParams;
-
     private final OpenAPI openAPI;
 
-    private static final List<String> queryParamSupportedTypes =
+    private static final List<String> paramSupportedTypes =
             new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
                     GeneratorConstants.STRING, GeneratorConstants.BOOLEAN));
 
@@ -177,11 +180,13 @@ public class ParametersGenerator {
     private ParameterNode handleHeader(Parameter parameter) throws BallerinaOpenApiException {
 
         Schema<?> schema = parameter.getSchema();
+        String headerType;
         TypeDescriptorNode headerTypeName;
         IdentifierToken parameterName = createIdentifierToken(GeneratorUtils.escapeIdentifier(parameter.getName()
                         .toLowerCase(Locale.ENGLISH)), AbstractNodeFactory.createEmptyMinutiaeList(),
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
-        if (schema.getType() == null) {
+
+        if (schema.getType() == null && schema.get$ref() == null) {
             // Header example:
             // 01.<pre>
             //       in: header
@@ -189,57 +194,87 @@ public class ParametersGenerator {
             //       schema: {}
             //  </pre>
             throw new BallerinaOpenApiException(String.format(OAS_SERVICE_106.getDescription(), parameter.getName()));
-        } else {
-            if (!schema.getType().equals(GeneratorConstants.STRING) && !(schema instanceof ArraySchema)) {
-                throw new BallerinaOpenApiException(String.format(OAS_SERVICE_105.getDescription(),
-                        parameter.getName(), schema.getType()));
-            } else if (schema instanceof ArraySchema) {
-                Schema<?> items = ((ArraySchema) schema).getItems();
-                if (items.getType() == null) {
-                    throw new BallerinaOpenApiException(String.format(OAS_SERVICE_104.getDescription(),
-                            parameter.getName()));
-                } else if (!items.getType().equals(GeneratorConstants.STRING)) {
-                    throw new BallerinaOpenApiException(String.format(OAS_SERVICE_103.getDescription(),
-                            parameter.getName(), items.getType()));
-                }
-                BuiltinSimpleNameReferenceNode headerArrayItemTypeName = createBuiltinSimpleNameReferenceNode(
-                        null, createIdentifierToken(GeneratorConstants.STRING));
-                ArrayDimensionNode dimensionNode =
-                        NodeFactory.createArrayDimensionNode(createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
-                                createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-                NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
-                headerTypeName = createArrayTypeDescriptorNode(headerArrayItemTypeName, nodeList);
+        } else if (schema.get$ref() != null) {
+            String type = getValidName(extractReferenceType(schema.get$ref()), true);
+            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
+            if (paramSupportedTypes.contains(refSchema.getType()) || refSchema instanceof ArraySchema) {
+                headerType = type;
             } else {
-                headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
-                        GeneratorUtils.convertOpenAPITypeToBallerina(schema.getType().trim()),
-                        GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
+                throw new BallerinaOpenApiException(String.format(OAS_SERVICE_105.getDescription(),
+                        parameter.getName(), refSchema.getType()));
             }
-            // Create annotation for header
-            // TODO: This code block is to be enabled when handle the headers handle additional parameters
-            // MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(
-            //        createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
-            //        createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
-
-            AnnotationNode headerNode = getAnnotationNode(GeneratorConstants.HEADER_ANNOT, null);
-            NodeList<AnnotationNode> headerAnnotations = createNodeList(headerNode);
-            // Handle optional values in headers
-            if (!parameter.getRequired()) {
-                // If optional it behaves like default value with null ex:(string? header)
-                headerTypeName = createOptionalTypeDescriptorNode(headerTypeName,
-                        createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-            }
-            // Handle default values in headers
-            if (schema.getDefault() != null) {
-                return getDefaultableHeaderNode(schema, headerTypeName, parameterName, headerAnnotations);
-            }
-            // Handle header with parameter required true and nullable ture ex: (string? header)
-            if (parameter.getRequired() && schema.getNullable() != null && schema.getNullable().equals(true)) {
-                isNullableRequired = true;
-                headerTypeName = createOptionalTypeDescriptorNode(headerTypeName,
-                        createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-            }
-            return createRequiredParameterNode(headerAnnotations, headerTypeName, parameterName);
+        } else if (paramSupportedTypes.contains(schema.getType()) || schema instanceof ArraySchema) {
+            headerType = convertOpenAPITypeToBallerina(schema).trim();
+        } else {
+            throw new BallerinaOpenApiException(String.format(OAS_SERVICE_105.getDescription(),
+                    parameter.getName(), schema.getType()));
         }
+
+        if (schema instanceof ArraySchema) {
+            // TODO: Support nested arrays
+            Schema<?> items = ((ArraySchema) schema).getItems();
+            String arrayType;
+            if (items.getType() == null && items.get$ref() == null) {
+                throw new BallerinaOpenApiException(String.format(OAS_SERVICE_104.getDescription(),
+                        parameter.getName()));
+            } else if (items.get$ref() != null) {
+                String type = getValidName(extractReferenceType(items.get$ref()), true);
+                Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
+                if (paramSupportedTypes.contains(refSchema.getType())) {
+                    arrayType = type;
+                } else {
+                    throw new BallerinaOpenApiException(String.format(OAS_SERVICE_103.getDescription(),
+                            parameter.getName(), type));
+                }
+            } else if (!paramSupportedTypes.contains(items.getType())) {
+                throw new BallerinaOpenApiException(String.format(OAS_SERVICE_103.getDescription(),
+                        parameter.getName(), items.getType()));
+            } else if (items.getEnum() != null && !items.getEnum().isEmpty()) {
+                arrayType = OPEN_PAREN_TOKEN.stringValue() + convertOpenAPITypeToBallerina(items) +
+                        CLOSE_PAREN_TOKEN.stringValue();
+            } else {
+                arrayType = GeneratorUtils.convertOpenAPITypeToBallerina(items);
+            }
+            BuiltinSimpleNameReferenceNode headerArrayItemTypeName = createBuiltinSimpleNameReferenceNode(
+                    null, createIdentifierToken(arrayType));
+            ArrayDimensionNode dimensionNode =
+                    NodeFactory.createArrayDimensionNode(createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
+                            createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+            NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
+            headerTypeName = createArrayTypeDescriptorNode(headerArrayItemTypeName, nodeList);
+        } else {
+            headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
+                    headerType, GeneratorUtils.SINGLE_WS_MINUTIAE,
+                    GeneratorUtils.SINGLE_WS_MINUTIAE));
+        }
+        // Create annotation for header
+        // TODO: This code block is to be enabled when handle the headers handle additional parameters
+        // MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(
+        //        createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
+        //        createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+
+        AnnotationNode headerNode = getAnnotationNode(GeneratorConstants.HEADER_ANNOT, null);
+        NodeList<AnnotationNode> headerAnnotations = createNodeList(headerNode);
+        // Handle optional values in headers
+        if (!parameter.getRequired()) {
+            // If optional it behaves like default value with null ex:(string? header)
+            // If schema has an enum and that has a null values then the type is already nill. Hence, the check.
+            headerTypeName = headerTypeName.toString().trim().endsWith(NILLABLE) ? headerTypeName :
+                    createOptionalTypeDescriptorNode(headerTypeName,
+                            createToken(SyntaxKind.QUESTION_MARK_TOKEN));
+        }
+        // Handle default values in headers
+        if (schema.getDefault() != null) {
+            return getDefaultableHeaderNode(schema, headerTypeName, parameterName, headerAnnotations);
+        }
+        // Handle header with parameter required true and nullable ture ex: (string? header)
+        if (parameter.getRequired() && schema.getNullable() != null && schema.getNullable().equals(true)) {
+            isNullableRequired = true;
+            headerTypeName = headerTypeName.toString().trim().endsWith(NILLABLE) ? headerTypeName :
+                    createOptionalTypeDescriptorNode(headerTypeName,
+                            createToken(SyntaxKind.QUESTION_MARK_TOKEN));
+        }
+        return createRequiredParameterNode(headerAnnotations, headerTypeName, parameterName);
     }
 
     /**
@@ -281,7 +316,7 @@ public class ParametersGenerator {
             String type = getValidName(extractReferenceType(schema.get$ref()), true);
             Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
             // TODO : Due to bug in http module, reference params with `nullable: true` are not allowed
-            if (queryParamSupportedTypes.contains(refSchema.getType()) &&
+            if (paramSupportedTypes.contains(refSchema.getType()) &&
                     !((refSchema.getNullable() != null) && refSchema.getNullable())) {
                 return handleReferencedQueryParameter(parameter, type, refSchema, annotations, parameterName);
             } else {
@@ -388,17 +423,16 @@ public class ParametersGenerator {
                 throw new BallerinaOpenApiException(String.format(messages.getDescription(), "object"));
             }
         } else {
-            //TODO: Uncomment after the fix from http module is provided
-//            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(schema),
-//                    GeneratorUtils.SINGLE_WS_MINUTIAE,
-//                    GeneratorUtils.SINGLE_WS_MINUTIAE);
-            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
-                            schema.getType().toLowerCase(Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE,
+            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(schema),
+                    GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
-            BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
-            OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(rTypeName,
-                    createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-            return createRequiredParameterNode(annotations, optionalNode, parameterName);
+            TypeDescriptorNode queryParamType = createBuiltinSimpleNameReferenceNode(null, name);
+            // If schema has an enum with null value, the type is already nil. Hence, the check.
+            if (!name.text().trim().endsWith(NILLABLE)) {
+                queryParamType = createOptionalTypeDescriptorNode(queryParamType,
+                        createToken(SyntaxKind.QUESTION_MARK_TOKEN));
+            }
+            return createRequiredParameterNode(annotations, queryParamType, parameterName);
         }
     }
 
@@ -442,12 +476,8 @@ public class ParametersGenerator {
                 throw new BallerinaOpenApiException(messages.getDescription());
             }
         } else {
-            //TODO: Uncomment after the fix from http module is provided
-//            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
-//                            schema), GeneratorUtils.SINGLE_WS_MINUTIAE,
-//                    GeneratorUtils.SINGLE_WS_MINUTIAE);
-            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
-                            schema.getType().toLowerCase(Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE,
+            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(schema),
+                    GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
             BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
             return createRequiredParameterNode(annotations, rTypeName, parameterName);
@@ -490,12 +520,8 @@ public class ParametersGenerator {
                 throw new BallerinaOpenApiException(messages.getDescription());
             }
         } else {
-            //TODO: Uncomment after the fix from http module is provided
-//            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
-//                            schema), GeneratorUtils.SINGLE_WS_MINUTIAE,
-//                    GeneratorUtils.SINGLE_WS_MINUTIAE);
-            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
-                            schema.getType().toLowerCase(Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE,
+            Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(schema),
+                    GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
             BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
             if (schema.getType().equals(GeneratorConstants.STRING)) {
@@ -517,16 +543,17 @@ public class ParametersGenerator {
         if (items.get$ref() != null) {
             String type = getValidName(extractReferenceType(items.get$ref()), true);
             Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
-            if (queryParamSupportedTypes.contains(refSchema.getType())) {
+            if (paramSupportedTypes.contains(refSchema.getType())) {
                 arrayName = type;
             } else {
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
                 throw new BallerinaOpenApiException(String.format(messages.getDescription(), type));
             }
         } else {
-            //TODO: Need to consider enum
-            arrayName = GeneratorUtils.convertOpenAPITypeToBallerina(items.getType().toLowerCase(
-                    Locale.ENGLISH).trim());
+            arrayName = GeneratorUtils.convertOpenAPITypeToBallerina(items);
+            if (items.getEnum() != null && !items.getEnum().isEmpty()) {
+                arrayName = OPEN_PAREN_TOKEN.stringValue() + arrayName + CLOSE_PAREN_TOKEN.stringValue();
+            }
         }
         Token arrayNameToken = createIdentifierToken(arrayName, GeneratorUtils.SINGLE_WS_MINUTIAE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
@@ -536,7 +563,7 @@ public class ParametersGenerator {
                 createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
         NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
 
-        if (items.getNullable() != null && items.getNullable()) {
+        if (items.getNullable() != null && items.getNullable() && items.getEnum() == null) {
             // generate -> int?[]
             OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(memberTypeDesc,
                     createToken(SyntaxKind.QUESTION_MARK_TOKEN));

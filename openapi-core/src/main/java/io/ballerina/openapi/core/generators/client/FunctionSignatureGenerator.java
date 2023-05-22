@@ -23,6 +23,7 @@ import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.LiteralValueToken;
+import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.NilLiteralNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -188,8 +189,8 @@ public class FunctionSignatureGenerator {
         if (parameters != null) {
             for (Parameter parameter : parameters) {
                 if (parameter.getDescription() != null && !parameter.getDescription().isBlank()) {
-                    MarkdownParameterDocumentationLineNode paramAPIDoc =
-                            DocCommentsGenerator.createAPIParamDoc(getValidName(
+                    MarkdownDocumentationNode paramAPIDoc =
+                            DocCommentsGenerator.createAPIParamDocFromSring(getValidName(
                                     parameter.getName(), false), parameter.getDescription());
                     remoteFunctionDoc.add(paramAPIDoc);
                 }
@@ -545,8 +546,8 @@ public class FunctionSignatureGenerator {
                 RequiredParameterNode payload = createRequiredParameterNode(
                         createNodeList(annotationNodes), typeName, paramNameToken);
                 if (requestBody.getDescription() != null && !requestBody.getDescription().isBlank()) {
-                    MarkdownParameterDocumentationLineNode paramAPIDoc =
-                            DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(paramName),
+                    MarkdownDocumentationNode paramAPIDoc =
+                            DocCommentsGenerator.createAPIParamDocFromSring(escapeIdentifier(paramName),
                                     requestBody.getDescription().split("\n")[0]);
                     requestBodyDoc.add(paramAPIDoc);
                 }
