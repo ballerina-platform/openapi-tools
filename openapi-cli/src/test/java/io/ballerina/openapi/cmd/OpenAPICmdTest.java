@@ -281,54 +281,6 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
     }
 
-    @Test(description = "Test openapi to ballerina generation with license headers")
-    public void testClientGenerationWithAutoLicenseHeaders() throws IOException {
-        Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
-        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--mode", "client"};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
-        new CommandLine(cmd).parseArgs(args);
-        cmd.execute();
-
-        if (Files.exists(this.tmpDir.resolve("client.bal")) &&
-                Files.exists(this.tmpDir.resolve("utils.bal")) &&
-                Files.exists(this.tmpDir.resolve("types.bal"))) {
-            try {
-                boolean isEqualTypes = compareFiles("schema.bal", "types.bal");
-                boolean isEqualClient = compareFiles("client.bal", "client.bal");
-                boolean isEqualUtils = compareFiles("utils_for_client_generation.bal", "utils.bal");
-                if (isEqualTypes && isEqualClient && isEqualUtils) {
-                    Assert.assertTrue(true);
-                    deleteGeneratedFiles(false);
-                } else {
-                    Assert.fail("Expected content and actual generated content is mismatched for: "
-                            + petstoreYaml.toString());
-                    deleteGeneratedFiles(false);
-                }
-            } catch (IOException e) {
-                Assert.fail(e.getMessage());
-            }
-        } else {
-            Assert.fail("Code generation failed. : " + readOutput(true));
-        }
-    }
-
-
-
-
-    /**
-     * Compare two files
-     */
-    private boolean compareFiles(String expectedFileName, String generatedFileName) throws IOException {
-        Stream<String> expectedFile = Files.lines(resourceDir.resolve(Paths.get("expected_gen",
-                expectedFileName)));
-        String expectedContent = expectedFile.collect(Collectors.joining(LINE_SEPARATOR));
-        Stream<String> types = Files.lines(this.tmpDir.resolve(generatedFileName));
-        String generatedFile = types.collect(Collectors.joining(LINE_SEPARATOR));
-        generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
-        expectedContent = (expectedContent.trim()).replaceAll("\\s+", "");
-        return expectedContent.equals(generatedFile);
-    }
-
     @Test(description = "Test openapi to ballerina generation with no new line license headers")
     public void testGenerationWithLicenseHeadersWithOneNewLine() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));

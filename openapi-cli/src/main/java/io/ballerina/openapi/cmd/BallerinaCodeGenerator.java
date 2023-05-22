@@ -57,13 +57,13 @@ import java.util.stream.Collectors;
 import static io.ballerina.openapi.cmd.CmdConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.cmd.CmdConstants.CONFIG_FILE_NAME;
 import static io.ballerina.openapi.cmd.CmdConstants.DEFAULT_CLIENT_PKG;
+import static io.ballerina.openapi.cmd.CmdConstants.DEFAULT_LICENSE_HEADER;
 import static io.ballerina.openapi.cmd.CmdConstants.DEFAULT_MOCK_PKG;
+import static io.ballerina.openapi.cmd.CmdConstants.DO_NOT_MODIFY_LICENSE_HEADER;
 import static io.ballerina.openapi.cmd.CmdConstants.GenType.GEN_BOTH;
 import static io.ballerina.openapi.cmd.CmdConstants.GenType.GEN_CLIENT;
 import static io.ballerina.openapi.cmd.CmdConstants.GenType.GEN_SERVICE;
 import static io.ballerina.openapi.cmd.CmdConstants.OAS_PATH_SEPARATOR;
-import static io.ballerina.openapi.cmd.CmdConstants.OPENAPI_DEFAULT_LICENSE_HEADER;
-import static io.ballerina.openapi.cmd.CmdConstants.SERVICE_TYPE_LICENSE_HEADER;
 import static io.ballerina.openapi.cmd.CmdConstants.TEST_DIR;
 import static io.ballerina.openapi.cmd.CmdConstants.TEST_FILE_NAME;
 import static io.ballerina.openapi.cmd.CmdConstants.TYPE_FILE_NAME;
@@ -123,7 +123,7 @@ public class BallerinaCodeGenerator {
                     BallerinaServiceObjectGenerator(serviceGenerator.getFunctionList());
             String serviceType = Formatter.format(ballerinaServiceObjectGenerator.generateSyntaxTree()).toString();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
-                    "service_type.bal", (licenseHeader.equals("") ? SERVICE_TYPE_LICENSE_HEADER :
+                    "service_type.bal", (licenseHeader.equals("") ? DO_NOT_MODIFY_LICENSE_HEADER :
                     licenseHeader) + serviceType));
         }
         // Generate client.
@@ -145,7 +145,7 @@ public class BallerinaCodeGenerator {
                 .generateUtilSyntaxTree()).toString();
         if (!utilContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, srcPackage, UTIL_FILE_NAME,
-                    (licenseHeader.equals("")? OPENAPI_DEFAULT_LICENSE_HEADER : licenseHeader) + utilContent));
+                    (licenseHeader.equals("") ? DEFAULT_LICENSE_HEADER : licenseHeader) + utilContent));
         }
 
         //Update type definition list
@@ -171,7 +171,7 @@ public class BallerinaCodeGenerator {
         }
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
-                    (licenseHeader.equals("") ? OPENAPI_DEFAULT_LICENSE_HEADER : licenseHeader) + schemaContent));
+                    (licenseHeader.equals("") ? DEFAULT_LICENSE_HEADER : licenseHeader) + schemaContent));
         }
 
         // Generate test boilerplate code for test cases
@@ -179,7 +179,7 @@ public class BallerinaCodeGenerator {
             BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(clientGenerator);
             String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME,
-                    (licenseHeader.equals("") ? OPENAPI_DEFAULT_LICENSE_HEADER : licenseHeader) + testContent));
+                    (licenseHeader.equals("") ? DEFAULT_LICENSE_HEADER : licenseHeader) + testContent));
 
             String configContent = ballerinaTestGenerator.getConfigTomlFile();
             if (!configContent.isBlank()) {
@@ -288,8 +288,6 @@ public class BallerinaCodeGenerator {
             if (!file.getType().isOverwritable()) {
                 filePath = implPath.resolve(file.getFileName());
                 if (Files.notExists(filePath)) {
-//                    String fileContent = file.getFileName().endsWith(".bal") ?
-//                            (licenseHeader + file.getContent()) : file.getContent();
                     String fileContent = file.getContent();
                     CodegenUtils.writeFile(filePath, fileContent);
                 }
@@ -305,8 +303,6 @@ public class BallerinaCodeGenerator {
                 } else {
                     filePath = Paths.get(srcPath.resolve(file.getFileName()).toFile().getCanonicalPath());
                 }
-//                String fileContent = file.getFileName().endsWith(".bal") ?
-//                        (licenseHeader + file.getContent()) : file.getContent();
                 String fileContent = file.getContent();
                 CodegenUtils.writeFile(filePath, fileContent);
             }

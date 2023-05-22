@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -123,7 +123,7 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
     @Test(description = "Test openapi to ballerina generation with license headers")
     public void testUserGivenLicenseHeader() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
-        Path licenseHeader = resourceDir.resolve(Paths.get("license.txt"));
+        Path licenseHeader = resourceDir.resolve(Paths.get("expected_gen/licenses/license.txt"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
                 licenseHeader.toString(), "--with-service-type"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
@@ -152,7 +152,7 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
     }
 
     /**
-     * Compare two files
+     * Compare two files.
      */
     private void compareFiles(String expectedFileName, String generatedFileName) throws IOException {
         Stream<String> expectedFile = Files.lines(resourceDir.resolve(Paths.get("expected_gen/licenses",
@@ -162,7 +162,7 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
         String generatedFile = types.collect(Collectors.joining(LINE_SEPARATOR));
         generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
         expectedContent = (expectedContent.trim()).replaceAll("\\s+", "");
-        Assert.assertEquals(expectedContent, generatedFile);
+        Assert.assertEquals(generatedFile, expectedContent);
     }
 
     // Delete the generated files

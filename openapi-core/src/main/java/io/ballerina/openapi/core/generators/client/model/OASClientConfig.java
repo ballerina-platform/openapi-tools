@@ -20,7 +20,6 @@ package io.ballerina.openapi.core.generators.client.model;
 import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 
-
 /**
  * This class stores metadata that related to client code generations.
  *
@@ -107,11 +106,10 @@ public class OASClientConfig {
             return this;
         }
 
-//        public Builder withLicense(String license) {
-////            this.license = Objects.equals(license, "") ? this.license + LINE_SEPARATOR :  this.license + license;
-//            this.license = license;
-//            return this;
-//        }
+        public Builder withLicense(String license) {
+            this.license = license;
+            return this;
+        }
 
         public OASClientConfig build() {
             return new OASClientConfig(this);
