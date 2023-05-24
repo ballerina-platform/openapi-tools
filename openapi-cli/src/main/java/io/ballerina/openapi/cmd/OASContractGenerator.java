@@ -54,11 +54,8 @@ import static io.ballerina.openapi.converter.utils.CodegenUtils.resolveContractF
  */
 
 public class OASContractGenerator {
-    private SyntaxTree syntaxTree;
-    private SemanticModel semanticModel;
-    private Project project;
-    private List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
-    private PrintStream outStream = System.out;
+    private final List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
+    private final PrintStream outStream = System.out;
 
     /**
      * Initialize constructor.
@@ -81,7 +78,7 @@ public class OASContractGenerator {
     public void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, String serviceName,
                                                   Boolean needJson) {
         // Load project instance for single ballerina file
-        project = ProjectLoader.loadProject(servicePath);
+        Project project = ProjectLoader.loadProject(servicePath);
         DiagnosticResult diagnosticsFromCodeGenAndModify = project.currentPackage().runCodeGenAndModifyPlugins();
         boolean hasErrorsFromCodeGenAndModify = diagnosticsFromCodeGenAndModify.diagnostics().stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
@@ -102,16 +99,20 @@ public class OASContractGenerator {
         Optional<Path> path = project.documentPath(docId);
         Path inputPath = path.orElse(null);
 
-        syntaxTree = doc.syntaxTree();
+        SyntaxTree syntaxTree = doc.syntaxTree();
         PackageCompilation compilation = project.currentPackage().getCompilation();
         boolean hasCompilationErrors = compilation.diagnosticResult()
                 .diagnostics().stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         if (hasCompilationErrors || hasErrorsFromCodeGenAndModify) {
-            // if there are any compilation errors, do not proceed
+            // if there are any compilation errors, do not proceed and those diagnostic will display to user
+            outStream.println("OpenAPI contract generation failed due to Ballerina code has compilation error/s. : \n");
+            compilation.diagnosticResult().diagnostics().forEach(diagnostic -> {
+                outStream.println(diagnostic.toString());
+            });
             return;
         }
-        semanticModel = compilation.getSemanticModel(docId.moduleId());
+        SemanticModel semanticModel = compilation.getSemanticModel(docId.moduleId());
         List<OASResult> openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(project, syntaxTree,
                 semanticModel, serviceName, needJson, inputPath);
 
