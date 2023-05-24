@@ -116,14 +116,14 @@ public class BallerinaCodeGenerator {
         String serviceContent = Formatter.format
                 (serviceGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile,
-                (licenseHeader.equals("") ? oasServiceMetadata.getLicense() : licenseHeader) + serviceContent));
+                (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + serviceContent));
 
         if (generateServiceType) {
             BallerinaServiceObjectGenerator ballerinaServiceObjectGenerator = new
                     BallerinaServiceObjectGenerator(serviceGenerator.getFunctionList());
             String serviceType = Formatter.format(ballerinaServiceObjectGenerator.generateSyntaxTree()).toString();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
-                    "service_type.bal", (licenseHeader.equals("") ? DO_NOT_MODIFY_FILE_HEADER :
+                    "service_type.bal", (licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
                     licenseHeader) + serviceType));
         }
         // Generate client.
@@ -139,13 +139,13 @@ public class BallerinaCodeGenerator {
         BallerinaClientGenerator clientGenerator = new BallerinaClientGenerator(oasClientConfig);
         String clientContent = Formatter.format(clientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME,
-                (licenseHeader.equals("") ? oasClientConfig.getLicense() : licenseHeader) + clientContent));
+                (licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER : licenseHeader) + clientContent));
         String utilContent = Formatter.format(clientGenerator
                 .getBallerinaUtilGenerator()
                 .generateUtilSyntaxTree()).toString();
         if (!utilContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, srcPackage, UTIL_FILE_NAME,
-                    (licenseHeader.equals("") ? DEFAULT_FILE_HEADER : licenseHeader) + utilContent));
+                    (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + utilContent));
         }
 
         //Update type definition list
@@ -171,7 +171,7 @@ public class BallerinaCodeGenerator {
         }
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
-                    (licenseHeader.equals("") ? DEFAULT_FILE_HEADER : licenseHeader) + schemaContent));
+                    (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaContent));
         }
 
         // Generate test boilerplate code for test cases
@@ -179,7 +179,7 @@ public class BallerinaCodeGenerator {
             BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(clientGenerator);
             String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME,
-                    (licenseHeader.equals("") ? DEFAULT_FILE_HEADER : licenseHeader) + testContent));
+                    (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + testContent));
 
             String configContent = ballerinaTestGenerator.getConfigTomlFile();
             if (!configContent.isBlank()) {
@@ -346,7 +346,7 @@ public class BallerinaCodeGenerator {
                 .withResourceMode(isResource)
                 .build();
         //Take default DO NOT modify
-        licenseHeader = licenseHeader.equals("") ? oasClientConfig.getLicense() : licenseHeader;
+        licenseHeader = licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER : licenseHeader;
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME,
@@ -425,7 +425,8 @@ public class BallerinaCodeGenerator {
                 .build();
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         String mainContent = Formatter.format(ballerinaServiceGenerator.generateSyntaxTree()).toString();
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile,
+                (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + mainContent));
         List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
                 ballerinaServiceGenerator.getTypeInclusionRecords());
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
@@ -434,14 +435,15 @@ public class BallerinaCodeGenerator {
                 ballerinaSchemaGenerator.generateSyntaxTree()).toString();
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME,
-                    schemaContent));
+                    (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaContent));
         }
         if (generateServiceType) {
             BallerinaServiceObjectGenerator ballerinaServiceObjectGenerator = new
                     BallerinaServiceObjectGenerator(ballerinaServiceGenerator.getFunctionList());
             String serviceType = Formatter.format(ballerinaServiceObjectGenerator.generateSyntaxTree()).toString();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
-                    "service_type.bal", serviceType));
+                    "service_type.bal",
+                    (licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER : licenseHeader) + serviceType));
         }
         return sourceFiles;
     }

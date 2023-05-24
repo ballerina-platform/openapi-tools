@@ -81,9 +81,34 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
                 Files.exists(this.tmpDir.resolve("types.bal")) &&
                 Files.exists(this.tmpDir.resolve("service_type.bal"))) {
             try {
-                compareFiles("schema_for_service.bal", "types.bal");
+                compareFiles("schema_for_both_service_client.bal", "types.bal");
                 compareFiles("client.bal", "client.bal");
                 compareFiles("utils_for_both_service_client_generation.bal", "utils.bal");
+                compareFiles("service_type.bal", "service_type.bal");
+                deleteGeneratedFiles(false);
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+        } else {
+            Assert.fail("Code generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test(description = "Test openapi to ballerina service generation with default file headers")
+    public void testServiceGeneration() throws IOException {
+        Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
+        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--with-service-type",
+                "--mode", "service"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+
+        if (Files.exists(this.tmpDir.resolve("petstore_service.bal")) &&
+                Files.exists(this.tmpDir.resolve("types.bal")) &&
+                Files.exists(this.tmpDir.resolve("service_type.bal"))) {
+            try {
+                compareFiles("schema_for_service.bal", "types.bal");
+                compareFiles("service_with_service_type.bal", "petstore_service.bal");
                 compareFiles("service_type.bal", "service_type.bal");
                 deleteGeneratedFiles(false);
             } catch (IOException e) {

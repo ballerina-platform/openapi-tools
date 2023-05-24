@@ -20,8 +20,6 @@ package io.ballerina.openapi.core.generators.service.model;
 import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 
-import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_FILE_HEADER;
-
 /**
  * This class stores metadata that related to service code generations.
  *
@@ -31,14 +29,12 @@ public class OASServiceMetadata {
     private final OpenAPI openAPI;
     private final Filter filters;
     private final boolean nullable;
-    private final String license;
     private final boolean generateServiceType;
 
     private OASServiceMetadata(Builder clientConfigBuilder) {
         this.openAPI = clientConfigBuilder.openAPI;
         this.filters = clientConfigBuilder.filters;
         this.nullable = clientConfigBuilder.nullable;
-        this.license = clientConfigBuilder.license;
         this.generateServiceType = clientConfigBuilder.generateServiceType;
     }
 
@@ -54,13 +50,10 @@ public class OASServiceMetadata {
         return nullable;
     }
 
-    public String getLicense() {
-        return license;
-    }
-
     public boolean isServiceTypeRequired() {
         return generateServiceType;
     }
+
     /**
      * Service generation meta data builder class.
      */
@@ -68,8 +61,6 @@ public class OASServiceMetadata {
         private OpenAPI openAPI;
         private Filter filters;
         private boolean nullable = false;
-
-        private String license = DEFAULT_FILE_HEADER;
 
         private boolean generateServiceType = false;
         public Builder withOpenAPI(OpenAPI openAPI) {
@@ -84,11 +75,6 @@ public class OASServiceMetadata {
 
         public Builder withNullable(boolean nullable) {
             this.nullable = nullable;
-            return this;
-        }
-
-        public Builder withLicense(String license) {
-            this.license = license;
             return this;
         }
 
