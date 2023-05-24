@@ -44,7 +44,7 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
         super.setup();
     }
 
-    @Test(description = "Test openapi to ballerina client generation with default license headers")
+    @Test(description = "Test openapi to ballerina client generation with default file headers")
     public void testClientGeneration() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--mode", "client"};
@@ -68,7 +68,7 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
         }
     }
 
-    @Test(description = "Test openapi to ballerina service type generation with default license headers")
+    @Test(description = "Test openapi to ballerina service type generation with default file headers")
     public void testServiceTypeGeneration() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--with-service-type"};
@@ -94,7 +94,7 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
         }
     }
 
-    @Test(description = "Test openapi to ballerina generation with default license headers")
+    @Test(description = "Test openapi to ballerina code generation with default file headers")
     public void testBothClientServiceGeneration() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString()};
@@ -120,7 +120,7 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
         }
     }
 
-    @Test(description = "Test openapi to ballerina generation with license headers")
+    @Test(description = "Test openapi to ballerina code generation with user provided license headers")
     public void testUserGivenLicenseHeader() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         Path licenseHeader = resourceDir.resolve(Paths.get("expected_gen/licenses/license.txt"));
@@ -140,15 +140,14 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
                 compareFiles("utils_for_with_user_given_license.bal", "utils.bal");
                 compareFiles("service_type_with_user_given_license.bal", "service_type.bal");
                 compareFiles("service_with_user_given_license.bal", "petstore_service.bal");
-                deleteGeneratedFiles(false);
-
             } catch (IOException e) {
                 Assert.fail(e.getMessage());
+            } finally {
+                deleteGeneratedFiles(true);
             }
         } else {
             Assert.fail("Code generation failed. : " + readOutput(true));
         }
-
     }
 
     /**
@@ -158,11 +157,11 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
         Stream<String> expectedFile = Files.lines(resourceDir.resolve(Paths.get("expected_gen/licenses",
                 expectedFileName)));
         String expectedContent = expectedFile.collect(Collectors.joining(LINE_SEPARATOR));
-        Stream<String> types = Files.lines(this.tmpDir.resolve(generatedFileName));
-        String generatedFile = types.collect(Collectors.joining(LINE_SEPARATOR));
-        generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
-        expectedContent = (expectedContent.trim()).replaceAll("\\s+", "");
-        Assert.assertEquals(generatedFile, expectedContent);
+        Stream<String> generatedFile = Files.lines(this.tmpDir.resolve(generatedFileName));
+        String generatedContent = generatedFile.collect(Collectors.joining(LINE_SEPARATOR));
+        generatedContent = generatedContent.trim().replaceAll("\\s+", "");
+        expectedContent = expectedContent.trim().replaceAll("\\s+", "");
+        Assert.assertEquals(generatedContent, expectedContent);
     }
 
     // Delete the generated files
