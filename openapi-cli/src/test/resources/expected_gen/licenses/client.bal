@@ -41,7 +41,7 @@ public isolated client class Client {
     #
     # + 'limit - How many items to return at one time (max 100)
     # + return - An paged array of pets
-    remote isolated function listPets(int? 'limit = ()) returns Pets|error {
+    resource isolated function get pets(int? 'limit = ()) returns Pets|error {
         string resourcePath = string `/pets`;
         map<anydata> queryParam = {"limit": 'limit};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
@@ -51,7 +51,7 @@ public isolated client class Client {
     # Create a pet
     #
     # + return - Null response
-    remote isolated function createPet() returns http:Response|error {
+    resource isolated function post pets() returns http:Response|error {
         string resourcePath = string `/pets`;
         http:Request request = new;
         //TODO: Update the request as needed;
@@ -62,18 +62,9 @@ public isolated client class Client {
     #
     # + petId - The id of the pet to retrieve
     # + return - Expected response to a valid request
-    remote isolated function showPetById(string petId) returns Pets|error {
+    resource isolated function get pets/[string petId]() returns Pets|error {
         string resourcePath = string `/pets/${getEncodedUri(petId)}`;
         Pets response = check self.clientEp->get(resourcePath);
-        return response;
-    }
-    # Info for a specific pet
-    #
-    # + dog_id - The id of the pet to retrieve
-    # + return - Expected response to a valid request
-    remote isolated function getDogs(string dog_id) returns Dog|error {
-        string resourcePath = string `/pets/dogs/${getEncodedUri(dog_id)}`;
-        Dog response = check self.clientEp->get(resourcePath);
         return response;
     }
 }
