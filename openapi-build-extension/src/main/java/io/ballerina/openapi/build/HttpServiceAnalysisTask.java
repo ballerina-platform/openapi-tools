@@ -40,6 +40,7 @@ import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -68,6 +69,15 @@ import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.isHttpSe
  * @since 2.0.0
  */
 public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
+    static boolean isWarningPrinted = false;
+
+    static void setIsWarningPrinted(boolean isWarningPrinted) {
+        HttpServiceAnalysisTask.isWarningPrinted = isWarningPrinted;
+    }
+
+//    public void setWarning(boolean isPrinted) {
+//        setIsWarningPrinted(isPrinted);
+//    }
 
     @Override
     public void perform(SyntaxNodeAnalysisContext context) {
@@ -83,8 +93,15 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         boolean hasErrors = context.compilation().diagnosticResult()
                 .diagnostics().stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+
         if (hasErrors) {
             // if there are any compilation errors, do not proceed
+            if (!isWarningPrinted) {
+                setIsWarningPrinted(true);
+                PrintStream outStream = System.out;
+                outStream.println("OpenAPI contract generation failed due to Ballerina package has compilation" +
+                        " error.");
+            }
             return;
         }
         Path outPath = project.targetDir();

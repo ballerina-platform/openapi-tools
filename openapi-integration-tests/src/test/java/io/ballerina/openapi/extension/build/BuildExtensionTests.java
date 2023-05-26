@@ -124,6 +124,7 @@ public class BuildExtensionTests {
                 TEST_RESOURCE.resolve("project_9"), buildArgs);
         Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_9/target/openapi/ชื่อ_openapi.yaml")));
     }
+
     private void executeCommand(String resourcePath) throws IOException, InterruptedException {
         List<String> buildArgs = new LinkedList<>();
         boolean successful = executeBuild(DISTRIBUTION_FILE_NAME,

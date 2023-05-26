@@ -106,7 +106,7 @@ public class OASContractGenerator {
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         if (hasCompilationErrors || hasErrorsFromCodeGenAndModify) {
             // if there are any compilation errors, do not proceed and those diagnostic will display to user
-            outStream.println("OpenAPI contract generation failed due to Ballerina code has compilation error/s. : \n");
+            outStream.println("OpenAPI contract generation failed due to Ballerina code has compilation errors. :");
             compilation.diagnosticResult().diagnostics().forEach(diagnostic -> {
                 outStream.println(diagnostic.toString());
             });
