@@ -17,7 +17,9 @@
  */
 package io.ballerina.openapi.cmd;
 
+import io.ballerina.openapi.OpenAPITest;
 import io.ballerina.openapi.TestUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -29,18 +31,19 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.ballerina.openapi.TestUtil.DISTRIBUTIONS_DIR;
+import static io.ballerina.openapi.TestUtil.OUT;
 import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
+import static io.ballerina.openapi.TestUtil.TEST_DISTRIBUTION_PATH;
+import static io.ballerina.openapi.TestUtil.assertOnErrorStream;
 
 /**
  * This {@code BallerinaToOpenAPITests} contains all the ballerina to openapi command with compiler annotation.
  */
-public class BallerinaToOpenAPITests {
+public class BallerinaToOpenAPITests extends OpenAPITest {
     public static final String DISTRIBUTION_FILE_NAME = DISTRIBUTIONS_DIR.toString();
     public static final Path TEST_RESOURCE = Paths.get(RESOURCES_PATH.toString() + "/ballerina_sources");
 
@@ -144,23 +147,24 @@ public class BallerinaToOpenAPITests {
                 "project_non_openapi_annotation_without_base_path/result.yaml");
     }
 
+    @Test(description = "Test for given bal service file contains compilation issues")
+    public void constraintWithUnsupportedStringPattern() throws IOException, InterruptedException {
+        String balFilePath = "bal_service_has_compilation_issue/service.bal";
+        Process process = getProcessForOpenAPISpecGeneration(balFilePath);
+
+        String out = "OpenAPI contract generation failed due to Ballerina code has compilation errors. :\n" +
+                "ERROR [main.bal:(11:1,11:2)] invalid token '}'";
+        //Thread for wait out put generate
+        Thread.sleep(5000);
+        // compare generated file has not included constraint annotation for scenario record field.
+        Assert.assertFalse(Files.exists(TEST_RESOURCE.resolve("payload_openapi.yaml")));
+        process.waitFor();
+        assertOnErrorStream(process, out);
+    }
+
     @AfterClass
     public void cleanUp() throws IOException {
         TestUtil.cleanDistribution();
-    }
-
-    //Replace contract file path in generated service file with common URL.
-    public String replaceContractPath(Stream<String> expectedServiceLines, String expectedService,
-                                      String generatedService) {
-
-        Pattern pattern = Pattern.compile("\\bcontract\\b: \"(.*?)\"");
-        Matcher matcher = pattern.matcher(generatedService);
-        matcher.find();
-        String contractPath = "contract: " + "\"" + matcher.group(1) + "\"";
-        expectedService = expectedService.replaceAll("\\bcontract\\b: \"(.*?)\"",
-                Matcher.quoteReplacement(contractPath));
-        expectedServiceLines.close();
-        return expectedService;
     }
 
     private String getStringFromGivenBalFile(Path expectedServiceFile) throws IOException {
@@ -180,5 +184,26 @@ public class BallerinaToOpenAPITests {
         String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve(generatedFile));
         String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve(expectedPath));
         Assert.assertEquals(expectedYaml, generatedOpenAPI);
+    }
+
+    public Process getProcessForOpenAPISpecGeneration(String ballerinaFilePath) throws IOException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add(0, "openapi");
+        buildArgs.add("-i");
+        buildArgs.add(ballerinaFilePath);
+        buildArgs.add("-o");
+        buildArgs.add(tmpDir.toString());
+
+        String balFile = "bal";
+
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            balFile = "bal.bat";
+        }
+        buildArgs.add(0, TEST_DISTRIBUTION_PATH.resolve(DISTRIBUTION_FILE_NAME).resolve("bin")
+                .resolve(balFile).toString());
+        OUT.println("Executing: " + StringUtils.join(buildArgs, ' '));
+        ProcessBuilder pb = new ProcessBuilder(buildArgs);
+        pb.directory(TEST_RESOURCE.toFile());
+        return pb.start();
     }
 }
