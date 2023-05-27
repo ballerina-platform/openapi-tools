@@ -51,7 +51,6 @@ public isolated client class Client {
     remote isolated function createPet() returns http:Response|error {
         string resourcePath = string `/pets`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
