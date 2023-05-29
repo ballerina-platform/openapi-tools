@@ -50,16 +50,16 @@ public class BuildExtensionNegativeTests extends OpenAPITest {
     @Test(description = "Ballerina package has compilation error")
     public void packageHasCompilationErrors() throws IOException, InterruptedException {
         List<String> buildArgs = new LinkedList<>();
-        buildArgs.add("build");
+        buildArgs.add(0, "build");
         buildArgs.add("--export-openapi");
-        Process process = getProcess(buildArgs, TEST_RESOURCE);
+        Process process = getProcess(buildArgs, TEST_RESOURCE.resolve("package_with_compilation_issue"));
 
         String out = "OpenAPI contract generation failed due to Ballerina code has compilation errors. :\n" +
-                "ERROR [main.bal:(11:1,11:2)] invalid token '}'";
+                " ERROR [service.bal:(10:1,10:2)] invalid token '}'";
         //Thread for wait out put generate
         Thread.sleep(5000);
         // compare generated file has not included constraint annotation for scenario record field.
-        Assert.assertFalse(Files.exists(RESOURCE.resolve("\"build/project_9/target/openapi/")));
+        Assert.assertFalse(Files.exists(RESOURCE.resolve("\"build/package_with_compilation_issue/target/openapi/")));
         process.waitFor();
         assertOnErrorStream(process, out);
     }
