@@ -38,7 +38,6 @@ import static io.ballerina.openapi.TestUtil.DISTRIBUTIONS_DIR;
 import static io.ballerina.openapi.TestUtil.OUT;
 import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
 import static io.ballerina.openapi.TestUtil.TEST_DISTRIBUTION_PATH;
-import static io.ballerina.openapi.TestUtil.assertOnErrorStream;
 
 /**
  * This {@code BallerinaToOpenAPITests} contains all the ballerina to openapi command with compiler annotation.
@@ -145,21 +144,6 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
         executeCommand("project_non_openapi_annotation_without_base_path/service_file.bal",
                 "service_file_openapi.yaml",
                 "project_non_openapi_annotation_without_base_path/result.yaml");
-    }
-
-    @Test(description = "Test for given bal service file contains compilation issues")
-    public void constraintWithUnsupportedStringPattern() throws IOException, InterruptedException {
-        String balFilePath = "bal_service_has_compilation_issue/service.bal";
-        Process process = getProcessForOpenAPISpecGeneration(balFilePath);
-
-        String out = "OpenAPI contract generation failed due to Ballerina code has compilation errors. :\n" +
-                "ERROR [main.bal:(11:1,11:2)] invalid token '}'";
-        //Thread for wait out put generate
-        Thread.sleep(5000);
-        // compare generated file has not included constraint annotation for scenario record field.
-        Assert.assertFalse(Files.exists(TEST_RESOURCE.resolve("payload_openapi.yaml")));
-        process.waitFor();
-        assertOnErrorStream(process, out);
     }
 
     @AfterClass

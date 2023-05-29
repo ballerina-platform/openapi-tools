@@ -48,7 +48,7 @@ public class BallerinaToOpenAPICLINegativeTests extends OpenAPITest {
     }
 
     @Test(description = "Test for given bal service file contains compilation issues")
-    public void constraintWithUnsupportedStringPattern() throws IOException, InterruptedException {
+    public void testForGivenBalServiceHasCompilationIssue() throws IOException, InterruptedException {
         String balFilePath = "bal_service_has_compilation_issue/service.bal";
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add(0, "openapi");
@@ -59,12 +59,12 @@ public class BallerinaToOpenAPICLINegativeTests extends OpenAPITest {
 
         Process process = getProcess(buildArgs, TEST_RESOURCE);
 
-        String out = "OpenAPI contract generation failed due to Ballerina code has compilation errors. :\n" +
-                "ERROR [main.bal:(11:1,11:2)] invalid token '}'";
+        String out = "OpenAPI contract generation failed due to Ballerina code has compilation errors.:\n" +
+                "ERROR [service.bal:(11:1,11:2)] invalid token '}'";
         //Thread for wait out put generate
         Thread.sleep(5000);
         // compare generated file has not included constraint annotation for scenario record field.
-        Assert.assertFalse(Files.exists(TEST_RESOURCE.resolve("payload_openapi.yaml")));
+        Assert.assertFalse(Files.exists(TEST_RESOURCE.resolve("cpi_openapi.yaml")));
         process.waitFor();
         assertOnErrorStream(process, out);
     }

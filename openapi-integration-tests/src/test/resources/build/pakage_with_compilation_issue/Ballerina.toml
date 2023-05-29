@@ -1,8 +1,0 @@
-[package]
-org = "openapi_extension_test"
-name = "compilation_issue"
-version = "0.1.0"
-
-[build-options]
-observabilityIncluded = true
-

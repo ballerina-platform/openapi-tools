@@ -1,6 +1,6 @@
 import ballerina/http;
 
-service /payload on new http:Listener(0) {
+service /cpi on new http:Listener(0) {
     resource function get hello() {
     }
 
