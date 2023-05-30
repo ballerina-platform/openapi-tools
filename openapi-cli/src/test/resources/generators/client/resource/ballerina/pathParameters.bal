@@ -47,7 +47,6 @@ public isolated client class Client {
     resource isolated function post .() returns string|error {
         string resourcePath = string `/`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         string response = check self.clientEp-> post(resourcePath, request);
         return response;
     }

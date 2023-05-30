@@ -65,7 +65,6 @@ public isolated client class Client {
         map<anydata> queryParam = {"appid1": self.apiKeyConfig.appid1, "appid2": self.apiKeyConfig.appid2};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response response = check self.clientEp-> put(resourcePath, request);
         return response;
     }
@@ -77,7 +76,6 @@ public isolated client class Client {
         map<anydata> queryParam = {"appid1": self.apiKeyConfig.appid1, "appid2": self.apiKeyConfig.appid2};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response response = check self.clientEp-> post(resourcePath, request);
         return response;
     }

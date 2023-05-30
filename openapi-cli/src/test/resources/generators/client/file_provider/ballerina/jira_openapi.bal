@@ -115,7 +115,6 @@ public isolated client class Client {
     remote isolated function removeAttachment(string id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/attachment/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -172,7 +171,6 @@ public isolated client class Client {
     remote isolated function deleteCommentProperty(string commentId, string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/comment/${commentId}/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -202,7 +200,6 @@ public isolated client class Client {
         map<anydata> queryParam = {moveIssuesTo: moveIssuesTo};
         resourcePath = resourcePath + check check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -318,7 +315,6 @@ public isolated client class Client {
     remote isolated function deleteDashboardItemProperty(string dashboardId, string itemId, string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/dashboard/${dashboardId}/items/${itemId}/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -338,7 +334,6 @@ public isolated client class Client {
     remote isolated function deleteDashboard(string id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/dashboard/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -463,7 +458,6 @@ public isolated client class Client {
     remote isolated function deleteCustomFieldContext(string fieldId, int contextId) returns json|error {
         string resourcePath = string `/rest/api/2/field/${fieldId}/context/${contextId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -517,7 +511,6 @@ public isolated client class Client {
     remote isolated function deleteCustomFieldOption(string fieldId, int contextId, int optionId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/field/${fieldId}/context/${contextId}/option/${optionId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -596,7 +589,6 @@ public isolated client class Client {
     remote isolated function deleteIssueFieldOption(string fieldKey, int optionId) returns json|error {
         string resourcePath = string `/rest/api/2/field/${fieldKey}/option/${optionId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -605,7 +597,6 @@ public isolated client class Client {
         map<anydata> queryParam = {replaceWith: replaceWith, jql: jql};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         TaskProgressBeanRemoveOptionFromIssuesResult response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -723,7 +714,6 @@ public isolated client class Client {
     remote isolated function deleteFilter(int id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/filter/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -741,7 +731,6 @@ public isolated client class Client {
     remote isolated function resetColumns(int id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/filter/${id}/columns`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -750,7 +739,6 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         Filter response = check self.clientEp-> put(resourcePath, request);
         return response;
     }
@@ -759,7 +747,6 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         Filter response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -784,7 +771,6 @@ public isolated client class Client {
     remote isolated function deleteSharePermission(int id, int permissionId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/filter/${id}/permission/${permissionId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -808,7 +794,6 @@ public isolated client class Client {
         map<anydata> queryParam = {groupname: groupname, swapGroup: swapGroup};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -841,7 +826,6 @@ public isolated client class Client {
         map<anydata> queryParam = {groupname: groupname, username: username, accountId: accountId};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -915,7 +899,6 @@ public isolated client class Client {
     remote isolated function bulkDeleteIssueProperty(string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issue/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -941,7 +924,6 @@ public isolated client class Client {
         map<anydata> queryParam = {deleteSubtasks: deleteSubtasks};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1003,7 +985,6 @@ public isolated client class Client {
     remote isolated function deleteComment(string issueIdOrKey, string id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/comment/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1043,7 +1024,6 @@ public isolated client class Client {
     remote isolated function deleteIssueProperty(string issueIdOrKey, string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1067,7 +1047,6 @@ public isolated client class Client {
         map<anydata> queryParam = {globalId: globalId};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1087,7 +1066,6 @@ public isolated client class Client {
     remote isolated function deleteRemoteIssueLinkById(string issueIdOrKey, string linkId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/remotelink/${linkId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1114,14 +1092,12 @@ public isolated client class Client {
     remote isolated function addVote(string issueIdOrKey) returns json|error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/votes`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
     remote isolated function removeVote(string issueIdOrKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/votes`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1143,7 +1119,6 @@ public isolated client class Client {
         map<anydata> queryParam = {username: username, accountId: accountId};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1186,7 +1161,6 @@ public isolated client class Client {
         map<anydata> queryParam = {notifyUsers: notifyUsers, adjustEstimate: adjustEstimate, newEstimate: newEstimate, increaseBy: increaseBy, overrideEditableFlag: overrideEditableFlag};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1211,7 +1185,6 @@ public isolated client class Client {
     remote isolated function deleteWorklogProperty(string issueIdOrKey, string worklogId, string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/worklog/${worklogId}/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1231,7 +1204,6 @@ public isolated client class Client {
     remote isolated function deleteIssueLink(string linkId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issueLink/${linkId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1264,7 +1236,6 @@ public isolated client class Client {
     remote isolated function deleteIssueLinkType(string issueLinkTypeId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issueLinkType/${issueLinkTypeId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1316,7 +1287,6 @@ public isolated client class Client {
         map<anydata> queryParam = {alternativeIssueTypeId: alternativeIssueTypeId};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1354,7 +1324,6 @@ public isolated client class Client {
     remote isolated function deleteIssueTypeProperty(string issueTypeId, string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issuetype/${issueTypeId}/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1406,7 +1375,6 @@ public isolated client class Client {
     remote isolated function deleteIssueTypeScheme(int issueTypeSchemeId) returns json|error {
         string resourcePath = string `/rest/api/2/issuetypescheme/${issueTypeSchemeId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -1429,7 +1397,6 @@ public isolated client class Client {
     remote isolated function removeIssueTypeFromIssueTypeScheme(int issueTypeSchemeId, int issueTypeId) returns json|error {
         string resourcePath = string `/rest/api/2/issuetypescheme/${issueTypeSchemeId}/issuetype/${issueTypeId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -1481,7 +1448,6 @@ public isolated client class Client {
     remote isolated function deleteIssueTypeScreenScheme(string issueTypeScreenSchemeId) returns json|error {
         string resourcePath = string `/rest/api/2/issuetypescreenscheme/${issueTypeScreenSchemeId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -1591,7 +1557,6 @@ public isolated client class Client {
         map<anydata> queryParam = {'key: 'key};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1611,7 +1576,6 @@ public isolated client class Client {
     remote isolated function deleteLocale() returns json|error {
         string resourcePath = string `/rest/api/2/mypreferences/locale`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -1694,7 +1658,6 @@ public isolated client class Client {
     remote isolated function deletePermissionScheme(int schemeId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/permissionscheme/${schemeId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1725,7 +1688,6 @@ public isolated client class Client {
     remote isolated function deletePermissionSchemeEntity(int schemeId, int permissionId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/permissionscheme/${schemeId}/permission/${permissionId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1803,14 +1765,12 @@ public isolated client class Client {
         map<anydata> queryParam = {enableUndo: enableUndo};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
     remote isolated function archiveProject(string projectIdOrKey) returns json|error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/archive`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
@@ -1825,7 +1785,6 @@ public isolated client class Client {
     remote isolated function deleteProjectAvatar(string projectIdOrKey, int id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/avatar/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1857,7 +1816,6 @@ public isolated client class Client {
     remote isolated function deleteProjectAsynchronously(string projectIdOrKey) returns TaskProgressBeanObject|error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/delete`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         TaskProgressBeanObject response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
@@ -1895,14 +1853,12 @@ public isolated client class Client {
     remote isolated function deleteProjectProperty(string projectIdOrKey, string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
     remote isolated function restore(string projectIdOrKey) returns Project|error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/restore`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         Project response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
@@ -1937,7 +1893,6 @@ public isolated client class Client {
         map<anydata> queryParam = {user: user, 'group: 'group};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1956,7 +1911,6 @@ public isolated client class Client {
     remote isolated function updateProjectType(string projectIdOrKey, string newProjectTypeKey) returns Project|error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/type/${newProjectTypeKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         Project response = check self.clientEp-> put(resourcePath, request);
         return response;
     }
@@ -2055,7 +2009,6 @@ public isolated client class Client {
     remote isolated function removeProjectCategory(int id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/projectCategory/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2129,7 +2082,6 @@ public isolated client class Client {
         map<anydata> queryParam = {swap: swap};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2151,7 +2103,6 @@ public isolated client class Client {
         map<anydata> queryParam = {user: user, 'group: 'group};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         ProjectRole response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -2173,7 +2124,6 @@ public isolated client class Client {
     remote isolated function addFieldToDefaultScreen(string fieldId) returns json|error {
         string resourcePath = string `/rest/api/2/screens/addToDefault/${fieldId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
@@ -2188,7 +2138,6 @@ public isolated client class Client {
     remote isolated function deleteScreen(int screenId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/screens/${screenId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2223,7 +2172,6 @@ public isolated client class Client {
     remote isolated function deleteScreenTab(int screenId, int tabId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/screens/${screenId}/tabs/${tabId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2245,7 +2193,6 @@ public isolated client class Client {
     remote isolated function removeScreenTabField(int screenId, int tabId, string id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/screens/${screenId}/tabs/${tabId}/fields/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2260,7 +2207,6 @@ public isolated client class Client {
     remote isolated function moveScreenTab(int screenId, int tabId, int pos) returns json|error {
         string resourcePath = string `/rest/api/2/screens/${screenId}/tabs/${tabId}/move/${pos}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
@@ -2290,7 +2236,6 @@ public isolated client class Client {
     remote isolated function deleteScreenScheme(string screenSchemeId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/screenscheme/${screenSchemeId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2358,7 +2303,6 @@ public isolated client class Client {
     remote isolated function cancelTask(string taskId) returns json|error {
         string resourcePath = string `/rest/api/2/task/${taskId}/cancel`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
@@ -2378,7 +2322,6 @@ public isolated client class Client {
     remote isolated function deleteAvatar(string 'type, string owningObjectId, int id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/universal_avatar/'type/${'type}/owner/${owningObjectId}/avatar/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2402,7 +2345,6 @@ public isolated client class Client {
         map<anydata> queryParam = {accountId: accountId, username: username, 'key: 'key};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2454,7 +2396,6 @@ public isolated client class Client {
         map<anydata> queryParam = {accountId: accountId, username: username};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2522,7 +2463,6 @@ public isolated client class Client {
         map<anydata> queryParam = {accountId: accountId, userKey: userKey, username: username};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2596,14 +2536,12 @@ public isolated client class Client {
         map<anydata> queryParam = {moveFixIssuesTo: moveFixIssuesTo, moveAffectedIssuesTo: moveAffectedIssuesTo};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
     remote isolated function mergeVersions(string id, string moveIssuesTo) returns json|error {
         string resourcePath = string `/rest/api/2/version/${id}/mergeto/${moveIssuesTo}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> put(resourcePath, request);
         return response;
     }
@@ -2651,7 +2589,6 @@ public isolated client class Client {
     remote isolated function deleteWebhookById() returns http:Response | error {
         string resourcePath = string `/rest/api/2/webhook`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2739,14 +2676,12 @@ public isolated client class Client {
         map<anydata> queryParam = {'key: 'key, workflowName: workflowName, workflowMode: workflowMode};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
     remote isolated function deleteInactiveWorkflow(string entityId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/workflow/${entityId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2798,14 +2733,12 @@ public isolated client class Client {
     remote isolated function deleteWorkflowScheme(int id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
     remote isolated function createWorkflowSchemeDraftFromParent(int id) returns WorkflowScheme|error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}/createdraft`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         WorkflowScheme response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
@@ -2829,7 +2762,6 @@ public isolated client class Client {
         map<anydata> queryParam = {updateDraftIfNeeded: updateDraftIfNeeded};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         WorkflowScheme response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -2849,7 +2781,6 @@ public isolated client class Client {
     remote isolated function deleteWorkflowSchemeDraft(int id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}/draft`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2869,7 +2800,6 @@ public isolated client class Client {
     remote isolated function deleteDraftDefaultWorkflow(int id) returns WorkflowScheme|error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}/draft/default`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         WorkflowScheme response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -2889,7 +2819,6 @@ public isolated client class Client {
     remote isolated function deleteWorkflowSchemeDraftIssueType(int id, string issueType) returns WorkflowScheme|error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}/draft/issuetype/${issueType}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         WorkflowScheme response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -2915,7 +2844,6 @@ public isolated client class Client {
         map<anydata> queryParam = {workflowName: workflowName};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2939,7 +2867,6 @@ public isolated client class Client {
         map<anydata> queryParam = {updateDraftIfNeeded: updateDraftIfNeeded};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         WorkflowScheme response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -2965,7 +2892,6 @@ public isolated client class Client {
         map<anydata> queryParam = {workflowName: workflowName, updateDraftIfNeeded: updateDraftIfNeeded};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -3014,7 +2940,6 @@ public isolated client class Client {
     remote isolated function 'AddonPropertiesResource\.deleteAddonProperty\_delete(string addonKey, string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/atlassian-connect/1/addons/${addonKey}/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -3036,7 +2961,6 @@ public isolated client class Client {
         map<anydata> queryParam = {moduleKey: moduleKey};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
