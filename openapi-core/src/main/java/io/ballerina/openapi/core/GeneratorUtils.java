@@ -1034,8 +1034,9 @@ public class GeneratorUtils {
                 return GeneratorUtils.convertOpenAPITypeToBallerina(schema.getFormat().trim());
             }
         } catch (BallerinaOpenApiException e) {
-            OUT_STREAM.printf("WARNING: unsupported format `%s` will be skipped when generating the counterpart " +
-                    "Ballerina type for openAPI schema type: `%s`", schema.getFormat(), schema.getType());
+            OUT_STREAM.println(String.format("WARNING: unsupported format `%s` will be skipped when generating" +
+                    " the counterpart Ballerina type for openAPI schema type: `%s`",
+                    schema.getFormat(), schema.getType()));
         }
         return dataType;
     }
