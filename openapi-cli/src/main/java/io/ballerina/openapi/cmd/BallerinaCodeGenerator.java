@@ -112,13 +112,13 @@ public class BallerinaCodeGenerator {
                 .build();
         BallerinaServiceGenerator serviceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         String serviceContent = Formatter.format
-                (serviceGenerator.generateSyntaxTree()).toString();
+                (serviceGenerator.generateSyntaxTree()).toSourceCode();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, serviceContent));
 
         if (generateServiceType) {
             BallerinaServiceObjectGenerator ballerinaServiceObjectGenerator = new
                     BallerinaServiceObjectGenerator(serviceGenerator.getFunctionList());
-            String serviceType = Formatter.format(ballerinaServiceObjectGenerator.generateSyntaxTree()).toString();
+            String serviceType = Formatter.format(ballerinaServiceObjectGenerator.generateSyntaxTree()).toSourceCode();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
                     "service_type.bal", serviceType));
         }
@@ -133,7 +133,7 @@ public class BallerinaCodeGenerator {
                 .withResourceMode(isResource).build();
 
         BallerinaClientGenerator clientGenerator = new BallerinaClientGenerator(oasClientConfig);
-        String clientContent = Formatter.format(clientGenerator.generateSyntaxTree()).toString();
+        String clientContent = Formatter.format(clientGenerator.generateSyntaxTree()).toSourceCode();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME, clientContent));
         String utilContent = Formatter.format(clientGenerator
                 .getBallerinaUtilGenerator()
@@ -156,7 +156,7 @@ public class BallerinaCodeGenerator {
                 openAPIDef, nullable, preGeneratedTypeDefNodes);
 
         SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        String schemaContent = Formatter.format(schemaSyntaxTree).toString();
+        String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
 
         if (filter.getTags().size() > 0) {
             // Remove unused records and enums when generating the client by the tags given.
@@ -171,7 +171,7 @@ public class BallerinaCodeGenerator {
         // Generate test boilerplate code for test cases
         if (this.includeTestFiles) {
             BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(clientGenerator);
-            String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
+            String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toSourceCode();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME, testContent));
 
             String configContent = ballerinaTestGenerator.getConfigTomlFile();
@@ -342,7 +342,7 @@ public class BallerinaCodeGenerator {
                 .withLicense(licenseHeader)
                 .build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
-        String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
+        String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toSourceCode();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME, mainContent));
         String utilContent = Formatter.format(
                 ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
@@ -358,7 +358,7 @@ public class BallerinaCodeGenerator {
                 openAPIDef, nullable, preGeneratedTypeDefNodes);
 
         SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        String schemaContent = Formatter.format(schemaSyntaxTree).toString();
+        String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
         if (filter.getTags().size() > 0) {
             // Remove unused records and enums when generating the client by the tags given.
             schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent, null);
@@ -371,7 +371,7 @@ public class BallerinaCodeGenerator {
         // Generate test boilerplate code for test cases
         if (this.includeTestFiles) {
             BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
-            String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
+            String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toSourceCode();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME, testContent));
 
             String configContent = ballerinaTestGenerator.getConfigTomlFile();
@@ -415,14 +415,14 @@ public class BallerinaCodeGenerator {
                 .withGenerateServiceType(generateServiceType)
                 .build();
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
-        String mainContent = Formatter.format(ballerinaServiceGenerator.generateSyntaxTree()).toString();
+        String mainContent = Formatter.format(ballerinaServiceGenerator.generateSyntaxTree()).toSourceCode();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
         List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
                 ballerinaServiceGenerator.getTypeInclusionRecords());
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
                 openAPIDef, nullable, preGeneratedTypeDefNodes);
         String schemaContent = Formatter.format(
-                ballerinaSchemaGenerator.generateSyntaxTree()).toString();
+                ballerinaSchemaGenerator.generateSyntaxTree()).toSourceCode();
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME,
                     schemaContent));
@@ -430,7 +430,7 @@ public class BallerinaCodeGenerator {
         if (generateServiceType) {
             BallerinaServiceObjectGenerator ballerinaServiceObjectGenerator = new
                     BallerinaServiceObjectGenerator(ballerinaServiceGenerator.getFunctionList());
-            String serviceType = Formatter.format(ballerinaServiceObjectGenerator.generateSyntaxTree()).toString();
+            String serviceType = Formatter.format(ballerinaServiceObjectGenerator.generateSyntaxTree()).toSourceCode();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
                     "service_type.bal", serviceType));
         }
