@@ -100,10 +100,10 @@ public class BallerinaTestGeneratorTests {
     public List<Diagnostic> getDiagnostics(SyntaxTree clientSyntaxTree, SyntaxTree testSyntaxTree,
                                            SyntaxTree schemaSyntaxTree, String configContent, SyntaxTree utilSyntaxTree)
             throws FormatterException, IOException {
-        TestUtils.writeFile(clientPath, Formatter.format(clientSyntaxTree).toString());
-        TestUtils.writeFile(utilPath, Formatter.format(utilSyntaxTree).toString());
-        TestUtils.writeFile(schemaPath, Formatter.format(schemaSyntaxTree).toString());
-        TestUtils.writeFile(testPath, Formatter.format(testSyntaxTree).toString());
+        TestUtils.writeFile(clientPath, Formatter.format(clientSyntaxTree).toSourceCode());
+        TestUtils.writeFile(utilPath, Formatter.format(utilSyntaxTree).toSourceCode());
+        TestUtils.writeFile(schemaPath, Formatter.format(schemaSyntaxTree).toSourceCode());
+        TestUtils.writeFile(testPath, Formatter.format(testSyntaxTree).toSourceCode());
         TestUtils.writeFile(configPath, configContent);
         SemanticModel semanticModel = TestUtils.getSemanticModel(clientPath);
         return semanticModel.diagnostics();
