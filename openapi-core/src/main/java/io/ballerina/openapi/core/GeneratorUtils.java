@@ -883,7 +883,7 @@ public class GeneratorUtils {
             ModulePartNode modiedModulePartNode = modulePartNode.modify(modulePartNode.imports(),
                     modifiedMembers, modulePartNode.eofToken());
             schemaSyntaxTree = schemaSyntaxTree.modifyWith(modiedModulePartNode);
-            schemaContent = Formatter.format(schemaSyntaxTree).toString();
+            schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
             tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);
             unusedTypeDefinitionNameList = getUnusedTypeDefinitionNameList(tempSourceFiles);
         }
@@ -893,7 +893,7 @@ public class GeneratorUtils {
 
         ModulePartNode modiedModulePartNode = rootNode.modify(imports, rootNode.members(), rootNode.eofToken());
         schemaSyntaxTree = schemaSyntaxTree.modifyWith(modiedModulePartNode);
-        schemaContent = Formatter.format(schemaSyntaxTree).toString();
+        schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
         return schemaContent;
     }
 
