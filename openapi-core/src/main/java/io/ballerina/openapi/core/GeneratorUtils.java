@@ -130,35 +130,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SLASH_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
-import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA;
-import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML;
-import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML_CONTENT;
-import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.CLOSE_CURLY_BRACE;
-import static io.ballerina.openapi.core.GeneratorConstants.CONSTRAINT;
-import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_PARAM_COMMENT;
-import static io.ballerina.openapi.core.GeneratorConstants.EXPLODE;
-import static io.ballerina.openapi.core.GeneratorConstants.GET;
-import static io.ballerina.openapi.core.GeneratorConstants.HEAD;
-import static io.ballerina.openapi.core.GeneratorConstants.HTTP_REQUEST;
-import static io.ballerina.openapi.core.GeneratorConstants.HTTP_RESPONSE;
-import static io.ballerina.openapi.core.GeneratorConstants.IDENTIFIER;
-import static io.ballerina.openapi.core.GeneratorConstants.IMAGE_PNG;
-import static io.ballerina.openapi.core.GeneratorConstants.JSON_EXTENSION;
-import static io.ballerina.openapi.core.GeneratorConstants.LINE_SEPARATOR;
-import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
-import static io.ballerina.openapi.core.GeneratorConstants.OPEN_CURLY_BRACE;
-import static io.ballerina.openapi.core.GeneratorConstants.SERVICE_FILE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.SLASH;
-import static io.ballerina.openapi.core.GeneratorConstants.SPECIAL_CHARACTERS_REGEX;
-import static io.ballerina.openapi.core.GeneratorConstants.SQUARE_BRACKETS;
-import static io.ballerina.openapi.core.GeneratorConstants.STRING;
-import static io.ballerina.openapi.core.GeneratorConstants.STYLE;
-import static io.ballerina.openapi.core.GeneratorConstants.TYPE_FILE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.TYPE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE;
-import static io.ballerina.openapi.core.GeneratorConstants.YAML_EXTENSION;
-import static io.ballerina.openapi.core.GeneratorConstants.YML_EXTENSION;
+import static io.ballerina.openapi.core.GeneratorConstants.*;
 
 /**
  * This class util for store all the common scenarios.
