@@ -279,14 +279,8 @@ public class ParametersGenerator {
         queryParamSupportedTypes.add(GeneratorConstants.OBJECT);
         if (schema != null && schema.get$ref() != null) {
             String type = getValidName(extractReferenceType(schema.get$ref()), true);
-            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
-            // TODO : Due to bug in http module, reference params with `nullable: true` are not allowed
-            if (queryParamSupportedTypes.contains(refSchema.getType())) {
-                return handleReferencedQueryParameter(parameter, type, refSchema, annotations, parameterName);
-            } else {
-                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
-                throw new BallerinaOpenApiException(String.format(messages.getDescription(), type));
-            }
+            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type);
+            return handleReferencedQueryParameter(parameter, type, refSchema, annotations, parameterName);
         } else if (parameter.getContent() != null) {
             Content content = parameter.getContent();
             for (Map.Entry<String, MediaType> mediaTypeEntry : content.entrySet()) {
@@ -351,9 +345,10 @@ public class ParametersGenerator {
                 return createRequiredParameterNode(annotations, optionalNode, parameterName);
             }
         } else {
+            String type = GeneratorUtils.getBallerinaMediaType(mediaTypeEntry.getKey(), false);
             ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
             throw new BallerinaOpenApiException(String.format(messages.getDescription(),
-                    "content"));
+                    type));
         }
     }
 
@@ -370,8 +365,7 @@ public class ParametersGenerator {
                 // item type.
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_101;
                 throw new BallerinaOpenApiException(messages.getDescription());
-            } else if ((!(items instanceof ObjectSchema) && !(items.getType() != null &&
-                    items.getType().equals(GeneratorConstants.ARRAY)))
+            } else if ((!(items.getType() != null && items.getType().equals(GeneratorConstants.ARRAY)))
                     || items.get$ref() != null) {
                 // create arrayTypeDescriptor
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);

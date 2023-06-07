@@ -158,7 +158,7 @@ public class ParameterGeneratorTest {
 
     @Test(description = "Generate functionDefinitionNode for paramter for content instead of schema",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Type 'content' is not a valid query parameter type in Ballerina. " +
+            expectedExceptionsMessageRegExp = "Type 'json' is not a valid query parameter type in Ballerina. " +
                     "The supported types are string, int, float, boolean, decimal, " +
                     "array types of the aforementioned types and map<json>.")
     public void generateParameterHasContent() throws IOException, BallerinaOpenApiException {
