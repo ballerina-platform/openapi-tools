@@ -162,7 +162,7 @@ public class BallerinaCodeGenerator {
                 openAPIDef, nullable, preGeneratedTypeDefNodes);
 
         SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        String schemaContent = Formatter.format(schemaSyntaxTree).toString();
+        String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
 
         if (filter.getTags().size() > 0) {
             // Remove unused records and enums when generating the client by the tags given.
