@@ -883,7 +883,7 @@ public class GeneratorUtils {
             ModulePartNode modiedModulePartNode = modulePartNode.modify(modulePartNode.imports(),
                     modifiedMembers, modulePartNode.eofToken());
             schemaSyntaxTree = schemaSyntaxTree.modifyWith(modiedModulePartNode);
-            schemaContent = Formatter.format(schemaSyntaxTree).toString();
+            schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
             tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);
             unusedTypeDefinitionNameList = getUnusedTypeDefinitionNameList(tempSourceFiles);
         }
@@ -893,7 +893,7 @@ public class GeneratorUtils {
 
         ModulePartNode modiedModulePartNode = rootNode.modify(imports, rootNode.members(), rootNode.eofToken());
         schemaSyntaxTree = schemaSyntaxTree.modifyWith(modiedModulePartNode);
-        schemaContent = Formatter.format(schemaSyntaxTree).toString();
+        schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
         return schemaContent;
     }
 
@@ -1034,8 +1034,9 @@ public class GeneratorUtils {
                 return GeneratorUtils.convertOpenAPITypeToBallerina(schema.getFormat().trim());
             }
         } catch (BallerinaOpenApiException e) {
-            OUT_STREAM.printf("WARNING: unsupported format `%s` will be skipped when generating the counterpart " +
-                    "Ballerina type for openAPI schema type: `%s`", schema.getFormat(), schema.getType());
+            OUT_STREAM.println(String.format("WARNING: unsupported format `%s` will be skipped when generating" +
+                    " the counterpart Ballerina type for openAPI schema type: `%s`",
+                    schema.getFormat(), schema.getType()));
         }
         return dataType;
     }
