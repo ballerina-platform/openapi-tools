@@ -1,0 +1,263 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/lnash94/QueryParam/1.0.0
+info:
+  description: This is a simple API
+  version: "1.0.0"
+  title: Simple Inventory API
+tags:
+  - name: admins
+    description: Secured Admin-only calls
+  - name: developers
+    description: Operations available to regular developers
+paths:
+  /inventory:
+    get:
+      tags:
+        - developers
+      summary: searches inventory
+      operationId: searchInventory
+      description: |
+        By passing in the appropriate options, you can search for
+        available inventory in the system
+      parameters:
+        - in: query
+          name: required_query
+          description:  1. required query param with inline object
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              id:
+                type: integer
+        - in: query
+          name: optional_query
+          description: 2. optional query param with inline object
+          required: false
+          schema:
+            type: object
+            properties:
+              rank:
+                type: string
+              id:
+                type: integer
+        - in: query
+          name: default_query
+          description: 3. default query param with inline object
+          schema:
+            type: object
+            required:
+              - nest
+            properties:
+              limit:
+                type: string
+              id:
+                type: integer
+              nest:
+                $ref: '#/components/schemas/Manufacturer'
+            default: {limit: "9", id: 9}
+        - in: query
+          name: reference_query
+          description: 4. reference query param
+          schema:
+            $ref: '#/components/schemas/Manufacturer'
+        - in: query
+          name: required_nullable
+          description:  5. required query param with inline object and nullable true
+          required: true
+          schema:
+            nullable: true
+            type: object
+            properties:
+              name:
+                type: string
+              id:
+                type: integer
+        - in: query
+          name: optional_nullable
+          description: 6. optional query param with inline object
+          required: false
+          schema:
+            nullable: true
+            type: object
+            properties:
+              rank:
+                type: string
+              id:
+                type: integer
+        - in: query
+          name: default_nullable
+          description: 7. default query param with inline object
+          schema:
+            nullable: true
+            type: object
+            properties:
+              limit:
+                type: string
+              id:
+                type: integer
+            default: {limit: "9", id: 9}
+        - in: query
+          name: reference_nullable
+          description: 8. reference_nullable query param won't consider nullable details when it has reference in swagger
+          schema:
+            nullbale: true
+            $ref: '#/components/schemas/Manufacturer'
+      responses:
+        '200':
+          description: search results matching criteria
+        '400':
+          description: bad input parameter
+    post:
+      tags:
+        - admins
+      summary: adds an inventory item
+      operationId: addInventory
+      description: Adds an item to the system
+      parameters:
+        - in: query
+          name: required_query
+          description:  9. required query param with inline object including additional properties with reference.
+          required: true
+          schema:
+            type: object
+            additionalProperties:
+              $ref: '#/components/schemas/InventoryItem'
+        - in: query
+          name: optional_query
+          description: 10. optional query param with inline object including additional properties integer value.
+          required: false
+          schema:
+            type: object
+            additionalProperties:
+              type: integer
+        - in: query
+          name: object_nullable
+          description:  11. nullable required query param with inline object including additional properties
+          schema:
+            nullable: true
+            type: object
+            additionalProperties:
+              $ref: '#/components/schemas/InventoryItem'
+        - in: query
+          name: skip_nullable
+          description: 12. nullable optional query param with inline object including additional properties
+          required: false
+          schema:
+            nullable: true
+            type: object
+            additionalProperties:
+              type: integer
+        - in: query
+          name: add_false
+          description: 13. nullable optional query param with inline object including additional properties.
+          schema:
+            nullable: true
+            type: object
+            properties:
+              name:
+                type: string
+            additionalProperties: false
+      responses:
+        '201':
+          description: item created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventoryItem'
+        description: Inventory item to add
+    put:
+      description: "Update inventory"
+      operationId: updateInvent
+      parameters:
+        - in: query
+          description: 14. object query parameter with additional property with primitive value
+          name: primitive
+          schema:
+            type: object
+            additionalProperties:
+              $ref: '#/components/schemas/PrimitiveValues'
+      responses:
+        '201':
+          description: Created
+    delete:
+      description: "Update inventory"
+      operationId: deleteInvent
+      parameters:
+        - in: query
+          name: arrayRecord
+          description: 15. Query parameter with object array
+          schema:
+            type: array
+            items:
+              type: object
+              $ref: '#/components/schemas/InventoryItem'
+      responses:
+        '201':
+          description: Created
+  /inventory02:
+    put:
+      description: "Update inventory"
+      operationId: updateInvent02
+      parameters:
+        - in: query
+          name: additionalArray
+          description: 16. Query parameter with record opens with record array
+          schema:
+            type: object
+            additionalProperties:
+              type: array
+              items:
+                type: object
+                $ref: '#/components/schemas/InventoryItem'
+      responses:
+        '201':
+          description: Created
+components:
+  schemas:
+    PrimitiveValues:
+      type: integer
+      enum:
+        - 0
+        - 1
+    InventoryItem:
+      type: object
+      required:
+        - id
+        - name
+        - manufacturer
+        - releaseDate
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        name:
+          type: string
+          example: Widget Adapter
+        releaseDate:
+          type: string
+          format: date-time
+          example: '2016-08-29T09:12:33.001Z'
+        manufacturer:
+          $ref: '#/components/schemas/Manufacturer'
+    Manufacturer:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: ACME Corporation
+        homePage:
+          type: string
+          format: url
+          example: 'https://www.acme-corp.com'
+        phone:
+          type: string
+          example: 408-867-5309
+      type: object

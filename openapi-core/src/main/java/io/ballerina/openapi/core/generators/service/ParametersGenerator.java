@@ -22,7 +22,6 @@ import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
-import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.RecordTypeGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -299,18 +298,7 @@ public class ParametersGenerator {
         paramSupportedTypes.add(GeneratorConstants.OBJECT);
         if (schema != null && schema.get$ref() != null) {
             String type = getValidName(extractReferenceType(schema.get$ref()), true);
-            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
-            // TODO : Due to bug in http module, reference params with `nullable: true` are not allowed
-//            if (paramSupportedTypes.contains(refSchema.getType()) && !((refSchema.getNullable() != null) && refSchema.getNullable())) {
-//
-//            } else {
-//                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
-//                throw new BallerinaOpenApiException(String.format(messages.getDescription(), type));
-//            }
-            //TODO: for check the given record open with additional fields.
-            Schema<?> referenceSchema = openAPI.getComponents().getSchemas().get(type);
-
-
+            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type);
             return handleReferencedQueryParameter(parameter, type, refSchema, annotations, parameterName);
         } else if (parameter.getContent() != null) {
             Content content = parameter.getContent();
@@ -376,9 +364,10 @@ public class ParametersGenerator {
                 return createRequiredParameterNode(annotations, optionalNode, parameterName);
             }
         } else {
+            String type = GeneratorUtils.getBallerinaMediaType(mediaTypeEntry.getKey(), false);
             ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
             throw new BallerinaOpenApiException(String.format(messages.getDescription(),
-                    "content"));
+                    type));
         }
     }
 
@@ -389,7 +378,7 @@ public class ParametersGenerator {
                                               IdentifierToken parameterName) throws BallerinaOpenApiException {
 
         if (schema instanceof ArraySchema) {
-            Schema<?> items = ((ArraySchema) schema).getItems();
+            Schema<?> items = schema.getItems();
             if (items.getType() == null && items.get$ref() == null) {
                 // Resource function doesn't support to query parameters with array type which doesn't have an
                 // item type.
@@ -538,11 +527,11 @@ public class ParametersGenerator {
 
     // Create ArrayTypeDescriptorNode using Schema
     private ArrayTypeDescriptorNode getArrayTypeDescriptorNode(Schema<?> items) throws BallerinaOpenApiException {
-
         String arrayName;
         if (items.get$ref() != null) {
-            String type = getValidName(extractReferenceType(items.get$ref()), true);
-            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
+            String referenceType = extractReferenceType(items.get$ref());
+            String type = getValidName(referenceType, true);
+            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(referenceType);
             if (paramSupportedTypes.contains(refSchema.getType())) {
                 arrayName = type;
             } else {
