@@ -37,8 +37,7 @@ paths:
         - description: "Meeting location"
           in: query
           name: location
-          schema:
-            $ref: '#/components/schemas/Room'
+          $ref: '#/components/parameters/responseFormat'
       responses:
         "200":
           content:
@@ -52,13 +51,10 @@ components:
       description: The response format you would like
       in: query
       name: format
-      schema:
-        enum:
-          - json
-          - jsonp
-          - msgpack
-          - html
-        type: string
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/MeetingList'
   schemas:
     Room:
       type: object
