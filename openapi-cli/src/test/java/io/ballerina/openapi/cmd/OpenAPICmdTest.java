@@ -510,11 +510,46 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             }
             generatedServiceType = (generatedServiceType.trim()).replaceAll("\\s+", "");
             expectedServiceTypeContent = (expectedServiceTypeContent.trim()).replaceAll("\\s+", "");
-            if (expectedServiceTypeContent.equals(generatedServiceType)) {
-                SemanticModel semanticModel = TestUtils.getSemanticModel(projectDir.resolve("petstore_service.bal"));
+            Assert.assertEquals(generatedServiceType, expectedServiceTypeContent,
+                    "Expected content and actual generated content is mismatched for: " + petstoreYaml.toString());
+        } else {
+            Assert.fail("Service generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test(description = "Test Ballerina service generation without data binding")
+    public void testServiceGenerationWithoutDataBinding() throws IOException {
+        Path projectDir = resourceDir.resolve("expected_gen").resolve("ballerina_project");
+        Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
+        String[] args = {"--input", petstoreYaml.toString(), "-o", projectDir.toString(), "--without-data-binding"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedService = resourceDir.resolve(Paths.get("expected_gen", "generic_service_petstore.bal"));
+        String expectedServiceContent = "";
+        try (Stream<String> expectedServiceTypeLines = Files.lines(expectedService)) {
+            expectedServiceContent = expectedServiceTypeLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(projectDir.resolve("client.bal")) &&
+                Files.exists(projectDir.resolve("petstore_service.bal")) &&
+                Files.exists(projectDir.resolve("types.bal"))) {
+            //Compare schema contents
+            String generatedService = "";
+            try (Stream<String> generatedServiceLines = Files.lines(projectDir.resolve("petstore_service.bal"))) {
+                generatedService = generatedServiceLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedService = (generatedService.trim()).replaceAll("\\s+", "");
+            expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
+            if (expectedServiceContent.equals(generatedService)) {
+                SemanticModel semanticModel = TestUtils.getSemanticModel(
+                        projectDir.resolve("petstore_service.bal"));
                 boolean hasErrors = semanticModel.diagnostics().stream()
                         .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
-                Assert.assertTrue(hasErrors, "Errors found in generated service");
+                Assert.assertFalse(hasErrors, "Errors found in generated service");
                 deleteGeneratedFiles(false, projectDir, true);
             } else {
                 Assert.fail("Expected content and actual generated content is mismatched for: "
