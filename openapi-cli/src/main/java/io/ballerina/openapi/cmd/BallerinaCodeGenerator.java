@@ -90,7 +90,8 @@ public class BallerinaCodeGenerator {
      */
     public void generateClientAndService(String definitionPath, String serviceName,
                                          String outPath, Filter filter, boolean nullable,
-                                         boolean isResource, boolean generateServiceType)
+                                         boolean isResource, boolean generateServiceType,
+                                         boolean generateWithoutDataBinding)
             throws IOException, FormatterException,
             io.ballerina.openapi.core.exception.BallerinaOpenApiException {
         Path srcPath = Paths.get(outPath);
@@ -111,6 +112,7 @@ public class BallerinaCodeGenerator {
                 .withFilters(filter)
                 .withNullable(nullable)
                 .withGenerateServiceType(generateServiceType)
+                .withGenerateWithoutDataBinding(generateWithoutDataBinding)
                 .build();
         BallerinaServiceGenerator serviceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         String serviceContent = Formatter.format
@@ -236,12 +238,12 @@ public class BallerinaCodeGenerator {
      * @throws BallerinaOpenApiException when code generator fails
      */
     public void generateService(String definitionPath, String serviceName, String outPath, Filter filter,
-                                boolean nullable, boolean generateServiceType)
+                                boolean nullable, boolean generateServiceType, boolean generateWithoutDataBinding)
             throws IOException, BallerinaOpenApiException, FormatterException {
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles = generateBallerinaService(Paths.get(definitionPath), serviceName,
-                filter, nullable, generateServiceType);
+                filter, nullable, generateServiceType, generateWithoutDataBinding);
         writeGeneratedSources(genFiles, srcPath, implPath, GEN_SERVICE);
     }
 
@@ -395,7 +397,8 @@ public class BallerinaCodeGenerator {
 
 
     public List<GenSrcFile> generateBallerinaService(Path openAPI, String serviceName,
-                                                      Filter filter, boolean nullable, boolean generateServiceType)
+                                                      Filter filter, boolean nullable, boolean generateServiceType,
+                                                     boolean generateWithoutDataBinding)
             throws IOException, FormatterException, BallerinaOpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_MOCK_PKG;
@@ -422,6 +425,7 @@ public class BallerinaCodeGenerator {
                 .withFilters(filter)
                 .withNullable(nullable)
                 .withGenerateServiceType(generateServiceType)
+                .withGenerateWithoutDataBinding(generateWithoutDataBinding)
                 .build();
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         String mainContent = Formatter.format(ballerinaServiceGenerator.generateSyntaxTree()).toSourceCode();

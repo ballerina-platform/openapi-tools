@@ -30,12 +30,14 @@ public class OASServiceMetadata {
     private final Filter filters;
     private final boolean nullable;
     private final boolean generateServiceType;
+    private final boolean generateWithoutDataBinding;
 
     private OASServiceMetadata(Builder clientConfigBuilder) {
         this.openAPI = clientConfigBuilder.openAPI;
         this.filters = clientConfigBuilder.filters;
         this.nullable = clientConfigBuilder.nullable;
         this.generateServiceType = clientConfigBuilder.generateServiceType;
+        this.generateWithoutDataBinding = clientConfigBuilder.generateWithoutDataBinding;
     }
 
     public OpenAPI getOpenAPI() {
@@ -54,6 +56,9 @@ public class OASServiceMetadata {
         return generateServiceType;
     }
 
+    public boolean generateWithoutDataBinding() {
+        return generateWithoutDataBinding;
+    }
     /**
      * Service generation meta data builder class.
      */
@@ -63,6 +68,9 @@ public class OASServiceMetadata {
         private boolean nullable = false;
 
         private boolean generateServiceType = false;
+
+        private boolean generateWithoutDataBinding = false;
+
         public Builder withOpenAPI(OpenAPI openAPI) {
             this.openAPI = openAPI;
             return this;
@@ -80,6 +88,11 @@ public class OASServiceMetadata {
 
         public Builder withGenerateServiceType(boolean generateServiceType) {
             this.generateServiceType = generateServiceType;
+            return this;
+        }
+
+        public Builder withGenerateWithoutDataBinding(boolean generateWithoutDataBinding) {
+            this.generateWithoutDataBinding = generateWithoutDataBinding;
             return this;
         }
 
