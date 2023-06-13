@@ -348,7 +348,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "21. Query parameter(s) having a object schema")
-    public void generateParamsWithObjectType() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateParamsWithObjectType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/object_query.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, false);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
