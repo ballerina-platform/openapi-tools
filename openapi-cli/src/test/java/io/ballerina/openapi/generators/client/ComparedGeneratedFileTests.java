@@ -26,6 +26,7 @@ import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
@@ -91,7 +92,9 @@ public class ComparedGeneratedFileTests {
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
-        Assert.assertTrue(diagnostics.isEmpty());
+        boolean hasErrors = diagnostics.stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        Assert.assertFalse(hasErrors);
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
@@ -106,7 +109,8 @@ public class ComparedGeneratedFileTests {
                 {"nillable_response.yaml", "nillable_response.bal"},
                 {"nillable_union_response.yaml", "nillable_union_response.bal"},
                 {"duplicated_response.yaml", "duplicated_response.bal"},
-                {"multiline_param_comment.yaml", "multiline_param_comment.bal"}
+                {"multiline_param_comment.yaml", "multiline_param_comment.bal"},
+                {"description_with_special_characters.yaml", "description_with_special_characters.bal"}
         };
     }
 

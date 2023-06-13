@@ -40,7 +40,6 @@ public isolated client class Client {
     resource isolated function post pet/[Param id]() returns http:Response|error {
         string resourcePath = string `/pet/${getEncodedUri(id)}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response response = check self.clientEp-> post(resourcePath, request);
         return response;
     }

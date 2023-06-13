@@ -1,5 +1,6 @@
 import ballerina/http;
 
+# This is a sample Pet Store Server based on the OpenAPI 3.0 specification.
 public isolated client class Client {
     final http:Client clientEp;
     # Gets invoked to initialize the `connector`.
@@ -7,7 +8,7 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "https://petstore.swagger.io:443/v2") returns error? {
+    public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "https://petstore3.swagger.io/api/v3") returns error? {
         http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
@@ -34,46 +35,24 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    # List all pets
+    # Add a new pet to the store
     #
-    # + 'limit - How many items to return at one time (max 100)
-    # + return - An paged array of pets
-    #
-    # # Deprecated
-    # This methods has deprecated since the Pet has deprecated
-    @display {label: "List Pets"}
-    @deprecated
-    remote isolated function listPets(int? 'limit = ()) returns Pets|error {
-        string resourcePath = string `/pets`;
-        map<anydata> queryParam = {"limit": 'limit};
+    # + autoUnicode - Specifies how to deal with message text that contains characters not present in the GSM 03.38 character set.
+    # Messages that contain only GSM 03.38 characters are not affected by this setting.
+    # If the value is `true` then a message containing non-GSM 03.38 characters will be transmitted as a Unicode SMS (which is most likely more costly).
+    # Please note: when `auto-unicode` is `true` and the value of the `encoding` property is specified as `UNICODE`, the message will always be sent as `UNICODE`.
+    # If the value is `false` and the `encoding` property is `TEXT` then non-GSM 03.38 characters will be replaced by the `?` character.
+    # When using this setting on the API, you should take case to ensure that your message is _clean_.
+    # Invisible unicode and unexpected characters could unintentionally convert an message to `UNICODE`.  A common mistake is to use the backtick character (\`) which is unicode and will turn your`TEXT` message into a `UNICODE` message.
+    # + payload - Create a new pet in the store
+    # + return - Successful operation
+    remote isolated function addPet(json payload, boolean autoUnicode = false) returns json|error {
+        string resourcePath = string `/pet`;
+        map<anydata> queryParam = {"auto-unicode": autoUnicode};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp-> get(resourcePath);
-        return response;
-    }
-    # Create a pet
-    #
-    # + return - Null response
-    remote isolated function createPet() returns http:Response|error {
-        string resourcePath = string `/pets`;
         http:Request request = new;
-        http:Response response = check self.clientEp-> post(resourcePath, request);
-        return response;
-    }
-    # Info for a specific pet
-    #
-    # + petId - The id of the pet to retrieve
-    # + 'limit - The id of the pet to retrieve
-    # # Deprecated parameters
-    # + 'limit - Limit is deprecated from v2
-    # + return - Expected response to a valid request
-    #
-    # # Deprecated
-    @deprecated
-    remote isolated function showPetById(string petId, @display {label: "Result limit"} @deprecated string 'limit) returns Pets|error {
-        string resourcePath = string `/pets/${getEncodedUri(petId)}`;
-        map<anydata> queryParam = {"limit": 'limit};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp-> get(resourcePath);
+        request.setPayload(payload, "application/json");
+        json response = check self.clientEp->post(resourcePath, request);
         return response;
     }
 }

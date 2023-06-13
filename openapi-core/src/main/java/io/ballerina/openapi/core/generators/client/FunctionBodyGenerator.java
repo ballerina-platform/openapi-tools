@@ -533,9 +533,6 @@ public class FunctionBodyGenerator {
                 ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                         "http:Request request = new");
                 statementsList.add(requestStatementNode);
-                ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
-                        "//TODO: Update the request as needed");
-                statementsList.add(expressionStatementNode);
                 clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH +
                         ", request, " + HTTP_HEADERS + ")";
             } else if (method.equals(DELETE)) {
@@ -554,9 +551,6 @@ public class FunctionBodyGenerator {
             ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                     "http:Request request = new");
             statementsList.add(requestStatementNode);
-            ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
-                    "//TODO: Update the request as needed");
-            statementsList.add(expressionStatementNode);
             clientCallStatement = "check self.clientEp-> " + method + "(" + RESOURCE_PATH + ", request)";
         } else {
             clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ")";
