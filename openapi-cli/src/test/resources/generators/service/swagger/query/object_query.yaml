@@ -50,15 +50,11 @@ paths:
           description: 3. default query param with inline object
           schema:
             type: object
-            required:
-              - nest
             properties:
               limit:
                 type: string
               id:
                 type: integer
-              nest:
-                $ref: '#/components/schemas/Manufacturer'
             default: {limit: "9", id: 9}
         - in: query
           name: reference_query

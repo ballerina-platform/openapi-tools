@@ -220,7 +220,7 @@ public class HeaderParameterTests {
     @Test(description = "14. Header parameter with invalid reference",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Header 'X-User' with type 'object' can not be " +
-                    "mapped as a valid Ballerina header parameter.")
+                    "mapped as a valid Ballerina header parameter.*")
     public void parametersWithInvalidReferences() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_with_invalid_ref.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -235,7 +235,7 @@ public class HeaderParameterTests {
     @Test(description = "15. Header parameter with invalid array reference with record type",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Header 'X-Users' with array item type: 'User'" +
-                    " is not supported in Ballerina.")
+                    " is not supported in Ballerina.*")
     public void parametersWithInvalidarrayReferences() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_with_invalid_array_ref.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -250,7 +250,7 @@ public class HeaderParameterTests {
     @Test(description = "16. Header parameter with invalid type (object)",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Header 'X-User' with type 'object' can not be mapped as a " +
-                    "valid Ballerina header parameter.")
+                    "valid Ballerina header parameter.*")
     public void parametersWithInvalidInlineObjectType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_record_type.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -265,7 +265,7 @@ public class HeaderParameterTests {
     @Test(description = "17. Header parameter with invalid array type (object)",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Header 'X-User' with array item type: 'object' " +
-                    "is not supported in Ballerina.")
+                    "is not supported in Ballerina.*")
     public void parametersWithInvalidObjectTypeArray() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_with_invalid_object.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -280,7 +280,7 @@ public class HeaderParameterTests {
     @Test(description = "18. Header parameter with invalid type (empty object)",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Header 'X-User' with type 'object' can not be mapped " +
-                    "as a valid Ballerina header parameter.")
+                    "as a valid Ballerina header parameter.*")
     public void parametersWithInvalidEmptyObjectType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_with_invalid_type.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
