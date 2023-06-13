@@ -95,6 +95,10 @@ public class ParametersGenerator {
             new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
                     GeneratorConstants.STRING, GeneratorConstants.BOOLEAN));
 
+    private static final List<String> queryParamSupportedTypes =
+            new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
+                    GeneratorConstants.STRING, GeneratorConstants.BOOLEAN, GeneratorConstants.OBJECT));
+
     public ParametersGenerator(boolean isNullableRequired, OpenAPI openAPI) {
         this.isNullableRequired = isNullableRequired;
         this.openAPI = openAPI;
@@ -311,7 +315,8 @@ public class ParametersGenerator {
                 GeneratorUtils.escapeIdentifier(parameter.getName().trim()),
                 AbstractNodeFactory.createEmptyMinutiaeList(), GeneratorUtils.SINGLE_WS_MINUTIAE);
         boolean isSchemaNotSupported = schema == null || schema.getType() == null;
-        paramSupportedTypes.add(GeneratorConstants.OBJECT);
+        //Todo: will enable when header parameter support objects
+        //paramSupportedTypes.add(GeneratorConstants.OBJECT);
         if (schema != null && schema.get$ref() != null) {
             String type = getValidName(extractReferenceType(schema.get$ref()), true);
             Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type);
@@ -548,7 +553,7 @@ public class ParametersGenerator {
             String referenceType = extractReferenceType(items.get$ref());
             String type = getValidName(referenceType, true);
             Schema<?> refSchema = openAPI.getComponents().getSchemas().get(referenceType);
-            if (paramSupportedTypes.contains(refSchema.getType())) {
+            if (queryParamSupportedTypes.contains(refSchema.getType())) {
                 arrayName = type;
             } else {
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
