@@ -75,7 +75,7 @@ paths:
                 type: integer
         - in: query
           name: optional_nullable
-          description: 6. optional query param with inline object
+          description: 6. optional query param with inline and nullable object
           required: false
           schema:
             nullable: true
@@ -87,7 +87,7 @@ paths:
                 type: integer
         - in: query
           name: default_nullable
-          description: 7. default query param with inline object
+          description: 7. default query param with inline and nullable object
           schema:
             nullable: true
             type: object

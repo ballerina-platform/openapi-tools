@@ -530,20 +530,18 @@ public class ParametersGenerator {
     }
 
     private static Token getQueryParamTypeToken(Schema<?> schema) throws BallerinaOpenApiException {
-        Token name;
         if (schema instanceof MapSchema) {
             // handle inline record open
             RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null);
             TypeDescriptorNode recordNode = recordTypeGenerator.generateTypeDescriptorNode();
-            name = createIdentifierToken(recordNode.toSourceCode(),
+            return createIdentifierToken(recordNode.toSourceCode(),
                     GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
         } else {
-            name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(schema),
+            return createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(schema),
                     GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
         }
-        return name;
     }
 
     // Create ArrayTypeDescriptorNode using Schema

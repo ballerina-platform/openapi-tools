@@ -10,8 +10,8 @@ service /lnash94/QueryParam/'1\.0\.0 on ep0 {
     # + default_query - 3. default query param with inline object
     # + reference_query - 4. reference query param
     # + required_nullable - 5. required query param with inline object and nullable true
-    # + optional_nullable - 6. optional query param with inline object
-    # + default_nullable - 7. default query param with inline object
+    # + optional_nullable - 6. optional query param with inline and nullable object
+    # + default_nullable - 7. default query param with inline and nullable object
     # + reference_nullable - 8. reference_nullable query param won't consider nullable details when it has reference in swagger
     # + return - returns can be any of following types
     # http:Ok (search results matching criteria)
