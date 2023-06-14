@@ -26,18 +26,19 @@ import io.swagger.v3.oas.models.OpenAPI;
  * @since 1.4.0
  */
 public class OASServiceMetadata {
+
     private final OpenAPI openAPI;
     private final Filter filters;
     private final boolean nullable;
     private final boolean generateServiceType;
     private final boolean generateWithoutDataBinding;
 
-    private OASServiceMetadata(Builder clientConfigBuilder) {
-        this.openAPI = clientConfigBuilder.openAPI;
-        this.filters = clientConfigBuilder.filters;
-        this.nullable = clientConfigBuilder.nullable;
-        this.generateServiceType = clientConfigBuilder.generateServiceType;
-        this.generateWithoutDataBinding = clientConfigBuilder.generateWithoutDataBinding;
+    private OASServiceMetadata(Builder serviceMetadataBuilder) {
+        this.openAPI = serviceMetadataBuilder.openAPI;
+        this.filters = serviceMetadataBuilder.filters;
+        this.nullable = serviceMetadataBuilder.nullable;
+        this.generateServiceType = serviceMetadataBuilder.generateServiceType;
+        this.generateWithoutDataBinding = serviceMetadataBuilder.generateWithoutDataBinding;
     }
 
     public OpenAPI getOpenAPI() {
@@ -59,10 +60,12 @@ public class OASServiceMetadata {
     public boolean generateWithoutDataBinding() {
         return generateWithoutDataBinding;
     }
+
     /**
      * Service generation meta data builder class.
      */
     public static class Builder {
+
         private OpenAPI openAPI;
         private Filter filters;
         private boolean nullable = false;

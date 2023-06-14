@@ -86,6 +86,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocume
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
@@ -108,6 +109,7 @@ import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtil
  * @since 1.3.0
  */
 public class BallerinaServiceGenerator {
+
     private boolean isNullableRequired;
     private final OpenAPI openAPI;
     private final Filter filter;
@@ -299,10 +301,14 @@ public class BallerinaServiceGenerator {
 
         SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(parameters);
 
+        ReturnTypeDescriptorNode returnTypeDescriptorNode =
+                createReturnTypeDescriptorNode(createToken(SyntaxKind.RETURNS_KEYWORD), createEmptyNodeList(),
+                        createSimpleNameReferenceNode(createIdentifierToken("error?")));
+
         // create function signature
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(createToken(
-                SyntaxKind.OPEN_PAREN_TOKEN), parameterList, createToken(SyntaxKind.CLOSE_PAREN_TOKEN),
-                null);
+                        SyntaxKind.OPEN_PAREN_TOKEN), parameterList, createToken(SyntaxKind.CLOSE_PAREN_TOKEN),
+                returnTypeDescriptorNode);
         // create function body
         FunctionBodyBlockNode functionBodyBlockNode = createFunctionBodyBlockNode(
                 createToken(SyntaxKind.OPEN_BRACE_TOKEN),
@@ -314,6 +320,7 @@ public class BallerinaServiceGenerator {
                 functionBodyBlockNode);
 
     }
+
     /**
      * Generate resource function for given operation.
      *
@@ -355,7 +362,7 @@ public class BallerinaServiceGenerator {
                         ? requestBody.getDescription() : DEFAULT_PARAM_COMMENT;
                 MarkdownParameterDocumentationLineNode paramAPIDoc =
                         DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(
-                                nodeForRequestBody.paramName().get().text()),
+                                        nodeForRequestBody.paramName().get().text()),
                                 description.split("\n")[0]);
                 resourceFunctionDocs.add(paramAPIDoc);
             }
