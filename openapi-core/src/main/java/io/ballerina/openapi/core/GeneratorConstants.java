@@ -380,4 +380,6 @@ public class GeneratorConstants {
     public static final String DEFAULT_FUNC_COMMENT = "Description";
     public static final String DEFAULT_PARAM_COMMENT = "parameter description";
     public static final String EMPTY_RECORD = "record{}";
+    public static final String HTTP_CALLER = "http:Caller";
+    public static final String CALLER = "caller";
 }
