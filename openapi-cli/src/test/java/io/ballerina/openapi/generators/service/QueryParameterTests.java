@@ -21,6 +21,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CmdUtils;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.model.Filter;
@@ -284,14 +285,14 @@ public class QueryParameterTests {
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
-                "parameters_with_ref_schema.bal", syntaxTree);
+                "parameters_with_object_ref_schema.bal", syntaxTree);
     }
 
     @Test(description = "17. Query parameter(s) having a referenced schema of unsupported type",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Type 'Room' is not a valid query parameter type in Ballerina. " +
-            "The supported types are string, int, float, boolean, decimal, array types of the aforementioned " +
-            "types and map<json>.")
+            expectedExceptionsMessageRegExp = "Type 'xml' is not a valid query parameter type in Ballerina. " +
+                    "The supported types are string, int, float, boolean, decimal, array types of the aforementioned " +
+                    "types and map<json>.")
     public void generateParamsWithInvalidRefSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_invalid_ref_schema.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -305,9 +306,8 @@ public class QueryParameterTests {
 
     @Test(description = "18. Query parameter(s) having a referenced schema of array of unsupported type",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Type 'Room' is not a valid query parameter type in Ballerina. " +
-                    "The supported types are string, int, float, boolean, decimal, array types of the aforementioned " +
-                    "types and map<json>.")
+            expectedExceptionsMessageRegExp = "OpenAPI definition has errors: \n" +
+                    "attribute components.schemas.Room.content is unexpected.*")
     public void generateParamsWithInvalidArrayRefSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameter_with_ref_array_invalid_schema.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -319,31 +319,50 @@ public class QueryParameterTests {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
     }
 
-    @Test(description = "tests int and int32 query parameters")
-    public void testIntegerQueryParameter() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/query/query_integer_signed32.yaml");
-        OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+    @Test(description = "19. Query parameter(s) having a referenced schema type")
+    public void generateParamsWithObjectRefSchema() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("swagger/parameters_with_object_ref_schema.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        CommonTestFunctions
-                .compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_integer_signed32.bal", syntaxTree);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "query/parameters_with_object_ref_schema.bal", syntaxTree);
     }
 
-    @Test(description = "tests invalid integer query parameters")
-    public void testInvalidIntegerQueryParameter() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/query/query_integer_invalid.yaml");
-        OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+    @Test(description = "20. Query parameter(s) having a referenced schema of array type")
+    public void generateParamsWithObjectArrayRefSchema() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/parameter_with_ref_array_object_schema.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        CommonTestFunctions
-                .compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_integer_invalid.bal", syntaxTree);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "query/parameter_with_ref_array_object_schema.bal", syntaxTree);
+    }
+
+    @Test(description = "21. Query parameter(s) having a object schema")
+    public void generateParamsWithObjectType() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/query/object_query.yaml");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, false);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "query/object_query.bal", syntaxTree);
+        //Check types
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "query/object_query_type.bal", syntaxTree);
     }
 }
