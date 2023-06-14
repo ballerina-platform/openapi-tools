@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +53,7 @@ public class DiagnosticTests {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
 
-    @Test(description = "Test diagnostic issues in OpenAPI definition to ballerina service skeleton generation",
+    @Test(description = "Test for compilation errors in OpenAPI definition to ballerina service skeleton generation",
             dataProvider = "singleFileProviderForDiagnosticCheck")
     public void checkDiagnosticIssues(String yamlFile) throws IOException, BallerinaOpenApiException,
             FormatterException {
@@ -73,7 +73,6 @@ public class DiagnosticTests {
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         Assert.assertFalse(hasErrors);
     }
-
 
     @DataProvider(name = "singleFileProviderForDiagnosticCheck")
     public Object[][] singleFileProviderForDiagnosticCheck() {
