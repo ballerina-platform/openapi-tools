@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.ballerina.openapi.cmd.CmdConstants.BAL_EXTENSION;
+import static io.ballerina.openapi.cmd.CmdConstants.CLIENT;
 import static io.ballerina.openapi.cmd.CmdConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.REMOTE;
 import static io.ballerina.openapi.cmd.CmdConstants.RESOURCE;
@@ -113,6 +114,10 @@ public class OpenApiCmd implements BLauncherCmd {
     @CommandLine.Option(names = {"--with-service-type"}, hidden = true, description = "Generate service type")
     private boolean generateServiceType;
 
+    @CommandLine.Option(names = {"--without-data-binding"}, hidden = true,
+            description = "Generate service without data binding")
+    private boolean generateWithoutDataBinding;
+
     @CommandLine.Parameters
     private List<String> argList;
 
@@ -180,6 +185,12 @@ public class OpenApiCmd implements BLauncherCmd {
                 if (!clientResourceMode && mode != null && mode.equals(SERVICE)) {
                     // Exit the code generation process
                     outStream.println("'--client-methods' option is only available in client generation mode.");
+                    exitError(this.exitWhenFinish);
+                }
+
+                if (generateWithoutDataBinding && mode != null && mode.equals(CLIENT)) {
+                    // Exit the code generation process
+                    outStream.println("'--without-data-binding' option is only available in service generation mode.");
                     exitError(this.exitWhenFinish);
                 }
                 try {
@@ -380,7 +391,7 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             assert resourcePath != null;
             generator.generateService(resourcePath.toString(), serviceName, targetOutputPath.toString(), filter,
-                    nullable, generateServiceType);
+                    nullable, generateServiceType, generateWithoutDataBinding);
         } catch (IOException | FormatterException | BallerinaOpenApiException e) {
             outStream.println("Error occurred when generating service for OpenAPI contract at " + argList.get(0) +
                     ". " + e.getMessage() + ".");
@@ -399,7 +410,7 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             assert resourcePath != null;
             generator.generateClientAndService(resourcePath.toString(), fileName, targetOutputPath.toString(), filter,
-                    nullable, generateClientResourceFunctions, generateServiceType);
+                    nullable, generateClientResourceFunctions, generateServiceType, generateWithoutDataBinding);
         } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             outStream.println("Error occurred when generating service for openAPI contract at " + argList.get(0) + "." +
                     " " + e.getMessage() + ".");
