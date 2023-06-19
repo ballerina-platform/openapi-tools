@@ -60,6 +60,13 @@ public class EnumTypeTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_with_value.yaml");
     }
 
+    @Test(description = "When the record field has reference to enum with constant value")
+    public void testEnumWithConstantValue01() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_02.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_with_value.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

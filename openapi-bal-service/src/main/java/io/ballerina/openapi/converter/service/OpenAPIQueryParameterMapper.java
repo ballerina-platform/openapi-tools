@@ -18,6 +18,7 @@
 package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
@@ -45,13 +46,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.BOOLEAN_LITERAL;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.LIST_CONSTRUCTOR;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.NIL_LITERAL;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.NUMERIC_LITERAL;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPTIONAL_TYPE_DESC;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.*;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getAnnotationNodesFromServiceNode;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.unescapeIdentifier;
 
@@ -200,11 +195,13 @@ public class OpenAPIQueryParameterMapper {
         ArraySchema arraySchema = new ArraySchema();
         queryParameter.setName(ConverterCommonUtils.unescapeIdentifier(queryParamName));
         TypeDescriptorNode itemTypeNode = arrayNode.memberTypeDesc();
-        Schema itemSchema;
+        Schema<?> itemSchema;
         if (arrayNode.memberTypeDesc().kind() == OPTIONAL_TYPE_DESC) {
             itemSchema = ConverterCommonUtils.getOpenApiSchema(
                     ((OptionalTypeDescriptorNode) itemTypeNode).typeDescriptor().toString().trim());
             itemSchema.setNullable(true);
+        } else if (arrayNode.memberTypeDesc().kind() == SIMPLE_NAME_REFERENCE) {
+            itemSchema = getItemSchemaForReference(arrayNode);
         } else {
             itemSchema = ConverterCommonUtils.getOpenApiSchema(itemTypeNode.toString().trim());
         }
@@ -215,6 +212,21 @@ public class OpenAPIQueryParameterMapper {
             queryParameter.setDescription(apidocs.get(queryParamName));
         }
         return queryParameter;
+    }
+
+    private Schema<?> getItemSchemaForReference(ArrayTypeDescriptorNode arrayNode) {
+        Schema<?> itemSchema;
+        itemSchema = new Schema<>();
+        SimpleNameReferenceNode record = (SimpleNameReferenceNode) arrayNode.memberTypeDesc();
+        // Creating request body - required.
+        Optional<Symbol> symbol = semanticModel.symbol(record);
+        if (symbol.isPresent() && symbol.get() instanceof TypeSymbol) {
+            String recordName = record.name().toString().trim();
+            OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
+            componentMapper.createComponentSchema(components.getSchemas(), (TypeSymbol) symbol.get());
+            itemSchema.set$ref(ConverterCommonUtils.unescapeIdentifier(recordName));
+        }
+        return itemSchema;
     }
 
     /**
@@ -233,7 +245,13 @@ public class OpenAPIQueryParameterMapper {
             arraySchema.setNullable(true);
             ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) node;
             TypeDescriptorNode itemTypeNode = arrayNode.memberTypeDesc();
-            Schema itemSchema = ConverterCommonUtils.getOpenApiSchema(itemTypeNode.toString().trim());
+            Schema itemSchema;
+            // handle optional array with references
+            if (arrayNode.memberTypeDesc().kind() == SIMPLE_NAME_REFERENCE) {
+                itemSchema = getItemSchemaForReference(arrayNode);
+            } else {
+                itemSchema = ConverterCommonUtils.getOpenApiSchema(itemTypeNode.toString().trim());
+            }
             arraySchema.setItems(itemSchema);
             queryParameter.schema(arraySchema);
             queryParameter.setName(ConverterCommonUtils.unescapeIdentifier(queryParamName));
