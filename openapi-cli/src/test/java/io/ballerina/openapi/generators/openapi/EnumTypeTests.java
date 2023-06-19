@@ -61,10 +61,17 @@ public class EnumTypeTests {
     }
 
     @Test(description = "When the record field has reference to enum with constant value")
-    public void testEnumWithConstantValue01() throws IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_02.bal");
+    public void testEnumWithQueryParameter() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_query.bal");
         //Compare generated yaml file with expected yaml content
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_with_value.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_query.yaml");
+    }
+
+    @Test(description = "When the record field has reference to enum with constant value")
+    public void testEnumWithHeaderParameter() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_header.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_header.yaml");
     }
 
     @AfterMethod

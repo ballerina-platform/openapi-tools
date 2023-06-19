@@ -28,29 +28,13 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
-import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
-import io.ballerina.compiler.syntax.tree.ExpressionNode;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MappingFieldNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
-import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.NonTerminalNode;
-import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
-import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.*;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.model.OASResult;
+import io.ballerina.openapi.converter.service.OpenAPIComponentMapper;
 import io.ballerina.runtime.api.utils.IdentifierUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -58,6 +42,7 @@ import io.ballerina.tools.diagnostics.Location;
 import io.ballerina.tools.text.LinePosition;
 import io.ballerina.tools.text.LineRange;
 import io.ballerina.tools.text.TextRange;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
@@ -521,5 +506,19 @@ public class ConverterCommonUtils {
     public static String unescapeIdentifier(String parameterName) {
         String unescapedParamName = IdentifierUtils.unescapeBallerina(parameterName);
         return unescapedParamName.replaceAll("\\\\", "").replaceAll("'", "");
+    }
+
+
+    public static Schema<?> handleReference(SemanticModel semanticModel, Components components, SimpleNameReferenceNode record) {
+        Schema<?> refSchema = new Schema<>();
+        // Creating request body - required.
+        Optional<Symbol> symbol = semanticModel.symbol(record);
+        if (symbol.isPresent() && symbol.get() instanceof TypeSymbol) {
+            String recordName = record.name().toString().trim();
+            OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
+            componentMapper.createComponentSchema(components.getSchemas(), (TypeSymbol) symbol.get());
+            refSchema.set$ref(ConverterCommonUtils.unescapeIdentifier(recordName));
+        }
+        return refSchema;
     }
 }

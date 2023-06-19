@@ -59,7 +59,6 @@ public class TestUtils {
             openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
             if (Files.exists(tempDir.resolve("api_v3_openapi.yaml"))) {
                 String generatedYaml = getStringFromGivenBalFile(tempDir, "api_v3_openapi.yaml");
-                System.out.println(generatedYaml);
                 generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
                 expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedYaml.contains(expectedYamlContent));

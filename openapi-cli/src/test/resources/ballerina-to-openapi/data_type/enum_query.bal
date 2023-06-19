@@ -3,7 +3,7 @@ import ballerina/http;
 listener http:Listener ep0 = new (9090);
 
 service /api/v3 on ep0 {
-    resource function get users/meetings/[MeetingGroup group](Status[] status, Status[]? status02, @http:Header DateFormat? 'x\-date\-format, @http:Header TimeZone[] 'x\-time\-zones, Format? format, "scheduled"|"live"|"upcoming" 'type = "live", RoomNo location = "R5") returns MeetingList|http:NotFound {
+    resource function get users/meetings/[MeetingGroup group](RoomNo required\-q\-ref, Status[] required\-q\-arr, Status[]? optional\-q\-arr, Format? format, "scheduled"|"live"|"upcoming" 'type = "live", RoomNo q\-default\-ref = "R5") returns MeetingList|http:NotFound {
         MeetingList m = {
             meetings: [
                 {
