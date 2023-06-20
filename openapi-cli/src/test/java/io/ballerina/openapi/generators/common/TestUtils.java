@@ -62,6 +62,7 @@ public class TestUtils {
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
     private static final Path utilPath = RES_DIR.resolve("ballerina_project/utils.bal");
+    private static final Path servicePath = RES_DIR.resolve("ballerina_project/service.bal");
     private static final String LINE_SEPARATOR = System.lineSeparator();
 
     // Get diagnostics
@@ -76,16 +77,23 @@ public class TestUtils {
                 openAPI, false, preGeneratedTypeDefinitionNodes);
         SyntaxTree schemaSyntax = ballerinaSchemaGenerator.generateSyntaxTree();
         SyntaxTree utilSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
-        writeFile(clientPath, Formatter.format(syntaxTree).toString());
-        writeFile(schemaPath, Formatter.format(schemaSyntax).toString());
-        writeFile(utilPath, Formatter.format(utilSyntaxTree).toString());
+        writeFile(clientPath, Formatter.format(syntaxTree).toSourceCode());
+        writeFile(schemaPath, Formatter.format(schemaSyntax).toSourceCode());
+        writeFile(utilPath, Formatter.format(utilSyntaxTree).toSourceCode());
         SemanticModel semanticModel = getSemanticModel(clientPath);
         return semanticModel.diagnostics();
     }
 
     public static List<Diagnostic> getDiagnostics(SyntaxTree syntaxTree) throws FormatterException, IOException {
-        writeFile(schemaPath, Formatter.format(syntaxTree).toString());
+        writeFile(schemaPath, Formatter.format(syntaxTree).toSourceCode());
         SemanticModel semanticModel = getSemanticModel(schemaPath);
+        return semanticModel.diagnostics();
+    }
+
+    public static List<Diagnostic> getDiagnosticsForGenericService(SyntaxTree serviceSyntaxTree)
+            throws FormatterException, IOException {
+        writeFile(servicePath, Formatter.format(serviceSyntaxTree).toSourceCode());
+        SemanticModel semanticModel = getSemanticModel(servicePath);
         return semanticModel.diagnostics();
     }
 
@@ -101,7 +109,7 @@ public class TestUtils {
             throws IOException {
 
         String expectedBallerinaContent = getStringFromGivenBalFile(path);
-        String generatedSyntaxTree = syntaxTree.toString();
+        String generatedSyntaxTree = syntaxTree.toSourceCode();
         generatedSyntaxTree = generatedSyntaxTree.replaceAll(LINE_SEPARATOR, "");
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
