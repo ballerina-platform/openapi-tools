@@ -41,7 +41,17 @@ The conforming implementation of the specification is released and included in t
                     - [Query parameters](#query-parameters)
                     - [Header parameters](#header-parameters)
                     - [Cookie parameters](#cookie-parameters)
-                - [2.1.3.2. Request Payload](#2132-request-payload)
+                - [2.1.3.3. Request Payload](#2133-request-payload)
+                    - [Payload with referenced schema](#payload-with-referenced-schema)
+                    - [Payload with inline schema](#payload-with-inline-schema)
+                    - [application/json media type](#applicationjson-media-type)
+                    - [application/xml media type](#applicationxml-media-type)
+                    - [application/x-www-form-urlencoded media type](#applicationx-www-form-urlencoded-media-type)
+                    - [multipart/form-data media type](#multipartform-data-media-type)
+                    - [application/octet-stream media type](#applicationoctet-stream-media-type)
+                    - [Vendor specific media types](#vendor-specific-media-types)
+                    - [Multiple media types](#multiple-media-types)
+                - [2.1.3.4. Return types](#2134-return-types)
 
 ## 1. Overview
 
@@ -876,7 +886,7 @@ According to OpenAPI specification header parameters can be primitive values, ar
 
 Operations can also pass parameters in the Cookie header as Cookie: name=value. However, in the OpenAPI to Ballerina client generation, cookie parameters are currently not taken into consideration.
 
-##### 2.1.3.2. Request Payload
+##### 2.1.3.3. Request Payload
 
 Request bodies are commonly utilized in operations such as `create` and `update` (POST, PUT, PATCH). For instance, when creating a resource through `POST` or `PUT`, the request body typically carries the representation of the resource to be created. In the OpenAPI specification, the `requestBody` keyword is provided to describe these request bodies.
 
@@ -910,7 +920,7 @@ paths:
 
 Following are the scenario supported in OpenAPI to Ballerina client generation.
 
-**Scenario 1 : Payload with referenced schema**
+###### Payload with referenced schema
 
 _Sample OpenAPI snippet_
 
@@ -963,7 +973,7 @@ _Generated resource function_
 Here the type of the payload is `Pet` which is a reference to a Ballerina type.
 
 
-**Scenario 2 : Payload with inline schema**
+###### Payload with inline schema
 
 _Sample OpenAPI snippet_
 
@@ -1017,44 +1027,302 @@ public type Pet_body record {
 };
 ```
 
-**Scenario 3 : application/json content type**
+###### application/json media type
 
 As given in above scenario 1 and scenario 2 examples when the content type is set as `application/json`, the `payload` parameter value is converted to JSON using the `toJson()` method and then assigned to the payload with the content type `application/json`."
 
 When an empty schema given for `application/json` content-type request body, the resource function is generated as below.
 
 ```bal
-    # Update an existing pet
-    #
-    # + payload - Update an existent pet in the store
-    # + return - Successful operation 
-    resource isolated function put pet(json payload) returns Pet|error {
-        string resourcePath = string `/pet`;
-        http:Request request = new;
-        request.setPayload(payload, "application/json");
-        Pet response = check self.clientEp->put(resourcePath, request);
-        return response;
-    }
+  # Update an existing pet
+  #
+  # + payload - Update an existent pet in the store
+  # + return - Successful operation 
+  resource isolated function put pet(json payload) returns Pet|error {
+      string resourcePath = string `/pet`;
+      http:Request request = new;
+      request.setPayload(payload, "application/json");
+      Pet response = check self.clientEp->put(resourcePath, request);
+      return response;
+  }
 ```
 
 The type of the `payload` parameter is `json`.
 
-**Scenario 3 : application/xml content type**
+###### application/xml media type
 
 _Sample OpenAPI snippet_
 
 ```yaml
-  /pet:
-    put:
-      tags:
-        - pet
-      summary: Update an existing pet
-      description: Update an existing pet by Id
-      operationId: updatePet
+/pet:
+  put:
+    tags:
+      - pet
+    summary: Update an existing pet
+    description: Update an existing pet by Id
+    operationId: updatePet
+    requestBody:
+      description: Update an existent pet in the store
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Pet'
+```
+
+_Generated resource function_
+
+```bal
+# Update an existing pet
+#
+# + payload - Update an existent pet in the store
+# + return - Successful operation 
+resource isolated function put pet(Pet payload) returns Pet|error {
+    string resourcePath = string `/pet`;
+    http:Request request = new;
+    json jsonBody = payload.toJson();
+    xml? xmlBody = check xmldata:fromJson(jsonBody);
+    request.setPayload(xmlBody, "application/xml");
+    Pet response = check self.clientEp->put(resourcePath, request);
+    return response;
+}
+```
+
+When the content type is set as `application/xml`, the request payload remains the same, and the value provided for the `payload` parameter is first converted to JSON and then transformed into XML.
+
+###### application/x-www-form-urlencoded media type
+
+_Sample OpenAPI snippet_
+
+```yaml
+/pet:
+  put:
+    tags:
+      - pet
+    summary: Update an existing pet
+    description: Update an existing pet by Id
+    operationId: updatePet
+    requestBody:
+      description: Update an existent pet in the store
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/Pet'
+```
+
+_Generated resource function_
+
+```bal
+# Update an existing pet
+#
+# + payload - Update an existent pet in the store
+# + return - Successful operation 
+resource isolated function put pet(Pet payload) returns Pet|error {
+    string resourcePath = string `/pet`;
+    http:Request request = new;
+    string encodedRequestBody = createFormURLEncodedRequestBody(payload);
+    request.setPayload(encodedRequestBody, "application/x-www-form-urlencoded");
+    Pet response = check self.clientEp->put(resourcePath, request);
+    return response;
+}
+```
+
+The `createFormURLEncodedRequestBody` function handles the encoding style of the payload. It is responsible for serializing complex objects when they are passed in the `application/x-www-form-urlencoded` content type. The serialization strategy for these properties is defined by the `style` and `explode` properties of the Encoding Object. The `createFormURLEncodedRequestBody` function utilizes these properties to ensure the proper serialization of the complex objects. The serialization support there for any basic type array, object and array of objects.
+
+```bal
+# Generate client request when the media type is given as application/x-www-form-urlencoded.
+#
+# + encodingMap - Includes the information about the encoding mechanism
+# + anyRecord - Record to be serialized
+# + return - Serialized request body or query parameter as a string
+isolated function createFormURLEncodedRequestBody(record {|anydata...;|} anyRecord, map<Encoding> encodingMap = {}) returns string {
+    string[] payload = [];
+    foreach [string, anydata] [key, value] in anyRecord.entries() {
+        Encoding encodingData = encodingMap.hasKey(key) ? encodingMap.get(key) : defaultEncoding;
+        if value is SimpleBasicType {
+            payload.push(key, "=", getEncodedUri(value.toString()));
+        } else if value is SimpleBasicType[] {
+            payload.push(getSerializedArray(key, value, encodingData.style, encodingData.explode));
+        } else if (value is record {}) {
+            if encodingData.style == DEEPOBJECT {
+                payload.push(getDeepObjectStyleRequest(key, value));
+            } else {
+                payload.push(getFormStyleRequest(key, value));
+            }
+        } else if (value is record {}[]) {
+            payload.push(getSerializedRecordArray(key, value, encodingData.style, encodingData.explode));
+        }
+        payload.push("&");
+    }
+    _ = payload.pop();
+    return string:'join("", ...payload);
+}
+
+```
+
+###### multipart/form-data media type
+
+Multipart requests combine one or more sets of data into a single body, separated by boundaries. By default, the content-Type of individual request parts is set automatically according to the type of the schema properties that describe the request parts. Default content types are as below.
+
+
+| Schema Property Type  | Content-Type |
+|----------|----------|
+| Primitive or array of primitives | text/plain  |
+| Complex value or array of complex values | application/json  |
+| String in the binary or base64 format | application/octet-stream  |
+
+Custom content type can also be provided via encoding property.
+
+```yaml
+encoding: # The same level as schema
+    profileImage: # Property name (see above)
+      	contentType: image/png, image/jpeg
+```
+
+In OpenAPI to Ballerina client generation, when the `multipart/form-data` content type is specified in the OpenAPI file as the request body content type, the following Ballerina resource/remote function is generated.
+
+
+_Sample OpenAPI snippet_
+
+```yaml
+paths:
+  /employees/{department}:
+    post:
+      operationId: operationId03
+      parameters:
+        - description: "Department name"
+          in: path
+          name: department
+          schema:
+            type: string
+            default: HR
+          required: true
       requestBody:
-        description: Update an existent pet in the store
         content:
-          application/xml:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                id:
+                  # default is text/plain
+                  type: string
+                  format: uuid
+                address:
+                  # default is application/json
+                  type: object
+                  properties: {}
+                historyMetadata:
+                  # need to declare XML format!
+                  description: metadata in XML format
+                  type: object
+                  properties: {}
+                profileImage: {}
+            encoding:
+              historyMetadata:
+                # require XML Content-Type in utf-8 encoding
+                contentType: application/xml; charset=utf-8
+              profileImage:
+                # only accept png/jpeg
+                contentType: image/png, image/jpeg
+                headers:
+                  X-Rate-Limit-Limit:
+                    description: The number of allowed requests in the current period
+                    schema:
+                      type: integer
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+```
+
+_Generated resource function_
+
+```bal
+  resource isolated function post employees/[string department](Employees_department_body payload, int? xRateLimitLimit = ()) returns string|error {
+      string resourcePath = string `/employees/${getEncodedUri(department)}`;
+      http:Request request = new;
+      map<Encoding> encodingMap = {"historyMetadata": {contentType: "application/xml; charset=utf-8"}, "profileImage": {contentType: "image/png", headers: {"X-Rate-Limit-Limit": xRateLimitLimit}}};
+      mime:Entity[] bodyParts = check createBodyParts(payload, encodingMap);
+      request.setBodyParts(bodyParts);
+      string response = check self.clientEp->post(resourcePath, request);
+      return response;
+  }
+```
+
+The `createBodyParts` function handles the construction of entities for each data item while accurately mapping the corresponding content type.
+
+###### application/octet-stream media type
+
+In OpenAPI to Ballerina client generation, when the request body content type is given as `application/octet-stream`, `byte[]` type payload parameter is generated.
+
+_Sample OpenAPI snippet_
+
+```yaml
+paths:
+  /user:
+    post:
+      summary: Creates a new user.
+      responses:
+        200:
+          description: OK
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+  /payment:
+    post:
+      summary: Creates a new payment.
+      responses:
+        200:
+          description: OK
+      requestBody:
+        description: Details of the pet to be purchased
+        content:
+          application/octet-stream:
+            schema:
+              $ref: '#/components/schemas/Pet'
+```
+_Generated resource function_
+
+```bal
+  resource isolated function post user(byte[] payload) returns http:Response|error {
+      string resourcePath = string `/user`;
+      http:Request request = new;
+      request.setPayload(payload, "application/octet-stream");
+      http:Response response = check self.clientEp->post(resourcePath, request);
+      return response;
+  }
+  resource isolated function post payment(byte[] payload) returns http:Response|error {
+      string resourcePath = string `/payment`;
+      http:Request request = new;
+      request.setPayload(payload, "application/octet-stream");
+      http:Response response = check self.clientEp->post(resourcePath, request);
+      return response;
+  }
+```
+
+###### Vendor specific media types
+
+Vendor-specific media types are registered formats created by vendors or organizations to define specific data types within the context of HTTP communication.
+
+If the provided vendor-specific media type is a subtype of `application/json`, `application/xml`, or `application/octet-stream`, the method is generated to follow the behavior associated with those types. However, if the provided vendor-specific media type is a custom type, the user needs to directly provide the `http:Request` as a function parameter along with the payload. Here is an example.
+
+_Sample OpenAPI snippet_
+
+```yaml
+/payment:
+    post:
+      summary: Creates a new payment.
+      responses:
+        200:
+          description: OK
+      requestBody:
+        description: Details of the pet to be purchased
+        content:
+          application/vnd.github.v3.diff:
             schema:
               $ref: '#/components/schemas/Pet'
 ```
@@ -1062,17 +1330,40 @@ _Sample OpenAPI snippet_
 _Generated resource function_
 
 ```bal
-  # Update an existing pet
-  #
-  # + payload - Update an existent pet in the store
-  # + return - Successful operation 
-  resource isolated function put pet(Pet payload) returns Pet|error {
-      string resourcePath = string `/pet`;
-      http:Request request = new;
-      json jsonBody = payload.toJson();
-      xml? xmlBody = check xmldata:fromJson(jsonBody);
-      request.setPayload(xmlBody, "application/xml");
-      Pet response = check self.clientEp->put(resourcePath, request);
-      return response;
-  }
+    resource isolated function post payment(http:Request request) returns http:Response|error {
+        string resourcePath = string `/payment`;
+        http:Response response = check self.clientEp->post(resourcePath, request);
+        return response;
+    }
 ```
+
+The above behavior is same for any other media type that has not specifically mentioned here including media types with wild cards, `text/*`, `image/*` etc.
+
+###### Multiple media types
+
+In most of the occasions there are  under the `requestBody` section there are multiple media types given as below.
+
+```yaml
+post:
+  description: Add a new pet to the store
+  operationId: addPet
+  requestBody:
+    description: Create a new pet in the store
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Pet'
+      application/xml:
+        schema:
+          $ref: '#/components/schemas/Pet'
+      application/x-www-form-urlencoded:
+        schema:
+          $ref: '#/components/schemas/Pet'
+```
+
+In OpenAPI to Ballerina client generation, when multiple media types are provided, the first media type specified is used as the reference when generating the resource/remote method.
+
+##### 2.1.3.4. Return types
+
+
+
