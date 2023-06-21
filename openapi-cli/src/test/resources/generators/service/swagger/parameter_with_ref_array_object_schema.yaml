@@ -63,10 +63,12 @@ components:
         type: string
   schemas:
     Room:
-      content:
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/RoomObject'
+      type: object
+      properties:
+        roomNo:
+          type: string
+        seats:
+          type: integer
     MeetingList:
       description: List of meetings
       title: Group List
