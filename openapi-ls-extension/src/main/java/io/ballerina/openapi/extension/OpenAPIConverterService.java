@@ -30,10 +30,10 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.model.OASResult;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
+import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
-import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -136,16 +136,21 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 response.setError("Error while getting the project.");
                 return response;
             }
-            Package aPackage = module.get().currentPackage();
-            Collection<Diagnostic> diagnostics = aPackage.getCompilation().diagnosticResult().diagnostics();
-            boolean hasErrors = diagnostics.stream()
+            DiagnosticResult diagnosticsFromCodeGenAndModify = module.get()
+                    .currentPackage()
+                    .runCodeGenAndModifyPlugins();
+            boolean hasErrorsFromCodeGenAndModify = diagnosticsFromCodeGenAndModify.diagnostics().stream()
                     .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
-            if (hasErrors) {
+            Collection<Diagnostic> compilationDiagnostics = module.get().currentPackage()
+                    .getCompilation().diagnosticResult().diagnostics();
+            boolean hasCompilationErrors = compilationDiagnostics.stream()
+                    .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+            if (hasCompilationErrors || hasErrorsFromCodeGenAndModify) {
                 // if there are any compilation errors, do not proceed
                 response.setError("Given Ballerina file contains compilation error(s).");
                 return response;
             }
-            Module defaultModule = aPackage.getDefaultModule();
+            Module defaultModule = module.get().currentPackage().getDefaultModule();
 
             JsonArray specs = new JsonArray();
             for (DocumentId currentDocumentID : defaultModule.documentIds()) {
