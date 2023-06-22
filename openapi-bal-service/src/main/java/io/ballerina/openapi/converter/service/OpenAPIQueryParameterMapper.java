@@ -45,8 +45,18 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.*;
-import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.*;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.BOOLEAN_LITERAL;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.LIST_CONSTRUCTOR;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.NIL_LITERAL;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.NUMERIC_LITERAL;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPTIONAL_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.SIMPLE_NAME_REFERENCE;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getAnnotationNodesFromServiceNode;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.handleReference;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.unescapeIdentifier;
+
 
 /**
  * This class processes mapping query parameters in between Ballerina and OAS.
@@ -76,7 +86,7 @@ public class OpenAPIQueryParameterMapper {
                 && queryParam.annotations().isEmpty();
         if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode && isQuery) {
             QueryParameter queryParameter = new QueryParameter();
-            queryParameter.setName(ConverterCommonUtils.unescapeIdentifier(queryParamName));
+            queryParameter.setName(unescapeIdentifier(queryParamName));
             Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(queryParam.typeName().toString().trim());
             queryParameter.setSchema(openApiSchema);
             queryParameter.setRequired(true);
@@ -103,13 +113,13 @@ public class OpenAPIQueryParameterMapper {
             return handleArrayTypeQueryParameter(queryParamName, arrayNode);
         } else if (queryParam.typeName() instanceof SimpleNameReferenceNode && isQuery) {
             QueryParameter queryParameter = new QueryParameter();
-            queryParameter.setName(ConverterCommonUtils.unescapeIdentifier(queryParamName));
+            queryParameter.setName(unescapeIdentifier(queryParamName));
             SimpleNameReferenceNode queryNode = (SimpleNameReferenceNode) queryParam.typeName();
             OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
             TypeSymbol typeSymbol = (TypeSymbol) semanticModel.symbol(queryNode).orElseThrow();
             componentMapper.createComponentSchema(components.getSchemas(), typeSymbol);
             Schema<?> schema = new Schema<>();
-            schema.set$ref(ConverterCommonUtils.unescapeIdentifier(queryNode.name().text().trim()));
+            schema.set$ref(unescapeIdentifier(queryNode.name().text().trim()));
             queryParameter.setSchema(schema);
             queryParameter.setRequired(true);
             if (!apidocs.isEmpty() && queryParam.paramName().isPresent() && apidocs.containsKey(queryParamName)) {
@@ -118,7 +128,8 @@ public class OpenAPIQueryParameterMapper {
             return queryParameter;
         } else if (queryParam.typeName().kind() == SIMPLE_NAME_REFERENCE) {
             QueryParameter queryParameter = new QueryParameter();
-            Schema<?> refSchema = handleReference(semanticModel, components, (SimpleNameReferenceNode) queryParam.typeName());
+            Schema<?> refSchema = handleReference(semanticModel, components, (SimpleNameReferenceNode)
+                    queryParam.typeName());
             queryParameter.setSchema(refSchema);
             queryParameter.setRequired(true);
             if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
@@ -145,7 +156,7 @@ public class OpenAPIQueryParameterMapper {
 
         QueryParameter queryParameter = new QueryParameter();
         if (defaultableQueryParam.typeName() instanceof BuiltinSimpleNameReferenceNode && isQuery) {
-            queryParameter.setName(ConverterCommonUtils.unescapeIdentifier(queryParamName));
+            queryParameter.setName(unescapeIdentifier(queryParamName));
             Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(
                     defaultableQueryParam.typeName().toString().trim());
             queryParameter.setSchema(openApiSchema);
@@ -163,8 +174,9 @@ public class OpenAPIQueryParameterMapper {
             ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) defaultableQueryParam.typeName();
             queryParameter = handleArrayTypeQueryParameter(queryParamName, arrayNode);
         } else if (defaultableQueryParam.typeName().kind() == SIMPLE_NAME_REFERENCE) {
-            queryParameter.setName(ConverterCommonUtils.unescapeIdentifier(queryParamName));
-            Schema<?> refSchema = handleReference(semanticModel, components, (SimpleNameReferenceNode) defaultableQueryParam.typeName());
+            queryParameter.setName(unescapeIdentifier(queryParamName));
+            Schema<?> refSchema = handleReference(semanticModel, components,
+                    (SimpleNameReferenceNode) defaultableQueryParam.typeName());
             queryParameter.setSchema(refSchema);
             queryParameter.setRequired(true);
             if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
@@ -208,7 +220,7 @@ public class OpenAPIQueryParameterMapper {
     private QueryParameter handleArrayTypeQueryParameter(String queryParamName, ArrayTypeDescriptorNode arrayNode) {
         QueryParameter queryParameter = new QueryParameter();
         ArraySchema arraySchema = new ArraySchema();
-        queryParameter.setName(ConverterCommonUtils.unescapeIdentifier(queryParamName));
+        queryParameter.setName(unescapeIdentifier(queryParamName));
         TypeDescriptorNode itemTypeNode = arrayNode.memberTypeDesc();
         Schema<?> itemSchema;
         if (arrayNode.memberTypeDesc().kind() == OPTIONAL_TYPE_DESC) {
@@ -243,7 +255,7 @@ public class OpenAPIQueryParameterMapper {
         if (isOptional.equals(Constants.FALSE)) {
             queryParameter.setRequired(true);
         }
-        queryParameter.setName(ConverterCommonUtils.unescapeIdentifier(queryParamName));
+        queryParameter.setName(unescapeIdentifier(queryParamName));
         Node node = typeNode.typeDescriptor();
         if (node.kind() == SyntaxKind.ARRAY_TYPE_DESC) {
             ArraySchema arraySchema = new ArraySchema();
@@ -259,7 +271,7 @@ public class OpenAPIQueryParameterMapper {
             }
             arraySchema.setItems(itemSchema);
             queryParameter.schema(arraySchema);
-            queryParameter.setName(ConverterCommonUtils.unescapeIdentifier(queryParamName));
+            queryParameter.setName(unescapeIdentifier(queryParamName));
             if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
                 queryParameter.setDescription(apidocs.get(queryParamName));
             }
@@ -304,7 +316,7 @@ public class OpenAPIQueryParameterMapper {
         MediaType media = new MediaType();
         media.setSchema(objectSchema);
         queryParameter.setContent(new Content().addMediaType("application/json", media));
-        queryParameter.setName(ConverterCommonUtils.unescapeIdentifier(queryParamName));
+        queryParameter.setName(unescapeIdentifier(queryParamName));
         return queryParameter;
     }
 }

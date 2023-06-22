@@ -1,9 +1,9 @@
 openapi: 3.0.1
 info:
-  title: Api V3
+  title: PayloadV
   version: 0.0.0
 servers:
-  - url: "{server}:{port}/api/v3"
+  - url: "{server}:{port}/payloadV"
     variables:
       server:
         default: http://localhost

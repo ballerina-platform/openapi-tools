@@ -57,8 +57,8 @@ public class TestUtils {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), yamlFile);
             OASContractGenerator openApiConverter = new OASContractGenerator();
             openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
-            if (Files.exists(tempDir.resolve("api_v3_openapi.yaml"))) {
-                String generatedYaml = getStringFromGivenBalFile(tempDir, "api_v3_openapi.yaml");
+            if (Files.exists(tempDir.resolve("payloadV_openapi.yaml"))) {
+                String generatedYaml = getStringFromGivenBalFile(tempDir, "payloadV_openapi.yaml");
                 generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
                 expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedYaml.contains(expectedYamlContent));

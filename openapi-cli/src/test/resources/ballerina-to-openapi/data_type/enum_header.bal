@@ -2,7 +2,7 @@ import ballerina/http;
 
 listener http:Listener ep0 = new (9090);
 
-service /api/v3 on ep0 {
+service /payloadV on ep0 {
     resource function get users/meetings/[MeetingGroup group](@http:Header DateFormat 'x\-date\-required, @http:Header DateFormat? 'x\-date\-optional, @http:Header TimeZone[] 'x\-required\-arr, @http:Header TimeZone[]? 'x\-optional\-arr, @http:Header DateFormat[] x\-def\-arr = ["UTC"], @http:Header DateFormat x\-def\-header= "UTC" ) returns MeetingList|http:NotFound {
         MeetingList m = {
             meetings: [

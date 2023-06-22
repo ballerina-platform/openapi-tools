@@ -18,7 +18,20 @@
 package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.syntax.tree.*;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MappingFieldNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
+import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
@@ -33,7 +46,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.*;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getAnnotationNodesFromServiceNode;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.handleReference;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.unescapeIdentifier;
 
 /**
  * This class for the mapping ballerina headers with OAS header parameter sections.
@@ -115,7 +130,6 @@ public class OpenAPIHeaderMapper {
         } else {
             headerTypeSchema = ConverterCommonUtils.getOpenApiSchema(getHeaderType(headerParam));
         }
-
         String defaultValue = headerParam.expression().toString().trim();
         if (defaultValue.length() > 1 && defaultValue.charAt(0) == '"' &&
                 defaultValue.charAt(defaultValue.length() - 1) == '"') {
