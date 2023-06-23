@@ -1365,5 +1365,85 @@ In OpenAPI to Ballerina client generation, when multiple media types are provide
 
 ##### 2.1.3.4. Return types
 
+In an OpenAPI definition, each operation should have at least one response defined, typically including the success response. A response is defined by its HTTP status code and the data returned in the response body and/or headers. It is possible to have multiple contents with different media types for a single response.
+
+Here is a minimal example:
+
+```yaml
+paths:
+  /ping:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: pong
+```
+
+In OpenAPI to Ballerina client generation, the target response type of the http:Request sent (or the return return type of the generated resource/remote function) is extracted from the success response specified in the OpenAPI file. When multiple media types are provided, the first media type is considered for generating the return type.
+
+Here is a minimal example:
+
+_Sample OpenAPI snippet_
+
+```yaml
+  /pets:
+    get:
+      summary: List all pets
+      description: Show a list of pets in the system
+      operationId: listPets
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: An paged array of pets
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/Pets"
+```
+
+_Generated resource function_
+
+```bal
+  resource isolated function get pets(int? 'limit = ()) returns Pets|error {
+      string resourcePath = string `/pets`;
+      map<anydata> queryParam = {"limit": 'limit};
+      resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+      Pets response = check self.clientEp->get(resourcePath);
+      return response;
+  }
+```
+
+Below table depicts the possible scenarios for response
+
+| OpenAPI snippet                                                                                                                                                                                                                   | Media Type                        | Schema                                                  | Generated Return Type     |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------- | ------------------------- |
+| responses:<br>  '200':<br>description: An paged array of pets<br>content:<br>application/json: {}                                                                                                                                 | application/json                  | Empty schema                                            | json|error                |
+| responses:<br>'200':<br>description: An paged array of pets<br>content:<br>application/xml: {}                                                                                                                                    | application/xml                   | Empty schema                                            | xml|error                 |
+| responses:<br>'200':<br>description: An paged array of pets<br>content:<br>text/plain: {}                                                                                                                                         | text/plain                        | Empty schema                                            | string|error              |
+| responses:<br>'200':<br>description: An paged array of pets<br>content:<br>application/octet-stream: {}                                                                                                                           | application/octet-stream          | Empty schema                                            | byte[]|error              |
+| responses:<br>'200':<br>description: An paged array of pets<br>content:<br>application/x-www-form-urlencoded: {}                                                                                                                  | application/x-www-form-urlencoded | Empty schema                                            | string|error              |
+| responses:<br>"200":<br>description: An array of products<br>content:<br>application/json:<br>schema:<br>type: array<br>items: {}                                                                                                 | application/json                  | Empty array schema                                      | json[]|error              |
+| responses:<br>"200":<br>description: An array of products<br>content:<br>application/json:<br>schema:<br>type: array<br>items: {}                                                                                                 | application/xml                   | Empty array schema                                      | xml[]|error               |
+| responses:<br>"200":<br>description: An array of products<br>content:<br>application/json:<br>schema:<br>type: array<br>items: {}                                                                                                 | text/plain                        | Empty array schema                                      | string[]|error            |
+| responses:<br>'200':<br>description: An paged array of pets<br>content:<br>application/json:<br>schema:<br>$ref: "#/components/schemas/Pets"                                                                                      | Any                               | Referenced schema                                       | Pets|error                |
+| responses:<br>'200':<br>description: An paged array of pets<br>content:<br>text/plain:<br>schema:<br>type: array<br>items:<br>$ref: "#/components/schemas/Pet"                                                                    | Any                               | Array schema with type reference                        | Pet[]|error               |
+| responses:<br>'200':<br>description: An paged array of pets<br>content:<br>application/json:<br>schema:<br>allOf:<br>\- properties:<br>id:<br>type: string<br>name:<br>type: string<br>\- properties:<br>address:<br>type: string | Any                               | oneOf/allOf/anyOf schemas                               | Inline_response_201|error |
+| responses:<br>'200':<br>description: An paged array of pets<br>content:<br>application/json:<br>schema:<br>type: object<br>additionalProperties:<br>type: integer<br>format: int32                                                | application/json                  | Empty object schema with additional properties          | json|error                |
+| application/json:<br>schema:<br>type: object<br>properties:<br>name:<br>type: string<br>age:<br>type: integer<br>additionalProperties:<br>type: integer<br>format: int32                                                          | Any                               | Object schema with primitive type additional properties | Inline_response_200|error |
+| responses: {}                                                                                                                                                                                                                     | N/A                               | N/A                                                     | http:Response|error       |
+
+
+When parsing the OpenAPI file using the swagger.v3.parser, the 'flatten' option is set to true. This enables the extraction of inline object schemas to reusable schemas during the parsing process. The parser itself assigns names to these schemas.
+
 
 
