@@ -21,6 +21,7 @@ package io.ballerina.openapi.generators.common;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.cmd.CmdUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
@@ -33,8 +34,6 @@ import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
@@ -148,9 +147,7 @@ public class TestUtils {
     }
 
     public static OpenAPI getOpenAPI(Path definitionPath) throws IOException, BallerinaOpenApiException {
-        String openAPIFileContent = Files.readString(definitionPath);
-        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
-        return parseResult.getOpenAPI();
+        return CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
     }
 
     public static String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
