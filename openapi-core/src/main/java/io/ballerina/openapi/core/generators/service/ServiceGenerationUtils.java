@@ -229,6 +229,9 @@ public class ServiceGenerationUtils {
                             JSON))), Optional.empty());
                 } else if (returnTypeDecNode.get() instanceof RecordTypeDescriptorNode) {
                     RecordTypeDescriptorNode recordNode = (RecordTypeDescriptorNode) returnTypeDecNode.get();
+                    if (recordName == null) {
+                        return ImmutablePair.of(returnTypeDecNode, Optional.empty());
+                    }
                     TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
                             createToken(PUBLIC_KEYWORD),
                             createToken(TYPE_KEYWORD),
