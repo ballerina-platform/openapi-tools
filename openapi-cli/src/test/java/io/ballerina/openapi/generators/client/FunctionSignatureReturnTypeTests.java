@@ -74,7 +74,7 @@ public class FunctionSignatureReturnTypeTests {
                 new BallerinaTypesGenerator(array), new ArrayList<>());
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/products").getGet(),
                 true);
-        Assert.assertEquals(returnType, "TestsProductsResponse|error");
+        Assert.assertEquals(returnType, "Inline_response_200|error");
     }
 
     @Test(description = "Tests for the object response without property and without additional properties")
@@ -96,7 +96,7 @@ public class FunctionSignatureReturnTypeTests {
                 new BallerinaTypesGenerator(array), new ArrayList<>());
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/products").getGet(),
                 true);
-        Assert.assertEquals(returnType, "TestsProductsResponse|error");
+        Assert.assertEquals(returnType, "Inline_response_200|error");
     }
 
     @Test(description = "Tests for the response with no schema")

@@ -46,7 +46,7 @@ public class OneOfResponsesTests {
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
                 ballerinaSchemaGenerator,  new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/pet").getGet(),
-                true), "ChannelDetails[]|string[]|error");
+                true), "Inline_response_2XX|error");
     }
 
     @Test(description = "Tests for returnType when response has array oneOf when it has function body")
@@ -56,6 +56,6 @@ public class OneOfResponsesTests {
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
                 ballerinaSchemaGenerator, new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/pet").getGet(),
-                false), "OneOfOperationId01Response|error");
+                false), "Inline_response_2XX|error");
     }
 }
