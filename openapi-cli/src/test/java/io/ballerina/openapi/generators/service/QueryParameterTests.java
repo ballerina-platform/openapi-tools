@@ -277,7 +277,7 @@ public class QueryParameterTests {
     @Test(description = "16. Query parameter(s) having a referenced schema")
     public void generateParamsWithRefSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_ref_schema.yaml");
-        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, false);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
