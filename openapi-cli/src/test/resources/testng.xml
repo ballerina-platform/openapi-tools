@@ -56,7 +56,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.service.HeaderTests"/>
             <class name="io.ballerina.openapi.generators.service.QueryParameterTests"/>
             <class name="io.ballerina.openapi.generators.service.HeaderParameterTests"/>
-            <class name="io.ballerina.openapi.generators.service.DiagnosticTests"/>
+            <class name="io.ballerina.openapi.generators.service.ServiceDiagnosticTests"/>
             <class name="io.ballerina.openapi.generators.client.ImportsTests"/>
             <class name="io.ballerina.openapi.generators.client.BallerinaDiagnosticTests"/>
             <class name="io.ballerina.openapi.generators.client.ComparedGeneratedFileTests"/>
