@@ -41,13 +41,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.ballerina.openapi.generators.common.TestUtils.getDiagnosticsForGenericService;
+import static io.ballerina.openapi.generators.common.TestUtils.getDiagnosticsForService;
 
 /**
  * Tests related to the check diagnostic issue in Ballerina service generation.
  */
-public class DiagnosticTests {
+public class ServiceDiagnosticTests {
     private static final Path RESDIR =
-            Paths.get("src/test/resources/generators/service/diagnostic_files").toAbsolutePath();
+            Paths.get("src/test/resources/generators/diagnostic_files").toAbsolutePath();
     SyntaxTree syntaxTree;
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
@@ -56,6 +57,27 @@ public class DiagnosticTests {
     @Test(description = "Test for compilation errors in OpenAPI definition to ballerina service skeleton generation",
             dataProvider = "singleFileProviderForDiagnosticCheck")
     public void checkDiagnosticIssues(String yamlFile) throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        Path definitionPath = RESDIR.resolve(yamlFile);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .withNullable(false)
+                .withGenerateServiceType(false)
+                .withGenerateWithoutDataBinding(false)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
+        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator);
+        boolean hasErrors = diagnostics.stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        Assert.assertFalse(hasErrors);
+    }
+
+    @Test(description = "Test for compilation errors in OpenAPI definition to ballerina service skeleton generation",
+            dataProvider = "singleFileProviderForDiagnosticCheck")
+    public void checkDiagnosticIssuesInGenericServiceGen(String yamlFile) throws IOException, BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -77,7 +99,34 @@ public class DiagnosticTests {
     @DataProvider(name = "singleFileProviderForDiagnosticCheck")
     public Object[][] singleFileProviderForDiagnosticCheck() {
         return new Object[][] {
-                {"petstore_original.yaml"}
+                {"petstore_server_with_base_path.yaml"},
+                {"petstore_get.yaml"},
+                // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1416
+//                {"openapi_display_annotation.yaml"}, // not working, unknown type '200
+                {"header_parameter.yaml"},
+                {"petstore_post.yaml"},
+                {"petstore_with_oneOf_response.yaml"},
+                {"response_nested_array.yaml"},
+                {"xml_payload.yaml"},
+                {"xml_payload_with_ref.yaml"},
+                {"duplicated_response.yaml"},
+                {"complex_oneOf_schema.yaml"},
+                {"request_body_ref.yaml"},
+                {"vendor_specific_mime_types.yaml"},
+                // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1415
+//                {"ballerinax_connector_tests/ably.yaml"},
+                {"ballerinax_connector_tests/azure.iot.yaml"},
+                // TODO: Uncomment when fixed https://github.com/wso2-enterprise/internal-support-ballerina/issues/360
+//                {"ballerinax_connector_tests/beezup.yaml"}, // mismatched type names with '
+                {"ballerinax_connector_tests/files.com.yaml"},
+                {"ballerinax_connector_tests/openweathermap.yaml"},
+                {"ballerinax_connector_tests/soundcloud.yaml"},
+                // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1417
+//                {"ballerinax_connector_tests/stripe.yaml"}, // parameter name mismatch - fixed
+                // TODO: Uncomment when fixed https://github.com/wso2-enterprise/internal-support-ballerina/issues/360
+//                {"ballerinax_connector_tests/vimeo.yaml"}, // mismatched type names with '
+//                {"ballerinax_connector_tests/ynab.yaml"}, // 209 status code is not supported in Ballerina
+                {"ballerinax_connector_tests/zoom.yaml"}
         };
     }
 

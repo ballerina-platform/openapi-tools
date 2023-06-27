@@ -24,6 +24,7 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
@@ -46,6 +47,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -93,6 +95,24 @@ public class TestUtils {
     public static List<Diagnostic> getDiagnosticsForGenericService(SyntaxTree serviceSyntaxTree)
             throws FormatterException, IOException {
         writeFile(servicePath, Formatter.format(serviceSyntaxTree).toSourceCode());
+        SemanticModel semanticModel = getSemanticModel(servicePath);
+        return semanticModel.diagnostics();
+    }
+
+    public static List<Diagnostic> getDiagnosticsForService(SyntaxTree serviceSyntaxTree, OpenAPI openAPI,
+                                                            BallerinaServiceGenerator ballerinaServiceGenerator)
+            throws FormatterException, IOException, BallerinaOpenApiException {
+        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
+                ballerinaServiceGenerator.getTypeInclusionRecords());
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
+                openAPI, false, preGeneratedTypeDefNodes);
+        String schemaContent = Formatter.format(
+                ballerinaSchemaGenerator.generateSyntaxTree()).toSourceCode();
+        String serviceContent = Formatter.format(serviceSyntaxTree).toSourceCode();
+        serviceContent = serviceContent.replaceAll(
+                "\\{" + System.lineSeparator() + "\\s*\\}", "\\{panic error(\"Tests\");\\}");
+        writeFile(servicePath, serviceContent);
+        writeFile(schemaPath, schemaContent);
         SemanticModel semanticModel = getSemanticModel(servicePath);
         return semanticModel.diagnostics();
     }
