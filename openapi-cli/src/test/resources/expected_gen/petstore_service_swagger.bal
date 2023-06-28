@@ -10,13 +10,13 @@ service /v2 on ep0 {
     # http:BadRequest (Invalid ID supplied)
     # http:NotFound (Pet not found)
     # http:MethodNotAllowed (Validation exception)
-    resource function put pet(@http:Payload Pet|xml payload) returns http:BadRequest|http:NotFound|http:MethodNotAllowed {
+    resource function put pet(@http:Payload xml|Pet payload) returns http:BadRequest|http:NotFound|http:MethodNotAllowed {
     }
     # Add a new pet to the store
     #
     # + payload - Pet object that needs to be added to the store
     # + return - Invalid input
-    resource function post pet(@http:Payload Pet|xml payload) returns http:MethodNotAllowed {
+    resource function post pet(@http:Payload xml|Pet payload) returns http:MethodNotAllowed {
     }
     # Finds Pets by status
     #
