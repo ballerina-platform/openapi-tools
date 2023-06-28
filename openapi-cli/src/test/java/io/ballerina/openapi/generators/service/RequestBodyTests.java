@@ -233,7 +233,12 @@ public class RequestBodyTests {
                 .build();
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        BallerinaTypesGenerator ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI, false,
+                ballerinaServiceGenerator.getTypeInclusionRecords());
+        SyntaxTree typeSyntaxTree = ballerinaTypesGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/additional_property.bal", syntaxTree);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "requestBody/additional_prop_types.bal", typeSyntaxTree);
     }
 }
