@@ -550,7 +550,7 @@ public class ParametersGenerator {
         if (items.get$ref() != null) {
             String referenceType = extractReferenceType(items.get$ref());
             String type = getValidName(referenceType, true);
-            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(referenceType);
+            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type);
             if (queryParamSupportedTypes.contains(refSchema.getType())) {
                 arrayName = type;
             } else {
