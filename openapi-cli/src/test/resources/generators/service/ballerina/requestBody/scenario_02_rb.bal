@@ -7,6 +7,6 @@ service /v1 on ep0 {
     #
     # + payload - Optional description in *Markdown*
     # + return - OK
-    resource function post pets(@http:Payload Pet|xml|map<string>|string payload) returns http:Ok {
+    resource function post pets(@http:Payload string|xml|map<string>|Pet payload) returns http:Ok {
     }
 }

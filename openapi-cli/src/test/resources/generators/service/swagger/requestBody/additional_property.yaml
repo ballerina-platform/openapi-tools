@@ -1,0 +1,128 @@
+openapi: 3.0.1
+info:
+  title: APITest
+  contact:
+    name: Samuel Apolion Benevenuto
+  version: v1
+paths:
+  /api/HistoricoSimulacao/AddHistorico:
+    post:
+      tags:
+        - HistoricoSimulacao
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: object
+              additionalProperties:  #addtionalProperties with primitive types
+                type: string
+          application/json:
+            schema:
+              type: object
+              additionalProperties:  #addtionalProperties with reference
+                $ref: '#/components/schemas/HistoricoSimulacaoViewModel'
+          application/path+json:
+            schema:
+              type: object
+              additionalProperties:  #addtionalProperties with reference
+                type: object
+                additionalProperties:
+                  type: string
+      responses:
+        '200':
+          description: Success
+      x-auth-type: None
+      x-throttling-tier: Unlimited
+  /api/Mailing/AddContact:
+    post:
+      tags:
+        - Mailing
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              additionalProperties:  #Object schema with properties and additionalProperties fields
+                type: integer
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              additionalProperties:  #Object schema with properties and additionalProperties with reference fields
+                $ref: '#/components/schemas/MailingViewModel'
+      responses:
+        '200':
+          description: Success
+      x-auth-type: None
+      x-throttling-tier: Unlimited
+    put:
+      tags:
+        - Mailing
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              additionalProperties:  #Object schema with properties and additionalProperties fields
+                allOf:
+                  - type: integer
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              additionalProperties:  #Object schema with properties and additionalProperties with reference fields
+                oneOf:
+                  - type: integer
+                  - $ref: '#/components/schemas/MailingViewModel'
+      responses:
+        '200':
+          description: Success
+      x-auth-type: None
+      x-throttling-tier: Unlimited
+components:
+  schemas:
+    HistoricoSimulacaoViewModel:
+      type: object
+      properties:
+        email:
+          type: string
+          nullable: true
+        data:
+          type: string
+          format: date-time
+          nullable: true
+        step:
+          type: string
+          nullable: true
+        descricao:
+          type: string
+          nullable: true
+      additionalProperties: false
+    MailingViewModel:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        optPhoneNumber:
+          type: boolean
+        phoneNumber:
+          type: string
+          nullable: true
+        motivoRecusa:
+          type: string
+          nullable: true
+      additionalProperties: false
