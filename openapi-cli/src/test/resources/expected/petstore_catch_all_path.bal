@@ -23,7 +23,7 @@ service /api/v3 on ep0 {
     # http:BadRequest (Invalid ID supplied)
     # http:NotFound (Pet not found)
     # http:MethodNotAllowed (Validation exception)
-    resource function put pet(@http:Payload Pet|xml|map<string> payload) returns Pet|xml|http:BadRequest|http:NotFound|http:MethodNotAllowed {
+    resource function put pet(@http:Payload xml|map<string>|Pet payload) returns Pet|xml|http:BadRequest|http:NotFound|http:MethodNotAllowed {
     }
     # Add a new pet to the store
     #
@@ -31,6 +31,6 @@ service /api/v3 on ep0 {
     # + return - returns can be any of following types
     # OkPetXml (Successful operation)
     # http:MethodNotAllowed (Invalid input)
-    resource function post pet(@http:Payload Pet|xml|map<string> payload) returns OkPetXml|http:MethodNotAllowed {
+    resource function post pet(@http:Payload xml|map<string>|Pet payload) returns OkPetXml|http:MethodNotAllowed {
     }
 }
