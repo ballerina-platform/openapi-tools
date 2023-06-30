@@ -109,7 +109,7 @@ clean {
 
 jar {
     enabled = false
-    dependsOn(shadowJar { classifier = null })
+    dependsOn(shadowJar { archiveClassifier = null })
 }
 
 shadowJar {
