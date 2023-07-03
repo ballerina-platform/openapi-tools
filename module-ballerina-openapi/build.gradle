@@ -338,6 +338,12 @@ ballerinaBuild.dependsOn ":${packageName}-extension:build"
 ballerinaBuild.dependsOn ":${packageName}-build-extension:build"
 ballerinaBuild.dependsOn updateCompilerTomlFile
 ballerinaBuild.dependsOn initializeVariables
+ballerinaBuild.dependsOn generatePomFileForMavenJavaPublication
+ballerinaBuild.dependsOn compileJava
+ballerinaBuild.dependsOn compileTestJava
+ballerinaBuild.dependsOn checkstyleMain
+ballerinaBuild.dependsOn checkstyleTest
+ballerinaBuild.dependsOn jar
 ballerinaBuild.finalizedBy revertTomlFile
 build.dependsOn ballerinaBuild
 
