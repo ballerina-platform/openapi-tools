@@ -89,6 +89,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -144,8 +145,10 @@ import static io.ballerina.openapi.core.GeneratorConstants.HTTP_REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP_RESPONSE;
 import static io.ballerina.openapi.core.GeneratorConstants.IDENTIFIER;
 import static io.ballerina.openapi.core.GeneratorConstants.IMAGE_PNG;
+import static io.ballerina.openapi.core.GeneratorConstants.INTEGER;
 import static io.ballerina.openapi.core.GeneratorConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.core.GeneratorConstants.LINE_SEPARATOR;
+import static io.ballerina.openapi.core.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.GeneratorConstants.OPEN_CURLY_BRACE;
 import static io.ballerina.openapi.core.GeneratorConstants.SERVICE_FILE_NAME;
@@ -171,6 +174,7 @@ public class GeneratorUtils {
     public static final List<String> BAL_KEYWORDS = SyntaxInfo.keywords();
     public static final MinutiaeList SINGLE_END_OF_LINE_MINUTIAE = getEndOfLineMinutiae();
     private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
+    private static final PrintStream OUT_STREAM = System.err;
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
 
@@ -307,12 +311,19 @@ public class GeneratorUtils {
      * @return ballerina type
      */
     public static String convertOpenAPITypeToBallerina(String type) throws BallerinaOpenApiException {
-
         if (GeneratorConstants.TYPE_MAP.containsKey(type)) {
             return GeneratorConstants.TYPE_MAP.get(type);
         } else {
             throw new BallerinaOpenApiException("Unsupported OAS data type `" + type + "`");
         }
+    }
+
+    public static String convertOpenAPITypeToBallerina(Schema<?> schema) throws BallerinaOpenApiException {
+        String type = schema.getType().toLowerCase(Locale.ENGLISH).trim();
+        if ((INTEGER.equals(type) || NUMBER.equals(type) || STRING.equals(type)) && schema.getFormat() != null) {
+            return convertOpenAPITypeFormatToBallerina(convertOpenAPITypeToBallerina(type), schema);
+        }
+        return convertOpenAPITypeToBallerina(type);
     }
 
     /**
@@ -987,5 +998,24 @@ public class GeneratorUtils {
         } catch (ProjectException e) {
             throw new ProjectException(e.getMessage());
         }
+    }
+
+    /**
+     * This utility is used to select the Ballerina data type for a given OpenAPI type format.
+     *
+     * @param dataType name of the data type. ex: number, integer, string
+     * @param schema uses to generate the type descriptor name ex: int32, int64
+     * @return data type for invalid numeric data formats
+     */
+    public static String convertOpenAPITypeFormatToBallerina(final String dataType, final Schema<?> schema) {
+        try {
+            if (schema.getFormat() != null) {
+                return GeneratorUtils.convertOpenAPITypeToBallerina(schema.getFormat().trim());
+            }
+        } catch (BallerinaOpenApiException e) {
+            OUT_STREAM.printf("WARNING: unsupported format `%s` will be skipped when generating the counterpart " +
+                    "Ballerina type for openAPI schema type: `%s`", schema.getFormat(), schema.getType());
+        }
+        return dataType;
     }
 }

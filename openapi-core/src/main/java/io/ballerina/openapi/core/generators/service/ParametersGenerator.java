@@ -212,7 +212,7 @@ public class ParametersGenerator {
                 headerTypeName = createArrayTypeDescriptorNode(headerArrayItemTypeName, nodeList);
             } else {
                 headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
-                        GeneratorUtils.convertOpenAPITypeToBallerina(schema.getType().trim()),
+                        GeneratorUtils.convertOpenAPITypeToBallerina(schema),
                         GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
             }
             // Create annotation for header
@@ -499,8 +499,7 @@ public class ParametersGenerator {
                 throw new BallerinaOpenApiException(String.format(messages.getDescription(), type));
             }
         } else {
-            arrayName = GeneratorUtils.convertOpenAPITypeToBallerina(items.getType().toLowerCase(
-                    Locale.ENGLISH).trim());
+            arrayName = GeneratorUtils.convertOpenAPITypeToBallerina(items);
         }
         Token arrayNameToken = createIdentifierToken(arrayName, GeneratorUtils.SINGLE_WS_MINUTIAE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
@@ -530,7 +529,7 @@ public class ParametersGenerator {
                     GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
         } else {
-            name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(schema.getType()),
+            name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(schema),
                     GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
         }
