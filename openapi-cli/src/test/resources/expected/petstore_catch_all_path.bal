@@ -13,7 +13,7 @@ service /api/v3 on ep0 {
     # Pet (xml)
     # http:BadRequest (Invalid ID supplied)
     # http:NotFound (Pet not found)
-    resource function get '\*(int petId) returns Pet|xml|http:BadRequest|http:NotFound {
+    resource function get \*(int petId) returns Pet|xml|http:BadRequest|http:NotFound {
     }
     # Update an existing pet
     #
