@@ -46,7 +46,7 @@ public isolated client class Client {
     #
     # + petId - ID of pet to return 
     # + return - successful operation 
-    resource isolated function get '\*(int petId) returns Pet|error {
+    resource isolated function get \*(int petId) returns Pet|error {
         string resourcePath = string `/*`;
         map<any> headerValues = {};
         map<anydata> queryParam = {"petId": petId};
@@ -60,8 +60,8 @@ public isolated client class Client {
     }
     # Update an existing pet
     #
-    # + payload - Update an existent pet in the store 
-    # + return - Successful operation 
+    # + payload - Update an existent pet in the store
+    # + return - Successful operation
     resource isolated function put pet(Pet payload) returns Pet|error {
         string resourcePath = string `/pet`;
         http:Request request = new;
@@ -72,8 +72,8 @@ public isolated client class Client {
     }
     # Add a new pet to the store
     #
-    # + payload - Create a new pet in the store 
-    # + return - Successful operation 
+    # + payload - Create a new pet in the store
+    # + return - Successful operation
     resource isolated function post pet(Pet payload) returns Pet|error {
         string resourcePath = string `/pet`;
         http:Request request = new;
