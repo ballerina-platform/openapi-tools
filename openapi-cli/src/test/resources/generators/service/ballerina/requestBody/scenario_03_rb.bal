@@ -13,12 +13,12 @@ service /v1 on ep0 {
     #
     # + payload - Optional description in *Markdown*
     # + return - OK
-    resource function post pets(@http:Payload Pet|xml|map<string>|string payload) returns http:Ok {
+    resource function post pets(@http:Payload string|xml|map<string>|Pet payload) returns http:Ok {
     }
     # List all pets
     #
     # + payload - parameter description
     # + return - OK
-    resource function post pets02(@http:Payload Pet|xml payload) returns http:Created {
+    resource function post pets02(@http:Payload xml|Pet payload) returns http:Created {
     }
 }

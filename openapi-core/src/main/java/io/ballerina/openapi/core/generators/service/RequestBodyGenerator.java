@@ -35,8 +35,7 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
@@ -77,7 +76,7 @@ public class RequestBodyGenerator {
         // public type PayloadType string|json|xml|byte[]|CustomRecord|CustomRecord[] ;
         Optional<TypeDescriptorNode> typeName;
         // Filter same data type
-        List<String> types = new ArrayList<>();
+        HashSet<String> types = new HashSet<>();
         for (Map.Entry<String, MediaType> mime : requestBody.getContent().entrySet()) {
             typeName = getNodeForPayloadType(mime);
             if (typeName.isPresent()) {
@@ -92,7 +91,7 @@ public class RequestBodyGenerator {
             String result = String.join(PIPE, types);
             typeName = Optional.of(NodeParser.parseTypeDescriptor(result));
         } else {
-            typeName = Optional.of(NodeParser.parseTypeDescriptor(types.get(0)));
+            typeName = Optional.of(NodeParser.parseTypeDescriptor(types.iterator().next()));
         }
         AnnotationNode annotationNode = getAnnotationNode(GeneratorConstants.PAYLOAD_KEYWORD, null);
         NodeList<AnnotationNode> annotation = NodeFactory.createNodeList(annotationNode);
@@ -163,5 +162,4 @@ public class RequestBodyGenerator {
         }
         return typeName;
     }
-
 }
