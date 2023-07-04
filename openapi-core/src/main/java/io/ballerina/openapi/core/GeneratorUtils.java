@@ -332,17 +332,13 @@ public class GeneratorUtils {
 
     public static String convertOpenAPITypeToBallerina(Schema<?> schema) throws BallerinaOpenApiException {
         String type = schema.getType().toLowerCase(Locale.ENGLISH).trim();
-        if (INTEGER.equals(type)) {
-            return convertOpenAPINumericTypeToBallerina(convertOpenAPITypeToBallerina(type), schema);
-        }
-        if ((type.equals(NUMBER) && schema.getFormat() != null) || (type.equals(STRING) && schema.getFormat() != null
-                && (schema.getFormat().equals(BINARY) || schema.getFormat().equals(BYTE)))) {
-            type = schema.getFormat().trim();
-        }
         if (schema.getEnum() != null && !schema.getEnum().isEmpty() && primitiveTypeList.contains(type)) {
             EnumGenerator enumGenerator = new EnumGenerator(schema, null);
             return enumGenerator.generateTypeDescriptorNode().toString();
         } else {
+            if ((INTEGER.equals(type) || NUMBER.equals(type) || STRING.equals(type)) && schema.getFormat() != null) {
+                return convertOpenAPITypeFormatToBallerina(convertOpenAPITypeToBallerina(type), schema);
+            }
             return convertOpenAPITypeToBallerina(type);
         }
     }
@@ -1022,21 +1018,20 @@ public class GeneratorUtils {
     }
 
     /**
-     * This utility is used to select the Ballerina data type for a given numeric format type.
+     * This utility is used to select the Ballerina data type for a given OpenAPI type format.
      *
-     * @param dataType name of the data type. ex: number, integer
+     * @param dataType name of the data type. ex: number, integer, string
      * @param schema uses to generate the type descriptor name ex: int32, int64
      * @return data type for invalid numeric data formats
      */
-    public static String convertOpenAPINumericTypeToBallerina(final String dataType, final Schema<?> schema) {
+    public static String convertOpenAPITypeFormatToBallerina(final String dataType, final Schema<?> schema) {
         try {
             if (schema.getFormat() != null) {
                 return GeneratorUtils.convertOpenAPITypeToBallerina(schema.getFormat().trim());
             }
         } catch (BallerinaOpenApiException e) {
-            OUT_STREAM.println(String.format("WARNING: unsupported format `%s` will be skipped when generating" +
-                    " the counterpart Ballerina type for openAPI schema type: `%s`",
-                    schema.getFormat(), schema.getType()));
+            OUT_STREAM.printf("WARNING: unsupported format `%s` will be skipped when generating the counterpart " +
+                    "Ballerina type for openAPI schema type: `%s`", schema.getFormat(), schema.getType());
         }
         return dataType;
     }
