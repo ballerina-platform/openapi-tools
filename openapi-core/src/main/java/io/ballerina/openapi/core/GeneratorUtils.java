@@ -156,6 +156,9 @@ import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.GeneratorConstants.OPEN_CURLY_BRACE;
+import static io.ballerina.openapi.core.GeneratorConstants.REGEX_INCLUDE_ONLY_LETTERS;
+import static io.ballerina.openapi.core.GeneratorConstants.REGEX_NUMBERS_WITH_SPECIAL_CHARACTER;
+import static io.ballerina.openapi.core.GeneratorConstants.REGEX_WORDS_STARTING_WITH_NUMBER;
 import static io.ballerina.openapi.core.GeneratorConstants.SERVICE_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.core.GeneratorConstants.SPECIAL_CHARACTERS_REGEX;
@@ -355,11 +358,11 @@ public class GeneratorUtils {
      */
     public static String escapeIdentifier(String identifier) {
 
-        if (identifier.matches("\\b[0-9 " + GeneratorConstants.ESCAPE_PATTERN + "]*\\b")
-                || identifier.matches("^[0-9].*")) {
+        if (identifier.matches(REGEX_NUMBERS_WITH_SPECIAL_CHARACTER)
+                || identifier.matches(REGEX_WORDS_STARTING_WITH_NUMBER)) {
             // this is to handle scenarios 220 => '220, 2023-06-28 => '2023\-06\-28, 3h => '3h
             return "'" + identifier.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1");
-        } else if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b")) {
+        } else if (!identifier.matches(REGEX_INCLUDE_ONLY_LETTERS)) {
             return identifier.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1");
         } else if (BAL_KEYWORDS.contains(identifier)) {
             return "'" + identifier;
