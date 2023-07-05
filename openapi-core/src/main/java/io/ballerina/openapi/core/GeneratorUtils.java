@@ -323,10 +323,13 @@ public class GeneratorUtils {
      */
     public static String escapeIdentifier(String identifier) {
 
-        if (identifier.matches("\\b[0-9]*\\b")) {
-            return "'" + identifier;
-        } else if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b") || BAL_KEYWORDS.contains(identifier)) {
-            identifier = identifier.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1");
+        if (identifier.matches("\\b[0-9 " + GeneratorConstants.ESCAPE_PATTERN + "]*\\b")
+                || identifier.matches("^[0-9].*")) {
+            // this is to handle scenarios 220 => '220, 2023-06-28 => '2023\-06\-28, 3h => '3h
+            return "'" + identifier.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1");
+        } else if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b")) {
+            return identifier.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1");
+        } else if (BAL_KEYWORDS.contains(identifier)) {
             return "'" + identifier;
         }
         return identifier;

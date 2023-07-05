@@ -87,7 +87,7 @@ public class GeneratorConstants {
             "version= \"0.0.0\"\n";
 
     public static final String OAS_PATH_SEPARATOR = "/";
-    public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/{}\\s|.$])";
+    public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~'`*\\-=^+();:\\/{}\\s|.$])";
     //ClientCode generator
     public static final String HTTP = "http";
     public static final String URL = "url";
