@@ -90,8 +90,8 @@ public class GeneratorConstants {
     public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~'`*\\-=^+();:\\/{}\\s|.$])";
     public static final String REGEX_INCLUDE_ONLY_LETTERS = "\\b[_a-zA-Z][_a-zA-Z0-9]*\\b";
     public static final String REGEX_WORDS_STARTING_WITH_NUMBER = "^[0-9].*";
-    public static final String REGEX_NUMBERS_WITH_SPECIAL_CHARACTER = "\\b[0-9([\\[\\]\\\\?!<>@#&~'`*\\-=^+();" +
-            ":\\/{}\\s|.$])]*\\b";
+    public static final String REGEX_ONLY_NUMBERS_OR_NUMBERS_WITH_SPECIAL_CHARACTERS = "\\b[0-9([\\[\\]\\\\?!<>@#&~'`" +
+            "*\\-=^+();:\\/{}\\s|.$])]*\\b";
     //ClientCode generator
     public static final String HTTP = "http";
     public static final String URL = "url";
