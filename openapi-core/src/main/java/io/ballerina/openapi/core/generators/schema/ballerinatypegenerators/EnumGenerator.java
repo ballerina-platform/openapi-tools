@@ -82,7 +82,7 @@ public class EnumGenerator extends TypeGenerator {
                 String enumString = isNull ? enumBuilder.toString() + NILLABLE : enumBuilder.toString();
                 return NodeParser.parseTypeDescriptor(enumString);
             } else {
-                String typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(schema.getType().trim());
+                String typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(schema);
                 if (isNull) {
                     return createSimpleNameReferenceNode(createIdentifierToken(typeDescriptorName + NILLABLE));
                 } else {
