@@ -169,7 +169,7 @@ public class FunctionReturnTypeGenerator {
             // TODO: Nested array when response has
             type = generateReturnTypeForArraySchema(media, arraySchema, isSignature);
         } else if (schema.getType() != null) {
-            type = convertOpenAPITypeToBallerina(schema.getType());
+            type = convertOpenAPITypeToBallerina(schema);
         } else if (media.getKey().trim().equals("application/xml")) {
             type = generateCustomTypeDefine("xml", "XML", isSignature);
         } else {
@@ -218,13 +218,13 @@ public class FunctionReturnTypeGenerator {
             if (arraySchema.getItems() instanceof ArraySchema) {
                 Schema nestedSchema = arraySchema.getItems();
                 ArraySchema nestedArraySchema = (ArraySchema) nestedSchema;
-                String inlineArrayType = convertOpenAPITypeToBallerina(nestedArraySchema.getItems().getType());
+                String inlineArrayType = convertOpenAPITypeToBallerina(nestedArraySchema.getItems());
                 typeName = inlineArrayType + "NestedArr";
                 type = inlineArrayType + "[][]";
             } else {
-                typeName = convertOpenAPITypeToBallerina(Objects.requireNonNull(arraySchema.getItems()).getType()) +
+                typeName = convertOpenAPITypeToBallerina(Objects.requireNonNull(arraySchema.getItems())) +
                         "Arr";
-                type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType()) + "[]";
+                type = convertOpenAPITypeToBallerina(arraySchema.getItems()) + "[]";
             }
             type = generateCustomTypeDefine(type, getValidName(typeName, true), isSignature);
         }
