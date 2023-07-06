@@ -48,7 +48,7 @@ import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
  */
 public class BallerinaDiagnosticTests {
     private static final Path RESDIR =
-            Paths.get("src/test/resources/generators/client/diagnostic_files").toAbsolutePath();
+            Paths.get("src/test/resources/generators/diagnostic_files").toAbsolutePath();
     SyntaxTree syntaxTree;
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
