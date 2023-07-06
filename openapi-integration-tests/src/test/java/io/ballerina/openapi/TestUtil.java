@@ -95,6 +95,16 @@ public class TestUtil {
     }
 
     /**
+     * Execute ballerina openapi command to test warnings in the output stream
+     */
+    public static InputStream executeOpenAPIToTestWarnings(String distributionName, Path sourceDirectory,
+                                                           List<String> args) throws IOException {
+        args.add(0, "openapi");
+        Process process = getProcessBuilderResults(distributionName, sourceDirectory, args);
+        return process.getErrorStream();
+    }
+
+    /**
      * Ballerina run command.
      */
     public static Process executeRun(String distributionName, Path sourceDirectory,
