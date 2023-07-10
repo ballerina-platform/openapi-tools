@@ -1,0 +1,375 @@
+[tool]
+id = "test_openapi"
+
+[[dependency]]
+path = "resources/openapi-cli-1.7.0-SNAPSHOT.jar"
+
+#[[dependency]]
+#path = "resources/openapi-core-1.7.0-SNAPSHOT.jar"
+
+[[dependency]]
+path = "resources/libs/annotations-13.0.jar"
+
+[[dependency]]
+path = "resources/libs/annotations-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/apache-mime4j-core-0.8.6.jar"
+
+[[dependency]]
+path = "resources/libs/asm-7.2.jar"
+
+[[dependency]]
+path = "resources/libs/asm-analysis-7.2.jar"
+
+[[dependency]]
+path = "resources/libs/asm-commons-7.2.jar"
+
+[[dependency]]
+path = "resources/libs/asm-tree-7.2.jar"
+
+[[dependency]]
+path = "resources/libs/atomikos-util-5.0.8.jar"
+
+[[dependency]]
+path = "resources/libs/axiom-api-1.4.0.jar"
+
+[[dependency]]
+path = "resources/libs/axiom-impl-1.4.0.jar"
+
+[[dependency]]
+path = "resources/libs/ballerina-cli-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/ballerina-lang-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/ballerina-parser-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/ballerina-runtime-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/ballerina-tools-api-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/bsh-2.0b6.jar"
+
+[[dependency]]
+path = "resources/libs/central-client-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/checker-qual-3.12.0.jar"
+
+[[dependency]]
+path = "resources/libs/commons-codec-1.11.jar"
+
+[[dependency]]
+path = "resources/libs/commons-compress-1.21.jar"
+
+[[dependency]]
+path = "resources/libs/commons-io-2.11.0.jar"
+
+[[dependency]]
+path = "resources/libs/commons-lang3-3.12.0.jar"
+
+[[dependency]]
+path = "resources/libs/commons-logging-1.2.jar"
+
+[[dependency]]
+path = "resources/libs/commons-text-1.10.0.jar"
+
+[[dependency]]
+path = "resources/libs/compiler-0.8.9.jar"
+
+[[dependency]]
+path = "resources/libs/docerina-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/error_prone_annotations-2.11.0.jar"
+
+[[dependency]]
+path = "resources/libs/failureaccess-1.0.1.jar"
+
+[[dependency]]
+path = "resources/libs/formatter-core-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/gson-2.8.9.jar"
+
+[[dependency]]
+path = "resources/libs/guava-31.1-android.jar"
+
+[[dependency]]
+path = "resources/libs/handlebars-4.2.0.jar"
+
+[[dependency]]
+path = "resources/libs/httpclient-4.5.13.jar"
+
+[[dependency]]
+path = "resources/libs/httpcore-4.4.14.jar"
+
+[[dependency]]
+path = "resources/libs/http-native-2.9.0-20230621-211000-3a0a7fa.jar"
+
+[[dependency]]
+path = "resources/libs/identifier-util-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/j2objc-annotations-1.3.jar"
+
+[[dependency]]
+path = "resources/libs/jackson-annotations-2.14.2.jar"
+
+[[dependency]]
+path = "resources/libs/jackson-core-2.14.2.jar"
+
+[[dependency]]
+path = "resources/libs/jackson-databind-2.14.2.jar"
+
+[[dependency]]
+path = "resources/libs/jackson-dataformat-yaml-2.14.2.jar"
+
+[[dependency]]
+path = "resources/libs/jackson-datatype-jsr310-2.14.2.jar"
+
+[[dependency]]
+path = "resources/libs/jakarta.activation-api-1.2.2.jar"
+
+[[dependency]]
+path = "resources/libs/jakarta.validation-api-2.0.2.jar"
+
+[[dependency]]
+path = "resources/libs/jakarta.xml.bind-api-2.3.3.jar"
+
+[[dependency]]
+path = "resources/libs/jansi-1.18.jar"
+
+[[dependency]]
+path = "resources/libs/java-diff-utils-4.5.jar"
+
+[[dependency]]
+path = "resources/libs/java-semver-0.9.0.jar"
+
+[[dependency]]
+path = "resources/libs/javax.annotation-api-1.3.2.jar"
+
+[[dependency]]
+path = "resources/libs/javax.inject-1.jar"
+
+[[dependency]]
+path = "resources/libs/javax.transaction-api-1.3.jar"
+
+[[dependency]]
+path = "resources/libs/javax.ws.rs-api-2.1.1.jar"
+
+[[dependency]]
+path = "resources/libs/jballerina.java-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/jcommander-1.72.jar"
+
+[[dependency]]
+path = "resources/libs/jline-3.11.0.jar"
+
+[[dependency]]
+path = "resources/libs/jsr305-3.0.2.jar"
+
+[[dependency]]
+path = "resources/libs/kotlin-stdlib-1.2.60.jar"
+
+[[dependency]]
+path = "resources/libs/kotlin-stdlib-common-1.2.60.jar"
+
+[[dependency]]
+path = "resources/libs/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar"
+
+[[dependency]]
+path = "resources/libs/maven-artifact-3.6.3.jar"
+
+[[dependency]]
+path = "resources/libs/maven-builder-support-3.6.3.jar"
+
+[[dependency]]
+path = "resources/libs/maven-model-3.6.3.jar"
+
+[[dependency]]
+path = "resources/libs/maven-model-builder-3.6.3.jar"
+
+[[dependency]]
+path = "resources/libs/maven-repository-metadata-3.6.3.jar"
+
+[[dependency]]
+path = "resources/libs/maven-resolver-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/maven-resolver-api-1.7.0.jar"
+
+[[dependency]]
+path = "resources/libs/maven-resolver-connector-basic-1.7.0.jar"
+
+[[dependency]]
+path = "resources/libs/maven-resolver-impl-1.7.0.jar"
+
+[[dependency]]
+path = "resources/libs/maven-resolver-named-locks-1.7.0.jar"
+
+[[dependency]]
+path = "resources/libs/maven-resolver-provider-3.6.3.jar"
+
+[[dependency]]
+path = "resources/libs/maven-resolver-spi-1.7.0.jar"
+
+[[dependency]]
+path = "resources/libs/maven-resolver-transport-file-1.7.0.jar"
+
+[[dependency]]
+path = "resources/libs/maven-resolver-transport-http-1.7.0.jar"
+
+[[dependency]]
+path = "resources/libs/maven-resolver-util-1.7.0.jar"
+
+[[dependency]]
+path = "resources/libs/netty-buffer-4.1.77.Final.jar"
+
+[[dependency]]
+path = "resources/libs/netty-common-4.1.77.Final.jar"
+
+[[dependency]]
+path = "resources/libs/okhttp-3.14.0.jar"
+
+[[dependency]]
+path = "resources/libs/okio-2.2.2.jar"
+
+[[dependency]]
+path = "resources/libs/openapi-bal-service-1.7.0-SNAPSHOT.jar"
+
+[[dependency]]
+path = "resources/libs/openapi-core-1.7.0-SNAPSHOT.jar"
+
+[[dependency]]
+path = "resources/libs/opentelemetry-api-1.0.0.jar"
+
+[[dependency]]
+path = "resources/libs/opentelemetry-context-1.0.0.jar"
+
+[[dependency]]
+path = "resources/libs/org.eclipse.lsp4j-0.8.1.jar"
+
+[[dependency]]
+path = "resources/libs/org.eclipse.lsp4j.generator-0.8.1.jar"
+
+[[dependency]]
+path = "resources/libs/org.eclipse.lsp4j.jsonrpc-0.8.1.jar"
+
+[[dependency]]
+path = "resources/libs/org.eclipse.sisu.inject-0.3.4.jar"
+
+[[dependency]]
+path = "resources/libs/org.eclipse.xtend.lib-2.18.0.jar"
+
+[[dependency]]
+path = "resources/libs/org.eclipse.xtend.lib.macro-2.18.0.jar"
+
+[[dependency]]
+path = "resources/libs/org.eclipse.xtext.xbase.lib-2.18.0.jar"
+
+[[dependency]]
+path = "resources/libs/org.jacoco.core-0.8.5.jar"
+
+[[dependency]]
+path = "resources/libs/org.jacoco.report-0.8.5.jar"
+
+[[dependency]]
+path = "resources/libs/picocli-4.0.1.jar"
+
+[[dependency]]
+path = "resources/libs/plexus-interpolation-1.25.jar"
+
+[[dependency]]
+path = "resources/libs/plexus-utils-3.2.1.jar"
+
+[[dependency]]
+path = "resources/libs/progressbar-0.7.4.jar"
+
+[[dependency]]
+path = "resources/libs/shell-cli-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/shell-core-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/shell-rt-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/slf4j-api-1.7.36.jar"
+
+[[dependency]]
+path = "resources/libs/snakeyaml-2.0.jar"
+
+[[dependency]]
+path = "resources/libs/stax2-api-4.2.1.jar"
+
+[[dependency]]
+path = "resources/libs/swagger-annotations-1.6.10.jar"
+
+[[dependency]]
+path = "resources/libs/swagger-annotations-2.2.9.jar"
+
+[[dependency]]
+path = "resources/libs/swagger-core-1.6.10.jar"
+
+[[dependency]]
+path = "resources/libs/swagger-core-2.2.9.jar"
+
+[[dependency]]
+path = "resources/libs/swagger-models-1.6.10.jar"
+
+[[dependency]]
+path = "resources/libs/swagger-models-2.2.9.jar"
+
+[[dependency]]
+path = "resources/libs/swagger-parser-1.0.65.jar"
+
+[[dependency]]
+path = "resources/libs/swagger-parser-2.1.13.jar"
+
+[[dependency]]
+path = "resources/libs/swagger-parser-core-2.1.13.jar"
+
+[[dependency]]
+path = "resources/libs/swagger-parser-v2-converter-2.1.13.jar"
+
+[[dependency]]
+path = "resources/libs/swagger-parser-v3-2.1.13.jar"
+
+[[dependency]]
+path = "resources/libs/testerina-compiler-plugin-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/testerina-core-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/testerina-runtime-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/testng-6.14.3.jar"
+
+[[dependency]]
+path = "resources/libs/toml4j-0.7.2.jar"
+
+[[dependency]]
+path = "resources/libs/toml-parser-2201.7.0-20230619-175900-bb4e4544.jar"
+
+[[dependency]]
+path = "resources/libs/transactions-5.0.8.jar"
+
+[[dependency]]
+path = "resources/libs/transactions-api-5.0.8.jar"
+
+[[dependency]]
+path = "resources/libs/transactions-jta-5.0.8.jar"
+
+[[dependency]]
+path = "resources/libs/woodstox-core-6.2.8.jar"
+

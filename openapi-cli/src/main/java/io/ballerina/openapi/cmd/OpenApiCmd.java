@@ -57,11 +57,11 @@ import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
  * generation.
  */
 @CommandLine.Command(
-        name = "openapi",
+        name = "test_openapi",
         description = "Generate the Ballerina sources for a given OpenAPI definition and vice versa."
 )
 public class OpenApiCmd implements BLauncherCmd {
-    private static final String CMD_NAME = "openapi";
+    private static final String CMD_NAME = "test_openapi";
     private PrintStream outStream;
     private Path executionPath = Paths.get(System.getProperty("user.dir"));
     private Path targetOutputPath;
