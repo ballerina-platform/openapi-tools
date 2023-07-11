@@ -52,7 +52,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     @Test(description = "Test openapi command with help flag")
     public void testOpenAPICmdHelp() throws IOException {
         String[] args = {"-h"};
-        OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd openApiCommand = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(openApiCommand).parseArgs(args);
         openApiCommand.execute();
         String output = readOutput(true);
@@ -63,7 +63,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     @Test(description = "Test openapi command with help flag")
     public void testOpenAPICmdHelpWithBalTools() throws IOException {
         String[] args = {"help", "openapi"};
-        OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd openApiCommand = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(openApiCommand).parseArgs(args);
         openApiCommand.execute();
         String output = readOutput(true);
@@ -73,7 +73,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
 
     @Test(description = "Test openapi command without help flag")
     public void testOpenAPICmdHelpWithoutFlag() throws IOException {
-        OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd openApiCommand = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(openApiCommand);
         openApiCommand.execute();
         String output = readOutput(true);
@@ -84,7 +84,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     @Test(description = "Test openapi gen-service without openapi contract file")
     public void testWithoutOpenApiContract() throws IOException {
         String[] args = {"--input"};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         String output = readOutput(true);
@@ -95,7 +95,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     public void testSuccessfulServiceGeneration() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema.bal"));
@@ -135,7 +135,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     public void testSuccessfulTypeBalGeneration() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore_type.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema_type.bal"));
@@ -174,7 +174,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path petstoreYaml = resourceDir.resolve(Paths.get("non_constraint_import.yaml"));
         String[] args = {"--input", petstoreYaml.toString(),
                 "--mode", "client", "--tags", "pets", "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen",
@@ -209,7 +209,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path petstoreYaml = resourceDir.resolve(Paths.get("constraint_import.yaml"));
         String[] args = {"--input", petstoreYaml.toString(),
                 "--mode", "client", "--tags", "pets", "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen",
@@ -245,7 +245,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path licenseHeader = resourceDir.resolve(Paths.get("license.txt"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
                 licenseHeader.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen",
@@ -287,7 +287,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path licenseHeader = resourceDir.resolve(Paths.get("license_with_new_line.txt"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
                 licenseHeader.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen",
@@ -328,7 +328,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore_tags.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--tags",
                 "pets,dogs", "--mode", "client", "--client-methods", "remote"};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Path expectedClientFile = resourceDir.resolve(Paths.get("expected_gen",
@@ -370,7 +370,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path licenseHeader = resourceDir.resolve(Paths.get("license.txt"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
                 licenseHeader.toString(), "--with-tests"};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Path expectedConfigFilePath = resourceDir.resolve(Paths.get("expected_gen",
@@ -414,7 +414,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path licenseHeader = resourceDir.resolve(Paths.get("licence.txt"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
                 licenseHeader.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         String output = readOutput(true);
@@ -427,7 +427,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path licenseHeader = resourceDir.resolve(Paths.get("license.txt"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
                 licenseHeader.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Path expectedConfigFilePath = resourceDir.resolve(Paths.get("expected_gen",
@@ -455,7 +455,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     public void testSuccessfulServiceGenerationForYML() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         try {
             cmd.execute();
@@ -498,7 +498,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path projectDir = resourceDir.resolve("expected_gen").resolve("ballerina_project");
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", projectDir.toString(), "--with-service-type"};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Path expectedServiceTypeFile = resourceDir.resolve(Paths.get("expected_gen", "pestore_service_type.bal"));
@@ -533,7 +533,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path projectDir = resourceDir.resolve("expected_gen").resolve("ballerina_project");
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", projectDir.toString(), "--without-data-binding"};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Path expectedService = resourceDir.resolve(Paths.get("expected_gen", "generic_service_petstore.bal"));
@@ -577,7 +577,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     public void testForYamlContractWithoutOperationID() throws IOException {
         Path yamlContract = resourceDir.resolve(Paths.get("without_operationID.yaml"));
         String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString(), "--mode", "service"};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         if (Files.exists(this.tmpDir.resolve("without_operationid_service.bal"))) {
@@ -634,7 +634,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
 
     @Test(description = "getRelative path")
     public void getRelativePath() {
-        OpenApiCmd cmd = new OpenApiCmd();
+        TestOpenApiCmd cmd = new TestOpenApiCmd();
         File resource01 = new File("dir1/test.txt");
         String target01 = "dir1/dir2";
         File resource02 = new File("dir1/dir2/dir3/test.txt");

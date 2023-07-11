@@ -60,7 +60,7 @@ import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
         name = "test_openapi",
         description = "Generate the Ballerina sources for a given OpenAPI definition and vice versa."
 )
-public class OpenApiCmd implements BLauncherCmd {
+public class TestOpenApiCmd implements BLauncherCmd {
     private static final String CMD_NAME = "test_openapi";
     private PrintStream outStream;
     private Path executionPath = Paths.get(System.getProperty("user.dir"));
@@ -121,17 +121,17 @@ public class OpenApiCmd implements BLauncherCmd {
     @CommandLine.Parameters
     private List<String> argList;
 
-    public OpenApiCmd() {
+    public TestOpenApiCmd() {
         this.outStream = System.err;
         this.executionPath = Paths.get(System.getProperty("user.dir"));
         this.exitWhenFinish = true;
     }
 
-    public OpenApiCmd(PrintStream outStream, Path executionDir) {
-        new OpenApiCmd(outStream, executionDir, true);
+    public TestOpenApiCmd(PrintStream outStream, Path executionDir) {
+        new TestOpenApiCmd(outStream, executionDir, true);
     }
 
-    public OpenApiCmd(PrintStream outStream, Path executionDir, boolean exitWhenFinish) {
+    public TestOpenApiCmd(PrintStream outStream, Path executionDir, boolean exitWhenFinish) {
         this.outStream = outStream;
         this.executionPath = executionDir;
         this.exitWhenFinish = exitWhenFinish;
@@ -425,7 +425,9 @@ public class OpenApiCmd implements BLauncherCmd {
 
     @Override
     public void printLongDesc(StringBuilder out) {
-        InputStream inputStream = ClassLoader.getSystemResourceAsStream("ballerina-openapi.help");
+        Class<?> clazz = TestOpenApiCmd.class;
+        ClassLoader classLoader = clazz.getClassLoader();
+        InputStream inputStream = classLoader.getSystemResourceAsStream("ballerina-openapi.help");
         try (InputStreamReader inputStreamREader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
              BufferedReader br = new BufferedReader(inputStreamREader)) {
             String content = br.readLine();
