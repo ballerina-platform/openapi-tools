@@ -29,9 +29,7 @@ module io.ballerina.openapi.converter {
     requires jsr305;
     requires org.apache.commons.io;
     requires org.slf4j;
-    requires swagger.core;
     requires swagger.parser;
-    requires swagger.models;
     requires swagger.parser.core;
     requires swagger.parser.v2.converter;
     requires swagger.parser.v3;

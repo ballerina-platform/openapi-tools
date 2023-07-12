@@ -30,6 +30,7 @@ public class CmdConstants {
     public static final String RESOURCE = "resource";
     public static final String REMOTE = "remote";
     public static final String SERVICE = "service";
+    public static final String CLIENT = "client";
 
     /**
      * Enum to select the code generation mode.
@@ -200,4 +201,5 @@ public class CmdConstants {
     // OS specific line separator
     public static final String LINE_SEPARATOR = System.lineSeparator();
     public static final String DOUBLE_LINE_SEPARATOR = LINE_SEPARATOR + LINE_SEPARATOR;
+
 }

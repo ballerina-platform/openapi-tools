@@ -68,7 +68,7 @@ public class CodeGeneratorTest {
         try {
             String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath, "generateSkeleton.bal");
             generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter,
-                    false, false);
+                    false, false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
@@ -117,7 +117,7 @@ public class CodeGeneratorTest {
             String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath,
                     "petstore_service_swagger.bal");
             generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter,
-                    false, false);
+                    false, false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
@@ -364,7 +364,7 @@ public class CodeGeneratorTest {
         try {
             String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath, "generatedRB.bal");
             generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter,
-                    false, false);
+                    false, false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
@@ -390,7 +390,7 @@ public class CodeGeneratorTest {
         try {
             String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath, "generated_bal.bal");
             generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter,
-                    false, false);
+                    false, false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
@@ -440,7 +440,7 @@ public class CodeGeneratorTest {
         try {
             String expectedContent = new String(Files.readAllBytes(expectedFilePath));
             List<GenSrcFile> generatedFileList = generator.generateBallerinaService(
-                    Paths.get(definitionPath), "", filter, false, false);
+                    Paths.get(definitionPath), "", filter, false, false, false);
             if (generatedFileList.size() > 0) {
                 GenSrcFile actualGeneratedContent = generatedFileList.get(0);
                 Assert.assertEquals((actualGeneratedContent.getContent().trim()).replaceAll("\\s+", ""),
@@ -462,7 +462,7 @@ public class CodeGeneratorTest {
         try {
             String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath, "multi_query_para.bal");
             generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter,
-                    false, false);
+                    false, false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
@@ -492,7 +492,7 @@ public class CodeGeneratorTest {
         try {
             String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath, "petstoreTag.bal");
             generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter01,
-                    false, false);
+                    false, false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
@@ -523,7 +523,7 @@ public class CodeGeneratorTest {
         try {
             String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath, "petstoreOperation.bal");
             generator.generateService(definitionPath,  serviceName, resourcePath.toString(), filter01,
-                    false, false);
+                    false, false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
@@ -547,7 +547,7 @@ public class CodeGeneratorTest {
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             generator.generateService(definitionPath, serviceName, resourcePath.toString(),
-                    filter, false, false);
+                    filter, false, false, false);
             boolean hasTypeFileGenerated = Files.exists(resourcePath.resolve("no_schema_service.bal")) &&
                     Files.notExists(resourcePath.resolve("types.bal"));
             Assert.assertTrue(hasTypeFileGenerated, "Empty types.bal file has been generated");
@@ -555,6 +555,32 @@ public class CodeGeneratorTest {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("no_schema_service.bal");
+        }
+    }
+
+    @Test(description = "Test Ballerina skeleton generation")
+    public void testGenericServiceGeneration() {
+        final String serviceName = "openapipetstore";
+        String definitionPath = RES_DIR.resolve("petstore_original.yaml").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+
+        try {
+            String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath,
+                    "generic_service_petstore_original.bal");
+            generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter,
+                    false, false, true);
+            if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
+                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
+                generatedService = (generatedService.trim()).replaceAll("\\s+", "");
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedService.contains(expectedServiceContent));
+            } else {
+                Assert.fail("Service was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore_service.bal");
         }
     }
 
@@ -566,7 +592,7 @@ public class CodeGeneratorTest {
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             generator.generateService(definitionPath, serviceName, resourcePath.toString(),
-                    filter, false, false);
+                    filter, false, false, false);
             boolean hasTypeFileGenerated = Files.exists(resourcePath.resolve("no_schema_service.bal")) &&
                     Files.exists(resourcePath.resolve("types.bal"));
             Assert.assertTrue(hasTypeFileGenerated, "types.bal file has not been generated");
@@ -589,7 +615,7 @@ public class CodeGeneratorTest {
             String expectedTypesContent = getStringFromGivenBalFile(
                     expectedDirPath, "petstore_wildcard_types.bal");
             generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter,
-                    false, false);
+                    false, false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal")) &&
                     Files.exists(resourcePath.resolve("types.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
@@ -640,12 +666,17 @@ public class CodeGeneratorTest {
         Assert.assertEquals(GeneratorUtils.escapeIdentifier("abc"), "abc");
         Assert.assertEquals(GeneratorUtils.escapeIdentifier("string"), "'string");
         Assert.assertEquals(GeneratorUtils.escapeIdentifier("int"), "'int");
-        Assert.assertEquals(GeneratorUtils.escapeIdentifier("io.foo.bar"), "'io\\.foo\\.bar");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("io.foo.bar"), "io\\.foo\\.bar");
         Assert.assertEquals(GeneratorUtils.escapeIdentifier("getV1CoreVersion"), "getV1CoreVersion");
-        Assert.assertEquals(GeneratorUtils.escapeIdentifier("org-invitation"), "'org\\-invitation");
-        Assert.assertEquals(GeneratorUtils.escapeIdentifier("int?"), "'int\\?");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("org-invitation"), "org\\-invitation");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("int?"), "int\\?");
         Assert.assertEquals(GeneratorUtils.escapeIdentifier("error"), "'error");
-        Assert.assertEquals(GeneratorUtils.escapeIdentifier("foo_bar$_baz"), "'foo_bar\\$_baz");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("foo_bar$_baz"), "foo_bar\\$_baz");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("foo_bar_baz"), "foo_bar_baz");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("foo'baz"), "foo\\'baz");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("200"), "'200");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("2023-06-28"), "'2023\\-06\\-28");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("3h"), "'3h");
     }
 
     @Test

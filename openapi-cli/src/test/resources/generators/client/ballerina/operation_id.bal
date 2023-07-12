@@ -33,7 +33,6 @@ public isolated client class Client {
     remote isolated function deletepetsBypetId(int petId) returns http:Response | error {
         string resourcePath = string `/pets/${getEncodedUri(petId)}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }

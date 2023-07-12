@@ -222,4 +222,23 @@ public class RequestBodyTests {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/any_of.bal", syntaxTree);
     }
+
+    @Test(description = "RequestBody has object type with additional property")
+    public void testForAdditionalProperty() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/requestBody/additional_property.yaml");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, false);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        BallerinaTypesGenerator ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI, false,
+                ballerinaServiceGenerator.getTypeInclusionRecords());
+        SyntaxTree typeSyntaxTree = ballerinaTypesGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "requestBody/additional_property.bal", syntaxTree);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "requestBody/additional_prop_types.bal", typeSyntaxTree);
+    }
 }

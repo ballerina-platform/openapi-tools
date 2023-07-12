@@ -73,7 +73,6 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
-        //TODO: Update the request as needed;
         Pet response = check self.clientEp->post(resourcePath, request, httpHeaders);
         return response;
     }

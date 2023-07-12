@@ -21,9 +21,11 @@ package io.ballerina.openapi.generators.common;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.cmd.CmdUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
@@ -33,8 +35,6 @@ import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
@@ -46,6 +46,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -62,6 +63,7 @@ public class TestUtils {
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
     private static final Path utilPath = RES_DIR.resolve("ballerina_project/utils.bal");
+    private static final Path servicePath = RES_DIR.resolve("ballerina_project/service.bal");
     private static final String LINE_SEPARATOR = System.lineSeparator();
 
     // Get diagnostics
@@ -76,16 +78,41 @@ public class TestUtils {
                 openAPI, false, preGeneratedTypeDefinitionNodes);
         SyntaxTree schemaSyntax = ballerinaSchemaGenerator.generateSyntaxTree();
         SyntaxTree utilSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
-        writeFile(clientPath, Formatter.format(syntaxTree).toString());
-        writeFile(schemaPath, Formatter.format(schemaSyntax).toString());
-        writeFile(utilPath, Formatter.format(utilSyntaxTree).toString());
+        writeFile(clientPath, Formatter.format(syntaxTree).toSourceCode());
+        writeFile(schemaPath, Formatter.format(schemaSyntax).toSourceCode());
+        writeFile(utilPath, Formatter.format(utilSyntaxTree).toSourceCode());
         SemanticModel semanticModel = getSemanticModel(clientPath);
         return semanticModel.diagnostics();
     }
 
     public static List<Diagnostic> getDiagnostics(SyntaxTree syntaxTree) throws FormatterException, IOException {
-        writeFile(schemaPath, Formatter.format(syntaxTree).toString());
+        writeFile(schemaPath, Formatter.format(syntaxTree).toSourceCode());
         SemanticModel semanticModel = getSemanticModel(schemaPath);
+        return semanticModel.diagnostics();
+    }
+
+    public static List<Diagnostic> getDiagnosticsForGenericService(SyntaxTree serviceSyntaxTree)
+            throws FormatterException, IOException {
+        writeFile(servicePath, Formatter.format(serviceSyntaxTree).toSourceCode());
+        SemanticModel semanticModel = getSemanticModel(servicePath);
+        return semanticModel.diagnostics();
+    }
+
+    public static List<Diagnostic> getDiagnosticsForService(SyntaxTree serviceSyntaxTree, OpenAPI openAPI,
+                                                            BallerinaServiceGenerator ballerinaServiceGenerator)
+            throws FormatterException, IOException, BallerinaOpenApiException {
+        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
+                ballerinaServiceGenerator.getTypeInclusionRecords());
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
+                openAPI, false, preGeneratedTypeDefNodes);
+        String schemaContent = Formatter.format(
+                ballerinaSchemaGenerator.generateSyntaxTree()).toSourceCode();
+        String serviceContent = Formatter.format(serviceSyntaxTree).toSourceCode();
+        serviceContent = serviceContent.replaceAll(
+                "\\{" + System.lineSeparator() + "\\s*\\}", "\\{panic error(\"Tests\");\\}");
+        writeFile(servicePath, serviceContent);
+        writeFile(schemaPath, schemaContent);
+        SemanticModel semanticModel = getSemanticModel(servicePath);
         return semanticModel.diagnostics();
     }
 
@@ -101,7 +128,7 @@ public class TestUtils {
             throws IOException {
 
         String expectedBallerinaContent = getStringFromGivenBalFile(path);
-        String generatedSyntaxTree = syntaxTree.toString();
+        String generatedSyntaxTree = syntaxTree.toSourceCode();
         generatedSyntaxTree = generatedSyntaxTree.replaceAll(LINE_SEPARATOR, "");
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
@@ -140,9 +167,7 @@ public class TestUtils {
     }
 
     public static OpenAPI getOpenAPI(Path definitionPath) throws IOException, BallerinaOpenApiException {
-        String openAPIFileContent = Files.readString(definitionPath);
-        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
-        return parseResult.getOpenAPI();
+        return CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
     }
 
     public static String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {

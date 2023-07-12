@@ -156,6 +156,9 @@ import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.GeneratorConstants.OPEN_CURLY_BRACE;
+import static io.ballerina.openapi.core.GeneratorConstants.REGEX_ONLY_NUMBERS_OR_NUMBERS_WITH_SPECIAL_CHARACTERS;
+import static io.ballerina.openapi.core.GeneratorConstants.REGEX_WITHOUT_SPECIAL_CHARACTERS;
+import static io.ballerina.openapi.core.GeneratorConstants.REGEX_WORDS_STARTING_WITH_NUMBERS;
 import static io.ballerina.openapi.core.GeneratorConstants.SERVICE_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.core.GeneratorConstants.SPECIAL_CHARACTERS_REGEX;
@@ -355,10 +358,13 @@ public class GeneratorUtils {
      */
     public static String escapeIdentifier(String identifier) {
 
-        if (identifier.matches("\\b[0-9]*\\b")) {
-            return "'" + identifier;
-        } else if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b") || BAL_KEYWORDS.contains(identifier)) {
-            identifier = identifier.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1");
+        if (identifier.matches(REGEX_ONLY_NUMBERS_OR_NUMBERS_WITH_SPECIAL_CHARACTERS)
+                || identifier.matches(REGEX_WORDS_STARTING_WITH_NUMBERS)) {
+            // this is to handle scenarios 220 => '220, 2023-06-28 => '2023\-06\-28, 3h => '3h
+            return "'" + identifier.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1");
+        } else if (!identifier.matches(REGEX_WITHOUT_SPECIAL_CHARACTERS)) {
+            return identifier.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1");
+        } else if (BAL_KEYWORDS.contains(identifier)) {
             return "'" + identifier;
         }
         return identifier;
@@ -883,7 +889,7 @@ public class GeneratorUtils {
             ModulePartNode modiedModulePartNode = modulePartNode.modify(modulePartNode.imports(),
                     modifiedMembers, modulePartNode.eofToken());
             schemaSyntaxTree = schemaSyntaxTree.modifyWith(modiedModulePartNode);
-            schemaContent = Formatter.format(schemaSyntaxTree).toString();
+            schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
             tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);
             unusedTypeDefinitionNameList = getUnusedTypeDefinitionNameList(tempSourceFiles);
         }
@@ -893,7 +899,7 @@ public class GeneratorUtils {
 
         ModulePartNode modiedModulePartNode = rootNode.modify(imports, rootNode.members(), rootNode.eofToken());
         schemaSyntaxTree = schemaSyntaxTree.modifyWith(modiedModulePartNode);
-        schemaContent = Formatter.format(schemaSyntaxTree).toString();
+        schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
         return schemaContent;
     }
 
@@ -1034,8 +1040,9 @@ public class GeneratorUtils {
                 return GeneratorUtils.convertOpenAPITypeToBallerina(schema.getFormat().trim());
             }
         } catch (BallerinaOpenApiException e) {
-            OUT_STREAM.printf("WARNING: unsupported format `%s` will be skipped when generating the counterpart " +
-                    "Ballerina type for openAPI schema type: `%s`", schema.getFormat(), schema.getType());
+            OUT_STREAM.println(String.format("WARNING: unsupported format `%s` will be skipped when generating" +
+                    " the counterpart Ballerina type for openAPI schema type: `%s`",
+                    schema.getFormat(), schema.getType()));
         }
         return dataType;
     }

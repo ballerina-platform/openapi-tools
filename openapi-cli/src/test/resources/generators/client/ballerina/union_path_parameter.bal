@@ -48,7 +48,6 @@ public isolated client class Client {
     resource isolated function post v1/[Id_1 id]() returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(id)}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         string response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
