@@ -46,7 +46,7 @@ public class AllOfResponsesTests {
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
                 ballerinaSchemaGenerator, new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/products").getGet(),
-                true), "CompoundTestsProductsResponse|error");
+                true), "Inline_response_200|error");
     }
     @Test(description = "Tests for returnType")
     public void getReturnTypeForAllOf() throws IOException, BallerinaOpenApiException {
@@ -55,7 +55,7 @@ public class AllOfResponsesTests {
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
                 ballerinaSchemaGenerator, new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/users/{userId}/meetings")
-                        .getPost(), true), "CompoundCreateMeetingResponse|error");
+                        .getPost(), true), "Inline_response_201|error");
     }
     @Test(description = "Tests for the object response without property")
     public void getReturnTypeForObjectSchema() throws IOException, BallerinaOpenApiException {
@@ -80,7 +80,7 @@ public class AllOfResponsesTests {
 
         String returnType = functionReturnType.getReturnType(response.getPaths().get("/products").getGet(),
                 true);
-        Assert.assertEquals(returnType, "TestsProductsResponse|error");
+        Assert.assertEquals(returnType, "Inline_response_200|error");
     }
 
     @Test(description = "Tests for the object response without property and without additional properties")
@@ -106,7 +106,7 @@ public class AllOfResponsesTests {
 
         String returnType = functionReturnType.getReturnType(response.getPaths().get("/products").getGet(),
                 true);
-        Assert.assertEquals(returnType, "TestsProductsResponse|error");
+        Assert.assertEquals(returnType, "Inline_response_200|error");
     }
     // 1. nested allof
     // 2. allof with reference
