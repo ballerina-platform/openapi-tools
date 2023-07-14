@@ -784,23 +784,28 @@ public class OpenAPIResponseMapper {
             if (apiResponses.containsKey(key)) {
                 ApiResponse res = apiResponses.get(key);
                 Content content = res.getContent();
-                String mediaType = value.getContent().keySet().iterator().next();
-                Schema newSchema = value.getContent().values().iterator().next().getSchema();
-                if (content.containsKey(mediaType)) {
-                    Schema<?> schema = content.get(mediaType).getSchema();
-                    if (schema instanceof ComposedSchema && ((ComposedSchema) schema).getOneOf() != null) {
-                        schema.getOneOf().add(newSchema);
-                        content.put(mediaType, new io.swagger.v3.oas.models.media.MediaType().schema(schema));
+                if (content == null) {
+                    content = new Content();
+                }
+                if (value.getContent() != null) {
+                    String mediaType = value.getContent().keySet().iterator().next();
+                    Schema newSchema = value.getContent().values().iterator().next().getSchema();
+                    if (content.containsKey(mediaType)) {
+                        Schema<?> schema = content.get(mediaType).getSchema();
+                        if (schema instanceof ComposedSchema && ((ComposedSchema) schema).getOneOf() != null) {
+                            schema.getOneOf().add(newSchema);
+                            content.put(mediaType, new io.swagger.v3.oas.models.media.MediaType().schema(schema));
+                        } else {
+                            ComposedSchema composedSchema = new ComposedSchema();
+                            composedSchema.addOneOfItem(schema);
+                            composedSchema.addOneOfItem(newSchema);
+                            io.swagger.v3.oas.models.media.MediaType updatedMediaContent =
+                                    new io.swagger.v3.oas.models.media.MediaType().schema(composedSchema);
+                            content.put(mediaType, updatedMediaContent);
+                        }
                     } else {
-                        ComposedSchema composedSchema = new ComposedSchema();
-                        composedSchema.addOneOfItem(schema);
-                        composedSchema.addOneOfItem(newSchema);
-                        io.swagger.v3.oas.models.media.MediaType updatedMediaContent =
-                                new io.swagger.v3.oas.models.media.MediaType().schema(composedSchema);
-                        content.put(mediaType, updatedMediaContent);
+                        content.put(mediaType, value.getContent().values().iterator().next());
                     }
-                } else {
-                    content.put(mediaType, value.getContent().values().iterator().next());
                 }
                 res.content(content);
                 apiResponses.put(key, res);
