@@ -68,7 +68,7 @@ dependencies {
     checkstyle "com.puppycrawl.tools:checkstyle:${project.puppycrawlCheckstyleVersion}"
 }
 
-sourceCompatibility = JavaVersion.VERSION_11
+sourceCompatibility = JavaVersion.VERSION_17
 
 def excludePattern = '**/module-info.java'
 tasks.withType(Checkstyle) {
