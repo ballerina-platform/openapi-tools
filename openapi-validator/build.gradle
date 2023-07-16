@@ -89,6 +89,7 @@ task copyStdlibs(type: Copy) {
     dependsOn(copyOpenAPI)
     def ballerinaDist = "$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}"
     into ballerinaDist
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     /* Standard Libraries */
     configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->

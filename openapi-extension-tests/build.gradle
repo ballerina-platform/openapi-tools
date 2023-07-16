@@ -91,3 +91,5 @@ jacocoTestReport {
 }
 copyPackageBala.dependsOn copyDistribution
 test.dependsOn copyPackageBala
+copyDistribution.dependsOn(':module-ballerina-openapi:unpackJballerinaTools')
+copyDistribution.dependsOn(':module-ballerina-openapi:copyStdlibs')
