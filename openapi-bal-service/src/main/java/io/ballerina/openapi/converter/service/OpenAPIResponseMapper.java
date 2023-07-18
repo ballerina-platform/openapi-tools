@@ -65,6 +65,7 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -490,8 +491,22 @@ public class OpenAPIResponseMapper {
             case ERROR_TYPE_DESC:
                 // Return type is given as error or error? in the ballerina it will generate 500 response.
                 apiResponse.description(HTTP_500_DESCRIPTION);
-                mediaType.setSchema(new StringSchema());
-                apiResponse.content(new Content().addMediaType(MediaType.TEXT_PLAIN, mediaType));
+                ObjectSchema errorSchema = new ObjectSchema();
+                // Create ErrorPayload object properties.
+                Map<String, Schema> properties = new HashMap<>();
+                properties.put("timestamp", new StringSchema().description("Timestamp of the error"));
+                properties.put("status", new IntegerSchema().description("Relevant HTTP status code"));
+                properties.put("reason", new StringSchema().description("Reason phrase"));
+                properties.put("message", new StringSchema().description("Error message"));
+                properties.put("path", new StringSchema().description("Request path"));
+                properties.put("method", new StringSchema().description("Method type of the request"));
+                errorSchema.setProperties(properties);
+                if (components.getSchemas() == null) {
+                    components.setSchemas(new HashMap<>());
+                }
+                components.getSchemas().put("ErrorPayload", errorSchema);
+                mediaType.setSchema(new Schema<>().$ref("ErrorPayload"));
+                apiResponse.content(new Content().addMediaType(APPLICATION_JSON, mediaType));
                 apiResponses.put(HTTP_500, apiResponse);
                 return Optional.of(apiResponses);
             case OPTIONAL_TYPE_DESC:
@@ -769,23 +784,28 @@ public class OpenAPIResponseMapper {
             if (apiResponses.containsKey(key)) {
                 ApiResponse res = apiResponses.get(key);
                 Content content = res.getContent();
-                String mediaType = value.getContent().keySet().iterator().next();
-                Schema newSchema = value.getContent().values().iterator().next().getSchema();
-                if (content.containsKey(mediaType)) {
-                    Schema<?> schema = content.get(mediaType).getSchema();
-                    if (schema instanceof ComposedSchema && ((ComposedSchema) schema).getOneOf() != null) {
-                        schema.getOneOf().add(newSchema);
-                        content.put(mediaType, new io.swagger.v3.oas.models.media.MediaType().schema(schema));
+                if (content == null) {
+                    content = new Content();
+                }
+                if (value.getContent() != null) {
+                    String mediaType = value.getContent().keySet().iterator().next();
+                    Schema newSchema = value.getContent().values().iterator().next().getSchema();
+                    if (content.containsKey(mediaType)) {
+                        Schema<?> schema = content.get(mediaType).getSchema();
+                        if (schema instanceof ComposedSchema && ((ComposedSchema) schema).getOneOf() != null) {
+                            schema.getOneOf().add(newSchema);
+                            content.put(mediaType, new io.swagger.v3.oas.models.media.MediaType().schema(schema));
+                        } else {
+                            ComposedSchema composedSchema = new ComposedSchema();
+                            composedSchema.addOneOfItem(schema);
+                            composedSchema.addOneOfItem(newSchema);
+                            io.swagger.v3.oas.models.media.MediaType updatedMediaContent =
+                                    new io.swagger.v3.oas.models.media.MediaType().schema(composedSchema);
+                            content.put(mediaType, updatedMediaContent);
+                        }
                     } else {
-                        ComposedSchema composedSchema = new ComposedSchema();
-                        composedSchema.addOneOfItem(schema);
-                        composedSchema.addOneOfItem(newSchema);
-                        io.swagger.v3.oas.models.media.MediaType updatedMediaContent =
-                                new io.swagger.v3.oas.models.media.MediaType().schema(composedSchema);
-                        content.put(mediaType, updatedMediaContent);
+                        content.put(mediaType, value.getContent().values().iterator().next());
                     }
-                } else {
-                    content.put(mediaType, value.getContent().values().iterator().next());
                 }
                 res.content(content);
                 apiResponses.put(key, res);

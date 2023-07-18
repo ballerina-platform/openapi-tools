@@ -19,22 +19,29 @@ package io.ballerina.openapi.cmd;
 
 import io.ballerina.openapi.OpenAPITest;
 import io.ballerina.openapi.TestUtil;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.ballerina.openapi.TestUtil.DISTRIBUTIONS_DIR;
 import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
+import static io.ballerina.openapi.extension.build.ValidatorTests.WHITESPACE_PATTERN;
 
 /**
  * This test class created for contain the OpenAPI to Ballerina service generator return type checks.
  */
-public class ServiceGeneratorReturnTypeTests extends OpenAPITest {
+public class ServiceGenerationTests extends OpenAPITest {
     public static final String DISTRIBUTION_FILE_NAME = DISTRIBUTIONS_DIR.toString();
     public static final Path TEST_RESOURCE = Paths.get(RESOURCES_PATH.toString() + "/service/return");
 
@@ -51,6 +58,36 @@ public class ServiceGeneratorReturnTypeTests extends OpenAPITest {
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("types.bal", expectedFilePath);
     }
+
+    @Test(description = "Negative test to assert warnings on unsupported OAS type formats")
+    public void testUnsupportedOASFormatTests() throws IOException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("-i");
+        buildArgs.add("swagger/" + "unsupported_oas_format.yaml");
+        buildArgs.add("--mode");
+        buildArgs.add("service");
+        buildArgs.add("-o");
+        buildArgs.add(tmpDir.toString());
+        InputStream successful = TestUtil.executeOpenAPIToTestWarnings(
+                DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        String msg = "WARNING: unsupported format `currency` will be skipped when generating the counterpart " +
+                "Ballerina type for openAPI schema type: `number`\n" +
+                "WARNING: unsupported format `date` will be skipped when generating the counterpart " +
+                "Ballerina type for openAPI schema type: `string`";
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
+            Stream<String> logLines = br.lines();
+            String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
+            logLines.close();
+            generatedLog = (generatedLog.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            msg = (msg.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            if (generatedLog.contains(msg)) {
+                Assert.assertTrue(true);
+            } else {
+                Assert.fail("Unexpected service generation output.");
+            }
+        }
+    }
+
     @DataProvider(name = "returnSampleProvider")
     public Object[][] dataProvider() {
         return new Object[][]{

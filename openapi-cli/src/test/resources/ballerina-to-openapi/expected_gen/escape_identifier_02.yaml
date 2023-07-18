@@ -31,9 +31,9 @@ paths:
         "500":
           description: Internal server error
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/ErrorPayload'
   /steps/{join}:
     get:
       summary: Header parameter
@@ -61,9 +61,9 @@ paths:
         "500":
           description: Internal server error
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/ErrorPayload'
   /steps:
     post:
       operationId: postSteps
@@ -82,9 +82,9 @@ paths:
         "500":
           description: Internal server error
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/ErrorPayload'
   /พิมพ์ชื่อ:
     get:
       operationId: getพิมพ์ชื่อ
@@ -110,6 +110,28 @@ paths:
           description: Accepted
 components:
   schemas:
+    ErrorPayload:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Reason phrase
+        path:
+          type: string
+          description: Request path
+        method:
+          type: string
+          description: Method type of the request
+        message:
+          type: string
+          description: Error message
+        timestamp:
+          type: string
+          description: Timestamp of the error
+        status:
+          type: integer
+          description: Relevant HTTP status code
+          format: int32
     Pet:
       required:
         - id
