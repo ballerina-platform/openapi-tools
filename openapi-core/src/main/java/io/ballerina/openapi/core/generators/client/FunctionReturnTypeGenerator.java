@@ -219,15 +219,13 @@ public class FunctionReturnTypeGenerator {
             if (arraySchema.getItems() instanceof ArraySchema) {
                 Schema nestedSchema = arraySchema.getItems();
                 ArraySchema nestedArraySchema = (ArraySchema) nestedSchema;
-                String inlineArrayType = convertOpenAPITypeToBallerina(
-                        getOpenAPIType(nestedArraySchema.getItems()));
+                String inlineArrayType = convertOpenAPITypeToBallerina(nestedArraySchema.getItems());
                 typeName = inlineArrayType + "NestedArr";
                 type = inlineArrayType + "[][]";
             } else {
-                typeName = convertOpenAPITypeToBallerina(
-                        getOpenAPIType(Objects.requireNonNull(arraySchema.getItems()))) +
+                typeName = convertOpenAPITypeToBallerina(Objects.requireNonNull(arraySchema.getItems())) +
                         "Arr";
-                type = convertOpenAPITypeToBallerina(getOpenAPIType(arraySchema.getItems())) + "[]";
+                type = convertOpenAPITypeToBallerina(arraySchema.getItems()) + "[]";
             }
             type = generateCustomTypeDefine(type, getValidName(typeName, true), isSignature);
         }

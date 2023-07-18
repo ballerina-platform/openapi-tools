@@ -195,7 +195,7 @@ public class ServiceGenerationUtils {
         } else if (schemaType != null && (schemaType.equals(INTEGER) || schemaType.equals(NUMBER) ||
                 schemaType.equals(BOOLEAN) || schemaType.equals(STRING))) {
             member = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
-                    GeneratorUtils.convertOpenAPITypeToBallerina(GeneratorUtils.getOpenAPIType(schema.getItems()))));
+                    GeneratorUtils.convertOpenAPITypeToBallerina(schema.getItems())));
         } else {
             return Optional.empty();
         }

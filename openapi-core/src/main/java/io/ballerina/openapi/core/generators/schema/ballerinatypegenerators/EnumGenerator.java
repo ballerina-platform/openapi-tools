@@ -20,6 +20,7 @@ package io.ballerina.openapi.core.generators.schema.ballerinatypegenerators;
 
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils;
@@ -82,8 +83,12 @@ public class EnumGenerator extends TypeGenerator {
                 String enumString = isNull ? enumBuilder.toString() + NILLABLE : enumBuilder.toString();
                 return NodeParser.parseTypeDescriptor(enumString);
             } else {
-                String typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(
-                        GeneratorUtils.getOpenAPIType(schema));
+                String typeDescriptorName;
+                if (GeneratorConstants.TYPE_MAP.containsKey(schema.getType().trim())) {
+                    typeDescriptorName = GeneratorConstants.TYPE_MAP.get(GeneratorUtils.getOpenAPIType(schema));
+                } else {
+                    throw new BallerinaOpenApiException("Unsupported OAS data type `" + schema.getType().trim() + "`");
+                }
                 if (isNull) {
                     return createSimpleNameReferenceNode(createIdentifierToken(typeDescriptorName + NILLABLE));
                 } else {

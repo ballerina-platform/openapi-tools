@@ -137,8 +137,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML_CONTENT;
-import static io.ballerina.openapi.core.GeneratorConstants.BINARY;
-import static io.ballerina.openapi.core.GeneratorConstants.BYTE;
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.CLOSE_CURLY_BRACE;
 import static io.ballerina.openapi.core.GeneratorConstants.CONSTRAINT;
@@ -325,33 +323,46 @@ public class GeneratorUtils {
     }
 
     /**
-     * Method for convert openApi type to ballerina type.
+     * Method for convert openApi type of format to ballerina type.
      *
-     * @param type OpenApi parameter types
+     * @param schema OpenApi schema
      * @return ballerina type
      */
-    public static String convertOpenAPITypeToBallerina(String type) throws BallerinaOpenApiException {
-        if (GeneratorConstants.TYPE_MAP.containsKey(type)) {
-            return GeneratorConstants.TYPE_MAP.get(type);
-        } else {
-            throw new BallerinaOpenApiException("Unsupported OAS data type `" + type + "`");
-        }
-    }
-
     public static String convertOpenAPITypeToBallerina(Schema<?> schema) throws BallerinaOpenApiException {
         String type = getOpenAPIType(schema);
-        if (INTEGER.equals(type)) {
-            return convertOpenAPINumericTypeToBallerina(convertOpenAPITypeToBallerina(type), schema);
-        }
-        if ((type.equals(NUMBER) && schema.getFormat() != null) || (type.equals(STRING) && schema.getFormat() != null
-                && (schema.getFormat().equals(BINARY) || schema.getFormat().equals(BYTE)))) {
-            type = schema.getFormat().trim();
-        }
         if (schema.getEnum() != null && !schema.getEnum().isEmpty() && primitiveTypeList.contains(type)) {
             EnumGenerator enumGenerator = new EnumGenerator(schema, null);
             return enumGenerator.generateTypeDescriptorNode().toString();
+        } else if ((INTEGER.equals(type) || NUMBER.equals(type) || STRING.equals(type)) && schema.getFormat() != null) {
+            return convertOpenAPITypeFormatToBallerina(type, schema);
         } else {
-            return convertOpenAPITypeToBallerina(type);
+            if (GeneratorConstants.TYPE_MAP.containsKey(type)) {
+                return GeneratorConstants.TYPE_MAP.get(type);
+            } else {
+                throw new BallerinaOpenApiException("Unsupported OAS data type `" + type + "`");
+            }
+        }
+    }
+
+    /**
+     * This utility is used to select the Ballerina data type for a given OpenAPI type format.
+     *
+     * @param dataType name of the data type. ex: number, integer, string
+     * @param schema uses to generate the type descriptor name ex: int32, int64
+     * @return data type for invalid numeric data formats
+     */
+    private static String convertOpenAPITypeFormatToBallerina(final String dataType, final Schema<?> schema)
+            throws BallerinaOpenApiException {
+        if (GeneratorConstants.TYPE_MAP.containsKey(schema.getFormat())) {
+            return GeneratorConstants.TYPE_MAP.get(schema.getFormat());
+        } else {
+            OUT_STREAM.printf("WARNING: unsupported format `%s` will be skipped when generating the counterpart " +
+                    "Ballerina type for openAPI schema type: `%s`%n", schema.getFormat(), schema.getType());
+            if (GeneratorConstants.TYPE_MAP.containsKey(dataType)) {
+                return GeneratorConstants.TYPE_MAP.get(dataType);
+            } else {
+                throw new BallerinaOpenApiException("Unsupported OAS data type `" + dataType + "`");
+            }
         }
     }
 
@@ -1030,26 +1041,6 @@ public class GeneratorUtils {
         } catch (ProjectException e) {
             throw new ProjectException(e.getMessage());
         }
-    }
-
-    /**
-     * This utility is used to select the Ballerina data type for a given numeric format type.
-     *
-     * @param dataType name of the data type. ex: number, integer
-     * @param schema uses to generate the type descriptor name ex: int32, int64
-     * @return data type for invalid numeric data formats
-     */
-    public static String convertOpenAPINumericTypeToBallerina(final String dataType, final Schema<?> schema) {
-        try {
-            if (schema.getFormat() != null) {
-                return GeneratorUtils.convertOpenAPITypeToBallerina(schema.getFormat().trim());
-            }
-        } catch (BallerinaOpenApiException e) {
-            OUT_STREAM.println(String.format("WARNING: unsupported format `%s` will be skipped when generating" +
-                    " the counterpart Ballerina type for openAPI schema type: `%s`",
-                    schema.getFormat(), getOpenAPIType(schema)));
-        }
-        return dataType;
     }
 
     public static String getOpenAPIType(Schema<?> schema) {

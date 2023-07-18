@@ -199,9 +199,8 @@ public class RecordTypeGenerator extends TypeGenerator {
         RecordRestDescriptorNode recordRestDescNode = null;
         if (additionalPropSchema instanceof NumberSchema && additionalPropSchema.getFormat() != null) {
             // this is special for `NumberSchema` because it has format with its expected type.
-            String type = additionalPropSchema.getFormat();
             SimpleNameReferenceNode numberNode = NodeFactory.createSimpleNameReferenceNode(
-                    createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(type)));
+                    createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(additionalPropSchema)));
             recordRestDescNode = NodeFactory.createRecordRestDescriptorNode(
                     TypeGeneratorUtils.getNullableType(additionalPropSchema, numberNode),
                     createToken(ELLIPSIS_TOKEN),
