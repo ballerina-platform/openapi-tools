@@ -158,8 +158,8 @@ public class ServiceGenerationUtils {
             RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null);
             TypeDescriptorNode record = recordTypeGenerator.generateTypeDescriptorNode();
             return Optional.ofNullable(record);
-        } else if (schema.getType() != null) {
-            String schemaType = schema.getType();
+        } else if (GeneratorUtils.getOpenAPIType(schema) != null) {
+            String schemaType = GeneratorUtils.getOpenAPIType(schema);
             boolean isPrimitiveType = schemaType.equals(INTEGER) || schemaType.equals(NUMBER) ||
                     schemaType.equals(BOOLEAN) || schemaType.equals(STRING);
             if (schema instanceof ArraySchema) {
@@ -187,7 +187,7 @@ public class ServiceGenerationUtils {
     private static Optional<TypeDescriptorNode> getTypeDescNodeForArraySchema(ArraySchema schema)
             throws BallerinaOpenApiException {
         TypeDescriptorNode member;
-        String schemaType = schema.getItems().getType();
+        String schemaType = GeneratorUtils.getOpenAPIType(schema.getItems());
         if (schema.getItems().get$ref() != null) {
             member = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(GeneratorUtils.getValidName(
@@ -195,7 +195,7 @@ public class ServiceGenerationUtils {
         } else if (schemaType != null && (schemaType.equals(INTEGER) || schemaType.equals(NUMBER) ||
                 schemaType.equals(BOOLEAN) || schemaType.equals(STRING))) {
             member = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
-                    GeneratorUtils.convertOpenAPITypeToBallerina(schema.getItems().getType())));
+                    GeneratorUtils.convertOpenAPITypeToBallerina(GeneratorUtils.getOpenAPIType(schema.getItems()))));
         } else {
             return Optional.empty();
         }

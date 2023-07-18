@@ -60,6 +60,7 @@ import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.EnumGenerator;
+import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
 import io.ballerina.openapi.core.model.GenSrcFile;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -268,8 +269,12 @@ public class GeneratorUtils {
         boolean hasSpecialCharacter = matcher.find();
 
         for (Parameter parameter : operation.getParameters()) {
+            if (parameter.get$ref() != null) {
+                parameter = GeneratorMetaData.getInstance().getOpenAPI().getComponents()
+                        .getParameters().get(extractReferenceType(parameter.get$ref()));
+            }
             if (parameter.getIn() == null) {
-                break;
+                continue;
             }
             if (pathParam.trim().equals(getValidName(parameter.getName().trim(), false))
                     && parameter.getIn().equals("path")) {
@@ -334,7 +339,7 @@ public class GeneratorUtils {
     }
 
     public static String convertOpenAPITypeToBallerina(Schema<?> schema) throws BallerinaOpenApiException {
-        String type = schema.getType().toLowerCase(Locale.ENGLISH).trim();
+        String type = getOpenAPIType(schema);
         if (INTEGER.equals(type)) {
             return convertOpenAPINumericTypeToBallerina(convertOpenAPITypeToBallerina(type), schema);
         }
@@ -500,7 +505,7 @@ public class GeneratorUtils {
         Schema<?> schema = mediaTypeEntry.getValue().getSchema();
 
         boolean isValidMultipartFormData = mediaType.equals(MediaType.MULTIPART_FORM_DATA) && schema != null &&
-                (schema.get$ref() != null || schema.getProperties() != null || schema.getType().equals(OBJECT));
+                (schema.get$ref() != null || schema.getProperties() != null || getOpenAPIType(schema).equals(OBJECT));
 
         if (defaultBallerinaType.equals(HTTP_REQUEST) && !isValidMultipartFormData) {
             return false;
@@ -1042,8 +1047,18 @@ public class GeneratorUtils {
         } catch (BallerinaOpenApiException e) {
             OUT_STREAM.println(String.format("WARNING: unsupported format `%s` will be skipped when generating" +
                     " the counterpart Ballerina type for openAPI schema type: `%s`",
-                    schema.getFormat(), schema.getType()));
+                    schema.getFormat(), getOpenAPIType(schema)));
         }
         return dataType;
+    }
+
+    public static String getOpenAPIType(Schema<?> schema) {
+        if (schema.getTypes() != null && schema.getTypes().iterator().next() != null) {
+            return schema.getTypes().iterator().next();
+        } else if (schema.getType() != null) {
+            return schema.getType();
+        } else {
+            return null;
+        }
     }
 }

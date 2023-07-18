@@ -120,13 +120,15 @@ public class TypeGeneratorUtils {
             } else {
                 return new UnionTypeGenerator(schemaValue, typeName);
             }
-        } else if ((schemaValue.getType() != null && schemaValue.getType().equals(GeneratorConstants.OBJECT)) ||
+        } else if ((GeneratorUtils.getOpenAPIType(schemaValue) != null &&
+                GeneratorUtils.getOpenAPIType(schemaValue).equals(GeneratorConstants.OBJECT)) ||
                 schemaValue instanceof ObjectSchema || schemaValue.getProperties() != null ||
                 schemaValue instanceof MapSchema) {
             return new RecordTypeGenerator(schemaValue, typeName);
         } else if (schemaValue instanceof ArraySchema) {
             return new ArrayTypeGenerator(schemaValue, typeName, parentName);
-        } else if (schemaValue.getType() != null && PRIMITIVE_TYPE_LIST.contains(schemaValue.getType())) {
+        } else if (GeneratorUtils.getOpenAPIType(schemaValue) != null &&
+                PRIMITIVE_TYPE_LIST.contains(GeneratorUtils.getOpenAPIType(schemaValue))) {
             return new PrimitiveTypeGenerator(schemaValue, typeName);
         } else { // when schemaValue.type == null
             return new AnyDataTypeGenerator(schemaValue, typeName);

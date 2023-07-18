@@ -65,7 +65,7 @@ public class EnumGenerator extends TypeGenerator {
         List<?> enumList = schema.getEnum();
         boolean isNull = false;
         StringBuilder enumBuilder = new StringBuilder();
-        if (PRIMITIVE_TYPE_LIST.contains(schema.getType().trim())) {
+        if (PRIMITIVE_TYPE_LIST.contains(GeneratorUtils.getOpenAPIType(schema))) {
             for (Object enumValue : enumList) {
                 isNull = enumValue == null;
                 if (isNull) {
@@ -82,7 +82,8 @@ public class EnumGenerator extends TypeGenerator {
                 String enumString = isNull ? enumBuilder.toString() + NILLABLE : enumBuilder.toString();
                 return NodeParser.parseTypeDescriptor(enumString);
             } else {
-                String typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(schema.getType().trim());
+                String typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(
+                        GeneratorUtils.getOpenAPIType(schema));
                 if (isNull) {
                     return createSimpleNameReferenceNode(createIdentifierToken(typeDescriptorName + NILLABLE));
                 } else {
@@ -93,7 +94,8 @@ public class EnumGenerator extends TypeGenerator {
             }
         } else {
             throw new BallerinaOpenApiException(String.format("The data type '%s' is not a valid enum type." +
-                    "The supported types are string, integer, number and boolean", schema.getType()));
+                    "The supported types are string, integer, number and boolean",
+                    GeneratorUtils.getOpenAPIType(schema)));
         }
     }
 }

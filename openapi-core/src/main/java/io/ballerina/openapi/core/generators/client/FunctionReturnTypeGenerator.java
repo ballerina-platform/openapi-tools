@@ -55,6 +55,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.ERROR;
 import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
+import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.GeneratorUtils.isValidSchemaName;
 
@@ -168,7 +169,7 @@ public class FunctionReturnTypeGenerator {
             ArraySchema arraySchema = (ArraySchema) schema;
             // TODO: Nested array when response has
             type = generateReturnTypeForArraySchema(media, arraySchema, isSignature);
-        } else if (schema.getType() != null) {
+        } else if (getOpenAPIType(schema) != null) {
             type = convertOpenAPITypeToBallerina(schema);
         } else if (media.getKey().trim().equals("application/xml")) {
             type = generateCustomTypeDefine("xml", "XML", isSignature);
@@ -199,7 +200,7 @@ public class FunctionReturnTypeGenerator {
             if (!isSignature) {
                 type = typeName;
             }
-        } else if (arraySchema.getItems().getType() == null) {
+        } else if (getOpenAPIType(arraySchema.getItems()) == null) {
             if (media.getKey().trim().equals("application/xml")) {
                 type = generateCustomTypeDefine("xml[]", "XMLArr", isSignature);
             } else if (media.getKey().trim().equals("application/pdf") ||
@@ -218,13 +219,15 @@ public class FunctionReturnTypeGenerator {
             if (arraySchema.getItems() instanceof ArraySchema) {
                 Schema nestedSchema = arraySchema.getItems();
                 ArraySchema nestedArraySchema = (ArraySchema) nestedSchema;
-                String inlineArrayType = convertOpenAPITypeToBallerina(nestedArraySchema.getItems().getType());
+                String inlineArrayType = convertOpenAPITypeToBallerina(
+                        getOpenAPIType(nestedArraySchema.getItems()));
                 typeName = inlineArrayType + "NestedArr";
                 type = inlineArrayType + "[][]";
             } else {
-                typeName = convertOpenAPITypeToBallerina(Objects.requireNonNull(arraySchema.getItems()).getType()) +
+                typeName = convertOpenAPITypeToBallerina(
+                        getOpenAPIType(Objects.requireNonNull(arraySchema.getItems()))) +
                         "Arr";
-                type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType()) + "[]";
+                type = convertOpenAPITypeToBallerina(getOpenAPIType(arraySchema.getItems())) + "[]";
             }
             type = generateCustomTypeDefine(type, getValidName(typeName, true), isSignature);
         }

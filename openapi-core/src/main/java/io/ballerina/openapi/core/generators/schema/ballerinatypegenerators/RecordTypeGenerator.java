@@ -156,7 +156,7 @@ public class RecordTypeGenerator extends TypeGenerator {
                 if (additionalPropSchema.get$ref() != null) {
                     isOpenRecord = false;
                     recordRestDescNode = getRestDescriptorNodeForReference(additionalPropSchema);
-                } else if (additionalPropSchema.getType() != null) {
+                } else if (GeneratorUtils.getOpenAPIType(additionalPropSchema) != null) {
                     isOpenRecord = false;
                     recordRestDescNode = getRecordRestDescriptorNode(additionalPropSchema);
                 } else if (additionalPropSchema instanceof ComposedSchema) {
@@ -225,7 +225,7 @@ public class RecordTypeGenerator extends TypeGenerator {
                     createToken(SEMICOLON_TOKEN));
         } else {
             OUT_STREAM.printf("WARNING: the Ballerina rest record field does not support with the data type `%s`",
-                    additionalPropSchema.getType());
+                    GeneratorUtils.getOpenAPIType(additionalPropSchema));
         }
         return recordRestDescNode;
     }

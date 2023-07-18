@@ -46,6 +46,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createParenthesisedT
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
+import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.GeneratorUtils.hasConstraints;
 import static io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils.getNullableType;
 
@@ -97,8 +98,8 @@ public class ArrayTypeGenerator extends TypeGenerator {
             }
             typeName = GeneratorUtils.getValidName(
                     parentType != null ?
-                            parentType + "-" + normalizedTypeName + "-Items-" + items.getType() :
-                            normalizedTypeName + "-Items-" + items.getType(),
+                            parentType + "-" + normalizedTypeName + "-Items-" + getOpenAPIType(items) :
+                            normalizedTypeName + "-Items-" + getOpenAPIType(items),
                     true);
             typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
             TypeDefinitionNode arrayItemWithConstraint = typeGenerator.generateTypeDefinitionNode(

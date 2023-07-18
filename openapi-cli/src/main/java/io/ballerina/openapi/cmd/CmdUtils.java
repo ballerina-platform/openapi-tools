@@ -76,6 +76,7 @@ public class CmdUtils {
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
         parseOptions.setFlatten(true);
+//        parseOptions.setResolveFully(true);
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
             StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n");

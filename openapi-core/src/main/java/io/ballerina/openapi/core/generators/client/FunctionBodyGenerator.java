@@ -122,6 +122,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.RESOURCE_PATH;
 import static io.ballerina.openapi.core.GeneratorConstants.RESPONSE;
 import static io.ballerina.openapi.core.GeneratorConstants.SELF;
 import static io.ballerina.openapi.core.GeneratorUtils.generateBodyStatementForComplexUrl;
+import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.GeneratorUtils.isComplexURL;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.extractReferenceType;
@@ -240,6 +241,9 @@ public class FunctionBodyGenerator {
         if (operation.getValue().getParameters() != null) {
             List<Parameter> parameters = operation.getValue().getParameters();
             for (Parameter parameter : parameters) {
+                if (parameter.get$ref() != null) {
+                    parameter = openAPI.getComponents().getParameters().get(extractReferenceType(parameter.get$ref()));
+                }
                 if (parameter.getIn().trim().equals(QUERY)) {
                     queryParameters.add(parameter);
                 } else if (parameter.getIn().trim().equals(HEADER)) {
@@ -442,7 +446,7 @@ public class FunctionBodyGenerator {
                         getValidName(extractReferenceType(paramSchema.get$ref()), true));
             }
             if (paramSchema != null && (paramSchema.getProperties() != null ||
-                    (paramSchema.getType() != null && paramSchema.getType().equals("array")) ||
+                    (getOpenAPIType(paramSchema) != null && getOpenAPIType(paramSchema).equals("array")) ||
                     (paramSchema instanceof ComposedSchema))) {
                 if (parameter.getStyle() != null || parameter.getExplode() != null) {
                     GeneratorUtils.createEncodingMap(filedOfMap, parameter.getStyle().toString(),

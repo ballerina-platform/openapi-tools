@@ -119,7 +119,17 @@ public class BallerinaDiagnosticTests {
                 {"ballerinax_connector_tests/stripe.yaml"},
                 {"ballerinax_connector_tests/vimeo.yaml"},
                 {"ballerinax_connector_tests/ynab.yaml"},
-                {"ballerinax_connector_tests/zoom.yaml"}
+                {"ballerinax_connector_tests/zoom.yaml"},
+                {"3.1.0_openapis/adyen_accountservice.yaml"},
+//                {"3.1.0_openapis/codat_accounting.yaml"}, // openapi file has errors
+//                {"3.1.0_openapis/codat_bank_feeds.yaml"}, // openapi file has errors
+//                {"3.1.0_openapis/disclosure.yaml"}, // openapi file has errors
+                {"3.1.0_openapis/listennotes.yaml"}, // need to use .getTypes()
+                {"3.1.0_openapis/placekit.yaml"},
+                {"3.1.0_openapis/urlbox.yaml"},
+//                {"3.1.0_openapis/vercel.yaml"}, // uncomment when /openapi-tools/issues/1332 is fixed
+                {"3.1.0_openapis/webscraping.yaml"}, // parameters with references are not resolving
+                {"3.1.0_openapis/wolframalpha.yaml"} // need to use .getTypes()
         };
     }
 
