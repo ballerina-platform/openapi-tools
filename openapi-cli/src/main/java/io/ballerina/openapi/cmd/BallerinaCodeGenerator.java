@@ -62,9 +62,11 @@ import static io.ballerina.openapi.cmd.CmdConstants.GenType.GEN_BOTH;
 import static io.ballerina.openapi.cmd.CmdConstants.GenType.GEN_CLIENT;
 import static io.ballerina.openapi.cmd.CmdConstants.GenType.GEN_SERVICE;
 import static io.ballerina.openapi.cmd.CmdConstants.OAS_PATH_SEPARATOR;
+import static io.ballerina.openapi.cmd.CmdConstants.OPENAPI_3_1_VERSION;
 import static io.ballerina.openapi.cmd.CmdConstants.TEST_DIR;
 import static io.ballerina.openapi.cmd.CmdConstants.TEST_FILE_NAME;
 import static io.ballerina.openapi.cmd.CmdConstants.TYPE_FILE_NAME;
+import static io.ballerina.openapi.cmd.CmdConstants.UNSUPPORTED_OAS_3_1_ERROR;
 import static io.ballerina.openapi.cmd.CmdConstants.UNTITLED_SERVICE;
 import static io.ballerina.openapi.cmd.CmdConstants.UTIL_FILE_NAME;
 import static io.ballerina.openapi.cmd.CmdUtils.setGeneratedFileName;
@@ -103,7 +105,9 @@ public class BallerinaCodeGenerator {
         // absence of the operationId in operation. Therefor we enable client flag true as default code generation.
         // if resource is enabled, we avoid checking operationId.
         OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPIPath, !isResource);
-
+        if (openAPIDef.getSpecVersion().name().equals(OPENAPI_3_1_VERSION)) {
+            throw new BallerinaOpenApiException(UNSUPPORTED_OAS_3_1_ERROR);
+        }
         // Generate service
         String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
@@ -338,6 +342,9 @@ public class BallerinaCodeGenerator {
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         // Normalize OpenAPI definition
         OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, !isResource);
+        if (openAPIDef.getSpecVersion().name().equals(OPENAPI_3_1_VERSION)) {
+            throw new BallerinaOpenApiException(UNSUPPORTED_OAS_3_1_ERROR);
+        }
         // Generate ballerina service and resources.
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -407,6 +414,8 @@ public class BallerinaCodeGenerator {
         if (openAPIDef.getInfo() == null) {
             throw new BallerinaOpenApiException("Info section of the definition file cannot be empty/null: " +
                     openAPI);
+        } else if (openAPIDef.getSpecVersion().name().equals(OPENAPI_3_1_VERSION)) {
+            throw new BallerinaOpenApiException(UNSUPPORTED_OAS_3_1_ERROR);
         }
 
         if (openAPIDef.getInfo().getTitle().isBlank() && (serviceName == null || serviceName.isBlank())) {

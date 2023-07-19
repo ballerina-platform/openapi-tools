@@ -201,5 +201,8 @@ public class CmdConstants {
     // OS specific line separator
     public static final String LINE_SEPARATOR = System.lineSeparator();
     public static final String DOUBLE_LINE_SEPARATOR = LINE_SEPARATOR + LINE_SEPARATOR;
+    public static final String OPENAPI_3_1_VERSION = "V31";
+    public static final String UNSUPPORTED_OAS_3_1_ERROR =
+            "OpenAPI definitions with version 3.1.x are currently unsupported";
 
 }
