@@ -897,6 +897,9 @@ public class OpenAPIResponseMapper {
         } else if (typeSymbol.typeKind() == TypeDescKind.TYPE_REFERENCE) {
             TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) typeSymbol;
             TypeSymbol referredTypeSymbol = typeReferenceTypeSymbol.typeDescriptor();
+            if (referredTypeSymbol.typeKind() == TypeDescKind.INTERSECTION) {
+                referredTypeSymbol = componentMapper.excludeReadonlyIfPresent(referredTypeSymbol);
+            }
             String referenceName = referenceNode.name().toString().trim();
             String referredTypeName = referredTypeSymbol.getName().isPresent() ?
                     referredTypeSymbol.getName().get() : "";
