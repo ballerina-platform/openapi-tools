@@ -94,6 +94,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SIMPLE_NAME_REFERENCE
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_REFERENCE;
 import static io.ballerina.openapi.converter.Constants.APPLICATION_PREFIX;
 import static io.ballerina.openapi.converter.Constants.BODY;
+import static io.ballerina.openapi.converter.Constants.BYTE;
+import static io.ballerina.openapi.converter.Constants.BYTE_ARRAY;
 import static io.ballerina.openapi.converter.Constants.CACHE_CONTROL;
 import static io.ballerina.openapi.converter.Constants.ETAG;
 import static io.ballerina.openapi.converter.Constants.FALSE;
@@ -621,6 +623,7 @@ public class OpenAPIResponseMapper {
             ArraySchema arraySchema = new ArraySchema();
             String type02 = array.memberTypeDesc().kind().toString().trim().split("_")[0].
                     toLowerCase(Locale.ENGLISH);
+            type02 = type02.equals(BYTE) ? BYTE_ARRAY : type02;
             Schema<?> openApiSchema = ConverterCommonUtils.getOpenApiSchema(type02);
             Optional<String> mimeType = convertBallerinaMIMEToOASMIMETypes(type02, customMediaPrefix);
             if (mimeType.isEmpty()) {

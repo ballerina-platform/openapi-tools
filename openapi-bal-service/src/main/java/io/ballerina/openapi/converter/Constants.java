@@ -46,6 +46,7 @@ public class Constants {
     public static final String TYPEREFERENCE = "typeReference";
     public static final String HTTP_HEADER = "http:Header";
     public static final String BYTE_ARRAY = "byte[]";
+    public static final String BYTE = "byte";
     public static final String OCTET_STREAM = "octet-stream";
     public static final String XML = "xml";
     public static final String JSON = "json";
