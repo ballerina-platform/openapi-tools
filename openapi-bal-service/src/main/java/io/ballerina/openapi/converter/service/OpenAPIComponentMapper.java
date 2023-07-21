@@ -72,7 +72,7 @@ public class OpenAPIComponentMapper {
 
     private final Components components;
     private final List<OpenAPIConverterDiagnostic> diagnostics;
-    private final List<String> visitedTypeDefinitionNames = new ArrayList<>();
+    private final HashSet<String> visitedTypeDefinitionNames = new HashSet<>();
 
     public OpenAPIComponentMapper(Components components) {
         this.components = components;
@@ -266,7 +266,8 @@ public class OpenAPIComponentMapper {
             allOfSchemaList.add(referenceSchema);
             if (typeInclusion.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
                 TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) typeInclusion;
-                if (typeRecord.typeDescriptor() instanceof RecordTypeSymbol) {
+                if (typeRecord.typeDescriptor() instanceof RecordTypeSymbol &&
+                        !isSameRecord(typeInclusionName, typeRecord)) {
                     RecordTypeSymbol typeInclusionRecord = (RecordTypeSymbol) typeRecord.typeDescriptor();
                     Map<String, RecordFieldSymbol> tInFields = typeInclusionRecord.fieldDescriptors();
                     unionKeys.addAll(tInFields.keySet());
@@ -318,8 +319,9 @@ public class OpenAPIComponentMapper {
 
             if (fieldTypeKind == TypeDescKind.TYPE_REFERENCE) {
                 TypeReferenceTypeSymbol typeReference = (TypeReferenceTypeSymbol) field.getValue().typeDescriptor();
-                property = handleTypeReference(schema, typeReference, property, isSameRecord(componentName,
-                        typeReference));
+                property = handleTypeReference(schema, typeReference, property,
+                        isSameRecord(ConverterCommonUtils.unescapeIdentifier(typeReference.definition().getName().get()),
+                                typeReference));
                 schema = components.getSchemas();
             } else if (fieldTypeKind == TypeDescKind.UNION) {
                 property = handleUnionType((UnionTypeSymbol) field.getValue().typeDescriptor(), property,
@@ -418,7 +420,6 @@ public class OpenAPIComponentMapper {
                 property = handleTypeReference(this.components.getSchemas(), typeReferenceTypeSymbol, property,
                         isSameRecord(parentComponentName, typeReferenceTypeSymbol));
                 properties.add(property);
-                // TODO: uncomment after fixing ballerina lang union type handling issue
             } else if (union.typeKind() == TypeDescKind.UNION) {
                 property = handleUnionType((UnionTypeSymbol) union, property, parentComponentName);
                 properties.add(property);
