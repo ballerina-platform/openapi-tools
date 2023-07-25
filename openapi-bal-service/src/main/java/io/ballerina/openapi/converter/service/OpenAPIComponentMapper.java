@@ -152,13 +152,12 @@ public class OpenAPIComponentMapper {
                     Schema enumSchema = mapEnumValues(enumSymbol);
                     schema.put(componentName, enumSchema.description(typeDoc));
                     components.setSchemas(schema);
-                    break;
                 } else {
                     Schema unionSchema = handleUnionType((UnionTypeSymbol) type, new Schema<>(), componentName);
                     schema.put(componentName, unionSchema.description(typeDoc));
                     components.setSchemas(schema);
-                    break;
                 }
+                break;
             case MAP:
                 MapTypeSymbol mapTypeSymbol = (MapTypeSymbol) type;
                 TypeSymbol typeParam = mapTypeSymbol.typeParam();

@@ -53,22 +53,22 @@ public class EnumTypeTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_array_type.yaml");
     }
 
-    @Test(description = "When the record field has reference to enum with constant value")
+    @Test(description = "Test for the record field has reference to enum with constant value")
     public void testEnumWithConstantValue() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_with_constant_value.bal");
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_with_value.yaml");
     }
 
-    @Test(description = "When the query and path has reference to enum with constant value")
-    public void testEnumWithQueryParameter() throws IOException {
+    @Test(description = "Test for query and path parameters having references to enums with constant value")
+    public void testEnumsWithinQueryParameters() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_query.bal");
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_query.yaml");
     }
 
-    @Test(description = "When the header has reference to enum with constant value")
-    public void testEnumWithHeaderParameter() throws IOException {
+    @Test(description = "Test for header parameters having references to enums with constant values")
+    public void testEnumsWithinHeaderParameters() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_header.bal");
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_header.yaml");
