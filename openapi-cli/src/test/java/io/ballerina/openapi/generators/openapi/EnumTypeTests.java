@@ -74,6 +74,14 @@ public class EnumTypeTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_header.yaml");
     }
 
+    //TODO:Enable this test after fixing issue : https://github.com/ballerina-platform/openapi-tools/issues/1472
+    @Test(description = "Test for enum that defined as ballerina types", enabled = false)
+    public void testEnumsDefinedAsBalTypes() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("data_type/bal_type_enum.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/bal_type_enum.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
