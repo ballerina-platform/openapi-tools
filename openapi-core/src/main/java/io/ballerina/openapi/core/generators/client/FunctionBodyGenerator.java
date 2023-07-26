@@ -48,7 +48,6 @@ import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -125,6 +124,7 @@ import static io.ballerina.openapi.core.GeneratorUtils.generateBodyStatementForC
 import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.GeneratorUtils.isComplexURL;
+import static io.ballerina.openapi.core.GeneratorUtils.isaComposedSchema;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.extractReferenceType;
 
 /**
@@ -242,7 +242,8 @@ public class FunctionBodyGenerator {
             List<Parameter> parameters = operation.getValue().getParameters();
             for (Parameter parameter : parameters) {
                 if (parameter.get$ref() != null) {
-                    parameter = openAPI.getComponents().getParameters().get(extractReferenceType(parameter.get$ref()));
+                    String[] splits = parameter.get$ref().split("/");
+                    parameter = openAPI.getComponents().getParameters().get(splits[splits.length - 1]);
                 }
                 if (parameter.getIn().trim().equals(QUERY)) {
                     queryParameters.add(parameter);
@@ -447,7 +448,7 @@ public class FunctionBodyGenerator {
             }
             if (paramSchema != null && (paramSchema.getProperties() != null ||
                     (getOpenAPIType(paramSchema) != null && getOpenAPIType(paramSchema).equals("array")) ||
-                    (paramSchema instanceof ComposedSchema))) {
+                    (isaComposedSchema(paramSchema)))) {
                 if (parameter.getStyle() != null || parameter.getExplode() != null) {
                     GeneratorUtils.createEncodingMap(filedOfMap, parameter.getStyle().toString(),
                             parameter.getExplode(), parameter.getName().trim());

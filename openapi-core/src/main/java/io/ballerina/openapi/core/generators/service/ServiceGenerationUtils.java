@@ -40,9 +40,6 @@ import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.RecordTypeGenerator;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -154,7 +151,7 @@ public class ServiceGenerationUtils {
         if (schema.get$ref() != null) {
             String schemaName = GeneratorUtils.getValidName(extractReferenceType(schema.get$ref()), true);
             return Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(schemaName)));
-        } else if (schema instanceof MapSchema) {
+        } else if (GeneratorUtils.isaMapSchema(schema)) {
             RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null);
             TypeDescriptorNode record = recordTypeGenerator.generateTypeDescriptorNode();
             return Optional.ofNullable(record);
@@ -162,8 +159,8 @@ public class ServiceGenerationUtils {
             String schemaType = GeneratorUtils.getOpenAPIType(schema);
             boolean isPrimitiveType = schemaType.equals(INTEGER) || schemaType.equals(NUMBER) ||
                     schemaType.equals(BOOLEAN) || schemaType.equals(STRING);
-            if (schema instanceof ArraySchema) {
-                return getTypeDescNodeForArraySchema((ArraySchema) schema);
+            if (GeneratorUtils.isaArraySchema(schema)) {
+                return getTypeDescNodeForArraySchema(schema);
             } else if (isPrimitiveType) {
                 //This returns identifier node for the types: int, float, decimal, boolean, string
                 IdentifierToken identifierToken = createIdentifierToken(
@@ -173,8 +170,8 @@ public class ServiceGenerationUtils {
             } else {
                 return Optional.empty();
             }
-        } else if (schema instanceof ComposedSchema && (((ComposedSchema) schema).getOneOf() != null)) {
-            Iterator<Schema> iterator = ((ComposedSchema) schema).getOneOf().iterator();
+        } else if (schema.getOneOf() != null) {
+            Iterator<Schema> iterator = schema.getOneOf().iterator();
             return Optional.ofNullable(getUnionNodeForOneOf(iterator));
         } else {
             return Optional.empty();
@@ -184,7 +181,7 @@ public class ServiceGenerationUtils {
     /**
      * Generate {@code TypeDescriptorNode} for ArraySchema in OAS.
      */
-    private static Optional<TypeDescriptorNode> getTypeDescNodeForArraySchema(ArraySchema schema)
+    private static Optional<TypeDescriptorNode> getTypeDescNodeForArraySchema(Schema schema)
             throws BallerinaOpenApiException {
         TypeDescriptorNode member;
         String schemaType = GeneratorUtils.getOpenAPIType(schema.getItems());

@@ -75,8 +75,6 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.ServerVariable;
@@ -103,6 +101,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -134,9 +133,11 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SLASH_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
+import static io.ballerina.openapi.core.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML_CONTENT;
+import static io.ballerina.openapi.core.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.CLOSE_CURLY_BRACE;
 import static io.ballerina.openapi.core.GeneratorConstants.CONSTRAINT;
@@ -740,10 +741,10 @@ public class GeneratorUtils {
             if (constraintExists) {
                 return true;
             }
-        } else if (value instanceof ComposedSchema) {
-            List<Schema> allOf = ((ComposedSchema) value).getAllOf();
-            List<Schema> oneOf = ((ComposedSchema) value).getOneOf();
-            List<Schema> anyOf = ((ComposedSchema) value).getAnyOf();
+        } else if (isaComposedSchema(value)) {
+            List<Schema> allOf = value.getAllOf();
+            List<Schema> oneOf = value.getOneOf();
+            List<Schema> anyOf = value.getAnyOf();
             boolean constraintExists = false;
             if (allOf != null) {
                 constraintExists = allOf.stream().anyMatch(GeneratorUtils::hasConstraints);
@@ -756,9 +757,9 @@ public class GeneratorUtils {
                 return true;
             }
 
-        } else if (value instanceof ArraySchema) {
+        } else if (isaArraySchema(value)) {
             if (!isConstraintExists(value)) {
-                return isConstraintExists(((ArraySchema) value).getItems());
+                return isConstraintExists(value.getItems());
             }
         }
         return isConstraintExists(value);
@@ -1051,5 +1052,38 @@ public class GeneratorUtils {
         } else {
             return null;
         }
+    }
+
+    public static boolean isaArraySchema(Schema schema) {
+        return getOpenAPIType(schema) != null && Objects.equals(getOpenAPIType(schema), ARRAY);
+    }
+
+    public static boolean isaMapSchema(Schema schema) {
+        return schema.getAdditionalProperties() != null;
+    }
+
+    public static boolean isaObjectSchema(Schema schema) {
+        return getOpenAPIType(schema) != null && Objects.equals(getOpenAPIType(schema), OBJECT);
+    }
+
+    public static boolean isaComposedSchema(Schema schema) {
+        return schema.getAnyOf() != null || schema.getOneOf() != null ||
+                schema.getAllOf() != null;
+    }
+
+    public static boolean isaStringSchema(Schema<?> schema) {
+        return getOpenAPIType(schema) != null && Objects.equals(getOpenAPIType(schema), STRING);
+    }
+
+    public static boolean isaBooleanSchema(Schema<?> schema) {
+        return getOpenAPIType(schema) != null && Objects.equals(getOpenAPIType(schema), BOOLEAN);
+    }
+
+    public static boolean isaIntegerSchema(Schema<?> fieldSchema) {
+        return Objects.equals(GeneratorUtils.getOpenAPIType(fieldSchema), INTEGER);
+    }
+
+    public static boolean isaNumberSchema(Schema<?> fieldSchema) {
+        return Objects.equals(GeneratorUtils.getOpenAPIType(fieldSchema), NUMBER);
     }
 }
