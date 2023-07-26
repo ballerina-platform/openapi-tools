@@ -307,6 +307,26 @@ public class ResponseTests {
         compareWithGeneratedFile(ballerinaFilePath, "response/service_config_with_cors.yaml");
     }
 
+    @Test(description = "When the service has `error` and `InternalServerError`")
+    public void testForResponseHasSameErrorStatusCode() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/service_with_error_and_internal_server_error.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "response/service_with_error_and_internal_server_error.yaml");
+    }
+
+    @Test(description = "When the service has same error response code")
+    public void testForResponseHasSameStatusCode() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/service_with_same_status_codes.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "response/service_with_same_status_code.yaml");
+    }
+
     @Test(description = "When the service has config without mediaType attribute, and with slash path")
     public void testResponseHasServiceConfigWithCorsWithSlash() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/service_config_with_cors_with_slash.bal");

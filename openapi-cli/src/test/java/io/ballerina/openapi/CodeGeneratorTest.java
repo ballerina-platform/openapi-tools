@@ -666,12 +666,17 @@ public class CodeGeneratorTest {
         Assert.assertEquals(GeneratorUtils.escapeIdentifier("abc"), "abc");
         Assert.assertEquals(GeneratorUtils.escapeIdentifier("string"), "'string");
         Assert.assertEquals(GeneratorUtils.escapeIdentifier("int"), "'int");
-        Assert.assertEquals(GeneratorUtils.escapeIdentifier("io.foo.bar"), "'io\\.foo\\.bar");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("io.foo.bar"), "io\\.foo\\.bar");
         Assert.assertEquals(GeneratorUtils.escapeIdentifier("getV1CoreVersion"), "getV1CoreVersion");
-        Assert.assertEquals(GeneratorUtils.escapeIdentifier("org-invitation"), "'org\\-invitation");
-        Assert.assertEquals(GeneratorUtils.escapeIdentifier("int?"), "'int\\?");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("org-invitation"), "org\\-invitation");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("int?"), "int\\?");
         Assert.assertEquals(GeneratorUtils.escapeIdentifier("error"), "'error");
-        Assert.assertEquals(GeneratorUtils.escapeIdentifier("foo_bar$_baz"), "'foo_bar\\$_baz");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("foo_bar$_baz"), "foo_bar\\$_baz");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("foo_bar_baz"), "foo_bar_baz");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("foo'baz"), "foo\\'baz");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("200"), "'200");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("2023-06-28"), "'2023\\-06\\-28");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("3h"), "'3h");
     }
 
     @Test

@@ -7,6 +7,6 @@ service / on ep0 {
     #
     # + payload - Content of the request
     # + return - Successful operation
-    resource function post 'handle\-request(@http:Payload HandleRequest_RequestBody payload) returns OkHandleResponse_RequestBody {
+    resource function post handle\-request(@http:Payload HandleRequest_RequestBody payload) returns OkHandleResponse_RequestBody {
     }
 }
