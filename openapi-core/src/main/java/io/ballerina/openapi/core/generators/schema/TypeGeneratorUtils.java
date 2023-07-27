@@ -381,6 +381,12 @@ public class TypeGeneratorUtils {
                     (isInt ? numberSchema.getMinimum().intValue() : value);
             fields.add(fieldRef);
         }
+        if (numberSchema.getMinimum() == null && numberSchema.getExclusiveMinimumValue() != null) {
+            String value = numberSchema.getExclusiveMinimumValue().toString();
+            String fieldRef = GeneratorConstants.EXCLUSIVE_MIN + GeneratorConstants.COLON +
+                    (isInt ? numberSchema.getExclusiveMinimumValue().intValue() : value);
+            fields.add(fieldRef);
+        }
         if (numberSchema.getExclusiveMaximum() != null &&
                 numberSchema.getExclusiveMaximum() && numberSchema.getMaximum() != null) {
             String value = numberSchema.getMaximum().toString();
@@ -388,6 +394,13 @@ public class TypeGeneratorUtils {
                     (isInt ? numberSchema.getMaximum().intValue() : value);
             fields.add(fieldRef);
         }
+        if (numberSchema.getMaximum() == null && numberSchema.getExclusiveMaximumValue() != null) {
+            String value = numberSchema.getExclusiveMaximumValue().toString();
+            String fieldRef = GeneratorConstants.EXCLUSIVE_MAX + GeneratorConstants.COLON +
+                    (isInt ? numberSchema.getExclusiveMaximumValue().intValue() : value);
+            fields.add(fieldRef);
+        }
+
         //TODO: This will be enable once constraint package gives this support.
 //        if (numberSchema.getMultipleOf() != null) {
 //            String value = numberSchema.getMultipleOf().toString();
