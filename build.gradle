@@ -181,7 +181,7 @@ task codeCoverageReport(type: JacocoReport) {
     }
 }
 
-sonarqube {
+sonar {
     properties {
         property "sonar.projectKey", "ballerina-platform_openapi-tools"
         property "sonar.organization", "ballerina-platform"
