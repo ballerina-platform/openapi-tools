@@ -161,6 +161,9 @@ tasks.withType(JavaCompile) {
 }
 task codeCoverageReport(type: JacocoReport) {
     dependsOn = subprojects.test
+    dependsOn(":test")
+    dependsOn(":openapi-extension-tests:jacocoTestReport")
+    dependsOn(":openapi-integration-tests:jacocoTestReport")
 
     executionData fileTree(project.rootDir.absolutePath).include("**/build/coverage-reports/*.exec")
 
