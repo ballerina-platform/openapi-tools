@@ -1045,13 +1045,17 @@ public class GeneratorUtils {
     }
 
     public static String getOpenAPIType(Schema<?> schema) {
-        if (schema.getTypes() != null && schema.getTypes().iterator().next() != null) {
-            return schema.getTypes().iterator().next();
+        if (schema.getTypes() != null && !schema.getTypes().isEmpty()) {
+            for (String type : schema.getTypes()) {
+                // this returns the first non-null type in the list
+                if (!type.equals("null")) {
+                    return type;
+                }
+            }
         } else if (schema.getType() != null) {
             return schema.getType();
-        } else {
-            return null;
         }
+        return null;
     }
 
     public static boolean isaArraySchema(Schema schema) {

@@ -146,6 +146,8 @@ public class TypeGeneratorUtils {
             if (schema.getNullable()) {
                 nillableType = createOptionalTypeDescriptorNode(originalTypeDesc, createToken(QUESTION_MARK_TOKEN));
             }
+        } else if (schema.getTypes() != null && schema.getTypes().contains("null")) {
+            nillableType = createOptionalTypeDescriptorNode(originalTypeDesc, createToken(QUESTION_MARK_TOKEN));
         } else if (nullable) {
             nillableType = createOptionalTypeDescriptorNode(originalTypeDesc, createToken(QUESTION_MARK_TOKEN));
         }
