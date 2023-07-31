@@ -95,7 +95,7 @@ public class TestUtil {
     }
 
     /**
-     * Execute ballerina openapi command to test warnings in the output stream
+     * Execute ballerina openapi command to test warnings in the output stream.
      */
     public static InputStream executeOpenAPIToTestWarnings(String distributionName, Path sourceDirectory,
                                                            List<String> args) throws IOException {
