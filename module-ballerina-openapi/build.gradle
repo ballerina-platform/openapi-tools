@@ -48,7 +48,7 @@ jar {
 
 def packageName = "openapi"
 def packageOrg = "ballerina"
-def platform = "java11"
+def platform = "java17"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def ballerinaCompileConfigFile = new File("$project.projectDir/CompilerPlugin.toml")
@@ -106,6 +106,7 @@ task unpackStdLibs() {
 task copyStdlibs(type: Copy) {
     def ballerinaDist = "build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
     into ballerinaDist
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     /* Standard Libraries */
     configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
@@ -177,6 +178,7 @@ task initializeVariables {
 
 task ballerinaBuild {
     inputs.dir file(project.projectDir)
+    doNotTrackState("build needs to run every time")
     doLast {
         // Build and populate caches
         exec {
@@ -337,6 +339,12 @@ ballerinaBuild.dependsOn ":${packageName}-extension:build"
 ballerinaBuild.dependsOn ":${packageName}-build-extension:build"
 ballerinaBuild.dependsOn updateCompilerTomlFile
 ballerinaBuild.dependsOn initializeVariables
+ballerinaBuild.dependsOn generatePomFileForMavenJavaPublication
+ballerinaBuild.dependsOn compileJava
+ballerinaBuild.dependsOn compileTestJava
+ballerinaBuild.dependsOn checkstyleMain
+ballerinaBuild.dependsOn checkstyleTest
+ballerinaBuild.dependsOn jar
 ballerinaBuild.finalizedBy revertTomlFile
 build.dependsOn ballerinaBuild
 

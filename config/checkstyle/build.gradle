@@ -19,10 +19,10 @@ plugins {
     id "de.undercouch.download"
 }
 
-task downloadMultipleFiles(type: Download) {
+task downloadCheckstyleRuleFiles(type: Download) {
     src([
-            'https://raw.githubusercontent.com/wso2/code-quality-tools/v1.3/checkstyle/checkstyle.xml',
-            'https://raw.githubusercontent.com/wso2/code-quality-tools/v1.3/checkstyle/suppressions.xml'
+            'https://raw.githubusercontent.com/wso2/code-quality-tools/v1.4/checkstyle/jdk-17/checkstyle.xml',
+            'https://raw.githubusercontent.com/wso2/code-quality-tools/v1.4/checkstyle/jdk-17/suppressions.xml'
     ])
     overwrite false
     onlyIfNewer true
@@ -37,10 +37,10 @@ clean {
     enabled = false
 }
 
-artifacts.add('default', file("${rootDir}/config/checkstyle/checkstyle.xml")) {
-    builtBy('downloadMultipleFiles')
+artifacts.add('default', file("$project.buildDir/checkstyle.xml")) {
+    builtBy('downloadCheckstyleRuleFiles')
 }
 
-artifacts.add('default', file("${rootDir}/config/checkstyle/suppressions.xml")) {
-    builtBy('downloadMultipleFiles')
+artifacts.add('default', file("$project.buildDir/suppressions.xml")) {
+    builtBy('downloadCheckstyleRuleFiles')
 }
