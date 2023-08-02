@@ -153,6 +153,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.INTEGER;
 import static io.ballerina.openapi.core.GeneratorConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.core.GeneratorConstants.LINE_SEPARATOR;
 import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
+import static io.ballerina.openapi.core.GeneratorConstants.NULL;
 import static io.ballerina.openapi.core.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.GeneratorConstants.OPEN_CURLY_BRACE;
@@ -1048,7 +1049,7 @@ public class GeneratorUtils {
         if (schema.getTypes() != null && !schema.getTypes().isEmpty()) {
             for (String type : schema.getTypes()) {
                 // this returns the first non-null type in the list
-                if (!type.equals("null")) {
+                if (!type.equals(NULL)) {
                     return type;
                 }
             }
