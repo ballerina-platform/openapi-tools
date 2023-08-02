@@ -1,0 +1,95 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /fhir/r4/Patient/{id}:
+    get:
+      operationId: getFhirR4PatientId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/fhir+json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+            application/fhir+xml:
+              schema:
+                $ref: '#/components/schemas/Patient'
+components:
+  schemas:
+    Extension:
+      $ref: '#/components/schemas/ExtensionExtension'
+    Identifier:
+      allOf:
+        - $ref: '#/components/schemas/Element'
+        - type: object
+          properties:
+            value:
+              type: string
+            assigner:
+              $ref: '#/components/schemas/Reference'
+            id:
+              type: string
+            element:
+              type: integer
+              format: int64
+    Reference:
+      allOf:
+        - $ref: '#/components/schemas/Element'
+        - type: object
+          properties:
+            reference:
+              type: string
+            type:
+              type: string
+            identifier:
+              $ref: '#/components/schemas/Identifier'
+            display:
+              type: string
+            id:
+              type: string
+            element:
+              type: integer
+              format: int64
+    Element:
+      type: object
+      properties:
+        id:
+          type: string
+        element:
+          type: integer
+          format: int64
+    ExtensionExtension:
+      allOf:
+        - $ref: '#/components/schemas/Element'
+        - type: object
+          properties:
+            extension:
+              type: array
+              items:
+                $ref: '#/components/schemas/Extension'
+    Patient:
+      type: object
+      properties:
+        ext:
+          type: array
+          items:
+            $ref: '#/components/schemas/Extension'
+        id:
+          type: string
+        ref:
+          $ref: '#/components/schemas/Reference'

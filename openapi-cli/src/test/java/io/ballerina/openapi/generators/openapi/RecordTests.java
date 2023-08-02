@@ -101,6 +101,25 @@ public class RecordTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/with_read_only_keyword.yaml");
     }
 
+
+    @Test(description = "Test for records have cyclic dependencies and include same typeInclusion record")
+    public void testRecordsWithCyclicDependenciesIncludingSameTypeInclusion() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/cyclic_record_with_typeInclusion.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/cyclic_record_with_typeInclusion.yaml");
+    }
+
+    @Test(description = "Test for define type with records have interdependencies")
+    public void testInterdependenceRecordWithTypeRef() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/typeref_records_with_interdependency.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/typeref_records_with_interdependency.yaml");
+    }
+
+    @Test(description = "Test for union type with records have interdependencies")
+    public void testInterdependenceRecordWithUnionType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/union_records_with_interdependency.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/union_records_with_interdependency.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
