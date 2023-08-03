@@ -53,11 +53,33 @@ public class EnumTypeTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_array_type.yaml");
     }
 
-    @Test(description = "When the record field has reference to enum with constant value")
+    @Test(description = "Test for the record field has reference to enum with constant value")
     public void testEnumWithConstantValue() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_with_constant_value.bal");
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_with_value.yaml");
+    }
+
+    @Test(description = "Test for query and path parameters having references to enums with constant value")
+    public void testEnumsWithinQueryParameters() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_query.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_query.yaml");
+    }
+
+    @Test(description = "Test for header parameters having references to enums with constant values")
+    public void testEnumsWithinHeaderParameters() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_header.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_header.yaml");
+    }
+
+    //TODO:Enable this test after fixing issue : https://github.com/ballerina-platform/openapi-tools/issues/1472
+    @Test(description = "Test for enum that defined as ballerina types", enabled = false)
+    public void testEnumsDefinedAsBalTypes() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("data_type/bal_type_enum.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/bal_type_enum.yaml");
     }
 
     @AfterMethod
