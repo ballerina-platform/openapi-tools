@@ -57,13 +57,9 @@ public class PrimitiveTypeGenerator extends TypeGenerator {
      */
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
-        String typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(schema.getType().trim());
+        String typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(schema);
         // TODO: Need to the format of other primitive types too
-        if (schema.getType().equals(GeneratorConstants.NUMBER)) {
-            if (schema.getFormat() != null) {
-                typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(schema.getFormat().trim());
-            }
-        } else if (schema.getType().equals(GeneratorConstants.STRING) && schema.getFormat() != null &&
+        if (schema.getType().equals(GeneratorConstants.STRING) && schema.getFormat() != null &&
                 schema.getFormat().equals(GeneratorConstants.BINARY)) {
             typeDescriptorName = "record {byte[] fileContent; string fileName;}";
         }

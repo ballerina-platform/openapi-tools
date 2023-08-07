@@ -24,7 +24,7 @@
             <class name="io.ballerina.openapi.extension.build.BuildExtensionTests"/>
             <class name="io.ballerina.openapi.cmd.BallerinaToOpenAPITests"/>
             <class name="io.ballerina.openapi.extension.build.ValidatorTests"/>
-            <class name="io.ballerina.openapi.cmd.ServiceGeneratorReturnTypeTests"/>
+            <class name="io.ballerina.openapi.cmd.ServiceGenerationTests"/>
             <class name="io.ballerina.openapi.cmd.ClientGenerationTests"/>
             <class name="io.ballerina.openapi.cmd.SchemaGenerationTests"/>
 <!--            <class name="io.ballerina.openapi.idl.client.IDLClientGenPluginTests"/>-->
