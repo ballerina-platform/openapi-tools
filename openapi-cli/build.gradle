@@ -59,7 +59,7 @@ dependencies {
 
 task copyDependencies(type: Copy) {
     from configurations.runtimeClasspath
-    into 'libs'
+    into '../tool-openapi/resources/libs'
 }
 
 def bDistribution = file("$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}")

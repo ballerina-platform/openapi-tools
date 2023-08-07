@@ -119,7 +119,7 @@ public class TestUtil {
      */
     public static boolean executeOpenAPI(String distributionName, Path sourceDirectory, List<String> args) throws
             IOException, InterruptedException {
-        args.add(0, "openapi");
+        args.add(0, "test_openapi");
         Process process = getProcessBuilderResults(distributionName, sourceDirectory, args);
         int exitCode = process.waitFor();
         logOutput(process.getInputStream());

@@ -1,0 +1,93 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+apply from: "$rootDir/gradle/javaProject.gradle"
+apply plugin: "java"
+
+description = "Publish OpenAPI CLI Tools to Central"
+
+configurations.all {
+    resolutionStrategy.preferProjectModules()
+}
+
+configurations {
+    balTools
+}
+
+def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-cli-${project.version}.jar")
+def distributionPath =  project.buildDir.absolutePath + "/extracted-distribution/jballerina-tools-${ballerinaLangVersion}"
+def distributionBinPath = distributionPath + "/bin"
+
+def needPublishToCentral = false
+def needPublishToLocalCentral = false
+
+task initializeVariables {
+    if (project.hasProperty("publishToLocalCentral") && (project.findProperty("publishToLocalCentral") == "true")) {
+        needPublishToLocalCentral = true
+    }
+    if (project.hasProperty("publishToCentral") && (project.findProperty("publishToCentral") == "true")) {
+        needPublishToCentral = true
+    }
+}
+
+
+task copyExtractedDistribution(type: Copy) {
+    dependsOn project(":openapi-cli").copyStdlibs
+    from "${project.rootDir}/openapi-cli/build/extracted-distribution"
+    into "${project.buildDir.absolutePath}/extracted-distribution"
+}
+
+task copyCLIJar(type: Copy) {
+    dependsOn project(":openapi-cli").build
+    from targetOpenApiCliJar
+    into "${project.projectDir}/resources"
+}
+
+task publishToCentral {
+    dependsOn(copyExtractedDistribution)
+    dependsOn(copyCLIJar)
+    doLast {
+        exec {
+            workingDir "${project.projectDir}"
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "${distributionBinPath}/bal.bat pack && exit  %%ERRORLEVEL%%"
+            } else {
+                commandLine 'sh', '-c', "${distributionBinPath}/bal pack"
+            }
+        }
+        if (needPublishToCentral) {
+            if (project.version.endsWith('-SNAPSHOT') ||
+                    project.version.matches(project.ext.timestampedVersionRegex)) {
+                return
+            }
+            if (ballerinaCentralAccessToken != null) {
+                println("Publishing to the ballerina central..")
+                exec {
+                    workingDir project.projectDir
+//                    environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+                    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                        commandLine 'cmd', '/c', "$distributionBinPath/bal.bat push && exit %%ERRORLEVEL%%"
+                    } else {
+                        commandLine 'sh', '-c', "$distributionBinPath/bal push"
+                    }
+                }
+            } else {
+                throw new InvalidUserDataException("Central Access Token is not present")
+            }
+        } else if (needPublishToLocalCentral) {
+            println("Publishing to the ballerina local central repository..")
+            exec {
+                workingDir project.projectDir
+//                environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                    commandLine 'cmd', '/c', "$distributionBinPath/bal.bat push && exit %%ERRORLEVEL%% --repository=local"
+                } else {
+                    commandLine 'sh', '-c', "$distributionBinPath/bal push --repository=local"
+                }
+            }
+        }
+    }
+}
+
+//publishToCentral.dependsOn ":openapi-cli:build"
+
+// Add any additional tasks or configurations you need

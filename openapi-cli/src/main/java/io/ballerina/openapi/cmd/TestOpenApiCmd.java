@@ -18,6 +18,7 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
+import io.ballerina.cli.launcher.LauncherUtils;
 import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
@@ -140,7 +141,7 @@ public class TestOpenApiCmd implements BLauncherCmd {
     public void execute() {
 
         if (helpFlag) {
-            String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(getName());
+            String commandUsageInfo = getCommandUsageInfo(getName());
             outStream.println(commandUsageInfo);
             return;
         }
@@ -212,7 +213,8 @@ public class TestOpenApiCmd implements BLauncherCmd {
                 exitError(this.exitWhenFinish);
             }
         } else {
-            String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(getName());
+//            String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(getName());
+            String commandUsageInfo = getCommandUsageInfo(getName());
             outStream.println(commandUsageInfo);
             exitError(this.exitWhenFinish);
             return;
@@ -221,6 +223,56 @@ public class TestOpenApiCmd implements BLauncherCmd {
         if (this.exitWhenFinish) {
             Runtime.getRuntime().exit(0);
         }
+    }
+
+    private static String getCommandUsageInfo(String commandName) {
+        String fileName = "ballerina-openapi.help";
+        try {
+            return readFileAsString(fileName);
+        } catch (IOException var3) {
+            throw LauncherUtils.createUsageExceptionWithHelp(
+                    "usage info not available for command: " + commandName);
+        }
+    }
+    private static String readFileAsString(String path) throws IOException {
+        Class<?> openApiCmdClass = TestOpenApiCmd.class;  // Replace `YourClass` with the actual class name
+        ClassLoader classLoader = openApiCmdClass.getClassLoader();
+        InputStream is = classLoader.getResourceAsStream(path);
+        InputStreamReader inputStreamREader = null;
+        BufferedReader br = null;
+        StringBuilder sb = new StringBuilder();
+
+        try {
+            inputStreamREader = new InputStreamReader(is, StandardCharsets.UTF_8);
+            br = new BufferedReader(inputStreamREader);
+            String content = br.readLine();
+            if (content == null) {
+                String var6 = sb.toString();
+                return var6;
+            }
+
+            sb.append(content);
+
+            while ((content = br.readLine()) != null) {
+                sb.append('\n').append(content);
+            }
+        } finally {
+            if (inputStreamREader != null) {
+                try {
+                    inputStreamREader.close();
+                } catch (IOException var18) {
+                }
+            }
+
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException var17) {
+                }
+            }
+
+        }
+        return sb.toString();
     }
 
     /**
