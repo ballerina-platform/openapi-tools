@@ -72,7 +72,7 @@ public class OpenAPIComponentMapper {
 
     private final Components components;
     private final List<OpenAPIConverterDiagnostic> diagnostics;
-    private final List<String> visitedTypeDefinitionNames = new ArrayList<>();
+    private final HashSet<String> visitedTypeDefinitionNames = new HashSet<>();
 
     public OpenAPIComponentMapper(Components components) {
         this.components = components;
@@ -117,7 +117,10 @@ public class OpenAPIComponentMapper {
                         type.getName().orElseThrow().trim())));
                 components.setSchemas(schema);
                 TypeReferenceTypeSymbol referredType = (TypeReferenceTypeSymbol) type;
-                createComponentSchema(schema, referredType);
+                if (!visitedTypeDefinitionNames.contains(componentName)) {
+                    visitedTypeDefinitionNames.add(componentName);
+                    createComponentSchema(schema, referredType);
+                }
                 break;
             case STRING:
                 schema.put(componentName, new StringSchema().description(typeDoc));
@@ -147,9 +150,15 @@ public class OpenAPIComponentMapper {
                 components.setSchemas(schema);
                 break;
             case UNION:
-                Schema unionSchema = handleUnionType((UnionTypeSymbol) type, new Schema<>(), componentName);
-                schema.put(componentName, unionSchema.description(typeDoc));
-                components.setSchemas(schema);
+                if (!visitedTypeDefinitionNames.contains(componentName)) {
+                    visitedTypeDefinitionNames.add(componentName);
+                    Schema unionSchema = handleUnionType((UnionTypeSymbol) type, new Schema<>(), componentName);
+                    schema.put(componentName, unionSchema.description(typeDoc));
+                    if (components.getSchemas() != null) {
+                        schema.putAll(components.getSchemas());
+                    }
+                    components.setSchemas(schema);
+                }
                 break;
             case MAP:
                 MapTypeSymbol mapTypeSymbol = (MapTypeSymbol) type;
@@ -210,11 +219,10 @@ public class OpenAPIComponentMapper {
         visitedTypeDefinitionNames.add(componentName);
         List<TypeSymbol> typeInclusions = recordTypeSymbol.typeInclusions();
         Map<String, RecordFieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
-        HashSet<String> unionKeys = new HashSet<>(rfields.keySet());
         if (typeInclusions.isEmpty()) {
             generateObjectSchemaFromRecordFields(schema, componentName, rfields, apiDocs);
         } else {
-            mapTypeInclusionToAllOfSchema(schema, componentName, typeInclusions, rfields, unionKeys, apiDocs);
+            mapTypeInclusionToAllOfSchema(schema, componentName, recordTypeSymbol, apiDocs);
         }
     }
 
@@ -222,7 +230,6 @@ public class OpenAPIComponentMapper {
      * Creating API docs related to given record fields.
      */
     private Map<String, String> getRecordFieldsAPIDocsMap(TypeReferenceTypeSymbol typeSymbol, String componentName) {
-
         Map<String, String> apiDocs = new LinkedHashMap<>();
         Symbol recordSymbol = typeSymbol.definition();
         Optional<Documentation> documentation = ((Documentable) recordSymbol).documentation();
@@ -251,10 +258,12 @@ public class OpenAPIComponentMapper {
     /**
      * This function is to map the ballerina typeInclusion to OAS allOf composedSchema.
      */
-    private void mapTypeInclusionToAllOfSchema(Map<String, Schema> schema,
-                                               String componentName, List<TypeSymbol> typeInclusions, Map<String,
-            RecordFieldSymbol> rfields, HashSet<String> unionKeys, Map<String, String> apiDocs) {
+    private void mapTypeInclusionToAllOfSchema(Map<String, Schema> schema, String componentName,
+                                               RecordTypeSymbol recordTypeSymbol, Map<String, String> apiDocs) {
 
+        List<TypeSymbol> typeInclusions = recordTypeSymbol.typeInclusions();
+        Map<String, RecordFieldSymbol> recordFields = recordTypeSymbol.fieldDescriptors();
+        HashSet<String> recordFieldNames = new HashSet<>(recordFields.keySet());
         // Map to allOF need to check the status code inclusion there
         ComposedSchema allOfSchema = new ComposedSchema();
         // Set schema
@@ -266,11 +275,12 @@ public class OpenAPIComponentMapper {
             allOfSchemaList.add(referenceSchema);
             if (typeInclusion.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
                 TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) typeInclusion;
-                if (typeRecord.typeDescriptor() instanceof RecordTypeSymbol) {
+                if (typeRecord.typeDescriptor() instanceof RecordTypeSymbol &&
+                        !isSameRecord(typeInclusionName, typeRecord)) {
                     RecordTypeSymbol typeInclusionRecord = (RecordTypeSymbol) typeRecord.typeDescriptor();
                     Map<String, RecordFieldSymbol> tInFields = typeInclusionRecord.fieldDescriptors();
-                    unionKeys.addAll(tInFields.keySet());
-                    unionKeys.removeAll(tInFields.keySet());
+                    recordFieldNames.addAll(tInFields.keySet());
+                    recordFieldNames.removeAll(tInFields.keySet());
                     generateObjectSchemaFromRecordFields(schema, typeInclusionName, tInFields, apiDocs);
                     // Update the schema value
                     schema = this.components.getSchemas();
@@ -278,7 +288,7 @@ public class OpenAPIComponentMapper {
             }
         }
         Map<String, RecordFieldSymbol> filteredField = new LinkedHashMap<>();
-        rfields.forEach((key1, value) -> unionKeys.stream().filter(key ->
+        recordFields.forEach((key1, value) -> recordFieldNames.stream().filter(key ->
                 ConverterCommonUtils.unescapeIdentifier(key1.trim()).
                         equals(ConverterCommonUtils.unescapeIdentifier(key))).forEach(key ->
                 filteredField.put(ConverterCommonUtils.unescapeIdentifier(key1), value)));
@@ -288,6 +298,9 @@ public class OpenAPIComponentMapper {
         if (schema != null && !schema.containsKey(componentName)) {
             // Set properties for the schema
             schema.put(componentName, allOfSchema);
+            if (this.components.getSchemas() != null) {
+                schema.putAll(this.components.getSchemas());
+            }
             this.components.setSchemas(schema);
         } else if (schema == null) {
             schema = new LinkedHashMap<>();
@@ -318,8 +331,9 @@ public class OpenAPIComponentMapper {
 
             if (fieldTypeKind == TypeDescKind.TYPE_REFERENCE) {
                 TypeReferenceTypeSymbol typeReference = (TypeReferenceTypeSymbol) field.getValue().typeDescriptor();
-                property = handleTypeReference(schema, typeReference, property, isSameRecord(componentName,
-                        typeReference));
+                property = handleTypeReference(schema, typeReference, property,
+                        isSameRecord(ConverterCommonUtils.unescapeIdentifier(
+                                        typeReference.definition().getName().get()), typeReference));
                 schema = components.getSchemas();
             } else if (fieldTypeKind == TypeDescKind.UNION) {
                 property = handleUnionType((UnionTypeSymbol) field.getValue().typeDescriptor(), property,
@@ -347,12 +361,16 @@ public class OpenAPIComponentMapper {
         if (componentName != null && schema != null && !schema.containsKey(componentName)) {
             // Set properties for the schema
             schema.put(componentName, componentSchema);
+            if (this.components.getSchemas() != null) {
+                schema.putAll(this.components.getSchemas());
+            }
             this.components.setSchemas(schema);
         } else if (schema == null && componentName != null) {
             schema = new LinkedHashMap<>();
             schema.put(componentName, componentSchema);
             this.components.setSchemas(schema);
         }
+        visitedTypeDefinitionNames.add(componentName);
         return componentSchema;
     }
 
@@ -415,10 +433,10 @@ public class OpenAPIComponentMapper {
                 }
                 property = ConverterCommonUtils.getOpenApiSchema(union.typeKind().getName().trim());
                 TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) union;
-                property = handleTypeReference(this.components.getSchemas(), typeReferenceTypeSymbol, property,
+                property = handleTypeReference(components.getSchemas(), typeReferenceTypeSymbol, property,
                         isSameRecord(parentComponentName, typeReferenceTypeSymbol));
+                visitedTypeDefinitionNames.add(typeReferenceTypeSymbol.getName().get());
                 properties.add(property);
-                // TODO: uncomment after fixing ballerina lang union type handling issue
             } else if (union.typeKind() == TypeDescKind.UNION) {
                 property = handleUnionType((UnionTypeSymbol) union, property, parentComponentName);
                 properties.add(property);
@@ -431,9 +449,10 @@ public class OpenAPIComponentMapper {
                 Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(typeDescKind.getName());
                 property = new ObjectSchema().additionalProperties(openApiSchema);
                 properties.add(property);
-                Map<String, Schema> schemas = components.getSchemas();
-                if (schemas != null) {
+                if (components.getSchemas() != null) {
+                    Map<String, Schema> schemas = components.getSchemas();
                     schemas.put(parentComponentName, property);
+                    components.setSchemas(schemas);
                 } else {
                     Map<String, Schema> schema = new HashMap<>();
                     schema.put(parentComponentName, property);
@@ -444,7 +463,6 @@ public class OpenAPIComponentMapper {
                 properties.add(property);
             }
         }
-
         property = generateOneOfSchema(property, properties);
         if (nullable) {
             property.setNullable(true);
@@ -498,6 +516,7 @@ public class OpenAPIComponentMapper {
      */
     private ArraySchema mapArrayToArraySchema(Map<String, Schema> schema, TypeSymbol symbol,
                                               String componentName) {
+        visitedTypeDefinitionNames.add(componentName);
         ArraySchema property = new ArraySchema();
         int arrayDimensions = 0;
         while (symbol instanceof ArrayTypeSymbol) {
@@ -578,17 +597,17 @@ public class OpenAPIComponentMapper {
     /**
      * This util function is to handle the type reference symbol is record type or enum type.
      */
-    private Schema getSchemaForTypeReferenceSymbol(TypeSymbol arrayType, Schema symbolProperty, String componentName,
-                                                   Map<String, Schema> schema) {
+    private Schema getSchemaForTypeReferenceSymbol(TypeSymbol referenceType, Schema symbolProperty,
+                                                   String componentName, Map<String, Schema> schema) {
 
-        if (((TypeReferenceTypeSymbol) arrayType).definition().kind() == SymbolKind.ENUM) {
-            TypeReferenceTypeSymbol typeRefEnum = (TypeReferenceTypeSymbol) arrayType;
+        if (((TypeReferenceTypeSymbol) referenceType).definition().kind() == SymbolKind.ENUM) {
+            TypeReferenceTypeSymbol typeRefEnum = (TypeReferenceTypeSymbol) referenceType;
             EnumSymbol enumSymbol = (EnumSymbol) typeRefEnum.definition();
             symbolProperty = mapEnumValues(enumSymbol);
         } else {
             symbolProperty.set$ref(ConverterCommonUtils.unescapeIdentifier(
-                    arrayType.getName().orElseThrow().trim()));
-            TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) arrayType;
+                    referenceType.getName().orElseThrow().trim()));
+            TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) referenceType;
             if (!isSameRecord(componentName, typeRecord)) {
                 createComponentSchema(schema, typeRecord);
             }
@@ -608,5 +627,4 @@ public class OpenAPIComponentMapper {
         }
         return arrayProperty;
     }
-
 }
