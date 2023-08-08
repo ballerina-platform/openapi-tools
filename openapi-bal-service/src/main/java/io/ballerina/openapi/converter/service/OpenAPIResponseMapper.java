@@ -606,10 +606,10 @@ public class OpenAPIResponseMapper {
         String statusCode = httpMethod.equals(POST) ? HTTP_201 : HTTP_200;
         String description = httpMethod.equals(POST) ? HTTP_201_DESCRIPTION : HTTP_200_DESCRIPTION;
 
-        Map<String, Schema> schemas02 = components.getSchemas();
+        Map<String, Schema> schemas = components.getSchemas();
         if (array.memberTypeDesc().kind() == SIMPLE_NAME_REFERENCE) {
             handleReferenceResponse(operationAdaptor, (SimpleNameReferenceNode) array.memberTypeDesc(),
-                    schemas02, apiResponses, customMediaPrefix, headers);
+                    schemas, apiResponses, customMediaPrefix, headers);
         } else if (array.memberTypeDesc().kind() == QUALIFIED_NAME_REFERENCE) {
             Optional<ApiResponses> optionalAPIResponses =
                     handleQualifiedNameType(new ApiResponses(), customMediaPrefix, headers, apiResponse,
@@ -621,11 +621,11 @@ public class OpenAPIResponseMapper {
             }
         } else {
             ArraySchema arraySchema = new ArraySchema();
-            String type02 = array.memberTypeDesc().kind().toString().trim().split("_")[0].
+            String type = array.memberTypeDesc().kind().toString().trim().split("_")[0].
                     toLowerCase(Locale.ENGLISH);
-            type02 = type02.equals(BYTE) ? BYTE_ARRAY : type02;
-            Schema<?> openApiSchema = ConverterCommonUtils.getOpenApiSchema(type02);
-            Optional<String> mimeType = convertBallerinaMIMEToOASMIMETypes(type02, customMediaPrefix);
+            type = type.equals(BYTE) ? BYTE_ARRAY : type;
+            Schema<?> openApiSchema = ConverterCommonUtils.getOpenApiSchema(type);
+            Optional<String> mimeType = convertBallerinaMIMEToOASMIMETypes(type, customMediaPrefix);
             if (mimeType.isEmpty()) {
                 return Optional.empty();
             }

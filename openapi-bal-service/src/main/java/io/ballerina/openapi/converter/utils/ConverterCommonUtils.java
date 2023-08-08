@@ -124,7 +124,7 @@ public class ConverterCommonUtils {
             case Constants.BYTE_ARRAY:
             case Constants.OCTET_STREAM:
                 schema = new StringSchema();
-                schema.setFormat("uuid");
+                schema.setFormat("byte");
                 break;
             case Constants.NUMBER:
             case Constants.DECIMAL:
@@ -179,7 +179,7 @@ public class ConverterCommonUtils {
                 break;
             case BYTE_TYPE_DESC:
                 schema = new StringSchema();
-                schema.setFormat("uuid");
+                schema.setFormat("byte");
                 break;
             case DECIMAL_TYPE_DESC:
                 schema = new NumberSchema();

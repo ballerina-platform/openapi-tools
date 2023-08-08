@@ -25,10 +25,8 @@ paths:
           content:
             application/octet-stream:
               schema:
-                type: array
-                items:
-                  type: string
-                  format: uuid
+                type: string
+                format: byte
         "500":
           description: Internal server error
           content:
