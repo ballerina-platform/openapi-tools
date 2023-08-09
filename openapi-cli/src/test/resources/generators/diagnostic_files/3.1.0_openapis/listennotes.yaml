@@ -141,7 +141,7 @@ paths:
           $ref: "#/components/responses/NotFound"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch a list of best podcasts by genre
       tags:
@@ -189,7 +189,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch curated lists of podcasts
       tags:
@@ -235,7 +235,7 @@ paths:
           $ref: "#/components/responses/NotFound"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch a curated list of podcasts by id
       tags:
@@ -273,7 +273,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Batch fetch basic meta data for episodes
       tags:
@@ -327,7 +327,7 @@ paths:
           $ref: "#/components/responses/NotFound"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch detailed meta data for an episode by id
       tags:
@@ -370,7 +370,7 @@ paths:
           $ref: "#/components/responses/NotFound"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch recommendations for an episode
       tags:
@@ -420,7 +420,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch a list of podcast genres
       tags:
@@ -451,7 +451,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch a random podcast episode
       tags:
@@ -483,7 +483,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch a list of supported languages for podcasts
       tags:
@@ -547,7 +547,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch a list of your playlists.
       tags:
@@ -647,7 +647,7 @@ paths:
           $ref: "#/components/responses/NotFound"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch a playlist's info and items (i.e., episodes or podcasts).
       tags:
@@ -694,7 +694,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Batch fetch basic meta data for podcasts
       tags:
@@ -753,7 +753,7 @@ paths:
           $ref: "#/components/responses/NotFound"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch podcasts by a publisher's domain name
       tags:
@@ -793,7 +793,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Submit a podcast to Listen Notes database
       tags:
@@ -845,7 +845,7 @@ paths:
           $ref: "#/components/responses/NotFound"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Request to delete a podcast
       tags:
@@ -918,7 +918,7 @@ paths:
           $ref: "#/components/responses/NotFound"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch detailed meta data and episodes for a podcast by id
       tags:
@@ -960,7 +960,7 @@ paths:
           $ref: "#/components/responses/NotFound"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch audience demographics for a podcast
       tags:
@@ -1003,7 +1003,7 @@ paths:
           $ref: "#/components/responses/NotFound"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch recommendations for a podcast
       tags:
@@ -1035,7 +1035,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch a list of supported countries/regions for best podcasts
       tags:
@@ -1079,7 +1079,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch related search terms
       tags:
@@ -1356,7 +1356,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Full-text search
       tags:
@@ -1400,7 +1400,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Spell check on a search term
       tags:
@@ -1433,7 +1433,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Fetch trending search terms
       tags:
@@ -1512,7 +1512,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
-        5XX:
+        "500":
           $ref: "#/components/responses/ServerError"
       summary: Typeahead search
       tags:
