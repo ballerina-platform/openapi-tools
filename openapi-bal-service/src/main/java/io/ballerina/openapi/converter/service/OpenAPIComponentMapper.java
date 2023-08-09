@@ -147,9 +147,16 @@ public class OpenAPIComponentMapper {
                 components.setSchemas(schema);
                 break;
             case UNION:
-                Schema unionSchema = handleUnionType((UnionTypeSymbol) type, new Schema<>(), componentName);
-                schema.put(componentName, unionSchema.description(typeDoc));
-                components.setSchemas(schema);
+                if (typeRef.definition() instanceof EnumSymbol) {
+                    EnumSymbol enumSymbol = (EnumSymbol) typeRef.definition();
+                    Schema enumSchema = mapEnumValues(enumSymbol);
+                    schema.put(componentName, enumSchema.description(typeDoc));
+                    components.setSchemas(schema);
+                } else {
+                    Schema unionSchema = handleUnionType((UnionTypeSymbol) type, new Schema<>(), componentName);
+                    schema.put(componentName, unionSchema.description(typeDoc));
+                    components.setSchemas(schema);
+                }
                 break;
             case MAP:
                 MapTypeSymbol mapTypeSymbol = (MapTypeSymbol) type;
@@ -314,6 +321,12 @@ public class OpenAPIComponentMapper {
             }
             TypeDescKind fieldTypeKind = field.getValue().typeDescriptor().typeKind();
             String type = fieldTypeKind.toString().toLowerCase(Locale.ENGLISH);
+
+            if (fieldTypeKind == TypeDescKind.INTERSECTION) {
+                TypeSymbol readOnlyExcludedType = excludeReadonlyIfPresent(field.getValue().typeDescriptor());
+                type = readOnlyExcludedType.typeKind().toString().toLowerCase(Locale.ENGLISH);
+            }
+
             Schema property = ConverterCommonUtils.getOpenApiSchema(type);
 
             if (fieldTypeKind == TypeDescKind.TYPE_REFERENCE) {
@@ -406,6 +419,9 @@ public class OpenAPIComponentMapper {
         List<Schema> properties = new ArrayList<>();
         boolean nullable = false;
         for (TypeSymbol union : unionTypes) {
+            if (union.typeKind() == TypeDescKind.INTERSECTION) {
+                union = excludeReadonlyIfPresent(union);
+            }
             if (union.typeKind() == TypeDescKind.NIL) {
                 nullable = true;
             } else if (union.typeKind() == TypeDescKind.TYPE_REFERENCE) {

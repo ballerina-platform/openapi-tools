@@ -15,7 +15,7 @@
  *
  */
 
-apply plugin: "java"
+apply plugin: "java-library"
 apply plugin: "com.github.spotbugs"
 apply plugin: "checkstyle"
 apply plugin: "jacoco"
@@ -63,18 +63,42 @@ dependencies {
     }
 
     jacocoRuntime "org.jacoco:org.jacoco.agent:${jacoco.toolVersion}:runtime"
-    checkstyle project(":config:checkstyle")
-    checkstyle "com.puppycrawl.tools:checkstyle:${puppycrawlCheckstyleVersion}"
+    checkstyle project(':checkstyle')
+    checkstyle "com.puppycrawl.tools:checkstyle:${project.puppycrawlCheckstyleVersion}"
 }
 
-sourceCompatibility = JavaVersion.VERSION_11
+sourceCompatibility = JavaVersion.VERSION_17
+
+def excludePattern = '**/module-info.java'
+tasks.withType(Checkstyle) {
+    exclude excludePattern
+}
+
+checkstyle {
+    toolVersion "${project.puppycrawlCheckstyleVersion}"
+    configFile rootProject.file("config/checkstyle/build/checkstyle.xml")
+    configProperties = ["suppressionFile" : file("${rootDir}/config/checkstyle/build/suppressions.xml")]
+}
+
+checkstyleMain.dependsOn(":checkstyle:downloadCheckstyleRuleFiles")
+checkstyleMain.dependsOn(":checkstyle:compileTestJava")
+checkstyleMain.dependsOn(":checkstyle:checkstyleMain")
+checkstyleMain.dependsOn(":checkstyle:checkstyleTest")
+checkstyleMain.dependsOn(":checkstyle:test")
+checkstyleMain.dependsOn(":checkstyle:processTestResources")
+
+checkstyleTest.dependsOn(":checkstyle:downloadCheckstyleRuleFiles")
+checkstyleTest.dependsOn(":checkstyle:compileTestJava")
+checkstyleTest.dependsOn(":checkstyle:checkstyleMain")
+checkstyleTest.dependsOn(":checkstyle:checkstyleTest")
+checkstyleTest.dependsOn(":checkstyle:test")
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
 jacoco {
-    toolVersion = "0.8.6"
+    toolVersion = "${project.jacocoVersion}"
 }
 
 test {
@@ -118,7 +142,7 @@ spotbugsMain {
     effort = "max"
     reportLevel = "low"
     reportsDir = file("$project.buildDir/reports/spotbugs")
-    def excludeFile = file("spotbugs-exclude.xml")
+    def excludeFile = file("${rootDir}/spotbugs-exclude.xml")
     if (excludeFile.exists()) {
         it.excludeFilter = excludeFile
     }
@@ -133,10 +157,8 @@ spotbugsTest {
 
 jacocoTestReport {
     reports {
-        xml.enabled true
+        xml.required = true
     }
 }
 
 spotbugsMain.finalizedBy validateSpotbugs
-checkstyleMain.dependsOn(":config:checkstyle:downloadMultipleFiles")
-

@@ -33,9 +33,9 @@ dependencies {
     testImplementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     testImplementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
     testImplementation group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
-    testRuntime group: 'commons-io', name: 'commons-io', version: "${commonsIoVersion}"
-    testRuntime project(':openapi-bal-service')
-    testRuntime project(':openapi-extension')
+    testRuntimeOnly group: 'commons-io', name: 'commons-io', version: "${commonsIoVersion}"
+    testRuntimeOnly project(':openapi-bal-service')
+    testRuntimeOnly project(':openapi-extension')
     testImplementation group: 'org.testng', name: 'testng', version: "${testngVersion}"
 }
 
@@ -81,9 +81,9 @@ jacocoTestReport {
     def classFiles = new File("${rootDir}/openapi-extension/build/classes/java/main/io/ballerina/openapi/extension")
     additionalClassDirs(classFiles)
     reports {
-        xml.enabled = true
-        html.enabled = true
-        csv.enabled = true
+        xml.required = true
+        html.required = true
+        csv.required = true
         xml.destination = new File("${buildDir}/reports/jacoco/report.xml")
         html.destination = new File("${buildDir}/reports/jacoco/report.html")
         csv.destination = new File("${buildDir}/reports/jacoco/report.csv")
@@ -91,3 +91,5 @@ jacocoTestReport {
 }
 copyPackageBala.dependsOn copyDistribution
 test.dependsOn copyPackageBala
+copyDistribution.dependsOn(':module-ballerina-openapi:unpackJballerinaTools')
+copyDistribution.dependsOn(':module-ballerina-openapi:copyStdlibs')

@@ -195,7 +195,7 @@ public class OpenAPIParameterMapper {
         for (AnnotationNode annotation: annotations) {
             if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
                 // Handle headers.
-                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(apidocs);
+                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(components, semanticModel, apidocs);
                 parameters.addAll(openAPIHeaderMapper.setHeaderParameter(requiredParameterNode));
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_QUERY)) {
                 // Handle query parameter.
@@ -233,7 +233,7 @@ public class OpenAPIParameterMapper {
         for (AnnotationNode annotation: annotations) {
             if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
                 // Handle headers.
-                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(apidocs);
+                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(components, semanticModel, apidocs);
                 parameters = openAPIHeaderMapper.setHeaderParameter(defaultableParameterNode);
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_QUERY)) {
                 // Handle query parameter.
