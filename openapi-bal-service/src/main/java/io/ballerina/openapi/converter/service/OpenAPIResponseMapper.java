@@ -629,8 +629,12 @@ public class OpenAPIResponseMapper {
             if (mimeType.isEmpty()) {
                 return Optional.empty();
             }
-            arraySchema.setItems(openApiSchema);
-            mediaType.setSchema(arraySchema);
+            if (type.equals(BYTE_ARRAY)) {
+                mediaType.setSchema(openApiSchema);
+            } else {
+                arraySchema.setItems(openApiSchema);
+                mediaType.setSchema(arraySchema);
+            }
             apiResponse.description(description);
             apiResponse.content(new Content().addMediaType(mimeType.get(), mediaType));
             apiResponses.put(statusCode, apiResponse);
