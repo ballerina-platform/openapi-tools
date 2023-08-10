@@ -178,6 +178,7 @@ task initializeVariables {
 
 task ballerinaBuild {
     inputs.dir file(project.projectDir)
+    doNotTrackState("build needs to run every time")
     doLast {
         // Build and populate caches
         exec {
