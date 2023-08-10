@@ -256,6 +256,16 @@ public class ResponseTests {
         compareWithGeneratedFile(ballerinaFilePath, "response/decimal.yaml");
     }
 
+    @Test(description = "When the response has byte[] return type")
+    public void testResponseWithByteArray() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/byte.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "response/byte.yaml");
+    }
+
     @Test
     public void testWithMultipleReturnPayloadSameStatusCode() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/same_status_code.bal");
