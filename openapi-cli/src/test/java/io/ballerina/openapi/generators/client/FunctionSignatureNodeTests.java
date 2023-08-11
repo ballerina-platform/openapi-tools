@@ -183,7 +183,7 @@ public class FunctionSignatureNodeTests {
         Assert.assertFalse(parameters.isEmpty());
         RequiredParameterNode param01 = (RequiredParameterNode) parameters.get(0);
         Assert.assertEquals(param01.paramName().orElseThrow().text(), "payload");
-        Assert.assertEquals(param01.typeName().toString(), "CreatedPet");
+        Assert.assertEquals(param01.typeName().toString(), "CreatedPet_requestBody");
     }
 
     @Test(description = "Test parameter generation for request body with unsupported (application/pdf) media type")
