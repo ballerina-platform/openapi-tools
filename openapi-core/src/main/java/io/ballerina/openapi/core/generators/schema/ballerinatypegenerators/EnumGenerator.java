@@ -83,8 +83,8 @@ public class EnumGenerator extends TypeGenerator {
                 return NodeParser.parseTypeDescriptor(enumString);
             } else {
                 String typeDescriptorName;
-                if (GeneratorConstants.TYPE_MAP.containsKey(schema.getType().trim())) {
-                    typeDescriptorName = GeneratorConstants.TYPE_MAP.get(schema.getType().trim());
+                if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(schema.getType().trim())) {
+                    typeDescriptorName = GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(schema.getType().trim());
                 } else {
                     throw new BallerinaOpenApiException("Unsupported OAS data type `" + schema.getType().trim() + "`");
                 }

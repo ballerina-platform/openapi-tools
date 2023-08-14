@@ -81,7 +81,7 @@ public class FunctionSignatureNodeTests {
         Assert.assertEquals(param03.typeName().toString(), "string");
 
         Assert.assertEquals(param04.paramName().orElseThrow().text(), "pages");
-        Assert.assertEquals(param04.typeName().toString(), "int[]");
+        Assert.assertEquals(param04.typeName().toString(), "decimal[]");
 
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
         Assert.assertEquals(returnTypeNode.type().toString(), "Product[]|error");
