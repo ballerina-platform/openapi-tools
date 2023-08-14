@@ -303,18 +303,17 @@ public class GeneratorConstants {
     public static final String SQUARE_BRACKETS = "[]";
 
     public static final Map<String, List<String>> OPENAPI_TYPE_TO_FORMAT_MAP;
+    public static final Map<String, String> OPENAPI_TYPE_TO_BAL_TYPE_MAP;
 
     static {
+        // Add values to `OPENAPI_TYPE_TO_FORMAT_MAP`
         Map<String, List<String>> typeToFormatMap = new HashMap<>();
         typeToFormatMap.put("integer", List.of("int32", "int64"));
         typeToFormatMap.put("number", List.of("float", "double"));
         typeToFormatMap.put("string", List.of("date", "date-time", "password", "byte", "binary"));
         OPENAPI_TYPE_TO_FORMAT_MAP = Collections.unmodifiableMap(typeToFormatMap);
-    }
 
-    public static final Map<String, String> OPENAPI_TYPE_TO_BAL_TYPE_MAP;
-
-    static {
+        // Add values to `OPENAPI_TYPE_TO_BAL_TYPE_MAP`
         Map<String, String> typeMap = new HashMap<>();
         typeMap.put("integer", "int");
         typeMap.put("string", "string");
