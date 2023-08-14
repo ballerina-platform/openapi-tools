@@ -20,6 +20,7 @@ package io.ballerina.openapi.core;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -301,9 +302,18 @@ public class GeneratorConstants {
     public static final String NILLABLE = "?";
     public static final String SQUARE_BRACKETS = "[]";
 
-    public static final Map<String, String> TYPE_MAP;
+    public static final Map<String, List<String>> OPENAPI_TYPE_TO_FORMAT_MAP;
+    public static final Map<String, String> OPENAPI_TYPE_TO_BAL_TYPE_MAP;
 
     static {
+        // Add values to `OPENAPI_TYPE_TO_FORMAT_MAP`
+        Map<String, List<String>> typeToFormatMap = new HashMap<>();
+        typeToFormatMap.put("integer", List.of("int32", "int64"));
+        typeToFormatMap.put("number", List.of("float", "double"));
+        typeToFormatMap.put("string", List.of("date", "date-time", "password", "byte", "binary"));
+        OPENAPI_TYPE_TO_FORMAT_MAP = Collections.unmodifiableMap(typeToFormatMap);
+
+        // Add values to `OPENAPI_TYPE_TO_BAL_TYPE_MAP`
         Map<String, String> typeMap = new HashMap<>();
         typeMap.put("integer", "int");
         typeMap.put("string", "string");
@@ -318,7 +328,7 @@ public class GeneratorConstants {
         typeMap.put("byte", "byte[]");
         typeMap.put("int32", "int:Signed32");
         typeMap.put("int64", "int");
-        TYPE_MAP = Collections.unmodifiableMap(typeMap);
+        OPENAPI_TYPE_TO_BAL_TYPE_MAP = Collections.unmodifiableMap(typeMap);
     }
 
     public static final String DEFAULT_HTTP_VERSION = "2.0";
