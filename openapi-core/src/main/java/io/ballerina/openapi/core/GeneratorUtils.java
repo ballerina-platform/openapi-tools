@@ -167,6 +167,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.GeneratorConstants.STYLE;
 import static io.ballerina.openapi.core.GeneratorConstants.TYPE_FILE_NAME;
+import static io.ballerina.openapi.core.GeneratorConstants.OPENAPI_TYPE_TO_FORMAT_MAP;
 import static io.ballerina.openapi.core.GeneratorConstants.TYPE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE;
 import static io.ballerina.openapi.core.GeneratorConstants.YAML_EXTENSION;
@@ -338,8 +339,8 @@ public class GeneratorUtils {
         } else if ((INTEGER.equals(type) || NUMBER.equals(type) || STRING.equals(type)) && schema.getFormat() != null) {
             return convertOpenAPITypeFormatToBallerina(type, schema);
         } else {
-            if (GeneratorConstants.TYPE_MAP.containsKey(type)) {
-                return GeneratorConstants.TYPE_MAP.get(type);
+            if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(type)) {
+                return GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(type);
             } else {
                 throw new BallerinaOpenApiException("Unsupported OAS data type `" + type + "`");
             }
@@ -355,13 +356,22 @@ public class GeneratorUtils {
      */
     private static String convertOpenAPITypeFormatToBallerina(final String dataType, final Schema<?> schema)
             throws BallerinaOpenApiException {
-        if (GeneratorConstants.TYPE_MAP.containsKey(schema.getFormat())) {
-            return GeneratorConstants.TYPE_MAP.get(schema.getFormat());
+        if (OPENAPI_TYPE_TO_FORMAT_MAP.containsKey(dataType) &&
+                OPENAPI_TYPE_TO_FORMAT_MAP.get(dataType).contains(schema.getFormat())) {
+            if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(schema.getFormat())) {
+                return GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(schema.getFormat());
+            } else {
+                OUT_STREAM.printf("WARNING: unsupported format `%s` will be skipped when generating the counterpart " +
+                        "Ballerina type for openAPI schema type: `%s`%n", schema.getFormat(), schema.getType());
+                if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(dataType)) {
+                    return GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(dataType);
+                } else {
+                    throw new BallerinaOpenApiException("Unsupported OAS data type `" + dataType + "`");
+                }
+            }
         } else {
-            OUT_STREAM.printf("WARNING: unsupported format `%s` will be skipped when generating the counterpart " +
-                    "Ballerina type for openAPI schema type: `%s`%n", schema.getFormat(), schema.getType());
-            if (GeneratorConstants.TYPE_MAP.containsKey(dataType)) {
-                return GeneratorConstants.TYPE_MAP.get(dataType);
+            if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(dataType)) {
+                return GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(dataType);
             } else {
                 throw new BallerinaOpenApiException("Unsupported OAS data type `" + dataType + "`");
             }

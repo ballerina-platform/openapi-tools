@@ -70,9 +70,7 @@ public class ServiceGenerationTests extends OpenAPITest {
         buildArgs.add(tmpDir.toString());
         InputStream successful = TestUtil.executeOpenAPIToTestWarnings(
                 DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = "WARNING: unsupported format `currency` will be skipped when generating the counterpart " +
-                "Ballerina type for openAPI schema type: `number`\n" +
-                "WARNING: unsupported format `date` will be skipped when generating the counterpart " +
+        String msg = "WARNING: unsupported format `date` will be skipped when generating the counterpart " +
                 "Ballerina type for openAPI schema type: `string`";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();

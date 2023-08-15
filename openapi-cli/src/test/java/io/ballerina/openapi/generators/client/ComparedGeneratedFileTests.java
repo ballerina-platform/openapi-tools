@@ -111,7 +111,8 @@ public class ComparedGeneratedFileTests {
                 {"duplicated_response.yaml", "duplicated_response.bal"},
                 {"multiline_param_comment.yaml", "multiline_param_comment.bal"},
                 {"description_with_special_characters.yaml", "description_with_special_characters.bal"},
-                {"header_with_enum.yaml", "header_with_enum.bal"}
+                {"header_with_enum.yaml", "header_with_enum.bal"},
+                {"incorrect_format.yaml", "incorrect_format.bal"}
         };
     }
 
