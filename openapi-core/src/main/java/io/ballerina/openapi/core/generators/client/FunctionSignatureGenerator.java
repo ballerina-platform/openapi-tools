@@ -526,9 +526,8 @@ public class FunctionSignatureGenerator {
                         //TODO: handle nested array - this is impossible to handle
                         ArraySchema arraySchema = (ArraySchema) schema;
                         paramType = getRequestBodyParameterForArraySchema(operationId, mediaTypeEntry, arraySchema);
-                    } else if (schema instanceof ObjectSchema) {
-                        ObjectSchema objectSchema = (ObjectSchema) schema;
-                        paramType = getRequestBodyParameterForObjectSchema(referencedRequestBodyName, objectSchema);
+                    } else if (schema instanceof ObjectSchema || schema.getProperties() != null) {
+                        paramType = getRequestBodyParameterForObjectSchema(referencedRequestBodyName, schema);
                     } else { // composed and object schemas are handled by the flatten
                         paramType = getBallerinaMediaType(mediaTypeEntryKey, true);
                     }
@@ -580,8 +579,9 @@ public class FunctionSignatureGenerator {
         }
     }
 
-    private String getRequestBodyParameterForObjectSchema (String recordName, ObjectSchema objectSchema)
+    private String getRequestBodyParameterForObjectSchema (String recordName, Schema objectSchema)
             throws BallerinaOpenApiException {
+        recordName = getValidName(recordName + "_RequestBody", true);
         if (objectSchema.getProperties() == null || objectSchema.getProperties().isEmpty()) {
             return EMPTY_RECORD;
         }

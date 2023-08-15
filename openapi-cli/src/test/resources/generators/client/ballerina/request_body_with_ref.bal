@@ -38,7 +38,7 @@ public isolated client class Client {
     #
     # + payload - Return from creating a pet
     # + return - Successful operation
-    remote isolated function createPet(CreatedPet payload) returns http:Response|error {
+    remote isolated function createPet(CreatedPet_RequestBody payload) returns http:Response|error {
         string resourcePath = string `/pets`;
         http:Request request = new;
         json jsonBody = payload.toJson();
