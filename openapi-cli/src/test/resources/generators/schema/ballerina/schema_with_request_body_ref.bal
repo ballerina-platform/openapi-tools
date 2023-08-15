@@ -1,4 +1,4 @@
-public type CreatedPet_requestBody record {
+public type CreatedPet_RequestBody record {
     string petId?;
     string createdDate?;
 };

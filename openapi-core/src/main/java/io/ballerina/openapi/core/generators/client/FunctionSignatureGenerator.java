@@ -581,7 +581,7 @@ public class FunctionSignatureGenerator {
 
     private String getRequestBodyParameterForObjectSchema (String recordName, Schema objectSchema)
             throws BallerinaOpenApiException {
-        recordName = getValidName(recordName + "_requestBody", true);
+        recordName = getValidName(recordName + "_RequestBody", true);
         if (objectSchema.getProperties() == null || objectSchema.getProperties().isEmpty()) {
             return EMPTY_RECORD;
         }
