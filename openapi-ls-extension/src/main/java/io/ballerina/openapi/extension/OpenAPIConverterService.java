@@ -127,22 +127,22 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
             OpenAPIConverterResponse response = new OpenAPIConverterResponse();
             Path filePath = Path.of(request.getDocumentFilePath());
             Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(filePath);
-            Optional<Project> module = workspaceManager.project(filePath);
+            Optional<Project> project = workspaceManager.project(filePath);
             if (semanticModel.isEmpty()) {
                 response.setError("Error while generating semantic model.");
                 return response;
             }
-            if (module.isEmpty()) {
+            if (project.isEmpty()) {
                 response.setError("Error while getting the project.");
                 return response;
             }
-            module = Optional.of(module.get().duplicate());
-            DiagnosticResult diagnosticsFromCodeGenAndModify = module.get()
+            project = Optional.of(project.get().duplicate());
+            DiagnosticResult diagnosticsFromCodeGenAndModify = project.get()
                     .currentPackage()
                     .runCodeGenAndModifyPlugins();
             boolean hasErrorsFromCodeGenAndModify = diagnosticsFromCodeGenAndModify.diagnostics().stream()
                     .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
-            Collection<Diagnostic> compilationDiagnostics = module.get().currentPackage()
+            Collection<Diagnostic> compilationDiagnostics = project.get().currentPackage()
                     .getCompilation().diagnosticResult().diagnostics();
             boolean hasCompilationErrors = compilationDiagnostics.stream()
                     .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
@@ -151,17 +151,17 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 response.setError("Given Ballerina file contains compilation error(s).");
                 return response;
             }
-            Module defaultModule = module.get().currentPackage().getDefaultModule();
-
+            Module defaultModule = project.get().currentPackage().getDefaultModule();
+            SemanticModel updatedSemanticModel =
+                    project.get().currentPackage().getCompilation().getSemanticModel(defaultModule.moduleId());
             JsonArray specs = new JsonArray();
             for (DocumentId currentDocumentID : defaultModule.documentIds()) {
                 Document document = defaultModule.document(currentDocumentID);
                 Optional<Path> path = defaultModule.project().documentPath(currentDocumentID);
                 Path inputPath = path.orElse(null);
                 SyntaxTree syntaxTree = document.syntaxTree();
-                List<OASResult> oasResults = ServiceToOpenAPIConverterUtils.generateOAS3Definition(module.get(),
-                        syntaxTree, semanticModel.get(), null, false, inputPath);
-
+                List<OASResult> oasResults = ServiceToOpenAPIConverterUtils.generateOAS3Definition(project.get(),
+                        syntaxTree, updatedSemanticModel, null, false, inputPath);
                 generateServiceJson(response, document.syntaxTree().filePath(), oasResults, specs);
             }
             response.setContent(specs);
