@@ -100,9 +100,9 @@ import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.GeneratorUtils.getBallerinaMediaType;
 import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.core.GeneratorUtils.isaArraySchema;
-import static io.ballerina.openapi.core.GeneratorUtils.isaComposedSchema;
-import static io.ballerina.openapi.core.GeneratorUtils.isaObjectSchema;
+import static io.ballerina.openapi.core.GeneratorUtils.isArraySchema;
+import static io.ballerina.openapi.core.GeneratorUtils.isComposedSchema;
+import static io.ballerina.openapi.core.GeneratorUtils.isObjectSchema;
 
 /**
  * This util class uses for generating {@link FunctionSignatureNode} for given OAS
@@ -376,7 +376,7 @@ public class FunctionSignatureGenerator {
         if (parameterSchema.get$ref() != null) {
             type = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
             Schema schema = openAPI.getComponents().getSchemas().get(type.trim());
-            if (isaObjectSchema(schema) || (isaComposedSchema(schema) && schema.getAllOf() != null)) {
+            if (isObjectSchema(schema) || (isComposedSchema(schema) && schema.getAllOf() != null)) {
                 throw new BallerinaOpenApiException("Ballerina does not support object type path parameters.");
             }
         } else {
@@ -434,7 +434,7 @@ public class FunctionSignatureGenerator {
 
         if (isRequiredHeader) {
             String type = convertOpenAPITypeToBallerina(schema);
-            if (isaArraySchema(schema)) {
+            if (isArraySchema(schema)) {
                 if (schema.getItems().get$ref() != null) {
                     type = extractReferenceType(schema.getItems().get$ref()) + SQUARE_BRACKETS;
                 } else if (schema.getItems().getEnum() != null && !schema.getItems().getEnum().isEmpty()) {
@@ -465,7 +465,7 @@ public class FunctionSignatureGenerator {
             } else {
                 String type = convertOpenAPITypeToBallerina(schema);
                 String nillableType = type.endsWith(NILLABLE) ? type : type + NILLABLE;
-                if (isaArraySchema(schema)) {
+                if (isArraySchema(schema)) {
                     if (schema.getItems().get$ref() != null) {
                         nillableType = extractReferenceType(schema.getItems().get$ref()) +
                                 SQUARE_BRACKETS + NILLABLE;
@@ -530,10 +530,10 @@ public class FunctionSignatureGenerator {
                             !getOpenAPIType(schema).equals(
                             OBJECT)) {
                         paramType = convertOpenAPITypeToBallerina(schema);
-                    } else if (isaArraySchema(schema)) {
+                    } else if (isArraySchema(schema)) {
                         //TODO: handle nested array - this is impossible to handle
                         paramType = getRequestBodyParameterForArraySchema(operationId, mediaTypeEntry, schema);
-                    } else if (isaObjectSchema(schema)) {
+                    } else if (isObjectSchema(schema)) {
                         paramType = getRequestBodyParameterForObjectSchema(referencedRequestBodyName, schema);
                     } else { // composed and object schemas are handled by the flatten
                         paramType = getBallerinaMediaType(mediaTypeEntryKey, true);
@@ -609,7 +609,7 @@ public class FunctionSignatureGenerator {
             paramType = convertOpenAPITypeToBallerina(arrayItems) + SQUARE_BRACKETS;
         } else if (arrayItems.get$ref() != null) {
             paramType = getValidName(extractReferenceType(arrayItems.get$ref()), true) + SQUARE_BRACKETS;
-        } else if (isaComposedSchema(arrayItems)) {
+        } else if (isComposedSchema(arrayItems)) {
             paramType = "CompoundArrayItem" + getValidName(operationId, true) + "Request";
             // TODO - Add API doc by checking requestBody
             TypeDefinitionNode arrayTypeNode =

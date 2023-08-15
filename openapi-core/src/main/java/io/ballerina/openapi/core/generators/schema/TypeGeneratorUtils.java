@@ -80,6 +80,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.core.GeneratorConstants.CONSTRAINT;
+import static io.ballerina.openapi.core.GeneratorConstants.NULL;
 
 /**
  * Contains util functions needed for schema generation.
@@ -105,7 +106,7 @@ public class TypeGeneratorUtils {
 
         if (schemaValue.get$ref() != null) {
             return new ReferencedTypeGenerator(schemaValue, typeName);
-        } else if (GeneratorUtils.isaComposedSchema(schemaValue)) {
+        } else if (GeneratorUtils.isComposedSchema(schemaValue)) {
             if (schemaValue.getAllOf() != null) {
                 return new AllOfRecordTypeGenerator(schemaValue, typeName);
             } else {
@@ -113,10 +114,10 @@ public class TypeGeneratorUtils {
             }
         } else if ((GeneratorUtils.getOpenAPIType(schemaValue) != null &&
                 GeneratorUtils.getOpenAPIType(schemaValue).equals(GeneratorConstants.OBJECT)) ||
-                GeneratorUtils.isaObjectSchema(schemaValue) || schemaValue.getProperties() != null ||
-                GeneratorUtils.isaMapSchema(schemaValue)) {
+                GeneratorUtils.isObjectSchema(schemaValue) || schemaValue.getProperties() != null ||
+                GeneratorUtils.isMapSchema(schemaValue)) {
             return new RecordTypeGenerator(schemaValue, typeName);
-        } else if (GeneratorUtils.isaArraySchema(schemaValue)) {
+        } else if (GeneratorUtils.isArraySchema(schemaValue)) {
             return new ArrayTypeGenerator(schemaValue, typeName, parentName);
         } else if (GeneratorUtils.getOpenAPIType(schemaValue) != null &&
                 PRIMITIVE_TYPE_LIST.contains(GeneratorUtils.getOpenAPIType(schemaValue))) {
@@ -146,7 +147,7 @@ public class TypeGeneratorUtils {
             if (schema.getNullable()) {
                 nillableType = createOptionalTypeDescriptorNode(originalTypeDesc, createToken(QUESTION_MARK_TOKEN));
             }
-        } else if (schema.getTypes() != null && schema.getTypes().contains("null")) {
+        } else if (schema.getTypes() != null && schema.getTypes().contains(NULL)) {
             nillableType = createOptionalTypeDescriptorNode(originalTypeDesc, createToken(QUESTION_MARK_TOKEN));
         } else if (nullable) {
             nillableType = createOptionalTypeDescriptorNode(originalTypeDesc, createToken(QUESTION_MARK_TOKEN));
@@ -245,7 +246,7 @@ public class TypeGeneratorUtils {
 
         Token defaultValueToken;
         String defaultValue = fieldSchema.getDefault().toString().trim();
-        if (GeneratorUtils.isaStringSchema(fieldSchema)) {
+        if (GeneratorUtils.isStringSchema(fieldSchema)) {
             if (defaultValue.equals("\"")) {
                 defaultValueToken = AbstractNodeFactory.createIdentifierToken("\"" + "\\" +
                         fieldSchema.getDefault().toString() + "\"");
@@ -255,7 +256,7 @@ public class TypeGeneratorUtils {
             }
         } else if (!defaultValue.matches("^[0-9]*$") && !defaultValue.matches("^(\\d*\\.)?\\d+$")
                 && !(defaultValue.startsWith("[") && defaultValue.endsWith("]")) &&
-                !GeneratorUtils.isaBooleanSchema(fieldSchema)) {
+                !GeneratorUtils.isBooleanSchema(fieldSchema)) {
             //This regex was added due to avoid adding quotes for default values which are numbers and array values.
             //Ex: default: 123
             defaultValueToken = AbstractNodeFactory.createIdentifierToken("\"" +
@@ -277,13 +278,13 @@ public class TypeGeneratorUtils {
      */
     public static AnnotationNode generateConstraintNode(String typeName, Schema<?> fieldSchema) {
         if (isConstraintAllowed(typeName, fieldSchema)) {
-            if (GeneratorUtils.isaStringSchema(fieldSchema)) {
+            if (GeneratorUtils.isStringSchema(fieldSchema)) {
                 // Attributes : maxLength, minLength
                 return generateStringConstraint(fieldSchema);
-            } else if (GeneratorUtils.isaNumberSchema(fieldSchema) || GeneratorUtils.isaIntegerSchema(fieldSchema)) {
+            } else if (GeneratorUtils.isNumberSchema(fieldSchema) || GeneratorUtils.isIntegerSchema(fieldSchema)) {
                 // Attribute : minimum, maximum, exclusiveMinimum, exclusiveMaximum
                 return generateNumberConstraint(fieldSchema);
-            } else if (GeneratorUtils.isaArraySchema(fieldSchema)) {
+            } else if (GeneratorUtils.isArraySchema(fieldSchema)) {
                 // Attributes: maxItems, minItems
                 return generateArrayConstraint(fieldSchema);
             }
@@ -320,7 +321,7 @@ public class TypeGeneratorUtils {
         String annotBody = GeneratorConstants.OPEN_BRACE + String.join(GeneratorConstants.COMMA, fields) +
                 GeneratorConstants.CLOSE_BRACE;
         AnnotationNode annotationNode;
-        if (GeneratorUtils.isaNumberSchema(fieldSchema)) {
+        if (GeneratorUtils.isNumberSchema(fieldSchema)) {
             if (fieldSchema.getFormat() != null && fieldSchema.getFormat().equals(GeneratorConstants.FLOAT)) {
                 annotationNode = createAnnotationNode(GeneratorConstants.CONSTRAINT_FLOAT, annotBody);
             } else {
@@ -363,7 +364,7 @@ public class TypeGeneratorUtils {
     private static List<String> getNumberAnnotFields(Schema<?> numberSchema) {
 
         List<String> fields = new ArrayList<>();
-        boolean isInt = GeneratorUtils.isaIntegerSchema(numberSchema);
+        boolean isInt = GeneratorUtils.isIntegerSchema(numberSchema);
         if (numberSchema.getMinimum() != null && numberSchema.getExclusiveMinimum() == null) {
             String value = numberSchema.getMinimum().toString();
             String fieldRef = GeneratorConstants.MINIMUM + GeneratorConstants.COLON +

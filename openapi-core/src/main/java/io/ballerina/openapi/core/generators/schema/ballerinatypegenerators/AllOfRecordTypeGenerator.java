@@ -135,7 +135,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                 List<String> required = allOfSchema.getRequired();
                 recordFieldList.addAll(addRecordFields(required, properties.entrySet(), typeName));
                 addAdditionalSchemas(allOfSchema);
-            } else if (GeneratorUtils.isaComposedSchema(allOfSchema)) {
+            } else if (GeneratorUtils.isComposedSchema(allOfSchema)) {
                 if (allOfSchema.getAllOf() != null) {
                     recordFieldList.addAll(generateAllOfRecordFields(allOfSchema.getAllOf()));
                 } else {

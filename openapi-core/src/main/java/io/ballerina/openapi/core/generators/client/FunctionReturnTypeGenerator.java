@@ -54,10 +54,10 @@ import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.GeneratorUtils.isValidSchemaName;
-import static io.ballerina.openapi.core.GeneratorUtils.isaArraySchema;
-import static io.ballerina.openapi.core.GeneratorUtils.isaComposedSchema;
-import static io.ballerina.openapi.core.GeneratorUtils.isaMapSchema;
-import static io.ballerina.openapi.core.GeneratorUtils.isaObjectSchema;
+import static io.ballerina.openapi.core.GeneratorUtils.isArraySchema;
+import static io.ballerina.openapi.core.GeneratorUtils.isComposedSchema;
+import static io.ballerina.openapi.core.GeneratorUtils.isMapSchema;
+import static io.ballerina.openapi.core.GeneratorUtils.isObjectSchema;
 
 /**
  * This util class for maintain the operation response with ballerina return type.
@@ -140,11 +140,11 @@ public class FunctionReturnTypeGenerator {
                                Map.Entry<String, MediaType> media, String type, Schema schema)
             throws BallerinaOpenApiException {
 
-        if (isaComposedSchema(schema)) {
+        if (isComposedSchema(schema)) {
             type = generateReturnDataTypeForComposedSchema(operation, type, schema, isSignature);
-        } else if (isaObjectSchema(schema)) {
+        } else if (isObjectSchema(schema)) {
             type = handleInLineRecordInResponse(operation, media, schema);
-        } else if (isaMapSchema(schema)) {
+        } else if (isMapSchema(schema)) {
             type = handleResponseWithMapSchema(operation, media, schema);
         } else if (schema.get$ref() != null) {
             type = getValidName(extractReferenceType(schema.get$ref()), true);
@@ -162,7 +162,7 @@ public class FunctionReturnTypeGenerator {
                         (componentSchema, type, responseDocs);
                 GeneratorUtils.updateTypeDefNodeList(type, typeDefinitionNode, typeDefinitionNodeList);
             }
-        } else if (isaArraySchema(schema)) {
+        } else if (isArraySchema(schema)) {
             // TODO: Nested array when response has
             type = generateReturnTypeForArraySchema(media, schema, isSignature);
         } else if (getOpenAPIType(schema) != null) {
@@ -212,7 +212,7 @@ public class FunctionReturnTypeGenerator {
             }
         } else {
             String typeName;
-            if (isaArraySchema(arraySchema.getItems())) {
+            if (isArraySchema(arraySchema.getItems())) {
                 Schema nestedSchema = arraySchema.getItems();
                 String inlineArrayType = convertOpenAPITypeToBallerina(nestedSchema.getItems());
                 typeName = inlineArrayType + "NestedArr";

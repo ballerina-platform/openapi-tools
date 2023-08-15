@@ -124,7 +124,7 @@ import static io.ballerina.openapi.core.GeneratorUtils.generateBodyStatementForC
 import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.GeneratorUtils.isComplexURL;
-import static io.ballerina.openapi.core.GeneratorUtils.isaComposedSchema;
+import static io.ballerina.openapi.core.GeneratorUtils.isComposedSchema;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.extractReferenceType;
 
 /**
@@ -448,7 +448,7 @@ public class FunctionBodyGenerator {
             }
             if (paramSchema != null && (paramSchema.getProperties() != null ||
                     (getOpenAPIType(paramSchema) != null && getOpenAPIType(paramSchema).equals("array")) ||
-                    (isaComposedSchema(paramSchema)))) {
+                    (isComposedSchema(paramSchema)))) {
                 if (parameter.getStyle() != null || parameter.getExplode() != null) {
                     GeneratorUtils.createEncodingMap(filedOfMap, parameter.getStyle().toString(),
                             parameter.getExplode(), parameter.getName().trim());

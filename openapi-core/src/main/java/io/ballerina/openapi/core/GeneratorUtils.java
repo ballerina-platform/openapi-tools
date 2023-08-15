@@ -742,7 +742,7 @@ public class GeneratorUtils {
             if (constraintExists) {
                 return true;
             }
-        } else if (isaComposedSchema(value)) {
+        } else if (isComposedSchema(value)) {
             List<Schema> allOf = value.getAllOf();
             List<Schema> oneOf = value.getOneOf();
             List<Schema> anyOf = value.getAnyOf();
@@ -758,7 +758,7 @@ public class GeneratorUtils {
                 return true;
             }
 
-        } else if (isaArraySchema(value)) {
+        } else if (isArraySchema(value)) {
             if (!isConstraintExists(value)) {
                 return isConstraintExists(value.getItems());
             }
@@ -1048,6 +1048,7 @@ public class GeneratorUtils {
     public static String getOpenAPIType(Schema<?> schema) {
         if (schema.getTypes() != null && !schema.getTypes().isEmpty()) {
             for (String type : schema.getTypes()) {
+                // TODO: https://github.com/ballerina-platform/openapi-tools/issues/1497
                 // this returns the first non-null type in the list
                 if (!type.equals(NULL)) {
                     return type;
@@ -1059,36 +1060,36 @@ public class GeneratorUtils {
         return null;
     }
 
-    public static boolean isaArraySchema(Schema schema) {
+    public static boolean isArraySchema(Schema schema) {
         return getOpenAPIType(schema) != null && Objects.equals(getOpenAPIType(schema), ARRAY);
     }
 
-    public static boolean isaMapSchema(Schema schema) {
+    public static boolean isMapSchema(Schema schema) {
         return schema.getAdditionalProperties() != null;
     }
 
-    public static boolean isaObjectSchema(Schema schema) {
+    public static boolean isObjectSchema(Schema schema) {
         return getOpenAPIType(schema) != null && Objects.equals(getOpenAPIType(schema), OBJECT);
     }
 
-    public static boolean isaComposedSchema(Schema schema) {
+    public static boolean isComposedSchema(Schema schema) {
         return schema.getAnyOf() != null || schema.getOneOf() != null ||
                 schema.getAllOf() != null;
     }
 
-    public static boolean isaStringSchema(Schema<?> schema) {
+    public static boolean isStringSchema(Schema<?> schema) {
         return getOpenAPIType(schema) != null && Objects.equals(getOpenAPIType(schema), STRING);
     }
 
-    public static boolean isaBooleanSchema(Schema<?> schema) {
+    public static boolean isBooleanSchema(Schema<?> schema) {
         return getOpenAPIType(schema) != null && Objects.equals(getOpenAPIType(schema), BOOLEAN);
     }
 
-    public static boolean isaIntegerSchema(Schema<?> fieldSchema) {
+    public static boolean isIntegerSchema(Schema<?> fieldSchema) {
         return Objects.equals(GeneratorUtils.getOpenAPIType(fieldSchema), INTEGER);
     }
 
-    public static boolean isaNumberSchema(Schema<?> fieldSchema) {
+    public static boolean isNumberSchema(Schema<?> fieldSchema) {
         return Objects.equals(GeneratorUtils.getOpenAPIType(fieldSchema), NUMBER);
     }
 }

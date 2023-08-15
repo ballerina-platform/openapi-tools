@@ -151,7 +151,7 @@ public class ServiceGenerationUtils {
         if (schema.get$ref() != null) {
             String schemaName = GeneratorUtils.getValidName(extractReferenceType(schema.get$ref()), true);
             return Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(schemaName)));
-        } else if (GeneratorUtils.isaMapSchema(schema)) {
+        } else if (GeneratorUtils.isMapSchema(schema)) {
             RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null);
             TypeDescriptorNode record = recordTypeGenerator.generateTypeDescriptorNode();
             return Optional.ofNullable(record);
@@ -159,7 +159,7 @@ public class ServiceGenerationUtils {
             String schemaType = GeneratorUtils.getOpenAPIType(schema);
             boolean isPrimitiveType = schemaType.equals(INTEGER) || schemaType.equals(NUMBER) ||
                     schemaType.equals(BOOLEAN) || schemaType.equals(STRING);
-            if (GeneratorUtils.isaArraySchema(schema)) {
+            if (GeneratorUtils.isArraySchema(schema)) {
                 return getTypeDescNodeForArraySchema(schema);
             } else if (isPrimitiveType) {
                 //This returns identifier node for the types: int, float, decimal, boolean, string
