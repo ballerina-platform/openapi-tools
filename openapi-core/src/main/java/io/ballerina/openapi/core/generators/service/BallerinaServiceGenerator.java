@@ -382,7 +382,8 @@ public class BallerinaServiceGenerator {
         SeparatedNodeList<ParameterNode> parameters = createSeparatedNodeList(params);
         String pathForRecord = Objects.equals(path, SLASH) || Objects.equals(path, CATCH_ALL_PATH) ? "" :
                 GeneratorUtils.getValidName(path, true);
-        ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator(ballerinaSchemaGenerator, pathForRecord);
+        ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator(ballerinaSchemaGenerator, pathForRecord,
+                openAPI);
         if (!paths.contains(path)) {
             returnTypeGenerator.setCountForRecord(0);
             paths.add(path);

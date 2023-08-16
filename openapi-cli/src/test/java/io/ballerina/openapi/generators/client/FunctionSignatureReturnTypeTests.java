@@ -118,4 +118,15 @@ public class FunctionSignatureReturnTypeTests {
                 true);
         Assert.assertEquals(returnType, "http:Response|error");
     }
+
+    @Test(description = "Tests for the response with additional properties in OpenAPI 3.1 spec")
+    public void getReturnTypeForAdditionalPropertySchema() throws IOException, BallerinaOpenApiException {
+        OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/" +
+                "response_with_only_additional_schema.yaml"));
+        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(array,
+                new BallerinaTypesGenerator(array), new ArrayList<>());
+        String returnType = functionReturnType.getReturnType(array.getPaths().get("/store/inventory").getGet(),
+                true);
+        Assert.assertEquals(returnType, "json|error");
+    }
 }

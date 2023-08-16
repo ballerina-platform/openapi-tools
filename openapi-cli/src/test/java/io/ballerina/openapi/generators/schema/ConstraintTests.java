@@ -216,6 +216,21 @@ public class ConstraintTests {
         assertFalse(hasErrors);
     }
 
+    @Test(description = "Test for exclusiveMin and exclusiveMax property changes in OpenAPI 3.1")
+    public void testExclusiveMinMaxInV31() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
+                "/exclusive_min_max_3_1.yaml"), true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/constraint/exclusive_min_max_3_1.bal", syntaxTree);
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
+        boolean hasErrors = diagnostics.stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        assertFalse(hasErrors);
+    }
+
     @AfterMethod
     private void deleteGeneratedFiles() {
         try {

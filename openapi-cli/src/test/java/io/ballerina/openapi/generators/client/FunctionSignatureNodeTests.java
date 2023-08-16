@@ -81,7 +81,7 @@ public class FunctionSignatureNodeTests {
         Assert.assertEquals(param03.typeName().toString(), "string");
 
         Assert.assertEquals(param04.paramName().orElseThrow().text(), "pages");
-        Assert.assertEquals(param04.typeName().toString(), "int[]");
+        Assert.assertEquals(param04.typeName().toString(), "decimal[]");
 
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
         Assert.assertEquals(returnTypeNode.type().toString(), "Product[]|error");
@@ -183,7 +183,7 @@ public class FunctionSignatureNodeTests {
         Assert.assertFalse(parameters.isEmpty());
         RequiredParameterNode param01 = (RequiredParameterNode) parameters.get(0);
         Assert.assertEquals(param01.paramName().orElseThrow().text(), "payload");
-        Assert.assertEquals(param01.typeName().toString(), "CreatedPet");
+        Assert.assertEquals(param01.typeName().toString(), "CreatedPet_RequestBody");
     }
 
     @Test(description = "Test parameter generation for request body with unsupported (application/pdf) media type")
