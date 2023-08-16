@@ -164,7 +164,7 @@ task codeCoverageReport(type: JacocoReport) {
     dependsOn(":test")
     dependsOn(":openapi-extension-tests:jacocoTestReport")
     dependsOn(":openapi-integration-tests:jacocoTestReport")
-    dependsOn("::graphql-cli:jacocoTestReport")
+    dependsOn(":graphql-cli:jacocoTestReport")
 
     executionData fileTree(project.rootDir.absolutePath).include("**/build/coverage-reports/*.exec")
 
