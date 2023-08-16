@@ -64,7 +64,8 @@ public class PrimitiveTypeGenerator extends TypeGenerator {
             typeDescriptorName = enumGenerator.generateTypeDescriptorNode().toString();
             return createSimpleNameReferenceNode(
                     createIdentifierToken(typeDescriptorName));
-        } else if (schema.getType().equals(GeneratorConstants.STRING) && schema.getFormat() != null &&
+        } else if (GeneratorUtils.getOpenAPIType(schema).equals(GeneratorConstants.STRING) &&
+                schema.getFormat() != null &&
                 schema.getFormat().equals(GeneratorConstants.BINARY)) {
             typeDescriptorName = "record {byte[] fileContent; string fileName;}";
         }

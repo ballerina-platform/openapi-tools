@@ -15,8 +15,6 @@
  */
 
 module io.ballerina.openapi {
-    requires com.fasterxml.jackson.core;
-    requires com.fasterxml.jackson.databind;
     requires handlebars;
     requires info.picocli;
     requires io.ballerina.lang;

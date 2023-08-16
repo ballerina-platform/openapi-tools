@@ -19,6 +19,7 @@
 package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.mime.CustomType;
 import io.ballerina.openapi.core.generators.client.mime.JsonType;
@@ -63,7 +64,8 @@ public class MimeFactory {
             throws BallerinaOpenApiException {
 
         Schema requestBodySchema = mediaTypeEntry.getValue().getSchema();
-        if (requestBodySchema != null && (requestBodySchema.get$ref() != null || requestBodySchema.getType() != null
+        if (requestBodySchema != null && (requestBodySchema.get$ref() != null ||
+                GeneratorUtils.getOpenAPIType(requestBodySchema) != null
                 || requestBodySchema.getProperties() != null)) {
             String mediaType = mediaTypeEntry.getKey();
             if (mediaType.matches(".*/json") || mediaType.matches("application/.*\\+json")) {

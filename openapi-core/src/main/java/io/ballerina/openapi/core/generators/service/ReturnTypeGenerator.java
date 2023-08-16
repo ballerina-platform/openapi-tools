@@ -43,6 +43,7 @@ import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Content;
@@ -100,6 +101,7 @@ public class ReturnTypeGenerator {
     private final String pathRecord;
     private static int countForRecord = 0;
     private String httpMethod;
+    private OpenAPI openAPI;
 
     private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
 
@@ -115,9 +117,10 @@ public class ReturnTypeGenerator {
         setCount(count);
     }
 
-    public ReturnTypeGenerator(BallerinaTypesGenerator ballerinaSchemaGenerator, String pathRecord) {
+    public ReturnTypeGenerator(BallerinaTypesGenerator ballerinaSchemaGenerator, String pathRecord, OpenAPI openAPI) {
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.pathRecord = pathRecord;
+        this.openAPI = openAPI;
     }
 
     /**
@@ -325,17 +328,23 @@ public class ReturnTypeGenerator {
         for (Map.Entry<String, ApiResponse> response : responses.entrySet()) {
             String responseCode = response.getKey().trim();
             String code = GeneratorConstants.HTTP_CODES_DES.get(responseCode);
-            Content content = response.getValue().getContent();
+            ApiResponse responseValue = response.getValue();
+            Content content = responseValue != null ? responseValue.getContent() : null;
             String typeName = null;
 
             if (code == null && !responseCode.equals(GeneratorConstants.DEFAULT)) {
                 throw new BallerinaOpenApiException(String.format(OAS_SERVICE_107.getDescription(), responseCode));
             }
-
+            if (responseValue != null && responseValue.get$ref() != null) {
+                String[] splits = responseValue.get$ref().split("/");
+                String extractReferenceType = splits[splits.length - 1];
+                responseValue = openAPI.getComponents().getResponses().get(extractReferenceType);
+                content = responseValue.getContent();
+            }
             if (responseCode.equals(GeneratorConstants.DEFAULT)) {
                 TypeDescriptorNode record = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
                 typeName = record.toSourceCode();
-            } else if (content == null && response.getValue().get$ref() == null ||
+            } else if (content == null && (responseValue == null || responseValue.get$ref() == null) ||
                     content != null && content.size() == 0) {
                 //key and value
                 QualifiedNameReferenceNode node = GeneratorUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP,
@@ -356,8 +365,8 @@ public class ReturnTypeGenerator {
             }
             if (typeName != null) {
                 qualifiedNodes.add(typeName);
-                if (response.getValue().getDescription() != null && !response.getValue().getDescription().isEmpty()) {
-                    returnDescription.add(typeName.trim() + PIPE + response.getValue().getDescription().trim());
+                if (responseValue.getDescription() != null && !responseValue.getDescription().isEmpty()) {
+                    returnDescription.add(typeName.trim() + PIPE + responseValue.getDescription().trim());
                 }
             }
         }
