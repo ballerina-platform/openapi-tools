@@ -287,16 +287,14 @@ public class TypeGeneratorUtils {
             throws BallerinaOpenApiException {
         if (isConstraintAllowed(typeName, fieldSchema)) {
             String ballerinaType = convertOpenAPITypeToBallerina(fieldSchema);
-            //The current tool still supports byte and binary formats in string types.
-            //The rest of the string formats are mapped to the string type. Therefore, we do not provide constraint
-            //support for byte and binary formats.
-            //TODO: Please verify if constraints are supported when attempting to add new string format type support.
-            if ((GeneratorUtils.isStringSchema(fieldSchema) && ballerinaType.equals(STRING))) {
+            // For openAPI field schemas having 'string' type, constraints generation will be skipped when
+            // the counterpart Ballerina type is non-string (e.g. for string schemas with format 'binary' or 'byte',
+            // the counterpart ballerina type is 'byte[]', hence any string constraints cannot be applied)
+            if (ballerinaType.equals(STRING)) {
                 // Attributes : maxLength, minLength
                 return generateStringConstraint(fieldSchema);
-            } else if (GeneratorUtils.isNumberSchema(fieldSchema) && (ballerinaType.equals(DECIMAL) ||
-                    ballerinaType.equals(FLOAT)) || (GeneratorUtils.isIntegerSchema(fieldSchema) &&
-                    (ballerinaType.equals(INT) || ballerinaType.equals(INT_SIGNED32)))) {
+            } else if (ballerinaType.equals(DECIMAL) || ballerinaType.equals(FLOAT) || ballerinaType.equals(INT) ||
+                    ballerinaType.equals(INT_SIGNED32)) {
                 // Attribute : minimum, maximum, exclusiveMinimum, exclusiveMaximum
                 return generateNumberConstraint(fieldSchema);
             } else if (GeneratorUtils.isArraySchema(fieldSchema)) {

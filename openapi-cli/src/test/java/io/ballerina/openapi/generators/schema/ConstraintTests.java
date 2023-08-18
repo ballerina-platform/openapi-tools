@@ -247,7 +247,6 @@ public class ConstraintTests {
         SyntaxTree syntaxTreeV3 = schemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/format_type.bal", syntaxTreeV3);
-
     }
 
     @AfterMethod
