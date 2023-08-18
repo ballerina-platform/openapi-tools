@@ -21,7 +21,7 @@ components:
         name:
           type: string
         age:
-          type: age
+          type: integer
       additionalProperties:
           type: string
           minLength: 10

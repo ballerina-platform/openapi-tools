@@ -80,7 +80,14 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.core.GeneratorConstants.CONSTRAINT;
+import static io.ballerina.openapi.core.GeneratorConstants.DECIMAL;
+import static io.ballerina.openapi.core.GeneratorConstants.FLOAT;
+import static io.ballerina.openapi.core.GeneratorConstants.INT;
+import static io.ballerina.openapi.core.GeneratorConstants.INT_SIGNED32;
 import static io.ballerina.openapi.core.GeneratorConstants.NULL;
+import static io.ballerina.openapi.core.GeneratorConstants.STRING;
+import static io.ballerina.openapi.core.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIType;
 
 /**
  * Contains util functions needed for schema generation.
@@ -163,7 +170,7 @@ public class TypeGeneratorUtils {
     public static ImmutablePair<List<Node>, Set<String>> updateRecordFieldListWithImports(
             List<String> required, List<Node> recordFieldList, Map.Entry<String, Schema<?>> field,
             Schema<?> fieldSchema, NodeList<Node> schemaDocNodes, IdentifierToken fieldName,
-            TypeDescriptorNode fieldTypeName) {
+            TypeDescriptorNode fieldTypeName) throws BallerinaOpenApiException {
 
         return updateRecordFieldListWithImports(required, recordFieldList, field, fieldSchema, schemaDocNodes,
                 fieldName,
@@ -173,7 +180,7 @@ public class TypeGeneratorUtils {
     public static ImmutablePair<List<Node>, Set<String>> updateRecordFieldListWithImports(
             List<String> required, List<Node> recordFieldList, Map.Entry<String, Schema<?>> field,
             Schema<?> fieldSchema, NodeList<Node> schemaDocNodes, IdentifierToken fieldName,
-            TypeDescriptorNode fieldTypeName, PrintStream outStream) {
+            TypeDescriptorNode fieldTypeName, PrintStream outStream) throws BallerinaOpenApiException {
 
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
         Set<String> imports = new HashSet<>();
@@ -276,12 +283,20 @@ public class TypeGeneratorUtils {
      * @param fieldSchema Schema for data type
      * @return {@link MetadataNode}
      */
-    public static AnnotationNode generateConstraintNode(String typeName, Schema<?> fieldSchema) {
+    public static AnnotationNode generateConstraintNode(String typeName, Schema<?> fieldSchema)
+            throws BallerinaOpenApiException {
         if (isConstraintAllowed(typeName, fieldSchema)) {
-            if (GeneratorUtils.isStringSchema(fieldSchema)) {
+            String ballerinaType = convertOpenAPITypeToBallerina(fieldSchema);
+            //The current tool still supports byte and binary formats in string types.
+            //The rest of the string formats are mapped to the string type. Therefore, we do not provide constraint
+            //support for byte and binary formats.
+            //TODO: Please verify if constraints are supported when attempting to add new string format type support.
+            if ((GeneratorUtils.isStringSchema(fieldSchema) && ballerinaType.equals(STRING))) {
                 // Attributes : maxLength, minLength
                 return generateStringConstraint(fieldSchema);
-            } else if (GeneratorUtils.isNumberSchema(fieldSchema) || GeneratorUtils.isIntegerSchema(fieldSchema)) {
+            } else if (GeneratorUtils.isNumberSchema(fieldSchema) && (ballerinaType.equals(DECIMAL) ||
+                    ballerinaType.equals(FLOAT)) || (GeneratorUtils.isIntegerSchema(fieldSchema) &&
+                    (ballerinaType.equals(INT) || ballerinaType.equals(INT_SIGNED32)))) {
                 // Attribute : minimum, maximum, exclusiveMinimum, exclusiveMaximum
                 return generateNumberConstraint(fieldSchema);
             } else if (GeneratorUtils.isArraySchema(fieldSchema)) {
@@ -297,7 +312,7 @@ public class TypeGeneratorUtils {
     public static boolean isConstraintAllowed(String typeName, Schema schema) {
 
         boolean isConstraintNotAllowed = schema.getNullable() != null && schema.getNullable() ||
-                (schema.getOneOf() != null || schema.getAnyOf() != null);
+                (schema.getOneOf() != null || schema.getAnyOf() != null) || getOpenAPIType(schema) == null;
         boolean nullable = GeneratorMetaData.getInstance().isNullable();
         if (nullable) {
             return false;
@@ -322,7 +337,7 @@ public class TypeGeneratorUtils {
                 GeneratorConstants.CLOSE_BRACE;
         AnnotationNode annotationNode;
         if (GeneratorUtils.isNumberSchema(fieldSchema)) {
-            if (fieldSchema.getFormat() != null && fieldSchema.getFormat().equals(GeneratorConstants.FLOAT)) {
+            if (fieldSchema.getFormat() != null && fieldSchema.getFormat().equals(FLOAT)) {
                 annotationNode = createAnnotationNode(GeneratorConstants.CONSTRAINT_FLOAT, annotBody);
             } else {
                 annotationNode = createAnnotationNode(GeneratorConstants.CONSTRAINT_NUMBER, annotBody);
