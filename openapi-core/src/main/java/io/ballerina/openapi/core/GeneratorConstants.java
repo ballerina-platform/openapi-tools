@@ -313,7 +313,8 @@ public class GeneratorConstants {
         typeToFormatMap.put("string", List.of("date", "date-time", "password", "byte", "binary"));
         OPENAPI_TYPE_TO_FORMAT_MAP = Collections.unmodifiableMap(typeToFormatMap);
 
-        // Add values to `OPENAPI_TYPE_TO_BAL_TYPE_MAP`
+        // Add values to `OPENAPI_TYPE_TO_BAL_TYPE_MAP`,
+        // ***Note: If any new format is added, Please check the constraint support also.***
         Map<String, String> typeMap = new HashMap<>();
         typeMap.put("integer", "int");
         typeMap.put("string", "string");
@@ -403,4 +404,7 @@ public class GeneratorConstants {
     public static final String HTTP_CALLER = "http:Caller";
     public static final String CALLER = "caller";
     public static final String NULL = "null";
+    public static final String INT = "int";
+    public static final String INT_SIGNED32 = "int:Signed32";
+    public static final String DECIMAL = "decimal";
 }

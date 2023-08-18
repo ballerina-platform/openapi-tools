@@ -112,7 +112,9 @@ public class ComparedGeneratedFileTests {
                 {"multiline_param_comment.yaml", "multiline_param_comment.bal"},
                 {"description_with_special_characters.yaml", "description_with_special_characters.bal"},
                 {"header_with_enum.yaml", "header_with_enum.bal"},
-                {"incorrect_format.yaml", "incorrect_format.bal"}
+                {"incorrect_format.yaml", "incorrect_format.bal"},
+                {"format_types_v3_0.yaml", "format_types_v3_0.bal"},
+                {"format_types_v3_1.yaml", "format_types_v3_1.bal"}
         };
     }
 

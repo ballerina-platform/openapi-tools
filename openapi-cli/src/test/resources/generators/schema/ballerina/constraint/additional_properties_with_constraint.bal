@@ -1,6 +1,6 @@
 public type Additional_Primitive record {|
     string name?;
-    anydata age?;
+    int age?;
     string...;
 |};
 
