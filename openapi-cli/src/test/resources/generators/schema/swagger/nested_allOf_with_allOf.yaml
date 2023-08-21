@@ -68,3 +68,50 @@ components:
         - properties:
             zipCode:
               type: integer
+    user:
+      description: "Nested allOf with reference"
+      allOf:
+        - $ref: "#/components/schemas/account"
+        - title: User
+          type: object
+          properties:
+            is_staff:
+              type: boolean
+              description: Indicates whether the user represents staff
+            account_id:
+              type: string
+              description: The user's Atlassian account ID
+          description: A user object
+    account:
+      description: "Make this object schema name with simple case because the tool will convert it to camel case."
+      allOf:
+        - title: Account
+          type: object
+          properties:
+            username:
+              type: string
+              description: Username of the account
+            nickname:
+              type: string
+            account_status:
+              type: string
+              description:
+                The status of the account. Currently the only possible value
+                is "active", but more values may be added in the future
+            display_name:
+              type: string
+              description: Display name of the account
+            website:
+              type: string
+              description: Website of the account
+            created_on:
+              type: string
+              format: date-time
+              description: The created date of the account
+            uuid:
+              type: string
+              description: The UUID of the account
+            has_2fa_enabled:
+              type: boolean
+              description: Indicates whether two factor authentication is on
+          description: An account object.

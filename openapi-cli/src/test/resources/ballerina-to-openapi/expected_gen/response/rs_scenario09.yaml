@@ -36,8 +36,8 @@ paths:
     post:
       operationId: postHi
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             application/json:
               schema:
@@ -60,11 +60,11 @@ paths:
             format: int64
       responses:
         "500":
-          description: Found unexpected output
+          description: Internal server error
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/ErrorPayload'
   /v1:
     post:
       operationId: postV1
@@ -78,6 +78,28 @@ paths:
           description: NotFound
 components:
   schemas:
+    ErrorPayload:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Reason phrase
+        path:
+          type: string
+          description: Request path
+        method:
+          type: string
+          description: Method type of the request
+        message:
+          type: string
+          description: Error message
+        timestamp:
+          type: string
+          description: Timestamp of the error
+        status:
+          type: integer
+          description: Relevant HTTP status code
+          format: int32
     Pet:
       required:
         - id

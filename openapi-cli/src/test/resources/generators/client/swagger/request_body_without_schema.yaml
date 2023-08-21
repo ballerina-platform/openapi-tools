@@ -46,7 +46,6 @@ paths:
           required: false
           schema:
             type: integer
-            format: int32
       requestBody:
         description: Pet
         content:

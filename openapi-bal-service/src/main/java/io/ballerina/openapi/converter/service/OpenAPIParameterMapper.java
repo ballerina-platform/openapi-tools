@@ -195,8 +195,13 @@ public class OpenAPIParameterMapper {
         for (AnnotationNode annotation: annotations) {
             if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
                 // Handle headers.
-                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(apidocs);
+                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(components, semanticModel, apidocs);
                 parameters.addAll(openAPIHeaderMapper.setHeaderParameter(requiredParameterNode));
+            } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_QUERY)) {
+                // Handle query parameter.
+                OpenAPIQueryParameterMapper openAPIQueryParameterMapper = new OpenAPIQueryParameterMapper(apidocs,
+                        components, semanticModel);
+                parameters.add(openAPIQueryParameterMapper.createQueryParameter(requiredParameterNode));
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
                     (!Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(
                             operationAdaptor.getHttpOperation()))) {
@@ -228,8 +233,13 @@ public class OpenAPIParameterMapper {
         for (AnnotationNode annotation: annotations) {
             if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
                 // Handle headers.
-                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(apidocs);
+                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(components, semanticModel, apidocs);
                 parameters = openAPIHeaderMapper.setHeaderParameter(defaultableParameterNode);
+            } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_QUERY)) {
+                // Handle query parameter.
+                OpenAPIQueryParameterMapper openAPIQueryParameterMapper = new OpenAPIQueryParameterMapper(apidocs,
+                        components, semanticModel);
+                parameters.add(openAPIQueryParameterMapper.createQueryParameter(defaultableParameterNode));
             }
         }
         return parameters;

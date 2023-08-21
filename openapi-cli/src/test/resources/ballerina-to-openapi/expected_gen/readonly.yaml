@@ -1,0 +1,78 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /lifts:
+    get:
+      summary: A list of all `Lift`s
+      operationId: getLifts
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            nullable: true
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LiftRecord'
+  /lift:
+    get:
+      summary: "Returns a `Lift` by `id` (id: \"panorama\")"
+      operationId: getLift
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiftRecord'
+components:
+  schemas:
+    LiftRecord:
+      required:
+        - capacity
+        - elevationgain
+        - id
+        - name
+        - night
+        - status
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+            - HOLD
+            - CLOSED
+            - OPEN
+        capacity:
+          type: integer
+          format: int64
+        night:
+          type: boolean
+        elevationgain:
+          type: integer
+          format: int64

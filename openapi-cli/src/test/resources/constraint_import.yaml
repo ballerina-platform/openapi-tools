@@ -1,0 +1,46 @@
+openapi: 3.0.1
+info:
+  title: V4
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/v4"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /pet:
+    post:
+      operationId: operation_post_/pet
+      responses:
+        "202":
+          description: Accepted
+    get:
+      tags:
+        - pets
+      operationId: getPet
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 10
+        age:
+          type: integer
+    Pet:
+      type: object
+      properties:
+        name:
+          type: string
+        owned_by:
+          type: string

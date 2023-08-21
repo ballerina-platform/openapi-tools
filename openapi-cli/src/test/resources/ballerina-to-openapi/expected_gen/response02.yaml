@@ -14,8 +14,8 @@ paths:
     post:
       operationId: postUser
       responses:
-        "200":
-          description: Ok
+        "201":
+          description: Created
           content:
             text/plain:
               schema:

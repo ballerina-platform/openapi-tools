@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.generators.openapi;
 
-import io.ballerina.openapi.converter.OpenApiConverterException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
@@ -42,63 +41,63 @@ public class HeaderTests {
     }
 
     @Test(description = "Generate OpenAPI spec with header type parameter")
-    public void testHeadscenario01() throws OpenApiConverterException, IOException {
+    public void testHeadscenario01() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("header_scenario01.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario01.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec with header type parameter with annotation values")
-    public void testHeadersWithAnnotation() throws OpenApiConverterException, IOException {
+    public void testHeadersWithAnnotation() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("header_scenario02.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario02.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec with header type parameter without curly brace")
-    public void testHeadersWithOutCurlyBrace() throws OpenApiConverterException, IOException {
+    public void testHeadersWithOutCurlyBrace() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("header_scenario03.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario03.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec with for multiple headers")
-    public void testWithMultipleHeaders() throws OpenApiConverterException, IOException {
+    public void testWithMultipleHeaders() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("header_scenario04.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario04.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec with for optional headers")
-    public void testOptionalHeaders() throws OpenApiConverterException, IOException {
+    public void testOptionalHeaders() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("header_scenario05.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario05.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec with when the service config has nullable and optional enable field")
-    public void testHeadersWithAnnotations() throws OpenApiConverterException, IOException {
+    public void testHeadersWithAnnotations() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("header_scenario06.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario06.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec when the header has defaultable parameter")
-    public void testHeadersWithDefaultValue() throws OpenApiConverterException, IOException {
+    public void testHeadersWithDefaultValue() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("header_scenario07.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario07.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec when the header has defaultable parameter with nullable enable data " +
             "type")
-    public void testHeadersWithDefaultValueWithNullable() throws OpenApiConverterException, IOException {
+    public void testHeadersWithDefaultValueWithNullable() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("header_scenario08.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario08.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec when the header has defaultable parameter with nullable enable data " +
             "type and service config enable")
-    public void testHeadersWithDefaultValueWithNullableServiceConfig() throws OpenApiConverterException, IOException {
+    public void testHeadersWithDefaultValueWithNullableServiceConfig() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("header_scenario09.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario09.yaml");
     }
 
     @Test(description = "Tests for header parameter has default value as expression")
-    public void testHeaderWithDefaultExpressionValue() throws OpenApiConverterException, IOException {
+    public void testHeaderWithDefaultExpressionValue() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("header_scenario10.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario10.yaml");
     }

@@ -25,6 +25,7 @@ under the License.
         <classes>
             <class name="io.ballerina.openapi.cmd.OpenAPICmdTest"/>
             <class name="io.ballerina.openapi.cmd.BallerinaToOASTests"/>
+            <class name="io.ballerina.openapi.cmd.BallerinaCodeGeneratorLicenseTests"/>
             <class name="io.ballerina.openapi.generators.openapi.OpenApiConverterUtilsTest"/>
             <class name="io.ballerina.openapi.generators.openapi.RequestBodyTest"/>
             <class name="io.ballerina.openapi.generators.openapi.RecordTests"/>
@@ -42,6 +43,8 @@ under the License.
             <class name="io.ballerina.openapi.generators.openapi.ResponseHeaderTests"/>
             <class name="io.ballerina.openapi.generators.openapi.MapTypeTests"/>
             <class name="io.ballerina.openapi.generators.openapi.ConstraintTests"/>
+            <class name="io.ballerina.openapi.generators.openapi.ParameterAnnotationTests"/>
+            <class name="io.ballerina.openapi.generators.openapi.UnSupportedBallerinaFileTests"/>
             <class name="io.ballerina.openapi.cmd.OpenApiGenServiceCmdTest"/>
             <class name="io.ballerina.openapi.cmd.BallerinaToOASTests"/>
             <class name="io.ballerina.openapi.CodeGeneratorTest"/>
@@ -54,6 +57,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.service.HeaderTests"/>
             <class name="io.ballerina.openapi.generators.service.QueryParameterTests"/>
             <class name="io.ballerina.openapi.generators.service.HeaderParameterTests"/>
+            <class name="io.ballerina.openapi.generators.service.ServiceDiagnosticTests"/>
             <class name="io.ballerina.openapi.generators.client.ImportsTests"/>
             <class name="io.ballerina.openapi.generators.client.BallerinaDiagnosticTests"/>
             <class name="io.ballerina.openapi.generators.client.ComparedGeneratedFileTests"/>
@@ -71,10 +75,12 @@ under the License.
             <class name="io.ballerina.openapi.generators.client.RequestBodyTests"/>
             <class name="io.ballerina.openapi.generators.client.UtilGenerationTests"/>
             <class name="io.ballerina.openapi.generators.client.ResourceFunctionTests"/>
+            <class name="io.ballerina.openapi.generators.client.EnumGenerationTests"/>
             <class name="io.ballerina.openapi.generators.auth.HttpAuthTests"/>
             <class name="io.ballerina.openapi.generators.auth.OAuth2Tests"/>
             <class name="io.ballerina.openapi.generators.auth.ApiKeyAuthTests"/>
             <class name="io.ballerina.openapi.generators.auth.MixedApiKeyAndHTTPAuthTests"/>
+            <class name="io.ballerina.openapi.generators.auth.HttpConfigurationExtensionTests"/>
             <class name="io.ballerina.openapi.generators.schema.AdvanceRecordTypeTests"/>
             <class name="io.ballerina.openapi.generators.schema.AnyOfDataTypeTests"/>
             <class name="io.ballerina.openapi.generators.schema.ArrayDataTypeTests"/>
@@ -91,6 +97,11 @@ under the License.
             <class name="io.ballerina.openapi.generators.schema.FieldGenWithNullableOption"/>
             <class name="io.ballerina.openapi.generators.schema.AnnotationTests"/>
             <class name="io.ballerina.openapi.generators.schema.ConstraintTests"/>
+            <class name="io.ballerina.openapi.generators.schema.MapSchemaTests"/>
+            <class name="io.ballerina.openapi.generators.schema.MapSchemaNegativeTests"/>
+            <class name="io.ballerina.openapi.generators.schema.IntegerDataTypeTests"/>
+            <class name="io.ballerina.openapi.generators.schema.EnumGenerationTests"/>
+            <class name="io.ballerina.openapi.generators.schema.NegativeConstraintTests"/>
             <class name="io.ballerina.openapi.generators.testcases.BallerinaTestGeneratorTests"/>
             <class name="io.ballerina.openapi.generators.client.OneOfResponsesTests"/>
             <class name="io.ballerina.openapi.generators.openapi.DataTypeTests"/>

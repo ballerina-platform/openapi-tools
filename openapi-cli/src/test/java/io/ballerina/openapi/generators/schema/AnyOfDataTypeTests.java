@@ -19,9 +19,11 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.CodeGenerator;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.model.GeneratorMetaData;
+import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.UnionTypeGenerator;
+import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -31,28 +33,26 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
 /**
- * All the tests related to AnyDataType handling the
- * {@link io.ballerina.openapi.generators.client.BallerinaClientGenerator} util.
+ * Test implementation to verify the `anyOf` property related scenarios in openAPI schema generation, handled by
+ * the {@link BallerinaTypesGenerator}.
  */
 public class AnyOfDataTypeTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    CodeGenerator codeGenerator = new CodeGenerator();
 
+    private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
 
     @Test(description = "Test for the schema has anyOf dataType")
     public void testAnyOfInSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
-        Schema schema = openAPI.getComponents().getSchemas().get("AnyOF");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        Schema<?> schema = openAPI.getComponents().getSchemas().get("AnyOF");
         ComposedSchema composedSchema = (ComposedSchema) schema;
-        List<Schema> anyOf = composedSchema.getAnyOf();
-        GeneratorMetaData.createInstance(openAPI, false);
-        String anyOfUnionType = TypeGeneratorUtils.getUnionType(anyOf, "AnyOF").toString().trim();
+        GeneratorMetaData.createInstance(openAPI, false, false);
+        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "AnyOF");
+        String anyOfUnionType = unionTypeGenerator.generateTypeDescriptorNode().toString().trim();
         Assert.assertEquals(anyOfUnionType, "User|Activity");
     }
 
@@ -60,7 +60,7 @@ public class AnyOfDataTypeTests {
     public void testAnyOfSchema() throws BallerinaOpenApiException, IOException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/schema15.bal");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);

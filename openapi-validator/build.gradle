@@ -33,7 +33,7 @@ configurations {
 
 dependencies {
     implementation "io.swagger.core.v3:swagger-models"
-    implementation ("io.swagger.parser.v3:swagger-parser-v2-converter")  {
+    implementation ("io.swagger.parser.v3:swagger-parser:${swaggerParserVersion}") {
         exclude group: "io.swagger", module: "swagger-compat-spec-parser"
         exclude group: "org.slf4j", module: "slf4j-ext"
         exclude group: "javax.validation", module: "validation-api"
@@ -89,6 +89,7 @@ task copyStdlibs(type: Copy) {
     dependsOn(copyOpenAPI)
     def ballerinaDist = "$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}"
     into ballerinaDist
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     /* Standard Libraries */
     configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
@@ -109,7 +110,7 @@ clean {
 
 jar {
     enabled = false
-    dependsOn(shadowJar { classifier = null })
+    dependsOn(shadowJar { archiveClassifier = null })
 }
 
 shadowJar {
@@ -124,7 +125,6 @@ shadowJar {
         include(dependency('io.swagger.core.v3:swagger-models'))
         include(dependency('io.swagger.parser.v3:swagger-parser'))
         include(dependency('io.swagger.parser.v3:swagger-parser-core'))
-        include(dependency('io.swagger.parser.v3:swagger-parser-v2-converter'))
         include(dependency('io.swagger.parser.v3:swagger-parser-v3'))
         exclude('META-INF/*.SF')
         exclude('META-INF/*.DSA')

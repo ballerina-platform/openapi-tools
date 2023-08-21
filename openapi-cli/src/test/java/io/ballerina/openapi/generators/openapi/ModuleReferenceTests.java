@@ -66,4 +66,28 @@ public class ModuleReferenceTests {
         Path ballerinaFilePath = RES_DIR.resolve("response_annotation.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/response_annotation.yaml");
     }
+
+    @Test
+    public void testRecordReferenceWithReadOnly() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("readonly.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "readonly.yaml");
+    }
+
+    @Test (enabled = false)
+    public void testListenersInSeparateModule() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners_in_separate_module.bal");
+        String osName = System.getProperty("os.name");
+        String yamlFile = osName.toLowerCase().contains("windows") ? "windows_listeners_in_separate_module.yaml"
+                : "listeners_in_separate_module.yaml";
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, yamlFile);
+    }
+
+    @Test (enabled = false)
+    public void testListenersInSeparateFiles() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners_in_separate_file.bal");
+        String osName = System.getProperty("os.name");
+        String yamlFile = osName.toLowerCase().contains("windows") ? "windows_listeners_in_separate_file.yaml"
+                : "listeners_in_separate_file.yaml";
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, yamlFile);
+    }
 }

@@ -15,22 +15,19 @@
  */
 
 module io.ballerina.openapi.converter {
-    requires com.fasterxml.jackson.core;
-    requires com.fasterxml.jackson.databind;
     requires handlebars;
     requires info.picocli;
     requires io.ballerina.lang;
     requires io.ballerina.parser;
     requires io.ballerina.tools.api;
+    requires io.ballerina.runtime;
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
     requires java.ws.rs;
     requires jsr305;
     requires org.apache.commons.io;
     requires org.slf4j;
-    requires swagger.core;
     requires swagger.parser;
-    requires swagger.models;
     requires swagger.parser.core;
     requires swagger.parser.v2.converter;
     requires swagger.parser.v3;

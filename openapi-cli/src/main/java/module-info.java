@@ -15,8 +15,6 @@
  */
 
 module io.ballerina.openapi {
-    requires com.fasterxml.jackson.core;
-    requires com.fasterxml.jackson.databind;
     requires handlebars;
     requires info.picocli;
     requires io.ballerina.lang;
@@ -32,19 +30,11 @@ module io.ballerina.openapi {
     requires jsr305;
     requires org.apache.commons.io;
     requires org.slf4j;
-    requires swagger.core;
     requires swagger.parser;
-    requires swagger.models;
     requires swagger.parser.core;
-    requires swagger.parser.v2.converter;
     requires swagger.parser.v3;
     requires org.apache.commons.lang3;
-    exports io.ballerina.openapi.generators.openapi;
+    requires io.ballerina.openapi.core;
     exports io.ballerina.openapi.cmd;
-    exports io.ballerina.openapi.exception;
-    exports io.ballerina.openapi.cmd.model;
-    exports io.ballerina.openapi.generators.schema;
-    exports io.ballerina.openapi.generators.schema.model;
-    exports io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 }
 

@@ -4,7 +4,7 @@ public isolated client class Client {
     public final http:Client clientEp;
     # Gets invoked to initialize the `connector`.
     #
-    # + clientConfig - The configurations to be used when initializing the `connector`
+    # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
     public isolated function init(string serviceUrl = "http://localhost:9090/petstore/v1", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
@@ -20,7 +20,7 @@ public isolated client class Client {
     remote isolated function createPet(Pet payload) returns http:Response | error {
         string resourcePath = string `/pet`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         http:Response  response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -33,7 +33,6 @@ public isolated client class Client {
     remote isolated function deletepetsBypetId(int petId) returns http:Response | error {
         string resourcePath = string `/pets/${getEncodedUri(petId)}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }

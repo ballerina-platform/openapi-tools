@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.generators.openapi;
 
+import io.ballerina.openapi.cmd.OASContractGenerator;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -50,13 +51,25 @@ public class HttpMethodTests {
     @Test(description = "Compiler warning for 'default' resource methods.")
     public void testForCompilerWarningForDefault() {
         Path ballerinaFilePath = RES_DIR.resolve("default_bal.bal");
-        OpenApiConverter openApiConverter = new OpenApiConverter();
+        OASContractGenerator openApiConverter = new OASContractGenerator();
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                 , false);
         List<OpenAPIConverterDiagnostic> errors = openApiConverter.getErrors();
         Assert.assertFalse(errors.isEmpty());
         Assert.assertEquals(errors.get(0).getMessage(), "Generated OpenAPI definition does not " +
                 "contain details for the `default` resource method in the Ballerina service.");
+    }
+
+    @Test
+    public void testForPostMethodStatusCodeMapping() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("post_method.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "post_method.yaml");
+    }
+
+    @Test
+    public void testForResourceWithCatchAllPath() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("catch_all_path_service.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "catch_all_path_service.yaml");
     }
 
     @AfterMethod

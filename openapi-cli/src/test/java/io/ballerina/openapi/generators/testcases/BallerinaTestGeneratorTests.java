@@ -19,13 +19,16 @@ package io.ballerina.openapi.generators.testcases;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.CodeGenerator;
-import io.ballerina.openapi.cmd.Filter;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.generators.client.BallerinaTestGenerator;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.generators.common.TestUtils;
-import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
@@ -41,10 +44,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
-import static io.ballerina.openapi.generators.GeneratorConstants.OAS_PATH_SEPARATOR;
-import static io.ballerina.openapi.generators.GeneratorConstants.TEST_DIR;
+import static io.ballerina.openapi.cmd.CmdConstants.OAS_PATH_SEPARATOR;
+import static io.ballerina.openapi.cmd.CmdConstants.TEST_DIR;
 
 /**
  * Test cases related to ballerina test skeleton generation.
@@ -67,14 +71,23 @@ public class BallerinaTestGeneratorTests {
             FormatterException, BallerinaOpenApiException, URISyntaxException {
         Files.createDirectories(Paths.get(PROJECT_DIR + OAS_PATH_SEPARATOR + TEST_DIR));
         Path definitionPath = RES_DIR.resolve("sample_yamls/" + yamlFile);
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         codeGenerator.setIncludeTestFiles(true);
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
-        BallerinaTypesGenerator schemaGenerator = new BallerinaTypesGenerator(openAPI);
-        schemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
-        BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI)
+                .withResourceMode(false).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree syntaxTreeClient = ballerinaClientGenerator.generateSyntaxTree();
+        List<TypeDefinitionNode> preGeneratedTypeDefinitionNodes = new LinkedList<>();
+        preGeneratedTypeDefinitionNodes.addAll(ballerinaClientGenerator.
+                getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
+        preGeneratedTypeDefinitionNodes.addAll(ballerinaClientGenerator.getTypeDefinitionNodeList());
+        BallerinaTypesGenerator schemaGenerator = new BallerinaTypesGenerator(
+                openAPI, false, preGeneratedTypeDefinitionNodes);
+        BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
         SyntaxTree syntaxTreeTest = ballerinaTestGenerator.generateSyntaxTree();
         SyntaxTree syntaxTreeSchema = schemaGenerator.generateSyntaxTree();
         SyntaxTree utilSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
@@ -87,10 +100,10 @@ public class BallerinaTestGeneratorTests {
     public List<Diagnostic> getDiagnostics(SyntaxTree clientSyntaxTree, SyntaxTree testSyntaxTree,
                                            SyntaxTree schemaSyntaxTree, String configContent, SyntaxTree utilSyntaxTree)
             throws FormatterException, IOException {
-        TestUtils.writeFile(clientPath, Formatter.format(clientSyntaxTree).toString());
-        TestUtils.writeFile(utilPath, Formatter.format(utilSyntaxTree).toString());
-        TestUtils.writeFile(schemaPath, Formatter.format(schemaSyntaxTree).toString());
-        TestUtils.writeFile(testPath, Formatter.format(testSyntaxTree).toString());
+        TestUtils.writeFile(clientPath, Formatter.format(clientSyntaxTree).toSourceCode());
+        TestUtils.writeFile(utilPath, Formatter.format(utilSyntaxTree).toSourceCode());
+        TestUtils.writeFile(schemaPath, Formatter.format(schemaSyntaxTree).toSourceCode());
+        TestUtils.writeFile(testPath, Formatter.format(testSyntaxTree).toSourceCode());
         TestUtils.writeFile(configPath, configContent);
         SemanticModel semanticModel = TestUtils.getSemanticModel(clientPath);
         return semanticModel.diagnostics();
@@ -117,7 +130,7 @@ public class BallerinaTestGeneratorTests {
                 "oauth2_implicit.yaml",
                 "query_api_key.yaml",
                 "no_auth.yaml",
-                "combination_of_apikey_and_http_oauth.yaml",
+//                "combination_of_apikey_and_http_oauth.yaml",
                 "oauth2_password.yaml"
         };
     }

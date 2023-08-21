@@ -11,11 +11,23 @@ paths:
       summary: Product Types
       operationId: getProducts
       description: The Products endpoint returns information about the Uber products
-        offered at a given location. The response includes the display name and
-        other details about each product, and lists the products in the proper
-        display order.
+        offered at a given location.
       tags:
         - Products
+      parameters:
+        - in: query
+          name: subscription_default_tax_rates
+          required: false
+          schema:
+            anyOf:
+              - items:
+                  maxLength: 5000
+                  type: string
+                type: array
+              - enum:
+                  - ''
+                type: string
+          style: deepObject
       responses:
         "200":
           description: An array of products
@@ -34,6 +46,15 @@ components:
         last_name:
           type: string
           description: Last name of the Uber user.
+        tax_rates:
+          anyOf:
+            - items:
+                maxLength: 5000
+                type: string
+              type: array
+            - enum:
+                - ''
+              type: string
     Activity:
       properties:
         uuid:
@@ -43,7 +64,6 @@ components:
       properties:
         offset:
           type: integer
-          format: int32
           description: Position in pagination.
         history:
           type: array

@@ -3,7 +3,7 @@ org= "ballerina"
 name= "openapi"
 version= "@toml.version@"
 
-[[platform.java11.dependency]]
+[[platform.java17.dependency]]
 path = "../openapi-validator/build/libs/openapi-validator-@project.version@.jar"
 groupId = "ballerina"
 artifactId = "openapi"

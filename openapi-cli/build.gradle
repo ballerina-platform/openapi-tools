@@ -17,7 +17,7 @@
 
 apply from: "$rootDir/gradle/javaProject.gradle"
 apply plugin: "com.github.johnrengelman.shadow"
-apply plugin: "java"
+apply plugin: "java-library"
 
 description = "Ballerina - OpenAPI Tooling - OpenAPI to Ballerina"
 
@@ -31,13 +31,13 @@ configurations {
 
 dependencies {
     implementation project(':openapi-bal-service')
-    implementation "com.fasterxml.jackson.core:jackson-databind"
-    implementation "io.swagger.core.v3:swagger-models"
-    implementation ("io.swagger.parser.v3:swagger-parser-v2-converter") {
+    implementation project(':openapi-core')
+    implementation ("io.swagger.parser.v3:swagger-parser:${swaggerParserVersion}") {
         exclude group: "io.swagger", module: "swagger-compat-spec-parser"
         exclude group: "org.slf4j", module: "slf4j-ext"
         exclude group: "javax.validation", module: "validation-api"
     }
+    implementation "io.swagger.core.v3:swagger-models"
     implementation "javax.ws.rs:javax.ws.rs-api"
     implementation "com.github.jknack:handlebars"
     implementation "info.picocli:picocli"
@@ -49,6 +49,7 @@ dependencies {
     implementation "io.ballerina.stdlib:http-native"
     implementation "com.google.code.findbugs:jsr305"
     testImplementation "org.testng:testng"
+    testImplementation 'junit:junit:4.13.1'
 
     balTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
@@ -84,6 +85,7 @@ task copyStdlibs(type: Copy) {
     dependsOn(unpackStdLibs)
     def ballerinaDist = "$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}"
     into ballerinaDist
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     /* Standard Libraries */
     configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->

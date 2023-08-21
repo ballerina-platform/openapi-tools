@@ -18,8 +18,10 @@
 
 package io.ballerina.openapi.generators.schema;
 
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.GeneratorUtils;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
 
@@ -52,5 +54,15 @@ public class SwaggerFileParserTests {
             expectedExceptions = BallerinaOpenApiException.class)
     public void testInvalidFile() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("swagger/invalid.yaml"));
+    }
+
+    @Test(description = "Test swagger file has undocumented reference in schema.",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "OpenAPI definition has errors: \n" +
+                    "attribute components.schemas.Person.Person01 is not of type `schema`.*")
+    public void testForUndocumentedReference() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/undocument_ref.yaml"), true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
     }
 }

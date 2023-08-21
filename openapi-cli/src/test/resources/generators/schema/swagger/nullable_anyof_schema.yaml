@@ -30,7 +30,7 @@ paths:
               properties:
                 address:
                   anyOf:
-                    - $ref: "#/components/schemas/customer_adresss"
+                    - $ref: "#/components/schemas/customer_address"
                     - type: string
                   nullable: true
                   description: The customer's address.
@@ -50,7 +50,7 @@ paths:
           description: Successful response.
 components:
   schemas:
-    customer_adresss:
+    customer_address:
       properties:
         city:
           maxLength: 5000
@@ -76,7 +76,7 @@ components:
       properties:
         address:
           anyOf:
-            - "$ref": "#/components/schemas/customer_adresss"
+            - "$ref": "#/components/schemas/customer_address"
           description: The customer's address.
           nullable: true
         name:

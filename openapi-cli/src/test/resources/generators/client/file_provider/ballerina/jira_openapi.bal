@@ -67,7 +67,7 @@ public isolated client class Client {
     remote isolated function updateCustomFieldValue(string fieldIdOrKey, CustomFieldValueUpdateRequest payload) returns json|error {
         string resourcePath = string `/rest/api/2/app/field/${fieldIdOrKey}/value`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -87,7 +87,7 @@ public isolated client class Client {
     remote isolated function setApplicationProperty(string id, SimpleApplicationPropertyBean payload) returns ApplicationProperty|error {
         string resourcePath = string `/rest/api/2/application-properties/${id}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ApplicationProperty response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -115,7 +115,6 @@ public isolated client class Client {
     remote isolated function removeAttachment(string id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/attachment/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -146,7 +145,7 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         PageBeanComment response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -164,7 +163,7 @@ public isolated client class Client {
     remote isolated function setCommentProperty(string commentId, string propertyKey, json payload) returns json|error {
         string resourcePath = string `/rest/api/2/comment/${commentId}/properties/${propertyKey}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -172,14 +171,13 @@ public isolated client class Client {
     remote isolated function deleteCommentProperty(string commentId, string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/comment/${commentId}/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
     remote isolated function createComponent(Component payload) returns Component|error {
         string resourcePath = string `/rest/api/2/component`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Component response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -192,7 +190,7 @@ public isolated client class Client {
     remote isolated function updateComponent(string id, Component payload) returns Component|error {
         string resourcePath = string `/rest/api/2/component/${id}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Component response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -202,7 +200,6 @@ public isolated client class Client {
         map<anydata> queryParam = {moveIssuesTo: moveIssuesTo};
         resourcePath = resourcePath + check check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -224,7 +221,7 @@ public isolated client class Client {
     remote isolated function selectTimeTrackingImplementation(TimeTrackingProvider payload) returns json|error {
         string resourcePath = string `/rest/api/2/configuration/timetracking`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -242,7 +239,7 @@ public isolated client class Client {
     remote isolated function setSharedTimeTrackingConfiguration(TimeTrackingConfiguration payload) returns TimeTrackingConfiguration|error {
         string resourcePath = string `/rest/api/2/configuration/timetracking/options`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         TimeTrackingConfiguration response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -257,7 +254,7 @@ public isolated client class Client {
     remote isolated function updateCustomFieldOptions(int fieldId, UpdateCustomFieldOption payload) returns json|error {
         string resourcePath = string `/rest/api/2/customField/${fieldId}/option`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -265,7 +262,7 @@ public isolated client class Client {
     remote isolated function createCustomFieldOptions(int fieldId, BulkCreateCustomFieldOptionRequest payload) returns json|error {
         string resourcePath = string `/rest/api/2/customField/${fieldId}/option`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -285,7 +282,7 @@ public isolated client class Client {
     remote isolated function createDashboard(DashboardDetails payload) returns Dashboard|error {
         string resourcePath = string `/rest/api/2/dashboard`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Dashboard response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -310,7 +307,7 @@ public isolated client class Client {
     remote isolated function setDashboardItemProperty(string dashboardId, string itemId, string propertyKey, json payload) returns json|error {
         string resourcePath = string `/rest/api/2/dashboard/${dashboardId}/items/${itemId}/properties/${propertyKey}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -318,7 +315,6 @@ public isolated client class Client {
     remote isolated function deleteDashboardItemProperty(string dashboardId, string itemId, string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/dashboard/${dashboardId}/items/${itemId}/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -330,7 +326,7 @@ public isolated client class Client {
     remote isolated function updateDashboard(string id, DashboardDetails payload) returns Dashboard|error {
         string resourcePath = string `/rest/api/2/dashboard/${id}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Dashboard response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -338,14 +334,13 @@ public isolated client class Client {
     remote isolated function deleteDashboard(string id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/dashboard/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
     remote isolated function copyDashboard(string id, DashboardDetails payload) returns Dashboard|error {
         string resourcePath = string `/rest/api/2/dashboard/${id}/copy`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Dashboard response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -355,7 +350,7 @@ public isolated client class Client {
         map<anydata> queryParam = {'check: 'check};
         resourcePath = resourcePath + check check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         JiraExpressionsAnalysis response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -365,7 +360,7 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         JiraExpressionResult response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -378,7 +373,7 @@ public isolated client class Client {
     remote isolated function createCustomField(CustomFieldDefinitionJsonBean payload) returns FieldDetails|error {
         string resourcePath = string `/rest/api/2/field`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         FieldDetails response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -393,7 +388,7 @@ public isolated client class Client {
     remote isolated function updateCustomField(string fieldId, UpdateCustomFieldDetails payload) returns json|error {
         string resourcePath = string `/rest/api/2/field/${fieldId}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -408,7 +403,7 @@ public isolated client class Client {
     remote isolated function createCustomFieldContext(string fieldId, CreateCustomFieldContext payload) returns CreateCustomFieldContext|error {
         string resourcePath = string `/rest/api/2/field/${fieldId}/context`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         CreateCustomFieldContext response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -423,7 +418,7 @@ public isolated client class Client {
     remote isolated function setDefaultValues(string fieldId, CustomFieldContextDefaultValueUpdate payload) returns json|error {
         string resourcePath = string `/rest/api/2/field/${fieldId}/context/defaultValue`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -440,7 +435,7 @@ public isolated client class Client {
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         PageBeanContextForProjectAndIssueType response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -455,7 +450,7 @@ public isolated client class Client {
     remote isolated function updateCustomFieldContext(string fieldId, int contextId, CustomFieldContextUpdateDetails payload) returns json|error {
         string resourcePath = string `/rest/api/2/field/${fieldId}/context/${contextId}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -463,14 +458,13 @@ public isolated client class Client {
     remote isolated function deleteCustomFieldContext(string fieldId, int contextId) returns json|error {
         string resourcePath = string `/rest/api/2/field/${fieldId}/context/${contextId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
     remote isolated function addIssueTypesToContext(string fieldId, int contextId, IssueTypeIds payload) returns json|error {
         string resourcePath = string `/rest/api/2/field/${fieldId}/context/${contextId}/issuetype`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -478,7 +472,7 @@ public isolated client class Client {
     remote isolated function removeIssueTypesFromContext(string fieldId, int contextId, IssueTypeIds payload) returns json|error {
         string resourcePath = string `/rest/api/2/field/${fieldId}/context/${contextId}/issuetype/remove`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -493,7 +487,7 @@ public isolated client class Client {
     remote isolated function updateCustomFieldOption(string fieldId, int contextId, BulkCustomFieldOptionUpdateRequest payload) returns CustomFieldUpdatedContextOptionsList|error {
         string resourcePath = string `/rest/api/2/field/${fieldId}/context/${contextId}/option`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         CustomFieldUpdatedContextOptionsList response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -501,7 +495,7 @@ public isolated client class Client {
     remote isolated function createCustomFieldOption(string fieldId, int contextId, BulkCustomFieldOptionCreateRequest payload) returns CustomFieldCreatedContextOptionsList|error {
         string resourcePath = string `/rest/api/2/field/${fieldId}/context/${contextId}/option`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         CustomFieldCreatedContextOptionsList response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -509,7 +503,7 @@ public isolated client class Client {
     remote isolated function reorderCustomFieldOptions(string fieldId, int contextId, OrderOfCustomFieldOptions payload) returns json|error {
         string resourcePath = string `/rest/api/2/field/${fieldId}/context/${contextId}/option/move`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -517,14 +511,13 @@ public isolated client class Client {
     remote isolated function deleteCustomFieldOption(string fieldId, int contextId, int optionId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/field/${fieldId}/context/${contextId}/option/${optionId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
     remote isolated function assignProjectsToCustomFieldContext(string fieldId, int contextId, ProjectIds payload) returns json|error {
         string resourcePath = string `/rest/api/2/field/${fieldId}/context/${contextId}/project`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -532,7 +525,7 @@ public isolated client class Client {
     remote isolated function removeCustomFieldContextFromProjects(string fieldId, int contextId, ProjectIds payload) returns json|error {
         string resourcePath = string `/rest/api/2/field/${fieldId}/context/${contextId}/project/remove`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -561,7 +554,7 @@ public isolated client class Client {
     remote isolated function createIssueFieldOption(string fieldKey, IssueFieldOptionCreateBean payload) returns IssueFieldOption|error {
         string resourcePath = string `/rest/api/2/field/${fieldKey}/option`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         IssueFieldOption response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -588,7 +581,7 @@ public isolated client class Client {
     remote isolated function updateIssueFieldOption(string fieldKey, int optionId, IssueFieldOption payload) returns IssueFieldOption|error {
         string resourcePath = string `/rest/api/2/field/${fieldKey}/option/${optionId}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         IssueFieldOption response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -596,7 +589,6 @@ public isolated client class Client {
     remote isolated function deleteIssueFieldOption(string fieldKey, int optionId) returns json|error {
         string resourcePath = string `/rest/api/2/field/${fieldKey}/option/${optionId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -605,7 +597,6 @@ public isolated client class Client {
         map<anydata> queryParam = {replaceWith: replaceWith, jql: jql};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         TaskProgressBeanRemoveOptionFromIssuesResult response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -647,7 +638,7 @@ public isolated client class Client {
     remote isolated function assignFieldConfigurationSchemeToProject(FieldConfigurationSchemeProjectAssociation payload) returns json|error {
         string resourcePath = string `/rest/api/2/fieldconfigurationscheme/project`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -664,7 +655,7 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Filter response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -677,7 +668,7 @@ public isolated client class Client {
     remote isolated function setDefaultShareScope(DefaultShareScope payload) returns DefaultShareScope|error {
         string resourcePath = string `/rest/api/2/filter/defaultShareScope`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         DefaultShareScope response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -715,7 +706,7 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Filter response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -723,7 +714,6 @@ public isolated client class Client {
     remote isolated function deleteFilter(int id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/filter/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -741,7 +731,6 @@ public isolated client class Client {
     remote isolated function resetColumns(int id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/filter/${id}/columns`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -750,7 +739,6 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         Filter response = check self.clientEp-> put(resourcePath, request);
         return response;
     }
@@ -759,7 +747,6 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         Filter response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -771,7 +758,7 @@ public isolated client class Client {
     remote isolated function addSharePermission(int id, SharePermissionInputBean payload) returns SharePermissionArr|error {
         string resourcePath = string `/rest/api/2/filter/${id}/permission`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         SharePermissionArr response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -784,7 +771,6 @@ public isolated client class Client {
     remote isolated function deleteSharePermission(int id, int permissionId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/filter/${id}/permission/${permissionId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -798,7 +784,7 @@ public isolated client class Client {
     remote isolated function createGroup(AddGroupBean payload) returns Group|error {
         string resourcePath = string `/rest/api/2/group`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Group response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -808,7 +794,6 @@ public isolated client class Client {
         map<anydata> queryParam = {groupname: groupname, swapGroup: swapGroup};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -831,7 +816,7 @@ public isolated client class Client {
         map<anydata> queryParam = {groupname: groupname};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Group response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -841,7 +826,6 @@ public isolated client class Client {
         map<anydata> queryParam = {groupname: groupname, username: username, accountId: accountId};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -869,7 +853,7 @@ public isolated client class Client {
         map<anydata> queryParam = {updateHistory: updateHistory};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         CreatedIssue response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -877,7 +861,7 @@ public isolated client class Client {
     remote isolated function createIssues(IssuesUpdateBean payload) returns CreatedIssues|error {
         string resourcePath = string `/rest/api/2/issue/bulk`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         CreatedIssues response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -899,7 +883,7 @@ public isolated client class Client {
     remote isolated function bulkSetIssuesProperties(IssueEntityProperties payload) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issue/properties`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         http:Response  response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -907,7 +891,7 @@ public isolated client class Client {
     remote isolated function bulkSetIssueProperty(string propertyKey, BulkIssuePropertyUpdateRequest payload) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issue/properties/${propertyKey}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         http:Response  response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -915,7 +899,6 @@ public isolated client class Client {
     remote isolated function bulkDeleteIssueProperty(string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issue/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -931,7 +914,7 @@ public isolated client class Client {
         map<anydata> queryParam = {notifyUsers: notifyUsers, overrideScreenSecurity: overrideScreenSecurity, overrideEditableFlag: overrideEditableFlag};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -941,14 +924,13 @@ public isolated client class Client {
         map<anydata> queryParam = {deleteSubtasks: deleteSubtasks};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
     remote isolated function assignIssue(string issueIdOrKey, User payload) returns json|error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/assignee`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -978,7 +960,7 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Comment response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -995,7 +977,7 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Comment response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1003,7 +985,6 @@ public isolated client class Client {
     remote isolated function deleteComment(string issueIdOrKey, string id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/comment/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1017,7 +998,7 @@ public isolated client class Client {
     remote isolated function notify(string issueIdOrKey, Notification payload) returns json|error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/notify`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1035,7 +1016,7 @@ public isolated client class Client {
     remote isolated function setIssueProperty(string issueIdOrKey, string propertyKey, json payload) returns json|error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/properties/${propertyKey}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1043,7 +1024,6 @@ public isolated client class Client {
     remote isolated function deleteIssueProperty(string issueIdOrKey, string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1057,7 +1037,7 @@ public isolated client class Client {
     remote isolated function createOrUpdateRemoteIssueLink(string issueIdOrKey, RemoteIssueLinkRequest payload) returns RemoteIssueLinkIdentifies|error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/remotelink`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         RemoteIssueLinkIdentifies response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1067,7 +1047,6 @@ public isolated client class Client {
         map<anydata> queryParam = {globalId: globalId};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1079,7 +1058,7 @@ public isolated client class Client {
     remote isolated function updateRemoteIssueLink(string issueIdOrKey, string linkId, RemoteIssueLinkRequest payload) returns json|error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/remotelink/${linkId}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1087,7 +1066,6 @@ public isolated client class Client {
     remote isolated function deleteRemoteIssueLinkById(string issueIdOrKey, string linkId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/remotelink/${linkId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1101,7 +1079,7 @@ public isolated client class Client {
     remote isolated function doTransition(string issueIdOrKey, IssueUpdateDetails payload) returns json|error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/transitions`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1114,14 +1092,12 @@ public isolated client class Client {
     remote isolated function addVote(string issueIdOrKey) returns json|error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/votes`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
     remote isolated function removeVote(string issueIdOrKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/votes`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1133,7 +1109,7 @@ public isolated client class Client {
     remote isolated function addWatcher(string issueIdOrKey, string payload) returns json|error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/watchers`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1143,7 +1119,6 @@ public isolated client class Client {
         map<anydata> queryParam = {username: username, accountId: accountId};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1159,7 +1134,7 @@ public isolated client class Client {
         map<anydata> queryParam = {notifyUsers: notifyUsers, adjustEstimate: adjustEstimate, newEstimate: newEstimate, reduceBy: reduceBy, expand: expand, overrideEditableFlag: overrideEditableFlag};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Worklog response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1176,7 +1151,7 @@ public isolated client class Client {
         map<anydata> queryParam = {notifyUsers: notifyUsers, adjustEstimate: adjustEstimate, newEstimate: newEstimate, expand: expand, overrideEditableFlag: overrideEditableFlag};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Worklog response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1186,7 +1161,6 @@ public isolated client class Client {
         map<anydata> queryParam = {notifyUsers: notifyUsers, adjustEstimate: adjustEstimate, newEstimate: newEstimate, increaseBy: increaseBy, overrideEditableFlag: overrideEditableFlag};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1203,7 +1177,7 @@ public isolated client class Client {
     remote isolated function setWorklogProperty(string issueIdOrKey, string worklogId, string propertyKey, json payload) returns json|error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/worklog/${worklogId}/properties/${propertyKey}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1211,14 +1185,13 @@ public isolated client class Client {
     remote isolated function deleteWorklogProperty(string issueIdOrKey, string worklogId, string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issue/${issueIdOrKey}/worklog/${worklogId}/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
     remote isolated function linkIssues(LinkIssueRequestJsonBean payload) returns json|error {
         string resourcePath = string `/rest/api/2/issueLink`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1231,7 +1204,6 @@ public isolated client class Client {
     remote isolated function deleteIssueLink(string linkId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issueLink/${linkId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1243,7 +1215,7 @@ public isolated client class Client {
     remote isolated function createIssueLinkType(IssueLinkType payload) returns IssueLinkType|error {
         string resourcePath = string `/rest/api/2/issueLinkType`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         IssueLinkType response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1256,7 +1228,7 @@ public isolated client class Client {
     remote isolated function updateIssueLinkType(string issueLinkTypeId, IssueLinkType payload) returns IssueLinkType|error {
         string resourcePath = string `/rest/api/2/issueLinkType/${issueLinkTypeId}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         IssueLinkType response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1264,7 +1236,6 @@ public isolated client class Client {
     remote isolated function deleteIssueLinkType(string issueLinkTypeId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issueLinkType/${issueLinkTypeId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1293,7 +1264,7 @@ public isolated client class Client {
     remote isolated function createIssueType(IssueTypeCreateBean payload) returns IssueTypeDetails|error {
         string resourcePath = string `/rest/api/2/issuetype`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         IssueTypeDetails response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1306,7 +1277,7 @@ public isolated client class Client {
     remote isolated function updateIssueType(string id, IssueTypeUpdateBean payload) returns IssueTypeDetails|error {
         string resourcePath = string `/rest/api/2/issuetype/${id}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         IssueTypeDetails response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1316,7 +1287,6 @@ public isolated client class Client {
         map<anydata> queryParam = {alternativeIssueTypeId: alternativeIssueTypeId};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1346,7 +1316,7 @@ public isolated client class Client {
     remote isolated function setIssueTypeProperty(string issueTypeId, string propertyKey, json payload) returns json|error {
         string resourcePath = string `/rest/api/2/issuetype/${issueTypeId}/properties/${propertyKey}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1354,7 +1324,6 @@ public isolated client class Client {
     remote isolated function deleteIssueTypeProperty(string issueTypeId, string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/issuetype/${issueTypeId}/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1368,7 +1337,7 @@ public isolated client class Client {
     remote isolated function createIssueTypeScheme(IssueTypeSchemeDetails payload) returns IssueTypeSchemeID|error {
         string resourcePath = string `/rest/api/2/issuetypescheme`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         IssueTypeSchemeID response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1390,7 +1359,7 @@ public isolated client class Client {
     remote isolated function assignIssueTypeSchemeToProject(IssueTypeSchemeProjectAssociation payload) returns json|error {
         string resourcePath = string `/rest/api/2/issuetypescheme/project`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1398,7 +1367,7 @@ public isolated client class Client {
     remote isolated function updateIssueTypeScheme(int issueTypeSchemeId, IssueTypeSchemeUpdateDetails payload) returns json|error {
         string resourcePath = string `/rest/api/2/issuetypescheme/${issueTypeSchemeId}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1406,14 +1375,13 @@ public isolated client class Client {
     remote isolated function deleteIssueTypeScheme(int issueTypeSchemeId) returns json|error {
         string resourcePath = string `/rest/api/2/issuetypescheme/${issueTypeSchemeId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
     remote isolated function addIssueTypesToIssueTypeScheme(int issueTypeSchemeId, IssueTypeIds payload) returns json|error {
         string resourcePath = string `/rest/api/2/issuetypescheme/${issueTypeSchemeId}/issuetype`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1421,7 +1389,7 @@ public isolated client class Client {
     remote isolated function reorderIssueTypesInIssueTypeScheme(int issueTypeSchemeId, OrderOfIssueTypes payload) returns json|error {
         string resourcePath = string `/rest/api/2/issuetypescheme/${issueTypeSchemeId}/issuetype/move`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1429,7 +1397,6 @@ public isolated client class Client {
     remote isolated function removeIssueTypeFromIssueTypeScheme(int issueTypeSchemeId, int issueTypeId) returns json|error {
         string resourcePath = string `/rest/api/2/issuetypescheme/${issueTypeSchemeId}/issuetype/${issueTypeId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -1443,7 +1410,7 @@ public isolated client class Client {
     remote isolated function createIssueTypeScreenScheme(IssueTypeScreenSchemeDetails payload) returns IssueTypeScreenSchemeId|error {
         string resourcePath = string `/rest/api/2/issuetypescreenscheme`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         IssueTypeScreenSchemeId response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1465,7 +1432,7 @@ public isolated client class Client {
     remote isolated function assignIssueTypeScreenSchemeToProject(IssueTypeScreenSchemeProjectAssociation payload) returns json|error {
         string resourcePath = string `/rest/api/2/issuetypescreenscheme/project`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1473,7 +1440,7 @@ public isolated client class Client {
     remote isolated function updateIssueTypeScreenScheme(string issueTypeScreenSchemeId, IssueTypeScreenSchemeUpdateDetails payload) returns json|error {
         string resourcePath = string `/rest/api/2/issuetypescreenscheme/${issueTypeScreenSchemeId}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1481,14 +1448,13 @@ public isolated client class Client {
     remote isolated function deleteIssueTypeScreenScheme(string issueTypeScreenSchemeId) returns json|error {
         string resourcePath = string `/rest/api/2/issuetypescreenscheme/${issueTypeScreenSchemeId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
     remote isolated function appendMappingsForIssueTypeScreenScheme(string issueTypeScreenSchemeId, IssueTypeScreenSchemeMappingDetails payload) returns json|error {
         string resourcePath = string `/rest/api/2/issuetypescreenscheme/${issueTypeScreenSchemeId}/mapping`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1496,7 +1462,7 @@ public isolated client class Client {
     remote isolated function updateDefaultScreenScheme(string issueTypeScreenSchemeId, UpdateDefaultScreenScheme payload) returns json|error {
         string resourcePath = string `/rest/api/2/issuetypescreenscheme/${issueTypeScreenSchemeId}/mapping/default`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1504,7 +1470,7 @@ public isolated client class Client {
     remote isolated function removeMappingsFromIssueTypeScreenScheme(string issueTypeScreenSchemeId, IssueTypeIds payload) returns json|error {
         string resourcePath = string `/rest/api/2/issuetypescreenscheme/${issueTypeScreenSchemeId}/mapping/remove`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1517,7 +1483,7 @@ public isolated client class Client {
     remote isolated function getAutoCompletePost(SearchAutoCompleteFilter payload) returns JQLReferenceData|error {
         string resourcePath = string `/rest/api/2/jql/autocompletedata`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         JQLReferenceData response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1532,7 +1498,7 @@ public isolated client class Client {
     remote isolated function matchIssues(IssuesAndJQLQueries payload) returns IssueMatches|error {
         string resourcePath = string `/rest/api/2/jql/match`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         IssueMatches response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1542,7 +1508,7 @@ public isolated client class Client {
         map<anydata> queryParam = {validation: validation};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ParsedJqlQueries response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1550,7 +1516,7 @@ public isolated client class Client {
     remote isolated function migrateQueries(JQLPersonalDataMigrationRequest payload) returns ConvertedJQLQueries|error {
         string resourcePath = string `/rest/api/2/jql/pdcleaner`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ConvertedJQLQueries response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1581,7 +1547,7 @@ public isolated client class Client {
         map<anydata> queryParam = {'key: 'key};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1591,7 +1557,6 @@ public isolated client class Client {
         map<anydata> queryParam = {'key: 'key};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1603,7 +1568,7 @@ public isolated client class Client {
     remote isolated function setLocale(Locale payload) returns json|error {
         string resourcePath = string `/rest/api/2/mypreferences/locale`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1611,7 +1576,6 @@ public isolated client class Client {
     remote isolated function deleteLocale() returns json|error {
         string resourcePath = string `/rest/api/2/mypreferences/locale`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -1644,7 +1608,7 @@ public isolated client class Client {
     remote isolated function getBulkPermissions(BulkPermissionsRequestBean payload) returns BulkPermissionGrants|error {
         string resourcePath = string `/rest/api/2/permissions/check`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         BulkPermissionGrants response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1652,7 +1616,7 @@ public isolated client class Client {
     remote isolated function getPermittedProjects(PermissionsKeysBean payload) returns PermittedProjects|error {
         string resourcePath = string `/rest/api/2/permissions/project`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         PermittedProjects response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1669,7 +1633,7 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         PermissionScheme response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1686,7 +1650,7 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         PermissionScheme response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1694,7 +1658,6 @@ public isolated client class Client {
     remote isolated function deletePermissionScheme(int schemeId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/permissionscheme/${schemeId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1710,7 +1673,7 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         PermissionGrant response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1725,7 +1688,6 @@ public isolated client class Client {
     remote isolated function deletePermissionSchemeEntity(int schemeId, int permissionId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/permissionscheme/${schemeId}/permission/${permissionId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1749,7 +1711,7 @@ public isolated client class Client {
     remote isolated function createProject(ProjectInputBean payload) returns ProjectIdentifiers|error {
         string resourcePath = string `/rest/api/2/project`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ProjectIdentifiers response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1793,7 +1755,7 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Project response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1803,21 +1765,19 @@ public isolated client class Client {
         map<anydata> queryParam = {enableUndo: enableUndo};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
     remote isolated function archiveProject(string projectIdOrKey) returns json|error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/archive`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
     remote isolated function updateProjectAvatar(string projectIdOrKey, Avatar payload) returns json|error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/avatar`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1825,7 +1785,6 @@ public isolated client class Client {
     remote isolated function deleteProjectAvatar(string projectIdOrKey, int id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/avatar/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1857,7 +1816,6 @@ public isolated client class Client {
     remote isolated function deleteProjectAsynchronously(string projectIdOrKey) returns TaskProgressBeanObject|error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/delete`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         TaskProgressBeanObject response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
@@ -1869,7 +1827,7 @@ public isolated client class Client {
     remote isolated function toggleFeatureForProject(string projectIdOrKey, string featureKey, ProjectFeatureToggleRequest payload) returns ProjectFeaturesResponse|error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/features/${featureKey}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ProjectFeaturesResponse response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1887,7 +1845,7 @@ public isolated client class Client {
     remote isolated function setProjectProperty(string projectIdOrKey, string propertyKey, json payload) returns json|error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/properties/${propertyKey}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1895,14 +1853,12 @@ public isolated client class Client {
     remote isolated function deleteProjectProperty(string projectIdOrKey, string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
     remote isolated function restore(string projectIdOrKey) returns Project|error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/restore`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         Project response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
@@ -1919,7 +1875,7 @@ public isolated client class Client {
     remote isolated function setActors(string projectIdOrKey, int id, ProjectRoleActorsUpdateBean payload) returns ProjectRole|error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/role/${id}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ProjectRole response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -1927,7 +1883,7 @@ public isolated client class Client {
     remote isolated function addActorUsers(string projectIdOrKey, int id, ActorsMap payload) returns ProjectRole|error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/role/${id}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ProjectRole response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -1937,7 +1893,6 @@ public isolated client class Client {
         map<anydata> queryParam = {user: user, 'group: 'group};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -1956,7 +1911,6 @@ public isolated client class Client {
     remote isolated function updateProjectType(string projectIdOrKey, string newProjectTypeKey) returns Project|error {
         string resourcePath = string `/rest/api/2/project/${projectIdOrKey}/type/${newProjectTypeKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         Project response = check self.clientEp-> put(resourcePath, request);
         return response;
     }
@@ -1982,7 +1936,7 @@ public isolated client class Client {
     remote isolated function updateProjectEmail(int projectId, ProjectEmailAddress payload) returns json|error {
         string resourcePath = string `/rest/api/2/project/${projectId}/email`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2016,7 +1970,7 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         PermissionScheme response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2034,7 +1988,7 @@ public isolated client class Client {
     remote isolated function createProjectCategory(ProjectCategory payload) returns ProjectCategory|error {
         string resourcePath = string `/rest/api/2/projectCategory`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ProjectCategory response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2047,7 +2001,7 @@ public isolated client class Client {
     remote isolated function updateProjectCategory(int id, ProjectCategory payload) returns UpdatedProjectCategory|error {
         string resourcePath = string `/rest/api/2/projectCategory/${id}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         UpdatedProjectCategory response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2055,7 +2009,6 @@ public isolated client class Client {
     remote isolated function removeProjectCategory(int id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/projectCategory/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2098,7 +2051,7 @@ public isolated client class Client {
     remote isolated function createProjectRole(CreateUpdateRoleRequestBean payload) returns ProjectRole|error {
         string resourcePath = string `/rest/api/2/role`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ProjectRole response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2111,7 +2064,7 @@ public isolated client class Client {
     remote isolated function fullyUpdateProjectRole(int id, CreateUpdateRoleRequestBean payload) returns ProjectRole|error {
         string resourcePath = string `/rest/api/2/role/${id}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ProjectRole response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2119,7 +2072,7 @@ public isolated client class Client {
     remote isolated function partialUpdateProjectRole(int id, CreateUpdateRoleRequestBean payload) returns ProjectRole|error {
         string resourcePath = string `/rest/api/2/role/${id}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ProjectRole response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2129,7 +2082,6 @@ public isolated client class Client {
         map<anydata> queryParam = {swap: swap};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2141,7 +2093,7 @@ public isolated client class Client {
     remote isolated function addProjectRoleActorsToRole(int id, ActorInputBean payload) returns ProjectRole|error {
         string resourcePath = string `/rest/api/2/role/${id}/actors`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ProjectRole response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2151,7 +2103,6 @@ public isolated client class Client {
         map<anydata> queryParam = {user: user, 'group: 'group};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         ProjectRole response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -2165,7 +2116,7 @@ public isolated client class Client {
     remote isolated function createScreen(ScreenDetails payload) returns Screen|error {
         string resourcePath = string `/rest/api/2/screens`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Screen response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2173,14 +2124,13 @@ public isolated client class Client {
     remote isolated function addFieldToDefaultScreen(string fieldId) returns json|error {
         string resourcePath = string `/rest/api/2/screens/addToDefault/${fieldId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
     remote isolated function updateScreen(int screenId, UpdateScreenDetails payload) returns Screen|error {
         string resourcePath = string `/rest/api/2/screens/${screenId}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Screen response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2188,7 +2138,6 @@ public isolated client class Client {
     remote isolated function deleteScreen(int screenId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/screens/${screenId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2207,7 +2156,7 @@ public isolated client class Client {
     remote isolated function addScreenTab(int screenId, ScreenableTab payload) returns ScreenableTab|error {
         string resourcePath = string `/rest/api/2/screens/${screenId}/tabs`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ScreenableTab response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2215,7 +2164,7 @@ public isolated client class Client {
     remote isolated function renameScreenTab(int screenId, int tabId, ScreenableTab payload) returns ScreenableTab|error {
         string resourcePath = string `/rest/api/2/screens/${screenId}/tabs/${tabId}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ScreenableTab response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2223,7 +2172,6 @@ public isolated client class Client {
     remote isolated function deleteScreenTab(int screenId, int tabId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/screens/${screenId}/tabs/${tabId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2237,7 +2185,7 @@ public isolated client class Client {
     remote isolated function addScreenTabField(int screenId, int tabId, AddFieldBean payload) returns ScreenableField|error {
         string resourcePath = string `/rest/api/2/screens/${screenId}/tabs/${tabId}/fields`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ScreenableField response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2245,14 +2193,13 @@ public isolated client class Client {
     remote isolated function removeScreenTabField(int screenId, int tabId, string id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/screens/${screenId}/tabs/${tabId}/fields/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
     remote isolated function moveScreenTabField(int screenId, int tabId, string id, MoveFieldBean payload) returns json|error {
         string resourcePath = string `/rest/api/2/screens/${screenId}/tabs/${tabId}/fields/${id}/move`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2260,7 +2207,6 @@ public isolated client class Client {
     remote isolated function moveScreenTab(int screenId, int tabId, int pos) returns json|error {
         string resourcePath = string `/rest/api/2/screens/${screenId}/tabs/${tabId}/move/${pos}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
@@ -2274,7 +2220,7 @@ public isolated client class Client {
     remote isolated function createScreenScheme(ScreenSchemeDetails payload) returns ScreenSchemeId|error {
         string resourcePath = string `/rest/api/2/screenscheme`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ScreenSchemeId response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2282,7 +2228,7 @@ public isolated client class Client {
     remote isolated function updateScreenScheme(string screenSchemeId, UpdateScreenSchemeDetails payload) returns json|error {
         string resourcePath = string `/rest/api/2/screenscheme/${screenSchemeId}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2290,7 +2236,6 @@ public isolated client class Client {
     remote isolated function deleteScreenScheme(string screenSchemeId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/screenscheme/${screenSchemeId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2304,7 +2249,7 @@ public isolated client class Client {
     remote isolated function searchForIssuesUsingJqlPost(SearchRequestBean payload) returns SearchResults|error {
         string resourcePath = string `/rest/api/2/search`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         SearchResults response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2358,7 +2303,6 @@ public isolated client class Client {
     remote isolated function cancelTask(string taskId) returns json|error {
         string resourcePath = string `/rest/api/2/task/${taskId}/cancel`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
@@ -2378,7 +2322,6 @@ public isolated client class Client {
     remote isolated function deleteAvatar(string 'type, string owningObjectId, int id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/universal_avatar/'type/${'type}/owner/${owningObjectId}/avatar/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2392,7 +2335,7 @@ public isolated client class Client {
     remote isolated function createUser(UserWriteBean payload) returns User|error {
         string resourcePath = string `/rest/api/2/user`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         User response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2402,7 +2345,6 @@ public isolated client class Client {
         map<anydata> queryParam = {accountId: accountId, username: username, 'key: 'key};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2454,7 +2396,6 @@ public isolated client class Client {
         map<anydata> queryParam = {accountId: accountId, username: username};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2512,7 +2453,7 @@ public isolated client class Client {
         map<anydata> queryParam = {accountId: accountId, userKey: userKey, username: username};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2522,7 +2463,6 @@ public isolated client class Client {
         map<anydata> queryParam = {accountId: accountId, userKey: userKey, username: username};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2571,7 +2511,7 @@ public isolated client class Client {
     remote isolated function createVersion(Version payload) returns Version|error {
         string resourcePath = string `/rest/api/2/version`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Version response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2586,7 +2526,7 @@ public isolated client class Client {
     remote isolated function updateVersion(string id, Version payload) returns Version|error {
         string resourcePath = string `/rest/api/2/version/${id}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Version response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2596,21 +2536,19 @@ public isolated client class Client {
         map<anydata> queryParam = {moveFixIssuesTo: moveFixIssuesTo, moveAffectedIssuesTo: moveAffectedIssuesTo};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
     remote isolated function mergeVersions(string id, string moveIssuesTo) returns json|error {
         string resourcePath = string `/rest/api/2/version/${id}/mergeto/${moveIssuesTo}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         json response = check self.clientEp-> put(resourcePath, request);
         return response;
     }
     remote isolated function moveVersion(string id, VersionMoveBean payload) returns Version|error {
         string resourcePath = string `/rest/api/2/version/${id}/move`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         Version response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2623,7 +2561,7 @@ public isolated client class Client {
     remote isolated function deleteAndReplaceVersion(string id, DeleteAndReplaceVersionBean payload) returns json|error {
         string resourcePath = string `/rest/api/2/version/${id}/removeAndSwap`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2643,7 +2581,7 @@ public isolated client class Client {
     remote isolated function registerDynamicWebhooks(WebhookRegistrationDetails payload) returns ContainerForRegisteredWebhooks|error {
         string resourcePath = string `/rest/api/2/webhook`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         ContainerForRegisteredWebhooks response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2651,7 +2589,6 @@ public isolated client class Client {
     remote isolated function deleteWebhookById() returns http:Response | error {
         string resourcePath = string `/rest/api/2/webhook`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2665,7 +2602,7 @@ public isolated client class Client {
     remote isolated function refreshWebhooks(ContainerForWebhookIDs payload) returns WebhooksExpirationDate|error {
         string resourcePath = string `/rest/api/2/webhook/refresh`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         WebhooksExpirationDate response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2680,7 +2617,7 @@ public isolated client class Client {
     remote isolated function createWorkflow(CreateWorkflowDetails payload) returns WorkflowIDs|error {
         string resourcePath = string `/rest/api/2/workflow`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         WorkflowIDs response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2695,7 +2632,7 @@ public isolated client class Client {
     remote isolated function updateWorkflowTransitionRuleConfigurations(WorkflowTransitionRulesUpdate payload) returns WorkflowTransitionRulesUpdateErrors|error {
         string resourcePath = string `/rest/api/2/workflow/rule/config`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         WorkflowTransitionRulesUpdateErrors response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2719,7 +2656,7 @@ public isolated client class Client {
         map<anydata> queryParam = {'key: 'key, workflowName: workflowName, workflowMode: workflowMode};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         WorkflowTransitionProperty response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2729,7 +2666,7 @@ public isolated client class Client {
         map<anydata> queryParam = {'key: 'key, workflowName: workflowName, workflowMode: workflowMode};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         WorkflowTransitionProperty response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2739,14 +2676,12 @@ public isolated client class Client {
         map<anydata> queryParam = {'key: 'key, workflowName: workflowName, workflowMode: workflowMode};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
     remote isolated function deleteInactiveWorkflow(string entityId) returns http:Response | error {
         string resourcePath = string `/rest/api/2/workflow/${entityId}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2760,7 +2695,7 @@ public isolated client class Client {
     remote isolated function createWorkflowScheme(WorkflowScheme payload) returns WorkflowScheme|error {
         string resourcePath = string `/rest/api/2/workflowscheme`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         WorkflowScheme response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -2775,7 +2710,7 @@ public isolated client class Client {
     remote isolated function assignSchemeToProject(WorkflowSchemeProjectAssociation payload) returns json|error {
         string resourcePath = string `/rest/api/2/workflowscheme/project`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         json response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2790,7 +2725,7 @@ public isolated client class Client {
     remote isolated function updateWorkflowScheme(int id, WorkflowScheme payload) returns WorkflowScheme|error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         WorkflowScheme response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2798,14 +2733,12 @@ public isolated client class Client {
     remote isolated function deleteWorkflowScheme(int id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
     remote isolated function createWorkflowSchemeDraftFromParent(int id) returns WorkflowScheme|error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}/createdraft`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         WorkflowScheme response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
@@ -2819,7 +2752,7 @@ public isolated client class Client {
     remote isolated function updateDefaultWorkflow(int id, DefaultWorkflow payload) returns WorkflowScheme|error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}/default`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         WorkflowScheme response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2829,7 +2762,6 @@ public isolated client class Client {
         map<anydata> queryParam = {updateDraftIfNeeded: updateDraftIfNeeded};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         WorkflowScheme response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -2841,7 +2773,7 @@ public isolated client class Client {
     remote isolated function updateWorkflowSchemeDraft(int id, WorkflowScheme payload) returns WorkflowScheme|error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}/draft`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         WorkflowScheme response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2849,7 +2781,6 @@ public isolated client class Client {
     remote isolated function deleteWorkflowSchemeDraft(int id) returns http:Response | error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}/draft`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2861,7 +2792,7 @@ public isolated client class Client {
     remote isolated function updateDraftDefaultWorkflow(int id, DefaultWorkflow payload) returns WorkflowScheme|error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}/draft/default`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         WorkflowScheme response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2869,7 +2800,6 @@ public isolated client class Client {
     remote isolated function deleteDraftDefaultWorkflow(int id) returns WorkflowScheme|error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}/draft/default`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         WorkflowScheme response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -2881,7 +2811,7 @@ public isolated client class Client {
     remote isolated function setWorkflowSchemeDraftIssueType(int id, string issueType, IssueTypeWorkflowMapping payload) returns WorkflowScheme|error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}/draft/issuetype/${issueType}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         WorkflowScheme response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2889,7 +2819,6 @@ public isolated client class Client {
     remote isolated function deleteWorkflowSchemeDraftIssueType(int id, string issueType) returns WorkflowScheme|error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}/draft/issuetype/${issueType}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         WorkflowScheme response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -2905,7 +2834,7 @@ public isolated client class Client {
         map<anydata> queryParam = {workflowName: workflowName};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         WorkflowScheme response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2915,7 +2844,6 @@ public isolated client class Client {
         map<anydata> queryParam = {workflowName: workflowName};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2929,7 +2857,7 @@ public isolated client class Client {
     remote isolated function setWorkflowSchemeIssueType(int id, string issueType, IssueTypeWorkflowMapping payload) returns WorkflowScheme|error {
         string resourcePath = string `/rest/api/2/workflowscheme/${id}/issuetype/${issueType}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         WorkflowScheme response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2939,7 +2867,6 @@ public isolated client class Client {
         map<anydata> queryParam = {updateDraftIfNeeded: updateDraftIfNeeded};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         WorkflowScheme response = check self.clientEp-> delete(resourcePath, request);
         return response;
     }
@@ -2955,7 +2882,7 @@ public isolated client class Client {
         map<anydata> queryParam = {workflowName: workflowName};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         WorkflowScheme response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -2965,7 +2892,6 @@ public isolated client class Client {
         map<anydata> queryParam = {workflowName: workflowName, updateDraftIfNeeded: updateDraftIfNeeded};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -2981,7 +2907,7 @@ public isolated client class Client {
         map<anydata> queryParam = {expand: expand};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         WorklogArr response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -3006,7 +2932,7 @@ public isolated client class Client {
     remote isolated function 'AddonPropertiesResource\.putAddonProperty\_put(string addonKey, string propertyKey, json payload) returns OperationMessage|error {
         string resourcePath = string `/rest/atlassian-connect/1/addons/${addonKey}/properties/${propertyKey}`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         OperationMessage response = check self.clientEp->put(resourcePath, request);
         return response;
@@ -3014,7 +2940,6 @@ public isolated client class Client {
     remote isolated function 'AddonPropertiesResource\.deleteAddonProperty\_delete(string addonKey, string propertyKey) returns http:Response | error {
         string resourcePath = string `/rest/atlassian-connect/1/addons/${addonKey}/properties/${propertyKey}`;
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }
@@ -3026,7 +2951,7 @@ public isolated client class Client {
     remote isolated function 'DynamicModulesResource\.registerModules\_post(ConnectModules payload) returns http:Response | error {
         string resourcePath = string `/rest/atlassian-connect/1/app/module/dynamic`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
+        json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         http:Response  response = check self.clientEp->post(resourcePath, request);
         return response;
@@ -3036,7 +2961,6 @@ public isolated client class Client {
         map<anydata> queryParam = {moduleKey: moduleKey};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(resourcePath, request );
         return response;
     }

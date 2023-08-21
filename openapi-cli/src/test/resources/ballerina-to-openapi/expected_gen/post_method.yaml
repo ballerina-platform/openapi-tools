@@ -1,0 +1,83 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /pet:
+    post:
+      operationId: postPet
+      responses:
+        "201":
+          description: Created
+          content:
+            text/plain:
+              schema:
+                type: string
+  /pet2:
+    post:
+      operationId: postPet2
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /cachingBackEnd:
+    post:
+      operationId: postCachingbackend
+      responses:
+        "201":
+          description: Created
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                default: "must-revalidate,public,max-age=3600"
+            ETag:
+              schema:
+                type: string
+            Last-Modified:
+              schema:
+                type: string
+          content:
+            text/plain:
+              schema:
+                type: string
+  /withMediaTypeOverrider:
+    post:
+      operationId: postWithmediatypeoverrider
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: string
+  /pet3:
+    post:
+      operationId: postPet3
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: integer
+          format: int64

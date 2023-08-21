@@ -19,9 +19,10 @@
 package io.ballerina.openapi.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.GeneratorUtils;
-import io.ballerina.openapi.generators.client.BallerinaAuthConfigGenerator;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.BallerinaAuthConfigGenerator;
 import io.ballerina.openapi.generators.common.TestConstants;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
@@ -32,7 +33,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
 /**
  * All the tests related to the auth related code snippet generation for api key auth mechanism.
@@ -45,17 +46,21 @@ public class MixedApiKeyAndHTTPAuthTests {
     public void testGetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/" + yamlFile);
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        String generatedConfigRecord = Objects.requireNonNull(
-                ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
-        Assert.assertFalse(generatedConfigRecord.isBlank());
-    }
-
-    @Test(description = "Generate AuthConfig record")
-    public void testGetAuthConfigRecord() {
-        String generatedConfigRecord = Objects.requireNonNull(
-                ballerinaAuthConfigGenerator.getAuthConfigRecord()).toString();
-        Assert.assertTrue(generatedConfigRecord.contains(TestConstants.authConfigRecordDoc));
-        Assert.assertTrue(generatedConfigRecord.contains("|ApiKeysConfigauth;"));
+        ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI);
+        List<TypeDefinitionNode> authRelatedTypeDefinitionNodes =
+                ballerinaAuthConfigGenerator.getAuthRelatedTypeDefinitionNodes();
+        Optional<TypeDefinitionNode> connectionConfig = authRelatedTypeDefinitionNodes.stream()
+                .filter(typeDefinitionNode -> typeDefinitionNode.typeName().text().equals("ConnectionConfig"))
+                .findFirst();
+        if (connectionConfig.isPresent()) {
+            String expectedRecord = TestConstants.CONNECTION_CONFIG_MIXED_AUTH;
+            String generatedRecord = connectionConfig.get().toString();
+            generatedRecord = (generatedRecord.trim()).replaceAll("\\s+", "");
+            expectedRecord = (expectedRecord.trim()).replaceAll("\\s+", "");
+            Assert.assertEquals(generatedRecord, expectedRecord);
+        } else {
+            Assert.fail();
+        }
     }
 
     @Test(description = "Test the generation of nillable ApiKeysConfig class variable",

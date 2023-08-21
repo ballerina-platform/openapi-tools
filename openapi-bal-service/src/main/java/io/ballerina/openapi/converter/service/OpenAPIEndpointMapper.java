@@ -31,6 +31,7 @@ import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
+import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
@@ -44,6 +45,7 @@ import io.swagger.v3.oas.models.servers.ServerVariables;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,28 +66,45 @@ public class OpenAPIEndpointMapper {
      * @param service   service node with bound endpoints
      * @return openapi definition with Server information
      */
-    public OpenAPI getServers(OpenAPI openAPI, List<ListenerDeclarationNode> endpoints,
+    public OpenAPI getServers(OpenAPI openAPI, LinkedHashSet<ListenerDeclarationNode> endpoints,
                               ServiceDeclarationNode service) {
         openAPI = extractServerForExpressionNode(openAPI, service.expressions(), service);
         List<Server> servers = openAPI.getServers();
+        //Handle ImplicitNewExpressionNode in listener
         if (!endpoints.isEmpty()) {
             for (ListenerDeclarationNode ep : endpoints) {
                 SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
                 for (ExpressionNode node : exprNodes) {
-                    if (node.toString().trim().equals(ep.variableName().text().trim())) {
-                        String serviceBasePath = getServiceBasePath(service);
-                        Server server = extractServer(ep, serviceBasePath);
-                        servers.add(server);
-                    }
+                    updateServerDetails(service, servers, ep, node);
                 }
             }
-
         }
         if (servers.size() > 1) {
             Server mainServer = addEnumValues(servers);
             openAPI.setServers(Collections.singletonList(mainServer));
         }
         return openAPI;
+    }
+
+    /**
+     * This util is for extracting the server details from endpoints and update server list.
+     */
+    private void updateServerDetails(ServiceDeclarationNode service, List<Server> servers,
+                                     ListenerDeclarationNode endPoint, ExpressionNode expNode) {
+
+        if (expNode instanceof QualifiedNameReferenceNode) {
+            //Handle QualifiedNameReferenceNode in listener
+            QualifiedNameReferenceNode refNode = (QualifiedNameReferenceNode) expNode;
+            if (refNode.identifier().text().trim().equals(endPoint.variableName().text().trim())) {
+                String serviceBasePath = getServiceBasePath(service);
+                Server server = extractServer(endPoint, serviceBasePath);
+                servers.add(server);
+            }
+        } else if (expNode.toString().trim().equals(endPoint.variableName().text().trim())) {
+            String serviceBasePath = getServiceBasePath(service);
+            Server server = extractServer(endPoint, serviceBasePath);
+            servers.add(server);
+        }
     }
 
     private Server addEnumValues(List<Server> servers) {
@@ -136,7 +155,7 @@ public class OpenAPIEndpointMapper {
         return list;
     }
 
-    // Function for handle both ExplicitNewExpressionNode and ImplicitNewExpressionNode in listener.
+    // Function to handle ExplicitNewExpressionNode in listener.
     private OpenAPI extractServerForExpressionNode(OpenAPI openAPI, SeparatedNodeList<ExpressionNode> bTypeExplicit,
                                                                     ServiceDeclarationNode service) {
         String serviceBasePath = getServiceBasePath(service);
@@ -146,11 +165,6 @@ public class OpenAPIEndpointMapper {
             if (expressionNode.kind().equals(SyntaxKind.EXPLICIT_NEW_EXPRESSION)) {
                 ExplicitNewExpressionNode explicit = (ExplicitNewExpressionNode) expressionNode;
                 list = Optional.ofNullable(explicit.parenthesizedArgList());
-                Server server = generateServer(serviceBasePath, list);
-                servers.add(server);
-            } else if (expressionNode.kind().equals(SyntaxKind.IMPLICIT_NEW_EXPRESSION)) {
-                ImplicitNewExpressionNode implicit = (ImplicitNewExpressionNode) expressionNode;
-                list = implicit.parenthesizedArgList();
                 Server server = generateServer(serviceBasePath, list);
                 servers.add(server);
             }

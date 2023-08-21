@@ -13,5 +13,6 @@ public type SimpleVaccineTimeline record {
 #
 # + fullvaccinetimelinelist - Descriptive Covid-19 vaccine timeline
 public type FullVaccineTimeline record {
-    record  { decimal total?; decimal daily?; decimal totalPerHundred?; decimal dailyPerMillion?; string date?;} [] fullvaccinetimelinelist;
+    record  {| decimal total?; decimal daily?; decimal totalPerHundred?; decimal dailyPerMillion?; string date?;|} []
+    fullvaccinetimelinelist;
 };

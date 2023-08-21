@@ -18,8 +18,9 @@
 
 package io.ballerina.openapi.generators.client;
 
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.FunctionReturnTypeGenerator;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -33,7 +34,7 @@ import static io.ballerina.openapi.generators.common.TestUtils.getOpenAPI;
 
 /**
  * All the tests related to the functionSignatureNode  Return type tests in
- * {@link BallerinaClientGenerator} util.
+ * {{@link io.ballerina.openapi.core.generators.client.BallerinaClientGenerator}} util.
  */
 public class FunctionSignatureReturnTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
@@ -73,7 +74,7 @@ public class FunctionSignatureReturnTypeTests {
                 new BallerinaTypesGenerator(array), new ArrayList<>());
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/products").getGet(),
                 true);
-        Assert.assertEquals(returnType, "TestsProductsResponse|error");
+        Assert.assertEquals(returnType, "Inline_response_200|error");
     }
 
     @Test(description = "Tests for the object response without property and without additional properties")
@@ -95,7 +96,7 @@ public class FunctionSignatureReturnTypeTests {
                 new BallerinaTypesGenerator(array), new ArrayList<>());
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/products").getGet(),
                 true);
-        Assert.assertEquals(returnType, "TestsProductsResponse|error");
+        Assert.assertEquals(returnType, "Inline_response_200|error");
     }
 
     @Test(description = "Tests for the response with no schema")
@@ -104,6 +105,27 @@ public class FunctionSignatureReturnTypeTests {
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(array,
                 new BallerinaTypesGenerator(array), new ArrayList<>());
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/path01").getGet(),
+                true);
+        Assert.assertEquals(returnType, "json|error");
+    }
+
+    @Test(description = "Tests for the empty response")
+    public void getReturnTypeForEmptyResponse() throws IOException, BallerinaOpenApiException {
+        OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/no_response.yaml"));
+        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(array,
+                new BallerinaTypesGenerator(array), new ArrayList<>());
+        String returnType = functionReturnType.getReturnType(array.getPaths().get("/pets").getGet(),
+                true);
+        Assert.assertEquals(returnType, "http:Response|error");
+    }
+
+    @Test(description = "Tests for the response with additional properties in OpenAPI 3.1 spec")
+    public void getReturnTypeForAdditionalPropertySchema() throws IOException, BallerinaOpenApiException {
+        OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/" +
+                "response_with_only_additional_schema.yaml"));
+        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(array,
+                new BallerinaTypesGenerator(array), new ArrayList<>());
+        String returnType = functionReturnType.getReturnType(array.getPaths().get("/store/inventory").getGet(),
                 true);
         Assert.assertEquals(returnType, "json|error");
     }

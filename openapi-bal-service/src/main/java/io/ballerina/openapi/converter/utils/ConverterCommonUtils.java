@@ -44,6 +44,7 @@ import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.Constants;
@@ -51,12 +52,15 @@ import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.model.OASResult;
+import io.ballerina.openapi.converter.service.OpenAPIComponentMapper;
+import io.ballerina.runtime.api.utils.IdentifierUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.ballerina.tools.text.LinePosition;
 import io.ballerina.tools.text.LineRange;
 import io.ballerina.tools.text.TextRange;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
@@ -71,8 +75,6 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -96,7 +98,6 @@ import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
  * Utilities used in Ballerina  to OpenAPI converter.
  */
 public class ConverterCommonUtils {
-    private static final String GENERATED_METHOD_PREFIX = "$gen$";
 
     /**
      * Retrieves a matching OpenApi {@link Schema} for a provided ballerina type.
@@ -104,8 +105,8 @@ public class ConverterCommonUtils {
      * @param type ballerina type name as a String
      * @return OpenApi {@link Schema} for type defined by {@code type}
      */
-    public static Schema getOpenApiSchema(String type) {
-        Schema schema;
+    public static Schema<?> getOpenApiSchema(String type) {
+        Schema<?> schema;
         switch (type) {
             case Constants.STRING:
             case Constants.PLAIN:
@@ -126,7 +127,7 @@ public class ConverterCommonUtils {
             case Constants.BYTE_ARRAY:
             case Constants.OCTET_STREAM:
                 schema = new StringSchema();
-                schema.setFormat("uuid");
+                schema.setFormat("byte");
                 break;
             case Constants.NUMBER:
             case Constants.DECIMAL:
@@ -151,7 +152,7 @@ public class ConverterCommonUtils {
             case Constants.XML:
             case Constants.JSON:
             default:
-                schema = new Schema();
+                schema = new Schema<>();
                 break;
         }
         return schema;
@@ -181,7 +182,7 @@ public class ConverterCommonUtils {
                 break;
             case BYTE_TYPE_DESC:
                 schema = new StringSchema();
-                schema.setFormat("uuid");
+                schema.setFormat("byte");
                 break;
             case DECIMAL_TYPE_DESC:
                 schema = new NumberSchema();
@@ -195,7 +196,7 @@ public class ConverterCommonUtils {
                 schema = new ObjectSchema();
                 break;
             default:
-                schema = new Schema();
+                schema = new Schema<>();
                 break;
         }
         return schema;
@@ -215,7 +216,7 @@ public class ConverterCommonUtils {
         }
         String[] split = operationID.split(Constants.SPECIAL_CHAR_REGEX);
         StringBuilder validName = new StringBuilder();
-        for (String part: split) {
+        for (String part : split) {
             if (!part.isBlank()) {
                 if (split.length > 1) {
                     part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
@@ -227,7 +228,6 @@ public class ConverterCommonUtils {
         operationID = validName.toString();
         return operationID.substring(0, 1).toLowerCase(Locale.ENGLISH) + operationID.substring(1);
     }
-
 
     /**
      * This util function uses to take the field value from annotation field.
@@ -252,9 +252,9 @@ public class ConverterCommonUtils {
     /**
      * This util functions is used to extract the details of annotation field.
      *
-     * @param annotationReference   Annotation reference name that need to extract
-     * @param annotationField       Annotation field name that need to extract details.
-     * @param annotation            Annotation node
+     * @param annotationReference Annotation reference name that need to extract
+     * @param annotationField     Annotation field name that need to extract details.
+     * @param annotation          Annotation node
      * @return List of string
      */
 
@@ -266,13 +266,13 @@ public class ConverterCommonUtils {
             MappingConstructorExpressionNode listOfAnnotValue = annotation.annotValue().get();
             for (MappingFieldNode field : listOfAnnotValue.fields()) {
                 SpecificFieldNode fieldNode = (SpecificFieldNode) field;
-                if (!((fieldNode).fieldName().toString().trim().equals(annotationField)) &&
+                if (!((fieldNode).fieldName().toString().trim().equals(annotationField)) ||
                         fieldNode.valueExpr().isEmpty()) {
                     continue;
                 }
                 ExpressionNode expressionNode = fieldNode.valueExpr().get();
                 if (expressionNode instanceof ListConstructorExpressionNode) {
-                    SeparatedNodeList mimeList = ((ListConstructorExpressionNode) expressionNode).expressions();
+                    SeparatedNodeList<Node> mimeList = ((ListConstructorExpressionNode) expressionNode).expressions();
                     for (Object mime : mimeList) {
                         if (!(mime instanceof BasicLiteralNode)) {
                             continue;
@@ -294,6 +294,7 @@ public class ConverterCommonUtils {
         }
         return mediaTypes;
     }
+
     /**
      * This function uses to take the service declaration node from given required node and return all the annotation
      * nodes that attached to service node.
@@ -337,6 +338,7 @@ public class ConverterCommonUtils {
      * This {@code NullLocation} represents the null location allocation for scenarios which has not location.
      */
     public static class NullLocation implements Location {
+
         @Override
         public LineRange lineRange() {
             LinePosition from = LinePosition.from(0, 0);
@@ -352,7 +354,7 @@ public class ConverterCommonUtils {
     /**
      * Parse and get the {@link OpenAPI} for the given OpenAPI contract.
      *
-     * @param definitionURI     URI for the OpenAPI contract
+     * @param definitionURI URI for the OpenAPI contract
      * @return {@link OASResult}  OpenAPI model
      */
     public static OASResult parseOpenAPIFile(String definitionURI) {
@@ -377,19 +379,17 @@ public class ConverterCommonUtils {
         }
         String openAPIFileContent = null;
         try {
-            openAPIFileContent = Files.readString(Paths.get(definitionURI));
+            openAPIFileContent = Files.readString(contractPath);
         } catch (IOException e) {
             DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
-            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode()
-                    , error.getDescription(), null, e.toString());
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(), error.getDescription(), null,
+                    e.toString());
             diagnostics.add(diagnostic);
         }
-        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null,
-                parseOptions);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
             DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_112;
-            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode()
-                    , error.getDescription(), null);
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(), error.getDescription(), null);
             diagnostics.add(diagnostic);
             return new OASResult(null, diagnostics);
         }
@@ -409,12 +409,14 @@ public class ConverterCommonUtils {
                 if (path.isBlank()) {
                     continue;
                 }
-                stringBuilder.append(path.substring(0, 1).toUpperCase(Locale.ENGLISH) + path.substring(1));
+                stringBuilder.append(path.substring(0, 1).toUpperCase(Locale.ENGLISH));
+                stringBuilder.append(path.substring(1));
                 stringBuilder.append(" ");
             }
             title = stringBuilder.toString().trim();
         } else if (urlPaths.length == 1 && !urlPaths[0].isBlank()) {
-            stringBuilder.append(urlPaths[0].substring(0, 1).toUpperCase(Locale.ENGLISH) + urlPaths[0].substring(1));
+            stringBuilder.append(urlPaths[0].substring(0, 1).toUpperCase(Locale.ENGLISH));
+            stringBuilder.append(urlPaths[0].substring(1));
             title = stringBuilder.toString().trim();
         }
         return title;
@@ -423,12 +425,16 @@ public class ConverterCommonUtils {
     /**
      * This util function is to check the given service is http service.
      *
-     * @param serviceNode    Service node for analyse
-     * @param semanticModel  Semantic model
-     * @return  boolean output
+     * @param serviceNode   Service node for analyse
+     * @param semanticModel Semantic model
+     * @return boolean output
      */
     public static boolean isHttpService(ServiceDeclarationNode serviceNode, SemanticModel semanticModel) {
         Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
+        if (serviceSymbol.isEmpty()) {
+            return false;
+        }
+
         ServiceDeclarationSymbol serviceNodeSymbol = (ServiceDeclarationSymbol) serviceSymbol.get();
         List<TypeSymbol> listenerTypes = (serviceNodeSymbol).listenerTypes();
         for (TypeSymbol listenerType : listenerTypes) {
@@ -516,17 +522,21 @@ public class ConverterCommonUtils {
     }
 
     public static String unescapeIdentifier(String parameterName) {
-        // NOTE: This is a temporary fix to decode unicode until we come up with a proper api.
-        // This already implemented API from {@link io.ballerina.identifier.Utils} can be access, if it is available
-        // in some which we can access in external class. That API is need to be implemented.
-        try {
-            Class<?> uClass = Class.forName("io.ballerina.identifier.Utils");
-            Method unescapeBallerina = uClass.getDeclaredMethod("unescapeBallerina", java.lang.String.class);
-            parameterName = (String) unescapeBallerina.invoke(null, parameterName);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
-                InvocationTargetException e) {
-            return parameterName;
+        String unescapedParamName = IdentifierUtils.unescapeBallerina(parameterName);
+        return unescapedParamName.replaceAll("\\\\", "").replaceAll("'", "");
+    }
+
+    public static Schema<?> handleReference(SemanticModel semanticModel, Components components,
+                                            SimpleNameReferenceNode record) {
+        Schema<?> refSchema = new Schema<>();
+        // Creating request body - required.
+        Optional<Symbol> symbol = semanticModel.symbol(record);
+        if (symbol.isPresent() && symbol.get() instanceof TypeSymbol) {
+            String recordName = record.name().toString().trim();
+            OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
+            componentMapper.createComponentSchema(components.getSchemas(), (TypeSymbol) symbol.get());
+            refSchema.set$ref(ConverterCommonUtils.unescapeIdentifier(recordName));
         }
-        return parameterName.replaceAll("\\\\", "").replaceAll("'", "");
+        return refSchema;
     }
 }

@@ -1,0 +1,68 @@
+openapi: 3.0.0
+info:
+  title: LaunchDarkly REST API
+  version: 4.0.0
+paths:
+  /projects:
+    post:
+      operationId: operation01
+      requestBody:
+        $ref: '#/components/requestBodies/deleteFeatureFlagApproval'
+      responses:
+        '200':
+          description: Feature flag approval request response
+  /projects02:
+    post:
+      operationId: operation02
+      requestBody:
+        $ref: '#/components/requestBodies/deleteFeatureFlag'
+      responses:
+        '200':
+          description: Feature flag approval request response
+
+servers:
+  - url: https://app.launchdarkly.com/api/v2
+components:
+  requestBodies:
+    deleteFeatureFlagApproval:
+      content:
+        application/json:
+          schema: #When schema type is an object
+            type: object
+            properties:
+              comment:
+                description: comment will be included in audit log item for change.
+                type: string
+              description:
+                description: A name that describes the changes you would like to apply to a feature flag configuration
+                type: string
+              notifyMemberIds:
+                description: Id of members to notify.
+                example:
+                  - memberId
+                  - memberId2
+                items:
+                  type: string
+                type: array
+            required:
+              - description
+              - instructions
+              - notifyMemberIds
+      description: Create a new feature flag approval request
+    deleteFeatureFlag:
+      content:
+        application/json:
+          schema: #When schema has properties without schema type object
+            properties:
+              comment:
+                type: string
+              date:
+                type: string
+
+      description: Create a new feature flag approval request
+  schemas:
+    deleteFeatureFlagApprovalRequestFeatureflagapprovalrequestconfigbody:
+      type: object
+      properties:
+        name:
+          type: string

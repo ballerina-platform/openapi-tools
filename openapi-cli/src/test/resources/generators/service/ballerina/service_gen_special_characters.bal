@@ -3,6 +3,12 @@ import ballerina/http;
 listener http:Listener ep0 = new (80, config = {host: "petstore.openapi.io"});
 
 service /v1 on ep0 {
-    resource function get v3/'pet\-store/v1(int? 'limit) returns Pets|http:Response {
+    # List all pets
+    #
+    # + 'limit - How many items to return at one time (max 100)
+    # + return - returns can be any of following types
+    # Pets (An paged array of pets)
+    # http:Response (unexpected error)
+    resource function get v3/pet\-store/v1(int? 'limit) returns Pets|http:Response {
     }
 }

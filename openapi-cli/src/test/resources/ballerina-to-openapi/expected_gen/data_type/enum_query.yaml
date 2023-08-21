@@ -1,0 +1,107 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /users/meetings/{group}:
+    get:
+      operationId: getUsersMeetingsGroup
+      parameters:
+        - name: group
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/MeetingGroup'
+        - name: required-q-ref
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/RoomNo'
+        - name: required-q-arr
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Status'
+        - name: optional-q-arr
+          in: query
+          schema:
+            type: array
+            nullable: true
+            items:
+              $ref: '#/components/schemas/Status'
+        - name: format
+          in: query
+          schema:
+            $ref: '#/components/schemas/Format'
+        - name: type
+          in: query
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                default: live
+        - name: q-default-ref
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/RoomNo'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingList'
+        "404":
+          description: NotFound
+components:
+  schemas:
+    Status:
+      type: string
+      enum:
+        - PENDING
+        - AVAILABLE
+    RoomNo:
+      type: string
+      enum:
+        - R6
+        - R5
+        - R3
+    Format:
+      type: string
+      enum:
+        - MSGPACK
+        - JSONP
+        - JSON
+    Meeting:
+      required:
+        - topic
+      type: object
+      properties:
+        topic:
+          type: string
+    MeetingList:
+      required:
+        - meetings
+      type: object
+      properties:
+        meetings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Meeting'
+    MeetingGroup:
+      type: string
+      enum:
+        - ENGINEERING
+        - HR
+        - ADMIN

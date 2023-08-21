@@ -18,7 +18,10 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.launcher.BLauncherException;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -38,6 +41,7 @@ import java.util.stream.Stream;
  * OpenAPI command test suit.
  */
 public class OpenAPICmdTest extends OpenAPICommandTest {
+
     private static final String LINE_SEPARATOR = System.lineSeparator();
 
     @BeforeTest(description = "This will create a new ballerina project for testing below scenarios.")
@@ -48,6 +52,17 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     @Test(description = "Test openapi command with help flag")
     public void testOpenAPICmdHelp() throws IOException {
         String[] args = {"-h"};
+        OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(openApiCommand).parseArgs(args);
+        openApiCommand.execute();
+        String output = readOutput(true);
+        Assert.assertTrue(output.contains("NAME\n" +
+                "       ballerina-openapi - Generate a Ballerina service"));
+    }
+
+    @Test(description = "Test openapi command with help flag")
+    public void testOpenAPICmdHelpWithBalTools() throws IOException {
+        String[] args = {"help", "openapi"};
         OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(openApiCommand).parseArgs(args);
         openApiCommand.execute();
@@ -73,7 +88,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("An OpenAPI definition file is required to generate the service."));
+        Assert.assertTrue(output.contains("An OpenAPI definition path is required to generate the service."));
     }
 
     @Test(description = "Test openapi gen-service for successful service generation")
@@ -148,6 +163,76 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 Assert.fail("Expected content and actual generated content is mismatched for: "
                         + petstoreYaml.toString());
             }
+            deleteGeneratedFiles(false);
+        } else {
+            Assert.fail("Type generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test
+    public void testForRemovedUnusedConstraintImport() throws IOException {
+        Path petstoreYaml = resourceDir.resolve(Paths.get("non_constraint_import.yaml"));
+        String[] args = {"--input", petstoreYaml.toString(),
+                "--mode", "client", "--tags", "pets", "-o", this.tmpDir.toString()};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen",
+                "non_constraint_import_types.bal"));
+        String expectedSchemaContent = "";
+        try (Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile)) {
+            expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("client.bal")) &&
+                Files.exists(this.tmpDir.resolve("types.bal"))) {
+            //Compare schema contents
+            String generatedSchema = "";
+            try (Stream<String> generatedSchemaLines = Files.lines(this.tmpDir.resolve("types.bal"))) {
+                generatedSchema = generatedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedSchema = (generatedSchema.trim()).replaceAll("\\s+", "");
+            expectedSchemaContent = (expectedSchemaContent.trim()).replaceAll("\\s+", "");
+            Assert.assertEquals(generatedSchema, expectedSchemaContent,
+                    "Expected content and actual generated content is mismatched for: " + petstoreYaml);
+            deleteGeneratedFiles(false);
+        } else {
+            Assert.fail("Type generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test(description = "This test for checking the constraint import when the type uses the constraint")
+    public void testWithConstraintImport() throws IOException {
+        Path petstoreYaml = resourceDir.resolve(Paths.get("constraint_import.yaml"));
+        String[] args = {"--input", petstoreYaml.toString(),
+                "--mode", "client", "--tags", "pets", "-o", this.tmpDir.toString()};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen",
+                "constraint_import_types.bal"));
+        String expectedSchemaContent = "";
+        try (Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile)) {
+            expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("client.bal")) &&
+                Files.exists(this.tmpDir.resolve("types.bal"))) {
+            //Compare schema contents
+            String generatedSchema = "";
+            try (Stream<String> generatedSchemaLines = Files.lines(this.tmpDir.resolve("types.bal"))) {
+                generatedSchema = generatedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedSchema = (generatedSchema.trim()).replaceAll("\\s+", "");
+            expectedSchemaContent = (expectedSchemaContent.trim()).replaceAll("\\s+", "");
+            Assert.assertEquals(generatedSchema, expectedSchemaContent,
+                    "Expected content and actual generated content is mismatched for: " + petstoreYaml);
             deleteGeneratedFiles(false);
         } else {
             Assert.fail("Type generation failed. : " + readOutput(true));
@@ -242,7 +327,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     public void testConnectorGenerationFilteringByTags() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore_tags.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--tags",
-                "pets,dogs", "--mode", "client"};
+                "pets,dogs", "--mode", "client", "--client-methods", "remote"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
@@ -337,7 +422,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     }
 
     @Test(description = "Test generation without including test files")
-    public void testClientGenerationWithoutIncludeTestFilesOption() throws IOException, BallerinaOpenApiException {
+    public void testClientGenerationWithoutIncludeTestFilesOption() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore_with_oauth.yaml"));
         Path licenseHeader = resourceDir.resolve(Paths.get("license.txt"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
@@ -359,8 +444,8 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 !Files.exists(this.tmpDir.resolve("tests/Config.toml")) &&
                 !Files.exists(this.tmpDir.resolve("tests/test.bal"))) {
 
-                Assert.assertTrue(true);
-                deleteGeneratedFiles(true);
+            Assert.assertTrue(true);
+            deleteGeneratedFiles(true);
         } else {
             Assert.fail("Code generation failed. : " + readOutput(true));
         }
@@ -408,6 +493,86 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
     }
 
+    @Test(description = "Test Ballerina service generation with service type")
+    public void testServiceTypeGeneration() throws IOException {
+        Path projectDir = resourceDir.resolve("expected_gen").resolve("ballerina_project");
+        Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
+        String[] args = {"--input", petstoreYaml.toString(), "-o", projectDir.toString(), "--with-service-type"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedServiceTypeFile = resourceDir.resolve(Paths.get("expected_gen", "pestore_service_type.bal"));
+        String expectedServiceTypeContent = "";
+        try (Stream<String> expectedServiceTypeLines = Files.lines(expectedServiceTypeFile)) {
+            expectedServiceTypeContent = expectedServiceTypeLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(projectDir.resolve("client.bal")) &&
+                Files.exists(projectDir.resolve("petstore_service.bal")) &&
+                Files.exists(projectDir.resolve("types.bal")) &&
+                Files.exists(projectDir.resolve("service_type.bal"))) {
+            //Compare schema contents
+            String generatedServiceType = "";
+            try (Stream<String> generatedServiceTypeLines = Files.lines(projectDir.resolve("service_type.bal"))) {
+                generatedServiceType = generatedServiceTypeLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedServiceType = (generatedServiceType.trim()).replaceAll("\\s+", "");
+            expectedServiceTypeContent = (expectedServiceTypeContent.trim()).replaceAll("\\s+", "");
+            Assert.assertEquals(generatedServiceType, expectedServiceTypeContent,
+                    "Expected content and actual generated content is mismatched for: " + petstoreYaml.toString());
+        } else {
+            Assert.fail("Service generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test(description = "Test Ballerina service generation without data binding")
+    public void testServiceGenerationWithoutDataBinding() throws IOException {
+        Path projectDir = resourceDir.resolve("expected_gen").resolve("ballerina_project");
+        Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
+        String[] args = {"--input", petstoreYaml.toString(), "-o", projectDir.toString(), "--without-data-binding"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedService = resourceDir.resolve(Paths.get("expected_gen", "generic_service_petstore.bal"));
+        String expectedServiceContent = "";
+        try (Stream<String> expectedServiceTypeLines = Files.lines(expectedService)) {
+            expectedServiceContent = expectedServiceTypeLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(projectDir.resolve("client.bal")) &&
+                Files.exists(projectDir.resolve("petstore_service.bal")) &&
+                Files.exists(projectDir.resolve("types.bal"))) {
+            //Compare schema contents
+            String generatedService = "";
+            try (Stream<String> generatedServiceLines = Files.lines(projectDir.resolve("petstore_service.bal"))) {
+                generatedService = generatedServiceLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedService = (generatedService.trim()).replaceAll("\\s+", "");
+            expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
+            if (expectedServiceContent.equals(generatedService)) {
+                SemanticModel semanticModel = TestUtils.getSemanticModel(
+                        projectDir.resolve("petstore_service.bal"));
+                boolean hasErrors = semanticModel.diagnostics().stream()
+                        .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+                Assert.assertFalse(hasErrors, "Errors found in generated service");
+                deleteGeneratedFiles(false, projectDir, true);
+            } else {
+                Assert.fail("Expected content and actual generated content is mismatched for: "
+                        + petstoreYaml.toString());
+                deleteGeneratedFiles(false, projectDir, true);
+            }
+        } else {
+            Assert.fail("Service generation failed. : " + readOutput(true));
+        }
+
+    }
+
     @Test(description = "Test for service generation with yaml contract without operationID")
     public void testForYamlContractWithoutOperationID() throws IOException {
         Path yamlContract = resourceDir.resolve(Paths.get("without_operationID.yaml"));
@@ -440,6 +605,29 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         if (isConfigGenerated) {
             File configFile = new File(this.tmpDir.resolve("tests/Config.toml").toString());
             configFile.delete();
+        }
+        FileUtils.deleteDirectory(testDir);
+    }
+
+    private void deleteGeneratedFiles(boolean isConfigGenerated, Path folderPath, boolean isServiceTypeGenerated)
+            throws IOException {
+        File serviceFile = new File(folderPath.resolve("petstore_service.bal").toString());
+        File clientFile = new File(folderPath.resolve("client.bal").toString());
+        File schemaFile = new File(folderPath.resolve("types.bal").toString());
+        File testFile = new File(folderPath.resolve("tests/test.bal").toString());
+        File testDir = new File(folderPath.resolve("tests").toString());
+        serviceFile.delete();
+        clientFile.delete();
+        schemaFile.delete();
+        testFile.delete();
+        if (isConfigGenerated) {
+            File configFile = new File(folderPath.resolve("tests/Config.toml").toString());
+            configFile.delete();
+        }
+        if (isServiceTypeGenerated) {
+            File serviceTypeFile = new File(folderPath.resolve("service_type.bal").toString());
+            File utilFile = new File(folderPath.resolve("utils.bal").toString());
+            utilFile.delete();
         }
         FileUtils.deleteDirectory(testDir);
     }

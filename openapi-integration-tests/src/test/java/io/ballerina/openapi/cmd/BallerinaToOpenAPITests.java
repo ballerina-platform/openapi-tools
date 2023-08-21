@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.cmd;
 
+import io.ballerina.openapi.TestUtil;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -33,8 +34,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.ballerina.openapi.cmd.TestUtil.DISTRIBUTIONS_DIR;
-import static io.ballerina.openapi.cmd.TestUtil.RESOURCES_PATH;
+import static io.ballerina.openapi.TestUtil.DISTRIBUTIONS_DIR;
+import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
 
 /**
  * This {@code BallerinaToOpenAPITests} contains all the ballerina to openapi command with compiler annotation.
@@ -122,6 +123,25 @@ public class BallerinaToOpenAPITests {
         buildArgs.add("project_11/service.bal");
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
         Assert.assertFalse(Files.exists(TEST_RESOURCE.resolve("query_openapi.yaml")));
+    }
+
+    @Test(description = "Service is with non openapi annotation")
+    public void nonOpenAPIAnnotation() throws IOException, InterruptedException {
+        executeCommand("project_non_openapi_annotation/service.bal", "service_openapi.yaml",
+                "project_non_openapi_annotation/result.yaml");
+    }
+
+    @Test(description = "Service is with non openapi annotation and slash as base path")
+    public void nonOpenAPIAnnotationWithSlash() throws IOException, InterruptedException {
+        executeCommand("project_non_openapi_annotation_with_base_path/service.bal", "payload_openapi.yaml",
+                "project_non_openapi_annotation_with_base_path/result.yaml");
+    }
+
+    @Test(description = "Service is with non openapi annotation and without a base path")
+    public void nonOpenAPIAnnotationWithWithoutBasePath() throws IOException, InterruptedException {
+        executeCommand("project_non_openapi_annotation_without_base_path/service_file.bal",
+                "service_file_openapi.yaml",
+                "project_non_openapi_annotation_without_base_path/result.yaml");
     }
 
     @AfterClass

@@ -9,7 +9,7 @@ public type Activity record {
     string uuid?;
 };
 
-public type  Error Activity|Profile01;
+public type Error Activity|Profile01;
 
 public type Profile01 record {
     # First name of the Uber user.

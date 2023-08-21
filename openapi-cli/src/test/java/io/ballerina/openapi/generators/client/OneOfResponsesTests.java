@@ -18,8 +18,9 @@
 
 package io.ballerina.openapi.generators.client;
 
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.FunctionReturnTypeGenerator;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -33,7 +34,7 @@ import static io.ballerina.openapi.generators.common.TestUtils.getOpenAPI;
 
 /**
  * All the tests related to the functionSignatureNode  Return type tests as oneOf typein
- * {@link BallerinaClientGenerator} util.
+ * {{@link io.ballerina.openapi.core.generators.client.BallerinaClientGenerator}} util.
  */
 public class OneOfResponsesTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
@@ -45,7 +46,7 @@ public class OneOfResponsesTests {
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
                 ballerinaSchemaGenerator,  new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/pet").getGet(),
-                true), "ChannelDetails[]|string[]|error");
+                true), "Inline_response_2XX|error");
     }
 
     @Test(description = "Tests for returnType when response has array oneOf when it has function body")
@@ -55,6 +56,6 @@ public class OneOfResponsesTests {
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
                 ballerinaSchemaGenerator, new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/pet").getGet(),
-                false), "OneOfOperationId01Response|error");
+                false), "Inline_response_2XX|error");
     }
 }

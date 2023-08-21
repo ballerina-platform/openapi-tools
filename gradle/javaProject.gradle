@@ -15,7 +15,7 @@
  *
  */
 
-apply plugin: "java"
+apply plugin: "java-library"
 apply plugin: "com.github.spotbugs"
 apply plugin: "checkstyle"
 apply plugin: "jacoco"
@@ -44,38 +44,61 @@ dependencies {
     testImplementation "org.slf4j:slf4j-api:${slf4jVersion}"
 
     constraints {
-        implementation "com.fasterxml.jackson.core:jackson-databind:2.13.2"
         implementation "com.github.jknack:handlebars:4.2.0"
         implementation "com.google.code.findbugs:jsr305:3.0.2"
         implementation "info.picocli:picocli:4.0.1"
-        implementation "io.swagger.core.v3:swagger-core:2.1.13"
-        implementation "io.swagger.core.v3:swagger-models:2.1.13"
-        implementation "io.swagger.parser.v3:swagger-parser-v2-converter:2.0.30"
-        implementation "io.swagger.parser.v3:swagger-parser:2.0.30"
+        implementation "io.swagger.core.v3:swagger-core:2.2.9"
+        implementation "io.swagger.core.v3:swagger-models:2.2.9"
+        implementation "io.swagger.parser.v3:swagger-parser:${swaggerParserVersion}"
         implementation "javax.ws.rs:javax.ws.rs-api:2.1.1"
         implementation "org.ballerinalang:ballerina-lang:${ballerinaLangVersion}"
         implementation "org.ballerinalang:ballerina-parser:${ballerinaLangVersion}"
         implementation "org.ballerinalang:ballerina-cli:${ballerinaLangVersion}"
         implementation "org.ballerinalang:formatter-core:${ballerinaLangVersion}"
         implementation "org.ballerinalang:ballerina-tools-api:${ballerinaLangVersion}"
+        implementation "org.ballerinalang:ballerina-runtime:${ballerinaLangVersion}"
         implementation "io.ballerina.stdlib:http-native:${stdlibHttpVersion}"
         implementation "org.ballerinalang:language-server-commons:${ballerinaLangVersion}"
         testImplementation "org.testng:testng:${testngVersion}"
     }
 
     jacocoRuntime "org.jacoco:org.jacoco.agent:${jacoco.toolVersion}:runtime"
-    checkstyle project(":config:checkstyle")
-    checkstyle "com.puppycrawl.tools:checkstyle:${puppycrawlCheckstyleVersion}"
+    checkstyle project(':checkstyle')
+    checkstyle "com.puppycrawl.tools:checkstyle:${project.puppycrawlCheckstyleVersion}"
 }
 
-sourceCompatibility = JavaVersion.VERSION_11
+sourceCompatibility = JavaVersion.VERSION_17
+
+def excludePattern = '**/module-info.java'
+tasks.withType(Checkstyle) {
+    exclude excludePattern
+}
+
+checkstyle {
+    toolVersion "${project.puppycrawlCheckstyleVersion}"
+    configFile rootProject.file("config/checkstyle/build/checkstyle.xml")
+    configProperties = ["suppressionFile" : file("${rootDir}/config/checkstyle/build/suppressions.xml")]
+}
+
+checkstyleMain.dependsOn(":checkstyle:downloadCheckstyleRuleFiles")
+checkstyleMain.dependsOn(":checkstyle:compileTestJava")
+checkstyleMain.dependsOn(":checkstyle:checkstyleMain")
+checkstyleMain.dependsOn(":checkstyle:checkstyleTest")
+checkstyleMain.dependsOn(":checkstyle:test")
+checkstyleMain.dependsOn(":checkstyle:processTestResources")
+
+checkstyleTest.dependsOn(":checkstyle:downloadCheckstyleRuleFiles")
+checkstyleTest.dependsOn(":checkstyle:compileTestJava")
+checkstyleTest.dependsOn(":checkstyle:checkstyleMain")
+checkstyleTest.dependsOn(":checkstyle:checkstyleTest")
+checkstyleTest.dependsOn(":checkstyle:test")
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
 jacoco {
-    toolVersion = "0.8.6"
+    toolVersion = "${project.jacocoVersion}"
 }
 
 test {
@@ -119,7 +142,7 @@ spotbugsMain {
     effort = "max"
     reportLevel = "low"
     reportsDir = file("$project.buildDir/reports/spotbugs")
-    def excludeFile = file("spotbugs-exclude.xml")
+    def excludeFile = file("${rootDir}/spotbugs-exclude.xml")
     if (excludeFile.exists()) {
         it.excludeFilter = excludeFile
     }
@@ -134,10 +157,8 @@ spotbugsTest {
 
 jacocoTestReport {
     reports {
-        xml.enabled true
+        xml.required = true
     }
 }
 
 spotbugsMain.finalizedBy validateSpotbugs
-checkstyleMain.dependsOn(":config:checkstyle:downloadMultipleFiles")
-

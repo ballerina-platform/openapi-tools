@@ -29,7 +29,7 @@ import java.util.Optional;
  * {@code OpenApiDocContextHandler} will manage the shared context among compiler plugin tasks.
  */
 public final class OpenApiDocContextHandler {
-    private static OpenApiDocContextHandler INSTANCE;
+    private static OpenApiDocContextHandler instance;
 
     private final List<OpenApiDocContext> contexts;
 
@@ -39,11 +39,11 @@ public final class OpenApiDocContextHandler {
 
     public static OpenApiDocContextHandler getContextHandler() {
         synchronized (OpenApiDocContextHandler.class) {
-            if (Objects.isNull(INSTANCE)) {
-                INSTANCE = new OpenApiDocContextHandler();
+            if (Objects.isNull(instance)) {
+                instance = new OpenApiDocContextHandler();
             }
         }
-        return INSTANCE;
+        return instance;
     }
 
     public void addContext(OpenApiDocContext context) {

@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.generators.openapi;
 
+import io.ballerina.openapi.cmd.OASContractGenerator;
 import org.testng.Assert;
 
 import java.io.File;
@@ -32,6 +33,7 @@ import java.util.stream.Stream;
  * This Util class for storing the common utils related to test in ballerina to openAPI command implementation.
  */
 public class TestUtils {
+
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();
 
     private static String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
@@ -40,6 +42,7 @@ public class TestUtils {
         expectedServiceLines.close();
         return expectedServiceContent;
     }
+
     public static void deleteGeneratedFiles(String filename, Path tempDir) {
         try {
             Files.deleteIfExists(tempDir.resolve(filename));
@@ -48,14 +51,12 @@ public class TestUtils {
         }
     }
 
-    public static void compareWithGeneratedFile(Path ballerinaFilePath, String yamlFile)
-            throws IOException {
+    public static void compareWithGeneratedFile(Path ballerinaFilePath, String yamlFile) throws IOException {
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), yamlFile);
-            OpenApiConverter openApiConverter = new OpenApiConverter();
-            openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
-                    , false);
+            OASContractGenerator openApiConverter = new OASContractGenerator();
+            openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
             if (Files.exists(tempDir.resolve("payloadV_openapi.yaml"))) {
                 String generatedYaml = getStringFromGivenBalFile(tempDir, "payloadV_openapi.yaml");
                 generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
@@ -72,15 +73,17 @@ public class TestUtils {
             System.gc();
         }
     }
+
     public static void deleteDirectory(Path path) {
-        try {
-            if (Files.exists(path)) {
-                Files.walk(path)
-                        .sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
-            }
-        } catch (IOException e) {
+        if (!Files.exists(path)) {
+            return;
+        }
+
+        try (Stream<Path> walk = Files.walk(path)) {
+            walk.sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        } catch (IOException ignored) {
             //ignore
         }
     }
