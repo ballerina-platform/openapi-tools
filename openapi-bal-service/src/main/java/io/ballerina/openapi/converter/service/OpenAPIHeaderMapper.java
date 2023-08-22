@@ -59,11 +59,14 @@ public class OpenAPIHeaderMapper {
     private final Components components;
     private final SemanticModel semanticModel;
     private final Map<String, String> apidocs;
+    private final ModuleMemberVisitor moduleMemberVisitor;
 
-    public OpenAPIHeaderMapper(Components components, SemanticModel semanticModel, Map<String, String> apidocs) {
+    public OpenAPIHeaderMapper(Components components, SemanticModel semanticModel, Map<String, String> apidocs,
+                               ModuleMemberVisitor moduleMemberVisitor) {
         this.apidocs = apidocs;
         this.components = components;
         this.semanticModel = semanticModel;
+        this.moduleMemberVisitor = moduleMemberVisitor;
     }
 
     /**
@@ -86,7 +89,7 @@ public class OpenAPIHeaderMapper {
 
         if (headerDetailNode.kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
             SimpleNameReferenceNode refNode = (SimpleNameReferenceNode) headerDetailNode;
-            headerTypeSchema = handleReference(semanticModel, components, refNode);
+            headerTypeSchema = handleReference(semanticModel, components, refNode, moduleMemberVisitor);
         } else {
             headerTypeSchema = ConverterCommonUtils.getOpenApiSchema(getHeaderType(headerParam));
         }
@@ -126,7 +129,7 @@ public class OpenAPIHeaderMapper {
         Schema<?> headerTypeSchema;
         if (headerParam.typeName().kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
             SimpleNameReferenceNode refNode = (SimpleNameReferenceNode) headerParam.typeName();
-            headerTypeSchema = handleReference(semanticModel, components, refNode);
+            headerTypeSchema = handleReference(semanticModel, components, refNode, moduleMemberVisitor);
         } else {
             headerTypeSchema = ConverterCommonUtils.getOpenApiSchema(getHeaderType(headerParam));
         }
@@ -184,7 +187,7 @@ public class OpenAPIHeaderMapper {
             Schema<?> itemSchema;
             if (kind == SyntaxKind.SIMPLE_NAME_REFERENCE) {
                 SimpleNameReferenceNode refNode = (SimpleNameReferenceNode) arrayNode.memberTypeDesc();
-                itemSchema = handleReference(semanticModel, components, refNode);
+                itemSchema = handleReference(semanticModel, components, refNode, moduleMemberVisitor);
             } else {
                 itemSchema = ConverterCommonUtils.getOpenApiSchema(kind);
             }

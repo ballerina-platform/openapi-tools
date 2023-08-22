@@ -38,14 +38,15 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
+import io.ballerina.compiler.syntax.tree.IntersectionTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
-import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.NonTerminalNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
+import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
@@ -70,6 +71,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -89,14 +91,13 @@ import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
 public class OpenAPIComponentMapper {
     private final Components components;
     private final List<OpenAPIConverterDiagnostic> diagnostics;
-    private final NonTerminalNode rootNode;
     private final HashSet<String> visitedTypeDefinitionNames = new HashSet<>();
+    private final LinkedHashSet<TypeDefinitionNode> typeDefinitionNodes;
 
-
-    public OpenAPIComponentMapper(Components components, NonTerminalNode rootNode) {
+    public OpenAPIComponentMapper(Components components, ModuleMemberVisitor moduleMemberVisitor) {
          this.components = components;
-         this.rootNode = rootNode;
          this.diagnostics = new ArrayList<>();
+         this.typeDefinitionNodes = moduleMemberVisitor.getTypeDefinitionNodes();
     }
 
     public List<OpenAPIConverterDiagnostic> getDiagnostics() {
@@ -122,24 +123,22 @@ public class OpenAPIComponentMapper {
         }
         TypeReferenceTypeSymbol typeRef = (TypeReferenceTypeSymbol) typeSymbol;
         TypeSymbol type = typeRef.typeDescriptor();
-        // Handle record type request body
         if (type.typeKind() == TypeDescKind.INTERSECTION) {
             type = excludeReadonlyIfPresent(type);
         }
 
         //Access module part node for finding the node to given typeSymbol.
-        //TODO: this works for module reference.
-        ModulePartNode modulePartNode = rootNode.syntaxTree().rootNode();
-        NonTerminalNode nonTerminalNode = modulePartNode.findNode(typeSymbol.getLocation().get().textRange());
         ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder =
                 new ConstraintAnnotation.ConstraintAnnotationBuilder();
-        if (nonTerminalNode instanceof TypeDefinitionNode) {
-            TypeDefinitionNode node = (TypeDefinitionNode) nonTerminalNode;
-
-            if (node.metadata().isPresent()) {
-                extractedConstraintAnnotation(node.metadata().get(), constraintBuilder);
+        ((TypeReferenceTypeSymbol) typeSymbol).definition().getName().ifPresent(name -> {
+            for (TypeDefinitionNode typeDefinitionNode : typeDefinitionNodes) {
+                if (typeDefinitionNode.typeName().text().equals(name)) {
+                    if (typeDefinitionNode.metadata().isPresent()) {
+                        extractedConstraintAnnotation(typeDefinitionNode.metadata().get(), constraintBuilder);
+                    }
+                }
             }
-        }
+        });
         ConstraintAnnotation constraintAnnot = constraintBuilder.build();
 
         switch (type.typeKind()) {
@@ -366,23 +365,43 @@ public class OpenAPIComponentMapper {
         List<String> required = new ArrayList<>();
         componentSchema.setDescription(apiDocs.get(componentName));
         Map<String, Schema> schemaProperties = new LinkedHashMap<>();
+        RecordTypeDescriptorNode record = null;
+        // Get the record type descriptor node from given record type symbol
+        for (TypeDefinitionNode typeDefinitionNode : typeDefinitionNodes) {
+            if (typeDefinitionNode.typeName().text().equals(componentName)) {
+                if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
+                    record = (RecordTypeDescriptorNode) typeDefinitionNode.typeDescriptor();
+                } else if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.INTERSECTION_TYPE_DESC)) {
+                    IntersectionTypeDescriptorNode intersecNode =
+                            (IntersectionTypeDescriptorNode) typeDefinitionNode.typeDescriptor();
+                    Node leftTypeDesc = intersecNode.leftTypeDesc();
+                    Node rightTypeDesc = intersecNode.rightTypeDesc();
+                    if (leftTypeDesc.kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
+                        record = (RecordTypeDescriptorNode) leftTypeDesc;
+                    }
+                    if (rightTypeDesc.kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
+                        record = (RecordTypeDescriptorNode) rightTypeDesc;
+                    }
+                }
+            }
+        }
+
         for (Map.Entry<String, RecordFieldSymbol> field : rfields.entrySet()) {
             ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder =
                     new ConstraintAnnotation.ConstraintAnnotationBuilder();
-
-            if (!(rootNode instanceof QualifiedNameReferenceNode)) {
-                ModulePartNode modulePartNode = rootNode.syntaxTree().rootNode();
-                NonTerminalNode node = modulePartNode.findNode(field.getValue().getLocation().get().textRange());
-                if (node instanceof RecordFieldNode) {
-                    RecordFieldNode fieldNode = (RecordFieldNode) modulePartNode.
-                            findNode(field.getValue().getLocation().get().textRange());
-                    Optional<MetadataNode> metadata = fieldNode.metadata();
-                    metadata.ifPresent(metadataNode -> extractedConstraintAnnotation(metadataNode, constraintBuilder));
+            if (record != null) {
+                for (Node node : record.fields()) {
+                    if (node instanceof RecordFieldNode) {
+                        RecordFieldNode fieldNode = (RecordFieldNode) node;
+                        if (fieldNode.fieldName().toString().equals(field.getKey())) {
+                            Optional<MetadataNode> metadata = fieldNode.metadata();
+                            metadata.ifPresent(metadataNode -> extractedConstraintAnnotation(metadataNode,
+                                    constraintBuilder));
+                        }
+                    }
                 }
             }
-
             ConstraintAnnotation constraintAnnot = constraintBuilder.build();
-
             String fieldName = ConverterCommonUtils.unescapeIdentifier(field.getKey().trim());
             if (!field.getValue().isOptional()) {
                 required.add(fieldName);

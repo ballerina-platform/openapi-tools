@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 LLC. (https://www.wso2.com).
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,8 +20,9 @@ package io.ballerina.openapi.converter.service;
 import java.util.Optional;
 
 /**
+ * This @link ConstraintAnnotation} class represents the constraint annotations.
  *
- * @since 1.2.0
+ * @since 1.9.0
  */
 public class ConstraintAnnotation {
     private final String minValue;

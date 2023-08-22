@@ -51,6 +51,7 @@ components:
         id:
           type: string
         name:
+          maxLength: 14
           type: string
         description:
           type: string

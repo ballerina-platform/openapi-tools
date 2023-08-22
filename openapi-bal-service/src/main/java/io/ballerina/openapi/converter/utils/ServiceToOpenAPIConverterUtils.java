@@ -203,7 +203,8 @@ public class ServiceToOpenAPIConverterUtils {
      */
     public static OASResult generateOAS(OASGenerationMetaInfo oasGenerationMetaInfo) {
         ServiceDeclarationNode serviceDefinition = oasGenerationMetaInfo.getServiceDeclarationNode();
-        LinkedHashSet<ListenerDeclarationNode> listeners = collectListeners(oasGenerationMetaInfo.getProject());;
+        ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(oasGenerationMetaInfo.getProject());
+        LinkedHashSet<ListenerDeclarationNode> listeners = moduleMemberVisitor.getListenerDeclarationNodes();
         SemanticModel semanticModel = oasGenerationMetaInfo.getSemanticModel();
         String openApiFileName = oasGenerationMetaInfo.getOpenApiFileName();
         Path ballerinaFilePath = oasGenerationMetaInfo.getBallerinaFilePath();
@@ -214,7 +215,8 @@ public class ServiceToOpenAPIConverterUtils {
             OpenAPI openapi = oasResult.getOpenAPI().get();
             if (openapi.getPaths() == null) {
                 // Take base path of service
-                OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel);
+                OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel,
+                        moduleMemberVisitor);
                 // 02. Filter and set the ServerURLs according to endpoints. Complete the server section in OAS
                 openapi = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServers(openapi, listeners, serviceDefinition);
                 // 03. Filter path and component sections in OAS.
@@ -489,17 +491,15 @@ public class ServiceToOpenAPIConverterUtils {
      *
      * @param project - current project
      */
-    public static LinkedHashSet<ListenerDeclarationNode> collectListeners(Project project) {
+    public static ModuleMemberVisitor extractNodesFromProject(Project project) {
         ModuleMemberVisitor balNodeVisitor = new ModuleMemberVisitor();
-        LinkedHashSet<ListenerDeclarationNode> listeners = new LinkedHashSet<>();
         project.currentPackage().moduleIds().forEach(moduleId -> {
             Module module = project.currentPackage().module(moduleId);
             module.documentIds().forEach(documentId -> {
                 SyntaxTree syntaxTreeDoc = module.document(documentId).syntaxTree();
                 syntaxTreeDoc.rootNode().accept(balNodeVisitor);
-                listeners.addAll(balNodeVisitor.getListenerDeclarationNodes());
             });
         });
-        return listeners;
+        return balNodeVisitor;
     }
 }

@@ -152,15 +152,18 @@ public class OpenAPIResponseMapper {
     private final List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
     private final Location location;
     private String httpMethod;
+    private ModuleMemberVisitor moduleMemberVisitor;
 
     public List<OpenAPIConverterDiagnostic> getErrors() {
         return errors;
     }
 
-    public OpenAPIResponseMapper(SemanticModel semanticModel, Components components, Location location) {
+    public OpenAPIResponseMapper(SemanticModel semanticModel, Components components, Location location,
+                                 ModuleMemberVisitor moduleMemberVisitor) {
         this.semanticModel = semanticModel;
         this.components = components;
         this.location = location;
+        this.moduleMemberVisitor = moduleMemberVisitor;
     }
 
     /**
@@ -585,7 +588,7 @@ public class OpenAPIResponseMapper {
                 if (typeSymbol.typeKind() == TypeDescKind.RECORD) {
                     ApiResponses responses = handleRecordTypeSymbol(qNode.identifier().text().trim(),
                             components.getSchemas(), customMediaPrefix, typeRef,
-                            new OpenAPIComponentMapper(components, qNode),
+                            new OpenAPIComponentMapper(components, moduleMemberVisitor),
                             headers);
                     apiResponses.putAll(responses);
                     return Optional.of(apiResponses);
@@ -882,7 +885,7 @@ public class OpenAPIResponseMapper {
         Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         //handle record for components
-        OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, referenceNode);
+        OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, moduleMemberVisitor);
         String mediaTypeString;
         // Check typeInclusion is related to the http status code
         if (referenceNode.parent().kind().equals(ARRAY_TYPE_DESC)) {

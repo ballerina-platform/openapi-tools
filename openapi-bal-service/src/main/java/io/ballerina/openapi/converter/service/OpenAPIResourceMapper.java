@@ -58,6 +58,7 @@ import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getOpera
  */
 public class OpenAPIResourceMapper {
     private final SemanticModel semanticModel;
+    private final ModuleMemberVisitor moduleMemberVisitor;
     private final Paths pathObject = new Paths();
     private final Components components = new Components();
     private final List<OpenAPIConverterDiagnostic> errors;
@@ -69,9 +70,10 @@ public class OpenAPIResourceMapper {
     /**
      * Initializes a resource parser for openApi.
      */
-    OpenAPIResourceMapper(SemanticModel semanticModel) {
+    OpenAPIResourceMapper(SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
         this.semanticModel = semanticModel;
         this.errors = new ArrayList<>();
+        this.moduleMemberVisitor = moduleMemberVisitor;
     }
 
     public Components getComponents() {
@@ -211,7 +213,7 @@ public class OpenAPIResourceMapper {
         Map<String, String> apiDocs = listAPIDocumentations(resource, op);
         //Add path parameters if in path and query parameters
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs, components,
-                semanticModel);
+                semanticModel, moduleMemberVisitor);
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
         if (openAPIParameterMapper.getErrors().size() > 1 || (openAPIParameterMapper.getErrors().size() == 1 &&
                 !openAPIParameterMapper.getErrors().get(0).getCode().equals("OAS_CONVERTOR_113"))) {
@@ -221,7 +223,7 @@ public class OpenAPIResourceMapper {
         errors.addAll(openAPIParameterMapper.getErrors());
 
         OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components,
-                resource.location());
+                resource.location(), moduleMemberVisitor);
         openAPIResponseMapper.getResourceOutput(resource, op);
         if (!openAPIResponseMapper.getErrors().isEmpty()) {
             errors.addAll(openAPIResponseMapper.getErrors());

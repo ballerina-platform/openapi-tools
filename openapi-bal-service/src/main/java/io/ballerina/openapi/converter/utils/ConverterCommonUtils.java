@@ -52,6 +52,7 @@ import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.model.OASResult;
+import io.ballerina.openapi.converter.service.ModuleMemberVisitor;
 import io.ballerina.openapi.converter.service.OpenAPIComponentMapper;
 import io.ballerina.runtime.api.utils.IdentifierUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -527,13 +528,13 @@ public class ConverterCommonUtils {
     }
 
     public static Schema<?> handleReference(SemanticModel semanticModel, Components components,
-                                            SimpleNameReferenceNode record) {
+                                            SimpleNameReferenceNode record, ModuleMemberVisitor moduleMemberVisitor) {
         Schema<?> refSchema = new Schema<>();
         // Creating request body - required.
         Optional<Symbol> symbol = semanticModel.symbol(record);
         if (symbol.isPresent() && symbol.get() instanceof TypeSymbol) {
             String recordName = record.name().toString().trim();
-            OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
+            OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, moduleMemberVisitor);
             componentMapper.createComponentSchema(components.getSchemas(), (TypeSymbol) symbol.get());
             refSchema.set$ref(ConverterCommonUtils.unescapeIdentifier(recordName));
         }
