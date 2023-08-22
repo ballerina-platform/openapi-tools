@@ -132,10 +132,8 @@ public class OpenAPIComponentMapper {
                 new ConstraintAnnotation.ConstraintAnnotationBuilder();
         ((TypeReferenceTypeSymbol) typeSymbol).definition().getName().ifPresent(name -> {
             for (TypeDefinitionNode typeDefinitionNode : typeDefinitionNodes) {
-                if (typeDefinitionNode.typeName().text().equals(name)) {
-                    if (typeDefinitionNode.metadata().isPresent()) {
+                if (typeDefinitionNode.typeName().text().equals(name) && typeDefinitionNode.metadata().isPresent()) {
                         extractedConstraintAnnotation(typeDefinitionNode.metadata().get(), constraintBuilder);
-                    }
                 }
             }
         });
@@ -365,22 +363,22 @@ public class OpenAPIComponentMapper {
         List<String> required = new ArrayList<>();
         componentSchema.setDescription(apiDocs.get(componentName));
         Map<String, Schema> schemaProperties = new LinkedHashMap<>();
-        RecordTypeDescriptorNode record = null;
-        // Get the record type descriptor node from given record type symbol
+        RecordTypeDescriptorNode recordNode = null;
+        // Get the recordNode type descriptor node from given recordNode type symbol
         for (TypeDefinitionNode typeDefinitionNode : typeDefinitionNodes) {
             if (typeDefinitionNode.typeName().text().equals(componentName)) {
                 if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
-                    record = (RecordTypeDescriptorNode) typeDefinitionNode.typeDescriptor();
+                    recordNode = (RecordTypeDescriptorNode) typeDefinitionNode.typeDescriptor();
                 } else if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.INTERSECTION_TYPE_DESC)) {
                     IntersectionTypeDescriptorNode intersecNode =
                             (IntersectionTypeDescriptorNode) typeDefinitionNode.typeDescriptor();
                     Node leftTypeDesc = intersecNode.leftTypeDesc();
                     Node rightTypeDesc = intersecNode.rightTypeDesc();
                     if (leftTypeDesc.kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
-                        record = (RecordTypeDescriptorNode) leftTypeDesc;
+                        recordNode = (RecordTypeDescriptorNode) leftTypeDesc;
                     }
                     if (rightTypeDesc.kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
-                        record = (RecordTypeDescriptorNode) rightTypeDesc;
+                        recordNode = (RecordTypeDescriptorNode) rightTypeDesc;
                     }
                 }
             }
@@ -389,8 +387,8 @@ public class OpenAPIComponentMapper {
         for (Map.Entry<String, RecordFieldSymbol> field : rfields.entrySet()) {
             ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder =
                     new ConstraintAnnotation.ConstraintAnnotationBuilder();
-            if (record != null) {
-                for (Node node : record.fields()) {
+            if (recordNode != null) {
+                for (Node node : recordNode.fields()) {
                     if (node instanceof RecordFieldNode) {
                         RecordFieldNode fieldNode = (RecordFieldNode) node;
                         if (fieldNode.fieldName().toString().equals(field.getKey())) {
@@ -437,7 +435,7 @@ public class OpenAPIComponentMapper {
                 property.setNullable(nullable);
                 schema = components.getSchemas();
             }
-            // Add API documentation for record field
+            // Add API documentation for recordNode field
             if (apiDocs.containsKey(fieldName)) {
                 property.setDescription(apiDocs.get(fieldName));
             }
@@ -738,7 +736,6 @@ public class OpenAPIComponentMapper {
         }
 
         try {
-
             BigDecimal minimum = null;
             BigDecimal maximum = null;
             if (constraintAnnot.getMinValue().isPresent()) {
@@ -777,14 +774,11 @@ public class OpenAPIComponentMapper {
      */
     private void extractedConstraintAnnotation(MetadataNode metadata,
                                                ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
-
         NodeList<AnnotationNode> annotations = metadata.annotations();
-        annotations.stream().filter(annot ->
-                        (annot.annotReference() instanceof QualifiedNameReferenceNode &&
+        annotations.stream().filter(annot -> (annot.annotReference() instanceof QualifiedNameReferenceNode &&
                                 ((QualifiedNameReferenceNode) annot.annotReference()).modulePrefix().text()
                                         .equals("constraint")))
                 .forEach(value -> {
-
                     Optional<MappingConstructorExpressionNode> fieldValues = value.annotValue();
                     if (fieldValues.isPresent()) {
                         Spliterator<MappingFieldNode> spliterator = fieldValues.get().fields().spliterator();

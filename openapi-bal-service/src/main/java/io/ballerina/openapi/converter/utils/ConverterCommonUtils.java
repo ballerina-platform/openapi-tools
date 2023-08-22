@@ -528,12 +528,13 @@ public class ConverterCommonUtils {
     }
 
     public static Schema<?> handleReference(SemanticModel semanticModel, Components components,
-                                            SimpleNameReferenceNode record, ModuleMemberVisitor moduleMemberVisitor) {
+                                            SimpleNameReferenceNode recordNode,
+                                            ModuleMemberVisitor moduleMemberVisitor) {
         Schema<?> refSchema = new Schema<>();
         // Creating request body - required.
-        Optional<Symbol> symbol = semanticModel.symbol(record);
+        Optional<Symbol> symbol = semanticModel.symbol(recordNode);
         if (symbol.isPresent() && symbol.get() instanceof TypeSymbol) {
-            String recordName = record.name().toString().trim();
+            String recordName = recordNode.name().toString().trim();
             OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, moduleMemberVisitor);
             componentMapper.createComponentSchema(components.getSchemas(), (TypeSymbol) symbol.get());
             refSchema.set$ref(ConverterCommonUtils.unescapeIdentifier(recordName));
