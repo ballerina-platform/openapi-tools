@@ -475,7 +475,7 @@ public class BallerinaCodeGenerator {
     }
 
     private void checkOpenAPIVersion(OpenAPI openAPIDef) {
-        if (SUPPORTED_OPENAPI_VERSIONS.contains(openAPIDef.getOpenapi())) {
+        if (!SUPPORTED_OPENAPI_VERSIONS.contains(openAPIDef.getOpenapi())) {
             outStream.printf("WARNING: The tool has not been tested with OpenAPI version %s. " +
                     "The generated code may potentially contain errors.%n", openAPIDef.getOpenapi());
         }
