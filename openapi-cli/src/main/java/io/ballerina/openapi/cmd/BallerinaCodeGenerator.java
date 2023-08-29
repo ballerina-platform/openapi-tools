@@ -104,10 +104,7 @@ public class BallerinaCodeGenerator {
         // absence of the operationId in operation. Therefor we enable client flag true as default code generation.
         // if resource is enabled, we avoid checking operationId.
         OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPIPath, !isResource);
-        if (SUPPORTED_OPENAPI_VERSIONS.contains(openAPIDef.getOpenapi())) {
-            outStream.printf("WARNING: The tool has not been tested with OpenAPI version %s. " +
-                    "The generated code may potentially contain errors.%n", openAPIDef.getOpenapi());
-        }
+        checkOpenAPIVersion(openAPIDef);
         // Generate service
         String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
@@ -342,10 +339,7 @@ public class BallerinaCodeGenerator {
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         // Normalize OpenAPI definition
         OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, !isResource);
-        if (SUPPORTED_OPENAPI_VERSIONS.contains(openAPIDef.getOpenapi())) {
-            outStream.printf("WARNING: The tool has not been tested with OpenAPI version %s. " +
-                    "The generated code may potentially contain errors.%n", openAPIDef.getOpenapi());
-        }
+        checkOpenAPIVersion(openAPIDef);
         // Generate ballerina service and resources.
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -417,10 +411,7 @@ public class BallerinaCodeGenerator {
                     openAPI);
         }
 
-        if (SUPPORTED_OPENAPI_VERSIONS.contains(openAPIDef.getOpenapi())) {
-            outStream.printf("WARNING: The tool has not been tested with OpenAPI version %s. " +
-                    "The generated code may potentially contain errors.%n", openAPIDef.getOpenapi());
-        }
+        checkOpenAPIVersion(openAPIDef);
 
         if (openAPIDef.getInfo().getTitle().isBlank() && (serviceName == null || serviceName.isBlank())) {
             openAPIDef.getInfo().setTitle(UNTITLED_SERVICE);
@@ -481,5 +472,12 @@ public class BallerinaCodeGenerator {
      */
     public void setIncludeTestFiles(boolean includeTestFiles) {
         this.includeTestFiles = includeTestFiles;
+    }
+
+    private void checkOpenAPIVersion(OpenAPI openAPIDef) {
+        if (SUPPORTED_OPENAPI_VERSIONS.contains(openAPIDef.getOpenapi())) {
+            outStream.printf("WARNING: The tool has not been tested with OpenAPI version %s. " +
+                    "The generated code may potentially contain errors.%n", openAPIDef.getOpenapi());
+        }
     }
 }
