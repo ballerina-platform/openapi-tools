@@ -94,6 +94,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SIMPLE_NAME_REFERENCE
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_REFERENCE;
 import static io.ballerina.openapi.converter.Constants.APPLICATION_PREFIX;
 import static io.ballerina.openapi.converter.Constants.BODY;
+import static io.ballerina.openapi.converter.Constants.BYTE;
+import static io.ballerina.openapi.converter.Constants.BYTE_ARRAY;
 import static io.ballerina.openapi.converter.Constants.CACHE_CONTROL;
 import static io.ballerina.openapi.converter.Constants.ETAG;
 import static io.ballerina.openapi.converter.Constants.FALSE;
@@ -604,10 +606,10 @@ public class OpenAPIResponseMapper {
         String statusCode = httpMethod.equals(POST) ? HTTP_201 : HTTP_200;
         String description = httpMethod.equals(POST) ? HTTP_201_DESCRIPTION : HTTP_200_DESCRIPTION;
 
-        Map<String, Schema> schemas02 = components.getSchemas();
+        Map<String, Schema> schemas = components.getSchemas();
         if (array.memberTypeDesc().kind() == SIMPLE_NAME_REFERENCE) {
             handleReferenceResponse(operationAdaptor, (SimpleNameReferenceNode) array.memberTypeDesc(),
-                    schemas02, apiResponses, customMediaPrefix, headers);
+                    schemas, apiResponses, customMediaPrefix, headers);
         } else if (array.memberTypeDesc().kind() == QUALIFIED_NAME_REFERENCE) {
             Optional<ApiResponses> optionalAPIResponses =
                     handleQualifiedNameType(new ApiResponses(), customMediaPrefix, headers, apiResponse,
@@ -619,15 +621,20 @@ public class OpenAPIResponseMapper {
             }
         } else {
             ArraySchema arraySchema = new ArraySchema();
-            String type02 = array.memberTypeDesc().kind().toString().trim().split("_")[0].
+            String type = array.memberTypeDesc().kind().toString().trim().split("_")[0].
                     toLowerCase(Locale.ENGLISH);
-            Schema<?> openApiSchema = ConverterCommonUtils.getOpenApiSchema(type02);
-            Optional<String> mimeType = convertBallerinaMIMEToOASMIMETypes(type02, customMediaPrefix);
+            type = type.equals(BYTE) ? BYTE_ARRAY : type;
+            Schema<?> openApiSchema = ConverterCommonUtils.getOpenApiSchema(type);
+            Optional<String> mimeType = convertBallerinaMIMEToOASMIMETypes(type, customMediaPrefix);
             if (mimeType.isEmpty()) {
                 return Optional.empty();
             }
-            arraySchema.setItems(openApiSchema);
-            mediaType.setSchema(arraySchema);
+            if (type.equals(BYTE_ARRAY)) {
+                mediaType.setSchema(openApiSchema);
+            } else {
+                arraySchema.setItems(openApiSchema);
+                mediaType.setSchema(arraySchema);
+            }
             apiResponse.description(description);
             apiResponse.content(new Content().addMediaType(mimeType.get(), mediaType));
             apiResponses.put(statusCode, apiResponse);
@@ -897,6 +904,9 @@ public class OpenAPIResponseMapper {
         } else if (typeSymbol.typeKind() == TypeDescKind.TYPE_REFERENCE) {
             TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) typeSymbol;
             TypeSymbol referredTypeSymbol = typeReferenceTypeSymbol.typeDescriptor();
+            if (referredTypeSymbol.typeKind() == TypeDescKind.INTERSECTION) {
+                referredTypeSymbol = componentMapper.excludeReadonlyIfPresent(referredTypeSymbol);
+            }
             String referenceName = referenceNode.name().toString().trim();
             String referredTypeName = referredTypeSymbol.getName().isPresent() ?
                     referredTypeSymbol.getName().get() : "";

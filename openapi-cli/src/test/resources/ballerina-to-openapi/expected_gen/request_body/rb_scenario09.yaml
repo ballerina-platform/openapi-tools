@@ -7,7 +7,7 @@ paths:
           application/octet-stream:
             schema:
               type: string
-              format: uuid
+              format: byte
       responses:
         "200":
           description: Ok

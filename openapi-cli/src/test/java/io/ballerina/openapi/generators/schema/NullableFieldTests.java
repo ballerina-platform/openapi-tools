@@ -128,4 +128,14 @@ public class NullableFieldTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/" +
                 "null_empty_record.bal", syntaxTree);
     }
+
+    @Test(description = "Test for type generation for OpenAPI 3.1 schemas with `null` type")
+    public void testNullTypePropertyGeneration() throws IOException, BallerinaOpenApiException, FormatterException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+                "/null_type_3_1.yaml"), true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/" +
+                "null_type_3_1.bal", syntaxTree);
+    }
 }

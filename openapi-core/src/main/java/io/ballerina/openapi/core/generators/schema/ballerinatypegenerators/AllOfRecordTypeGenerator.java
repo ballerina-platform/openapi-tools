@@ -32,7 +32,6 @@ import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
 import io.ballerina.openapi.core.generators.schema.model.RecordMetadata;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
@@ -92,9 +91,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
         // This assertion is always `true` because this type generator receive ComposedSchema during the upper level
         // filtering as input. Has to use this assertion statement instead of `if` condition, because to avoid
         // unreachable else statement.
-        assert schema instanceof ComposedSchema;
-        ComposedSchema composedSchema = (ComposedSchema) schema;
-        List<Schema> allOfSchemas = composedSchema.getAllOf();
+        List<Schema> allOfSchemas = schema.getAllOf();
 
         RecordMetadata recordMetadata = getRecordMetadata();
         RecordRestDescriptorNode restDescriptorNode = recordMetadata.getRestDescriptorNode();
@@ -138,10 +135,9 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                 List<String> required = allOfSchema.getRequired();
                 recordFieldList.addAll(addRecordFields(required, properties.entrySet(), typeName));
                 addAdditionalSchemas(allOfSchema);
-            } else if (allOfSchema instanceof ComposedSchema) {
-                ComposedSchema nestedComposedSchema = (ComposedSchema) allOfSchema;
-                if (nestedComposedSchema.getAllOf() != null) {
-                    recordFieldList.addAll(generateAllOfRecordFields(nestedComposedSchema.getAllOf()));
+            } else if (GeneratorUtils.isComposedSchema(allOfSchema)) {
+                if (allOfSchema.getAllOf() != null) {
+                    recordFieldList.addAll(generateAllOfRecordFields(allOfSchema.getAllOf()));
                 } else {
                     // TODO: Needs to improve the error message. Could not access the schema name at this level.
                     throw new BallerinaOpenApiException(

@@ -24,7 +24,6 @@ import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
@@ -66,13 +65,11 @@ public class UnionTypeGenerator extends TypeGenerator {
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
 
-        assert schema instanceof ComposedSchema;
-        ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> schemas;
-        if (composedSchema.getOneOf() != null) {
-            schemas = composedSchema.getOneOf();
+        if (schema.getOneOf() != null) {
+            schemas = schema.getOneOf();
         } else {
-            schemas = composedSchema.getAnyOf();
+            schemas = schema.getAnyOf();
         }
         TypeDescriptorNode unionTypeDesc = getUnionType(schemas, typeName);
         return TypeGeneratorUtils.getNullableType(schema, unionTypeDesc);

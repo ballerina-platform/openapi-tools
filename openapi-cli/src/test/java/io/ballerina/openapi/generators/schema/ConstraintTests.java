@@ -216,6 +216,39 @@ public class ConstraintTests {
         assertFalse(hasErrors);
     }
 
+    @Test(description = "Test for exclusiveMin and exclusiveMax property changes in OpenAPI 3.1")
+    public void testExclusiveMinMaxInV31() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
+                "/exclusive_min_max_3_1.yaml"), true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/constraint/exclusive_min_max_3_1.bal", syntaxTree);
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
+        boolean hasErrors = diagnostics.stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        assertFalse(hasErrors);
+    }
+
+    @Test(description = "Test for schema properties containing data types with format constraints.")
+    public void testDataTypeHasFormatWithConstraint() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
+                "/format_types_v3_0.yaml"), true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/constraint/format_type.bal", syntaxTree);
+
+        //Test for OpenAPI version 3.1
+        OpenAPI openAPIV31 = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
+                "/format_types_v3_1.yaml"), true);
+        BallerinaTypesGenerator schemaGenerator = new BallerinaTypesGenerator(openAPIV31);
+        SyntaxTree syntaxTreeV3 = schemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/constraint/format_type.bal", syntaxTreeV3);
+    }
+
     @AfterMethod
     private void deleteGeneratedFiles() {
         try {
