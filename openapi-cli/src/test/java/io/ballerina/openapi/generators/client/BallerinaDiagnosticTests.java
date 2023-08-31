@@ -90,6 +90,7 @@ public class BallerinaDiagnosticTests {
                 {"duplicated_response.yaml"},
                 {"complex_oneOf_schema.yaml"},
                 {"request_body_ref.yaml"},
+                {"single_allOf.yaml"},
                 {"vendor_specific_mime_types.yaml"},
                 {"ballerinax_connector_tests/ably.yaml"},
                 {"ballerinax_connector_tests/azure.iot.yaml"},

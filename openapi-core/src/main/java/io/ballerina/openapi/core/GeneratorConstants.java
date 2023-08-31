@@ -277,7 +277,7 @@ public class GeneratorConstants {
         httpCodeMap.put("501", "NotImplemented");
         httpCodeMap.put("502", "BadGateway");
         httpCodeMap.put("503", "ServiceUnavailable");
-        httpCodeMap.put("504", "GatewayTimeOut");
+        httpCodeMap.put("504", "GatewayTimeout");
         httpCodeMap.put("505", "HttpVersionNotSupported");
         httpCodeMap.put("506", "VariantAlsoNegotiates");
         httpCodeMap.put("507", "InsufficientStorage");
