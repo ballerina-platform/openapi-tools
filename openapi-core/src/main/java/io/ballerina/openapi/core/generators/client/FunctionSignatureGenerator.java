@@ -371,7 +371,9 @@ public class FunctionSignatureGenerator {
             TypeDefinitionNode typeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
                     (schema, type, new ArrayList<>());
             if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
-                throw new BallerinaOpenApiException("Ballerina does not support object type path parameters.");
+                throw new BallerinaOpenApiException(String.format(
+                        "Path parameter: '%s' is invalid. Ballerina does not support object type path parameters.",
+                        parameter.getName()));
             }
         } else {
             type = convertOpenAPITypeToBallerina(parameter.getSchema());

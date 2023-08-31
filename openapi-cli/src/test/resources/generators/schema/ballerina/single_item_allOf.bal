@@ -4,7 +4,10 @@ public type User record {
     string email?;
     string name?;
     Address address?;
+    anydata remarks?;
 };
+
+public type Description anydata;
 
 public type Address record {
     string street?;
