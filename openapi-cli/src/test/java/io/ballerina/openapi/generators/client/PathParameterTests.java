@@ -164,7 +164,8 @@ public class PathParameterTests {
 
     @Test(description = "When path parameter has given allOf data type in ballerina",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Ballerina does not support object type path .*")
+            expectedExceptionsMessageRegExp = "Path parameter: 'id' is invalid. " +
+                    "Ballerina does not support object type path parameters.")
     public void allOfPathParameter() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/allOf_path_parameter.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
