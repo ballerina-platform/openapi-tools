@@ -20,6 +20,13 @@ paths:
             allOf:
               - $ref: "#/components/schemas/Name"
               - description: "Name details"
+        - name: description
+          in: query
+          required: true
+          schema:
+            allOf:
+              - description: "Explain the user"
+              - description: "Name details"
       responses:
         "200":
           description: OK
@@ -41,6 +48,10 @@ components:
           allOf:
             - $ref: "#/components/schemas/Address"
             - description: "abc"
+        remarks:
+          allOf:
+            - description: "User status"
+            - description: "User data"
       xml:
         name: User
     Address:

@@ -92,7 +92,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
         // This assertion is always `true` because this type generator receive ComposedSchema during the upper level
         // filtering as input. Has to use this assertion statement instead of `if` condition, because to avoid
         // unreachable else statement.
-        List<Schema> allOfSchemas = schema.getAllOf();
+        List<Schema<?>> allOfSchemas = schema.getAllOf();
 
         RecordMetadata recordMetadata = getRecordMetadata();
         RecordRestDescriptorNode restDescriptorNode = recordMetadata.getRestDescriptorNode();
@@ -107,17 +107,22 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
             if (validSchemas.size() == 1) {
                 TypeGenerator typeGenerator = getTypeGenerator(validSchemas.get(0), typeName, null);
                 return typeGenerator.generateTypeDescriptorNode();
-            }
-            addAdditionalSchemas(schema);
-            restDescriptorNode =
-                    restSchemas.size() > 1 ? getRestDescriptorNodeForAllOf(restSchemas) : restDescriptorNode;
+            } else if (validSchemas.isEmpty()) {
+                AnyDataTypeGenerator anyDataTypeGenerator = new AnyDataTypeGenerator(schema, typeName);
+                return anyDataTypeGenerator.generateTypeDescriptorNode();
+            } else {
+                addAdditionalSchemas(schema);
+                restDescriptorNode =
+                        restSchemas.size() > 1 ? getRestDescriptorNodeForAllOf(restSchemas) : restDescriptorNode;
 
-            NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
-            return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
-                    recordMetadata.isOpenRecord() ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
-                    fieldNodes, restDescriptorNode,
-                    recordMetadata.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) :
-                            createToken(CLOSE_BRACE_PIPE_TOKEN));
+                NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
+                return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
+                        recordMetadata.isOpenRecord() ?
+                                createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
+                        fieldNodes, restDescriptorNode,
+                        recordMetadata.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) :
+                                createToken(CLOSE_BRACE_PIPE_TOKEN));
+            }
         }
     }
 
