@@ -104,12 +104,12 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
             ImmutablePair<List<Node>, List<Schema<?>>> recordFlist = generateAllOfRecordFields(allOfSchemas);
             List<Node> recordFieldList = recordFlist.getLeft();
             List<Schema<?>> validSchemas = recordFlist.getRight();
-            if (validSchemas.size() == 1) {
-                TypeGenerator typeGenerator = getTypeGenerator(validSchemas.get(0), typeName, null);
-                return typeGenerator.generateTypeDescriptorNode();
-            } else if (validSchemas.isEmpty()) {
+            if (validSchemas.isEmpty()) {
                 AnyDataTypeGenerator anyDataTypeGenerator = new AnyDataTypeGenerator(schema, typeName);
                 return anyDataTypeGenerator.generateTypeDescriptorNode();
+            } else if (validSchemas.size() == 1) {
+                TypeGenerator typeGenerator = getTypeGenerator(validSchemas.get(0), typeName, null);
+                return typeGenerator.generateTypeDescriptorNode();
             } else {
                 addAdditionalSchemas(schema);
                 restDescriptorNode =
