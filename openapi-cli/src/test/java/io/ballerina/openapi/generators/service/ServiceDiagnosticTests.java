@@ -113,6 +113,7 @@ public class ServiceDiagnosticTests {
                 {"complex_oneOf_schema.yaml"},
                 {"request_body_ref.yaml"},
                 {"vendor_specific_mime_types.yaml"},
+                {"single_allOf.yaml"},
                 // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1415
 //                {"ballerinax_connector_tests/ably.yaml"},
                 {"ballerinax_connector_tests/azure.iot.yaml"},
