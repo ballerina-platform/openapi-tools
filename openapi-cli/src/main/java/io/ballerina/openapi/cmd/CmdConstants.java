@@ -19,6 +19,7 @@ package io.ballerina.openapi.cmd;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -201,5 +202,6 @@ public class CmdConstants {
     // OS specific line separator
     public static final String LINE_SEPARATOR = System.lineSeparator();
     public static final String DOUBLE_LINE_SEPARATOR = LINE_SEPARATOR + LINE_SEPARATOR;
-
+    public static final List<String> SUPPORTED_OPENAPI_VERSIONS =
+            List.of("2.0", "3.0.0", "3.0.1", "3.0.2", "3.0.3", "3.1.0");
 }
