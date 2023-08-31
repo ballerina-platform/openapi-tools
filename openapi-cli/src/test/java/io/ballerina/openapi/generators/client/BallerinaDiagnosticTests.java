@@ -151,6 +151,7 @@ public class BallerinaDiagnosticTests {
                 {"duplicated_response.yaml"},
                 {"complex_oneOf_schema.yaml"},
                 {"request_body_ref.yaml"},
+                {"single_allOf.yaml"},
                 {"vendor_specific_mime_types.yaml"},
                 {"requestBody_reference_has_inline_object_content_type.yaml"},
                 {"ballerinax_connector_tests/ably.yaml"},
