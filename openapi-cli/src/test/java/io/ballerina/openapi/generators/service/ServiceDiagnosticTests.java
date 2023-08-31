@@ -40,7 +40,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.openapi.generators.common.TestUtils.getDiagnosticsForGenericService;
 import static io.ballerina.openapi.generators.common.TestUtils.getDiagnosticsForService;
 
 /**
@@ -90,7 +89,7 @@ public class ServiceDiagnosticTests {
                 .build();
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnosticsForGenericService(syntaxTree);
+        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         Assert.assertFalse(hasErrors);
