@@ -41,7 +41,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.openapi.generators.common.TestUtils.getDiagnosticsForGenericService;
 import static io.ballerina.openapi.generators.common.TestUtils.getDiagnosticsForService;
 import static io.ballerina.openapi.generators.common.TestUtils.normalizeOpenAPI;
 
@@ -92,7 +91,7 @@ public class ServiceDiagnosticTests {
                 .build();
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnosticsForGenericService(syntaxTree);
+        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         Assert.assertFalse(hasErrors);
@@ -137,6 +136,7 @@ public class ServiceDiagnosticTests {
                 {"complex_oneOf_schema.yaml"},
                 {"request_body_ref.yaml"},
                 {"vendor_specific_mime_types.yaml"},
+                {"single_allOf.yaml"},
                 // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1415
 //                {"ballerinax_connector_tests/ably.yaml"},
                 {"ballerinax_connector_tests/azure.iot.yaml"},
