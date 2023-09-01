@@ -170,7 +170,7 @@ public class CmdConstants {
         httpCodeMap.put("501", "NotImplemented");
         httpCodeMap.put("502", "BadGateway");
         httpCodeMap.put("503", "ServiceUnavailable");
-        httpCodeMap.put("504", "GatewayTimeOut");
+        httpCodeMap.put("504", "GatewayTimeout");
         httpCodeMap.put("505", "HttpVersionNotSupported");
         HTTP_CODES_DES = Collections.unmodifiableMap(httpCodeMap);
     }
