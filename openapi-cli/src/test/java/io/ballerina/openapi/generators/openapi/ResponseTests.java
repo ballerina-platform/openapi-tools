@@ -373,7 +373,7 @@ public class ResponseTests {
         Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
     }
 
-    @Test(description = "When the service has config without mediaType attribute")
+    @Test(description = "When the resource has nil type return")
     public void testNilReturnType() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/nil_return_type.bal");
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
@@ -381,6 +381,16 @@ public class ResponseTests {
                 , false);
         Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/nil_return_type.yaml");
+    }
+
+    @Test(description = "When the resource has nil union type return")
+    public void testNilUnionReturnType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/nil_union_return_type.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "response/nil_union_return_type.yaml");
     }
 
     @AfterMethod
