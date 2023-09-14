@@ -199,6 +199,11 @@ public class OpenAPIResponseMapper {
             ApiResponse apiResponse = new ApiResponse();
             apiResponse.description("Accepted");
             apiResponses.put("202", apiResponse);
+            if (operation.getRequestBody() != null || operation.getParameters() != null) {
+                ApiResponse badRequestResponse = new ApiResponse();
+                badRequestResponse.description("BadRequest");
+                apiResponses.put("400", badRequestResponse);
+            }
         }
         operation.setResponses(apiResponses);
     }
