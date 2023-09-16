@@ -238,22 +238,22 @@ public class ResponseTests {
 
     @Test(description = "When the response has float return type")
     public void testResponseWithFloatReturnType() throws IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("response/float.bal");
+        Path ballerinaFilePath = RES_DIR.resolve("response/floatMin.bal");
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
         Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
-        compareWithGeneratedFile(ballerinaFilePath, "response/float.yaml");
+        compareWithGeneratedFile(ballerinaFilePath, "response/floatMin.yaml");
     }
 
     @Test(description = "When the response has decimal return type")
     public void testResponseWithDecimalReturnType() throws IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("response/decimal.bal");
+        Path ballerinaFilePath = RES_DIR.resolve("response/decimalMin.bal");
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
         Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
-        compareWithGeneratedFile(ballerinaFilePath, "response/decimal.yaml");
+        compareWithGeneratedFile(ballerinaFilePath, "response/decimalMin.yaml");
     }
 
     @Test(description = "When the response has byte[] return type")
