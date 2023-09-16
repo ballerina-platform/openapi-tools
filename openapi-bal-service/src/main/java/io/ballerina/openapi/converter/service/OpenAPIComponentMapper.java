@@ -18,24 +18,7 @@
 
 package io.ballerina.openapi.converter.service;
 
-import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
-import io.ballerina.compiler.api.symbols.ConstantSymbol;
-import io.ballerina.compiler.api.symbols.Documentable;
-import io.ballerina.compiler.api.symbols.Documentation;
-import io.ballerina.compiler.api.symbols.EnumSymbol;
-import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
-import io.ballerina.compiler.api.symbols.MapTypeSymbol;
-import io.ballerina.compiler.api.symbols.ReadonlyTypeSymbol;
-import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
-import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
-import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.api.symbols.SymbolKind;
-import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
-import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
-import io.ballerina.compiler.api.symbols.TypeDescKind;
-import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
-import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.api.symbols.*;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.IntersectionTypeDescriptorNode;
@@ -719,54 +702,107 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This util uses to set the constraint value for relevant schema field.
+     * This util uses to set the integer constraint values for relevant schema field.
      */
-    private Schema setConstraintValueToSchema(ConstraintAnnotation constraintAnnot, Schema property) {
-
-        if (property instanceof ArraySchema) {
-            property.setMaxItems(constraintAnnot.getMaxLength().isPresent() ?
-                    Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
-            property.setMinItems(constraintAnnot.getMinLength().isPresent() ?
-                    Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
-        } else {
-            property.setMaxLength(constraintAnnot.getMaxLength().isPresent() ?
-                    Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
-            property.setMinLength(constraintAnnot.getMinLength().isPresent() ?
-                    Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
+    private Schema setIntegerConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+        BigDecimal minimum = null;
+        BigDecimal maximum = null;
+        if (constraintAnnot.getMinValue().isPresent()) {
+            minimum = BigDecimal.valueOf(Integer.parseInt(constraintAnnot.getMinValue().get()));
+        } else if (constraintAnnot.getMinValueExclusive().isPresent()) {
+            minimum = BigDecimal.valueOf(Integer.parseInt(constraintAnnot.getMinValueExclusive().get()));
+            properties.setExclusiveMinimum(true);
         }
 
+        if (constraintAnnot.getMaxValue().isPresent()) {
+            maximum = BigDecimal.valueOf(Integer.parseInt(constraintAnnot.getMaxValue().get()));
+        } else if (constraintAnnot.getMaxValueExclusive().isPresent()) {
+            maximum = BigDecimal.valueOf(Integer.parseInt(constraintAnnot.getMaxValueExclusive().get()));
+            properties.setExclusiveMaximum(true);
+        }
+        properties.setMinimum(minimum);
+        properties.setMaximum(maximum);
+        return properties;
+    }
+
+    /**
+     * This util uses to set the number (float, double) constraint values for relevant schema field.
+     */
+    private Schema setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+        BigDecimal minimum = null;
+        BigDecimal maximum = null;
         try {
-            BigDecimal minimum = null;
-            BigDecimal maximum = null;
             if (constraintAnnot.getMinValue().isPresent()) {
-                try {
-                    minimum = BigDecimal.valueOf(Integer.parseInt(constraintAnnot.getMinValue().get()));
-                } catch (NumberFormatException e) {
-                    minimum = BigDecimal.valueOf(NumberFormat.getInstance().parse(
-                            constraintAnnot.getMinValue().get()).doubleValue());
-                }
+                minimum = BigDecimal.valueOf((NumberFormat.getInstance()
+                                .parse(constraintAnnot.getMinValue().get()).doubleValue()));
+            } else if (constraintAnnot.getMinValueExclusive().isPresent()) {
+                minimum = BigDecimal.valueOf((NumberFormat.getInstance()
+                                .parse(constraintAnnot.getMinValueExclusive().get()).doubleValue()));
+                properties.setExclusiveMinimum(true);
             }
 
             if (constraintAnnot.getMaxValue().isPresent()) {
-                try {
-                    maximum = BigDecimal.valueOf(Integer.parseInt(constraintAnnot.getMaxValue().get()));
-                } catch (NumberFormatException e) {
-                    maximum = BigDecimal.valueOf((NumberFormat.getInstance()
-                                    .parse(constraintAnnot.getMaxValue().get()).doubleValue()));
-                }
-
+                maximum = BigDecimal.valueOf((NumberFormat.getInstance()
+                                .parse(constraintAnnot.getMaxValue().get()).doubleValue()));
+            } else if (constraintAnnot.getMaxValueExclusive().isPresent()) {
+                maximum = BigDecimal.valueOf((NumberFormat.getInstance()
+                                .parse(constraintAnnot.getMaxValueExclusive().get()).doubleValue()));
+                properties.setExclusiveMaximum(true);
             }
-            property.setMinimum(minimum);
-            property.setMaximum(maximum);
-
-        } catch (ParseException parserMessage) {
+            properties.setMinimum(minimum);
+            properties.setMaximum(maximum);
+        } catch (ParseException exception) {
             DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
             ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
-                    error.getDescription(), null, parserMessage.getMessage());
+                    error.getDescription(), null, exception.getMessage());
             diagnostics.add(diagnostic);
         }
+        return properties;
+    }
 
-        return property;
+    /**
+     * This util uses to set the string constraint values for relevant schema field.
+     */
+    private Schema setStringConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+        properties.setMaxLength(constraintAnnot.getMaxLength().isPresent() ?
+                Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
+        properties.setMinLength(constraintAnnot.getMinLength().isPresent() ?
+                Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
+        return properties;
+    }
+
+    /**
+     * This util uses to set the array constraint values for relevant schema field.
+     */
+    private Schema setArrayConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+        properties.setMaxItems(constraintAnnot.getMaxLength().isPresent() ?
+                Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
+        properties.setMinItems(constraintAnnot.getMinLength().isPresent() ?
+                Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
+        return properties;
+    }
+
+    /**
+     * This util uses to set the constraint values for relevant schema field.
+     */
+    private Schema setConstraintValueToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+        try {
+            if (properties instanceof ArraySchema) {
+                setArrayConstraintValuesToSchema(constraintAnnot, properties);
+            } else if (properties instanceof StringSchema){
+                setStringConstraintValuesToSchema(constraintAnnot, properties);
+            } else if (properties instanceof IntegerSchema) {
+                setIntegerConstraintValuesToSchema(constraintAnnot, properties);
+            } else if (properties instanceof NumberSchema) {
+                setNumberConstraintValuesToSchema(constraintAnnot, properties);
+            }
+        } catch (NumberFormatException exception) {
+            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
+                    error.getDescription(), null, exception.getMessage());
+            diagnostics.add(diagnostic);
+        }
+        return properties;
     }
 
     /**
@@ -776,8 +812,8 @@ public class OpenAPIComponentMapper {
                                                ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
         NodeList<AnnotationNode> annotations = metadata.annotations();
         annotations.stream().filter(annot -> (annot.annotReference() instanceof QualifiedNameReferenceNode &&
-                                ((QualifiedNameReferenceNode) annot.annotReference()).modulePrefix().text()
-                                        .equals("constraint")))
+                        ((QualifiedNameReferenceNode) annot.annotReference()).modulePrefix().text()
+                                .equals("constraint")))
                 .forEach(value -> {
                     Optional<MappingConstructorExpressionNode> fieldValues = value.annotValue();
                     if (fieldValues.isPresent()) {
@@ -791,7 +827,7 @@ public class OpenAPIComponentMapper {
                                     ExpressionNode expressionNode = specificFieldNode.valueExpr().get();
                                     SyntaxKind kind = expressionNode.kind();
                                     if (kind == SyntaxKind.NUMERIC_LITERAL) {
-                                        String constraintValue = expressionNode.toString();
+                                        String constraintValue = expressionNode.toString().trim();
                                         fillConstraintValue(constraintBuilder, name, constraintValue);
                                     }
                                 }

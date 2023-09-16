@@ -44,4 +44,46 @@ public class ConstraintTests {
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/array.yaml");
     }
+
+    @Test(description = "When the record field has integer (minValueExclusive) type")
+    public void testIntegerMinType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("constraint/integerMin.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/integerMin.yaml");
+    }
+
+    @Test(description = "When the record field has integer (maxValueExclusive) type")
+    public void testIntegerMaxType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("constraint/integerMax.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/integerMax.yaml");
+    }
+
+    @Test(description = "When the record field has float (minValueExclusive) type")
+    public void testFloatMinType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("constraint/floatMin.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/floatMin.yaml");
+    }
+
+    @Test(description = "When the record field has float (maxValueExclusive) type")
+    public void testFloatMaxType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("constraint/floatMax.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/floatMax.yaml");
+    }
+
+    @Test(description = "When the record field has decimal (minValueExclusive) type")
+    public void testDecimalMinType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("constraint/decimalMin.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/decimalMin.yaml");
+    }
+
+    @Test(description = "When the record field has decimal (maxValueExclusive) type")
+    public void testDecimalMaxType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("constraint/decimalMax.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/decimalMax.yaml");
+    }
 }
