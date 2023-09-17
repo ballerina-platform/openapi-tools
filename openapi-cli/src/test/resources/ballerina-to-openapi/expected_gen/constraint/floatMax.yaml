@@ -62,3 +62,4 @@ components:
         properties:
           rate:
             $ref: '#/components/schemas/Rating'
+            
