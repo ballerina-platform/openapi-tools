@@ -62,3 +62,4 @@ components:
       exclusiveMinimum: true
       type: number
       format: double
+      
