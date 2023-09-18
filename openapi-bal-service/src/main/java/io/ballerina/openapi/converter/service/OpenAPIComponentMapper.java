@@ -745,35 +745,28 @@ public class OpenAPIComponentMapper {
     /**
      * This util uses to set the number (float, double) constraint values for relevant schema field.
      */
-    private Schema setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+    private Schema setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) throws ParseException{
         BigDecimal minimum = null;
         BigDecimal maximum = null;
-        try {
-            if (constraintAnnot.getMinValue().isPresent()) {
-                minimum = BigDecimal.valueOf((NumberFormat.getInstance()
-                                .parse(constraintAnnot.getMinValue().get()).doubleValue()));
-            } else if (constraintAnnot.getMinValueExclusive().isPresent()) {
-                minimum = BigDecimal.valueOf((NumberFormat.getInstance()
-                                .parse(constraintAnnot.getMinValueExclusive().get()).doubleValue()));
-                properties.setExclusiveMinimum(true);
-            }
-
-            if (constraintAnnot.getMaxValue().isPresent()) {
-                maximum = BigDecimal.valueOf((NumberFormat.getInstance()
-                                .parse(constraintAnnot.getMaxValue().get()).doubleValue()));
-            } else if (constraintAnnot.getMaxValueExclusive().isPresent()) {
-                maximum = BigDecimal.valueOf((NumberFormat.getInstance()
-                                .parse(constraintAnnot.getMaxValueExclusive().get()).doubleValue()));
-                properties.setExclusiveMaximum(true);
-            }
-            properties.setMinimum(minimum);
-            properties.setMaximum(maximum);
-        } catch (ParseException exception) {
-            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
-            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
-                    error.getDescription(), null, exception.getMessage());
-            diagnostics.add(diagnostic);
+        if (constraintAnnot.getMinValue().isPresent()) {
+            minimum = BigDecimal.valueOf((NumberFormat.getInstance()
+                    .parse(constraintAnnot.getMinValue().get()).doubleValue()));
+        } else if (constraintAnnot.getMinValueExclusive().isPresent()) {
+            minimum = BigDecimal.valueOf((NumberFormat.getInstance()
+                    .parse(constraintAnnot.getMinValueExclusive().get()).doubleValue()));
+            properties.setExclusiveMinimum(true);
         }
+
+        if (constraintAnnot.getMaxValue().isPresent()) {
+            maximum = BigDecimal.valueOf((NumberFormat.getInstance()
+                    .parse(constraintAnnot.getMaxValue().get()).doubleValue()));
+        } else if (constraintAnnot.getMaxValueExclusive().isPresent()) {
+            maximum = BigDecimal.valueOf((NumberFormat.getInstance()
+                    .parse(constraintAnnot.getMaxValueExclusive().get()).doubleValue()));
+            properties.setExclusiveMaximum(true);
+        }
+        properties.setMinimum(minimum);
+        properties.setMaximum(maximum);
         return properties;
     }
 
@@ -813,10 +806,10 @@ public class OpenAPIComponentMapper {
             } else if (properties instanceof NumberSchema) {
                 setNumberConstraintValuesToSchema(constraintAnnot, properties);
             }
-        } catch (NumberFormatException exception) {
+        } catch (ParseException parseException) {
             DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
             ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
-                    error.getDescription(), null, exception.getMessage());
+                    error.getDescription(), null, parseException.getMessage());
             diagnostics.add(diagnostic);
         }
         return properties;
