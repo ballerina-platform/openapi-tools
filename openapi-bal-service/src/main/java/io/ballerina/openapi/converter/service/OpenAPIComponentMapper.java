@@ -794,7 +794,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This util uses to set the constraint values for relevant schema field.
+     * This util is used to set the constraint values for relevant schema field.
      */
     private Schema setConstraintValueToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
         try {
