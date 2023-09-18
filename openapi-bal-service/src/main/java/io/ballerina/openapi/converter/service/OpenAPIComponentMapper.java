@@ -155,8 +155,9 @@ public class OpenAPIComponentMapper {
                 }
                 break;
             case STRING:
-                schema.put(componentName, setConstraintValueToSchema(constraintAnnot,
-                        new StringSchema().description(typeDoc)));
+                Schema stringSchema = new StringSchema().description(typeDoc);
+                setConstraintValueToSchema(constraintAnnot, stringSchema);
+                schema.put(componentName, stringSchema);
                 components.setSchemas(schema);
                 break;
             case JSON:
@@ -165,25 +166,28 @@ public class OpenAPIComponentMapper {
                 components.setSchemas(schema);
                 break;
             case INT:
-                schema.put(componentName, setConstraintValueToSchema(constraintAnnot,
-                        new IntegerSchema().description(typeDoc)));
+                Schema intSchema = new IntegerSchema().description(typeDoc);
+                setConstraintValueToSchema(constraintAnnot, intSchema);
+                schema.put(componentName, intSchema);
                 components.setSchemas(schema);
                 break;
             case DECIMAL:
-                schema.put(componentName, setConstraintValueToSchema(constraintAnnot,
-                        new NumberSchema().format(DOUBLE).description(typeDoc)));
+                Schema decimalSchema = new NumberSchema().format(DOUBLE).description(typeDoc);
+                setConstraintValueToSchema(constraintAnnot, decimalSchema);
+                schema.put(componentName, decimalSchema);
                 components.setSchemas(schema);
                 break;
             case FLOAT:
-                schema.put(componentName, setConstraintValueToSchema(constraintAnnot,
-                        new NumberSchema().format(FLOAT).description(typeDoc)));
+                Schema floatSchema = new NumberSchema().format(FLOAT).description(typeDoc);
+                setConstraintValueToSchema(constraintAnnot, floatSchema);
+                schema.put(componentName, floatSchema);
                 components.setSchemas(schema);
                 break;
             case ARRAY:
             case TUPLE:
                 ArraySchema arraySchema = mapArrayToArraySchema(schema, type, componentName);
-                schema.put(componentName, setConstraintValueToSchema(constraintAnnot,
-                        arraySchema.description(typeDoc)));
+                setConstraintValueToSchema(constraintAnnot, arraySchema.description(typeDoc));
+                schema.put(componentName, arraySchema);
                 components.setSchemas(schema);
                 break;
             case UNION:
@@ -721,7 +725,7 @@ public class OpenAPIComponentMapper {
     /**
      * This util is used to set the integer constraint values for relevant schema field.
      */
-    private Schema setIntegerConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+    private void setIntegerConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
         BigDecimal minimum = null;
         BigDecimal maximum = null;
         if (constraintAnnot.getMinValue().isPresent()) {
@@ -739,13 +743,12 @@ public class OpenAPIComponentMapper {
         }
         properties.setMinimum(minimum);
         properties.setMaximum(maximum);
-        return properties;
     }
 
     /**
      * This util is used to set the number (float, double) constraint values for relevant schema field.
      */
-    private Schema setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties)
+    private void setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties)
                                                         throws ParseException {
         BigDecimal minimum = null;
         BigDecimal maximum = null;
@@ -768,35 +771,32 @@ public class OpenAPIComponentMapper {
         }
         properties.setMinimum(minimum);
         properties.setMaximum(maximum);
-        return properties;
     }
 
     /**
      * This util is used to set the string constraint values for relevant schema field.
      */
-    private Schema setStringConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+    private void setStringConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
         properties.setMaxLength(constraintAnnot.getMaxLength().isPresent() ?
                 Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
         properties.setMinLength(constraintAnnot.getMinLength().isPresent() ?
                 Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
-        return properties;
     }
 
     /**
      * This util is used to set the array constraint values for relevant schema field.
      */
-    private Schema setArrayConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+    private void setArrayConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
         properties.setMaxItems(constraintAnnot.getMaxLength().isPresent() ?
                 Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
         properties.setMinItems(constraintAnnot.getMinLength().isPresent() ?
                 Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
-        return properties;
     }
 
     /**
      * This util is used to set the constraint values for relevant schema field.
      */
-    private Schema setConstraintValueToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+    private void setConstraintValueToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
         try {
             if (properties instanceof ArraySchema) {
                 setArrayConstraintValuesToSchema(constraintAnnot, properties);
@@ -804,7 +804,11 @@ public class OpenAPIComponentMapper {
                 setStringConstraintValuesToSchema(constraintAnnot, properties);
             } else if (properties instanceof IntegerSchema) {
                 setIntegerConstraintValuesToSchema(constraintAnnot, properties);
-            } else if (properties instanceof NumberSchema) {
+            } else {
+                /**
+                 * Ballerina currently supports only Int, Number (Float, Decimal), String & Array constraints,
+                 * with plans to extend constraint support in the future.
+                 */
                 setNumberConstraintValuesToSchema(constraintAnnot, properties);
             }
         } catch (ParseException parseException) {
@@ -813,7 +817,6 @@ public class OpenAPIComponentMapper {
                     error.getDescription(), null, parseException.getMessage());
             diagnostics.add(diagnostic);
         }
-        return properties;
     }
 
     /**
