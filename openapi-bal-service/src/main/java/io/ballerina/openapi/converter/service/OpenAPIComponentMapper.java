@@ -823,8 +823,8 @@ public class OpenAPIComponentMapper {
                                                ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
         NodeList<AnnotationNode> annotations = metadata.annotations();
         annotations.stream().filter(annot -> (annot.annotReference() instanceof QualifiedNameReferenceNode &&
-                        ((QualifiedNameReferenceNode) annot.annotReference()).modulePrefix().text()
-                                .equals("constraint")))
+                                ((QualifiedNameReferenceNode) annot.annotReference()).modulePrefix().text()
+                                        .equals("constraint")))
                 .forEach(value -> {
                     Optional<MappingConstructorExpressionNode> fieldValues = value.annotValue();
                     if (fieldValues.isPresent()) {
