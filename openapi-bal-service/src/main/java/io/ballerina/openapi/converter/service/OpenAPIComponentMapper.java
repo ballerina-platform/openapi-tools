@@ -685,7 +685,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This util function is to handle the type reference symbol is record type or enum type.
+     * This util function is used to handle the type reference symbol is record type or enum type.
      */
     private Schema getSchemaForTypeReferenceSymbol(TypeSymbol referenceType, Schema symbolProperty,
                                                    String componentName, Map<String, Schema> schema) {
@@ -838,8 +838,8 @@ public class OpenAPIComponentMapper {
                                     ExpressionNode expressionNode = specificFieldNode.valueExpr().get();
                                     SyntaxKind kind = expressionNode.kind();
                                     if (kind == SyntaxKind.NUMERIC_LITERAL) {
-                                        String constraintValue = expressionNode.toString().trim();
-                                        fillConstraintValue(constraintBuilder, name, constraintValue);
+                                        fillConstraintValue(constraintBuilder, name, expressionNode
+                                                                    .toString().trim());
                                     }
                                 }
                             }
