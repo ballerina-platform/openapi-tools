@@ -21,7 +21,6 @@ import ballerina/constraint;
     maxValueExclusive: 5.55,
     minValue: 2.55
 }
-
 public type Marks decimal;
 
 public type School record {

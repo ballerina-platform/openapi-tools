@@ -21,7 +21,6 @@ import ballerina/constraint;
     minValueExclusive: 2.5,
     maxValue: 10.5
 }
-
 public type Rating float;
 
 public type Hotel record {
