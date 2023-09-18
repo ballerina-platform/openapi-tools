@@ -745,7 +745,8 @@ public class OpenAPIComponentMapper {
     /**
      * This util uses to set the number (float, double) constraint values for relevant schema field.
      */
-    private Schema setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) throws ParseException{
+    private Schema setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties)
+                                                        throws ParseException {
         BigDecimal minimum = null;
         BigDecimal maximum = null;
         if (constraintAnnot.getMinValue().isPresent()) {
@@ -799,7 +800,7 @@ public class OpenAPIComponentMapper {
         try {
             if (properties instanceof ArraySchema) {
                 setArrayConstraintValuesToSchema(constraintAnnot, properties);
-            } else if (properties instanceof StringSchema){
+            } else if (properties instanceof StringSchema) {
                 setStringConstraintValuesToSchema(constraintAnnot, properties);
             } else if (properties instanceof IntegerSchema) {
                 setIntegerConstraintValuesToSchema(constraintAnnot, properties);
