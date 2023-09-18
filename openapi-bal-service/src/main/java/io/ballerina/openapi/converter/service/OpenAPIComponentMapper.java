@@ -18,7 +18,24 @@
 
 package io.ballerina.openapi.converter.service;
 
-import io.ballerina.compiler.api.symbols.*;
+import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
+import io.ballerina.compiler.api.symbols.ConstantSymbol;
+import io.ballerina.compiler.api.symbols.Documentable;
+import io.ballerina.compiler.api.symbols.Documentation;
+import io.ballerina.compiler.api.symbols.EnumSymbol;
+import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
+import io.ballerina.compiler.api.symbols.MapTypeSymbol;
+import io.ballerina.compiler.api.symbols.ReadonlyTypeSymbol;
+import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
+import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.SymbolKind;
+import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.IntersectionTypeDescriptorNode;
@@ -728,28 +745,35 @@ public class OpenAPIComponentMapper {
     /**
      * This util uses to set the number (float, double) constraint values for relevant schema field.
      */
-    private Schema setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) throws ParseException {
+    private Schema setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
         BigDecimal minimum = null;
         BigDecimal maximum = null;
-        if (constraintAnnot.getMinValue().isPresent()) {
-            minimum = BigDecimal.valueOf((NumberFormat.getInstance()
-                    .parse(constraintAnnot.getMinValue().get()).doubleValue()));
-        } else if (constraintAnnot.getMinValueExclusive().isPresent()) {
-            minimum = BigDecimal.valueOf((NumberFormat.getInstance()
-                    .parse(constraintAnnot.getMinValueExclusive().get()).doubleValue()));
-            properties.setExclusiveMinimum(true);
-        }
+        try {
+            if (constraintAnnot.getMinValue().isPresent()) {
+                minimum = BigDecimal.valueOf((NumberFormat.getInstance()
+                                .parse(constraintAnnot.getMinValue().get()).doubleValue()));
+            } else if (constraintAnnot.getMinValueExclusive().isPresent()) {
+                minimum = BigDecimal.valueOf((NumberFormat.getInstance()
+                                .parse(constraintAnnot.getMinValueExclusive().get()).doubleValue()));
+                properties.setExclusiveMinimum(true);
+            }
 
-        if (constraintAnnot.getMaxValue().isPresent()) {
-            maximum = BigDecimal.valueOf((NumberFormat.getInstance()
-                    .parse(constraintAnnot.getMaxValue().get()).doubleValue()));
-        } else if (constraintAnnot.getMaxValueExclusive().isPresent()) {
-            maximum = BigDecimal.valueOf((NumberFormat.getInstance()
-                    .parse(constraintAnnot.getMaxValueExclusive().get()).doubleValue()));
-            properties.setExclusiveMaximum(true);
+            if (constraintAnnot.getMaxValue().isPresent()) {
+                maximum = BigDecimal.valueOf((NumberFormat.getInstance()
+                                .parse(constraintAnnot.getMaxValue().get()).doubleValue()));
+            } else if (constraintAnnot.getMaxValueExclusive().isPresent()) {
+                maximum = BigDecimal.valueOf((NumberFormat.getInstance()
+                                .parse(constraintAnnot.getMaxValueExclusive().get()).doubleValue()));
+                properties.setExclusiveMaximum(true);
+            }
+            properties.setMinimum(minimum);
+            properties.setMaximum(maximum);
+        } catch (ParseException exception) {
+            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
+                    error.getDescription(), null, exception.getMessage());
+            diagnostics.add(diagnostic);
         }
-        properties.setMinimum(minimum);
-        properties.setMaximum(maximum);
         return properties;
     }
 
@@ -789,7 +813,7 @@ public class OpenAPIComponentMapper {
             } else if (properties instanceof NumberSchema) {
                 setNumberConstraintValuesToSchema(constraintAnnot, properties);
             }
-        } catch (ParseException exception) {
+        } catch (NumberFormatException exception) {
             DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
             ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
                     error.getDescription(), null, exception.getMessage());
