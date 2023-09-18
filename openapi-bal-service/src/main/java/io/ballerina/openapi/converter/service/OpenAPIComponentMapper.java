@@ -481,7 +481,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This function uses to handle the field datatype has TypeReference(ex: Record or Enum).
+     * This function is used to handle the field datatype has TypeReference(ex: Record or Enum).
      */
     private Schema<?> handleTypeReference(Map<String, Schema> schema, TypeReferenceTypeSymbol typeReferenceSymbol,
                                           Schema<?> property, boolean isCyclicRecord) {
@@ -499,7 +499,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This function uses to generate schema when field has union type as data type.
+     * This function is used to generate schema when field has union type as data type.
      * <pre>
      *     type Pet record {
      *         Dog|Cat type;
@@ -568,7 +568,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This function generate oneOf composed schema for record fields.
+     * This function generates oneOf composed schema for record fields.
      */
     private Schema generateOneOfSchema(Schema property, List<Schema> properties) {
         boolean isTypeReference = properties.size() == 1 && properties.get(0).get$ref() == null;
@@ -719,7 +719,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This util uses to set the integer constraint values for relevant schema field.
+     * This util is used to set the integer constraint values for relevant schema field.
      */
     private Schema setIntegerConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
         BigDecimal minimum = null;
@@ -743,7 +743,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This util uses to set the number (float, double) constraint values for relevant schema field.
+     * This util is used to set the number (float, double) constraint values for relevant schema field.
      */
     private Schema setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties)
                                                         throws ParseException {
@@ -772,7 +772,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This util uses to set the string constraint values for relevant schema field.
+     * This util is used to set the string constraint values for relevant schema field.
      */
     private Schema setStringConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
         properties.setMaxLength(constraintAnnot.getMaxLength().isPresent() ?
@@ -783,7 +783,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This util uses to set the array constraint values for relevant schema field.
+     * This util is used to set the array constraint values for relevant schema field.
      */
     private Schema setArrayConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
         properties.setMaxItems(constraintAnnot.getMaxLength().isPresent() ?
@@ -794,7 +794,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This util uses to set the constraint values for relevant schema field.
+     * This util is used to set the constraint values for relevant schema field.
      */
     private Schema setConstraintValueToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
         try {
@@ -817,7 +817,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This util uses to extract the annotation values in `@constraint` and store it in builder.
+     * This util is used to extract the annotation values in `@constraint` and store it in builder.
      */
     private void extractedConstraintAnnotation(MetadataNode metadata,
                                                ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
@@ -849,7 +849,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This util uses to build the constraint builder with available constraint annotation field value.
+     * This util is used to build the constraint builder with available constraint annotation field value.
      */
     private void fillConstraintValue(ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder,
                                      String name, String constraintValue) {

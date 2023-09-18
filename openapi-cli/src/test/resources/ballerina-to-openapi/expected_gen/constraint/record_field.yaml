@@ -68,15 +68,21 @@ components:
             type: string
         id:
           maximum: 5
+          exclusiveMaximum: true
+          minimum: 0
           type: integer
           format: int64
         address:
           $ref: '#/components/schemas/Address'
         salary:
           maximum: 100000.0
+          exclusiveMaximum: true
+          minimum: 1000.0
           type: number
           format: float
         net:
+          maximum: 1000000.0
           minimum: 500000.0
+          exclusiveMinimum: true
           type: number
           format: double
