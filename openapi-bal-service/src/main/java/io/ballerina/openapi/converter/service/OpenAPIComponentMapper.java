@@ -726,6 +726,12 @@ public class OpenAPIComponentMapper {
      * This util is used to set the integer constraint values for relevant schema field.
      */
     private void setIntegerConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+        /**
+         * To-Do:
+         * Currently, the compiler checks integer constraints during compile time.
+         * If it fails, we must address the error when translating Ballerina integer constraints to OpenAPI spec.
+         * This issue will be resolved during the refactoring of the modules using the semantic model.
+         */
         BigDecimal minimum = null;
         BigDecimal maximum = null;
         if (constraintAnnot.getMinValue().isPresent()) {
