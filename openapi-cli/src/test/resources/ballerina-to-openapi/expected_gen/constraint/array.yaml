@@ -77,7 +77,8 @@ components:
         hobby:
           $ref: '#/components/schemas/Hobby'
         Details:
-          maxItems: 5
+          maxItems: 15
+          minItems: 15
           type: array
           items:
             $ref: '#/components/schemas/PersonDetailsItemsString'

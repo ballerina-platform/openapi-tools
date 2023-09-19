@@ -18,7 +18,7 @@ public type Hobby HobbyItemsString[];
 
 public type Person record {
     Hobby hobby?;
-    @constraint:Array {maxLength: 5}
+    @constraint:Array {length: 15}
     PersonDetailsItemsString[] Details?;
     int id;
     PersonFeeItemsNumber[] fee?;

@@ -793,10 +793,15 @@ public class OpenAPIComponentMapper {
      * This util is used to set the array constraint values for relevant schema field.
      */
     private void setArrayConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
-        properties.setMaxItems(constraintAnnot.getMaxLength().isPresent() ?
-                Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
-        properties.setMinItems(constraintAnnot.getMinLength().isPresent() ?
-                Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
+        if (constraintAnnot.getLength().isPresent()) {
+            properties.setMinItems(Integer.valueOf(constraintAnnot.getLength().get()));
+            properties.setMaxItems(Integer.valueOf(constraintAnnot.getLength().get()));
+        } else {
+            properties.setMaxItems(constraintAnnot.getMaxLength().isPresent() ?
+                    Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
+            properties.setMinItems(constraintAnnot.getMinLength().isPresent() ?
+                    Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
+        }
     }
 
     /**
