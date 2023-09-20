@@ -9,12 +9,12 @@ public type Person record {
     string name?;
     @constraint:Array {maxLength: 5, minLength: 2}
     string[] hobby?;
-    @constraint:Int {maxValue: 5}
+    @constraint:Int {maxValueExclusive: 5, minValue: 0}
     int id;
     Address address?;
-    @constraint:Float {maxValue: 100000}
+    @constraint:Float {maxValueExclusive: 100000, minValue: 1000}
     float salary?;
-    @constraint:Number {minValue: 500000}
+    @constraint:Number {minValueExclusive: 500000, maxValue: 1000000}
     decimal net?;
 };
 

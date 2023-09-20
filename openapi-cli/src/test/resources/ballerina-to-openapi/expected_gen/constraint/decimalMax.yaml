@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Person'
+              $ref: '#/components/schemas/School'
       responses:
         "500":
           description: Internal server error
@@ -27,6 +27,13 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    School:
+      required:
+        - marks
+      type: object
+      properties:
+        marks:
+          $ref: '#/components/schemas/Marks'
     ErrorPayload:
       type: object
       properties:
@@ -49,40 +56,9 @@ components:
           type: integer
           description: Relevant HTTP status code
           format: int32
-    Address:
-      minLength: 5
-      type: string
-    Person:
-      required:
-        - id
-      type: object
-      properties:
-        name:
-          maxLength: 14
-          type: string
-        hobby:
-          maxItems: 5
-          minItems: 2
-          type: array
-          items:
-            type: string
-        id:
-          maximum: 5
-          exclusiveMaximum: true
-          minimum: 0
-          type: integer
-          format: int64
-        address:
-          $ref: '#/components/schemas/Address'
-        salary:
-          maximum: 100000.0
-          exclusiveMaximum: true
-          minimum: 1000.0
-          type: number
-          format: float
-        net:
-          maximum: 1000000.0
-          minimum: 500000.0
-          exclusiveMinimum: true
-          type: number
-          format: double
+    Marks:
+      maximum: 5.55
+      exclusiveMaximum: true
+      minimum: 2.55
+      type: number
+      format: double
