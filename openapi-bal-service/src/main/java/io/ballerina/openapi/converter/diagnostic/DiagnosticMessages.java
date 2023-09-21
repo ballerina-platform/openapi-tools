@@ -63,7 +63,10 @@ public enum DiagnosticMessages {
             "for Ballerina type '%s'. ", DiagnosticSeverity.WARNING),
 
     OAS_CONVERTOR_115("OAS_CONVERTOR_115", "Given Ballerina file does not contain any HTTP service.",
-            DiagnosticSeverity.ERROR);
+            DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_116("OAS_CONVERTOR_116", "Generated OpenAPI definition does not contain `%s` request" +
+            " body information, as it's not supported by the OpenAPI tool.",
+            DiagnosticSeverity.WARNING);
 
     private final String code;
     private final String description;
