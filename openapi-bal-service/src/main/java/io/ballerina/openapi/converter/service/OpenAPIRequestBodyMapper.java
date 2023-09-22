@@ -60,6 +60,7 @@ import java.util.Optional;
 import javax.ws.rs.core.MediaType;
 
 import static io.ballerina.openapi.converter.Constants.APPLICATION_PREFIX;
+import static io.ballerina.openapi.converter.Constants.DELETE;
 import static io.ballerina.openapi.converter.Constants.HTTP_PAYLOAD;
 import static io.ballerina.openapi.converter.Constants.JSON_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.MEDIA_TYPE;
@@ -164,10 +165,9 @@ public class OpenAPIRequestBodyMapper {
                                    RequestBody bodyParameter) {
         SyntaxKind kind = payloadNode.kind();
         String mediaTypeString = getMediaTypeForSyntaxKind(payloadNode);
-        if (mediaTypeString != null || payloadNode.kind() == SyntaxKind.UNION_TYPE_DESC ||
-                payloadNode.kind() == SyntaxKind.QUALIFIED_NAME_REFERENCE ||
-                payloadNode.kind() == SyntaxKind.OPTIONAL_TYPE_DESC ||
-                payloadNode.kind() == SyntaxKind.ARRAY_TYPE_DESC) {
+        if (mediaTypeString != null || kind == SyntaxKind.UNION_TYPE_DESC ||
+                kind == SyntaxKind.QUALIFIED_NAME_REFERENCE || kind == SyntaxKind.OPTIONAL_TYPE_DESC ||
+                kind == SyntaxKind.ARRAY_TYPE_DESC) {
             switch (kind) {
                 case INT_TYPE_DESC:
                 case FLOAT_TYPE_DESC:
@@ -242,17 +242,16 @@ public class OpenAPIRequestBodyMapper {
                     break;
                 default:
                     //Warning message for unsupported request payload type in Ballerina resource.
-                    DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_116;
-                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
-                            payloadNode.location(), String.valueOf(payloadNode.kind()));
+                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(
+                            DiagnosticMessages.OAS_CONVERTOR_116, payloadNode.location(),
+                            String.valueOf(payloadNode.kind()));
                     diagnostics.add(error);
                     break;
             }
         } else {
             //Warning message for unsupported request payload type in Ballerina resource.
-            DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_116;
-            IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
-                    payloadNode.location(), String.valueOf(payloadNode.kind()));
+            IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(
+                    DiagnosticMessages.OAS_CONVERTOR_116, payloadNode.location(), String.valueOf(payloadNode.kind()));
             diagnostics.add(error);
         }
     }
@@ -447,7 +446,7 @@ public class OpenAPIRequestBodyMapper {
         }
         //  Adding conditional check for http delete operation as it cannot have body
         //  parameter.
-        if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
+        if (!operationAdaptor.getHttpOperation().equalsIgnoreCase(DELETE)) {
             operationAdaptor.getOperation().setRequestBody(bodyParameter);
         }
     }
