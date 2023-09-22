@@ -131,7 +131,7 @@ public class Constants {
         httpCodes.put("NotImplemented", "501");
         httpCodes.put("BadGateway", "502");
         httpCodes.put("ServiceUnavailable", "503");
-        httpCodes.put("GatewayTimeOut", "504");
+        httpCodes.put("GatewayTimeout", "504");
         httpCodes.put("HttpVersionNotSupported", "505");
         httpCodes.put("VariantAlsoNegotiates", "506");
         httpCodes.put("InsufficientStorage", "507");

@@ -62,6 +62,7 @@ import static io.ballerina.openapi.cmd.CmdConstants.GenType.GEN_BOTH;
 import static io.ballerina.openapi.cmd.CmdConstants.GenType.GEN_CLIENT;
 import static io.ballerina.openapi.cmd.CmdConstants.GenType.GEN_SERVICE;
 import static io.ballerina.openapi.cmd.CmdConstants.OAS_PATH_SEPARATOR;
+import static io.ballerina.openapi.cmd.CmdConstants.SUPPORTED_OPENAPI_VERSIONS;
 import static io.ballerina.openapi.cmd.CmdConstants.TEST_DIR;
 import static io.ballerina.openapi.cmd.CmdConstants.TEST_FILE_NAME;
 import static io.ballerina.openapi.cmd.CmdConstants.TYPE_FILE_NAME;
@@ -103,7 +104,7 @@ public class BallerinaCodeGenerator {
         // absence of the operationId in operation. Therefor we enable client flag true as default code generation.
         // if resource is enabled, we avoid checking operationId.
         OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPIPath, !isResource);
-
+        checkOpenAPIVersion(openAPIDef);
         // Generate service
         String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
@@ -338,6 +339,7 @@ public class BallerinaCodeGenerator {
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         // Normalize OpenAPI definition
         OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, !isResource);
+        checkOpenAPIVersion(openAPIDef);
         // Generate ballerina service and resources.
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -409,6 +411,8 @@ public class BallerinaCodeGenerator {
                     openAPI);
         }
 
+        checkOpenAPIVersion(openAPIDef);
+
         if (openAPIDef.getInfo().getTitle().isBlank() && (serviceName == null || serviceName.isBlank())) {
             openAPIDef.getInfo().setTitle(UNTITLED_SERVICE);
         } else {
@@ -468,5 +472,12 @@ public class BallerinaCodeGenerator {
      */
     public void setIncludeTestFiles(boolean includeTestFiles) {
         this.includeTestFiles = includeTestFiles;
+    }
+
+    private void checkOpenAPIVersion(OpenAPI openAPIDef) {
+        if (!SUPPORTED_OPENAPI_VERSIONS.contains(openAPIDef.getOpenapi())) {
+            outStream.printf("WARNING: The tool has not been tested with OpenAPI version %s. " +
+                    "The generated code may potentially contain errors.%n", openAPIDef.getOpenapi());
+        }
     }
 }
