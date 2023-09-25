@@ -7,9 +7,6 @@ public type HobbyItemsString string;
 @constraint:String {minLength: 7}
 public type PersonDetailsItemsString string;
 
-@constraint:String {length: 10, pattern: re `^[a-zA-Z0-9_]+$`}
-public type PersonNIC string;
-
 @constraint:Float {maxValue: 445.4}
 public type PersonFeeItemsNumber float;
 
@@ -24,7 +21,6 @@ public type Person record {
     @constraint:Array {maxLength: 5}
     PersonDetailsItemsString[] Details?;
     int id;
-    PersonNIC nic?;
     PersonFeeItemsNumber[] fee?;
     # The maximum number of items in the response (as set in the query or by default).
     PersonLimitItemsInteger[] 'limit?;

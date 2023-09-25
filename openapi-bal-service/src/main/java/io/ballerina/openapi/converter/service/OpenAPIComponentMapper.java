@@ -863,7 +863,7 @@ public class OpenAPIComponentMapper {
                                                                     .toString().trim());
                                     } else if (kind == SyntaxKind.REGEX_TEMPLATE_EXPRESSION) {
                                         fillConstraintValue(constraintBuilder, name, expressionNode
-                                                .toString().replaceAll("re `|`", "").trim());
+                                                .toString().replaceAll("re |`", "").trim());
                                     }
                                 }
                             }

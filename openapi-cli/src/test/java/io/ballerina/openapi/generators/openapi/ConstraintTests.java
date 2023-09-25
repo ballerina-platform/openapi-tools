@@ -86,4 +86,11 @@ public class ConstraintTests {
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/decimalMax.yaml");
     }
+
+    @Test(description = "When the record field has string type")
+    public void testStringType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("constraint/string.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/string.yaml");
+    }
 }
