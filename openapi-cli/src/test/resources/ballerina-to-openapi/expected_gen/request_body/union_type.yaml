@@ -21,6 +21,12 @@ paths:
       responses:
         "202":
           description: Accepted
+  /path1:
+    post:
+      operationId: postPath1
+      responses:
+        "202":
+          description: Accepted
   /path2:
     post:
       operationId: postPath2

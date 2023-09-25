@@ -4,9 +4,13 @@ public type ABC record {
     int id;
     string name;
 };
+type UnionType ABC|xml;
 
 service /payloadV on new http:Listener(0) {
     resource function post path(ABC? payload) {
+    }
+    //This needs to be fixed with separated PR
+    resource function post path1(UnionType payload) {
     }
     resource function post path2(ABC|xml payload) {
     }
