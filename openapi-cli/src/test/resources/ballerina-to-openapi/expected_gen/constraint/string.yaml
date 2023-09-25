@@ -56,6 +56,9 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/St_ID'
+        name:
+          pattern: "^[a-zA-Z]+$"
+          type: string
     St_ID:
       maxLength: 10
       minLength: 10

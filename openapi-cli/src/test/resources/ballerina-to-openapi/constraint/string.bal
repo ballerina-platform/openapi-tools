@@ -25,6 +25,8 @@ public type St_ID string;
 
 public type StudentRecord record {
     St_ID id;
+    @constraint:String { pattern: re `^[a-zA-Z]+$`}
+    string name?;
 };
 
 service /payloadV on new http:Listener(9090) {
