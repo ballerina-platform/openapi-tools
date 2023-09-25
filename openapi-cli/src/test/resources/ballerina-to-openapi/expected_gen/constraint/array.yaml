@@ -84,6 +84,8 @@ components:
         id:
           type: integer
           format: int64
+        nic:
+          $ref: '#/components/schemas/PersonNIC'
         fee:
           type: array
           items:
@@ -94,3 +96,8 @@ components:
             query or by default).
           items:
             $ref: '#/components/schemas/PersonLimitItemsInteger'
+    PersonNIC:
+      maxLength: 10
+      minLength: 10
+      pattern: "^[a-zA-Z0-9_]+$"
+      type: string

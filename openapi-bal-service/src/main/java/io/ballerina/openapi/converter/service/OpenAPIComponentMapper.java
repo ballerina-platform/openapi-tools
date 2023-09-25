@@ -77,6 +77,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Spliterator;
+import java.util.regex.Pattern;
 
 import static io.ballerina.openapi.converter.Constants.DOUBLE;
 import static io.ballerina.openapi.converter.Constants.FLOAT;
@@ -783,10 +784,21 @@ public class OpenAPIComponentMapper {
      * This util is used to set the string constraint values for relevant schema field.
      */
     private void setStringConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
-        properties.setMaxLength(constraintAnnot.getMaxLength().isPresent() ?
-                Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
-        properties.setMinLength(constraintAnnot.getMinLength().isPresent() ?
-                Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
+        if (constraintAnnot.getLength().isPresent()) {
+            properties.setMinLength(Integer.valueOf(constraintAnnot.getLength().get()));
+            properties.setMaxLength(Integer.valueOf(constraintAnnot.getLength().get()));
+        } else {
+            properties.setMaxLength(constraintAnnot.getMaxLength().isPresent() ?
+                    Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
+            properties.setMinLength(constraintAnnot.getMinLength().isPresent() ?
+                    Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
+        }
+
+        if (constraintAnnot.getPattern().isPresent()) {
+            String regexPattern = constraintAnnot.getPattern().get();
+            Pattern pattern = Pattern.compile(regexPattern);
+            properties.setPattern(pattern.toString());
+        }
     }
 
     /**
@@ -849,6 +861,9 @@ public class OpenAPIComponentMapper {
                                     if (kind == SyntaxKind.NUMERIC_LITERAL) {
                                         fillConstraintValue(constraintBuilder, name, expressionNode
                                                                     .toString().trim());
+                                    } else if (kind == SyntaxKind.REGEX_TEMPLATE_EXPRESSION) {
+                                        fillConstraintValue(constraintBuilder, name, expressionNode
+                                                .toString().replaceAll("re `|`", "").trim());
                                     }
                                 }
                             }
@@ -883,6 +898,9 @@ public class OpenAPIComponentMapper {
                 break;
             case "minLength":
                 constraintBuilder.withMinLength(constraintValue);
+                break;
+            case "pattern":
+                constraintBuilder.withPattern(constraintValue);
                 break;
             default:
                 break;

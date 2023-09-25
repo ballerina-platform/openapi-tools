@@ -32,6 +32,7 @@ public class ConstraintAnnotation {
     private final String maxLength;
     private final String minValueExclusive;
     private final String maxValueExclusive;
+    private final String pattern;
 
     public ConstraintAnnotation(ConstraintAnnotationBuilder builder) {
         this.minValue = builder.minValue;
@@ -41,6 +42,7 @@ public class ConstraintAnnotation {
         this.maxLength = builder.maxLength;
         this.minValueExclusive = builder.minValueExclusive;
         this.maxValueExclusive = builder.maxValueExclusive;
+        this.pattern = builder.pattern;
     }
 
     public Optional<String> getMinValue() {
@@ -71,6 +73,10 @@ public class ConstraintAnnotation {
         return Optional.ofNullable(maxValueExclusive);
     }
 
+    public Optional<String> getPattern() {
+        return Optional.ofNullable(pattern);
+    }
+
     /**
      * This is the builder class for the {@link ConstraintAnnotation}.
      */
@@ -82,6 +88,7 @@ public class ConstraintAnnotation {
         private String maxLength;
         private String minValueExclusive;
         private String maxValueExclusive;
+        private String pattern;
 
         public ConstraintAnnotationBuilder withMinValue(String minValue) {
             this.minValue = minValue;
@@ -115,6 +122,11 @@ public class ConstraintAnnotation {
 
         public ConstraintAnnotationBuilder withMaxValueExclusive(String maxValueExclusive) {
             this.maxValueExclusive = maxValueExclusive;
+            return this;
+        }
+
+        public ConstraintAnnotationBuilder withPattern(String pattern) {
+            this.pattern = pattern;
             return this;
         }
 
