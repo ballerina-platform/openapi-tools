@@ -38,11 +38,25 @@ public class ConstraintTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/record_field.yaml");
     }
 
+    @Test(description = "When the record field has constraint type with records")
+    public void testMapRecFiled() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("constraint/record_fieldRec.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/record_fieldRec.yaml");
+    }
+
     @Test(description = "When the record field has array type")
     public void testArrayType() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("constraint/array.bal");
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/array.yaml");
+    }
+
+    @Test(description = "When the record field has array record type")
+    public void testArrayRecType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("constraint/arrayRec.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/arrayRec.yaml");
     }
 
     @Test(description = "When the record field has integer (minValueExclusive) type")
@@ -59,6 +73,13 @@ public class ConstraintTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/integerMax.yaml");
     }
 
+    @Test(description = "When the record field has integer record type")
+    public void testIntegerRecType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("constraint/integerRec.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/integerRec.yaml");
+    }
+
     @Test(description = "When the record field has float (minValueExclusive) type")
     public void testFloatMinType() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("constraint/floatMin.bal");
@@ -71,6 +92,13 @@ public class ConstraintTests {
         Path ballerinaFilePath = RES_DIR.resolve("constraint/floatMax.bal");
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/floatMax.yaml");
+    }
+
+    @Test(description = "When the record field has float record type")
+    public void testFloatRecType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("constraint/floatRec.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/floatRec.yaml");
     }
 
     @Test(description = "When the record field has decimal (minValueExclusive) type")
@@ -87,10 +115,24 @@ public class ConstraintTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/decimalMax.yaml");
     }
 
+    @Test(description = "When the record field has decimal record type")
+    public void testDecimalRecType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("constraint/decimalRec.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/decimalRec.yaml");
+    }
+
     @Test(description = "When the record field has string type")
     public void testStringType() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("constraint/string.bal");
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/string.yaml");
+    }
+
+    @Test(description = "When the record field has string record type")
+    public void testStringRecType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("constraint/stringRec.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/stringRec.yaml");
     }
 }
