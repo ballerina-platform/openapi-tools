@@ -50,6 +50,7 @@ import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.compiler.syntax.tree.TemplateExpressionNode;
 import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
@@ -837,6 +838,7 @@ public class OpenAPIComponentMapper {
         }
     }
 
+
     /**
      * This util is used to extract the annotation values in `@constraint` and store it in builder.
      */
@@ -851,20 +853,31 @@ public class OpenAPIComponentMapper {
                     if (fieldValues.isPresent()) {
                         Spliterator<MappingFieldNode> spliterator = fieldValues.get().fields().spliterator();
                         spliterator.forEachRemaining(fieldV -> {
-                            if (fieldV.kind() == SyntaxKind.SPECIFIC_FIELD) {
-                                SpecificFieldNode specificFieldNode = (SpecificFieldNode) fieldV;
-                                // generate string
-                                String name = specificFieldNode.fieldName().toString().trim();
-                                if (specificFieldNode.valueExpr().isPresent()) {
-                                    ExpressionNode expressionNode = specificFieldNode.valueExpr().get();
-                                    SyntaxKind kind = expressionNode.kind();
-                                    if (kind == SyntaxKind.NUMERIC_LITERAL) {
-                                        fillConstraintValue(constraintBuilder, name, expressionNode
-                                                                    .toString().trim());
-                                    } else if (kind == SyntaxKind.REGEX_TEMPLATE_EXPRESSION) {
-                                        fillConstraintValue(constraintBuilder, name, expressionNode
-                                                .toString().replaceAll("re |`", "").trim());
+                            if (!SyntaxKind.SPECIFIC_FIELD.equals(fieldV.kind())) {
+                                return;
+                            }
+                            SpecificFieldNode specificFieldNode = (SpecificFieldNode) fieldV;
+                            // generate string
+                            String name = specificFieldNode.fieldName().toString().trim();
+                            if (specificFieldNode.valueExpr().isPresent()) {
+                                ExpressionNode expressionNode = specificFieldNode.valueExpr().get();
+                                SyntaxKind kind = expressionNode.kind();
+                                if (kind == SyntaxKind.NUMERIC_LITERAL) {
+                                    fillConstraintValue(constraintBuilder, name, expressionNode
+                                            .toString().trim());
+                                } else if (kind == SyntaxKind.MAPPING_CONSTRUCTOR) {
+                                    for (Node field : ((MappingConstructorExpressionNode) expressionNode).fields()) {
+                                        SpecificFieldNode fieldNode = (SpecificFieldNode) field;
+                                        if (fieldNode.fieldName().toString().trim().equals("value")) {
+                                            fillConstraintValue(constraintBuilder, name,
+                                                    fieldNode.valueExpr().get().toString());
+                                            break;
+                                        }
                                     }
+                                } else if (kind == SyntaxKind.REGEX_TEMPLATE_EXPRESSION) {
+                                    fillConstraintValue(constraintBuilder, name,
+                                            ((TemplateExpressionNode) expressionNode).content()
+                                                    .get(0).toString());
                                 }
                             }
                         });
