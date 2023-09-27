@@ -76,7 +76,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import static io.ballerina.openapi.converter.Constants.DOUBLE;
 import static io.ballerina.openapi.converter.Constants.FLOAT;
@@ -726,12 +725,6 @@ public class OpenAPIComponentMapper {
      * This util is used to set the integer constraint values for relevant schema field.
      */
     private void setIntegerConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
-        /**
-         * To-Do:
-         * Currently, the compiler checks integer constraints during compile time.
-         * If it fails, we must address the error when translating Ballerina integer constraints to OpenAPI spec.
-         * This issue will be resolved during the refactoring of the modules using the semantic model.
-         */
         BigDecimal minimum = null;
         BigDecimal maximum = null;
         if (constraintAnnot.getMinValue().isPresent()) {
@@ -782,7 +775,7 @@ public class OpenAPIComponentMapper {
     /**
      * This util is used to set the string constraint values for relevant schema field.
      */
-    private void setStringConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+    private void setStringConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, StringSchema properties) {
         if (constraintAnnot.getLength().isPresent()) {
             properties.setMinLength(Integer.valueOf(constraintAnnot.getLength().get()));
             properties.setMaxLength(Integer.valueOf(constraintAnnot.getLength().get()));
@@ -795,8 +788,7 @@ public class OpenAPIComponentMapper {
 
         if (constraintAnnot.getPattern().isPresent()) {
             String regexPattern = constraintAnnot.getPattern().get();
-            Pattern pattern = Pattern.compile(regexPattern);
-            properties.setPattern(pattern.toString());
+            properties.setPattern(regexPattern);
         }
     }
 
@@ -817,15 +809,13 @@ public class OpenAPIComponentMapper {
         try {
             if (properties instanceof ArraySchema) {
                 setArrayConstraintValuesToSchema(constraintAnnot, properties);
-            } else if (properties instanceof StringSchema) {
-                setStringConstraintValuesToSchema(constraintAnnot, properties);
+            } else if (properties instanceof StringSchema stringSchema) {
+                setStringConstraintValuesToSchema(constraintAnnot, stringSchema);
             } else if (properties instanceof IntegerSchema) {
                 setIntegerConstraintValuesToSchema(constraintAnnot, properties);
             } else {
-                /**
-                 * Ballerina currently supports only Int, Number (Float, Decimal), String & Array constraints,
-                 * with plans to extend constraint support in the future.
-                 */
+                //Ballerina currently supports only Int, Number (Float, Decimal), String & Array constraints,
+                //with plans to extend constraint support in the future.
                 setNumberConstraintValuesToSchema(constraintAnnot, properties);
             }
         } catch (ParseException parseException) {
@@ -880,18 +870,21 @@ public class OpenAPIComponentMapper {
 
     private Optional<String> extractFieldValue(ExpressionNode exprNode) {
         SyntaxKind syntaxKind = exprNode.kind();
-        if (SyntaxKind.NUMERIC_LITERAL.equals(syntaxKind)) {
-            return Optional.of(exprNode.toString().trim());
-        } else if (SyntaxKind.REGEX_TEMPLATE_EXPRESSION.equals(syntaxKind)) {
-            return Optional.of(((TemplateExpressionNode) exprNode).content().get(0).toString());
-        } else if (SyntaxKind.MAPPING_CONSTRUCTOR.equals(syntaxKind)) {
-            return ((MappingConstructorExpressionNode) exprNode).fields().stream()
+        switch (syntaxKind) {
+            case NUMERIC_LITERAL:
+                return Optional.of(exprNode.toString().trim());
+            case REGEX_TEMPLATE_EXPRESSION:
+                return Optional.of(((TemplateExpressionNode) exprNode)
+                                                    .content().get(0).toString());
+            case MAPPING_CONSTRUCTOR:
+                return ((MappingConstructorExpressionNode) exprNode).fields().stream()
                     .filter(fieldNode -> ((SpecificFieldNode) fieldNode).fieldName().toString().trim().equals("value"))
                     .findFirst()
                     .flatMap(node -> ((SpecificFieldNode) node).valueExpr()
-                            .flatMap(this::extractFieldValue));
-        } else {
-            return Optional.empty();
+                    )       .flatMap(this::extractFieldValue);
+            case INTERPOLATION:
+            default:
+                return Optional.empty();
         }
     }
 
