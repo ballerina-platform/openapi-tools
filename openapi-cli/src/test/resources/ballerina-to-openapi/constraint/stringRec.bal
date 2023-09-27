@@ -22,7 +22,10 @@ import ballerina/constraint;
         value: 10,
         message: "Length Exceeded!"
     },
-    pattern: re `^[a-zA-Z0-9_]+$`
+    pattern: {
+        value: re `^[a-zA-Z0-9_]+$`,
+        message: "Incorrect Pattern"
+    }
 }
 public type St_ID string;
 

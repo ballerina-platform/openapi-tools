@@ -40,7 +40,6 @@ import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.IntersectionTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -77,7 +76,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Spliterator;
 import java.util.regex.Pattern;
 
 import static io.ballerina.openapi.converter.Constants.DOUBLE;
@@ -845,44 +843,56 @@ public class OpenAPIComponentMapper {
     private void extractedConstraintAnnotation(MetadataNode metadata,
                                                ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
         NodeList<AnnotationNode> annotations = metadata.annotations();
-        annotations.stream().filter(annot -> (annot.annotReference() instanceof QualifiedNameReferenceNode &&
-                                ((QualifiedNameReferenceNode) annot.annotReference()).modulePrefix().text()
-                                        .equals("constraint")))
-                .forEach(value -> {
-                    Optional<MappingConstructorExpressionNode> fieldValues = value.annotValue();
-                    if (fieldValues.isPresent()) {
-                        Spliterator<MappingFieldNode> spliterator = fieldValues.get().fields().spliterator();
-                        spliterator.forEachRemaining(fieldV -> {
-                            if (!SyntaxKind.SPECIFIC_FIELD.equals(fieldV.kind())) {
-                                return;
-                            }
-                            SpecificFieldNode specificFieldNode = (SpecificFieldNode) fieldV;
-                            // generate string
-                            String name = specificFieldNode.fieldName().toString().trim();
-                            if (specificFieldNode.valueExpr().isPresent()) {
-                                ExpressionNode expressionNode = specificFieldNode.valueExpr().get();
-                                SyntaxKind kind = expressionNode.kind();
-                                if (kind == SyntaxKind.NUMERIC_LITERAL) {
-                                    fillConstraintValue(constraintBuilder, name, expressionNode
-                                            .toString().trim());
-                                } else if (kind == SyntaxKind.MAPPING_CONSTRUCTOR) {
-                                    for (Node field : ((MappingConstructorExpressionNode) expressionNode).fields()) {
-                                        SpecificFieldNode fieldNode = (SpecificFieldNode) field;
-                                        if (fieldNode.fieldName().toString().trim().equals("value")) {
-                                            fillConstraintValue(constraintBuilder, name,
-                                                    fieldNode.valueExpr().get().toString());
-                                            break;
-                                        }
-                                    }
-                                } else if (kind == SyntaxKind.REGEX_TEMPLATE_EXPRESSION) {
-                                    fillConstraintValue(constraintBuilder, name,
-                                            ((TemplateExpressionNode) expressionNode).content()
-                                                    .get(0).toString());
-                                }
-                            }
-                        });
-                    }
+        annotations.stream()
+                .filter(this::isConstraintAnnotation)
+                .filter(annotation -> annotation.annotValue().isPresent())
+                .forEach(annotation -> {
+                    MappingConstructorExpressionNode annotationValue = annotation.annotValue().get();
+                    annotationValue.fields().stream()
+                            .filter(field -> SyntaxKind.SPECIFIC_FIELD.equals(field.kind()))
+                            .forEach(field -> {
+                                String name = ((SpecificFieldNode) field).fieldName().toString().trim();
+                                processConstraintAnnotation((SpecificFieldNode) field, name, constraintBuilder);
+                            });
                 });
+    }
+
+    /**
+     * This util is used to check whether an annotation is a constraint annotation.
+     */
+    private boolean isConstraintAnnotation(AnnotationNode annotation) {
+        if (annotation.annotReference() instanceof QualifiedNameReferenceNode qualifiedNameRef) {
+            return qualifiedNameRef.modulePrefix().text().equals("constraint");
+        }
+        return false;
+    }
+
+    /**
+     * This util is used to process the content of a constraint annotation.
+     */
+    private void processConstraintAnnotation(SpecificFieldNode specificFieldNode, String fieldName,
+                                             ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
+
+        specificFieldNode.valueExpr()
+                .flatMap(this::extractFieldValue)
+                .ifPresent(fieldValue -> fillConstraintValue(constraintBuilder, fieldName, fieldValue));
+    }
+
+    private Optional<String> extractFieldValue(ExpressionNode exprNode) {
+        SyntaxKind syntaxKind = exprNode.kind();
+        if (SyntaxKind.NUMERIC_LITERAL.equals(syntaxKind)) {
+            return Optional.of(exprNode.toString().trim());
+        } else if (SyntaxKind.REGEX_TEMPLATE_EXPRESSION.equals(syntaxKind)) {
+            return Optional.of(((TemplateExpressionNode) exprNode).content().get(0).toString());
+        } else if (SyntaxKind.MAPPING_CONSTRUCTOR.equals(syntaxKind)) {
+            return ((MappingConstructorExpressionNode) exprNode).fields().stream()
+                    .filter(fieldNode -> ((SpecificFieldNode) fieldNode).fieldName().toString().trim().equals("value"))
+                    .findFirst()
+                    .flatMap(node -> ((SpecificFieldNode) node).valueExpr()
+                            .flatMap(this::extractFieldValue));
+        } else {
+            return Optional.empty();
+        }
     }
 
     /**
