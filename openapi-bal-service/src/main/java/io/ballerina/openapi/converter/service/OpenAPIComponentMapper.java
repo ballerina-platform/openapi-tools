@@ -881,7 +881,7 @@ public class OpenAPIComponentMapper {
                     .filter(fieldNode -> ((SpecificFieldNode) fieldNode).fieldName().toString().trim().equals("value"))
                     .findFirst()
                     .flatMap(node -> ((SpecificFieldNode) node).valueExpr()
-                    )       .flatMap(this::extractFieldValue);
+                           .flatMap(this::extractFieldValue));
             case INTERPOLATION:
             default:
                 return Optional.empty();
