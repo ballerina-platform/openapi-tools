@@ -189,7 +189,7 @@ public class Constants {
         httpCodeMap.put("NotImplemented", "501");
         httpCodeMap.put("BadGateway", "502");
         httpCodeMap.put("ServiceUnavailable", "503");
-        httpCodeMap.put("GatewayTimeOut", "504");
+        httpCodeMap.put("GatewayTimeout", "504");
         httpCodeMap.put("HttpVersionNotSupported", "505");
         httpCodeMap.put("VariantAlsoNegotiates", "506");
         httpCodeMap.put("InsufficientStorage", "507");

@@ -34,6 +34,7 @@ import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -217,8 +218,12 @@ public class OpenAPIResourceMapper {
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
         if (openAPIParameterMapper.getErrors().size() > 1 || (openAPIParameterMapper.getErrors().size() == 1 &&
                 !openAPIParameterMapper.getErrors().get(0).getCode().equals("OAS_CONVERTOR_113"))) {
-            errors.addAll(openAPIParameterMapper.getErrors());
-            return Optional.empty();
+            boolean isErrorIncluded = openAPIParameterMapper.getErrors().stream().anyMatch(d ->
+                    DiagnosticSeverity.ERROR.equals(d.getDiagnosticSeverity()));
+            if (isErrorIncluded) {
+                errors.addAll(openAPIParameterMapper.getErrors());
+                return Optional.empty();
+            }
         }
         errors.addAll(openAPIParameterMapper.getErrors());
 

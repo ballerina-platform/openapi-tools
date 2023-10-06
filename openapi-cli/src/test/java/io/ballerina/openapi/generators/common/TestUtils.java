@@ -99,13 +99,6 @@ public class TestUtils {
         return semanticModel.diagnostics();
     }
 
-    public static List<Diagnostic> getDiagnosticsForGenericService(SyntaxTree serviceSyntaxTree)
-            throws FormatterException, IOException {
-        writeFile(servicePath, Formatter.format(serviceSyntaxTree).toSourceCode());
-        SemanticModel semanticModel = getSemanticModel(servicePath);
-        return semanticModel.diagnostics();
-    }
-
     public static List<Diagnostic> getDiagnosticsForService(SyntaxTree serviceSyntaxTree, OpenAPI openAPI,
                                                             BallerinaServiceGenerator ballerinaServiceGenerator)
             throws FormatterException, IOException, BallerinaOpenApiException {
