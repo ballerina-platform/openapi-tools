@@ -245,15 +245,15 @@ public class OpenAPIRequestBodyMapper {
                 default:
                     //Warning message for unsupported request payload type in Ballerina resource.
                     IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(
-                            DiagnosticMessages.OAS_CONVERTOR_116, payloadNode.location(),
-                            String.valueOf(payloadNode.kind()));
+                            DiagnosticMessages.OAS_CONVERTOR_117, payloadNode.location(),
+                            payloadNode.toSourceCode().trim());
                     diagnostics.add(error);
                     break;
             }
         } else {
             //Warning message for unsupported request payload type in Ballerina resource.
             IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(
-                    DiagnosticMessages.OAS_CONVERTOR_116, payloadNode.location(), payloadNode.toSourceCode().trim());
+                    DiagnosticMessages.OAS_CONVERTOR_117, payloadNode.location(), payloadNode.toSourceCode().trim());
             diagnostics.add(error);
         }
     }
