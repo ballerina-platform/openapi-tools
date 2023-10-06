@@ -264,6 +264,12 @@ public class RequestBodyTest {
         compareWithGeneratedFile(ballerinaFilePath, "service_config_with_cors.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for request body with union type")
+    public void testForUnionTypeRequestBody() {
+        Path ballerinaFilePath = RES_DIR.resolve("request_body/union_type.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "union_type.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         deleteDirectory(this.tempDir);
