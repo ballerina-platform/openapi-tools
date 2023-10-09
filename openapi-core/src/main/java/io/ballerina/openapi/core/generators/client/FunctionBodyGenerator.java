@@ -120,10 +120,8 @@ import static io.ballerina.openapi.core.GeneratorConstants.REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.RESOURCE_PATH;
 import static io.ballerina.openapi.core.GeneratorConstants.RESPONSE;
 import static io.ballerina.openapi.core.GeneratorConstants.SELF;
-import static io.ballerina.openapi.core.GeneratorUtils.generateBodyStatementForComplexUrl;
 import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.core.GeneratorUtils.isComplexURL;
 import static io.ballerina.openapi.core.GeneratorUtils.isComposedSchema;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.extractReferenceType;
 
@@ -141,7 +139,6 @@ public class FunctionBodyGenerator {
     private final BallerinaTypesGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
-    private final boolean resourceMode;
 
     public List<ImportDeclarationNode> getImports() {
         return imports;
@@ -163,7 +160,6 @@ public class FunctionBodyGenerator {
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.ballerinaUtilGenerator = ballerinaUtilGenerator;
         this.ballerinaAuthConfigGenerator = ballerinaAuthConfigGenerator;
-        this.resourceMode = resourceMode;
     }
 
     /**
@@ -183,11 +179,6 @@ public class FunctionBodyGenerator {
         isHeader = false;
         // Create statements
         List<StatementNode> statementsList = new ArrayList<>();
-        // Check whether given path is complex path , if complex it will handle adding these two statement
-        if (resourceMode && isComplexURL(path)) {
-            List<StatementNode> bodyStatements = generateBodyStatementForComplexUrl(path);
-            statementsList.addAll(bodyStatements);
-        }
         //string path - common for every remote functions
         VariableDeclarationNode pathInt = getPathStatement(path, annotationNodes);
         statementsList.add(pathInt);

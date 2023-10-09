@@ -64,9 +64,11 @@ import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 
+import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -119,6 +121,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_API_KEY_DESC;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP;
 import static io.ballerina.openapi.core.GeneratorConstants.SELF;
 import static io.ballerina.openapi.core.GeneratorConstants.X_BALLERINA_INIT_DESCRIPTION;
+import static io.ballerina.openapi.core.GeneratorUtils.isComplexURL;
 
 /**
  * This class is used to generate ballerina client file according to given yaml file.
@@ -138,6 +141,7 @@ public class BallerinaClientGenerator {
     private String serverURL;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
     private final boolean resourceMode;
+    private final Map<String, String> modifiedURLs = new HashMap<>();
 
     /**
      * Returns a list of type definition nodes.
@@ -218,6 +222,14 @@ public class BallerinaClientGenerator {
                 createModulePartNode(importsList, createNodeList(nodes), createToken(EOF_TOKEN));
         TextDocument textDocument = TextDocuments.from("");
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
+        //Handle the path url warning messages
+        if (!modifiedURLs.isEmpty()) {
+            PrintStream outStream = System.err;
+            for (Map.Entry<String, String> url: modifiedURLs.entrySet()) {
+                outStream.printf("WARNING: found unsupported characters in the given `%s` url. Please" +
+                        " use the modified `%s` url.%n", url.getKey(), url.getValue());
+            }
+        }
         return syntaxTree.modifyWith(modulePartNode);
     }
 
@@ -580,8 +592,16 @@ public class BallerinaClientGenerator {
 
         //Generate relative path
         NodeList<Node> relativeResourcePath = resourceMode ?
-                createNodeList(GeneratorUtils.getRelativeResourcePath(path, operation.getValue(), null)) :
+                createNodeList(GeneratorUtils.getRelativeResourcePathForClient(path, operation.getValue(),
+                        null)) :
                 createEmptyNodeList();
+        if (resourceMode && isComplexURL(path)) {
+            String modifiedURL = "";
+            for (Node node: relativeResourcePath) {
+                modifiedURL = modifiedURL.concat(node.toSourceCode());
+            }
+            modifiedURLs.put(path, modifiedURL);
+        }
         return createFunctionDefinitionNode(null,
                 metadataNode, qualifierList, functionKeyWord, functionName, relativeResourcePath,
                 functionSignatureNode, functionBodyNode);

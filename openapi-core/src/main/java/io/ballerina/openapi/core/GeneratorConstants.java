@@ -407,4 +407,6 @@ public class GeneratorConstants {
     public static final String INT = "int";
     public static final String INT_SIGNED32 = "int:Signed32";
     public static final String DECIMAL = "decimal";
+    public static final String PATH_SEGMENT_REGEX = "(?![^{]*})[^a-zA-Z0-9{}]";
+    public static final String PATH = "path";
 }

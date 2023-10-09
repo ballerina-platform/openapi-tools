@@ -73,7 +73,7 @@ public class ModuleReferenceTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "readonly.yaml");
     }
 
-    @Test (enabled = false)
+    @Test ()
     public void testListenersInSeparateModule() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("listeners_in_separate_module.bal");
         String osName = System.getProperty("os.name");
@@ -82,7 +82,7 @@ public class ModuleReferenceTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, yamlFile);
     }
 
-    @Test (enabled = false)
+    @Test ()
     public void testListenersInSeparateFiles() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("listeners_in_separate_file.bal");
         String osName = System.getProperty("os.name");

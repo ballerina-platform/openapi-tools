@@ -138,6 +138,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML_CONTENT;
 import static io.ballerina.openapi.core.GeneratorConstants.BOOLEAN;
+import static io.ballerina.openapi.core.GeneratorConstants.CATCH_ALL_PATH;
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.CLOSE_CURLY_BRACE;
 import static io.ballerina.openapi.core.GeneratorConstants.CONSTRAINT;
@@ -157,6 +158,8 @@ import static io.ballerina.openapi.core.GeneratorConstants.NULL;
 import static io.ballerina.openapi.core.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.GeneratorConstants.OPEN_CURLY_BRACE;
+import static io.ballerina.openapi.core.GeneratorConstants.PATH;
+import static io.ballerina.openapi.core.GeneratorConstants.PATH_SEGMENT_REGEX;
 import static io.ballerina.openapi.core.GeneratorConstants.REGEX_ONLY_NUMBERS_OR_NUMBERS_WITH_SPECIAL_CHARACTERS;
 import static io.ballerina.openapi.core.GeneratorConstants.REGEX_WITHOUT_SPECIAL_CHARACTERS;
 import static io.ballerina.openapi.core.GeneratorConstants.REGEX_WORDS_STARTING_WITH_NUMBERS;
@@ -312,6 +315,127 @@ public class GeneratorUtils {
                 functionRelativeResourcePath.add(createToken(SLASH_TOKEN));
 
                 // Add documentation
+                if (resourceFunctionDocs != null) {
+                    String parameterName = paramName.text();
+                    String paramComment = parameter.getDescription() != null && !parameter.getDescription().isBlank() ?
+                            parameter.getDescription() : DEFAULT_PARAM_COMMENT;
+                    MarkdownParameterDocumentationLineNode paramAPIDoc =
+                            DocCommentsGenerator.createAPIParamDoc(parameterName, paramComment);
+                    resourceFunctionDocs.add(paramAPIDoc);
+                }
+                break;
+            }
+        }
+    }
+
+    /**
+     * Generate resource function relative path nodes list for client generation.
+     *
+     * @param path - Openapi path
+     * @param operation - OAS operation
+     * @param resourceFunctionDocs - resource function API document list
+     * @return - List of nodes with relative path
+     * @throws BallerinaOpenApiException
+     */
+    public static List<Node> getRelativeResourcePathForClient(String path, Operation operation,
+                                                              List<Node> resourceFunctionDocs)
+            throws BallerinaOpenApiException {
+
+        List<Node> functionRelativeResourcePath = new ArrayList<>();
+        String[] pathNodes = path.split(SLASH);
+        if (pathNodes.length >= 2) {
+            for (String pathNode : pathNodes) {
+                if (pathNode.contains(OPEN_CURLY_BRACE)) {
+                    if (pathNode.equals("*")) {
+                        // Handle special case: asterisk (catch all path)
+                        functionRelativeResourcePath.add(createIdentifierToken(CATCH_ALL_PATH));
+                    }
+                    String[] subPaths = pathNode.split(PATH_SEGMENT_REGEX);
+                    handleParametrizedPathSegment(operation, resourceFunctionDocs, functionRelativeResourcePath,
+                            subPaths);
+                } else if (!pathNode.isBlank()) {
+                    IdentifierToken idToken = createIdentifierToken(escapeIdentifier(pathNode.trim()));
+                    functionRelativeResourcePath.add(idToken);
+                    functionRelativeResourcePath.add(createToken(SLASH_TOKEN));
+                }
+            }
+            if (functionRelativeResourcePath.size() > 1) {
+                functionRelativeResourcePath.remove(functionRelativeResourcePath.size() - 1);
+            }
+        } else if (pathNodes.length == 0) {
+            IdentifierToken idToken = createIdentifierToken(".");
+            functionRelativeResourcePath.add(idToken);
+        } else {
+            IdentifierToken idToken = createIdentifierToken(pathNodes[1].trim());
+            functionRelativeResourcePath.add(idToken);
+        }
+        return functionRelativeResourcePath;
+    }
+
+    /**
+     * This util is to handle the parameterized path segments. ex: /{custom_id}.json/
+     */
+    private static void handleParametrizedPathSegment(Operation operation, List<Node> resourceFunctionDocs,
+                                                      List<Node> functionRelativeResourcePath, String[] subPaths)
+            throws BallerinaOpenApiException {
+        for (String x : subPaths) {
+            if (x.contains(OPEN_CURLY_BRACE)) {
+                String pathParam = x;
+                pathParam = pathParam.substring(x.indexOf(OPEN_CURLY_BRACE) + 1);
+                pathParam = pathParam.substring(0, pathParam.indexOf(CLOSE_CURLY_BRACE));
+                pathParam = getValidName(pathParam, false);
+                if (operation.getParameters() != null) {
+                    extractPathParameterDetailsForClient(operation, functionRelativeResourcePath, pathParam,
+                            resourceFunctionDocs);
+                }
+            } else if (!x.isBlank()) {
+                IdentifierToken idToken = createIdentifierToken(escapeIdentifier(x.trim()));
+                functionRelativeResourcePath.add(idToken);
+                functionRelativeResourcePath.add(createToken(SLASH_TOKEN));
+            }
+        }
+    }
+
+    /**
+     * This util is for getting parameter type.
+     */
+    private static void extractPathParameterDetailsForClient(Operation operation,
+                                                             List<Node> functionRelativeResourcePath,
+                                                             String pathParam, List<Node> resourceFunctionDocs)
+            throws BallerinaOpenApiException {
+        for (Parameter parameter : operation.getParameters()) {
+            if (parameter.get$ref() != null) {
+                parameter = GeneratorMetaData.getInstance().getOpenAPI().getComponents()
+                        .getParameters().get(extractReferenceType(parameter.get$ref()));
+            }
+            if (parameter.getIn() == null) {
+                continue;
+            }
+            if (pathParam.trim().equals(getValidName(parameter.getName().trim(), false))
+                    && parameter.getIn().equals(PATH)) {
+                String paramType;
+                if (parameter.getSchema().get$ref() != null) {
+                    paramType = getValidName(extractReferenceType(parameter.getSchema().get$ref()), true);
+                } else {
+                    paramType = convertOpenAPITypeToBallerina(parameter.getSchema());
+                    if (paramType.endsWith(NILLABLE)) {
+                        throw new BallerinaOpenApiException("Path parameter value cannot be null.");
+                    }
+                }
+                BuiltinSimpleNameReferenceNode parameterType = createBuiltinSimpleNameReferenceNode(
+                        null,
+                        parameter.getSchema() == null ?
+                                createIdentifierToken(STRING, AbstractNodeFactory.createEmptyMinutiaeList(),
+                                        getSingleWSMinutiae()) :
+                                createIdentifierToken(paramType, AbstractNodeFactory.createEmptyMinutiaeList(),
+                                        getSingleWSMinutiae()));
+                IdentifierToken paramName = createIdentifierToken(pathParam);
+                ResourcePathParameterNode resourcePathParameterNode =
+                        createResourcePathParameterNode(SyntaxKind.RESOURCE_PATH_SEGMENT_PARAM,
+                                createToken(OPEN_BRACKET_TOKEN), NodeFactory.createEmptyNodeList(), parameterType,
+                                null, paramName, createToken(CLOSE_BRACKET_TOKEN));
+                functionRelativeResourcePath.add(resourcePathParameterNode);
+                functionRelativeResourcePath.add(createToken(SLASH_TOKEN));
                 if (resourceFunctionDocs != null) {
                     String parameterName = paramName.text();
                     String paramComment = parameter.getDescription() != null && !parameter.getDescription().isBlank() ?
