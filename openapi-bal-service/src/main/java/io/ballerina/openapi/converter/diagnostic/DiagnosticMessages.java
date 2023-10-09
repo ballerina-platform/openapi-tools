@@ -64,7 +64,11 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_115("OAS_CONVERTOR_115", "Given Ballerina file does not contain any HTTP service.",
             DiagnosticSeverity.ERROR),
     OAS_CONVERTOR_116("OAS_CONVERTOR_116", "Failed to parser the Number value due to: %s ",
-            DiagnosticSeverity.ERROR);
+            DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_118("OAS_CONVERTOR_118", "Generated OpenAPI definition does not contain information " +
+            "for variable assignment '%s' in constraint validation.", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_119("OAS_CONVERTOR_119", "Generated OpenAPI definition does not contain information " +
+            "regarding interpolations in REGEX", DiagnosticSeverity.WARNING);
 
     private final String code;
     private final String description;

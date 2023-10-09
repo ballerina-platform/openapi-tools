@@ -868,22 +868,35 @@ public class OpenAPIComponentMapper {
                 .ifPresent(fieldValue -> fillConstraintValue(constraintBuilder, fieldName, fieldValue));
     }
 
+    private static final String checkInterpolation = ".*(\\$\\{[^{}]+\\})*+([^\\[]*\\$\\{[^{}]+\\}*).*";
+    private static final String chkSquareBrackets = ".*(\\[[^${]*\\]).*";
     private Optional<String> extractFieldValue(ExpressionNode exprNode) {
         SyntaxKind syntaxKind = exprNode.kind();
         switch (syntaxKind) {
             case NUMERIC_LITERAL:
                 return Optional.of(exprNode.toString().trim());
             case REGEX_TEMPLATE_EXPRESSION:
-                return Optional.of(((TemplateExpressionNode) exprNode)
-                                                    .content().get(0).toString());
+                String regexContent = ((TemplateExpressionNode) exprNode).content().get(0).toString();
+                if (!regexContent.matches(checkInterpolation) || !regexContent.matches(chkSquareBrackets)) {
+                    return Optional.of(regexContent);
+                } else {
+                    DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_119;
+                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                            exprNode.location(), exprNode.toString());
+                    diagnostics.add(error);
+                    return Optional.empty();
+                }
             case MAPPING_CONSTRUCTOR:
                 return ((MappingConstructorExpressionNode) exprNode).fields().stream()
                     .filter(fieldNode -> ((SpecificFieldNode) fieldNode).fieldName().toString().trim().equals("value"))
                     .findFirst()
                     .flatMap(node -> ((SpecificFieldNode) node).valueExpr()
                            .flatMap(this::extractFieldValue));
-            case INTERPOLATION:
             default:
+                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_118;
+                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                        exprNode.location(), exprNode.toString());
+                diagnostics.add(error);
                 return Optional.empty();
         }
     }

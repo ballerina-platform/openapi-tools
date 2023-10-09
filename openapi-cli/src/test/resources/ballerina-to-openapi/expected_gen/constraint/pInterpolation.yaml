@@ -62,3 +62,8 @@ components:
           $ref: '#/components/schemas/PosID'
         code:
           type: string
+        name:
+          $ref: '#/components/schemas/Name'
+    Name:
+      pattern: "^[a-z${2}]+$"
+      type: string

@@ -25,10 +25,16 @@ int j = 20;
 }
 public type PosID string;
 
+@constraint:String {
+    pattern: re `^[a-z${2}]+$`
+}
+public type Name string;
+
 public type Emp record {
     PosID posId;
     @constraint:String { pattern: re `^${j}[A-Z]+$`}
     string code?;
+    Name name?;
 };
 
 service /payloadV on new http:Listener(9090) {
