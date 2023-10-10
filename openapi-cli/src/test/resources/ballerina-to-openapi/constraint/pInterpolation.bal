@@ -26,14 +26,20 @@ int j = 20;
 public type PosID string;
 
 @constraint:String {
+    pattern: re `^[\${2}a-z]+$`
+}
+public type EmpID string;
+
+@constraint:String {
     pattern: re `^[a-z${2}]+$`
 }
 public type Name string;
 
 public type Emp record {
     PosID posId;
-    @constraint:String { pattern: re `^${j}[A-Z]+$`}
+    @constraint:String { pattern: re `^[A-Z]${j}+$`}
     string code?;
+    EmpID empID?;
     Name name?;
 };
 
