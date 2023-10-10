@@ -65,6 +65,9 @@ public enum DiagnosticMessages {
             DiagnosticSeverity.ERROR),
     OAS_CONVERTOR_116("OAS_CONVERTOR_116", "Failed to parser the Number value due to: %s ",
             DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_117("OAS_CONVERTOR_117", "Generated OpenAPI definition does not contain `%s` request" +
+            " body information, as it's not supported by the OpenAPI tool.",
+            DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_118("OAS_CONVERTOR_118", "Generated OpenAPI definition does not contain variable " +
             "assignment '%s' in constraint validation.", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_119("OAS_CONVERTOR_119", "Generated OpenAPI definition does not contain REGEX " +

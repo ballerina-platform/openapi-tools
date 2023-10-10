@@ -7,6 +7,9 @@ public type HobbyItemsString string;
 @constraint:String {minLength: 7}
 public type PersonDetailsItemsString string;
 
+@constraint:String {minLength: 5}
+public type SchoolName string;
+
 @constraint:Float {maxValue: 445.4}
 public type PersonFeeItemsNumber float;
 
@@ -16,8 +19,12 @@ public type PersonLimitItemsInteger int;
 @constraint:Array {maxLength: 5, minLength: 2}
 public type Hobby HobbyItemsString[];
 
+@constraint:Array {length: 15}
+public type School SchoolName[];
+
 public type Person record {
     Hobby hobby?;
+    School school?;
     @constraint:Array {maxLength: 5}
     PersonDetailsItemsString[] Details?;
     int id;
