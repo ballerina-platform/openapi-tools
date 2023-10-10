@@ -868,8 +868,8 @@ public class OpenAPIComponentMapper {
                 .ifPresent(fieldValue -> fillConstraintValue(constraintBuilder, fieldName, fieldValue));
     }
 
-    private static final String CHECK_INTERPOLATION = "^.*(\\$\\{).*$";
-    private static final String CHECK_SQUARE_BRACKETS = "^.*(\\[[^${]*\\]).*$";
+    private static final String CHECK_INTERPOLATION = "^.*?(\\$\\{).*?$";
+    private static final String CHECK_SQUARE_BRACKETS = "^.*?(\\[[^${]*\\]).*?$";
     private Optional<String> extractFieldValue(ExpressionNode exprNode) {
         SyntaxKind syntaxKind = exprNode.kind();
         switch (syntaxKind) {
@@ -880,10 +880,10 @@ public class OpenAPIComponentMapper {
                 if (!regexContent.matches(CHECK_INTERPOLATION) || !regexContent.matches(CHECK_SQUARE_BRACKETS)) {
                     return Optional.of(regexContent);
                 } else {
-                    DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_119;
-                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
-                            exprNode.location(), exprNode.toString());
-                    diagnostics.add(error);
+//                    DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_119;
+//                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+//                            exprNode.location(), exprNode.toString());
+//                    diagnostics.add(error);
                     return Optional.empty();
                 }
             case MAPPING_CONSTRUCTOR:
