@@ -868,8 +868,8 @@ public class OpenAPIComponentMapper {
                 .ifPresent(fieldValue -> fillConstraintValue(constraintBuilder, fieldName, fieldValue));
     }
 
-    private static final String CHECK_INTERPOLATION = "^.*?(\\$\\{).*?$";
-    private static final String CHECK_SQUARE_BRACKETS = "^.*?(\\[[^${]*\\]).*?$";
+    private static final String CHECK_INTERPOLATION = "^.*\\$\\{.*$";
+    private static final String CHECK_SQUARE_BRACKETS = "^[^\\[]*(\\[[^${]+]).*$";
     private Optional<String> extractFieldValue(ExpressionNode exprNode) {
         SyntaxKind syntaxKind = exprNode.kind();
         switch (syntaxKind) {
