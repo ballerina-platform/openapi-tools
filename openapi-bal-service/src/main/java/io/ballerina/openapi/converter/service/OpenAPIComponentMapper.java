@@ -869,7 +869,6 @@ public class OpenAPIComponentMapper {
     }
 
     private static final String CHECK_INTERPOLATION = "^.*\\$\\{.*$";
-    private static final String CHECK_SQUARE_BRACKETS = "^[^\\[]*(\\[[^${]+]).*$";
     private Optional<String> extractFieldValue(ExpressionNode exprNode) {
         SyntaxKind syntaxKind = exprNode.kind();
         switch (syntaxKind) {
@@ -877,7 +876,7 @@ public class OpenAPIComponentMapper {
                 return Optional.of(exprNode.toString().trim());
             case REGEX_TEMPLATE_EXPRESSION:
                 String regexContent = ((TemplateExpressionNode) exprNode).content().get(0).toString();
-                if (!regexContent.matches(CHECK_INTERPOLATION) || !regexContent.matches(CHECK_SQUARE_BRACKETS)) {
+                if (!regexContent.matches(CHECK_INTERPOLATION)) {
                     return Optional.of(regexContent);
                 } else {
                     DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_119;
