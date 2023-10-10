@@ -67,8 +67,6 @@ components:
         name:
           $ref: '#/components/schemas/Name'
     EmpID:
-      pattern: "^[\\${2}a-z]+$"
       type: string
     Name:
-      pattern: "^[a-z${2}]+$"
       type: string
