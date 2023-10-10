@@ -1,0 +1,182 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "0"
+paths:
+  /path:
+    post:
+      operationId: postPath
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ABC'
+      responses:
+        "202":
+          description: Accepted
+  /path1:
+    post:
+      operationId: postPath1
+      responses:
+        "202":
+          description: Accepted
+  /path2:
+    post:
+      operationId: postPath2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ABC'
+          application/xml:
+            schema: {}
+      responses:
+        "202":
+          description: Accepted
+  /path3:
+    post:
+      operationId: postPath3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/ABC'
+                - $ref: '#/components/schemas/Remote'
+          application/xml:
+            schema: {}
+      responses:
+        "202":
+          description: Accepted
+  /path4:
+    post:
+      operationId: postPath4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ABC'
+          text/plain:
+            schema:
+              type: string
+          application/xml:
+            schema: {}
+      responses:
+        "202":
+          description: Accepted
+  /path5:
+    post:
+      operationId: postPath5
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/ABC'
+                - type: integer
+                  format: int64
+      responses:
+        "202":
+          description: Accepted
+  /path6:
+    post:
+      operationId: postPath6
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: integer
+              format: int64
+          text/plain:
+            schema:
+              type: string
+      responses:
+        "202":
+          description: Accepted
+  /path7:
+    post:
+      operationId: postPath7
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  additionalProperties: {}
+                - type: array
+                  items:
+                    type: integer
+                    format: int64
+      responses:
+        "202":
+          description: Accepted
+  /path8:
+    post:
+      operationId: postPath8
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: integer
+                format: int64
+          text/plain:
+            schema:
+              type: string
+      responses:
+        "202":
+          description: Accepted
+  /path9:
+    post:
+      operationId: postPath9
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  additionalProperties:
+                    type: integer
+                    format: int64
+                - type: object
+                  additionalProperties:
+                    type: string
+      responses:
+        "202":
+          description: Accepted
+components:
+  schemas:
+    ABC:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+    Remote:
+      required:
+        - host
+        - ip
+        - port
+      type: object
+      properties:
+        host:
+          type: string
+        port:
+          type: integer
+          format: int64
+        ip:
+          type: string
+      description: Presents a read-only view of the remote address.

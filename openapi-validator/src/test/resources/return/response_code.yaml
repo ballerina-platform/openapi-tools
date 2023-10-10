@@ -94,6 +94,8 @@ paths:
           description: BadGateway
         "503":
           description: ServiceUnavailable
+        "504":
+          description: GatewayTimeout
         "505":
           description: HttpVersionNotSupported
 components: {}

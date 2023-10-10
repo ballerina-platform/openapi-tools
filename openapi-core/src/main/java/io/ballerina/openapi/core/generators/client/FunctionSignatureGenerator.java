@@ -33,6 +33,7 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
@@ -376,8 +377,12 @@ public class FunctionSignatureGenerator {
         if (parameterSchema.get$ref() != null) {
             type = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
             Schema schema = openAPI.getComponents().getSchemas().get(type.trim());
-            if (isObjectSchema(schema) || (isComposedSchema(schema) && schema.getAllOf() != null)) {
-                throw new BallerinaOpenApiException("Ballerina does not support object type path parameters.");
+            TypeDefinitionNode typeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
+                    (schema, type, new ArrayList<>());
+            if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
+                throw new BallerinaOpenApiException(String.format(
+                        "Path parameter: '%s' is invalid. Ballerina does not support object type path parameters.",
+                        parameter.getName()));
             }
         } else {
             type = convertOpenAPITypeToBallerina(parameter.getSchema());

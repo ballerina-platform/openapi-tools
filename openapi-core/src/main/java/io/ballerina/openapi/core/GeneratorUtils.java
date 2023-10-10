@@ -292,7 +292,7 @@ public class GeneratorUtils {
                 // TypeDescriptor
                 BuiltinSimpleNameReferenceNode builtSNRNode = createBuiltinSimpleNameReferenceNode(
                         null,
-                        parameter.getSchema() == null ?
+                        parameter.getSchema() == null || hasSpecialCharacter ?
                                 createIdentifierToken(STRING) :
                                 createIdentifierToken(paramType));
                 IdentifierToken paramName = createIdentifierToken(

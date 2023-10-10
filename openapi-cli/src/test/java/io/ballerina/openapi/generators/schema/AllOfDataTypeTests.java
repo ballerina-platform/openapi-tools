@@ -114,6 +114,16 @@ public class AllOfDataTypeTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/nested_all_of.bal", syntaxTree);
     }
 
+    @Test(description = "Generate type definition from allOf schema with valid single item")
+    public void generateAllOfwithValidSingleItem() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/single_item_allOf.yaml");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/single_item_allOf.bal", syntaxTree);
+    }
+
     @Test(description = "Tests record generation for nested OneOf schema inside AllOf schema",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp =
