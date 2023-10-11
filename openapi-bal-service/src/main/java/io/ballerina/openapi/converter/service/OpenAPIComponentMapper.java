@@ -886,7 +886,7 @@ public class OpenAPIComponentMapper {
                 } else {
                     DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_119;
                     IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
-                            exprNode.location(), exprNode.toString());
+                            exprNode.location(), regexContent);
                     diagnostics.add(error);
                     return Optional.empty();
                 }

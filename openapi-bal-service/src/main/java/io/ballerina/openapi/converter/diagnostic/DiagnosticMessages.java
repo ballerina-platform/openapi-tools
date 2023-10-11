@@ -70,8 +70,8 @@ public enum DiagnosticMessages {
             DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_118("OAS_CONVERTOR_118", "Generated OpenAPI definition does not contain variable " +
             "assignment '%s' in constraint validation.", DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_119("OAS_CONVERTOR_119", "Generated OpenAPI definition does not contain REGEX " +
-            "pattern(s) with interpolation.", DiagnosticSeverity.WARNING);
+    OAS_CONVERTOR_119("OAS_CONVERTOR_119", "Given REGEX pattern '%s' is not supported by the OpenAPI " +
+            "tool, it may also not support interpolation within the REGEX pattern.", DiagnosticSeverity.WARNING);
 
     private final String code;
     private final String description;
