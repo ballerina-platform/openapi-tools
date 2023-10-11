@@ -30,6 +30,12 @@ components:
     PersonDetailsItemsString:
       minLength: 7
       type: string
+    School:
+      maxItems: 15
+      minItems: 15
+      type: array
+      items:
+        $ref: '#/components/schemas/SchoolName'
     ErrorPayload:
       type: object
       properties:
@@ -69,6 +75,9 @@ components:
     HobbyItemsString:
       maxLength: 23
       type: string
+    SchoolName:
+      minLength: 5
+      type: string
     Person:
       required:
         - id
@@ -76,6 +85,8 @@ components:
       properties:
         hobby:
           $ref: '#/components/schemas/Hobby'
+        school:
+          $ref: '#/components/schemas/School'
         Details:
           maxItems: 5
           type: array

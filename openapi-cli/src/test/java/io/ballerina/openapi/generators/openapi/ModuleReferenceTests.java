@@ -73,6 +73,7 @@ public class ModuleReferenceTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "readonly.yaml");
     }
 
+    //To-Do: This test is disabled due to an Ubuntu build failure.
     @Test (enabled = false)
     public void testListenersInSeparateModule() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("listeners_in_separate_module.bal");
@@ -82,6 +83,7 @@ public class ModuleReferenceTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, yamlFile);
     }
 
+    //To-Do: This test is disabled due to an Ubuntu build failure.
     @Test (enabled = false)
     public void testListenersInSeparateFiles() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("listeners_in_separate_file.bal");
