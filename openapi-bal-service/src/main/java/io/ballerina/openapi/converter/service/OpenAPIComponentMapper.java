@@ -81,6 +81,7 @@ import static io.ballerina.openapi.converter.Constants.DOUBLE;
 import static io.ballerina.openapi.converter.Constants.FLOAT;
 import static io.ballerina.openapi.converter.Constants.HTTP;
 import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
+import static io.ballerina.openapi.converter.Constants.CHECK_INTERPOLATION;
 
 /**
  * This util class for processing the mapping in between ballerina record and openAPI object schema.
@@ -868,7 +869,6 @@ public class OpenAPIComponentMapper {
                 .ifPresent(fieldValue -> fillConstraintValue(constraintBuilder, fieldName, fieldValue));
     }
 
-    private static final String CHECK_INTERPOLATION = "^(?!.*\\$\\{).+$";
     private Optional<String> extractFieldValue(ExpressionNode exprNode) {
         SyntaxKind syntaxKind = exprNode.kind();
         switch (syntaxKind) {

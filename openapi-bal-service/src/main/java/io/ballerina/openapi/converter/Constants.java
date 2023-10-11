@@ -82,6 +82,7 @@ public class Constants {
     public static final String WILD_CARD_SUMMARY = "Any type of entity body";
     public static final String MEDIA_TYPE = "mediaType";
     public static final String TUPLE = "tuple";
+    public static final String CHECK_INTERPOLATION = "^(?!.*\\$\\{).+$";
 
     /**
      * Enum to select the Ballerina Type.
