@@ -58,6 +58,8 @@ paths:
             text/plain:
               schema:
                 type: string
+        "202":
+          description: Accepted
         "500":
           description: Internal server error
           content:
