@@ -821,7 +821,7 @@ public class OpenAPIComponentMapper {
                 setStringConstraintValuesToSchema(constraintAnnot, stringSchema);
             } else if (properties instanceof IntegerSchema integerSchema) {
                 setIntegerConstraintValuesToSchema(constraintAnnot, integerSchema);
-            } else if (properties instanceof NumberSchema numberSchema){
+            } else if (properties instanceof NumberSchema numberSchema) {
                 setNumberConstraintValuesToSchema(constraintAnnot, numberSchema);
             }
         } catch (ParseException parseException) {
