@@ -725,7 +725,7 @@ public class OpenAPIComponentMapper {
     /**
      * This util is used to set the integer constraint values for relevant schema field.
      */
-    private void setIntegerConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+    private void setIntegerConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, IntegerSchema properties) {
         BigDecimal minimum = null;
         BigDecimal maximum = null;
         if (constraintAnnot.getMinValue().isPresent()) {
@@ -748,7 +748,7 @@ public class OpenAPIComponentMapper {
     /**
      * This util is used to set the number (float, double) constraint values for relevant schema field.
      */
-    private void setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties)
+    private void setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, NumberSchema properties)
                                                         throws ParseException {
         BigDecimal minimum = null;
         BigDecimal maximum = null;
@@ -796,7 +796,7 @@ public class OpenAPIComponentMapper {
     /**
      * This util is used to set the array constraint values for relevant schema field.
      */
-    private void setArrayConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+    private void setArrayConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, ArraySchema properties) {
         if (constraintAnnot.getLength().isPresent()) {
             properties.setMinItems(Integer.valueOf(constraintAnnot.getLength().get()));
             properties.setMaxItems(Integer.valueOf(constraintAnnot.getLength().get()));
@@ -813,19 +813,19 @@ public class OpenAPIComponentMapper {
      */
     private void setConstraintValueToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
         try {
-            if (properties instanceof ArraySchema) {
-                setArrayConstraintValuesToSchema(constraintAnnot, properties);
+            //Ballerina currently supports only Int, Number (Float, Decimal), String & Array constraints,
+            //with plans to extend constraint support in the future.
+            if (properties instanceof ArraySchema arraySchema) {
+                setArrayConstraintValuesToSchema(constraintAnnot, arraySchema);
             } else if (properties instanceof StringSchema stringSchema) {
                 setStringConstraintValuesToSchema(constraintAnnot, stringSchema);
-            } else if (properties instanceof IntegerSchema) {
-                setIntegerConstraintValuesToSchema(constraintAnnot, properties);
-            } else {
-                //Ballerina currently supports only Int, Number (Float, Decimal), String & Array constraints,
-                //with plans to extend constraint support in the future.
-                setNumberConstraintValuesToSchema(constraintAnnot, properties);
+            } else if (properties instanceof IntegerSchema integerSchema) {
+                setIntegerConstraintValuesToSchema(constraintAnnot, integerSchema);
+            } else if (properties instanceof NumberSchema numberSchema){
+                setNumberConstraintValuesToSchema(constraintAnnot, numberSchema);
             }
         } catch (ParseException parseException) {
-            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
+            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_114;
             ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
                     error.getDescription(), null, parseException.getMessage());
             diagnostics.add(diagnostic);
