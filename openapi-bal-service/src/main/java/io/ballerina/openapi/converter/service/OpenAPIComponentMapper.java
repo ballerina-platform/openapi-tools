@@ -77,7 +77,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.openapi.converter.Constants.*;
+import static io.ballerina.openapi.converter.Constants.DOUBLE;
+import static io.ballerina.openapi.converter.Constants.FLOAT;
+import static io.ballerina.openapi.converter.Constants.HTTP;
+import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
+import static io.ballerina.openapi.converter.Constants.REGEX_INTERPOLATION_PATTERN;
 
 /**
  * This util class for processing the mapping in between ballerina record and openAPI object schema.
