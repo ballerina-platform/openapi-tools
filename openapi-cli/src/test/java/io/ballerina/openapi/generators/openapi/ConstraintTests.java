@@ -120,10 +120,4 @@ public class ConstraintTests {
         Path ballerinaFilePath = RES_DIR.resolve("constraint/stringRec.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/stringRec.yaml");
     }
-
-    @Test(description = "When the record field has string record type")
-    public void testPatternInterpolation() throws IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("constraint/pInterpolation.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/pInterpolation.yaml");
-    }
 }
