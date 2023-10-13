@@ -77,11 +77,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.openapi.converter.Constants.DOUBLE;
-import static io.ballerina.openapi.converter.Constants.FLOAT;
-import static io.ballerina.openapi.converter.Constants.HTTP;
-import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
-import static io.ballerina.openapi.converter.Constants.CHECK_INTERPOLATION;
+import static io.ballerina.openapi.converter.Constants.*;
 
 /**
  * This util class for processing the mapping in between ballerina record and openAPI object schema.
@@ -881,7 +877,7 @@ public class OpenAPIComponentMapper {
                 return Optional.of(exprNode.toString().trim());
             case REGEX_TEMPLATE_EXPRESSION:
                 String regexContent = ((TemplateExpressionNode) exprNode).content().get(0).toString();
-                if (regexContent.matches(CHECK_INTERPOLATION)) {
+                if (regexContent.matches(REGEX_INTERPOLATION_PATTERN)) {
                     return Optional.of(regexContent);
                 } else {
                     DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_119;
