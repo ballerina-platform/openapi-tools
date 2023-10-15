@@ -12,7 +12,7 @@ servers:
 paths:
   /path_get_error:
     get:
-      summary: for `get` method with nil return type and no error status code
+      summary: for `get` method with nil return type and error
       operationId: getPathGetError
       responses:
         "202":
@@ -25,7 +25,7 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
   /path_get:
     get:
-      summary: for `get` method with nil return type and no error status code
+      summary: for `get` method with nil return type and success status code
       operationId: getPathGet
       responses:
         "202":
@@ -38,7 +38,8 @@ paths:
                 type: string
   /path_get_query_param:
     get:
-      summary: for `get` method with nil return type and no error status code
+      summary: for `get` method with nil return type and success status code with
+        query param
       operationId: getPathGetQueryParam
       parameters:
         - name: id
@@ -59,7 +60,7 @@ paths:
                 type: string
   /path_post:
     post:
-      summary: for `post` method with 201 payload with optional error status code
+      summary: for `post` method with 201 payload with error status code and nil type
       operationId: postPathPost
       responses:
         "201":
@@ -74,7 +75,7 @@ paths:
           description: NotFound
   /path:
     get:
-      summary: for union return type with error status code
+      summary: for union return type with error status code and nil type
       operationId: getPath
       responses:
         "200":
@@ -88,8 +89,8 @@ paths:
         "404":
           description: NotFound
     post:
-      summary: "with same error status code (202): by default for ? and explicitly\
-        \ mentioned as return type"
+      summary: "resource has 3 status codes that explicitly returns (202, 404, 400)\
+        \ while ? type returns implicitly 400, 202"
       operationId: postPath
       parameters:
         - name: id
@@ -110,6 +111,8 @@ paths:
                 type: string
   /path_with_query:
     get:
+      summary: "resource has 4 status codes that explicitly returns (200, 404) while\
+        \ ? type returns implicitly 400, 202"
       operationId: getPathWithQuery
       parameters:
         - name: id
@@ -132,6 +135,8 @@ paths:
           description: NotFound
   /path_with_path/{id}:
     post:
+      summary: "resource has 3 status codes that explicitly returns (404) while ?\
+        \ type returns implicitly 400, 202"
       operationId: postPathWithPathId
       parameters:
         - name: id
@@ -148,6 +153,8 @@ paths:
           description: NotFound
   /path_with_headers:
     post:
+      summary: "method has 3 status codes that explicitly returns (404) while ? type\
+        \ returns implicitly 400, 202"
       operationId: postPathWithHeaders
       parameters:
         - name: header

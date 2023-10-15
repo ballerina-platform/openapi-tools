@@ -93,7 +93,9 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUALIFIED_NAME_REFERE
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_FIELD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SIMPLE_NAME_REFERENCE;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_REFERENCE;
+import static io.ballerina.openapi.converter.Constants.ACCEPTED;
 import static io.ballerina.openapi.converter.Constants.APPLICATION_PREFIX;
+import static io.ballerina.openapi.converter.Constants.BAD_REQUEST;
 import static io.ballerina.openapi.converter.Constants.BODY;
 import static io.ballerina.openapi.converter.Constants.BYTE;
 import static io.ballerina.openapi.converter.Constants.BYTE_ARRAY;
@@ -106,7 +108,9 @@ import static io.ballerina.openapi.converter.Constants.HTTP_200;
 import static io.ballerina.openapi.converter.Constants.HTTP_200_DESCRIPTION;
 import static io.ballerina.openapi.converter.Constants.HTTP_201;
 import static io.ballerina.openapi.converter.Constants.HTTP_201_DESCRIPTION;
+import static io.ballerina.openapi.converter.Constants.HTTP_202;
 import static io.ballerina.openapi.converter.Constants.HTTP_204;
+import static io.ballerina.openapi.converter.Constants.HTTP_400;
 import static io.ballerina.openapi.converter.Constants.HTTP_500;
 import static io.ballerina.openapi.converter.Constants.HTTP_500_DESCRIPTION;
 import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
@@ -198,12 +202,12 @@ public class OpenAPIResponseMapper {
         } else {
             // When the return type is not mention in the resource function.
             ApiResponse apiResponse = new ApiResponse();
-            apiResponse.description("Accepted");
-            apiResponses.put("202", apiResponse);
+            apiResponse.description(ACCEPTED);
+            apiResponses.put(HTTP_202, apiResponse);
             if (operation.getRequestBody() != null || operation.getParameters() != null) {
                 ApiResponse badRequestResponse = new ApiResponse();
-                badRequestResponse.description("BadRequest");
-                apiResponses.put("400", badRequestResponse);
+                badRequestResponse.description(BAD_REQUEST);
+                apiResponses.put(HTTP_400, badRequestResponse);
             }
         }
         operation.setResponses(apiResponses);
@@ -441,13 +445,13 @@ public class OpenAPIResponseMapper {
         String description = httpMethod.equals(POST) ? HTTP_201_DESCRIPTION : HTTP_200_DESCRIPTION;
         if (typeNode.parent().kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
             ApiResponse acceptedRequestResponse = new ApiResponse();
-            acceptedRequestResponse.description("Accepted");
-            apiResponses.put("202", acceptedRequestResponse);
+            acceptedRequestResponse.description(ACCEPTED);
+            apiResponses.put(HTTP_202, acceptedRequestResponse);
             Operation operation = operationAdaptor.getOperation();
             if (operation.getRequestBody() != null || operation.getParameters() != null) {
                 ApiResponse badRequestResponse = new ApiResponse();
-                badRequestResponse.description("BadRequest");
-                apiResponses.put("400", badRequestResponse);
+                badRequestResponse.description(BAD_REQUEST);
+                apiResponses.put(HTTP_400, badRequestResponse);
             }
         }
         String mediaTypeString;
