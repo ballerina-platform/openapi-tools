@@ -42,7 +42,7 @@ public class NegativeConstraintTests {
         List<OpenAPIConverterDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
                                     ballerinaFilePath, "constraint/negative_patternInterpolation.yaml");
         List<String> expectedPatterns = Arrays.asList("^${i}[a-zA-Z]+$", "^[A-Z]${j}+$", "^[\\${2}a-z]+$"
-                                                     ,"^[a-z${2}]+$");
+                                                     , "^[a-z${2}]+$");
         for (int i = 0; i < errors.size(); i++) {
             Assert.assertEquals(errors.get(i).getMessage(), "Given REGEX pattern '" + expectedPatterns.get(i) +
                     "' is not supported by the OpenAPI tool, it may also not support interpolation within the " +
