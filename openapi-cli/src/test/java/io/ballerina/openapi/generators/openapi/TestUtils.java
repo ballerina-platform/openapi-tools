@@ -18,6 +18,7 @@
 package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.openapi.cmd.OASContractGenerator;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import org.testng.Assert;
 
 import java.io.File;
@@ -26,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -52,11 +54,17 @@ public class TestUtils {
     }
 
     public static void compareWithGeneratedFile(Path ballerinaFilePath, String yamlFile) throws IOException {
+        compareWithGeneratedFile(new OASContractGenerator(), ballerinaFilePath, yamlFile);
+    }
+
+    public static List<OpenAPIConverterDiagnostic> compareWithGeneratedFile(OASContractGenerator openApiConverter,
+                                                                            Path ballerinaFilePath, String yamlFile)
+                                                                            throws IOException {
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), yamlFile);
-            OASContractGenerator openApiConverter = new OASContractGenerator();
-            openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
+            openApiConverter.generateOAS3DefinitionsAllService(
+                    ballerinaFilePath, tempDir, null, false);
             if (Files.exists(tempDir.resolve("payloadV_openapi.yaml"))) {
                 String generatedYaml = getStringFromGivenBalFile(tempDir, "payloadV_openapi.yaml");
                 generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
@@ -65,8 +73,10 @@ public class TestUtils {
             } else {
                 Assert.fail("Yaml was not generated");
             }
+            return openApiConverter.getErrors();
         } catch (IOException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
+            return List.of();
         } finally {
             deleteGeneratedFiles("payloadV_openapi.yaml", tempDir);
             deleteDirectory(tempDir);
