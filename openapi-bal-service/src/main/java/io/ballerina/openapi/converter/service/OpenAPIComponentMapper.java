@@ -868,7 +868,6 @@ public class OpenAPIComponentMapper {
      */
     private void processConstraintAnnotation(SpecificFieldNode specificFieldNode, String fieldName,
                                              ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
-
         specificFieldNode.valueExpr()
                 .flatMap(this::extractFieldValue)
                 .ifPresent(fieldValue -> fillConstraintValue(constraintBuilder, fieldName, fieldValue));

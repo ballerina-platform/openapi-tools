@@ -38,9 +38,9 @@ public class NegativeConstraintTests {
 
     @Test(description = "When the string constraint has incompatible REGEX patterns with OAS")
     public void testInvalidRegexPatterns() throws IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("constraint/negative_patternInterpolation.bal");
+        Path ballerinaFilePath = RES_DIR.resolve("constraint-negative/negative_patternInterpolation.bal");
         List<OpenAPIConverterDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
-                                    ballerinaFilePath, "constraint/negative_patternInterpolation.yaml");
+                                    ballerinaFilePath, "constraint-negative/negative_patternInterpolation.yaml");
         List<String> expectedPatterns = Arrays.asList("^${i}[a-zA-Z]+$", "^[A-Z]${j}+$", "^[\\${2}a-z]+$"
                                                      , "^[a-z${2}]+$");
         for (int i = 0; i < errors.size(); i++) {
