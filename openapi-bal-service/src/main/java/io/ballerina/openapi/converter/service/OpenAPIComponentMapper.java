@@ -858,8 +858,25 @@ public class OpenAPIComponentMapper {
      */
     private boolean isConstraintAnnotation(AnnotationNode annotation) {
         if (annotation.annotReference() instanceof QualifiedNameReferenceNode qualifiedNameRef) {
-            return qualifiedNameRef.modulePrefix().text().equals("constraint");
+            return qualifiedNameRef.modulePrefix().text().equals("constraint") && isNotConstraintDate(qualifiedNameRef);
         }
+        return false;
+    }
+
+    /*
+     * This util is used to check whether an annotation is a constraint:Date annotation.
+     * Currently, we don't have support for mapping Date constraints to OAS hence we skip them.
+     * TODO: <a href="https://github.com/ballerina-platform/ballerina-standard-library/issues/5049">...</a>
+     * Once the above improvement is completed this method should be removed!
+     */
+    private boolean isNotConstraintDate(QualifiedNameReferenceNode qualifiedNameRef) {
+        if (!qualifiedNameRef.toString().trim().equals("constraint:Date")) {
+            return true;
+        }
+        DiagnosticMessages errorMsg = DiagnosticMessages.OAS_CONVERTOR_120;
+        IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMsg,
+                qualifiedNameRef.location(), qualifiedNameRef.toString());
+        diagnostics.add(error);
         return false;
     }
 

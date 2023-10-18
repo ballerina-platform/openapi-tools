@@ -1,0 +1,116 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /pet:
+    post:
+      operationId: postPet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegDate'
+      responses:
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    ErrorPayload:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Reason phrase
+        path:
+          type: string
+          description: Request path
+        method:
+          type: string
+          description: Method type of the request
+        message:
+          type: string
+          description: Error message
+        timestamp:
+          type: string
+          description: Timestamp of the error
+        status:
+          type: integer
+          description: Relevant HTTP status code
+          format: int32
+    MyDate:
+      $ref: '#/components/schemas/Date'
+    RegDate:
+      required:
+        - date
+      type: object
+      properties:
+        date:
+          $ref: '#/components/schemas/MyDate'
+        lastLogin:
+          $ref: '#/components/schemas/Date'
+    Seconds:
+      type: number
+      description: Holds the seconds as a decimal value.
+      format: double
+    OptionalTimeOfDayFields:
+      type: object
+      properties:
+        hour:
+          type: integer
+          format: int64
+        minute:
+          type: integer
+          format: int64
+        second:
+          $ref: '#/components/schemas/Seconds'
+    Date:
+      allOf:
+        - $ref: '#/components/schemas/DateFields'
+        - $ref: '#/components/schemas/OptionalTimeOfDayFields'
+        - type: object
+          properties:
+            utcOffset:
+              $ref: '#/components/schemas/ZoneOffset'
+    DateFields:
+      required:
+        - day
+        - month
+        - year
+      type: object
+      properties:
+        year:
+          type: integer
+          format: int64
+        month:
+          type: integer
+          format: int64
+        day:
+          type: integer
+          format: int64
+    ZoneOffset:
+      required:
+        - hours
+        - minutes
+      type: object
+      properties:
+        hours:
+          type: integer
+          format: int64
+        minutes:
+          type: integer
+          format: int64
+        seconds:
+          type: number
+          format: double

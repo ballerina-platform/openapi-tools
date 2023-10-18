@@ -19,6 +19,11 @@ package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.openapi.cmd.OASContractGenerator;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
+import io.ballerina.projects.DiagnosticResult;
+import io.ballerina.projects.Package;
+import io.ballerina.projects.Project;
+import io.ballerina.projects.ProjectException;
+import io.ballerina.projects.directory.ProjectLoader;
 import org.testng.Assert;
 
 import java.io.File;
@@ -82,6 +87,23 @@ public class TestUtils {
             deleteDirectory(tempDir);
             System.gc();
         }
+    }
+
+    public static Project getProject(Path servicePath) {
+        Project project = null;
+        // Load project instance for single ballerina file
+        try {
+            project = ProjectLoader.loadProject(servicePath);
+        } catch (ProjectException e) {
+            //ignore
+        }
+        return project;
+    }
+
+    public static DiagnosticResult getCompilation(Project project) {
+        Package cPackage = project.currentPackage();
+        return  cPackage.getCompilation().diagnosticResult();
+
     }
 
     public static void deleteDirectory(Path path) {
