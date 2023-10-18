@@ -832,7 +832,6 @@ public class OpenAPIComponentMapper {
         }
     }
 
-
     /**
      * This util is used to extract the annotation values in `@constraint` and store it in builder.
      */
