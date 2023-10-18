@@ -877,10 +877,7 @@ public class OpenAPIComponentMapper {
      * Once the above improvement is completed this method should be removed!
      */
     private boolean isDateConstraint(AnnotationNode annotation) {
-        if (annotation.annotReference().toString().trim().equals(CHECK_DATE_CONSTRAINT)) {
-            return true;
-        }
-        return false;
+        return annotation.annotReference().toString().trim().equals(CHECK_DATE_CONSTRAINT);
     }
 
     /**
