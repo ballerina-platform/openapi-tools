@@ -44,6 +44,38 @@ paths:
             text/plain:
               schema:
                 type: string
+  /reservations:
+    post:
+      summary: Represents Snowpeak reservations resource
+      operationId: postReservations
+      requestBody:
+        description: Array representation of Reservations
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Reservation'
+      responses:
+        "201":
+          description: Created
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                default: "must-revalidate,public,max-age=3600"
+            ETag:
+              schema:
+                type: string
+            Last-Modified:
+              schema:
+                type: string
+        "409":
+          description: Conflict
+          content:
+            text/plain:
+              schema:
+                type: string
   /payment/{id}:
     post:
       summary: Represents Snowpeak payment resource
