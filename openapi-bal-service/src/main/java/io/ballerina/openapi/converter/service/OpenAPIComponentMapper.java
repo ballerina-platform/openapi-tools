@@ -840,6 +840,7 @@ public class OpenAPIComponentMapper {
         NodeList<AnnotationNode> annotations = metadata.annotations();
         annotations.stream()
                 .filter(this::isConstraintAnnotation)
+                .filter(this::isNotConstraintDate)
                 .filter(annotation -> annotation.annotValue().isPresent())
                 .forEach(annotation -> {
                     MappingConstructorExpressionNode annotationValue = annotation.annotValue().get();
@@ -857,7 +858,7 @@ public class OpenAPIComponentMapper {
      */
     private boolean isConstraintAnnotation(AnnotationNode annotation) {
         if (annotation.annotReference() instanceof QualifiedNameReferenceNode qualifiedNameRef) {
-            return qualifiedNameRef.modulePrefix().text().equals("constraint") && isNotConstraintDate(qualifiedNameRef);
+            return qualifiedNameRef.modulePrefix().text().equals("constraint");
         }
         return false;
     }
@@ -868,13 +869,13 @@ public class OpenAPIComponentMapper {
      * {@link <a href="https://github.com/ballerina-platform/ballerina-standard-library/issues/5049">...</a>}
      * Once the above improvement is completed this method should be removed!
      */
-    private boolean isNotConstraintDate(QualifiedNameReferenceNode qualifiedNameRef) {
-        if (!qualifiedNameRef.toString().trim().equals("constraint:Date")) {
+    private boolean isNotConstraintDate(AnnotationNode annotation) {
+        if (!annotation.annotReference().toString().trim().equals("constraint:Date")) {
             return true;
         }
         DiagnosticMessages errorMsg = DiagnosticMessages.OAS_CONVERTOR_120;
         IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMsg,
-                qualifiedNameRef.location(), qualifiedNameRef.toString());
+                annotation.location(), annotation.toString());
         diagnostics.add(error);
         return false;
     }
