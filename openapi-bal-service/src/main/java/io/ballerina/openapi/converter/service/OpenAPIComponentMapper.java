@@ -82,6 +82,7 @@ import static io.ballerina.openapi.converter.Constants.FLOAT;
 import static io.ballerina.openapi.converter.Constants.HTTP;
 import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
 import static io.ballerina.openapi.converter.Constants.REGEX_INTERPOLATION_PATTERN;
+import static io.ballerina.openapi.converter.Constants.CHECK_DATE_CONSTRAINT;
 
 /**
  * This util class for processing the mapping in between ballerina record and openAPI object schema.
@@ -840,9 +841,15 @@ public class OpenAPIComponentMapper {
         NodeList<AnnotationNode> annotations = metadata.annotations();
         annotations.stream()
                 .filter(this::isConstraintAnnotation)
-                .filter(this::isNotConstraintDate)
                 .filter(annotation -> annotation.annotValue().isPresent())
                 .forEach(annotation -> {
+                    if (isDateConstraint(annotation)) {
+                        DiagnosticMessages errorMsg = DiagnosticMessages.OAS_CONVERTOR_120;
+                        IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMsg,
+                                annotation.location(), annotation.toString());
+                        diagnostics.add(error);
+                        return;
+                    }
                     MappingConstructorExpressionNode annotationValue = annotation.annotValue().get();
                     annotationValue.fields().stream()
                             .filter(field -> SyntaxKind.SPECIFIC_FIELD.equals(field.kind()))
@@ -869,14 +876,10 @@ public class OpenAPIComponentMapper {
      * {@link <a href="https://github.com/ballerina-platform/ballerina-standard-library/issues/5049">...</a>}
      * Once the above improvement is completed this method should be removed!
      */
-    private boolean isNotConstraintDate(AnnotationNode annotation) {
-        if (!annotation.annotReference().toString().trim().equals("constraint:Date")) {
+    private boolean isDateConstraint(AnnotationNode annotation) {
+        if (annotation.annotReference().toString().trim().equals(CHECK_DATE_CONSTRAINT)) {
             return true;
         }
-        DiagnosticMessages errorMsg = DiagnosticMessages.OAS_CONVERTOR_120;
-        IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMsg,
-                annotation.location(), annotation.toString());
-        diagnostics.add(error);
         return false;
     }
 
