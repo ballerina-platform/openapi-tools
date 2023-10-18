@@ -103,7 +103,6 @@ public class TestUtils {
     public static DiagnosticResult getCompilation(Project project) {
         Package cPackage = project.currentPackage();
         return  cPackage.getCompilation().diagnosticResult();
-
     }
 
     public static void deleteDirectory(Path path) {
