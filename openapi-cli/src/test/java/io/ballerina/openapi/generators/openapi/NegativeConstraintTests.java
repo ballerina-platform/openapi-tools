@@ -21,6 +21,8 @@ import io.ballerina.openapi.cmd.OASContractGenerator;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Project;
+import io.ballerina.projects.ProjectException;
+import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -32,7 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static io.ballerina.openapi.generators.openapi.TestUtils.getCompilation;
-import static io.ballerina.openapi.generators.openapi.TestUtils.getProject;
 
 /**
  * This test class for the covering the negative tests for constraint
@@ -91,9 +92,9 @@ public class NegativeConstraintTests {
      * TODO: <a href="https://github.com/ballerina-platform/ballerina-standard-library/issues/5048">...</a>
      */
     @Test(description = "When String constraint has compilation errors (REGEX pattern with invalid format)")
-    public void testInvalidRegexPattern() {
+    public void testInvalidRegexPattern() throws ProjectException {
         Path ballerinaFilePath = RES_DIR.resolve("constraint-negative/invalidRegexPattern.bal");
-        Project project = getProject(ballerinaFilePath);
+        Project project = ProjectLoader.loadProject(ballerinaFilePath);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = diagnostic.diagnostics().stream().filter(d ->
                 DiagnosticSeverity.ERROR == d.diagnosticInfo().severity()).toArray();
@@ -105,9 +106,9 @@ public class NegativeConstraintTests {
     }
 
     @Test(description = "When Integer constraint has float value which is invalid")
-    public void testInvalidInteger() {
+    public void testInvalidInteger() throws ProjectException {
         Path ballerinaFilePath = RES_DIR.resolve("constraint-negative/invalidInteger.bal");
-        Project project = getProject(ballerinaFilePath);
+        Project project = ProjectLoader.loadProject(ballerinaFilePath);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = diagnostic.diagnostics().stream().filter(d ->
                 DiagnosticSeverity.ERROR == d.diagnosticInfo().severity()).toArray();
