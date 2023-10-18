@@ -866,7 +866,7 @@ public class OpenAPIComponentMapper {
     /*
      * This util is used to check whether an annotation is a constraint:Date annotation.
      * Currently, we don't have support for mapping Date constraints to OAS hence we skip them.
-     * TODO: <a href="https://github.com/ballerina-platform/ballerina-standard-library/issues/5049">...</a>
+     * {@link <a href="https://github.com/ballerina-platform/ballerina-standard-library/issues/5049">...</a>}
      * Once the above improvement is completed this method should be removed!
      */
     private boolean isNotConstraintDate(QualifiedNameReferenceNode qualifiedNameRef) {
