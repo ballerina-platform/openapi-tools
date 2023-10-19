@@ -82,7 +82,7 @@ import static io.ballerina.openapi.converter.Constants.FLOAT;
 import static io.ballerina.openapi.converter.Constants.HTTP;
 import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
 import static io.ballerina.openapi.converter.Constants.REGEX_INTERPOLATION_PATTERN;
-import static io.ballerina.openapi.converter.Constants.CHECK_DATE_CONSTRAINT;
+import static io.ballerina.openapi.converter.Constants.DATE_CONSTRAINT_ANNOTATION;
 
 /**
  * This util class for processing the mapping in between ballerina record and openAPI object schema.
@@ -877,7 +877,7 @@ public class OpenAPIComponentMapper {
      * Once the above improvement is completed this method should be removed!
      */
     private boolean isDateConstraint(AnnotationNode annotation) {
-        return annotation.annotReference().toString().trim().equals(CHECK_DATE_CONSTRAINT);
+        return annotation.annotReference().toString().trim().equals(DATE_CONSTRAINT_ANNOTATION);
     }
 
     /**
