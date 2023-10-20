@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.ballerina.openapi.bal.tool.client;
+package io.ballerina.openapi.bal.tool;
 
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
@@ -25,6 +25,11 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
  * @since 1.9.0
  */
 public class Constants {
+    public static final String OAS_PATH_SEPARATOR = "/";
+    public static final String TEST_DIR = "tests";
+    public static final String TEST_FILE_NAME = "test.bal";
+    public static final String CONFIG_FILE_NAME = "Config.toml";
+
     public static final String OPENAPI_CLIENT_REFERENCE = "openapi:ClientConfig";
     public static final String TAGS = "tags";
     public static final String OPERATIONS = "operations";

@@ -16,13 +16,13 @@
  * under the License.
  */
 
-module io.ballerina.openapi.idl.client {
+module io.ballerina.openapi.bal.tool {
     requires io.ballerina.lang;
     requires io.ballerina.parser;
-    requires io.ballerina.stdlib.http;
     requires io.ballerina.tools.api;
     requires io.ballerina.formatter.core;
-    requires io.ballerina.openapi.converter;
+    requires io.ballerina.cli;
+//    requires io.ballerina.toml.semantic.ast;
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
     requires java.ws.rs;
@@ -31,4 +31,5 @@ module io.ballerina.openapi.idl.client {
     requires org.slf4j;
     requires org.apache.commons.lang3;
     requires io.ballerina.openapi.core;
+    requires io.ballerina.toml;
 }
