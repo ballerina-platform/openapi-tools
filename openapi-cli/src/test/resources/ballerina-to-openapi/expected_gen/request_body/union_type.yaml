@@ -21,6 +21,8 @@ paths:
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
   /path1:
     post:
       operationId: postPath1
@@ -40,6 +42,8 @@ paths:
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
   /path3:
     post:
       operationId: postPath3
@@ -55,6 +59,8 @@ paths:
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
   /path4:
     post:
       operationId: postPath4
@@ -71,6 +77,8 @@ paths:
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
   /path5:
     post:
       operationId: postPath5
@@ -85,6 +93,8 @@ paths:
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
   /path6:
     post:
       operationId: postPath6
@@ -100,6 +110,8 @@ paths:
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
   /path7:
     post:
       operationId: postPath7
@@ -117,6 +129,8 @@ paths:
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
   /path8:
     post:
       operationId: postPath8
@@ -134,6 +148,8 @@ paths:
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
   /path9:
     post:
       operationId: postPath9
@@ -152,6 +168,8 @@ paths:
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
 components:
   schemas:
     ABC:

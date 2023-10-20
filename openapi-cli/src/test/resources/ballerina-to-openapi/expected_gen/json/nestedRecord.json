@@ -31,6 +31,9 @@
         "responses" : {
           "202" : {
             "description" : "Accepted"
+          },
+          "400" : {
+            "description" : "BadRequest"
           }
         }
       }

@@ -31,6 +31,15 @@ service /payloadV on new http:Listener(9090) {
         return created;
     }
 
+    # Represents Snowpeak reservations resource
+    #
+    # + reservations - Array representation of Reservations
+    # + return - `ReservationCreated` or ReservationConflict representation
+    resource function post reservations(@http:Payload rep:Reservation[] reservations)
+                returns @http:Cache{} http:Created|rep:ReservationConflict {
+        return http:CREATED;
+    }
+
     # Represents Snowpeak payment resource
     #
     # + id - Unique identification of payment
