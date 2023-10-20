@@ -289,8 +289,8 @@ public class OpenAPIRequestBodyMapper {
                 return customMediaPrefix == null ? MediaType.APPLICATION_OCTET_STREAM :
                         APPLICATION_PREFIX + customMediaPrefix + OCTECT_STREAM_POSTFIX;
             case SIMPLE_NAME_REFERENCE:
-                SimpleNameReferenceNode record = (SimpleNameReferenceNode) payloadNode;
-                TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(record));
+            case QUALIFIED_NAME_REFERENCE:
+                TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(payloadNode));
                 if (typeSymbol instanceof TypeReferenceTypeSymbol) {
                     typeSymbol = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
                 }
@@ -352,7 +352,8 @@ public class OpenAPIRequestBodyMapper {
         TypeDescriptorNode typeDescriptorNode = arrayNode.memberTypeDesc();
         // Nested array not allowed
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
-        if (typeDescriptorNode.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
+        if (typeDescriptorNode.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE) ||
+                typeDescriptorNode.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
             //handle record for components
             SimpleNameReferenceNode referenceNode = (SimpleNameReferenceNode) typeDescriptorNode;
             TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(referenceNode));
@@ -360,8 +361,13 @@ public class OpenAPIRequestBodyMapper {
             componentMapper.createComponentSchema(schema, typeSymbol);
             diagnostics.addAll(componentMapper.getDiagnostics());
             Schema itemSchema = new Schema();
-            arraySchema.setItems(itemSchema.$ref(ConverterCommonUtils.unescapeIdentifier(
-                    referenceNode.name().text().trim())));
+            String referenceName;
+            if (typeDescriptorNode.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
+                referenceName = ((SimpleNameReferenceNode) typeDescriptorNode).name().toString().trim();
+            } else {
+                referenceName = ((QualifiedNameReferenceNode) typeDescriptorNode).identifier().text();
+            }
+            arraySchema.setItems(itemSchema.$ref(ConverterCommonUtils.unescapeIdentifier(referenceName)));
             media.setSchema(arraySchema);
         } else if (typeDescriptorNode.kind() == SyntaxKind.BYTE_TYPE_DESC) {
             StringSchema byteSchema = new StringSchema();

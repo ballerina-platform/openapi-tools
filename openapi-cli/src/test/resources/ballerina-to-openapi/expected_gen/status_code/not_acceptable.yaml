@@ -16,6 +16,8 @@ paths:
       responses:
         "406":
           description: NotAcceptable
+        "202":
+          description: Accepted
         "500":
           description: Internal server error
           content:

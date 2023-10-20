@@ -20,6 +20,8 @@ paths:
             '*/*':
               schema:
                 description: Any type of entity body
+        "202":
+          description: Accepted
         "500":
           description: Internal server error
           content:

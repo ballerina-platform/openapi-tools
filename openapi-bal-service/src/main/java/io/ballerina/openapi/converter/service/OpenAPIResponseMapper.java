@@ -61,6 +61,7 @@ import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -92,7 +93,9 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUALIFIED_NAME_REFERE
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_FIELD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SIMPLE_NAME_REFERENCE;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_REFERENCE;
+import static io.ballerina.openapi.converter.Constants.ACCEPTED;
 import static io.ballerina.openapi.converter.Constants.APPLICATION_PREFIX;
+import static io.ballerina.openapi.converter.Constants.BAD_REQUEST;
 import static io.ballerina.openapi.converter.Constants.BODY;
 import static io.ballerina.openapi.converter.Constants.BYTE;
 import static io.ballerina.openapi.converter.Constants.BYTE_ARRAY;
@@ -105,7 +108,9 @@ import static io.ballerina.openapi.converter.Constants.HTTP_200;
 import static io.ballerina.openapi.converter.Constants.HTTP_200_DESCRIPTION;
 import static io.ballerina.openapi.converter.Constants.HTTP_201;
 import static io.ballerina.openapi.converter.Constants.HTTP_201_DESCRIPTION;
+import static io.ballerina.openapi.converter.Constants.HTTP_202;
 import static io.ballerina.openapi.converter.Constants.HTTP_204;
+import static io.ballerina.openapi.converter.Constants.HTTP_400;
 import static io.ballerina.openapi.converter.Constants.HTTP_500;
 import static io.ballerina.openapi.converter.Constants.HTTP_500_DESCRIPTION;
 import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
@@ -200,8 +205,13 @@ public class OpenAPIResponseMapper {
         } else {
             // When the return type is not mention in the resource function.
             ApiResponse apiResponse = new ApiResponse();
-            apiResponse.description("Accepted");
-            apiResponses.put("202", apiResponse);
+            apiResponse.description(ACCEPTED);
+            apiResponses.put(HTTP_202, apiResponse);
+            if (operation.getRequestBody() != null || operation.getParameters() != null) {
+                ApiResponse badRequestResponse = new ApiResponse();
+                badRequestResponse.description(BAD_REQUEST);
+                apiResponses.put(HTTP_400, badRequestResponse);
+            }
         }
         operation.setResponses(apiResponses);
     }
@@ -436,7 +446,17 @@ public class OpenAPIResponseMapper {
         io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
         String statusCode = httpMethod.equals(POST) ? HTTP_201 : HTTP_200;
         String description = httpMethod.equals(POST) ? HTTP_201_DESCRIPTION : HTTP_200_DESCRIPTION;
-
+        if (typeNode.parent().kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
+            ApiResponse acceptedRequestResponse = new ApiResponse();
+            acceptedRequestResponse.description(ACCEPTED);
+            apiResponses.put(HTTP_202, acceptedRequestResponse);
+            Operation operation = operationAdaptor.getOperation();
+            if (operation.getRequestBody() != null || operation.getParameters() != null) {
+                ApiResponse badRequestResponse = new ApiResponse();
+                badRequestResponse.description(BAD_REQUEST);
+                apiResponses.put(HTTP_400, badRequestResponse);
+            }
+        }
         String mediaTypeString;
         switch (typeNode.kind()) {
             case QUALIFIED_NAME_REFERENCE:
@@ -794,11 +814,11 @@ public class OpenAPIResponseMapper {
         apiResponse.ifPresent(responses -> responses.forEach((key, value) -> {
             if (apiResponses.containsKey(key)) {
                 ApiResponse res = apiResponses.get(key);
-                Content content = res.getContent();
-                if (content == null) {
-                    content = new Content();
-                }
                 if (value.getContent() != null) {
+                    Content content = res.getContent();
+                    if (content == null) {
+                        content = new Content();
+                    }
                     String mediaType = value.getContent().keySet().iterator().next();
                     Schema newSchema = value.getContent().values().iterator().next().getSchema();
                     if (content.containsKey(mediaType)) {
@@ -817,8 +837,8 @@ public class OpenAPIResponseMapper {
                     } else {
                         content.put(mediaType, value.getContent().values().iterator().next());
                     }
+                    res.content(content);
                 }
-                res.content(content);
                 apiResponses.put(key, res);
             } else {
                 apiResponses.put(key, value);
