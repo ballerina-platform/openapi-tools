@@ -71,11 +71,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Spliterator;
 
 import static io.ballerina.openapi.converter.Constants.DOUBLE;
@@ -92,7 +92,7 @@ public class OpenAPIComponentMapper {
     private final Components components;
     private final List<OpenAPIConverterDiagnostic> diagnostics;
     private final HashSet<String> visitedTypeDefinitionNames = new HashSet<>();
-    private final LinkedHashSet<TypeDefinitionNode> typeDefinitionNodes;
+    private final Set<TypeDefinitionNode> typeDefinitionNodes;
 
     public OpenAPIComponentMapper(Components components, ModuleMemberVisitor moduleMemberVisitor) {
          this.components = components;

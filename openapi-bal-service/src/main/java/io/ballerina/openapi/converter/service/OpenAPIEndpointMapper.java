@@ -45,9 +45,9 @@ import io.swagger.v3.oas.models.servers.ServerVariables;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static io.ballerina.openapi.converter.Constants.PORT;
 import static io.ballerina.openapi.converter.Constants.SERVER;
@@ -66,7 +66,7 @@ public class OpenAPIEndpointMapper {
      * @param service   service node with bound endpoints
      * @return openapi definition with Server information
      */
-    public OpenAPI getServers(OpenAPI openAPI, LinkedHashSet<ListenerDeclarationNode> endpoints,
+    public OpenAPI getServers(OpenAPI openAPI, Set<ListenerDeclarationNode> endpoints,
                               ServiceDeclarationNode service) {
         openAPI = extractServerForExpressionNode(openAPI, service.expressions(), service);
         List<Server> servers = openAPI.getServers();

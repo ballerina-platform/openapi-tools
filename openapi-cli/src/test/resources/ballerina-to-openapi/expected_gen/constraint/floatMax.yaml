@@ -19,6 +19,10 @@ paths:
             schema:
               $ref: '#/components/schemas/Hotel'
       responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
         "500":
           description: Internal server error
           content:
@@ -55,10 +59,10 @@ components:
       minimum: 2.5
       type: number
       format: float
-      Hotel:
-        required:
-          - rate
-        type: object
-        properties:
-          rate:
-            $ref: '#/components/schemas/Rating'
+    Hotel:
+      required:
+        - rate
+      type: object
+      properties:
+        rate:
+          $ref: '#/components/schemas/Rating'
