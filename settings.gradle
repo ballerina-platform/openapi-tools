@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ include(':openapi-validator')
 include(':openapi-extension')
 include(':openapi-extension-tests')
 include(':openapi-integration-tests')
+include(':openapi-client-bal-task-plugin')
 //include(':openapi-tests')
 project(':checkstyle').projectDir = file("config${File.separator}checkstyle")
 

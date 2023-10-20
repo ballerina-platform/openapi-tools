@@ -32,7 +32,7 @@ configurations {
 }
 
 dependencies {
-    implementation project(':openapi-bal-service')
+//    implementation project(':openapi-bal-service')
     implementation project(':openapi-core')
     implementation ("io.swagger.parser.v3:swagger-parser:${swaggerParserVersion}") {
         exclude group: "io.swagger", module: "swagger-compat-spec-parser"
@@ -48,7 +48,7 @@ dependencies {
     implementation "org.ballerinalang:formatter-core"
     implementation "org.ballerinalang:ballerina-cli"
     implementation "org.ballerinalang:ballerina-tools-api"
-    implementation "io.ballerina.stdlib:http-native"
+    implementation "org.ballerinalang:toml-parser:${ballerinaLangVersion}"
     implementation "com.google.code.findbugs:jsr305"
     testImplementation "org.testng:testng"
 
