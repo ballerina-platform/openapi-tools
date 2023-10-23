@@ -59,11 +59,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static io.ballerina.openapi.converter.Constants.CONTRACT;
 import static io.ballerina.openapi.converter.Constants.HYPHEN;
@@ -204,7 +204,7 @@ public class ServiceToOpenAPIConverterUtils {
     public static OASResult generateOAS(OASGenerationMetaInfo oasGenerationMetaInfo) {
         ServiceDeclarationNode serviceDefinition = oasGenerationMetaInfo.getServiceDeclarationNode();
         ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(oasGenerationMetaInfo.getProject());
-        LinkedHashSet<ListenerDeclarationNode> listeners = moduleMemberVisitor.getListenerDeclarationNodes();
+        Set<ListenerDeclarationNode> listeners = moduleMemberVisitor.getListenerDeclarationNodes();
         SemanticModel semanticModel = oasGenerationMetaInfo.getSemanticModel();
         String openApiFileName = oasGenerationMetaInfo.getOpenApiFileName();
         Path ballerinaFilePath = oasGenerationMetaInfo.getBallerinaFilePath();

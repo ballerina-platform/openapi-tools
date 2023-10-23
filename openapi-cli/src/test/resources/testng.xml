@@ -106,6 +106,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.testcases.BallerinaTestGeneratorTests"/>
             <class name="io.ballerina.openapi.generators.client.OneOfResponsesTests"/>
             <class name="io.ballerina.openapi.generators.openapi.DataTypeTests"/>
+            <class name="io.ballerina.openapi.generators.openapi.NegativeResponseTests"/>
             <!--            <class name="io.ballerina.openapi.generators.schema.SwaggerParserTests"/>-->
         </classes>
     </test>

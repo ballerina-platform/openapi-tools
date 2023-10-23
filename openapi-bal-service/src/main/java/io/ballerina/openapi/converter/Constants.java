@@ -240,5 +240,8 @@ public class Constants {
     public static final String YML_EXTENSION = ".yml";
     public static final String PLUS = "+";
     public static final String UNDERSCORE = "_";
-
+    public static final String HTTP_202 = "202";
+    public static final String HTTP_400 = "400";
+    public static final String ACCEPTED = "Accepted";
+    public static final String BAD_REQUEST = "BadRequest";
 }
