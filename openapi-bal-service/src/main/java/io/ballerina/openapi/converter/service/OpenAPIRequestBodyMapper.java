@@ -355,8 +355,7 @@ public class OpenAPIRequestBodyMapper {
         if (typeDescriptorNode.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE) ||
                 typeDescriptorNode.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
             //handle record for components
-            SimpleNameReferenceNode referenceNode = (SimpleNameReferenceNode) typeDescriptorNode;
-            TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(referenceNode));
+            TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(typeDescriptorNode));
             OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, moduleMemberVisitor);
             componentMapper.createComponentSchema(schema, typeSymbol);
             diagnostics.addAll(componentMapper.getDiagnostics());
