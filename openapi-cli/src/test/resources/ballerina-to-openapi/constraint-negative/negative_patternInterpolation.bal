@@ -17,18 +17,34 @@
 import ballerina/http;
 import ballerina/constraint;
 
-@constraint:Number {
-    minValueExclusive: 2.55,
-    maxValue: 5.55
+int i = 123;
+int j = 20;
+@constraint:String {
+    length: 21,
+    pattern: re `^${i}[a-zA-Z]+$`
 }
-public type Marks decimal;
+public type PosID string;
 
-public type School record {
-    Marks marks;
+@constraint:String {
+    pattern: re `^[\${2}a-z]+$`
+}
+public type EmpID string;
+
+@constraint:String {
+    pattern: re `^[a-z${2}]+$`
+}
+public type Name string;
+
+public type Emp record {
+    PosID posId;
+    @constraint:String { pattern: re `^[A-Z]${j}+$`}
+    string code?;
+    EmpID empID?;
+    Name name?;
 };
 
 service /payloadV on new http:Listener(9090) {
-    resource function post pet(@http:Payload School body) returns error? {
+    resource function post pet(@http:Payload Emp body) returns error? {
         return;
     }
 }

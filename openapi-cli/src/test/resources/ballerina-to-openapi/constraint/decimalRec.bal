@@ -1,4 +1,4 @@
-// Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org).
+// Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org). 
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -18,7 +18,10 @@ import ballerina/http;
 import ballerina/constraint;
 
 @constraint:Number {
-    minValueExclusive: 2.55,
+    minValueExclusive: {
+        value: 2.55,
+        message: "Min Value Exceeded!"
+    },
     maxValue: 5.55
 }
 public type Marks decimal;

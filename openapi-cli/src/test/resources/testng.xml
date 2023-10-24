@@ -43,6 +43,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.openapi.ResponseHeaderTests"/>
             <class name="io.ballerina.openapi.generators.openapi.MapTypeTests"/>
             <class name="io.ballerina.openapi.generators.openapi.ConstraintTests"/>
+            <class name="io.ballerina.openapi.generators.openapi.NegativeConstraintTests"/>
             <class name="io.ballerina.openapi.generators.openapi.ParameterAnnotationTests"/>
             <class name="io.ballerina.openapi.generators.openapi.UnSupportedBallerinaFileTests"/>
             <class name="io.ballerina.openapi.cmd.OpenApiGenServiceCmdTest"/>

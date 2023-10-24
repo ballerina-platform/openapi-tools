@@ -16,19 +16,28 @@
 
 import ballerina/http;
 import ballerina/constraint;
+import ballerina/time;
 
-@constraint:Number {
-    minValueExclusive: 2.55,
-    maxValue: 5.55
+@constraint:Date {
+    option: constraint:FUTURE,
+    message: "Event date cannot be past!"
 }
-public type Marks decimal;
+public type MyDate time:Date;
 
-public type School record {
-    Marks marks;
+type RegDate record {
+    MyDate date;
+    @constraint:Date {
+        option: {
+            value: constraint:PAST,
+            message: "Last login should be past!"
+        },
+        message: "Invalid date found for last login!"
+    }
+    time:Date lastLogin?;
 };
 
 service /payloadV on new http:Listener(9090) {
-    resource function post pet(@http:Payload School body) returns error? {
-        return;
+    resource function post pet(RegDate body) returns error? {
+	    return;
     }
 }

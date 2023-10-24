@@ -17,18 +17,17 @@
 import ballerina/http;
 import ballerina/constraint;
 
-@constraint:Number {
-    minValueExclusive: 2.55,
-    maxValue: 5.55
+@constraint:Int{
+    minValueExclusive: 10.5
 }
-public type Marks decimal;
+public type Distance int;
 
-public type School record {
-    Marks marks;
+public type City record{
+    Distance distance;
 };
 
 service /payloadV on new http:Listener(9090) {
-    resource function post pet(@http:Payload School body) returns error? {
+    resource function post pet(@http:Payload City body) returns error? {
         return;
     }
 }

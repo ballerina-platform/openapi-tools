@@ -1,4 +1,4 @@
-// Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org).
+// Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org). 
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -17,18 +17,21 @@
 import ballerina/http;
 import ballerina/constraint;
 
-@constraint:Number {
-    minValueExclusive: 2.55,
-    maxValue: 5.55
+@constraint:Float {
+    maxValueExclusive: {
+        value: 10.5,
+        message: "Max Value Exceeded!"
+    },
+    minValue: 2.5
 }
-public type Marks decimal;
+public type Rating float;
 
-public type School record {
-    Marks marks;
+public type Hotel record {
+    Rating rate;
 };
 
 service /payloadV on new http:Listener(9090) {
-    resource function post pet(@http:Payload School body) returns error? {
+    resource function post pet(@http:Payload Hotel body) returns error? {
         return;
     }
 }

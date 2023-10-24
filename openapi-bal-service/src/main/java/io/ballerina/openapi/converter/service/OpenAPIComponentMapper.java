@@ -40,7 +40,6 @@ import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.IntersectionTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -49,6 +48,7 @@ import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.TemplateExpressionNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
@@ -76,12 +76,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Spliterator;
 
 import static io.ballerina.openapi.converter.Constants.DOUBLE;
 import static io.ballerina.openapi.converter.Constants.FLOAT;
 import static io.ballerina.openapi.converter.Constants.HTTP;
 import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
+import static io.ballerina.openapi.converter.Constants.REGEX_INTERPOLATION_PATTERN;
+import static io.ballerina.openapi.converter.Constants.DATE_CONSTRAINT_ANNOTATION;
 
 /**
  * This util class for processing the mapping in between ballerina record and openAPI object schema.
@@ -725,13 +726,7 @@ public class OpenAPIComponentMapper {
     /**
      * This util is used to set the integer constraint values for relevant schema field.
      */
-    private void setIntegerConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
-        /**
-         * To-Do:
-         * Currently, the compiler checks integer constraints during compile time.
-         * If it fails, we must address the error when translating Ballerina integer constraints to OpenAPI spec.
-         * This issue will be resolved during the refactoring of the modules using the semantic model.
-         */
+    private void setIntegerConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, IntegerSchema properties) {
         BigDecimal minimum = null;
         BigDecimal maximum = null;
         if (constraintAnnot.getMinValue().isPresent()) {
@@ -754,7 +749,7 @@ public class OpenAPIComponentMapper {
     /**
      * This util is used to set the number (float, double) constraint values for relevant schema field.
      */
-    private void setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties)
+    private void setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, NumberSchema properties)
                                                         throws ParseException {
         BigDecimal minimum = null;
         BigDecimal maximum = null;
@@ -782,17 +777,27 @@ public class OpenAPIComponentMapper {
     /**
      * This util is used to set the string constraint values for relevant schema field.
      */
-    private void setStringConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
-        properties.setMaxLength(constraintAnnot.getMaxLength().isPresent() ?
-                Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
-        properties.setMinLength(constraintAnnot.getMinLength().isPresent() ?
-                Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
+    private void setStringConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, StringSchema properties) {
+        if (constraintAnnot.getLength().isPresent()) {
+            properties.setMinLength(Integer.valueOf(constraintAnnot.getLength().get()));
+            properties.setMaxLength(Integer.valueOf(constraintAnnot.getLength().get()));
+        } else {
+            properties.setMaxLength(constraintAnnot.getMaxLength().isPresent() ?
+                    Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
+            properties.setMinLength(constraintAnnot.getMinLength().isPresent() ?
+                    Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
+        }
+
+        if (constraintAnnot.getPattern().isPresent()) {
+            String regexPattern = constraintAnnot.getPattern().get();
+            properties.setPattern(regexPattern);
+        }
     }
 
     /**
      * This util is used to set the array constraint values for relevant schema field.
      */
-    private void setArrayConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+    private void setArrayConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, ArraySchema properties) {
         if (constraintAnnot.getLength().isPresent()) {
             properties.setMinItems(Integer.valueOf(constraintAnnot.getLength().get()));
             properties.setMaxItems(Integer.valueOf(constraintAnnot.getLength().get()));
@@ -809,21 +814,19 @@ public class OpenAPIComponentMapper {
      */
     private void setConstraintValueToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
         try {
-            if (properties instanceof ArraySchema) {
-                setArrayConstraintValuesToSchema(constraintAnnot, properties);
-            } else if (properties instanceof StringSchema) {
-                setStringConstraintValuesToSchema(constraintAnnot, properties);
-            } else if (properties instanceof IntegerSchema) {
-                setIntegerConstraintValuesToSchema(constraintAnnot, properties);
-            } else {
-                /**
-                 * Ballerina currently supports only Int, Number (Float, Decimal), String & Array constraints,
-                 * with plans to extend constraint support in the future.
-                 */
-                setNumberConstraintValuesToSchema(constraintAnnot, properties);
+            //Ballerina currently supports only Int, Number (Float, Decimal), String & Array constraints,
+            //with plans to extend constraint support in the future.
+            if (properties instanceof ArraySchema arraySchema) {
+                setArrayConstraintValuesToSchema(constraintAnnot, arraySchema);
+            } else if (properties instanceof StringSchema stringSchema) {
+                setStringConstraintValuesToSchema(constraintAnnot, stringSchema);
+            } else if (properties instanceof IntegerSchema integerSchema) {
+                setIntegerConstraintValuesToSchema(constraintAnnot, integerSchema);
+            } else if (properties instanceof NumberSchema numberSchema) {
+                setNumberConstraintValuesToSchema(constraintAnnot, numberSchema);
             }
         } catch (ParseException parseException) {
-            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
+            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_114;
             ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
                     error.getDescription(), null, parseException.getMessage());
             diagnostics.add(diagnostic);
@@ -836,30 +839,86 @@ public class OpenAPIComponentMapper {
     private void extractedConstraintAnnotation(MetadataNode metadata,
                                                ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
         NodeList<AnnotationNode> annotations = metadata.annotations();
-        annotations.stream().filter(annot -> (annot.annotReference() instanceof QualifiedNameReferenceNode &&
-                                ((QualifiedNameReferenceNode) annot.annotReference()).modulePrefix().text()
-                                        .equals("constraint")))
-                .forEach(value -> {
-                    Optional<MappingConstructorExpressionNode> fieldValues = value.annotValue();
-                    if (fieldValues.isPresent()) {
-                        Spliterator<MappingFieldNode> spliterator = fieldValues.get().fields().spliterator();
-                        spliterator.forEachRemaining(fieldV -> {
-                            if (fieldV.kind() == SyntaxKind.SPECIFIC_FIELD) {
-                                SpecificFieldNode specificFieldNode = (SpecificFieldNode) fieldV;
-                                // generate string
-                                String name = specificFieldNode.fieldName().toString().trim();
-                                if (specificFieldNode.valueExpr().isPresent()) {
-                                    ExpressionNode expressionNode = specificFieldNode.valueExpr().get();
-                                    SyntaxKind kind = expressionNode.kind();
-                                    if (kind == SyntaxKind.NUMERIC_LITERAL) {
-                                        fillConstraintValue(constraintBuilder, name, expressionNode
-                                                                    .toString().trim());
-                                    }
-                                }
-                            }
-                        });
+        annotations.stream()
+                .filter(this::isConstraintAnnotation)
+                .filter(annotation -> annotation.annotValue().isPresent())
+                .forEach(annotation -> {
+                    if (isDateConstraint(annotation)) {
+                        DiagnosticMessages errorMsg = DiagnosticMessages.OAS_CONVERTOR_120;
+                        IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMsg,
+                                annotation.location(), annotation.toString());
+                        diagnostics.add(error);
+                        return;
                     }
+                    MappingConstructorExpressionNode annotationValue = annotation.annotValue().get();
+                    annotationValue.fields().stream()
+                            .filter(field -> SyntaxKind.SPECIFIC_FIELD.equals(field.kind()))
+                            .forEach(field -> {
+                                String name = ((SpecificFieldNode) field).fieldName().toString().trim();
+                                processConstraintAnnotation((SpecificFieldNode) field, name, constraintBuilder);
+                            });
                 });
+    }
+
+    /**
+     * This util is used to check whether an annotation is a constraint annotation.
+     */
+    private boolean isConstraintAnnotation(AnnotationNode annotation) {
+        if (annotation.annotReference() instanceof QualifiedNameReferenceNode qualifiedNameRef) {
+            return qualifiedNameRef.modulePrefix().text().equals("constraint");
+        }
+        return false;
+    }
+
+    /*
+     * This util is used to check whether an annotation is a constraint:Date annotation.
+     * Currently, we don't have support for mapping Date constraints to OAS hence we skip them.
+     * {@link <a href="https://github.com/ballerina-platform/ballerina-standard-library/issues/5049">...</a>}
+     * Once the above improvement is completed this method should be removed!
+     */
+    private boolean isDateConstraint(AnnotationNode annotation) {
+        return annotation.annotReference().toString().trim().equals(DATE_CONSTRAINT_ANNOTATION);
+    }
+
+    /**
+     * This util is used to process the content of a constraint annotation.
+     */
+    private void processConstraintAnnotation(SpecificFieldNode specificFieldNode, String fieldName,
+                                             ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
+        specificFieldNode.valueExpr()
+                .flatMap(this::extractFieldValue)
+                .ifPresent(fieldValue -> fillConstraintValue(constraintBuilder, fieldName, fieldValue));
+    }
+
+    private Optional<String> extractFieldValue(ExpressionNode exprNode) {
+        SyntaxKind syntaxKind = exprNode.kind();
+        switch (syntaxKind) {
+            case NUMERIC_LITERAL:
+                return Optional.of(exprNode.toString().trim());
+            case REGEX_TEMPLATE_EXPRESSION:
+                String regexContent = ((TemplateExpressionNode) exprNode).content().get(0).toString();
+                if (regexContent.matches(REGEX_INTERPOLATION_PATTERN)) {
+                    return Optional.of(regexContent);
+                } else {
+                    DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_119;
+                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                            exprNode.location(), regexContent);
+                    diagnostics.add(error);
+                    return Optional.empty();
+                }
+            case MAPPING_CONSTRUCTOR:
+                return ((MappingConstructorExpressionNode) exprNode).fields().stream()
+                    .filter(fieldNode -> ((SpecificFieldNode) fieldNode).fieldName().toString().trim().equals("value"))
+                    .findFirst()
+                    .flatMap(node -> ((SpecificFieldNode) node).valueExpr()
+                           .flatMap(this::extractFieldValue));
+            default:
+                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_118;
+                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                        exprNode.location(), exprNode.toString());
+                diagnostics.add(error);
+                return Optional.empty();
+        }
     }
 
     /**
@@ -888,6 +947,9 @@ public class OpenAPIComponentMapper {
                 break;
             case "minLength":
                 constraintBuilder.withMinLength(constraintValue);
+                break;
+            case "pattern":
+                constraintBuilder.withPattern(constraintValue);
                 break;
             default:
                 break;
