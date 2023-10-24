@@ -22,8 +22,8 @@ import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Visitor to get the TypeDefinitionNode and ListenerDeclarationNodes.
@@ -32,8 +32,8 @@ import java.util.List;
  */
 public class ModuleMemberVisitor extends NodeVisitor {
 
-    LinkedList<TypeDefinitionNode> typeDefinitionNodes = new LinkedList<>();
-    LinkedList<ListenerDeclarationNode> listenerDeclarationNodes = new LinkedList<>();
+    Set<TypeDefinitionNode> typeDefinitionNodes = new LinkedHashSet<>();
+    Set<ListenerDeclarationNode> listenerDeclarationNodes = new LinkedHashSet<>();
 
     @Override
     public void visit(TypeDefinitionNode typeDefinitionNode) {
@@ -45,11 +45,11 @@ public class ModuleMemberVisitor extends NodeVisitor {
         listenerDeclarationNodes.add(listenerDeclarationNode);
     }
 
-    public List<TypeDefinitionNode> getTypeDefinitionNodes() {
+    public Set<TypeDefinitionNode> getTypeDefinitionNodes() {
         return typeDefinitionNodes;
     }
 
-    public List<ListenerDeclarationNode> getListenerDeclarationNodes() {
+    public Set<ListenerDeclarationNode> getListenerDeclarationNodes() {
         return listenerDeclarationNodes;
     }
 }

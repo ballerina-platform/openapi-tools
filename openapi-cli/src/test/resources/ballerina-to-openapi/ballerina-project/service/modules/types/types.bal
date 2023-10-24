@@ -1,4 +1,6 @@
 import ballerina/http;
+import ballerina/constraint;
+
 # Represents a product
 #
 # + name - Name of the product
@@ -6,6 +8,7 @@ import ballerina/http;
 # + price - Product price
 public type Product record {|
     string id?;
+    @constraint:String {maxLength: 14}
     string name;
     string description;
     Price price;

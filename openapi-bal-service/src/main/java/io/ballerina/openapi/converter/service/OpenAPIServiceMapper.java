@@ -39,6 +39,7 @@ import java.util.List;
  */
 public class OpenAPIServiceMapper {
     private final SemanticModel semanticModel;
+    private final ModuleMemberVisitor moduleMemberVisitor;
     private final List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
 
     public List<OpenAPIConverterDiagnostic> getErrors() {
@@ -48,9 +49,10 @@ public class OpenAPIServiceMapper {
     /**
      * Initializes a service parser for OpenApi.
      */
-    public OpenAPIServiceMapper(SemanticModel semanticModel) {
+    public OpenAPIServiceMapper(SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
         // Default object mapper is JSON mapper available in openApi utils.
         this.semanticModel = semanticModel;
+        this.moduleMemberVisitor = moduleMemberVisitor;
     }
 
     /**
@@ -69,7 +71,7 @@ public class OpenAPIServiceMapper {
                 resource.add((FunctionDefinitionNode) function);
             }
         }
-        OpenAPIResourceMapper resourceMapper = new OpenAPIResourceMapper(this.semanticModel);
+        OpenAPIResourceMapper resourceMapper = new OpenAPIResourceMapper(this.semanticModel, this.moduleMemberVisitor);
         openapi.setPaths(resourceMapper.getPaths(resource));
         openapi.setComponents(resourceMapper.getComponents());
         errors.addAll(resourceMapper.getErrors());
