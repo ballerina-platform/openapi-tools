@@ -1,5 +1,6 @@
 package io.ballerina.openapi.bal.tool;
 
+import io.ballerina.cli.tool.BuildToolRunner;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.GeneratorUtils;
@@ -10,12 +11,15 @@ import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.core.model.GenSrcFile;
+import io.ballerina.projects.Package;
 import io.ballerina.projects.ToolContext;
+import io.ballerina.toml.semantic.ast.TomlKeyValueNode;
 import io.ballerina.toml.semantic.ast.TomlTableNode;
 import io.ballerina.toml.semantic.ast.TopLevelNode;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.ballerinalang.formatter.core.Formatter;
@@ -28,16 +32,19 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import static io.ballerina.openapi.bal.tool.Constants.CONFIG_FILE_NAME;
 import static io.ballerina.openapi.bal.tool.Constants.IS_RESOURCE;
 import static io.ballerina.openapi.bal.tool.Constants.LICENSE;
 import static io.ballerina.openapi.bal.tool.Constants.NULLABLE;
 import static io.ballerina.openapi.bal.tool.Constants.OAS_PATH_SEPARATOR;
-import static io.ballerina.openapi.bal.tool.Constants.OPENAPI_REGEX_PATTERN;
 import static io.ballerina.openapi.bal.tool.Constants.OPERATIONS;
 import static io.ballerina.openapi.bal.tool.Constants.TAGS;
 import static io.ballerina.openapi.bal.tool.Constants.TEST_DIR;
@@ -52,8 +59,8 @@ import static io.ballerina.openapi.core.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.core.GeneratorConstants.YML_EXTENSION;
 import static io.ballerina.openapi.core.GeneratorUtils.normalizeOpenAPI;
 
-public class BuildToolRunner implements io.ballerina.cli.tool.BuildToolRunner {
-    List<Diagnostic> reportDiagnostics = new ArrayList<>();
+public class OpenAPIBuildToolRunner implements BuildToolRunner {
+    static List<Diagnostic> diagnostics = new ArrayList<>();
 
     @Override
     public String getToolName() {
@@ -62,7 +69,7 @@ public class BuildToolRunner implements io.ballerina.cli.tool.BuildToolRunner {
 
     @Override
     public List<Diagnostic> diagnostics() {
-        return new ArrayList<>();
+        return diagnostics;
     }
 
 
@@ -74,25 +81,24 @@ public class BuildToolRunner implements io.ballerina.cli.tool.BuildToolRunner {
         ImmutablePair<OASClientConfig, OASServiceMetadata> codeGeneratorConfig;
         try {
             // Validate the OAS file
-            String oasFilePath = toolContext.filePath();
+            if (!getOpenAPI(toolContext)){
+                return;
+            }
 
-            codeGeneratorConfig = extractOptionDetails(toolContext);
+            String oasFilePath = toolContext.filePath();
+            Path packagePath = toolContext.packageInstance().project().sourceRoot();
+            OpenAPI openAPI = getOpenAPIContract(packagePath, Path.of(oasFilePath), toolContext.optionsTable().location());
+            if (openAPI == null) {
+                return;
+            }
+            codeGeneratorConfig = extractOptionDetails(toolContext, openAPI);
             if (options.containsKey("mode")) {
                 if (options.get("mode").toString().contains("client")) {
                     // create client for the given OAS
                     OASClientConfig clientConfig = codeGeneratorConfig.getLeft();
-
                     List<GenSrcFile> sources = generateClientFiles(clientConfig);
                     Path outputPath = toolContext.outputPath();
                     writeGeneratedSources(sources, outputPath);
-
-
-                } else if (options.get("mode").toString().contains("service")) {
-                    // create service
-                } else if (options.get("mode").toString().contains("service-type")) {
-                    // create service type
-                } else {
-                    // create both client and service
                 }
             } else {
                 // create both client and service
@@ -100,30 +106,15 @@ public class BuildToolRunner implements io.ballerina.cli.tool.BuildToolRunner {
 
         } catch (BallerinaOpenApiException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.PARSER_ERROR;
-            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), e.getMessage(),
-                    error.getSeverity());
-            Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
-                    toolContext.optionsTable().location());
-            reportDiagnostics.add(diagnostic);
+            reportDiagnostics(error, e.getMessage(), toolContext.optionsTable().location());
         } catch (IOException | FormatterException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_GENERATING_CLIENT;
-            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), e.getMessage(),
-                    error.getSeverity());
-            Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
-                    toolContext.optionsTable().location());
-            reportDiagnostics.add(diagnostic);
+            reportDiagnostics(error, e.getMessage(), toolContext.optionsTable().location());
         }
-
-
-        System.out.println(toolContext.toolId());
-
     }
 
-    public static ImmutablePair<OASClientConfig, OASServiceMetadata> extractOptionDetails(ToolContext toolContext) throws IOException, BallerinaOpenApiException {
-        String oasPath = toolContext.filePath();
-        Path oasFilePath = toolContext.packageInstance().project().sourceRoot().resolve(oasPath);
+    public static ImmutablePair<OASClientConfig, OASServiceMetadata> extractOptionDetails(ToolContext toolContext, OpenAPI openAPI) throws IOException, BallerinaOpenApiException {
 
-        OpenAPI openAPI = normalizeOpenAPI(oasFilePath, true);
         Map<String, TopLevelNode> options = toolContext.optionsTable().entries();
         Filter filter = new Filter();
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
@@ -131,8 +122,8 @@ public class BuildToolRunner implements io.ballerina.cli.tool.BuildToolRunner {
         clientMetaDataBuilder.withOpenAPI(openAPI);
         serviceMetaDataBuilder.withOpenAPI(openAPI);
         for (Map.Entry<String, TopLevelNode> field : options.entrySet()) {
-
-            String[] values = field.getValue().toString().split(",");
+            String tomlKeyValue = ((TomlKeyValueNode) field.getValue()).value().toNativeValue().toString();
+            String[] values = tomlKeyValue.split(",");
             String fieldName = field.getKey();
             switch (fieldName) {
                 case TAGS:
@@ -146,21 +137,19 @@ public class BuildToolRunner implements io.ballerina.cli.tool.BuildToolRunner {
                     clientMetaDataBuilder.withNullable(Arrays.asList(values).contains(TRUE));
                     break;
                 case IS_RESOURCE:
-//                    isResources = expression.toString().contains(TRUE);
                     clientMetaDataBuilder.withResourceMode(Arrays.asList(values).contains(TRUE));
                     break;
                 case LICENSE:
-//                    clientMetaDataBuilder.withLicense(
-//                            expression.kind() == SyntaxKind.STRING_LITERAL && !expression.toString().isBlank() ?
-//                                    getLicenseContent(context,
-//                                            Paths.get(getStringValue((BasicLiteralNode) expression))) : "");
+                    String licenseContent = !Objects.equals(values[0], "") ? getLicenseContent(toolContext,
+                            Paths.get(values[0])) : DO_NOT_MODIFY_FILE_HEADER;
+                    clientMetaDataBuilder.withLicense(licenseContent);
                     break;
                 default:
                     break;
             }
-            clientMetaDataBuilder.withFilters(filter);
-            serviceMetaDataBuilder.withFilters(filter);
         }
+        clientMetaDataBuilder.withFilters(filter);
+        serviceMetaDataBuilder.withFilters(filter);
         return new ImmutablePair<>(clientMetaDataBuilder.build(), serviceMetaDataBuilder.build());
     }
 
@@ -170,11 +159,10 @@ public class BuildToolRunner implements io.ballerina.cli.tool.BuildToolRunner {
      */
     private static List<GenSrcFile> generateClientFiles(OASClientConfig oasClientConfig) throws BallerinaOpenApiException, IOException, FormatterException {
 
-
         List<GenSrcFile> sourceFiles = new ArrayList<>();
 
         // generate ballerina client files.
-        String licenseContent = DO_NOT_MODIFY_FILE_HEADER;
+        String licenseContent = oasClientConfig.getLicense();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
@@ -261,20 +249,91 @@ public class BuildToolRunner implements io.ballerina.cli.tool.BuildToolRunner {
      * This method uses to check whether given specification can be handled via the openapi client generation tool.
      * This includes basic requirements like file extension check and file header check.
      */
-    private static Optional<OpenAPI> getOpenAPI(ToolContext toolContext) {
+    private static boolean getOpenAPI(ToolContext toolContext) {
         String oasPath = toolContext.filePath();
-        try {
-            if (!(oasPath.endsWith(YAML_EXTENSION) || oasPath.endsWith(JSON_EXTENSION) ||
-                    oasPath.endsWith(YML_EXTENSION))) {
-                return Optional.empty();
-            }
-            Path oasFilePath = toolContext.packageInstance().project().sourceRoot().resolve(oasPath);
+        return !(oasPath.endsWith(YAML_EXTENSION) || oasPath.endsWith(JSON_EXTENSION) ||
+                oasPath.endsWith(YML_EXTENSION));
+    }
 
-            OpenAPI openAPI = normalizeOpenAPI(oasFilePath, true);
-            return Optional.of(openAPI);
-
-        } catch (IOException | NullPointerException | BallerinaOpenApiException e) {
-            return Optional.empty();
+    /**
+     * Util to read license content.
+     */
+    private static String getLicenseContent(ToolContext context, Path licensePath) {
+        Path relativePath = null;
+        String licenseHeader = DO_NOT_MODIFY_FILE_HEADER;
+        Package packageInstance = context.packageInstance();
+        Location location = context.optionsTable().entries().get("license").location();
+        Path ballerinaFilePath = packageInstance.project().sourceRoot();
+        if (ballerinaFilePath == null) {
+            return null;
         }
+        try {
+             if (licensePath.toString().isBlank()) {
+                Constants.DiagnosticMessages error = Constants.DiagnosticMessages.LICENSE_PATH_BLANK;
+                 reportDiagnostics(error, error.getDescription(), location);
+             } else {
+                Path finalLicensePath = Paths.get(licensePath.toString());
+                if (finalLicensePath.isAbsolute()) {
+                    relativePath = finalLicensePath;
+                } else {
+                    File openapiContract = new File(ballerinaFilePath.toString(), licensePath.toString());
+                    relativePath = Paths.get(openapiContract.getCanonicalPath());
+                }
+            }
+            if (relativePath != null) {
+                try {
+                    String newLine = System.lineSeparator();
+                    Path filePath = Paths.get((new File(relativePath.toString()).getCanonicalPath()));
+                    licenseHeader = Files.readString(Paths.get(filePath.toString()));
+                    if (!licenseHeader.endsWith(newLine)) {
+                        licenseHeader = licenseHeader + newLine + newLine;
+                    } else if (!licenseHeader.endsWith(newLine + newLine)) {
+                        licenseHeader = licenseHeader + newLine;
+                    }
+                } catch (IOException e) {
+                    Constants.DiagnosticMessages error = Constants.DiagnosticMessages
+                            .ERROR_WHILE_READING_LICENSE_FILE;
+                    reportDiagnostics(error, error.getDescription(), location);
+                    return null;
+                }
+                return licenseHeader;
+            }
+        } catch (IOException e) {
+            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_READING_LICENSE_FILE;
+            reportDiagnostics(error, error.getDescription(), location);
+            return null;
+        }
+        return licenseHeader;
+    }
+
+    private OpenAPI getOpenAPIContract(Path ballerinaFilePath, Path openAPIPath, Location location) {
+        Path relativePath = null;
+        try {
+            if (openAPIPath.toString().isBlank()) {
+                Constants.DiagnosticMessages error = Constants.DiagnosticMessages.EMPTY_CONTRACT_PATH;
+                reportDiagnostics(error, error.getDescription(), location);
+            } else if (Paths.get(openAPIPath.toString()).isAbsolute()) {
+                relativePath = Paths.get(openAPIPath.toString());
+            } else {
+                File file = new File(ballerinaFilePath.toString());
+                File openapiContract = new File(file, openAPIPath.toString());
+                relativePath = Paths.get(openapiContract.getCanonicalPath());
+            }
+            if (relativePath != null) {
+                return normalizeOpenAPI(Path.of(relativePath.toString()), true);
+            }
+        } catch (IOException|BallerinaOpenApiException e) {
+            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.UNEXPECTED_EXCEPTIONS;
+            reportDiagnostics(error, error.getDescription(), location);
+        }
+        return null;
+    }
+
+    private static void reportDiagnostics(Constants.DiagnosticMessages error, String error1, Location location) {
+        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), error1,
+                error.getSeverity());
+        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
+                location);
+        diagnostics.add(diagnostic);
     }
 }

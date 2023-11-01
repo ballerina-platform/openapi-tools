@@ -16,6 +16,9 @@
     },
     "mode": {
       "type": "string"
+    },
+    "license": {
+      "type": "string"
     }
   },
   "additionalProperties": false
