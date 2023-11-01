@@ -50,8 +50,13 @@ public class Constants {
                 DiagnosticSeverity.ERROR),
         ERROR_WHILE_GENERATING_CLIENT("OAS_IDL_CLIENT_03", "unexpected error occurred while generating the client",
                                          DiagnosticSeverity.ERROR),
-        PARSER_ERROR("OAS_IDL_CLIENT_04", "", DiagnosticSeverity.ERROR); // parser errors are assigned directly to
-        // diagnostic via exceptions.
+        PARSER_ERROR("OAS_IDL_CLIENT_04", "", DiagnosticSeverity.ERROR),
+        UNEXPECTED_EXCEPTIONS("OAS_IDK_CLIENT_05", "unexpected error occurred while reading the contract",
+                DiagnosticSeverity.ERROR),
+        EMPTY_CONTRACT_PATH("OAS_IDK_CLIENT_06", "given OpenAPI contract file path is an empty string.",
+                DiagnosticSeverity.WARNING);
+
+
         private final String code;
         private final String description;
         private final DiagnosticSeverity severity;
