@@ -58,8 +58,8 @@ import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
-import static io.ballerina.openapi.converter.Constants.HTTP;
 import static io.ballerina.openapi.core.GeneratorConstants.CONNECTION_CONFIG;
+import static io.ballerina.openapi.service.Constants.HTTP;
 
 /**
  * This class wraps the {@link Schema} from openapi models inorder to overcome complications

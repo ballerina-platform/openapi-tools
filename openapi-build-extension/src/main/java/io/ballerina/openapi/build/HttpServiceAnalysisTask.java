@@ -24,13 +24,13 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
-import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
-import io.ballerina.openapi.converter.model.OASGenerationMetaInfo;
-import io.ballerina.openapi.converter.model.OASResult;
-import io.ballerina.openapi.converter.service.OpenAPIEndpointMapper;
-import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
+import io.ballerina.openapi.service.ServiceToOpenAPIMapper;
+import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.OpenAPIEndpointMapper;
+import io.ballerina.openapi.service.model.OASGenerationMetaInfo;
+import io.ballerina.openapi.service.model.OASResult;
 import io.ballerina.projects.BuildOptions;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
@@ -52,15 +52,15 @@ import java.util.Optional;
 import static io.ballerina.openapi.build.PluginConstants.OAS_PATH_SEPARATOR;
 import static io.ballerina.openapi.build.PluginConstants.OPENAPI;
 import static io.ballerina.openapi.build.PluginConstants.UNDERSCORE;
-import static io.ballerina.openapi.converter.Constants.HYPHEN;
-import static io.ballerina.openapi.converter.Constants.OPENAPI_SUFFIX;
-import static io.ballerina.openapi.converter.Constants.SLASH;
-import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
-import static io.ballerina.openapi.converter.utils.CodegenUtils.resolveContractFileName;
-import static io.ballerina.openapi.converter.utils.CodegenUtils.writeFile;
-import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.containErrors;
-import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getNormalizedFileName;
-import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.isHttpService;
+import static io.ballerina.openapi.service.Constants.HYPHEN;
+import static io.ballerina.openapi.service.Constants.OPENAPI_SUFFIX;
+import static io.ballerina.openapi.service.Constants.SLASH;
+import static io.ballerina.openapi.service.Constants.YAML_EXTENSION;
+import static io.ballerina.openapi.service.utils.CodegenUtils.resolveContractFileName;
+import static io.ballerina.openapi.service.utils.CodegenUtils.writeFile;
+import static io.ballerina.openapi.service.utils.MapperCommonUtils.containErrors;
+import static io.ballerina.openapi.service.utils.MapperCommonUtils.getNormalizedFileName;
+import static io.ballerina.openapi.service.utils.MapperCommonUtils.isHttpService;
 
 /**
  * SyntaxNodeAnalyzer for getting all service node.
@@ -106,7 +106,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 builder.setServiceDeclarationNode(serviceNode).setSemanticModel(semanticModel)
                         .setOpenApiFileName(services.get(serviceSymbol.get().hashCode()))
                         .setBallerinaFilePath(inputPath).setProject(project);
-                OASResult oasResult = ServiceToOpenAPIConverterUtils.generateOAS(builder.build());
+                OASResult oasResult = ServiceToOpenAPIMapper.generateOAS(builder.build());
                 oasResult.setServiceName(constructFileName(syntaxTree, services, serviceSymbol.get()));
                 writeOpenAPIYaml(outPath, oasResult, diagnostics);
             }
@@ -153,7 +153,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
             }
         }
         if (!oasResult.getDiagnostics().isEmpty()) {
-            for (OpenAPIConverterDiagnostic diagnostic : oasResult.getDiagnostics()) {
+            for (OpenAPIMapperDiagnostic diagnostic : oasResult.getDiagnostics()) {
                 diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
             }
         }

@@ -18,12 +18,12 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
-import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
-import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
-import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;
 
@@ -228,7 +228,7 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param fileName  input resource file
      */
     private void ballerinaToOpenApi(String fileName) {
-        List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
+        List<OpenAPIMapperDiagnostic> errors = new ArrayList<>();
         final File balFile = new File(fileName);
         Path balFilePath = null;
         try {
@@ -246,7 +246,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 generatedFileType);
         errors.addAll(openApiConverter.getErrors());
         if (!errors.isEmpty()) {
-            for (OpenAPIConverterDiagnostic error: errors) {
+            for (OpenAPIMapperDiagnostic error: errors) {
                 if (error instanceof ExceptionDiagnostic) {
                     this.outStream = System.err;
                     ExceptionDiagnostic exceptionDiagnostic = (ExceptionDiagnostic) error;

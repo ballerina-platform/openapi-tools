@@ -20,7 +20,6 @@ package io.ballerina.openapi.cmd;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.openapi.converter.utils.CodegenUtils;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
@@ -32,6 +31,7 @@ import io.ballerina.openapi.core.generators.service.BallerinaServiceObjectGenera
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.core.model.GenSrcFile;
+import io.ballerina.openapi.service.utils.CodegenUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;

@@ -23,12 +23,12 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
-import io.ballerina.openapi.converter.model.OASGenerationMetaInfo;
-import io.ballerina.openapi.converter.model.OASResult;
-import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.openapi.extension.Constants;
 import io.ballerina.openapi.extension.OpenApiDiagnosticCode;
 import io.ballerina.openapi.extension.context.OpenApiDocContext;
+import io.ballerina.openapi.service.ServiceToOpenAPIMapper;
+import io.ballerina.openapi.service.model.OASGenerationMetaInfo;
+import io.ballerina.openapi.service.model.OASResult;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
@@ -41,8 +41,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import static io.ballerina.openapi.converter.Constants.SLASH;
-import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.normalizeTitle;
+import static io.ballerina.openapi.service.Constants.SLASH;
+import static io.ballerina.openapi.service.utils.MapperCommonUtils.normalizeTitle;
 import static io.ballerina.openapi.extension.context.OpenApiDocContextHandler.getContextHandler;
 import static io.ballerina.openapi.extension.doc.DocGenerationUtils.getDiagnostics;
 
@@ -156,7 +156,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 .setOpenApiFileName(targetFile)
                 .setBallerinaFilePath(null)
                 .setProject(project);
-        OASResult oasResult = ServiceToOpenAPIConverterUtils.generateOAS(builder.build());
+        OASResult oasResult = ServiceToOpenAPIMapper.generateOAS(builder.build());
         Optional<OpenAPI> openApiOpt = oasResult.getOpenAPI();
         if (!oasResult.getDiagnostics().isEmpty() || openApiOpt.isEmpty()) {
             OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;

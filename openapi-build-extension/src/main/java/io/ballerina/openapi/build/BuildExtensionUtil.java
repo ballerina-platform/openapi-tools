@@ -16,7 +16,7 @@
 
 package io.ballerina.openapi.build;
 
-import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
+import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
@@ -32,7 +32,7 @@ import io.ballerina.tools.text.TextRange;
  */
 public class BuildExtensionUtil {
 
-    public static Diagnostic getDiagnostics(OpenAPIConverterDiagnostic diagnostic) {
+    public static Diagnostic getDiagnostics(OpenAPIMapperDiagnostic diagnostic) {
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(diagnostic.getCode(), diagnostic.getMessage(),
                 diagnostic.getDiagnosticSeverity());
         Location location = diagnostic.getLocation().orElse(new NullLocation());
