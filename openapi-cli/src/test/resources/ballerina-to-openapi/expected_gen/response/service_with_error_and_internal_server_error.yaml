@@ -33,28 +33,31 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                oneOf:
+                  - {}
+                  - $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        reason:
-          type: string
-          description: Reason phrase
-        path:
-          type: string
-          description: Request path
-        method:
-          type: string
-          description: Method type of the request
-        message:
-          type: string
-          description: Error message
         timestamp:
           type: string
-          description: Timestamp of the error
         status:
           type: integer
-          description: Relevant HTTP status code
-          format: int32
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

@@ -48,6 +48,7 @@ components:
           type: integer
           description: Number of rooms
           format: int64
+      additionalProperties: false
       description: Represents rooms be reserved
     Reservation:
       required:
@@ -67,7 +68,16 @@ components:
         endDate:
           type: string
           description: End date in yyyy-mm-dd
+      additionalProperties: false
       description: Represents a reservation of rooms
+    Action:
+      type: string
+      enum:
+        - PATCH
+        - DELETE
+        - PUT
+        - POST
+        - GET
     Links:
       required:
         - links
@@ -77,7 +87,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Link'
+      additionalProperties: false
     ReservationReceipt:
+      type: object
+      description: Represents a receipt for the reservation
       allOf:
         - $ref: '#/components/schemas/Links'
         - required:
@@ -98,6 +111,7 @@ components:
               description: Last updated time stamp
             reservation:
               $ref: '#/components/schemas/Reservation'
+          additionalProperties: false
     Link:
       required:
         - href
@@ -115,10 +129,5 @@ components:
         actions:
           type: array
           items:
-            type: string
-            enum:
-              - PATCH
-              - DELETE
-              - PUT
-              - POST
-              - GET
+            $ref: '#/components/schemas/Action'
+      additionalProperties: false

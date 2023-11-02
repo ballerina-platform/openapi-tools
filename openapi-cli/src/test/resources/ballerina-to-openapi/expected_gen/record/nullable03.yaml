@@ -1,5 +1,18 @@
 components:
   schemas:
+    Link:
+      required:
+        - rel
+      type: object
+      properties:
+        rel:
+          type: string
+          nullable: true
+        pet:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Pet'
+      additionalProperties: false
     Pet:
       required:
         - id
@@ -11,15 +24,4 @@ components:
         name:
           type: string
           nullable: true
-    Link:
-      required:
-        - rel
-      type: object
-      properties:
-        rel:
-          type: string
-          nullable: true
-        pet:
-          nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/Pet'
+      additionalProperties: false

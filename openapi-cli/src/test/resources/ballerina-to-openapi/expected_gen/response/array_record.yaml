@@ -25,6 +25,18 @@ paths:
                   $ref: '#/components/schemas/Location'
 components:
   schemas:
+    Links:
+      required:
+        - links
+      type: object
+      properties:
+        links:
+          type: array
+          description: Array links
+          items:
+            $ref: '#/components/schemas/Link'
+      additionalProperties: false
+      description: Link details
     Link:
       required:
         - href
@@ -42,17 +54,11 @@ components:
           description: link mediatype
           items:
             type: string
+      additionalProperties: false
       description: Link details
-    Links:
-      required:
-        - links
-      type: object
-      properties:
-        links:
-          type: array
-          items:
-            $ref: '#/components/schemas/Link'
     Location:
+      type: object
+      description: Represents locations
       allOf:
         - $ref: '#/components/schemas/Links'
         - required:
@@ -70,3 +76,4 @@ components:
             address:
               type: string
               description: Address of the location
+          additionalProperties: false

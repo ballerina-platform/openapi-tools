@@ -28,7 +28,7 @@ paths:
                 $ref: '#/components/schemas/Patient'
             application/fhir+xml:
               schema:
-                $ref: '#/components/schemas/Patient'
+                type: object
 components:
   schemas:
     Extension:
@@ -48,7 +48,9 @@ components:
           $ref: '#/components/schemas/uri'
         valueCode:
           type: string
+      additionalProperties: false
     Identifier:
+      type: object
       allOf:
         - $ref: '#/components/schemas/Element'
         - type: object
@@ -57,18 +59,13 @@ components:
               type: string
             assigner:
               $ref: '#/components/schemas/Reference'
-            id:
-              type: string
-            element:
-              type: integer
-              format: int64
+          additionalProperties: false
     Coding:
+      type: object
       allOf:
         - $ref: '#/components/schemas/Element'
         - type: object
           properties:
-            id:
-              type: string
             extension:
               type: array
               items:
@@ -81,9 +78,7 @@ components:
               type: string
             userSelected:
               type: boolean
-            element:
-              type: integer
-              format: int64
+          additionalProperties: false
     CodingExtension:
       required:
         - url
@@ -94,7 +89,9 @@ components:
           $ref: '#/components/schemas/uri'
         valueCoding:
           $ref: '#/components/schemas/Coding'
+      additionalProperties: false
     Reference:
+      type: object
       allOf:
         - $ref: '#/components/schemas/Element'
         - type: object
@@ -107,11 +104,7 @@ components:
               $ref: '#/components/schemas/Identifier'
             display:
               type: string
-            id:
-              type: string
-            element:
-              type: integer
-              format: int64
+          additionalProperties: false
     Element:
       type: object
       properties:
@@ -120,6 +113,7 @@ components:
         element:
           type: integer
           format: int64
+      additionalProperties: false
     StringExtension:
       required:
         - url
@@ -130,7 +124,9 @@ components:
           $ref: '#/components/schemas/uri'
         valueString:
           type: string
+      additionalProperties: false
     ExtensionExtension:
+      type: object
       allOf:
         - $ref: '#/components/schemas/Element'
         - type: object
@@ -139,17 +135,7 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Extension'
-    IntegerExtension:
-      required:
-        - url
-        - valueInteger
-      type: object
-      properties:
-        url:
-          $ref: '#/components/schemas/uri'
-        valueInteger:
-          type: integer
-          format: int64
+          additionalProperties: false
     Patient:
       type: object
       properties:
@@ -161,5 +147,18 @@ components:
           type: string
         ref:
           $ref: '#/components/schemas/Reference'
+      additionalProperties: false
+    IntegerExtension:
+      required:
+        - url
+        - valueInteger
+      type: object
+      properties:
+        url:
+          $ref: '#/components/schemas/uri'
+        valueInteger:
+          type: integer
+          format: int64
+      additionalProperties: false
     uri:
       type: string

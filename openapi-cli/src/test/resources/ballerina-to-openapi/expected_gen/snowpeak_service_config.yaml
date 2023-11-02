@@ -46,4 +46,5 @@ components:
         expiryYear:
           type: string
           description: Expiaration year of the card in yyyy
+      additionalProperties: false
       description: Reperesents payement for rooms

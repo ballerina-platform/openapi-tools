@@ -38,6 +38,7 @@ components:
           type: integer
           description: Number of rooms
           format: int64
+      additionalProperties: false
       description: Represents rooms be reserved
     Reservation:
       required:
@@ -57,4 +58,5 @@ components:
         endDate:
           type: string
           description: End date in yyyy-mm-dd
+      additionalProperties: false
       description: Represents a reservation of rooms

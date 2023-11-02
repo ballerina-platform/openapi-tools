@@ -28,12 +28,13 @@ paths:
                 $ref: '#/components/schemas/Patient'
             application/fhir+xml:
               schema:
-                $ref: '#/components/schemas/Patient'
+                type: object
 components:
   schemas:
     Extension:
       $ref: '#/components/schemas/ExtensionExtension'
     Identifier:
+      type: object
       allOf:
         - $ref: '#/components/schemas/Element'
         - type: object
@@ -42,12 +43,9 @@ components:
               type: string
             assigner:
               $ref: '#/components/schemas/Reference'
-            id:
-              type: string
-            element:
-              type: integer
-              format: int64
+          additionalProperties: false
     Reference:
+      type: object
       allOf:
         - $ref: '#/components/schemas/Element'
         - type: object
@@ -60,11 +58,7 @@ components:
               $ref: '#/components/schemas/Identifier'
             display:
               type: string
-            id:
-              type: string
-            element:
-              type: integer
-              format: int64
+          additionalProperties: false
     Element:
       type: object
       properties:
@@ -73,7 +67,9 @@ components:
         element:
           type: integer
           format: int64
+      additionalProperties: false
     ExtensionExtension:
+      type: object
       allOf:
         - $ref: '#/components/schemas/Element'
         - type: object
@@ -82,6 +78,7 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Extension'
+          additionalProperties: false
     Patient:
       type: object
       properties:
@@ -93,3 +90,4 @@ components:
           type: string
         ref:
           $ref: '#/components/schemas/Reference'
+      additionalProperties: false

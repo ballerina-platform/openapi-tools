@@ -36,21 +36,6 @@ paths:
           description: Accepted
 components:
   schemas:
-    Link:
-      required:
-        - rel
-      type: object
-      properties:
-        rel:
-          type: string
-        actions:
-          type: string
-          enum:
-            - PATCH
-            - DELETE
-            - PUT
-            - POST
-            - GET
     Order:
       required:
         - rel
@@ -59,8 +44,29 @@ components:
         rel:
           type: string
         actions:
+          $ref: '#/components/schemas/OrderType'
+      additionalProperties: false
+    Action:
+      type: string
+      enum:
+        - PATCH
+        - DELETE
+        - PUT
+        - POST
+        - GET
+    OrderType:
+      type: string
+      enum:
+        - custom size
+        - Half "Portion"
+        - full
+    Link:
+      required:
+        - rel
+      type: object
+      properties:
+        rel:
           type: string
-          enum:
-            - custom size
-            - Half "Portion"
-            - full
+        actions:
+          $ref: '#/components/schemas/Action'
+      additionalProperties: false

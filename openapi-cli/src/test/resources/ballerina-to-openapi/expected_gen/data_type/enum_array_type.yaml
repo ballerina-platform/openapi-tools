@@ -25,6 +25,14 @@ paths:
           description: Accepted
 components:
   schemas:
+    Action:
+      type: string
+      enum:
+        - PATCH
+        - DELETE
+        - PUT
+        - POST
+        - GET
     Link:
       required:
         - href
@@ -42,10 +50,5 @@ components:
         actions:
           type: array
           items:
-            type: string
-            enum:
-              - PATCH
-              - DELETE
-              - PUT
-              - POST
-              - GET
+            $ref: '#/components/schemas/Action'
+      additionalProperties: false

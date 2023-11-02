@@ -32,15 +32,18 @@ components:
       type: object
       properties:
         currency:
-          type: string
-          enum:
-            - GBP
-            - SGD
-            - LKR
-            - USD
+          $ref: '#/components/schemas/Currency'
         amount:
           type: number
           format: float
+      additionalProperties: false
+    Currency:
+      type: string
+      enum:
+        - GBP
+        - SGD
+        - LKR
+        - USD
     Product:
       required:
         - description
@@ -56,4 +59,5 @@ components:
           type: string
         price:
           $ref: '#/components/schemas/Price'
+      additionalProperties: false
       description: Represents a product

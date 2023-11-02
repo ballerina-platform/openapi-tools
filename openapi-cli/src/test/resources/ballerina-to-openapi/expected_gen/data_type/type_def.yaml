@@ -49,6 +49,7 @@ components:
         salary:
           type: number
           format: double
+      additionalProperties: false
     Salary:
       oneOf:
         - type: integer
@@ -67,7 +68,7 @@ components:
         - $ref: '#/components/schemas/PriceMap'
     Count:
       type: integer
-      format: int32
+      format: int64
     Rels:
       type: array
       items:
@@ -78,7 +79,7 @@ components:
         type: string
     PetId:
       type: integer
-      format: int32
+      format: int64
     Link:
       required:
         - count
@@ -93,7 +94,7 @@ components:
           $ref: '#/components/schemas/Action'
         count:
           nullable: true
-          oneOf:
+          allOf:
             - $ref: '#/components/schemas/Count'
         books:
           $ref: '#/components/schemas/Books'
@@ -101,3 +102,4 @@ components:
           $ref: '#/components/schemas/Price'
         salary:
           $ref: '#/components/schemas/Salary'
+      additionalProperties: false

@@ -51,7 +51,7 @@ paths:
         "201":
           description: Created
           content:
-            text/vnd.wso2.sales+plain:
+            application/vnd.wso2.sales+json:
               schema:
                 type: array
                 items:

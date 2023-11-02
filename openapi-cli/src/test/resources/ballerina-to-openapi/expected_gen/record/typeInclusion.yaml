@@ -23,6 +23,26 @@ paths:
           description: Accepted
 components:
   schemas:
+    Links:
+      type: object
+      properties:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+        linkid:
+          type: integer
+          format: int64
+      additionalProperties: false
+    ReservationReceipt:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Links'
+        - type: object
+          properties:
+            id:
+              type: string
+          additionalProperties: false
     Link:
       type: object
       properties:
@@ -34,20 +54,4 @@ components:
           type: array
           items:
             type: string
-    Links:
-      type: object
-      properties:
-        links:
-          type: array
-          items:
-            $ref: '#/components/schemas/Link'
-        linkid:
-          type: integer
-          format: int64
-    ReservationReceipt:
-      allOf:
-        - $ref: '#/components/schemas/Links'
-        - type: object
-          properties:
-            id:
-              type: string
+      additionalProperties: false

@@ -41,7 +41,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueIntNil'
+                type: integer
+                format: int64
+        "202":
+          description: Accepted
   /lift03:
     get:
       operationId: getLift03
@@ -149,11 +152,11 @@ paths:
             type: string
       responses:
         "500":
-          description: Internal server error
+          description: InternalServerError
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/ReturnValueError'
   /lift11:
     get:
       operationId: getLift11
@@ -169,7 +172,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValuePrimitiveUnion'
+                oneOf:
+                  - type: number
+                    format: float
+                  - type: integer
+                    format: int64
   /lift12:
     get:
       operationId: getLift12
@@ -185,7 +192,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueRecUnion'
+                oneOf:
+                  - $ref: '#/components/schemas/Pet'
+                  - $ref: '#/components/schemas/Dog'
   /res13:
     get:
       operationId: getRes13
@@ -208,14 +217,18 @@ paths:
           schema:
             type: string
       responses:
-        "400":
-          description: BadRequest
         "200":
           description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResUnion'
+                oneOf:
+                  - type: number
+                    format: float
+                  - type: integer
+                    format: int64
+        "400":
+          description: BadRequest
   /res16:
     get:
       operationId: getRes16
@@ -231,7 +244,9 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/StrNil'
+                type: string
+        "202":
+          description: Accepted
   /res17:
     get:
       operationId: getRes17
@@ -245,7 +260,7 @@ paths:
         "200":
           description: Ok
           content:
-            text/plain:
+            application/json:
               schema:
                 $ref: '#/components/schemas/StrArray'
   /res19:
@@ -268,14 +283,6 @@ components:
   schemas:
     ReturnValueJson:
       type: object
-    ReturnValueIntNil:
-      type: integer
-      format: int64
-      nullable: true
-    ReturnValueRecUnion:
-      oneOf:
-        - $ref: '#/components/schemas/Pet'
-        - $ref: '#/components/schemas/Dog'
     ReturnValueIntArray:
       type: array
       items:
@@ -289,24 +296,39 @@ components:
       type: object
       additionalProperties:
         type: string
-    ReturnValuePrimitiveUnion:
-      oneOf:
-        - type: number
-          format: float
-        - type: integer
-          format: int64
     ReturnValueMapJson:
       type: object
-      additionalProperties: true
+      additionalProperties:
+        type: object
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     ReturnValueMapRec:
       type: object
       additionalProperties:
         $ref: '#/components/schemas/Pet'
     ReturnValueStr:
       type: string
-    StrNil:
-      type: string
-      nullable: true
     Dog:
       required:
         - breed
@@ -324,14 +346,12 @@ components:
       properties:
         name:
           type: string
-    ErrorResUnion:
-      oneOf:
-        - type: number
-          format: float
-        - type: integer
-          format: int64
+    ReturnValueError:
+      $ref: '#/components/schemas/ErrorPayload'
     ByteArr:
       type: array
-      items: {}
+      items:
+        type: string
+        format: byte
     ReturnValueXML:
       type: object

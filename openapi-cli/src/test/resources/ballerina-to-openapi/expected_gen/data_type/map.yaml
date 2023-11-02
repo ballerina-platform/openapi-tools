@@ -67,7 +67,8 @@ components:
             format: float
         item:
           type: object
-          additionalProperties: true
+          additionalProperties:
+            type: object
         mapArray:
           type: object
           additionalProperties:
@@ -78,10 +79,12 @@ components:
           type: object
           additionalProperties:
             type: object
-            additionalProperties: true
+            additionalProperties:
+              type: object
         arrayItemMap:
           type: array
           items:
             type: object
             additionalProperties:
               type: string
+      additionalProperties: false

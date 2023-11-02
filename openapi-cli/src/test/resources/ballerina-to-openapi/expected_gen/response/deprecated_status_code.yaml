@@ -15,5 +15,5 @@ paths:
       operationId: postPet
       responses:
         "511":
-          description: NetworkAuthorizationRequired
+          description: NetworkAuthenticationRequired
 components: {}

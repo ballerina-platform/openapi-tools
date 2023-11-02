@@ -57,7 +57,9 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/ReadOnlyStrNil'
+                type: string
+        "202":
+          description: Accepted
   /res4:
     get:
       operationId: getRes4
@@ -71,7 +73,7 @@ paths:
         "200":
           description: Ok
           content:
-            text/plain:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ReadOnlyStrArray'
   /res5:
@@ -133,11 +135,11 @@ paths:
             type: string
       responses:
         "500":
-          description: Internal server error
+          description: InternalServerError
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/ReadOnlyError'
   /res9:
     get:
       operationId: getRes9
@@ -153,7 +155,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReadOnlyPrimitiveUnion'
+                type: integer
+                format: int64
+            text/plain:
+              schema:
+                type: string
   /res10:
     get:
       operationId: getRes10
@@ -169,7 +175,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReadOnlyBracedUnion'
+                type: integer
+                format: int64
+            text/plain:
+              schema:
+                type: string
   /res11:
     get:
       operationId: getRes11
@@ -188,6 +198,29 @@ paths:
                 $ref: '#/components/schemas/ReadOnlyRec'
 components:
   schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     ReadOnlyPet:
       $ref: '#/components/schemas/Pet'
     ReadOnlyRec:
@@ -200,30 +233,21 @@ components:
           type: string
         name:
           type: string
+      additionalProperties: false
     ReadOnlyStr:
       type: string
-    ReadOnlyPrimitiveUnion:
-      oneOf:
-        - type: string
-        - type: integer
-          format: int64
+    ReadOnlyError:
+      $ref: '#/components/schemas/ErrorPayload'
     ReadOnlyMapJson:
       type: object
-      additionalProperties: true
+      additionalProperties:
+        type: object
     ReadOnlyJson:
       type: object
     ReadOnlyStrArray:
       type: array
       items:
         type: string
-    ReadOnlyStrNil:
-      type: string
-      nullable: true
-    ReadOnlyBracedUnion:
-      oneOf:
-        - type: string
-        - type: integer
-          format: int64
     Pet:
       required:
         - name

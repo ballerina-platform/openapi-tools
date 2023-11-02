@@ -46,8 +46,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LiftRecord'
+        "202":
+          description: Accepted
 components:
   schemas:
+    Status:
+      type: string
+      enum:
+        - HOLD
+        - CLOSED
+        - OPEN
     LiftRecord:
       required:
         - capacity
@@ -63,11 +71,7 @@ components:
         name:
           type: string
         status:
-          type: string
-          enum:
-            - HOLD
-            - CLOSED
-            - OPEN
+          $ref: '#/components/schemas/Status'
         capacity:
           type: integer
           format: int64
@@ -76,3 +80,4 @@ components:
         elevationgain:
           type: integer
           format: int64
+      additionalProperties: false

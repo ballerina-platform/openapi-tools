@@ -1,3 +1,14 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /locations:
     get:
@@ -29,6 +40,41 @@ paths:
                 type: string
 components:
   schemas:
+    Locations:
+      required:
+        - locations
+      type: object
+      properties:
+        locations:
+          type: array
+          description: collection of locations
+          items:
+            $ref: '#/components/schemas/Location'
+      additionalProperties: false
+      description: Represents a collection of locations
+    Links:
+      required:
+        - _links
+      type: object
+      properties:
+        _links:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          description: Map of available links
+      additionalProperties: false
+      description: Represents available server-provided links
+    Method:
+      type: string
+      description: Represents HTTP methods.
+      enum:
+        - OPTIONS
+        - HEAD
+        - PATCH
+        - DELETE
+        - PUT
+        - POST
+        - GET
     Link:
       required:
         - href
@@ -50,26 +96,11 @@ components:
           type: array
           description: Allowed resource methods
           items:
-            type: string
-            enum:
-              - OPTIONS
-              - HEAD
-              - PATCH
-              - DELETE
-              - PUT
-              - POST
-              - GET
+            $ref: '#/components/schemas/Method'
       description: Represents a server-provided hyperlink
-    Links:
-      required:
-        - _links
-      type: object
-      properties:
-        _links:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/Link'
     Location:
+      type: object
+      description: Represents location
       allOf:
         - $ref: '#/components/schemas/Links'
         - required:
@@ -87,14 +118,4 @@ components:
             address:
               type: string
               description: Address of the location
-    Locations:
-      required:
-        - locations
-      type: object
-      properties:
-        locations:
-          type: array
-          description: collection of locations
-          items:
-            $ref: '#/components/schemas/Location'
-      description: Represents a collection of locations
+          additionalProperties: false

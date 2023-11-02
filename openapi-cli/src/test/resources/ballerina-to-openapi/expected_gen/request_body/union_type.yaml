@@ -179,4 +179,5 @@ components:
           format: int64
         ip:
           type: string
+      additionalProperties: false
       description: Presents a read-only view of the remote address.

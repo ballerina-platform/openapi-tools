@@ -69,3 +69,4 @@ components:
           $ref: '#/components/schemas/Books'
         salary:
           $ref: '#/components/schemas/Salary'
+      additionalProperties: false

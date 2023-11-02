@@ -35,6 +35,7 @@ components:
         age:
           type: integer
           format: int64
+      additionalProperties: false
     ReturnTypes:
       type: array
       items:
@@ -68,7 +69,7 @@ components:
               - $ref: '#/components/schemas/User'
         tuples:
           nullable: true
-          oneOf:
+          allOf:
             - $ref: '#/components/schemas/ReturnTypes'
         unionTuple:
           type: array

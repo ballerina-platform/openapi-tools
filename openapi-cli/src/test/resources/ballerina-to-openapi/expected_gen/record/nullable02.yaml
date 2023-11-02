@@ -16,3 +16,4 @@ components:
           nullable: true
           items:
             type: string
+      additionalProperties: false
