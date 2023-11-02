@@ -532,20 +532,34 @@ public class OpenAPIResponseMapper {
     }
 
     private List<TypeSymbol> getBasicMemberTypes(UnionTypeSymbol unionTypeSymbol) {
-        List<TypeSymbol> memberTypes = unionTypeSymbol.memberTypeDescriptors();
-        for (TypeSymbol directMemberType : memberTypes) {
+        List<TypeSymbol> directMemberTypes = unionTypeSymbol.userSpecifiedMemberTypes();
+        List<TypeSymbol> memberTypes = new ArrayList<>();
+        for (TypeSymbol directMemberType : directMemberTypes) {
             if (isHttpStatusCodeResponseType(semanticModel, directMemberType)) {
                 directMemberType = getBodyTypeFromStatusCodeResponse(directMemberType, semanticModel);
             }
-            UnionTypeSymbol unionType = getUnionType(directMemberType);
-            if (Objects.isNull(unionType)) {
-                continue;
+            if (isSameContentType(directMemberType)) {
+                memberTypes.add(directMemberType);
+            } else {
+                UnionTypeSymbol unionType = getUnionType(directMemberType);
+                if (Objects.isNull(unionType)) {
+                    memberTypes.add(directMemberType);
+                    continue;
+                }
+                List<TypeSymbol> internalMemberTypes = getBasicMemberTypes(unionType);
+                memberTypes.addAll(internalMemberTypes);
             }
-            List<TypeSymbol> internalMemberTypes = getBasicMemberTypes(unionType);
-            memberTypes.remove(directMemberType);
-            memberTypes.addAll(internalMemberTypes);
         }
         return memberTypes;
+    }
+
+    private boolean isSameContentType(TypeSymbol typeSymbol) {
+        if (typeSymbol.subtypeOf(semanticModel.types().STRING) || typeSymbol.subtypeOf(semanticModel.types().XML) ||
+                typeSymbol.subtypeOf(semanticModel.types().builder().ARRAY_TYPE.withType(
+                        semanticModel.types().BYTE).build())) {
+            return true;
+        }
+        return typeSymbol.subtypeOf(semanticModel.types().JSON) && !semanticModel.types().STRING.subtypeOf(typeSymbol);
     }
 
     private void updateResponseCodeMap(Map<String, Map<String, TypeSymbol>> responseCodeMap, String code,
