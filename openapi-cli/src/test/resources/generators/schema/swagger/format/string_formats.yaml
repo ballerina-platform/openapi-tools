@@ -1,0 +1,62 @@
+openapi: 3.0.0
+info:
+  title: Format REST API
+  version: 4.0.0
+paths:
+  /projects:
+    get:
+      operationId: op1
+      responses:
+        '200':
+          description: Feature flag approval request response
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/OASStringFormats'
+servers:
+  - url: https://app.launchdarkly.com/api/v2
+components:
+  schemas:
+    OASStringFormats:
+      type: object
+      description: formats those are defined by the OpenAPI Specification
+      properties:
+        name:
+          type: string
+        byteContent:
+          type: string
+          format: byte
+        binaryContent:
+          type: string
+          format: binary
+        dateContent:
+          type: string
+          format: date
+        passwordContent:
+          type: string
+          format: password
+        datetimeContent:
+          type: string
+          format: date-time
+    NONOASStringFormats:
+      description:  formats those are not defined by the OpenAPI Specification
+      type: object
+      properties:
+        uuidContent:
+          type: string
+          format: uuid
+        uriContent:
+          type: string
+          format: uri
+        emailContent:
+          type: string
+          format: email
+        hostnameContent:
+          type: string
+          format: hostname
+        ipv4Content:
+          type: string
+          format: ipv4
+        ipv6Content:
+          type: string
+          format: ipv6

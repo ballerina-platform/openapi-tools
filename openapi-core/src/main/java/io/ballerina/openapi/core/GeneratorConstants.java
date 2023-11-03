@@ -326,7 +326,7 @@ public class GeneratorConstants {
         typeMap.put("double", "decimal");
         typeMap.put("float", "float");
         typeMap.put("binary", "byte[]");
-        typeMap.put("byte", "byte[]");
+        typeMap.put("byte", "string");
         typeMap.put("int32", "int:Signed32");
         typeMap.put("int64", "int");
         OPENAPI_TYPE_TO_BAL_TYPE_MAP = Collections.unmodifiableMap(typeMap);
