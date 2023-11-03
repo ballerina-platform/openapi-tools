@@ -37,7 +37,7 @@ public class TypeFormatTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
 
     @Test
-    public void stringFormats() throws IOException, BallerinaOpenApiException {
+    public void testStringFormats() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/format/string_formats.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
