@@ -2,7 +2,8 @@ import ballerina/constraint;
 
 public type StringObject record {
     string name?;
-    byte[] byteContent?;
+    @constraint:String {pattern: re `^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$`}
+    string byteContent?;
     record {byte[] fileContent; string fileName;} binaryContent?;
     @constraint:String {pattern: re `^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$`}
     string uuidContent?;
