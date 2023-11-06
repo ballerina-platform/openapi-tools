@@ -41,6 +41,7 @@ import io.ballerina.openapi.service.Constants;
 import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.ballerina.openapi.service.model.OperationAdaptor;
 import io.ballerina.openapi.service.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.Components;
@@ -351,8 +352,8 @@ public class OpenAPIRequestBodyMapper {
             //handle record for components
             SimpleNameReferenceNode referenceNode = (SimpleNameReferenceNode) typeDescriptorNode;
             TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(referenceNode));
-            OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, semanticModel);
-            componentMapper.createComponentSchema(typeSymbol);
+            ComponentMapper componentMapper = new ComponentMapper(components, semanticModel);
+            componentMapper.createComponentsSchema(typeSymbol);
             diagnostics.addAll(componentMapper.getDiagnostics());
             Schema itemSchema = new Schema();
             arraySchema.setItems(itemSchema.$ref(MapperCommonUtils.unescapeIdentifier(
@@ -423,8 +424,8 @@ public class OpenAPIRequestBodyMapper {
     private void handleReferencePayload(TypeSymbol typeSymbol, String mediaType, String recordName,
                                         Map<String, Schema> schema, RequestBody bodyParameter) {
         //handle record for components
-        OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, semanticModel);
-        componentMapper.createComponentSchema(typeSymbol);
+        ComponentMapper componentMapper = new ComponentMapper(components, semanticModel);
+        componentMapper.createComponentsSchema(typeSymbol);
         diagnostics.addAll(componentMapper.getDiagnostics());
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
         media.setSchema(new Schema().$ref(MapperCommonUtils.unescapeIdentifier(recordName)));

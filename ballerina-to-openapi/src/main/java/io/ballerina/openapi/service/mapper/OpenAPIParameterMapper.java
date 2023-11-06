@@ -38,6 +38,7 @@ import io.ballerina.openapi.service.Constants;
 import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.ballerina.openapi.service.model.OperationAdaptor;
 import io.ballerina.openapi.service.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.Components;
@@ -160,9 +161,9 @@ public class OpenAPIParameterMapper {
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) param;
                 if (pathParam.typeDescriptor().kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
                     SimpleNameReferenceNode queryNode = (SimpleNameReferenceNode) pathParam.typeDescriptor();
-                    OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, semanticModel);
+                    ComponentMapper componentMapper = new ComponentMapper(components, semanticModel);
                     TypeSymbol typeSymbol = (TypeSymbol) semanticModel.symbol(queryNode).orElseThrow();
-                    componentMapper.createComponentSchema(typeSymbol);
+                    componentMapper.createComponentsSchema(typeSymbol);
                     Schema schema = new Schema();
                     schema.set$ref(MapperCommonUtils.unescapeIdentifier(queryNode.name().text().trim()));
                     pathParameterOAS.setSchema(schema);

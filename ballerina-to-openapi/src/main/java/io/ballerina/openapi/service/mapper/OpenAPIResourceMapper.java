@@ -33,6 +33,7 @@ import io.ballerina.openapi.service.Constants;
 import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.parameter.ResponseMapper;
 import io.ballerina.openapi.service.model.OperationAdaptor;
 import io.ballerina.openapi.service.utils.MapperCommonUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -40,6 +41,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -225,13 +227,15 @@ public class OpenAPIResourceMapper {
             }
         }
         errors.addAll(openAPIParameterMapper.getErrors());
-
-        OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components);
-        openAPIResponseMapper.getResourceOutput(resource, op);
-        if (!openAPIResponseMapper.getErrors().isEmpty()) {
-            errors.addAll(openAPIResponseMapper.getErrors());
-            return Optional.empty();
-        }
+        ResponseMapper responseMapper = new ResponseMapper(semanticModel, components, resource, op.getHttpOperation());
+        ApiResponses apiResponses = responseMapper.getApiResponses();
+        op.getOperation().setResponses(apiResponses);
+//        OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components);
+//        openAPIResponseMapper.getResourceOutput(resource, op);
+//        if (!openAPIResponseMapper.getErrors().isEmpty()) {
+//            errors.addAll(openAPIResponseMapper.getErrors());
+//            return Optional.empty();
+//        }
         return Optional.of(op);
     }
 

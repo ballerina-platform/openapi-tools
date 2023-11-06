@@ -30,7 +30,7 @@ public class ErrorTypeMapper extends TypeMapper {
         Optional<Symbol> optErrorPayload = semanticModel.types().getTypeByName("ballerina", "http",
                 "", "ErrorPayload");
         if (optErrorPayload.isPresent() && optErrorPayload.get() instanceof TypeDefinitionSymbol errorPayload) {
-            Schema schema = TypeSchemaGenerator.getTypeSchema(errorPayload.typeDescriptor(), components, semanticModel);
+            Schema schema = ComponentMapper.getTypeSchema(errorPayload.typeDescriptor(), components, semanticModel);
             if (Objects.nonNull(schema)) {
                 components.put("ErrorPayload", schema);
                 return new ObjectSchema().$ref("ErrorPayload");

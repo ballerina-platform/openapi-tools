@@ -40,6 +40,6 @@ public class TableTypeMapper extends TypeMapper {
     public static Schema getSchema(TableTypeSymbol typeSymbol, Map<String, Schema> components,
                                    SemanticModel semanticModel) {
         TypeSymbol elementType = typeSymbol.rowTypeParameter();
-        return new ArraySchema().items(TypeSchemaGenerator.getTypeSchema(elementType, components, semanticModel));
+        return new ArraySchema().items(ComponentMapper.getTypeSchema(elementType, components, semanticModel));
     }
 }

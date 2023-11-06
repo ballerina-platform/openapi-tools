@@ -43,9 +43,9 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.ballerina.openapi.service.mapper.type.RecordTypeMapper;
 import io.ballerina.openapi.service.mapper.type.ReferenceTypeMapper;
-import io.ballerina.openapi.service.mapper.type.TypeSchemaGenerator;
 import io.ballerina.openapi.service.model.CacheConfigAnnotation;
 import io.ballerina.openapi.service.model.OperationAdaptor;
 import io.swagger.v3.oas.models.Components;
@@ -200,7 +200,7 @@ public class OpenAPIResponseMapper {
             if (componentSchemas == null) {
                 componentSchemas = new HashMap<>();
             }
-            mediaTypeObj.setSchema(TypeSchemaGenerator.getTypeSchema(returnType, componentSchemas, semanticModel));
+            mediaTypeObj.setSchema(ComponentMapper.getTypeSchema(returnType, componentSchemas, semanticModel));
             if (!componentSchemas.isEmpty()) {
                 components.setSchemas(componentSchemas);
             }

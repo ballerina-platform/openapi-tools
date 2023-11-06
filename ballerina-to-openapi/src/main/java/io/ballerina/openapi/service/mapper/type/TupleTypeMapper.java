@@ -44,7 +44,7 @@ public class TupleTypeMapper extends TypeMapper {
         // Does not consider rest parameter
         List<TypeSymbol> memberTypeSymbols = typeSymbol.memberTypeDescriptors();
         Schema memberSchema = new ComposedSchema().oneOf(memberTypeSymbols.stream().map(
-                type -> TypeSchemaGenerator.getTypeSchema(type, components, semanticModel)).toList());
+                type -> ComponentMapper.getTypeSchema(type, components, semanticModel)).toList());
         return new ArraySchema().items(memberSchema);
     }
 }

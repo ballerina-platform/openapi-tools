@@ -20,7 +20,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ParameterKind;
 import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.mapper.type.TypeSchemaGenerator;
+import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
@@ -63,7 +63,7 @@ public class QueryParameterMapper implements ParameterMapper {
         if (Objects.isNull(componentSchemas)) {
             componentSchemas = new HashMap<>();
         }
-        queryParameter.setSchema(TypeSchemaGenerator.getTypeSchema(type, componentSchemas, semanticModel));
+        queryParameter.setSchema(ComponentMapper.getTypeSchema(type, componentSchemas, semanticModel));
         if (!componentSchemas.isEmpty()) {
             components.setSchemas(componentSchemas);
         }

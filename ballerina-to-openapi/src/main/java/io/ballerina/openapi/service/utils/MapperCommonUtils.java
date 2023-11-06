@@ -54,7 +54,7 @@ import io.ballerina.openapi.service.Constants;
 import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.OpenAPIComponentMapper;
+import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.ballerina.openapi.service.model.OASResult;
 import io.ballerina.runtime.api.utils.IdentifierUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -536,8 +536,8 @@ public class MapperCommonUtils {
         Optional<Symbol> symbol = semanticModel.symbol(record);
         if (symbol.isPresent() && symbol.get() instanceof TypeSymbol) {
             String recordName = record.name().toString().trim();
-            OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, semanticModel);
-            componentMapper.createComponentSchema((TypeSymbol) symbol.get());
+            ComponentMapper componentMapper = new ComponentMapper(components, semanticModel);
+            componentMapper.createComponentsSchema((TypeSymbol) symbol.get());
             refSchema.set$ref(MapperCommonUtils.unescapeIdentifier(recordName));
         }
         return refSchema;

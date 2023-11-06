@@ -28,7 +28,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.ballerina.openapi.service.mapper.type.TypeSchemaGenerator.createComponentMapping;
+import static io.ballerina.openapi.service.mapper.type.ComponentMapper.createComponentMapping;
 
 public class ReferenceTypeMapper extends TypeMapper {
 

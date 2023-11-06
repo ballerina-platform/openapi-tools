@@ -68,7 +68,7 @@ public class RecordTypeMapper extends TypeMapper {
         Optional<TypeSymbol> restFieldType = typeSymbol.restTypeDescriptor();
         if (restFieldType.isPresent()) {
             if (!restFieldType.get().typeKind().equals(TypeDescKind.ANYDATA)) {
-                Schema restFieldSchema = TypeSchemaGenerator.getTypeSchema(restFieldType.get(),
+                Schema restFieldSchema = ComponentMapper.getTypeSchema(restFieldType.get(),
                         components, semanticModel);
                 schema.additionalProperties(restFieldSchema);
             }
@@ -113,7 +113,7 @@ public class RecordTypeMapper extends TypeMapper {
                 Schema includedRecordSchema = new Schema();
                 includedRecordSchema.set$ref(getTypeName(typeInclusion));
                 allOfSchemaList.add(includedRecordSchema);
-                TypeSchemaGenerator.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion,
+                ComponentMapper.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion,
                         components, semanticModel);
 
                 RecordTypeSymbol includedRecordTypeSymbol = (RecordTypeSymbol) ((TypeReferenceTypeSymbol) typeInclusion)
@@ -138,7 +138,7 @@ public class RecordTypeMapper extends TypeMapper {
                 requiredFields.add(recordFieldName);
             }
             String recordFieldDescription = getRecordFieldTypeDescription(recordFieldSymbol);
-            Schema recordFieldSchema = TypeSchemaGenerator.getTypeSchema(recordFieldSymbol.typeDescriptor(),
+            Schema recordFieldSchema = ComponentMapper.getTypeSchema(recordFieldSymbol.typeDescriptor(),
                     components, semanticModel);
             if (Objects.nonNull(recordFieldDescription) && Objects.nonNull(recordFieldSchema)) {
                 recordFieldSchema = recordFieldSchema.description(recordFieldDescription);

@@ -40,7 +40,7 @@ public class MapTypeMapper extends TypeMapper {
     public static Schema getSchema(MapTypeSymbol typeSymbol, Map<String, Schema> components,
                                    SemanticModel semanticModel) {
         TypeSymbol memberType = typeSymbol.typeParam();
-        return new ObjectSchema().additionalProperties(TypeSchemaGenerator.getTypeSchema(memberType,
+        return new ObjectSchema().additionalProperties(ComponentMapper.getTypeSchema(memberType,
                 components, semanticModel));
     }
 }

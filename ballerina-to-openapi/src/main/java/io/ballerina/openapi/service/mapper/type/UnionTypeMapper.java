@@ -68,7 +68,7 @@ public class UnionTypeMapper extends TypeMapper {
             if (memberTypeSymbol.typeKind().equals(TypeDescKind.NIL)) {
                 continue;
             }
-            Schema schema = TypeSchemaGenerator.getTypeSchema(memberTypeSymbol, components, semanticModel);
+            Schema schema = ComponentMapper.getTypeSchema(memberTypeSymbol, components, semanticModel);
             if (Objects.nonNull(schema)) {
                 memberSchemas.add(schema);
             }
