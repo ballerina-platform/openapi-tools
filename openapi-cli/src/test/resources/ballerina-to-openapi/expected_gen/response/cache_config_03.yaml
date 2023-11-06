@@ -17,15 +17,15 @@ paths:
         "200":
           description: Ok
           headers:
+            Last-Modified:
+              schema:
+                type: string
             Cache-Control:
               schema:
                 type: string
                 default: "must-revalidate,no-cache=\"field03,fields04\",private=\"\
                   field1,filed2\",max-age=5"
             ETag:
-              schema:
-                type: string
-            Last-Modified:
               schema:
                 type: string
           content:

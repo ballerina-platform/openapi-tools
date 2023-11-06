@@ -6,14 +6,14 @@ paths:
         "200":
           description: Ok
           headers:
+            Last-Modified:
+              schema:
+                type: string
             Cache-Control:
               schema:
                 type: string
                 default: "must-revalidate,public,max-age=3600"
             ETag:
-              schema:
-                type: string
-            Last-Modified:
               schema:
                 type: string
           content:
@@ -27,14 +27,14 @@ paths:
         "200":
           description: Ok
           headers:
+            Last-Modified:
+              schema:
+                type: string
             Cache-Control:
               schema:
                 type: string
                 default: "must-revalidate,public,max-age=3600"
             ETag:
-              schema:
-                type: string
-            Last-Modified:
               schema:
                 type: string
           content:
