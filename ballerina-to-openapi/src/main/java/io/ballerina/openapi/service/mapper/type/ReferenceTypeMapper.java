@@ -48,10 +48,6 @@ public class ReferenceTypeMapper extends TypeMapper {
 
     public static Schema getSchema(TypeReferenceTypeSymbol typeSymbol, Map<String, Schema> components,
                                    SemanticModel semanticModel) {
-//        if (RecordTypeMapper.isHttpStatusCodeResponseType(semanticModel, typeSymbol)) {
-//            TypeSymbol bodyType = RecordTypeMapper.getBodyTypeFromStatusCodeResponse(typeSymbol.typeDescriptor());
-//            return TypeSchemaGenerator.getTypeSchema(bodyType, components, semanticModel);
-//        }
         if (!components.containsKey(MapperCommonUtils.getTypeName(typeSymbol))) {
             createComponentMapping(typeSymbol, components, semanticModel);
             if (!components.containsKey(MapperCommonUtils.getTypeName(typeSymbol)) || Objects.isNull(

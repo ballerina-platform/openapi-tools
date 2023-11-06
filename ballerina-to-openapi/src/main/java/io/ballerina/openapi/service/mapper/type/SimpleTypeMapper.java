@@ -86,7 +86,6 @@ public class SimpleTypeMapper extends TypeMapper {
                 return new Schema();
             default:
                 // Represents the unsupported type
-
                 return null;
         }
     }

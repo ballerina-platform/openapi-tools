@@ -80,12 +80,6 @@ public class ResponseMapper {
     private final TypeSymbol returnTypeSymbol;
     private final ApiResponses apiResponses = new ApiResponses();
 
-
-    private static final String JSON_PATTERN = "^(application|text)\\/(.*[.+-]|)json$";
-    private static final String XML_PATTERN = "^(application|text)\\/(.*[.+-]|)xml$";
-    private static final String TEXT_PATTERN = "^(text)\\/(.*[.+-]|)plain$";
-    private static final String OCTET_STREAM_PATTERN = "^(application)\\/(.*[.+-]|)octet-stream$";
-
     public ResponseMapper(SemanticModel semanticModel, Components components, FunctionDefinitionNode resourceNode,
                           String resourceMethod) {
         this.semanticModel = semanticModel;
@@ -183,9 +177,6 @@ public class ResponseMapper {
                     String mediaType = entry.getKey();
                     ApiResponse apiResponse = new ApiResponse();
                     addResponseContent(typeSymbol, apiResponse, mediaType);
-                    if (isSuccessStatusCode(responseCode)) {
-                        addHeaders(apiResponse, responseCode);
-                    }
                     addApiResponse(apiResponse, responseCode);
                 }
             }
@@ -194,7 +185,7 @@ public class ResponseMapper {
 
     private void addHeaders(ApiResponse apiResponse, String statusCode) {
         Map<String, Header> headers = new HashMap<>();
-        if (!cacheHeaders.isEmpty()) {
+        if (!cacheHeaders.isEmpty() && isSuccessStatusCode(statusCode)) {
             headers.putAll(cacheHeaders);
         }
         if (headersMap.containsKey(statusCode)) {
@@ -221,6 +212,7 @@ public class ResponseMapper {
     }
 
     public void addApiResponse(ApiResponse apiResponse, String statusCode) {
+        addHeaders(apiResponse, statusCode);
         if (apiResponses.containsKey(statusCode)) {
             updateExistingApiResponse(apiResponse, statusCode);
         } else {
@@ -286,7 +278,6 @@ public class ResponseMapper {
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setDescription("Any Response");
         apiResponse.setContent(new Content().addMediaType("*/*", mediaTypeObj));
-        addHeaders(apiResponse, "default");
         addApiResponse(apiResponse, "default");
     }
 
@@ -308,10 +299,7 @@ public class ResponseMapper {
             addResponseContent(returnType, apiResponse, mediaType);
             String statusCode = getResponseCode(returnType, defaultStatusCode, semanticModel);
             apiResponse.description(HTTP_CODE_DESCRIPTIONS.get(statusCode));
-            if (isSuccessStatusCode(statusCode)) {
-                addHeaders(apiResponse, statusCode);
-            }
-            apiResponses.put(statusCode, apiResponse);
+            addApiResponse(apiResponse, statusCode);
         }
     }
 
