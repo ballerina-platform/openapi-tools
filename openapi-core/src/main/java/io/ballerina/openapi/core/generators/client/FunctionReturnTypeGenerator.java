@@ -95,6 +95,7 @@ public class FunctionReturnTypeGenerator {
         if (operation.getResponses() != null) {
             ApiResponses responses = operation.getResponses();
             for (Map.Entry<String, ApiResponse> entry : responses.entrySet()) {
+                noContentResponseFound = false;
                 String statusCode = entry.getKey();
                 ApiResponse response = entry.getValue();
                 if (statusCode.startsWith("2")) {
@@ -113,9 +114,11 @@ public class FunctionReturnTypeGenerator {
                             // Currently support for first media type
                             break;
                         }
-                    } else {
-                        noContentResponseFound = true;
                     }
+                }
+                if ((statusCode.startsWith("1") || statusCode.startsWith("2") || statusCode.startsWith("3")) &&
+                        response.getContent() == null && response.getHeaders() == null && response.getLinks() == null) {
+                    noContentResponseFound = true;
                 }
             }
         }
@@ -128,6 +131,8 @@ public class FunctionReturnTypeGenerator {
                 finalReturnType.append(NILLABLE);
             }
             return finalReturnType.toString();
+        } else if (noContentResponseFound){
+            return ERROR + NILLABLE;
         } else {
             return DEFAULT_RETURN;
         }

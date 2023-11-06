@@ -103,6 +103,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /products/nocontent:
+    get:
+      summary: without return content type
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of products
+
 components:
   securitySchemes:
     apikey:

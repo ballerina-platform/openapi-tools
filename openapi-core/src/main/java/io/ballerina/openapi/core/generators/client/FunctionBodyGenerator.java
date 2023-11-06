@@ -198,14 +198,17 @@ public class FunctionBodyGenerator {
         String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
         // This return type for target data type binding.
         String rType = functionReturnType.getReturnType(operation.getValue(), true);
-        String returnType = returnTypeForTargetTypeField(rType);
-        // Statement Generator for requestBody
-        if (operation.getValue().getRequestBody() != null) {
-            RequestBody requestBody = operation.getValue().getRequestBody();
-            handleRequestBodyInOperation(statementsList, method, returnType, requestBody);
-        } else {
-            createCommonFunctionBodyStatements(statementsList, method, returnType);
-        }
+//        if (!rType.equals("error?")) {
+            String returnType = returnTypeForTargetTypeField(rType);
+            // Statement Generator for requestBody
+            if (operation.getValue().getRequestBody() != null) {
+                RequestBody requestBody = operation.getValue().getRequestBody();
+                handleRequestBodyInOperation(statementsList, method, returnType, requestBody);
+            } else {
+                createCommonFunctionBodyStatements(statementsList, method, returnType);
+            }
+//        }
+
         //Create statements
         NodeList<StatementNode> statements = createNodeList(statementsList);
         return createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN), null, statements,
@@ -563,9 +566,14 @@ public class FunctionBodyGenerator {
         //Return Variable
         VariableDeclarationNode clientCall = GeneratorUtils.getSimpleStatement(returnType, RESPONSE,
                 clientCallStatement);
-        statementsList.add(clientCall);
         Token returnKeyWord = createIdentifierToken("return");
-        SimpleNameReferenceNode returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
+        SimpleNameReferenceNode returns;
+        if (returnType.equals("error?")) {
+            returns = createSimpleNameReferenceNode(createIdentifierToken(clientCallStatement));
+        } else {
+            statementsList.add(clientCall);
+            returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
+        }
         ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returns,
                 createToken(SEMICOLON_TOKEN));
         statementsList.add(returnStatementNode);
@@ -662,27 +670,38 @@ public class FunctionBodyGenerator {
             statementsList.add(expressionStatementNode);
         }
         // POST, PUT, PATCH, DELETE, EXECUTE
-        VariableDeclarationNode requestStatement =
-                GeneratorUtils.getSimpleStatement(returnType, RESPONSE, "check self.clientEp->"
-                        + method + "(" + RESOURCE_PATH + ", request)");
+        String requestStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", request)";
         if (isHeader) {
             if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
                     || method.equals(EXECUTE)) {
-                requestStatement = GeneratorUtils.getSimpleStatement(returnType, RESPONSE,
-                        "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", request, " +
-                                HTTP_HEADERS + ")");
-                statementsList.add(requestStatement);
+                requestStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", request, " +
+                                HTTP_HEADERS + ")";
                 Token returnKeyWord = createIdentifierToken("return");
-                SimpleNameReferenceNode returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
+                SimpleNameReferenceNode returns;
+                if (returnType.equals("error?")) {
+                    returns = createSimpleNameReferenceNode(createIdentifierToken(requestStatement));
+                } else {
+                    VariableDeclarationNode requestStatementNode =
+                            GeneratorUtils.getSimpleStatement(returnType, RESPONSE, requestStatement);
+                    statementsList.add(requestStatementNode);
+                    returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
+                }
                 ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returns,
                         createToken(SEMICOLON_TOKEN));
                 statementsList.add(returnStatementNode);
             }
         } else {
-            statementsList.add(requestStatement);
             Token returnKeyWord = createIdentifierToken("return");
-            SimpleNameReferenceNode returnVariable = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
-            ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returnVariable,
+            SimpleNameReferenceNode returns;
+            if (returnType.equals("error?")) {
+                returns = createSimpleNameReferenceNode(createIdentifierToken(requestStatement));
+            } else {
+                VariableDeclarationNode requestStatementNode =
+                        GeneratorUtils.getSimpleStatement(returnType, RESPONSE, requestStatement);
+                statementsList.add(requestStatementNode);
+                returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
+            }
+            ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returns,
                     createToken(SEMICOLON_TOKEN));
             statementsList.add(returnStatementNode);
         }
@@ -709,7 +728,9 @@ public class FunctionBodyGenerator {
      * @return - return type
      */
     private String returnTypeForTargetTypeField(String rType) {
-
+        if (rType.equals("error?")) {
+            return rType;
+        }
         String returnType;
         int index = rType.lastIndexOf("|");
         returnType = rType.substring(0, index);
