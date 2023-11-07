@@ -77,6 +77,6 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<any> headerValues = {"X-Request-ID": xRequestId, "X-Request-Client": xRequestClient, "X-Request-Pet": xRequestPet};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        return check self.clientEp->get(resourcePath, httpHeaders);
+        return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

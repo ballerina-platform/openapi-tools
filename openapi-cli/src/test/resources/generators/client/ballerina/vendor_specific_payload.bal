@@ -40,6 +40,6 @@ public isolated client class Client {
     remote isolated function createPet(http:Request request) returns error? {
         string resourcePath = string `/pets`;
         // TODO: Update the request as needed;
-        return check self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request);
     }
 }

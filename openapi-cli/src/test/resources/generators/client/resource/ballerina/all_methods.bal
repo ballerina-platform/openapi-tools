@@ -65,7 +65,7 @@ public isolated client class Client {
         map<anydata> queryParam = {"appid1": self.apiKeyConfig.appid1, "appid2": self.apiKeyConfig.appid2};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        return check self.clientEp-> put(resourcePath, request);
+        return self.clientEp-> put(resourcePath, request);
     }
     # Create a pet
     #
@@ -75,7 +75,7 @@ public isolated client class Client {
         map<anydata> queryParam = {"appid1": self.apiKeyConfig.appid1, "appid2": self.apiKeyConfig.appid2};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        return check self.clientEp-> post(resourcePath, request);
+        return self.clientEp-> post(resourcePath, request);
     }
     # Delete a pet
     #
@@ -84,6 +84,6 @@ public isolated client class Client {
         string resourcePath = string `/pets`;
         map<anydata> queryParam = {"appid1": self.apiKeyConfig.appid1, "appid2": self.apiKeyConfig.appid2};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        return check self.clientEp->delete(resourcePath);
+        return self.clientEp->delete(resourcePath);
     }
 }

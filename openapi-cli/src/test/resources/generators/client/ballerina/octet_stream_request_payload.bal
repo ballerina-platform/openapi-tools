@@ -42,7 +42,7 @@ public isolated client class Client {
         string resourcePath = string `/user`;
         http:Request request = new;
         request.setPayload(payload, "application/octet-stream");
-        return check self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request);
     }
     # Creates a new payment.
     #
@@ -52,6 +52,6 @@ public isolated client class Client {
         string resourcePath = string `/payment`;
         http:Request request = new;
         request.setPayload(payload, "application/octet-stream");
-        return check self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request);
     }
 }
