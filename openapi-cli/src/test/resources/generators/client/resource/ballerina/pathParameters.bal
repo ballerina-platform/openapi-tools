@@ -93,6 +93,6 @@ public isolated client class Client {
         string resourcePath = string `/admin/api/2021-10/customers/${getEncodedUri(customer_id)}.json`;
         map<anydata> queryParam = {"fields": fields};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        return check self.clientEp->get(resourcePath);
+        return self.clientEp->get(resourcePath);
     }
 }

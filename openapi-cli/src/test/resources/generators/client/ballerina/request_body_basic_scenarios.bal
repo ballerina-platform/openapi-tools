@@ -44,7 +44,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return check self.clientEp->put(resourcePath, request);
+        return self.clientEp->put(resourcePath, request);
     }
     # 01 Request body with reference.
     #
@@ -54,7 +54,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return check self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request);
     }
     # 04 Example for rb has inline requestbody.
     #
@@ -65,7 +65,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return check self.clientEp->put(resourcePath, request);
+        return self.clientEp->put(resourcePath, request);
     }
     # 03 Request body with record reference.
     #
@@ -75,7 +75,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return check self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request);
     }
     # 06 Example for rb has array inline requestbody.
     #
@@ -86,7 +86,7 @@ public isolated client class Client {
         json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
-        return check self.clientEp->put(resourcePath, request);
+        return self.clientEp->put(resourcePath, request);
     }
     # 05 Example for rb has array inline requestbody.
     #
@@ -97,7 +97,7 @@ public isolated client class Client {
         json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
-        return check self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request);
     }
     # 07 Example for rb has array inline requestbody.
     #
@@ -108,6 +108,6 @@ public isolated client class Client {
         json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
-        return check self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request);
     }
 }

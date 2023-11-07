@@ -89,7 +89,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return check self.clientEp->put(resourcePath, request);
+        return self.clientEp->put(resourcePath, request);
     }
     # Request body has non-standard media type application/zip with object content without properties
     #
@@ -97,6 +97,6 @@ public isolated client class Client {
     resource isolated function post greeting03(http:Request request) returns error? {
         string resourcePath = string `/greeting03`;
         // TODO: Update the request as needed;
-        return check self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request);
     }
 }

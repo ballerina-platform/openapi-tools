@@ -42,7 +42,7 @@ public isolated client class Client {
         http:Request request = new;
         string encodedRequestBody = payload.toBase64();
         request.setPayload(encodedRequestBody, "application/octet-stream");
-        return check self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request);
     }
 }
 

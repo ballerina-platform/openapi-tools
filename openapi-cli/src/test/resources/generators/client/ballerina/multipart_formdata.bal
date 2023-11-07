@@ -44,7 +44,7 @@ public isolated client class Client {
         http:Request request = new;
         mime:Entity[] bodyParts = check createBodyParts(payload);
         request.setBodyParts(bodyParts);
-        return check self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request);
     }
 
     # Create an user
@@ -56,6 +56,6 @@ public isolated client class Client {
         http:Request request = new;
         mime:Entity[] bodyParts = check createBodyParts(payload);
         request.setBodyParts(bodyParts);
-        return check self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request);
     }
 }

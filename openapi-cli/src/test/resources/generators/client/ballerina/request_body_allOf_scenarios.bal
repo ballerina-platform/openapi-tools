@@ -45,7 +45,7 @@ public isolated client class Client {
         json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
-        return check self.clientEp->put(resourcePath, request);
+        return self.clientEp->put(resourcePath, request);
     }
     # Request Body has nested allOf.
     #
@@ -55,7 +55,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return check self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request);
     }
     # Request Body has Array type AllOf.
     #
@@ -66,6 +66,6 @@ public isolated client class Client {
         json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
-        return check self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request);
     }
 }

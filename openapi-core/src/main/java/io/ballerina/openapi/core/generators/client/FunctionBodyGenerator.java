@@ -103,6 +103,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.API_KEYS_CONFIG;
 import static io.ballerina.openapi.core.GeneratorConstants.API_KEY_CONFIG_PARAM;
 import static io.ballerina.openapi.core.GeneratorConstants.DELETE;
 import static io.ballerina.openapi.core.GeneratorConstants.ENCODING;
+import static io.ballerina.openapi.core.GeneratorConstants.ERROR_NILLABLE;
 import static io.ballerina.openapi.core.GeneratorConstants.EXECUTE;
 import static io.ballerina.openapi.core.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.core.GeneratorConstants.HEADER;
@@ -119,6 +120,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.QUERY_PARAM;
 import static io.ballerina.openapi.core.GeneratorConstants.REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.RESOURCE_PATH;
 import static io.ballerina.openapi.core.GeneratorConstants.RESPONSE;
+import static io.ballerina.openapi.core.GeneratorConstants.RETURN;
 import static io.ballerina.openapi.core.GeneratorConstants.SELF;
 import static io.ballerina.openapi.core.GeneratorUtils.generateBodyStatementForComplexUrl;
 import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIType;
@@ -198,16 +200,14 @@ public class FunctionBodyGenerator {
         String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
         // This return type for target data type binding.
         String rType = functionReturnType.getReturnType(operation.getValue(), true);
-//        if (!rType.equals("error?")) {
-            String returnType = returnTypeForTargetTypeField(rType);
-            // Statement Generator for requestBody
-            if (operation.getValue().getRequestBody() != null) {
-                RequestBody requestBody = operation.getValue().getRequestBody();
-                handleRequestBodyInOperation(statementsList, method, returnType, requestBody);
-            } else {
-                createCommonFunctionBodyStatements(statementsList, method, returnType);
-            }
-//        }
+        String returnType = returnTypeForTargetTypeField(rType);
+        // Statement Generator for requestBody
+        if (operation.getValue().getRequestBody() != null) {
+            RequestBody requestBody = operation.getValue().getRequestBody();
+            handleRequestBodyInOperation(statementsList, method, returnType, requestBody);
+        } else {
+            createCommonFunctionBodyStatements(statementsList, method, returnType);
+        }
 
         //Create statements
         NodeList<StatementNode> statements = createNodeList(statementsList);
@@ -564,19 +564,7 @@ public class FunctionBodyGenerator {
             clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ")";
         }
         //Return Variable
-        VariableDeclarationNode clientCall = GeneratorUtils.getSimpleStatement(returnType, RESPONSE,
-                clientCallStatement);
-        Token returnKeyWord = createIdentifierToken("return");
-        SimpleNameReferenceNode returns;
-        if (returnType.equals("error?")) {
-            returns = createSimpleNameReferenceNode(createIdentifierToken(clientCallStatement));
-        } else {
-            statementsList.add(clientCall);
-            returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
-        }
-        ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returns,
-                createToken(SEMICOLON_TOKEN));
-        statementsList.add(returnStatementNode);
+        generateReturnStatement(statementsList, returnType, clientCallStatement);
     }
 
     /**
@@ -676,35 +664,37 @@ public class FunctionBodyGenerator {
                     || method.equals(EXECUTE)) {
                 requestStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", request, " +
                                 HTTP_HEADERS + ")";
-                Token returnKeyWord = createIdentifierToken("return");
-                SimpleNameReferenceNode returns;
-                if (returnType.equals("error?")) {
-                    returns = createSimpleNameReferenceNode(createIdentifierToken(requestStatement));
-                } else {
-                    VariableDeclarationNode requestStatementNode =
-                            GeneratorUtils.getSimpleStatement(returnType, RESPONSE, requestStatement);
-                    statementsList.add(requestStatementNode);
-                    returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
-                }
-                ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returns,
-                        createToken(SEMICOLON_TOKEN));
-                statementsList.add(returnStatementNode);
+                generateReturnStatement(statementsList, returnType, requestStatement);
             }
         } else {
-            Token returnKeyWord = createIdentifierToken("return");
-            SimpleNameReferenceNode returns;
-            if (returnType.equals("error?")) {
-                returns = createSimpleNameReferenceNode(createIdentifierToken(requestStatement));
-            } else {
-                VariableDeclarationNode requestStatementNode =
-                        GeneratorUtils.getSimpleStatement(returnType, RESPONSE, requestStatement);
-                statementsList.add(requestStatementNode);
-                returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
-            }
-            ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returns,
-                    createToken(SEMICOLON_TOKEN));
-            statementsList.add(returnStatementNode);
+            generateReturnStatement(statementsList, returnType, requestStatement);
         }
+    }
+
+    /**
+     * This function is used for generating return statement.
+     *
+     * @param statementsList  - Previous statements list
+     * @param returnType      - Return type
+     * @param returnStatement - Request statement
+     */
+    private static void generateReturnStatement(List<StatementNode> statementsList, String returnType,
+                                                String returnStatement) {
+        Token returnKeyWord = createIdentifierToken(RETURN);
+        SimpleNameReferenceNode returns;
+        if (returnType.equals(ERROR_NILLABLE)) {
+            //to ignore the check keyword
+            returnStatement = returnStatement.substring(6);
+            returns = createSimpleNameReferenceNode(createIdentifierToken(returnStatement));
+        } else {
+            VariableDeclarationNode requestStatementNode =
+                    GeneratorUtils.getSimpleStatement(returnType, RESPONSE, returnStatement);
+            statementsList.add(requestStatementNode);
+            returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
+        }
+        ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returns,
+                createToken(SEMICOLON_TOKEN));
+        statementsList.add(returnStatementNode);
     }
 
     /**
@@ -728,7 +718,7 @@ public class FunctionBodyGenerator {
      * @return - return type
      */
     private String returnTypeForTargetTypeField(String rType) {
-        if (rType.equals("error?")) {
+        if (rType.equals(ERROR_NILLABLE)) {
             return rType;
         }
         String returnType;

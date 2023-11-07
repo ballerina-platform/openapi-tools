@@ -39,10 +39,9 @@ public isolated client class Client {
     # + order_id - Order ID
     # + risk_id - Order Risk ID
     # + return - Status OK
-    remote isolated function delete_order_risk(string order_id, string risk_id) returns http:Response|error {
+    remote isolated function delete_order_risk(string order_id, string risk_id) returns error? {
         string resourcePath = string `/admin/api/2021-10/orders/${getEncodedUri(order_id)}/risks/${getEncodedUri(risk_id)}.json`;
-        http:Response response = check self.clientEp-> delete(resourcePath);
-        return response;
+        return self.clientEp-> delete(resourcePath);
     }
     # Delete with request body.
     #
@@ -51,7 +50,7 @@ public isolated client class Client {
         string resourcePath = string `/request-body`;
         http:Request request = new;
         request.setPayload(payload, "application/json");
-        return check self.clientEp->delete(resourcePath, request);
+        return self.clientEp->delete(resourcePath, request);
     }
     # Delete with header.
     #
@@ -61,8 +60,7 @@ public isolated client class Client {
         string resourcePath = string `/header`;
         map<any> headerValues = {"X-Request-ID": xRequestId};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        return check self.clientEp->delete(resourcePath, headers = httpHeaders);
-        return response;
+        return self.clientEp->delete(resourcePath, headers = httpHeaders);
     }
     # Delete with header and request body.
     #
@@ -74,6 +72,6 @@ public isolated client class Client {
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         request.setPayload(payload, "application/json");
-        return check self.clientEp->delete(resourcePath, request, httpHeaders);
+        return self.clientEp->delete(resourcePath, request, httpHeaders);
     }
 }
