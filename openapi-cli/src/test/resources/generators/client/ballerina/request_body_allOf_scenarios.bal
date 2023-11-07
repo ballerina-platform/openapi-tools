@@ -39,36 +39,33 @@ public isolated client class Client {
     # Request Body has allOf with specific properties.
     #
     # + return - OK
-    remote isolated function updateXMLUser(Path01_body payload) returns http:Response|error {
+    remote isolated function updateXMLUser(Path01_body payload) returns error? {
         string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
-        http:Response response = check self.clientEp->put(resourcePath, request);
-        return response;
+        return check self.clientEp->put(resourcePath, request);
     }
     # Request Body has nested allOf.
     #
     # + return - OK
-    remote isolated function postXMLUser(Path01_body_1 payload) returns http:Response|error {
+    remote isolated function postXMLUser(Path01_body_1 payload) returns error? {
         string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        http:Response response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return check self.clientEp->post(resourcePath, request);
     }
     # Request Body has Array type AllOf.
     #
     # + return - OK
-    remote isolated function postXMLUserInLineArray(CompoundArrayItemPostXMLUserInLineArrayRequest payload) returns http:Response|error {
+    remote isolated function postXMLUserInLineArray(CompoundArrayItemPostXMLUserInLineArrayRequest payload) returns error? {
         string resourcePath = string `/path02`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
-        http:Response response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return check self.clientEp->post(resourcePath, request);
     }
 }

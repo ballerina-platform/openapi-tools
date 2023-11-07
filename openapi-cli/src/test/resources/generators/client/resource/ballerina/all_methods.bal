@@ -60,33 +60,30 @@ public isolated client class Client {
     # Update a pet
     #
     # + return - Null response
-    resource isolated function put pets() returns http:Response|error {
+    resource isolated function put pets() returns error? {
         string resourcePath = string `/pets`;
         map<anydata> queryParam = {"appid1": self.apiKeyConfig.appid1, "appid2": self.apiKeyConfig.appid2};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        http:Response response = check self.clientEp-> put(resourcePath, request);
-        return response;
+        return check self.clientEp-> put(resourcePath, request);
     }
     # Create a pet
     #
     # + return - Null response
-    resource isolated function post pets() returns http:Response|error {
+    resource isolated function post pets() returns error? {
         string resourcePath = string `/pets`;
         map<anydata> queryParam = {"appid1": self.apiKeyConfig.appid1, "appid2": self.apiKeyConfig.appid2};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        http:Response response = check self.clientEp-> post(resourcePath, request);
-        return response;
+        return check self.clientEp-> post(resourcePath, request);
     }
     # Delete a pet
     #
     # + return - Ok response
-    resource isolated function delete pets() returns http:Response|error {
+    resource isolated function delete pets() returns error? {
         string resourcePath = string `/pets`;
         map<anydata> queryParam = {"appid1": self.apiKeyConfig.appid1, "appid2": self.apiKeyConfig.appid2};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        http:Response response = check self.clientEp->delete(resourcePath);
-        return response;
+        return check self.clientEp->delete(resourcePath);
     }
 }
