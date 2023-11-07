@@ -114,10 +114,12 @@ public class FunctionReturnTypeGenerator {
                             // Currently support for first media type
                             break;
                         }
+                    } else {
+                        noContentResponseFound = true;
                     }
                 }
                 if ((statusCode.startsWith("1") || statusCode.startsWith("2") || statusCode.startsWith("3")) &&
-                        response.getContent() == null && response.getHeaders() == null && response.getLinks() == null) {
+                        response.getContent() == null) {
                     noContentResponseFound = true;
                 }
             }

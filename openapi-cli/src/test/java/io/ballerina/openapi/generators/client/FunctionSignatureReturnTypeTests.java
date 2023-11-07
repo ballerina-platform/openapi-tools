@@ -42,18 +42,18 @@ public class FunctionSignatureReturnTypeTests {
     public void getReturnTypeTests() throws IOException, BallerinaOpenApiException {
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator();
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/all_return_type_operation.yaml"));
-//        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/jsonproducts").getGet(),
-//                true), "json|error");
-//        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/stringproducts/record").getGet(),
-//                true), "Product[]|error");
-//        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/stringproducts/record").getGet(),
-//                false), "ProductArr|error");
-//        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/xmlproducts").getGet(),
-//                true), "xml|error");
-//        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/xmlarrayproducts").getGet(),
-//                true), "xml[]|error");
-//        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/xmlarrayproducts").getGet(),
-//                false), "XMLArr|error");
+        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/jsonproducts").getGet(),
+                true), "json|error");
+        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/stringproducts/record").getGet(),
+                true), "Product[]|error");
+        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/stringproducts/record").getGet(),
+                false), "ProductArr|error");
+        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/xmlproducts").getGet(),
+                true), "xml|error");
+        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/xmlarrayproducts").getGet(),
+                true), "xml[]|error");
+        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/xmlarrayproducts").getGet(),
+                false), "XMLArr|error");
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/products/nocontent").getGet(),
                 true);
         Assert.assertEquals(returnType, "error?");

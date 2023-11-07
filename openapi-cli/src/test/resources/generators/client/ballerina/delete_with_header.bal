@@ -47,35 +47,33 @@ public isolated client class Client {
     # Delete with request body.
     #
     # + return - Status OK
-    remote isolated function order_risk(json payload) returns http:Response|error {
+    remote isolated function order_risk(json payload) returns error? {
         string resourcePath = string `/request-body`;
         http:Request request = new;
         request.setPayload(payload, "application/json");
-        http:Response response = check self.clientEp->delete(resourcePath, request);
-        return response;
+        return check self.clientEp->delete(resourcePath, request);
     }
     # Delete with header.
     #
     # + xRequestId - Tests header 01
     # + return - Status OK
-    remote isolated function deleteHeader(string xRequestId) returns http:Response|error {
+    remote isolated function deleteHeader(string xRequestId) returns error? {
         string resourcePath = string `/header`;
         map<any> headerValues = {"X-Request-ID": xRequestId};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        http:Response response = check self.clientEp->delete(resourcePath, headers = httpHeaders);
+        return check self.clientEp->delete(resourcePath, headers = httpHeaders);
         return response;
     }
     # Delete with header and request body.
     #
     # + xRequestId - Tests header 01
     # + return - Status OK
-    remote isolated function deleteHeaderRequestBody(string xRequestId, json payload) returns http:Response|error {
+    remote isolated function deleteHeaderRequestBody(string xRequestId, json payload) returns error? {
         string resourcePath = string `/header-with-request-body`;
         map<any> headerValues = {"X-Request-ID": xRequestId};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         request.setPayload(payload, "application/json");
-        http:Response response = check self.clientEp->delete(resourcePath, request, httpHeaders);
-        return response;
+        return check self.clientEp->delete(resourcePath, request, httpHeaders);
     }
 }

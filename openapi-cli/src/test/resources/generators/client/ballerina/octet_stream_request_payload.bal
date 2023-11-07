@@ -38,22 +38,20 @@ public isolated client class Client {
     # Creates a new user.
     #
     # + return - OK
-    resource isolated function post user(byte[] payload) returns http:Response|error {
+    resource isolated function post user(byte[] payload) returns error? {
         string resourcePath = string `/user`;
         http:Request request = new;
         request.setPayload(payload, "application/octet-stream");
-        http:Response response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return check self.clientEp->post(resourcePath, request);
     }
     # Creates a new payment.
     #
     # + payload - Details of the pet to be purchased
     # + return - OK
-    resource isolated function post payment(byte[] payload) returns http:Response|error {
+    resource isolated function post payment(byte[] payload) returns error? {
         string resourcePath = string `/payment`;
         http:Request request = new;
         request.setPayload(payload, "application/octet-stream");
-        http:Response response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return check self.clientEp->post(resourcePath, request);
     }
 }
