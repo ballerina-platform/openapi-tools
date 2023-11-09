@@ -32,9 +32,8 @@ configurations {
 }
 
 dependencies {
-//    implementation project(':openapi-bal-service')
     implementation project(':openapi-core')
-    implementation ("io.swagger.parser.v3:swagger-parser:${swaggerParserVersion}") {
+    implementation("io.swagger.parser.v3:swagger-parser:${swaggerParserVersion}") {
         exclude group: "io.swagger", module: "swagger-compat-spec-parser"
         exclude group: "org.slf4j", module: "slf4j-ext"
         exclude group: "javax.validation", module: "validation-api"
@@ -52,7 +51,7 @@ dependencies {
     implementation "com.google.code.findbugs:jsr305"
     testImplementation "org.testng:testng"
 
-    balTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
+    balTools("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
     }
 }
@@ -82,33 +81,33 @@ task unpackStdLibs() {
     }
 }
 
-task copyStdlibs(type: Copy) {
-    dependsOn(unpackStdLibs)
-    def ballerinaDist = "$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}"
-    into ballerinaDist
-
-    /* Standard Libraries */
-    configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-        def artifactExtractedPath = "${project.buildDir}/extracted-distribution/" + artifact.name + "-zip"
-        into("repo/bala") {
-            from "${artifactExtractedPath}/bala/"
-        }
-        into("repo/cache") {
-            from "${artifactExtractedPath}/cache"
-        }
-    }
-}
-
-test {
-    dependsOn {
-        copyStdlibs
-    }
-    systemProperty "ballerina.home", bDistribution
-
-    useTestNG() {
-        suites "src/test/resources/testng.xml"
-    }
-}
+//task copyStdlibs(type: Copy) {
+//    dependsOn(unpackStdLibs)
+//    def ballerinaDist = "$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}"
+//    into ballerinaDist
+//
+//    /* Standard Libraries */
+//    configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+//        def artifactExtractedPath = "${project.buildDir}/extracted-distribution/" + artifact.name + "-zip"
+//        into("repo/bala") {
+//            from "${artifactExtractedPath}/bala/"
+//        }
+//        into("repo/cache") {
+//            from "${artifactExtractedPath}/cache"
+//        }
+//    }
+//}
+//
+//test {
+//    dependsOn {
+//        copyStdlibs
+//    }
+//    systemProperty "ballerina.home", bDistribution
+//
+//    useTestNG() {
+//        suites "src/test/resources/testng.xml"
+//    }
+//}
 
 shadowJar {
     configurations = [project.configurations.runtimeClasspath]

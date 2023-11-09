@@ -28,7 +28,7 @@ include(':openapi-validator')
 include(':openapi-extension')
 include(':openapi-extension-tests')
 include(':openapi-integration-tests')
-include(':openapi-client-bal-task-plugin')
+include(':openapi-bal-task-plugin')
 //include(':openapi-tests')
 project(':checkstyle').projectDir = file("config${File.separator}checkstyle")
 

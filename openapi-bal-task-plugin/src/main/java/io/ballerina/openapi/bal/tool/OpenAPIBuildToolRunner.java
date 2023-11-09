@@ -38,7 +38,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import static io.ballerina.openapi.bal.tool.Constants.CONFIG_FILE_NAME;
 import static io.ballerina.openapi.bal.tool.Constants.IS_RESOURCE;
@@ -62,58 +61,9 @@ import static io.ballerina.openapi.core.GeneratorUtils.normalizeOpenAPI;
 public class OpenAPIBuildToolRunner implements BuildToolRunner {
     static List<Diagnostic> diagnostics = new ArrayList<>();
 
-    @Override
-    public String getToolName() {
-        return "openapi";
-    }
-
-    @Override
-    public List<Diagnostic> diagnostics() {
-        return diagnostics;
-    }
-
-
-    @Override
-    public void executeTool(ToolContext toolContext) {
-
-        TomlTableNode tomlTableNode = toolContext.optionsTable();
-        Map<String, TopLevelNode> options = tomlTableNode.entries();
-        ImmutablePair<OASClientConfig, OASServiceMetadata> codeGeneratorConfig;
-        try {
-            // Validate the OAS file
-            if (!getOpenAPI(toolContext)){
-                return;
-            }
-
-            String oasFilePath = toolContext.filePath();
-            Path packagePath = toolContext.packageInstance().project().sourceRoot();
-            OpenAPI openAPI = getOpenAPIContract(packagePath, Path.of(oasFilePath), toolContext.optionsTable().location());
-            if (openAPI == null) {
-                return;
-            }
-            codeGeneratorConfig = extractOptionDetails(toolContext, openAPI);
-            if (options.containsKey("mode")) {
-                if (options.get("mode").toString().contains("client")) {
-                    // create client for the given OAS
-                    OASClientConfig clientConfig = codeGeneratorConfig.getLeft();
-                    List<GenSrcFile> sources = generateClientFiles(clientConfig);
-                    Path outputPath = toolContext.outputPath();
-                    writeGeneratedSources(sources, outputPath);
-                }
-            } else {
-                // create both client and service
-            }
-
-        } catch (BallerinaOpenApiException e) {
-            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.PARSER_ERROR;
-            reportDiagnostics(error, e.getMessage(), toolContext.optionsTable().location());
-        } catch (IOException | FormatterException e) {
-            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_GENERATING_CLIENT;
-            reportDiagnostics(error, e.getMessage(), toolContext.optionsTable().location());
-        }
-    }
-
-    public static ImmutablePair<OASClientConfig, OASServiceMetadata> extractOptionDetails(ToolContext toolContext, OpenAPI openAPI) throws IOException, BallerinaOpenApiException {
+    public static ImmutablePair<OASClientConfig, OASServiceMetadata> extractOptionDetails(ToolContext toolContext,
+                                                                                          OpenAPI openAPI) throws
+            IOException, BallerinaOpenApiException {
 
         Map<String, TopLevelNode> options = toolContext.optionsTable().entries();
         Filter filter = new Filter();
@@ -157,7 +107,8 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
      * This method uses to generate ballerina files for openapi client stub.
      * This will return list of (client.bal, util.bal, types.bal) {@code GenSrcFile}.
      */
-    private static List<GenSrcFile> generateClientFiles(OASClientConfig oasClientConfig) throws BallerinaOpenApiException, IOException, FormatterException {
+    private static List<GenSrcFile> generateClientFiles(OASClientConfig oasClientConfig) throws
+            BallerinaOpenApiException, IOException, FormatterException {
 
         List<GenSrcFile> sourceFiles = new ArrayList<>();
 
@@ -201,35 +152,6 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         return sourceFiles;
     }
 
-
-    private void writeGeneratedSources(List<GenSrcFile> sources, Path outputPath) throws IOException {
-
-        for (GenSrcFile file : sources) {
-            Path filePath;
-            if (!file.getType().isOverwritable()) {
-                filePath = outputPath.resolve(file.getFileName());
-                if (Files.notExists(filePath)) {
-                    String fileContent = file.getContent();
-                    writeFile(filePath, fileContent);
-                }
-            } else {
-                boolean isDuplicatedFileInTests = file.getFileName().matches("test.+[0-9]+.bal") ||
-                        file.getFileName().matches("Config.+[0-9]+.toml");
-                if (file.getFileName().equals(TEST_FILE_NAME) || file.getFileName().equals(CONFIG_FILE_NAME) ||
-                        isDuplicatedFileInTests) {
-                    // Create test directory if not exists in the path. If exists do not throw an error
-                    Files.createDirectories(Paths.get(outputPath + OAS_PATH_SEPARATOR + TEST_DIR));
-                    filePath = Paths.get(outputPath.resolve(TEST_DIR + OAS_PATH_SEPARATOR +
-                            file.getFileName()).toFile().getCanonicalPath());
-                } else {
-                    filePath = Paths.get(outputPath.resolve(file.getFileName()).toFile().getCanonicalPath());
-                }
-                String fileContent = file.getContent();
-                writeFile(filePath, fileContent);
-            }
-        }
-    }
-
     public static void writeFile(Path filePath, String content) throws IOException {
         File file = new File(filePath.toString());
 
@@ -268,10 +190,10 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
             return null;
         }
         try {
-             if (licensePath.toString().isBlank()) {
+            if (licensePath.toString().isBlank()) {
                 Constants.DiagnosticMessages error = Constants.DiagnosticMessages.LICENSE_PATH_BLANK;
-                 reportDiagnostics(error, error.getDescription(), location);
-             } else {
+                reportDiagnostics(error, error.getDescription(), location);
+            } else {
                 Path finalLicensePath = Paths.get(licensePath.toString());
                 if (finalLicensePath.isAbsolute()) {
                     relativePath = finalLicensePath;
@@ -306,6 +228,93 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         return licenseHeader;
     }
 
+    private static void reportDiagnostics(Constants.DiagnosticMessages error, String error1, Location location) {
+        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), error1,
+                error.getSeverity());
+        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
+                location);
+        diagnostics.add(diagnostic);
+    }
+
+    @Override
+    public String getToolName() {
+        return "openapi";
+    }
+
+    @Override
+    public List<Diagnostic> diagnostics() {
+        return diagnostics;
+    }
+
+    @Override
+    public void executeTool(ToolContext toolContext) {
+
+        TomlTableNode tomlTableNode = toolContext.optionsTable();
+        Map<String, TopLevelNode> options = tomlTableNode.entries();
+        ImmutablePair<OASClientConfig, OASServiceMetadata> codeGeneratorConfig;
+        try {
+            // Validate the OAS file
+            if (!getOpenAPI(toolContext)) {
+                return;
+            }
+
+            String oasFilePath = toolContext.filePath();
+            Path packagePath = toolContext.packageInstance().project().sourceRoot();
+            OpenAPI openAPI = getOpenAPIContract(packagePath, Path.of(oasFilePath),
+                    toolContext.optionsTable().location());
+            if (openAPI == null) {
+                return;
+            }
+            codeGeneratorConfig = extractOptionDetails(toolContext, openAPI);
+            if (options.containsKey("mode")) {
+                if (options.get("mode").toString().contains("client")) {
+                    // create client for the given OAS
+                    OASClientConfig clientConfig = codeGeneratorConfig.getLeft();
+                    List<GenSrcFile> sources = generateClientFiles(clientConfig);
+                    Path outputPath = toolContext.outputPath();
+                    writeGeneratedSources(sources, outputPath);
+                }
+            } else {
+                // create both client and service
+            }
+
+        } catch (BallerinaOpenApiException e) {
+            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.PARSER_ERROR;
+            reportDiagnostics(error, e.getMessage(), toolContext.optionsTable().location());
+        } catch (IOException | FormatterException e) {
+            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_GENERATING_CLIENT;
+            reportDiagnostics(error, e.getMessage(), toolContext.optionsTable().location());
+        }
+    }
+
+    private void writeGeneratedSources(List<GenSrcFile> sources, Path outputPath) throws IOException {
+
+        for (GenSrcFile file : sources) {
+            Path filePath;
+            if (!file.getType().isOverwritable()) {
+                filePath = outputPath.resolve(file.getFileName());
+                if (Files.notExists(filePath)) {
+                    String fileContent = file.getContent();
+                    writeFile(filePath, fileContent);
+                }
+            } else {
+                boolean isDuplicatedFileInTests = file.getFileName().matches("test.+[0-9]+.bal") ||
+                        file.getFileName().matches("Config.+[0-9]+.toml");
+                if (file.getFileName().equals(TEST_FILE_NAME) || file.getFileName().equals(CONFIG_FILE_NAME) ||
+                        isDuplicatedFileInTests) {
+                    // Create test directory if not exists in the path. If exists do not throw an error
+                    Files.createDirectories(Paths.get(outputPath + OAS_PATH_SEPARATOR + TEST_DIR));
+                    filePath = Paths.get(outputPath.resolve(TEST_DIR + OAS_PATH_SEPARATOR +
+                            file.getFileName()).toFile().getCanonicalPath());
+                } else {
+                    filePath = Paths.get(outputPath.resolve(file.getFileName()).toFile().getCanonicalPath());
+                }
+                String fileContent = file.getContent();
+                writeFile(filePath, fileContent);
+            }
+        }
+    }
+
     private OpenAPI getOpenAPIContract(Path ballerinaFilePath, Path openAPIPath, Location location) {
         Path relativePath = null;
         try {
@@ -322,18 +331,10 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
             if (relativePath != null) {
                 return normalizeOpenAPI(Path.of(relativePath.toString()), true);
             }
-        } catch (IOException|BallerinaOpenApiException e) {
+        } catch (IOException | BallerinaOpenApiException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.UNEXPECTED_EXCEPTIONS;
             reportDiagnostics(error, error.getDescription(), location);
         }
         return null;
-    }
-
-    private static void reportDiagnostics(Constants.DiagnosticMessages error, String error1, Location location) {
-        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), error1,
-                error.getSeverity());
-        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
-                location);
-        diagnostics.add(diagnostic);
     }
 }
