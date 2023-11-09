@@ -39,25 +39,23 @@ public isolated client class Client {
     #
     # + payload - Pet
     # + return - Null response
-    remote isolated function createPet(Pets_body payload) returns http:Response|error {
+    remote isolated function createPet(Pets_body payload) returns error? {
         string resourcePath = string `/pets`;
         http:Request request = new;
         mime:Entity[] bodyParts = check createBodyParts(payload);
         request.setBodyParts(bodyParts);
-        http:Response response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
 
     # Create an user
     #
     # + payload - User
     # + return - Null response
-    remote isolated function createUser(User_body payload) returns http:Response|error {
+    remote isolated function createUser(User_body payload) returns error? {
         string resourcePath = string `/user`;
         http:Request request = new;
         mime:Entity[] bodyParts = check createBodyParts(payload);
         request.setBodyParts(bodyParts);
-        http:Response response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
 }
