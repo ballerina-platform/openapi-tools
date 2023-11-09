@@ -103,7 +103,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.API_KEYS_CONFIG;
 import static io.ballerina.openapi.core.GeneratorConstants.API_KEY_CONFIG_PARAM;
 import static io.ballerina.openapi.core.GeneratorConstants.DELETE;
 import static io.ballerina.openapi.core.GeneratorConstants.ENCODING;
-import static io.ballerina.openapi.core.GeneratorConstants.ERROR_NILLABLE;
+import static io.ballerina.openapi.core.GeneratorConstants.OPTIONAL_ERROR;
 import static io.ballerina.openapi.core.GeneratorConstants.EXECUTE;
 import static io.ballerina.openapi.core.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.core.GeneratorConstants.HEADER;
@@ -541,27 +541,28 @@ public class FunctionBodyGenerator {
                 ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                         "http:Request request = new");
                 statementsList.add(requestStatementNode);
-                clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH +
-                        ", request, " + HTTP_HEADERS + ")";
+                clientCallStatement = "check self.clientEp->%s(%s, request, %s)".formatted(method, RESOURCE_PATH,
+                        HTTP_HEADERS);
+
             } else if (method.equals(DELETE)) {
-                clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH +
-                        ", headers = " + HTTP_HEADERS + ")";
+                clientCallStatement = "check self.clientEp->%s(%s, headers = %s)".formatted(method, RESOURCE_PATH,
+                        HTTP_HEADERS);
             } else if (method.equals(HEAD)) {
-                clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", " +
-                        HTTP_HEADERS + ")";
+                clientCallStatement = "check self.clientEp->%s(%s, %s)".formatted(method, RESOURCE_PATH,
+                        HTTP_HEADERS);
             } else {
-                clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", " +
-                        HTTP_HEADERS + ")";
+                clientCallStatement = "check self.clientEp->%s(%s, %s)".formatted(method, RESOURCE_PATH,
+                        HTTP_HEADERS);
             }
         } else if (method.equals(DELETE)) {
-            clientCallStatement = "check self.clientEp-> " + method + "(" + RESOURCE_PATH + ")";
+            clientCallStatement = "check self.clientEp->%s(%s)".formatted(method, RESOURCE_PATH);
         } else if (isEntityBodyMethods) {
             ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                     "http:Request request = new");
             statementsList.add(requestStatementNode);
-            clientCallStatement = "check self.clientEp-> " + method + "(" + RESOURCE_PATH + ", request)";
+            clientCallStatement = "check self.clientEp->%s(%s, request)".formatted(method, RESOURCE_PATH);
         } else {
-            clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ")";
+            clientCallStatement =  "check self.clientEp->%s(%s)".formatted(method, RESOURCE_PATH);
         }
         //Return Variable
         generateReturnStatement(statementsList, returnType, clientCallStatement);
@@ -658,12 +659,12 @@ public class FunctionBodyGenerator {
             statementsList.add(expressionStatementNode);
         }
         // POST, PUT, PATCH, DELETE, EXECUTE
-        String requestStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", request)";
+        String requestStatement = "check self.clientEp->%s(%s, request)".formatted(method, RESOURCE_PATH);
         if (isHeader) {
             if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
                     || method.equals(EXECUTE)) {
-                requestStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", request, " +
-                                HTTP_HEADERS + ")";
+                requestStatement = "check self.clientEp->%s(%s, request, %s)".formatted(method, RESOURCE_PATH,
+                        HTTP_HEADERS);
                 generateReturnStatement(statementsList, returnType, requestStatement);
             }
         } else {
@@ -682,7 +683,7 @@ public class FunctionBodyGenerator {
                                                 String returnStatement) {
         Token returnKeyWord = createIdentifierToken(RETURN);
         SimpleNameReferenceNode returns;
-        if (returnType.equals(ERROR_NILLABLE)) {
+        if (returnType.equals(OPTIONAL_ERROR)) {
             //to ignore the check keyword
             returnStatement = returnStatement.substring(6);
             returns = createSimpleNameReferenceNode(createIdentifierToken(returnStatement));
@@ -718,7 +719,7 @@ public class FunctionBodyGenerator {
      * @return - return type
      */
     private String returnTypeForTargetTypeField(String rType) {
-        if (rType.equals(ERROR_NILLABLE)) {
+        if (rType.equals(OPTIONAL_ERROR)) {
             return rType;
         }
         String returnType;
