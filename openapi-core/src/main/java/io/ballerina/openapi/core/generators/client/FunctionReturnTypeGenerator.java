@@ -48,7 +48,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_RETURN;
 import static io.ballerina.openapi.core.GeneratorConstants.ERROR;
-import static io.ballerina.openapi.core.GeneratorConstants.ERROR_NILLABLE;
+import static io.ballerina.openapi.core.GeneratorConstants.OPTIONAL_ERROR;
 import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
@@ -135,7 +135,7 @@ public class FunctionReturnTypeGenerator {
             }
             return finalReturnType.toString();
         } else if (noContentResponseFound) {
-            return ERROR_NILLABLE;
+            return OPTIONAL_ERROR;
         } else {
             return DEFAULT_RETURN;
         }
