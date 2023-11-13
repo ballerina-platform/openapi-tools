@@ -40,8 +40,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.ballerina.openapi.extension.build.ValidatorTests.WHITESPACE_PATTERN;
-import static io.ballerina.openapi.idl.client.IDLClientGenPluginTests.DISTRIBUTION_FILE_NAME;
-import static io.ballerina.openapi.idl.client.IDLClientGenPluginTests.TEST_RESOURCE;
+import static io.ballerina.openapi.bal.task.client.ClientGenPluginTests.DISTRIBUTION_FILE_NAME;
+import static io.ballerina.openapi.bal.task.client.ClientGenPluginTests.TEST_RESOURCE;
 
 /**
  * This class for storing the test utils for integration tests.
@@ -194,7 +194,7 @@ public class TestUtil {
         //TODO: Change this function after fixing module name with client declaration alias.
         Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve(project), buildArgs);
         Assert.assertEquals(process.waitFor(), 0);
-        File dir = new File(RESOURCE.resolve("client-idl-projects/" + project + "/generated/").toString());
+        File dir = new File(RESOURCE.resolve("client-bal-task-projects/" + project + "/generated/").toString());
         File[] matchingFiles = dir.listFiles(new FileFilter() {
             public boolean accept(File pathname) {
                 for (String id : ids) {
