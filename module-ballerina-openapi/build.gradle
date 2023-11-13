@@ -29,10 +29,9 @@ dependencies {
     implementation project(':openapi-validator')
     implementation project(':openapi-core')
     implementation project(':openapi-cli')
-//    implementation project(':openapi-client-idl-plugin')
+    implementation project(':openapi-bal-task-plugin')
     implementation project(':openapi-ls-extension')
     implementation project(':openapi-extension')
-    implementation project(':openapi-bal-task-plugin')
 }
 
 clean {
@@ -60,8 +59,7 @@ def targetNativeJar = file("""$project.rootDir/${packageName}-validator/build/li
 def targetOpenApiCommonJar = file("$project.rootDir/openapi-bal-service/build/libs/openapi-bal-service-${project.version}.jar")
 def targetOpenApiCoreJar = file("$project.rootDir/openapi-core/build/libs/openapi-core-${project.version}.jar")
 def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-cli-${project.version}.jar")
-def targetOpenApiBalTaskLJar = file("$project.rootDir/openapi-bal-task-plugin" +
-        "/build/libs/openapi-bal-task-plugin-${project.version}.jar")
+def targetOpenApiBalTaskJar = file("$project.rootDir/openapi-bal-task-plugin/build/libs/openapi-bal-task-plugin-${project.version}.jar")
 def targetOpenApiBuiltInExtensionJar = file("$project.rootDir/openapi-extension/build/libs/openapi-extension-${project.version}.jar")
 def targetOpenApiBuildExtensionJar = file("$project.rootDir/openapi-build-extension/build/libs/openapi-build-extension-${project.version}.jar")
 def targetOpenApiLSJar = file("$project.rootDir/openapi-ls-extension/build/libs/openapi-ls-extension-${project.version}.jar")
@@ -239,7 +237,7 @@ task ballerinaBuild {
         }
 
         copy {
-            from targetOpenApiBalTaskLJar
+            from targetOpenApiBalTaskJar
             into file("$artifactLibParent/libs")
         }
 

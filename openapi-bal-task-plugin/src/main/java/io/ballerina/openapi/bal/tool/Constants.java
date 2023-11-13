@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+ * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.com).
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,8 +37,8 @@ public class Constants {
     public static final String IS_RESOURCE = "isResource";
     public static final String LICENSE = "license";
     public static final String TRUE = "true";
-    public static final String MODULE_ALIAS = "openapi_client";
-    public static final String OPENAPI_REGEX_PATTERN = "\"?(openapi|swagger)\"?\\s*:\\s*\"?[0-9]\\d*\\.\\d+\\.\\d+\"?";
+    public static final String MODE = "mode";
+    public static final String CLIENT = "client";
 
     /**
      * Enum class for containing diagnostic messages.

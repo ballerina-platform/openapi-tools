@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.com).
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package io.ballerina.openapi.bal.tool;
 
 import io.ballerina.cli.tool.BuildToolRunner;
@@ -39,15 +56,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.ballerina.openapi.bal.tool.Constants.CONFIG_FILE_NAME;
+import static io.ballerina.openapi.bal.tool.Constants.CLIENT;
 import static io.ballerina.openapi.bal.tool.Constants.IS_RESOURCE;
 import static io.ballerina.openapi.bal.tool.Constants.LICENSE;
+import static io.ballerina.openapi.bal.tool.Constants.MODE;
 import static io.ballerina.openapi.bal.tool.Constants.NULLABLE;
-import static io.ballerina.openapi.bal.tool.Constants.OAS_PATH_SEPARATOR;
 import static io.ballerina.openapi.bal.tool.Constants.OPERATIONS;
 import static io.ballerina.openapi.bal.tool.Constants.TAGS;
-import static io.ballerina.openapi.bal.tool.Constants.TEST_DIR;
-import static io.ballerina.openapi.bal.tool.Constants.TEST_FILE_NAME;
 import static io.ballerina.openapi.bal.tool.Constants.TRUE;
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
@@ -58,9 +73,101 @@ import static io.ballerina.openapi.core.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.core.GeneratorConstants.YML_EXTENSION;
 import static io.ballerina.openapi.core.GeneratorUtils.normalizeOpenAPI;
 
+/**
+ * This class includes the implementation of the {@code BuildToolRunner} for the OpenAPI tool.
+ *
+ * @since 1.9.0
+ */
 public class OpenAPIBuildToolRunner implements BuildToolRunner {
     static List<Diagnostic> diagnostics = new ArrayList<>();
 
+    @Override
+    public String getToolName() {
+        return "openapi";
+    }
+
+    @Override
+    public List<Diagnostic> diagnostics() {
+        return diagnostics;
+    }
+
+    @Override
+    public void executeTool(ToolContext toolContext) {
+
+        TomlTableNode tomlTableNode = toolContext.optionsTable();
+        Map<String, TopLevelNode> options = tomlTableNode.entries();
+        ImmutablePair<OASClientConfig, OASServiceMetadata> codeGeneratorConfig;
+        try {
+            // Validate the OAS file whether we can handle within OpenAPI tool
+            if (!canHandle(toolContext)) {
+                return;
+            }
+
+            String oasFilePath = toolContext.filePath();
+            Path packagePath = toolContext.packageInstance().project().sourceRoot();
+            OpenAPI openAPI = getOpenAPIContract(packagePath, Path.of(oasFilePath),
+                    toolContext.optionsTable().location());
+            if (openAPI == null) {
+                return;
+            }
+            codeGeneratorConfig = extractOptionDetails(toolContext, openAPI);
+            if (options.containsKey(MODE)) {
+                if (options.get(MODE).toString().contains(CLIENT)) {
+                    // Create client for the given OAS
+                    generateClient(toolContext, codeGeneratorConfig);
+                }
+            } else {
+                // Default generates client
+                generateClient(toolContext, codeGeneratorConfig);
+            }
+        } catch (BallerinaOpenApiException e) {
+            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.PARSER_ERROR;
+            reportDiagnostics(error, e.getMessage(), toolContext.optionsTable().location());
+        } catch (IOException | FormatterException e) {
+            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_GENERATING_CLIENT;
+            reportDiagnostics(error, e.getMessage(), toolContext.optionsTable().location());
+        }
+    }
+
+    /**
+     * This method uses to check whether given specification can be handled via the openapi client generation tool.
+     * This includes basic requirements like file extension check and file header check.
+     */
+    private static boolean canHandle(ToolContext toolContext) {
+        String oasPath = toolContext.filePath();
+        return (oasPath.endsWith(YAML_EXTENSION) || oasPath.endsWith(JSON_EXTENSION) ||
+                oasPath.endsWith(YML_EXTENSION));
+    }
+
+    /**
+     * This method uses to read the openapi contract and return the {@code OpenAPI} object.
+     */
+    private OpenAPI getOpenAPIContract(Path ballerinaFilePath, Path openAPIPath, Location location) {
+        Path relativePath = null;
+        try {
+            if (openAPIPath.toString().isBlank()) {
+                Constants.DiagnosticMessages error = Constants.DiagnosticMessages.EMPTY_CONTRACT_PATH;
+                reportDiagnostics(error, error.getDescription(), location);
+            } else if (Paths.get(openAPIPath.toString()).isAbsolute()) {
+                relativePath = Paths.get(openAPIPath.toString());
+            } else {
+                File file = new File(ballerinaFilePath.toString());
+                File openapiContract = new File(file, openAPIPath.toString());
+                relativePath = Paths.get(openapiContract.getCanonicalPath());
+            }
+            if (relativePath != null) {
+                return normalizeOpenAPI(Path.of(relativePath.toString()), true);
+            }
+        } catch (IOException | BallerinaOpenApiException e) {
+            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.UNEXPECTED_EXCEPTIONS;
+            reportDiagnostics(error, error.getDescription(), location);
+        }
+        return null;
+    }
+
+    /**
+     * This method uses to extract the options given by the user.
+     */
     public static ImmutablePair<OASClientConfig, OASServiceMetadata> extractOptionDetails(ToolContext toolContext,
                                                                                           OpenAPI openAPI) throws
             IOException, BallerinaOpenApiException {
@@ -103,6 +210,14 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         return new ImmutablePair<>(clientMetaDataBuilder.build(), serviceMetaDataBuilder.build());
     }
 
+    private void generateClient(ToolContext toolContext, ImmutablePair<OASClientConfig,
+            OASServiceMetadata> codeGeneratorConfig) throws BallerinaOpenApiException, IOException, FormatterException {
+        OASClientConfig clientConfig = codeGeneratorConfig.getLeft();
+        List<GenSrcFile> sources = generateClientFiles(clientConfig);
+        Path outputPath = toolContext.outputPath();
+        writeGeneratedSources(sources, outputPath);
+    }
+
     /**
      * This method uses to generate ballerina files for openapi client stub.
      * This will return list of (client.bal, util.bal, types.bal) {@code GenSrcFile}.
@@ -112,7 +227,7 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
 
         List<GenSrcFile> sourceFiles = new ArrayList<>();
 
-        // generate ballerina client files.
+        // Generate ballerina client files.
         String licenseContent = oasClientConfig.getLicense();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
@@ -128,7 +243,7 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
                             licenseContent + System.lineSeparator() + utilContent));
         }
 
-        // generate ballerina records to represent schemas.
+        // Generate ballerina records to represent schemas.
         List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
         typeDefinitionNodeList.addAll(ballerinaClientGenerator.getTypeDefinitionNodeList());
         typeDefinitionNodeList.addAll(ballerinaClientGenerator
@@ -139,7 +254,7 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
 
         if (oasClientConfig.getFilters().getTags().size() > 0) {
-            // remove unused records and enums when generating the client by the tags given.
+            // Remove unused records and enums when generating the client by the tags given.
             schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent,
                     null);
         }
@@ -150,31 +265,6 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         }
 
         return sourceFiles;
-    }
-
-    public static void writeFile(Path filePath, String content) throws IOException {
-        File file = new File(filePath.toString());
-
-        // Ensure the directory structure exists
-        File parentDirectory = file.getParentFile();
-        if (!parentDirectory.exists()) {
-            if (!parentDirectory.mkdirs()) {
-                return; // Directory creation failed
-            }
-        }
-        try (FileWriter writer = new FileWriter(filePath.toString(), StandardCharsets.UTF_8)) {
-            writer.write(content);
-        }
-    }
-
-    /**
-     * This method uses to check whether given specification can be handled via the openapi client generation tool.
-     * This includes basic requirements like file extension check and file header check.
-     */
-    private static boolean getOpenAPI(ToolContext toolContext) {
-        String oasPath = toolContext.filePath();
-        return !(oasPath.endsWith(YAML_EXTENSION) || oasPath.endsWith(JSON_EXTENSION) ||
-                oasPath.endsWith(YML_EXTENSION));
     }
 
     /**
@@ -228,6 +318,9 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         return licenseHeader;
     }
 
+    /**
+     * This method uses to report the diagnostics.
+     */
     private static void reportDiagnostics(Constants.DiagnosticMessages error, String error1, Location location) {
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), error1,
                 error.getSeverity());
@@ -236,105 +329,29 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         diagnostics.add(diagnostic);
     }
 
-    @Override
-    public String getToolName() {
-        return "openapi";
-    }
-
-    @Override
-    public List<Diagnostic> diagnostics() {
-        return diagnostics;
-    }
-
-    @Override
-    public void executeTool(ToolContext toolContext) {
-
-        TomlTableNode tomlTableNode = toolContext.optionsTable();
-        Map<String, TopLevelNode> options = tomlTableNode.entries();
-        ImmutablePair<OASClientConfig, OASServiceMetadata> codeGeneratorConfig;
-        try {
-            // Validate the OAS file
-            if (!getOpenAPI(toolContext)) {
-                return;
-            }
-
-            String oasFilePath = toolContext.filePath();
-            Path packagePath = toolContext.packageInstance().project().sourceRoot();
-            OpenAPI openAPI = getOpenAPIContract(packagePath, Path.of(oasFilePath),
-                    toolContext.optionsTable().location());
-            if (openAPI == null) {
-                return;
-            }
-            codeGeneratorConfig = extractOptionDetails(toolContext, openAPI);
-            if (options.containsKey("mode")) {
-                if (options.get("mode").toString().contains("client")) {
-                    // create client for the given OAS
-                    OASClientConfig clientConfig = codeGeneratorConfig.getLeft();
-                    List<GenSrcFile> sources = generateClientFiles(clientConfig);
-                    Path outputPath = toolContext.outputPath();
-                    writeGeneratedSources(sources, outputPath);
-                }
-            } else {
-                // create both client and service
-            }
-
-        } catch (BallerinaOpenApiException e) {
-            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.PARSER_ERROR;
-            reportDiagnostics(error, e.getMessage(), toolContext.optionsTable().location());
-        } catch (IOException | FormatterException e) {
-            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_GENERATING_CLIENT;
-            reportDiagnostics(error, e.getMessage(), toolContext.optionsTable().location());
-        }
-    }
-
+    /**
+     * This method uses to write the generated sources into the given output path.
+     */
     private void writeGeneratedSources(List<GenSrcFile> sources, Path outputPath) throws IOException {
-
         for (GenSrcFile file : sources) {
-            Path filePath;
-            if (!file.getType().isOverwritable()) {
-                filePath = outputPath.resolve(file.getFileName());
-                if (Files.notExists(filePath)) {
-                    String fileContent = file.getContent();
-                    writeFile(filePath, fileContent);
-                }
-            } else {
-                boolean isDuplicatedFileInTests = file.getFileName().matches("test.+[0-9]+.bal") ||
-                        file.getFileName().matches("Config.+[0-9]+.toml");
-                if (file.getFileName().equals(TEST_FILE_NAME) || file.getFileName().equals(CONFIG_FILE_NAME) ||
-                        isDuplicatedFileInTests) {
-                    // Create test directory if not exists in the path. If exists do not throw an error
-                    Files.createDirectories(Paths.get(outputPath + OAS_PATH_SEPARATOR + TEST_DIR));
-                    filePath = Paths.get(outputPath.resolve(TEST_DIR + OAS_PATH_SEPARATOR +
-                            file.getFileName()).toFile().getCanonicalPath());
-                } else {
-                    filePath = Paths.get(outputPath.resolve(file.getFileName()).toFile().getCanonicalPath());
-                }
-                String fileContent = file.getContent();
-                writeFile(filePath, fileContent);
-            }
+            Path filePath = Paths.get(outputPath.resolve(file.getFileName()).toFile().getCanonicalPath());
+            String fileContent = file.getContent();
+            writeFile(filePath, fileContent);
         }
     }
 
-    private OpenAPI getOpenAPIContract(Path ballerinaFilePath, Path openAPIPath, Location location) {
-        Path relativePath = null;
-        try {
-            if (openAPIPath.toString().isBlank()) {
-                Constants.DiagnosticMessages error = Constants.DiagnosticMessages.EMPTY_CONTRACT_PATH;
-                reportDiagnostics(error, error.getDescription(), location);
-            } else if (Paths.get(openAPIPath.toString()).isAbsolute()) {
-                relativePath = Paths.get(openAPIPath.toString());
-            } else {
-                File file = new File(ballerinaFilePath.toString());
-                File openapiContract = new File(file, openAPIPath.toString());
-                relativePath = Paths.get(openapiContract.getCanonicalPath());
-            }
-            if (relativePath != null) {
-                return normalizeOpenAPI(Path.of(relativePath.toString()), true);
-            }
-        } catch (IOException | BallerinaOpenApiException e) {
-            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.UNEXPECTED_EXCEPTIONS;
-            reportDiagnostics(error, error.getDescription(), location);
+    /**
+     * This method uses to write the content into the given file path.
+     */
+    public static void writeFile(Path filePath, String content) throws IOException {
+        File file = new File(filePath.toString());
+        // Ensure the directory structure exists
+        File parentDirectory = file.getParentFile();
+        if (!parentDirectory.exists() && !parentDirectory.mkdirs()) {
+                return; // Directory creation failed
         }
-        return null;
+        try (FileWriter writer = new FileWriter(filePath.toString(), StandardCharsets.UTF_8)) {
+            writer.write(content);
+        }
     }
 }
