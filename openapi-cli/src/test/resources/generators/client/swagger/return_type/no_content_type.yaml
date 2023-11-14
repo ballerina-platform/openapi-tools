@@ -1,0 +1,58 @@
+openapi: 3.0.0
+info:
+  version: 0.0.0
+  title: Links example
+paths:
+  /users:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '101':
+          description: Switching protocols
+
+  /users02:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: Created
+  /user3:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '301':
+          description: Moved Permanently
+  /user4:
+    post:
+      description: This status code will be generate with previous approach till we address the error status code.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '401':
+          description: Unauthorized
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        image:
+          type: string
+          format: byte
+        name:
+          type: string

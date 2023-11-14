@@ -37,10 +37,9 @@ public isolated client class Client {
     #
     # + id - Id of the point
     # + return - Accepted
-    resource isolated function post pet/[Param id]() returns http:Response|error {
+    resource isolated function post pet/[Param id]() returns error? {
         string resourcePath = string `/pet/${getEncodedUri(id)}`;
         http:Request request = new;
-        http:Response response = check self.clientEp-> post(resourcePath, request);
-        return response;
+        return self.clientEp-> post(resourcePath, request);
     }
 }

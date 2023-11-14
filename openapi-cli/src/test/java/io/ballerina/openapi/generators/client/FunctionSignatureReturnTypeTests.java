@@ -18,9 +18,13 @@
 
 package io.ballerina.openapi.generators.client;
 
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.FunctionReturnTypeGenerator;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -29,7 +33,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 
+import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 import static io.ballerina.openapi.generators.common.TestUtils.getOpenAPI;
 
 /**
@@ -54,6 +60,9 @@ public class FunctionSignatureReturnTypeTests {
                 true), "xml[]|error");
         Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/xmlarrayproducts").getGet(),
                 false), "XMLArr|error");
+        String returnType = functionReturnType.getReturnType(array.getPaths().get("/products/nocontent").getGet(),
+                true);
+        Assert.assertEquals(returnType, "error?");
     }
 
     @Test(description = "Tests for the object response without property")
@@ -128,5 +137,22 @@ public class FunctionSignatureReturnTypeTests {
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/store/inventory").getGet(),
                 true);
         Assert.assertEquals(returnType, "json|error");
+    }
+
+    @Test(description = "Tests for the response without content type")
+    public void getReturnTypeForNoContentType() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = getOpenAPI(RES_DIR.resolve("swagger/return_type" +
+                "/no_content_type.yaml"));
+        Path expectedPath = RES_DIR.resolve("ballerina/return/no_content_type.bal");
+
+        List<String> list1 = new ArrayList<>();
+        Filter filter = new Filter(list1, list1);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 }
