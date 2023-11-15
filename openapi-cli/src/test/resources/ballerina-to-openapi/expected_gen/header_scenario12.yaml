@@ -20,7 +20,9 @@ paths:
             type: array
             items:
               type: boolean
-            default: "[true, false]"
+            default:
+              - true
+              - false
       responses:
         "200":
           description: Ok
