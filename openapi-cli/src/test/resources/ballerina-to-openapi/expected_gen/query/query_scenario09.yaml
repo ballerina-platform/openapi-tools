@@ -89,17 +89,9 @@ paths:
                 age: "30"
         - name: q8
           in: query
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: true
-                default:
-                  name: John
-                  address:
-                    number: 14/7
-                    streetName: 2nd cross street
-                    city: London
+          required: true
+          schema:
+            $ref: '#/components/schemas/Record'
         - name: q9
           in: query
           content:
@@ -126,4 +118,17 @@ paths:
             text/plain:
               schema:
                 type: string
-components: {}
+components:
+  schemas:
+    Record:
+      required:
+        - address
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: object
+          additionalProperties:
+            type: string
