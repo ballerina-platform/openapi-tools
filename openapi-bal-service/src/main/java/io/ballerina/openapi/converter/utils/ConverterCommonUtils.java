@@ -85,6 +85,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -544,6 +545,9 @@ public class ConverterCommonUtils {
     }
 
     public static void setDefaultValue(Schema schema, String defaultValue) {
+        if (Objects.isNull(schema) || Objects.isNull(defaultValue)) {
+            return;
+        }
         try {
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
