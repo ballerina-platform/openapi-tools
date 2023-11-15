@@ -1,0 +1,83 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /header:
+    get:
+      operationId: getHeader
+      parameters:
+        - name: h
+          in: header
+          required: true
+          schema: {}
+        - name: h0
+          in: header
+          schema:
+            type: string
+            default: ""
+        - name: h1
+          in: header
+          schema:
+            type: string
+            default: \"John\"
+        - name: h2
+          in: header
+          schema:
+            type: array
+            items:
+              type: string
+            default: []
+        - name: h3
+          in: header
+          schema:
+            type: array
+            items:
+              type: string
+            default:
+              - one
+              - two
+              - three
+        - name: h4
+          in: header
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+            default:
+              - 1
+              - 2
+              - 3
+        - name: h5
+          in: header
+          schema:
+            type: array
+            items:
+              type: number
+              format: float
+            default:
+              - 1
+              - 2.3
+              - 4.56
+        - name: h6
+          in: header
+          schema: {}
+        - name: h7
+          in: header
+          schema: {}
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+components: {}
