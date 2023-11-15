@@ -89,9 +89,15 @@ paths:
                 age: "30"
         - name: q8
           in: query
-          required: true
           schema:
-            $ref: '#/components/schemas/Record'
+            allOf:
+              - $ref: '#/components/schemas/Record'
+            default:
+              name: John
+              address:
+                number: 14/7
+                streetName: 2nd cross street
+                city: London
         - name: q9
           in: query
           content:

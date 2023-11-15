@@ -52,7 +52,9 @@ paths:
         - name: x-def-header
           in: header
           schema:
-            $ref: '#/components/schemas/DateFormat'
+            allOf:
+              - $ref: '#/components/schemas/DateFormat'
+            default: UTC
       responses:
         "200":
           description: Ok
