@@ -195,7 +195,7 @@ public class OpenAPIQueryParameterMapper {
 
         if (Arrays.stream(validExpressionKind).anyMatch(syntaxKind -> syntaxKind ==
                 defaultableQueryParam.expression().kind())) {
-            String defaultValue = defaultableQueryParam.expression().toString().replaceAll("\"", "");
+            String defaultValue = defaultableQueryParam.expression().toString();
             if (defaultableQueryParam.expression().kind() == NIL_LITERAL) {
                 defaultValue = null;
             }
@@ -203,14 +203,14 @@ public class OpenAPIQueryParameterMapper {
                 Content content = queryParameter.getContent();
                 for (Map.Entry<String, MediaType> stringMediaTypeEntry : content.entrySet()) {
                     Schema schema = stringMediaTypeEntry.getValue().getSchema();
-                    schema.setDefault(defaultValue);
+                    ConverterCommonUtils.setDefaultValue(schema, defaultValue);
                     io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
                     media.setSchema(schema);
                     content.addMediaType(stringMediaTypeEntry.getKey(), media);
                 }
             } else {
                 Schema schema = queryParameter.getSchema();
-                schema.setDefault(defaultValue);
+                ConverterCommonUtils.setDefaultValue(schema, defaultValue);
                 queryParameter.setSchema(schema);
             }
         }

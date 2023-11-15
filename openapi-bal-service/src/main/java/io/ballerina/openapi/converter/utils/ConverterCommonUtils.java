@@ -18,6 +18,9 @@
 
 package io.ballerina.openapi.converter.utils;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
@@ -540,5 +543,15 @@ public class ConverterCommonUtils {
             refSchema.set$ref(ConverterCommonUtils.unescapeIdentifier(recordName));
         }
         return refSchema;
+    }
+
+    public static void setDefaultValue(Schema schema, String defaultValue) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+            schema.setDefault(mapper.readValue(defaultValue, Object.class));
+        } catch (JsonProcessingException e) {
+            schema.setDefault(defaultValue);
+        }
     }
 }
