@@ -47,7 +47,8 @@ paths:
             type: array
             items:
               $ref: '#/components/schemas/DateFormat'
-            default: "[\"UTC\"]"
+            default:
+              - UTC
         - name: x-def-header
           in: header
           schema:

@@ -17,7 +17,8 @@ paths:
         - name: h
           in: header
           required: true
-          schema: {}
+          schema:
+            $ref: '#/components/schemas/Header'
         - name: h0
           in: header
           schema:
@@ -69,10 +70,12 @@ paths:
               - 4.56
         - name: h6
           in: header
-          schema: {}
+          schema:
+            $ref: '#/components/schemas/Record'
         - name: h7
           in: header
-          schema: {}
+          schema:
+            $ref: '#/components/schemas/Header'
       responses:
         "200":
           description: Ok
@@ -80,4 +83,37 @@ paths:
             text/plain:
               schema:
                 type: string
-components: {}
+components:
+  schemas:
+    Header:
+      required:
+        - header1
+        - header2
+        - header3
+        - header4
+      type: object
+      properties:
+        header1:
+          type: string
+        header2:
+          type: array
+          items:
+            type: integer
+            format: int64
+        header3:
+          type: array
+          items:
+            type: number
+            format: float
+        header4:
+          type: boolean
+    Record:
+      required:
+        - city
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        city:
+          type: string
