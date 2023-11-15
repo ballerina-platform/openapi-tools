@@ -544,9 +544,15 @@ public class ConverterCommonUtils {
         return refSchema;
     }
 
-    public static void setDefaultValue(Schema schema, String defaultValue) {
+    public static Schema setDefaultValue(Schema schema, String defaultValue) {
         if (Objects.isNull(schema) || Objects.isNull(defaultValue)) {
-            return;
+            return schema;
+        }
+        String ref = schema.get$ref();
+        if (!Objects.isNull(ref)) {
+            Schema<?> compoundSchema = new Schema<>();
+            compoundSchema.setAllOf(List.of(schema));
+            schema = compoundSchema;
         }
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -555,5 +561,6 @@ public class ConverterCommonUtils {
         } catch (JsonProcessingException e) {
             schema.setDefault(defaultValue);
         }
+        return schema;
     }
 }
