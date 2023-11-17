@@ -172,11 +172,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: number
-                    format: float
-                  - type: integer
-                    format: int64
+                $ref: '#/components/schemas/ReturnValuePrimitiveUnion'
   /lift12:
     get:
       operationId: getLift12
@@ -296,6 +292,12 @@ components:
       type: object
       additionalProperties:
         type: string
+    ReturnValuePrimitiveUnion:
+      oneOf:
+        - type: number
+          format: float
+        - type: integer
+          format: int64
     ReturnValueMapJson:
       type: object
       additionalProperties:
