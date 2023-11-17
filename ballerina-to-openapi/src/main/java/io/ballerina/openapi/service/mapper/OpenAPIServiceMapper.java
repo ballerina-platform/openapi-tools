@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * OpenAPIServiceMapper provides functionality for reading and writing OpenApi, either to and from ballerina mapper, or
+ * OpenAPIServiceMapper provides functionality for reading and writing OpenApi, either to and from ballerina service, or
  * to, as well as related functionality for performing conversions between openapi and ballerina.
  *
  * @since 2.0.0
@@ -40,17 +40,19 @@ import java.util.List;
 public class OpenAPIServiceMapper {
     private final SemanticModel semanticModel;
     private final List<OpenAPIMapperDiagnostic> errors = new ArrayList<>();
+    private final ModuleMemberVisitor moduleMemberVisitor;
 
     public List<OpenAPIMapperDiagnostic> getErrors() {
         return errors;
     }
 
     /**
-     * Initializes a mapper parser for OpenApi.
+     * Initializes a service parser for OpenApi.
      */
-    public OpenAPIServiceMapper(SemanticModel semanticModel) {
+    public OpenAPIServiceMapper(SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
         // Default object mapper is JSON mapper available in openApi utils.
         this.semanticModel = semanticModel;
+        this.moduleMemberVisitor = moduleMemberVisitor;
     }
 
     /**
@@ -58,7 +60,7 @@ public class OpenAPIServiceMapper {
      *
      * @param service   - Ballerina @Service object to be map to openApi definition
      * @param openapi   - OpenApi model to populate
-     * @return OpenApi object which represent current mapper.
+     * @return OpenApi object which represent current service.
      */
     public OpenAPI convertServiceToOpenAPI(ServiceDeclarationNode service, OpenAPI openapi) {
         NodeList<Node> functions = service.members();
@@ -69,7 +71,7 @@ public class OpenAPIServiceMapper {
                 resource.add((FunctionDefinitionNode) function);
             }
         }
-        OpenAPIResourceMapper resourceMapper = new OpenAPIResourceMapper(this.semanticModel);
+        OpenAPIResourceMapper resourceMapper = new OpenAPIResourceMapper(this.semanticModel, this.moduleMemberVisitor);
         openapi.setPaths(resourceMapper.getPaths(resource));
         openapi.setComponents(resourceMapper.getComponents());
         errors.addAll(resourceMapper.getErrors());

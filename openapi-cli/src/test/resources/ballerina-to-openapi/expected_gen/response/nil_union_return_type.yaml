@@ -1,0 +1,223 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /path_get_error:
+    get:
+      summary: for `get` method with nil return type and error
+      operationId: getPathGetError
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /path_get:
+    get:
+      summary: for `get` method with nil return type and success status code
+      operationId: getPathGet
+      responses:
+        "202":
+          description: Accepted
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+  /path_get_query_param:
+    get:
+      summary: for `get` method with nil return type and success status code with
+        query param
+      operationId: getPathGetQueryParam
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+  /path_post:
+    post:
+      summary: for `post` method with 201 payload with error status code and nil type
+      operationId: postPathPost
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Links'
+        "202":
+          description: Accepted
+        "404":
+          description: NotFound
+  /path:
+    get:
+      summary: for union return type with error status code and nil type
+      operationId: getPath
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+        "202":
+          description: Accepted
+        "404":
+          description: NotFound
+    post:
+      summary: "resource has 3 status codes that explicitly returns (202, 404, 400)\
+        \ while ? type returns implicitly 400, 202"
+      operationId: postPath
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "404":
+          description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            text/plain:
+              schema:
+                type: string
+  /path_with_query:
+    get:
+      summary: "resource has 4 status codes that explicitly returns (200, 404) while\
+        \ ? type returns implicitly 400, 202"
+      operationId: getPathWithQuery
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+        "404":
+          description: NotFound
+  /path_with_path/{id}:
+    post:
+      summary: "resource has 3 status codes that explicitly returns (404) while ?\
+        \ type returns implicitly 400, 202"
+      operationId: postPathWithPathId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+        "404":
+          description: NotFound
+  /path_with_headers:
+    post:
+      summary: "method has 3 status codes that explicitly returns (404) while ? type\
+        \ returns implicitly 400, 202"
+      operationId: postPathWithHeaders
+      parameters:
+        - name: header
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+        "404":
+          description: NotFound
+  /path_with_request_body:
+    post:
+      operationId: postPathWithRequestBody
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+        "404":
+          description: NotFound
+components:
+  schemas:
+    ErrorPayload:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Reason phrase
+        path:
+          type: string
+          description: Request path
+        method:
+          type: string
+          description: Method type of the request
+        message:
+          type: string
+          description: Error message
+        timestamp:
+          type: string
+          description: Timestamp of the error
+        status:
+          type: integer
+          description: Relevant HTTP status code
+          format: int32
+    Links:
+      required:
+        - id
+        - links
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        links:
+          type: array
+          items:
+            type: string

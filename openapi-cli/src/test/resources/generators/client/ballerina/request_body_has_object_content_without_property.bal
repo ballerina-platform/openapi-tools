@@ -84,21 +84,19 @@ public isolated client class Client {
     # Request body has properties with {} value
     #
     # + return - Ok
-    resource isolated function put greeting03(record{} payload) returns http:Response|error {
+    resource isolated function put greeting03(record{} payload) returns error? {
         string resourcePath = string `/greeting03`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        http:Response response = check self.clientEp->put(resourcePath, request);
-        return response;
+        return self.clientEp->put(resourcePath, request);
     }
     # Request body has non-standard media type application/zip with object content without properties
     #
     # + return - Ok
-    resource isolated function post greeting03(http:Request request) returns http:Response|error {
+    resource isolated function post greeting03(http:Request request) returns error? {
         string resourcePath = string `/greeting03`;
         // TODO: Update the request as needed;
-        http:Response response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
 }

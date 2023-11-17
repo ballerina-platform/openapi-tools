@@ -1,0 +1,330 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /path1:
+    get:
+      operationId: getPath1
+      responses:
+        "202":
+          description: Accepted
+    put:
+      operationId: putPath1
+      responses:
+        "202":
+          description: Accepted
+    post:
+      operationId: postPath1
+      responses:
+        "202":
+          description: Accepted
+    delete:
+      operationId: deletePath1
+      responses:
+        "202":
+          description: Accepted
+    head:
+      operationId: headPath1
+      responses:
+        "202":
+          description: Accepted
+    patch:
+      operationId: patchPath1
+      responses:
+        "202":
+          description: Accepted
+  /path_with_query:
+    get:
+      operationId: getPathWithQuery
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    put:
+      operationId: putPathWithQuery
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    post:
+      operationId: postPathWithQuery
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    delete:
+      operationId: deletePathWithQuery
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    head:
+      operationId: headPathWithQuery
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    patch:
+      operationId: patchPathWithQuery
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+  /path_with_path/{id}:
+    get:
+      operationId: getPathWithPathId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    put:
+      operationId: putPathWithPathId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    post:
+      operationId: postPathWithPathId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    delete:
+      operationId: deletePathWithPathId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    head:
+      operationId: headPathWithPathId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    patch:
+      operationId: patchPathWithPathId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+  /path_with_headers:
+    get:
+      operationId: getPathWithHeaders
+      parameters:
+        - name: header
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    put:
+      operationId: putPathWithHeaders
+      parameters:
+        - name: header
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    post:
+      operationId: postPathWithHeaders
+      parameters:
+        - name: header
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    delete:
+      operationId: deletePathWithHeaders
+      parameters:
+        - name: header
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    head:
+      operationId: headPathWithHeaders
+      parameters:
+        - name: header
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    patch:
+      operationId: patchPathWithHeaders
+      parameters:
+        - name: header
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+  /path_with_request_body:
+    put:
+      operationId: putPathWithRequestBody
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    post:
+      operationId: postPathWithRequestBody
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    delete:
+      operationId: deletePathWithRequestBody
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+    patch:
+      operationId: patchPathWithRequestBody
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+components: {}

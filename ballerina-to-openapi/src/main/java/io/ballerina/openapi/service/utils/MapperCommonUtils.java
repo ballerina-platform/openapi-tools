@@ -51,6 +51,7 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.Constants;
+import io.ballerina.openapi.service.ModuleMemberVisitor;
 import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
@@ -299,8 +300,8 @@ public class MapperCommonUtils {
     }
 
     /**
-     * This function uses to take the mapper declaration node from given required node and return all the annotation
-     * nodes that attached to mapper node.
+     * This function uses to take the service declaration node from given required node and return all the annotation
+     * nodes that attached to service node.
      */
     public static NodeList<AnnotationNode> getAnnotationNodesFromServiceNode(RequiredParameterNode headerParam) {
         NodeList<AnnotationNode> annotations = AbstractNodeFactory.createEmptyNodeList();
@@ -317,7 +318,7 @@ public class MapperCommonUtils {
     }
 
     /**
-     * This function for taking the specific media-type subtype prefix from http mapper configuration annotation.
+     * This function for taking the specific media-type subtype prefix from http service configuration annotation.
      * <pre>
      *     @http:ServiceConfig {
      *          mediaTypeSubtypePrefix : "vnd.exm.sales"
@@ -426,7 +427,7 @@ public class MapperCommonUtils {
     }
 
     /**
-     * This util function is to check the given mapper is http mapper.
+     * This util function is to check the given service is http service.
      *
      * @param serviceNode   Service node for analyse
      * @param semanticModel Semantic model
@@ -471,20 +472,20 @@ public class MapperCommonUtils {
     }
 
     /**
-     * Generate file name with mapper basePath.
+     * Generate file name with service basePath.
      */
     public static String getOpenApiFileName(String servicePath, String serviceName, boolean isJson) {
         String openAPIFileName;
         if (serviceName.isBlank() || serviceName.equals(SLASH) || serviceName.startsWith(SLASH + HYPHEN)) {
             String[] fileName = serviceName.split(SLASH);
-            // This condition is to handle `mapper on ep1 {} ` multiple scenarios
+            // This condition is to handle `service on ep1 {} ` multiple scenarios
             if (fileName.length > 0 && !serviceName.isBlank()) {
                 openAPIFileName = FilenameUtils.removeExtension(servicePath) + fileName[1];
             } else {
                 openAPIFileName = FilenameUtils.removeExtension(servicePath);
             }
         } else if (serviceName.startsWith(HYPHEN)) {
-            // serviceName -> mapper on ep1 {} has multiple mapper ex: "-33456"
+            // serviceName -> service on ep1 {} has multiple service ex: "-33456"
             openAPIFileName = FilenameUtils.removeExtension(servicePath) + serviceName;
         } else {
             // Remove starting path separate if exists
@@ -530,13 +531,14 @@ public class MapperCommonUtils {
     }
 
     public static Schema<?> handleReference(SemanticModel semanticModel, Components components,
-                                            SimpleNameReferenceNode record) {
+                                            SimpleNameReferenceNode recordNode,
+                                            ModuleMemberVisitor moduleMemberVisitor) {
         Schema<?> refSchema = new Schema<>();
         // Creating request body - required.
-        Optional<Symbol> symbol = semanticModel.symbol(record);
+        Optional<Symbol> symbol = semanticModel.symbol(recordNode);
         if (symbol.isPresent() && symbol.get() instanceof TypeSymbol) {
-            String recordName = record.name().toString().trim();
-            ComponentMapper componentMapper = new ComponentMapper(components, semanticModel);
+            String recordName = recordNode.name().toString().trim();
+            ComponentMapper componentMapper = new ComponentMapper(components, semanticModel, moduleMemberVisitor);
             componentMapper.createComponentsSchema((TypeSymbol) symbol.get());
             refSchema.set$ref(MapperCommonUtils.unescapeIdentifier(recordName));
         }

@@ -60,11 +60,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static io.ballerina.openapi.service.Constants.CONTRACT;
 import static io.ballerina.openapi.service.Constants.HYPHEN;
@@ -78,7 +78,7 @@ import static io.ballerina.openapi.service.utils.MapperCommonUtils.getOpenApiFil
 import static io.ballerina.openapi.service.utils.MapperCommonUtils.isHttpService;
 
 /**
- * The ServiceToOpenAPIConverterUtils provide API for convert ballerina mapper into openAPI specification.
+ * The ServiceToOpenAPIConverterUtils provide API for convert ballerina service into openAPI specification.
  *
  * @since 2.0.0
  */
@@ -87,12 +87,12 @@ public class ServiceToOpenAPIMapper {
     /**
      * This method will generate  openapi definition Map lists with ballerina code.
      *
-     * @param syntaxTree    - Syntax tree the related to ballerina mapper
+     * @param syntaxTree    - Syntax tree the related to ballerina service
      * @param semanticModel - Semantic model related to ballerina module
      * @param serviceName   - Service name that need to generate the openAPI specification
      * @param needJson      - Flag for enabling the generated file format with json or YAML
      * @param inputPath     - Input file path for resolve the annotation details
-     * @return - {@link java.util.Map} with openAPI definitions for mapper nodes
+     * @return - {@link java.util.Map} with openAPI definitions for service nodes
      */
     public static List<OASResult> generateOAS3Definition(Project project, SyntaxTree syntaxTree,
                                                          SemanticModel semanticModel,
@@ -141,7 +141,7 @@ public class ServiceToOpenAPIMapper {
     }
 
     /**
-     * Filter all the end points and mapper nodes.
+     * Filter all the end points and service nodes.
      */
     private static void extractServiceNodes(String serviceName, List<String> availableService,
                                             Map<String, ServiceDeclarationNode> servicesToGenerate,
@@ -151,22 +151,22 @@ public class ServiceToOpenAPIMapper {
             if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
                 ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
                 if (isHttpService(serviceNode, semanticModel)) {
-                    // Here check the mapper is related to the http
-                    // module by checking listener type that attached to mapper endpoints.
+                    // Here check the service is related to the http
+                    // module by checking listener type that attached to service endpoints.
                     Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
                     if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
                         String service = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
                         String updateServiceName = service;
-                        //`String updateServiceName` used to track the mapper
-                        // name for mapper file contains multiple mapper node.
+                        //`String updateServiceName` used to track the service
+                        // name for service file contains multiple service node.
                         //example:
                         //<pre>
                         //    listener http:Listener ep1 = new (443, config = {host: "pets-tore.swagger.io"});
-                        //    mapper /hello on ep1 {
+                        //    service /hello on ep1 {
                         //        resource function post hi(@http:Payload json payload) {
                         //       }
                         //    }
-                        //    mapper /hello on new http:Listener(9090) {
+                        //    service /hello on new http:Listener(9090) {
                         //        resource function get hi() {
                         //        }
                         //    }
@@ -179,7 +179,7 @@ public class ServiceToOpenAPIMapper {
                             updateServiceName = service + HYPHEN + serviceSymbol.get().hashCode();
                         }
                         if (serviceName != null) {
-                            // Filtering by mapper name
+                            // Filtering by service name
                             availableService.add(service);
                             if (serviceName.equals(service)) {
                                 servicesToGenerate.put(updateServiceName, serviceNode);
@@ -198,13 +198,14 @@ public class ServiceToOpenAPIMapper {
      * Provides an instance of {@code OASResult}, which contains the generated contract as well as
      * all the diagnostics information.
      *
-     * @param oasGenerationMetaInfo    Includes the mapper definition node, endpoints, semantic model, openapi file
+     * @param oasGenerationMetaInfo    Includes the service definition node, endpoints, semantic model, openapi file
      *                                 name and ballerina file path
      * @return {@code OASResult}
      */
     public static OASResult generateOAS(OASGenerationMetaInfo oasGenerationMetaInfo) {
         ServiceDeclarationNode serviceDefinition = oasGenerationMetaInfo.getServiceDeclarationNode();
         LinkedHashSet<ListenerDeclarationNode> listeners = collectListeners(oasGenerationMetaInfo.getProject());
+        Set<ListenerDeclarationNode> listeners = moduleMemberVisitor.getListenerDeclarationNodes();
         SemanticModel semanticModel = oasGenerationMetaInfo.getSemanticModel();
         String openApiFileName = oasGenerationMetaInfo.getOpenApiFileName();
         Path ballerinaFilePath = oasGenerationMetaInfo.getBallerinaFilePath();
@@ -214,12 +215,13 @@ public class ServiceToOpenAPIMapper {
         if (oasResult.getOpenAPI().isPresent() && oasResult.getDiagnostics().isEmpty()) {
             OpenAPI openapi = oasResult.getOpenAPI().get();
             if (openapi.getPaths() == null) {
-                // Take base path of mapper
-                OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel);
+                // Take base path of service
+                OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel,
+                        moduleMemberVisitor);
                 // 02. Filter and set the ServerURLs according to endpoints. Complete the server section in OAS
                 openapi = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServers(openapi, listeners, serviceDefinition);
                 // 03. Filter path and component sections in OAS.
-                // Generate openApi string for the mentioned mapper name.
+                // Generate openApi string for the mentioned service name.
                 openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi);
                 return new OASResult(openapi, openAPIServiceMapper.getErrors());
             } else {
@@ -232,18 +234,19 @@ public class ServiceToOpenAPIMapper {
 
     /**
      * This function is for completing the OpenAPI info section with package details and annotation details.
-     * First check the given mapper node has metadata with annotation details with `openapi:serviceInfo`,
+     *
+     * First check the given service node has metadata with annotation details with `openapi:serviceInfo`,
      * if it is there, then {@link #parseServiceInfoAnnotationAttachmentDetails(List, AnnotationNode, Path)}
      * function extracts the annotation details and store details in {@code OpenAPIInfo} model using
      * {@link #updateOpenAPIInfoModel(SeparatedNodeList)} function. If the annotation contains the valid contract
      * path then we complete given OpenAPI specification using annotation details. if not we create new OpenAPI
      * specification and fill openAPI info sections.
-     * If the annotation is not in the given mapper, then we filled the OpenAPI specification info section using
-     * package details and title with mapper base path.
+     * If the annotation is not in the given service, then we filled the OpenAPI specification info section using
+     * package details and title with service base path.
      * After completing these two process we normalized the OpenAPI specification by checking all the info
      * details are completed, if in case not completed, we complete empty fields with default values.
      *
-     * @param serviceNode   Service node for relevant mapper.
+     * @param serviceNode   Service node for relevant service.
      * @param semanticModel Semantic model for relevant project.
      * @param openapiFileName OpenAPI generated file name.
      * @param ballerinaFilePath Ballerina file path.
@@ -283,7 +286,7 @@ public class ServiceToOpenAPIMapper {
     }
 
     /**
-     * Generates openAPI Info section when the mapper base path is absent or `/`.
+     * Generates openAPI Info section when the service base path is absent or `/`.
      */
     private static void setInfoDetailsIfServiceNameAbsent(String openapiFileName, OpenAPI openAPI,
                                                           String currentServiceName, String version) {
@@ -489,17 +492,15 @@ public class ServiceToOpenAPIMapper {
      *
      * @param project - current project
      */
-    public static LinkedHashSet<ListenerDeclarationNode> collectListeners(Project project) {
+    public static ModuleMemberVisitor extractNodesFromProject(Project project) {
         ModuleMemberVisitor balNodeVisitor = new ModuleMemberVisitor();
-        LinkedHashSet<ListenerDeclarationNode> listeners = new LinkedHashSet<>();
         project.currentPackage().moduleIds().forEach(moduleId -> {
             Module module = project.currentPackage().module(moduleId);
             module.documentIds().forEach(documentId -> {
                 SyntaxTree syntaxTreeDoc = module.document(documentId).syntaxTree();
                 syntaxTreeDoc.rootNode().accept(balNodeVisitor);
-                listeners.addAll(balNodeVisitor.getListenerDeclarationNodes());
             });
         });
-        return listeners;
+        return balNodeVisitor;
     }
 }

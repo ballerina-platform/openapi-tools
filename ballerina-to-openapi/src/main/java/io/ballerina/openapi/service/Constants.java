@@ -84,6 +84,8 @@ public final class Constants {
     public static final String WILD_CARD_SUMMARY = "Any type of entity body";
     public static final String MEDIA_TYPE = "mediaType";
     public static final String TUPLE = "tuple";
+    public static final String REGEX_INTERPOLATION_PATTERN = "^(?!.*\\$\\{).+$";
+    public static final String DATE_CONSTRAINT_ANNOTATION = "constraint:Date";
 
     /**
      * Enum to select the Ballerina Type.
@@ -307,5 +309,8 @@ public final class Constants {
     public static final String YML_EXTENSION = ".yml";
     public static final String PLUS = "+";
     public static final String UNDERSCORE = "_";
-
+    public static final String HTTP_202 = "202";
+    public static final String HTTP_400 = "400";
+    public static final String ACCEPTED = "Accepted";
+    public static final String BAD_REQUEST = "BadRequest";
 }

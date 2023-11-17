@@ -84,22 +84,25 @@ public class OpenAPIRequestBodyMapper {
     private final SemanticModel semanticModel;
     private final String customMediaPrefix;
     private final List<OpenAPIMapperDiagnostic> diagnostics;
+    private final ModuleMemberVisitor moduleMemberVisitor;
 
     /**
      * This constructor uses to create OpenAPIRequestBodyMapper instance when customMedia type enable.
      *
      * @param components        - OAS Components
      * @param operationAdaptor  - Model of operation
-     * @param semanticModel     - Semantic model for given ballerina mapper
+     * @param semanticModel     - Semantic model for given ballerina service
      * @param customMediaType   - custom media type
      */
     public OpenAPIRequestBodyMapper(Components components, OperationAdaptor operationAdaptor,
-                                    SemanticModel semanticModel, String customMediaType) {
+                                    SemanticModel semanticModel, String customMediaType,
+                                    ModuleMemberVisitor moduleMemberVisitor) {
         this.components = components;
         this.operationAdaptor = operationAdaptor;
         this.semanticModel = semanticModel;
         this.customMediaPrefix = customMediaType;
         this.diagnostics = new ArrayList<>();
+        this.moduleMemberVisitor = moduleMemberVisitor;
     }
 
     /**
@@ -107,11 +110,11 @@ public class OpenAPIRequestBodyMapper {
      *
      * @param components        - OAS Components
      * @param operationAdaptor  - Model of operation
-     * @param semanticModel     - Semantic model for given ballerina mapper
+     * @param semanticModel     - Semantic model for given ballerina service
      */
     public OpenAPIRequestBodyMapper(Components components, OperationAdaptor operationAdaptor,
-                                    SemanticModel semanticModel) {
-        this(components, operationAdaptor, semanticModel, null);
+                                    SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
+        this(components, operationAdaptor, semanticModel, null, moduleMemberVisitor);
     }
 
     public List<OpenAPIMapperDiagnostic> getDiagnostics() {
@@ -127,7 +130,6 @@ public class OpenAPIRequestBodyMapper {
      */
     public void handlePayloadAnnotation(RequiredParameterNode payloadNode, Map<String, Schema> schema,
                                         AnnotationNode annotation, Map<String, String> apiDocs) {
-
         if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD)) {
             // Creating request body - required.
             RequestBody bodyParameter = new RequestBody();
@@ -167,95 +169,99 @@ public class OpenAPIRequestBodyMapper {
                                    RequestBody bodyParameter) {
         SyntaxKind kind = payloadNode.kind();
         String mediaTypeString = getMediaTypeForSyntaxKind(payloadNode);
-        if (mediaTypeString != null || kind == SyntaxKind.UNION_TYPE_DESC ||
-                kind == SyntaxKind.QUALIFIED_NAME_REFERENCE || kind == SyntaxKind.OPTIONAL_TYPE_DESC ||
-                kind == SyntaxKind.ARRAY_TYPE_DESC) {
-            switch (kind) {
-                case INT_TYPE_DESC:
-                case FLOAT_TYPE_DESC:
-                case DECIMAL_TYPE_DESC:
-                case BOOLEAN_TYPE_DESC:
-                case JSON_TYPE_DESC:
-                case XML_TYPE_DESC:
-                case BYTE_TYPE_DESC:
-                    addConsumes(operationAdaptor, bodyParameter, mediaTypeString, kind);
-                    break;
-                case STRING_TYPE_DESC:
-                    mediaTypeString = customMediaPrefix == null ? MediaType.TEXT_PLAIN :
-                            TEXT_PREFIX + customMediaPrefix + TEXT_POSTFIX;
-                    addConsumes(operationAdaptor, bodyParameter, mediaTypeString, kind);
-                    break;
-                case MAP_TYPE_DESC:
-                    Schema objectSchema = new ObjectSchema();
-                    MapTypeDescriptorNode mapTypeDescriptorNode = (MapTypeDescriptorNode) payloadNode;
-                    SyntaxKind mapMemberType = (mapTypeDescriptorNode.mapTypeParamsNode()).typeNode().kind();
-                    Schema<?> openApiSchema = getOpenApiSchema(mapMemberType);
-                    objectSchema.additionalProperties(openApiSchema);
-                    io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
-                    if (bodyParameter.getContent() != null) {
-                        Content content = bodyParameter.getContent();
-                        if (content.containsKey(mediaTypeString)) {
-                            ComposedSchema oneOfSchema = new ComposedSchema();
-                            oneOfSchema.addOneOfItem(content.get(mediaTypeString).getSchema());
-                            oneOfSchema.addOneOfItem(objectSchema);
-                            mediaType.setSchema(oneOfSchema);
-                            content.addMediaType(mediaTypeString, mediaType);
-                        } else {
-                            mediaType.setSchema(objectSchema);
-                            content.addMediaType(mediaTypeString, mediaType);
-                        }
-                    } else {
-                        mediaType.setSchema(objectSchema);
-                        bodyParameter.setContent(new Content().addMediaType(mediaTypeString, mediaType));
-                    }
-                    operationAdaptor.getOperation().setRequestBody(bodyParameter);
-                    break;
-                case OPTIONAL_TYPE_DESC:
-                    OptionalTypeDescriptorNode optionalTypeDescriptorNode = (OptionalTypeDescriptorNode) payloadNode;
-                    handlePayloadType((TypeDescriptorNode) optionalTypeDescriptorNode.typeDescriptor(),
-                            schema, bodyParameter);
-                    break;
-                case UNION_TYPE_DESC:
-                    UnionTypeDescriptorNode unionTypeDescriptorNode = (UnionTypeDescriptorNode) payloadNode;
-                    TypeDescriptorNode leftTypeDesc = unionTypeDescriptorNode.leftTypeDesc();
-                    TypeDescriptorNode rightTypeDesc = unionTypeDescriptorNode.rightTypeDesc();
-                    handlePayloadType(leftTypeDesc, schema, bodyParameter);
-                    handlePayloadType(rightTypeDesc, schema, bodyParameter);
-                    break;
-                case SIMPLE_NAME_REFERENCE:
-                    SimpleNameReferenceNode record = (SimpleNameReferenceNode) payloadNode;
-                    TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(record));
-                    String recordName = record.name().toString().trim();
-                    handleReferencePayload(typeSymbol, mediaTypeString, recordName, schema, bodyParameter);
-                    break;
-                case QUALIFIED_NAME_REFERENCE:
-                    QualifiedNameReferenceNode separateRecord = (QualifiedNameReferenceNode) payloadNode;
-                    typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(separateRecord));
-                    recordName = ((QualifiedNameReferenceNode) payloadNode).identifier().text();
-                    TypeDescKind typeDesc = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor().typeKind();
-                    String mimeType = getMediaTypeForTypeDecKind(typeDesc);
-
-                    handleReferencePayload(typeSymbol, mimeType, recordName, schema, bodyParameter);
-                    break;
-                case ARRAY_TYPE_DESC:
-                    ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) payloadNode;
-                    mediaTypeString = getMediaTypeForSyntaxKind(arrayNode.memberTypeDesc());
-                    handleArrayTypePayload(schema, arrayNode, mediaTypeString, bodyParameter);
-                    break;
-                default:
-                    //Warning message for unsupported request payload type in Ballerina resource.
-                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(
-                            DiagnosticMessages.OAS_CONVERTOR_116, payloadNode.location(),
-                            String.valueOf(payloadNode.kind()));
-                    diagnostics.add(error);
-                    break;
-            }
-        } else {
+        if (!isTypeDeclarationExtractable(kind, mediaTypeString)) {
             //Warning message for unsupported request payload type in Ballerina resource.
             IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(
-                    DiagnosticMessages.OAS_CONVERTOR_116, payloadNode.location(), payloadNode.toSourceCode().trim());
+                    DiagnosticMessages.OAS_CONVERTOR_117, payloadNode.location(), payloadNode.toSourceCode().trim());
             diagnostics.add(error);
+            return;
         }
+        switch (kind) {
+            case INT_TYPE_DESC:
+            case FLOAT_TYPE_DESC:
+            case DECIMAL_TYPE_DESC:
+            case BOOLEAN_TYPE_DESC:
+            case JSON_TYPE_DESC:
+            case XML_TYPE_DESC:
+            case BYTE_TYPE_DESC:
+                addConsumes(operationAdaptor, bodyParameter, mediaTypeString, kind);
+                break;
+            case STRING_TYPE_DESC:
+                mediaTypeString = customMediaPrefix == null ? MediaType.TEXT_PLAIN :
+                        TEXT_PREFIX + customMediaPrefix + TEXT_POSTFIX;
+                addConsumes(operationAdaptor, bodyParameter, mediaTypeString, kind);
+                break;
+            case MAP_TYPE_DESC:
+                Schema objectSchema = new ObjectSchema();
+                MapTypeDescriptorNode mapTypeDescriptorNode = (MapTypeDescriptorNode) payloadNode;
+                SyntaxKind mapMemberType = (mapTypeDescriptorNode.mapTypeParamsNode()).typeNode().kind();
+                Schema<?> openApiSchema = getOpenApiSchema(mapMemberType);
+                objectSchema.additionalProperties(openApiSchema);
+                io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
+                if (bodyParameter.getContent() != null) {
+                    Content content = bodyParameter.getContent();
+                    if (content.containsKey(mediaTypeString)) {
+                        ComposedSchema oneOfSchema = new ComposedSchema();
+                        oneOfSchema.addOneOfItem(content.get(mediaTypeString).getSchema());
+                        oneOfSchema.addOneOfItem(objectSchema);
+                        mediaType.setSchema(oneOfSchema);
+                        content.addMediaType(mediaTypeString, mediaType);
+                    } else {
+                        mediaType.setSchema(objectSchema);
+                        content.addMediaType(mediaTypeString, mediaType);
+                    }
+                } else {
+                    mediaType.setSchema(objectSchema);
+                    bodyParameter.setContent(new Content().addMediaType(mediaTypeString, mediaType));
+                }
+                operationAdaptor.getOperation().setRequestBody(bodyParameter);
+                break;
+            case OPTIONAL_TYPE_DESC:
+                OptionalTypeDescriptorNode optionalTypeDescriptorNode = (OptionalTypeDescriptorNode) payloadNode;
+                handlePayloadType((TypeDescriptorNode) optionalTypeDescriptorNode.typeDescriptor(),
+                        schema, bodyParameter);
+                break;
+            case UNION_TYPE_DESC:
+                UnionTypeDescriptorNode unionTypeDescriptorNode = (UnionTypeDescriptorNode) payloadNode;
+                TypeDescriptorNode leftTypeDesc = unionTypeDescriptorNode.leftTypeDesc();
+                TypeDescriptorNode rightTypeDesc = unionTypeDescriptorNode.rightTypeDesc();
+                handlePayloadType(leftTypeDesc, schema, bodyParameter);
+                handlePayloadType(rightTypeDesc, schema, bodyParameter);
+                break;
+            case SIMPLE_NAME_REFERENCE:
+                SimpleNameReferenceNode record = (SimpleNameReferenceNode) payloadNode;
+                TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(record));
+                String recordName = record.name().toString().trim();
+                handleReferencePayload(typeSymbol, mediaTypeString, recordName, schema, bodyParameter);
+                break;
+            case QUALIFIED_NAME_REFERENCE:
+                QualifiedNameReferenceNode separateRecord = (QualifiedNameReferenceNode) payloadNode;
+                typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(separateRecord));
+                recordName = ((QualifiedNameReferenceNode) payloadNode).identifier().text();
+                TypeDescKind typeDesc = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor().typeKind();
+                String mimeType = getMediaTypeForTypeDecKind(typeDesc);
+
+                handleReferencePayload(typeSymbol, mimeType, recordName, schema, bodyParameter);
+                break;
+            case ARRAY_TYPE_DESC:
+                ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) payloadNode;
+                mediaTypeString = getMediaTypeForSyntaxKind(arrayNode.memberTypeDesc());
+                handleArrayTypePayload(schema, arrayNode, mediaTypeString, bodyParameter);
+                break;
+            default:
+                //Warning message for unsupported request payload type in Ballerina resource.
+                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(
+                        DiagnosticMessages.OAS_CONVERTOR_117, payloadNode.location(),
+                        payloadNode.toSourceCode().trim());
+                diagnostics.add(error);
+                break;
+        }
+    }
+
+    private static boolean isTypeDeclarationExtractable(SyntaxKind kind, String mediaTypeString) {
+        return mediaTypeString != null || kind == SyntaxKind.UNION_TYPE_DESC ||
+                kind == SyntaxKind.QUALIFIED_NAME_REFERENCE || kind == SyntaxKind.OPTIONAL_TYPE_DESC ||
+                kind == SyntaxKind.ARRAY_TYPE_DESC;
     }
 
     /**
@@ -285,8 +291,8 @@ public class OpenAPIRequestBodyMapper {
                 return customMediaPrefix == null ? MediaType.APPLICATION_OCTET_STREAM :
                         APPLICATION_PREFIX + customMediaPrefix + OCTECT_STREAM_POSTFIX;
             case SIMPLE_NAME_REFERENCE:
-                SimpleNameReferenceNode record = (SimpleNameReferenceNode) payloadNode;
-                TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(record));
+            case QUALIFIED_NAME_REFERENCE:
+                TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(payloadNode));
                 if (typeSymbol instanceof TypeReferenceTypeSymbol) {
                     typeSymbol = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
                 }
@@ -348,16 +354,22 @@ public class OpenAPIRequestBodyMapper {
         TypeDescriptorNode typeDescriptorNode = arrayNode.memberTypeDesc();
         // Nested array not allowed
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
-        if (typeDescriptorNode.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
+        if (typeDescriptorNode.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE) ||
+                typeDescriptorNode.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
             //handle record for components
             SimpleNameReferenceNode referenceNode = (SimpleNameReferenceNode) typeDescriptorNode;
             TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(referenceNode));
-            ComponentMapper componentMapper = new ComponentMapper(components, semanticModel);
+            ComponentMapper componentMapper = new ComponentMapper(components, semanticModel, moduleMemberVisitor);
             componentMapper.createComponentsSchema(typeSymbol);
             diagnostics.addAll(componentMapper.getDiagnostics());
             Schema itemSchema = new Schema();
-            arraySchema.setItems(itemSchema.$ref(MapperCommonUtils.unescapeIdentifier(
-                    referenceNode.name().text().trim())));
+            String referenceName;
+            if (typeDescriptorNode.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
+                referenceName = ((SimpleNameReferenceNode) typeDescriptorNode).name().toString().trim();
+            } else {
+                referenceName = ((QualifiedNameReferenceNode) typeDescriptorNode).identifier().text();
+            }
+            arraySchema.setItems(itemSchema.$ref(ConverterCommonUtils.unescapeIdentifier(referenceName)));
             media.setSchema(arraySchema);
         } else if (typeDescriptorNode.kind() == SyntaxKind.BYTE_TYPE_DESC) {
             StringSchema byteSchema = new StringSchema();
@@ -424,7 +436,7 @@ public class OpenAPIRequestBodyMapper {
     private void handleReferencePayload(TypeSymbol typeSymbol, String mediaType, String recordName,
                                         Map<String, Schema> schema, RequestBody bodyParameter) {
         //handle record for components
-        ComponentMapper componentMapper = new ComponentMapper(components, semanticModel);
+        ComponentMapper componentMapper = new ComponentMapper(components, semanticModel, moduleMemberVisitor);
         componentMapper.createComponentsSchema(typeSymbol);
         diagnostics.addAll(componentMapper.getDiagnostics());
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();

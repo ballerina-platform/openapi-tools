@@ -58,7 +58,6 @@ import static io.ballerina.openapi.service.utils.MapperCommonUtils.getAnnotation
 import static io.ballerina.openapi.service.utils.MapperCommonUtils.handleReference;
 import static io.ballerina.openapi.service.utils.MapperCommonUtils.unescapeIdentifier;
 
-
 /**
  * This class processes mapping query parameters in between Ballerina and OAS.
  *
@@ -68,14 +67,16 @@ public class OpenAPIQueryParameterMapper {
     private final Components components;
     private final SemanticModel semanticModel;
     private final Map<String, String> apidocs;
+    private final ModuleMemberVisitor moduleMemberVisitor;
     private final SyntaxKind[] validExpressionKind = {STRING_LITERAL, NUMERIC_LITERAL, BOOLEAN_LITERAL,
             LIST_CONSTRUCTOR, NIL_LITERAL, MAPPING_CONSTRUCTOR};
 
     public OpenAPIQueryParameterMapper(Map<String, String> apidocs, Components components,
-                                       SemanticModel semanticModel) {
+                                       SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
         this.apidocs = apidocs;
         this.components = components;
         this.semanticModel = semanticModel;
+        this.moduleMemberVisitor = moduleMemberVisitor;
     }
 
     /**
@@ -116,7 +117,7 @@ public class OpenAPIQueryParameterMapper {
             QueryParameter queryParameter = new QueryParameter();
             queryParameter.setName(unescapeIdentifier(queryParamName));
             SimpleNameReferenceNode queryNode = (SimpleNameReferenceNode) queryParam.typeName();
-            ComponentMapper componentMapper = new ComponentMapper(components, semanticModel);
+            ComponentMapper componentMapper = new ComponentMapper(components, semanticModel, moduleMemberVisitor);
             TypeSymbol typeSymbol = (TypeSymbol) semanticModel.symbol(queryNode).orElseThrow();
             componentMapper.createComponentsSchema(typeSymbol);
             Schema<?> schema = new Schema<>();
@@ -130,7 +131,7 @@ public class OpenAPIQueryParameterMapper {
         } else if (queryParam.typeName().kind() == SIMPLE_NAME_REFERENCE) {
             QueryParameter queryParameter = new QueryParameter();
             Schema<?> refSchema = handleReference(semanticModel, components, (SimpleNameReferenceNode)
-                    queryParam.typeName());
+                    queryParam.typeName(), moduleMemberVisitor);
             queryParameter.setSchema(refSchema);
             queryParameter.setRequired(true);
             if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
@@ -177,7 +178,7 @@ public class OpenAPIQueryParameterMapper {
         } else if (defaultableQueryParam.typeName().kind() == SIMPLE_NAME_REFERENCE) {
             queryParameter.setName(unescapeIdentifier(queryParamName));
             Schema<?> refSchema = handleReference(semanticModel, components,
-                    (SimpleNameReferenceNode) defaultableQueryParam.typeName());
+                    (SimpleNameReferenceNode) defaultableQueryParam.typeName(), moduleMemberVisitor);
             queryParameter.setSchema(refSchema);
             queryParameter.setRequired(true);
             if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
@@ -244,7 +245,7 @@ public class OpenAPIQueryParameterMapper {
 
     private Schema<?> getItemSchemaForReference(ArrayTypeDescriptorNode arrayNode) {
         SimpleNameReferenceNode record = (SimpleNameReferenceNode) arrayNode.memberTypeDesc();
-        return handleReference(semanticModel, components, record);
+        return handleReference(semanticModel, components, record, moduleMemberVisitor);
     }
 
     /**
@@ -287,7 +288,8 @@ public class OpenAPIQueryParameterMapper {
             }
             return queryParameter;
         } else if (node.kind() == SIMPLE_NAME_REFERENCE) {
-            Schema<?> refSchema = handleReference(semanticModel, components, (SimpleNameReferenceNode) node);
+            Schema<?> refSchema = handleReference(semanticModel, components, (SimpleNameReferenceNode) node,
+                    moduleMemberVisitor);
             queryParameter.setSchema(refSchema);
             if (isOptional.equals(Constants.FALSE)) {
                 queryParameter.setRequired(true);
