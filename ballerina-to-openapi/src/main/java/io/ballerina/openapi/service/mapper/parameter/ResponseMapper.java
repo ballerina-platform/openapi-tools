@@ -145,7 +145,7 @@ public class ResponseMapper {
     }
 
     private void addResponseMapping(TypeSymbol returnType, String defaultStatusCode) {
-        UnionTypeSymbol unionType = getUnionType(returnType);
+        UnionTypeSymbol unionType = getUnionType(returnType, semanticModel);
         if (Objects.nonNull(unionType)) {
             getResponseMappingForUnion(defaultStatusCode, unionType);
         } else {
@@ -153,14 +153,16 @@ public class ResponseMapper {
         }
     }
 
-    private static UnionTypeSymbol getUnionType(TypeSymbol typeSymbol) {
+    private static UnionTypeSymbol getUnionType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
         if (Objects.isNull(typeSymbol)) {
             return null;
         }
         return switch (typeSymbol.typeKind()) {
             case UNION -> (UnionTypeSymbol) typeSymbol;
-            case TYPE_REFERENCE -> getUnionType(((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor());
-            case INTERSECTION -> getUnionType(((IntersectionTypeSymbol) typeSymbol).effectiveTypeDescriptor());
+            case TYPE_REFERENCE -> isSameMediaType(typeSymbol, semanticModel) ? null :
+                    getUnionType(((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor(), semanticModel);
+            case INTERSECTION ->
+                    getUnionType(((IntersectionTypeSymbol) typeSymbol).effectiveTypeDescriptor(), semanticModel);
             default -> null;
         };
     }
@@ -382,7 +384,7 @@ public class ResponseMapper {
                         semanticModel);
                 updateResponseCodeMap(responses, directMemberType, code, mediaType);
             } else {
-                UnionTypeSymbol unionType = getUnionType(directMemberType);
+                UnionTypeSymbol unionType = getUnionType(directMemberType, semanticModel);
                 if (Objects.isNull(unionType)) {
                     String mediaType = getMediaTypeFromType(directMemberType, mediaTypeSubTypePrefix,
                             allowedMediaTypes, semanticModel);

@@ -70,6 +70,7 @@ public final class MediaTypeUtils {
                         semanticModel.types().BYTE).build())) {
             return true;
         }
-        return typeSymbol.subtypeOf(semanticModel.types().JSON) && !semanticModel.types().STRING.subtypeOf(typeSymbol);
+        return typeSymbol.subtypeOf(semanticModel.types().JSON) && !semanticModel.types().STRING.subtypeOf(typeSymbol)
+                && !semanticModel.types().NIL.subtypeOf(typeSymbol);
     }
 }
