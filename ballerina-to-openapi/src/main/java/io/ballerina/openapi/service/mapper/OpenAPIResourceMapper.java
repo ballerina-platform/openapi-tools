@@ -227,7 +227,8 @@ public class OpenAPIResourceMapper {
             }
         }
         errors.addAll(openAPIParameterMapper.getErrors());
-        ResponseMapper responseMapper = new ResponseMapper(semanticModel, components, resource, op.getHttpOperation());
+        ResponseMapper responseMapper = new ResponseMapper(semanticModel, components, resource,
+                op.getHttpOperation(), errors);
         ApiResponses apiResponses = responseMapper.getApiResponses();
         op.getOperation().setResponses(apiResponses);
 //        OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components);

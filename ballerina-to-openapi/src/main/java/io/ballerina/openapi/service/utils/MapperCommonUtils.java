@@ -563,6 +563,7 @@ public class MapperCommonUtils {
     }
 
     public static String getTypeName(TypeSymbol typeSymbol) {
-        return unescapeIdentifier(typeSymbol.getName().orElseThrow().trim());
+        String typeName = typeSymbol.getName().orElse(typeSymbol.signature());
+        return unescapeIdentifier(typeName);
     }
 }

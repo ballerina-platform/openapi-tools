@@ -35,6 +35,7 @@ import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.parameter.utils.CacheHeaderUtils;
 import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.ballerina.openapi.service.mapper.type.RecordTypeMapper;
@@ -79,14 +80,16 @@ public class ResponseMapper {
     private final String mediaTypeSubTypePrefix;
     private final TypeSymbol returnTypeSymbol;
     private final ApiResponses apiResponses = new ApiResponses();
+    private final List<OpenAPIMapperDiagnostic> diagnostics;
 
     public ResponseMapper(SemanticModel semanticModel, Components components, FunctionDefinitionNode resourceNode,
-                          String resourceMethod) {
+                          String resourceMethod, List<OpenAPIMapperDiagnostic> diagnostics) {
         this.semanticModel = semanticModel;
         this.components = components;
         this.defaultStatusCode = resourceMethod.equalsIgnoreCase(POST) ? "201" : "200";
         this.mediaTypeSubTypePrefix = extractCustomMediaType(resourceNode).orElse("");
         this.returnTypeSymbol = getReturnTypeSymbol(resourceNode);
+        this.diagnostics = diagnostics;
         extractAnnotationDetails(resourceNode);
     }
 
@@ -203,7 +206,8 @@ public class ResponseMapper {
             if (componentSchemas == null) {
                 componentSchemas = new HashMap<>();
             }
-            mediaTypeObj.setSchema(ComponentMapper.getTypeSchema(returnType, componentSchemas, semanticModel));
+            mediaTypeObj.setSchema(ComponentMapper.getTypeSchema(returnType, componentSchemas,
+                    semanticModel, diagnostics));
             if (!componentSchemas.isEmpty()) {
                 components.setSchemas(componentSchemas);
             }
@@ -356,6 +360,13 @@ public class ResponseMapper {
 
     private void extractBasicMembers(UnionTypeSymbol unionTypeSymbol, String defaultCode,
                                      Map<String, Map<String, List<TypeSymbol>>> responses) {
+        if (isSameMediaType(unionTypeSymbol, semanticModel)) {
+            String mediaType = getMediaTypeFromType(unionTypeSymbol, mediaTypeSubTypePrefix, allowedMediaTypes,
+                    semanticModel);
+            String code = getResponseCode(unionTypeSymbol, defaultCode, semanticModel);
+            updateResponseCodeMap(responses, unionTypeSymbol, code, mediaType);
+            return;
+        }
         List<TypeSymbol> directMemberTypes = unionTypeSymbol.userSpecifiedMemberTypes();
         for (TypeSymbol directMemberType : directMemberTypes) {
             String code = getResponseCode(directMemberType, defaultCode, semanticModel);
@@ -415,7 +426,7 @@ public class ResponseMapper {
                     schemas = new HashMap<>();
                 }
                 Map<String, Schema> recordFieldsMapping = RecordTypeMapper.getRecordFieldsMapping(recordFieldMap,
-                        schemas, new HashSet<>(), semanticModel);
+                        schemas, new HashSet<>(), semanticModel, diagnostics);
                 if (!schemas.isEmpty()) {
                     components.setSchemas(schemas);
                 }

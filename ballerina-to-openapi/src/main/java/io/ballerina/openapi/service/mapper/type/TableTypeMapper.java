@@ -20,26 +20,30 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.TableTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
+import java.util.List;
 import java.util.Map;
 
 public class TableTypeMapper extends TypeMapper {
 
-    public TableTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel) {
-        super(typeSymbol, semanticModel);
+    public TableTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
+                           List<OpenAPIMapperDiagnostic> diagnostics) {
+        super(typeSymbol, semanticModel, diagnostics);
     }
 
     @Override
     public Schema getReferenceTypeSchema(Map<String, Schema> components) {
         TableTypeSymbol referredType = (TableTypeSymbol) typeSymbol.typeDescriptor();
-        return getSchema(referredType, components, semanticModel).description(description);
+        return getSchema(referredType, components, semanticModel, diagnostics).description(description);
     }
 
     public static Schema getSchema(TableTypeSymbol typeSymbol, Map<String, Schema> components,
-                                   SemanticModel semanticModel) {
+                                   SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
         TypeSymbol elementType = typeSymbol.rowTypeParameter();
-        return new ArraySchema().items(ComponentMapper.getTypeSchema(elementType, components, semanticModel));
+        return new ArraySchema().items(ComponentMapper.getTypeSchema(elementType, components,
+                semanticModel, diagnostics));
     }
 }

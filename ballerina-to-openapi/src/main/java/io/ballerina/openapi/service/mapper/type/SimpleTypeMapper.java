@@ -19,6 +19,10 @@ package io.ballerina.openapi.service.mapper.type;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.NumberSchema;
@@ -26,6 +30,7 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -37,18 +42,19 @@ import static io.ballerina.openapi.service.Constants.INT64;
 
 public class SimpleTypeMapper extends TypeMapper {
 
-    public SimpleTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel) {
-        super(typeSymbol, semanticModel);
+    public SimpleTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
+                            List<OpenAPIMapperDiagnostic> diagnostics) {
+        super(typeSymbol, semanticModel, diagnostics);
     }
 
     @Override
     public Schema getReferenceTypeSchema(Map<String, Schema> components) {
         TypeSymbol referredType = typeSymbol.typeDescriptor();
-        Schema schema = getTypeSchema(referredType);
+        Schema schema = getTypeSchema(referredType, diagnostics);
         return Objects.nonNull(schema) ? schema.description(description) : null;
     }
 
-    public static Schema getTypeSchema(TypeSymbol typeSymbol) {
+    public static Schema getTypeSchema(TypeSymbol typeSymbol, List<OpenAPIMapperDiagnostic> diagnostics) {
         switch (typeSymbol.typeKind()) {
             case STRING:
             case STRING_CHAR:
@@ -85,7 +91,10 @@ public class SimpleTypeMapper extends TypeMapper {
             case ANYDATA:
                 return new Schema();
             default:
-                // Represents the unsupported type
+                DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_117;
+                ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
+                        message.getDescription(), null, MapperCommonUtils.getTypeName(typeSymbol));
+                diagnostics.add(error);
                 return null;
         }
     }

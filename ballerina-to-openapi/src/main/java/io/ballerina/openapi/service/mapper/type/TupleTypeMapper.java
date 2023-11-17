@@ -20,6 +20,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -29,22 +30,23 @@ import java.util.Map;
 
 public class TupleTypeMapper extends TypeMapper {
 
-    public TupleTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel) {
-        super(typeSymbol, semanticModel);
+    public TupleTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
+                           List<OpenAPIMapperDiagnostic> diagnostics) {
+        super(typeSymbol, semanticModel, diagnostics);
     }
 
     @Override
     public Schema getReferenceTypeSchema(Map<String, Schema> components) {
         TupleTypeSymbol referredType = (TupleTypeSymbol) typeSymbol.typeDescriptor();
-        return getSchema(referredType, components, semanticModel).description(description);
+        return getSchema(referredType, components, semanticModel, diagnostics).description(description);
     }
 
     public static Schema getSchema(TupleTypeSymbol typeSymbol, Map<String, Schema> components,
-                                   SemanticModel semanticModel) {
+                                   SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
         // Does not consider rest parameter
         List<TypeSymbol> memberTypeSymbols = typeSymbol.memberTypeDescriptors();
         Schema memberSchema = new ComposedSchema().oneOf(memberTypeSymbols.stream().map(
-                type -> ComponentMapper.getTypeSchema(type, components, semanticModel)).toList());
+                type -> ComponentMapper.getTypeSchema(type, components, semanticModel, diagnostics)).toList());
         return new ArraySchema().items(memberSchema);
     }
 }

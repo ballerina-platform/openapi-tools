@@ -26,6 +26,10 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -39,8 +43,9 @@ public class UnionTypeMapper extends TypeMapper {
 
     private final boolean isEnumType;
 
-    public UnionTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel) {
-        super(typeSymbol, semanticModel);
+    public UnionTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
+                           List<OpenAPIMapperDiagnostic> diagnostics) {
+        super(typeSymbol, semanticModel, diagnostics);
         this.isEnumType = isEnumTypeDefinition(typeSymbol);
     }
 
@@ -51,15 +56,15 @@ public class UnionTypeMapper extends TypeMapper {
             schema = getEnumTypeSchema((EnumSymbol) typeSymbol.definition());
         } else {
             UnionTypeSymbol unionTypeSymbol = (UnionTypeSymbol) typeSymbol.typeDescriptor();
-            schema = getSchema(unionTypeSymbol, components, semanticModel);
+            schema = getSchema(unionTypeSymbol, components, semanticModel, diagnostics);
         }
         return Objects.nonNull(schema) ? schema.description(description) : null;
     }
 
     public static Schema getSchema(UnionTypeSymbol typeSymbol, Map<String, Schema> components,
-                                   SemanticModel semanticModel) {
+                                   SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
         if (isUnionOfSingletons(typeSymbol)) {
-            return getSingletonUnionTypeSchema(typeSymbol);
+            return getSingletonUnionTypeSchema(typeSymbol, diagnostics);
         }
         List<TypeSymbol> memberTypeSymbols = typeSymbol.memberTypeDescriptors();
         List<Schema> memberSchemas = new ArrayList<>();
@@ -68,7 +73,7 @@ public class UnionTypeMapper extends TypeMapper {
             if (memberTypeSymbol.typeKind().equals(TypeDescKind.NIL)) {
                 continue;
             }
-            Schema schema = ComponentMapper.getTypeSchema(memberTypeSymbol, components, semanticModel);
+            Schema schema = ComponentMapper.getTypeSchema(memberTypeSymbol, components, semanticModel, diagnostics);
             if (Objects.nonNull(schema)) {
                 memberSchemas.add(schema);
             }
@@ -108,7 +113,7 @@ public class UnionTypeMapper extends TypeMapper {
         };
     }
 
-    static Schema getSingletonUnionTypeSchema(UnionTypeSymbol typeSymbol) {
+    static Schema getSingletonUnionTypeSchema(UnionTypeSymbol typeSymbol, List<OpenAPIMapperDiagnostic> diagnostics) {
         List<TypeSymbol> memberTypeSymbols = typeSymbol.memberTypeDescriptors();
         List<String> enumValues = new ArrayList<>();
         boolean nullable = hasNilableType(typeSymbol);
@@ -117,6 +122,10 @@ public class UnionTypeMapper extends TypeMapper {
                 continue;
             } else if (!((SingletonTypeSymbol) memberTypeSymbol).originalType().
                     typeKind().equals(TypeDescKind.STRING)) {
+                DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_117;
+                ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
+                        message.getDescription(), null, MapperCommonUtils.getTypeName(typeSymbol));
+                diagnostics.add(error);
                 return null;
             }
             String signature = memberTypeSymbol.signature();

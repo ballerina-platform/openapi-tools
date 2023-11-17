@@ -22,6 +22,7 @@ import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -40,36 +41,34 @@ import static io.ballerina.openapi.service.utils.MapperCommonUtils.getTypeName;
 
 public class RecordTypeMapper extends TypeMapper {
 
-    public RecordTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel) {
-        super(typeSymbol, semanticModel);
+    public RecordTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
+                            List<OpenAPIMapperDiagnostic> diagnostics) {
+        super(typeSymbol, semanticModel, diagnostics);
     }
 
     @Override
     public Schema getReferenceTypeSchema(Map<String, Schema> components) {
         RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeSymbol.typeDescriptor();
-        return getSchema(recordTypeSymbol, components, semanticModel).description(description);
+        return getSchema(recordTypeSymbol, components, semanticModel, diagnostics).description(description);
     }
 
     public static Schema getSchema(RecordTypeSymbol typeSymbol, Map<String, Schema> components,
-                                   SemanticModel semanticModel) {
-//        if (isHttpStatusCodeResponseType(semanticModel, typeSymbol)) {
-//            TypeSymbol bodyType = getBodyTypeFromStatusCodeResponse(typeSymbol);
-//            return TypeSchemaGenerator.getTypeSchema(bodyType, components, semanticModel);
-//        }
+                                   SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
         ObjectSchema schema = new ObjectSchema();
         Set<String> requiredFields = new HashSet<>();
 
         Map<String, RecordFieldSymbol> recordFieldMap = new LinkedHashMap<>(typeSymbol.fieldDescriptors());
-        List<Schema> allOfSchemaList = mapIncludedRecords(typeSymbol, components, recordFieldMap, semanticModel);
+        List<Schema> allOfSchemaList = mapIncludedRecords(typeSymbol, components, recordFieldMap, semanticModel,
+                diagnostics);
 
         Map<String, Schema> properties = getRecordFieldsMapping(recordFieldMap, components,
-                requiredFields, semanticModel);
+                requiredFields, semanticModel, diagnostics);
 
         Optional<TypeSymbol> restFieldType = typeSymbol.restTypeDescriptor();
         if (restFieldType.isPresent()) {
             if (!restFieldType.get().typeKind().equals(TypeDescKind.ANYDATA)) {
                 Schema restFieldSchema = ComponentMapper.getTypeSchema(restFieldType.get(),
-                        components, semanticModel);
+                        components, semanticModel, diagnostics);
                 schema.additionalProperties(restFieldSchema);
             }
         } else {
@@ -87,23 +86,9 @@ public class RecordTypeMapper extends TypeMapper {
         return schema;
     }
 
-//    public static boolean isHttpStatusCodeResponseType(SemanticModel semanticModel, TypeSymbol typeSymbol) {
-//        Optional<Symbol> optionalStatusCodeRecordSymbol = semanticModel.types().getTypeByName("ballerina", "http",
-//                "", "StatusCodeResponse");
-//        if (optionalStatusCodeRecordSymbol.isPresent() &&
-//                optionalStatusCodeRecordSymbol.get() instanceof TypeDefinitionSymbol statusCodeRecordSymbol) {
-//            return typeSymbol.subtypeOf(statusCodeRecordSymbol.typeDescriptor());
-//        }
-//        return false;
-//    }
-//
-//    public static TypeSymbol getBodyTypeFromStatusCodeResponse(TypeSymbol typeSymbol) {
-//        RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) ReferenceTypeMapper.getReferredType(typeSymbol);
-//        return (recordTypeSymbol).fieldDescriptors().get("body").typeDescriptor();
-//    }
-
     static List<Schema> mapIncludedRecords(RecordTypeSymbol typeSymbol, Map<String, Schema> components,
-                                           Map<String, RecordFieldSymbol> recordFieldMap, SemanticModel semanticModel) {
+                                           Map<String, RecordFieldSymbol> recordFieldMap, SemanticModel semanticModel,
+                                           List<OpenAPIMapperDiagnostic> diagnostics) {
         List<Schema> allOfSchemaList = new ArrayList<>();
         List<TypeSymbol> typeInclusions = typeSymbol.typeInclusions();
         for (TypeSymbol typeInclusion : typeInclusions) {
@@ -114,7 +99,7 @@ public class RecordTypeMapper extends TypeMapper {
                 includedRecordSchema.set$ref(getTypeName(typeInclusion));
                 allOfSchemaList.add(includedRecordSchema);
                 ComponentMapper.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion,
-                        components, semanticModel);
+                        components, semanticModel, diagnostics);
 
                 RecordTypeSymbol includedRecordTypeSymbol = (RecordTypeSymbol) ((TypeReferenceTypeSymbol) typeInclusion)
                         .typeDescriptor();
@@ -129,7 +114,8 @@ public class RecordTypeMapper extends TypeMapper {
 
     public static Map<String, Schema> getRecordFieldsMapping(Map<String, RecordFieldSymbol> recordFieldMap,
                                                              Map<String, Schema> components, Set<String> requiredFields,
-                                                             SemanticModel semanticModel) {
+                                                             SemanticModel semanticModel,
+                                                             List<OpenAPIMapperDiagnostic> diagnostics) {
         Map<String, Schema> properties = new LinkedHashMap<>();
         for (Map.Entry<String, RecordFieldSymbol> recordField : recordFieldMap.entrySet()) {
             RecordFieldSymbol recordFieldSymbol = recordField.getValue();
@@ -139,7 +125,7 @@ public class RecordTypeMapper extends TypeMapper {
             }
             String recordFieldDescription = getRecordFieldTypeDescription(recordFieldSymbol);
             Schema recordFieldSchema = ComponentMapper.getTypeSchema(recordFieldSymbol.typeDescriptor(),
-                    components, semanticModel);
+                    components, semanticModel, diagnostics);
             if (Objects.nonNull(recordFieldDescription) && Objects.nonNull(recordFieldSchema)) {
                 recordFieldSchema = recordFieldSchema.description(recordFieldDescription);
             }

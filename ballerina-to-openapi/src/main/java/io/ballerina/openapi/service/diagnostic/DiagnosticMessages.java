@@ -66,7 +66,8 @@ public enum DiagnosticMessages {
             DiagnosticSeverity.ERROR),
     OAS_CONVERTOR_116("OAS_CONVERTOR_116", "Generated OpenAPI definition does not contain `%s` request" +
             " body information, as it's not supported by the OpenAPI tool.",
-            DiagnosticSeverity.WARNING);
+            DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_117("OAS_CONVERTOR_117", "Unsupported type: %s found", DiagnosticSeverity.WARNING);
 
     private final String code;
     private final String description;
