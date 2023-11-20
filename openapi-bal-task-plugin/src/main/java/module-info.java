@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+ * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -22,7 +22,6 @@ module io.ballerina.openapi.bal.tool {
     requires io.ballerina.tools.api;
     requires io.ballerina.formatter.core;
     requires io.ballerina.cli;
-//    requires io.ballerina.toml.semantic.ast;
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
     requires java.ws.rs;

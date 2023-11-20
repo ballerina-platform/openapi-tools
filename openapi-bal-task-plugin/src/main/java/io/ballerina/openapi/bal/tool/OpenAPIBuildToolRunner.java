@@ -94,8 +94,6 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
     @Override
     public void executeTool(ToolContext toolContext) {
 
-        TomlTableNode tomlTableNode = toolContext.optionsTable();
-        Map<String, TopLevelNode> options = tomlTableNode.entries();
         ImmutablePair<OASClientConfig, OASServiceMetadata> codeGeneratorConfig;
         try {
             // Validate the OAS file whether we can handle within OpenAPI tool
@@ -111,14 +109,16 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
                 return;
             }
             codeGeneratorConfig = extractOptionDetails(toolContext, openAPI);
-            if (options.containsKey(MODE)) {
-                if (options.get(MODE).toString().contains(CLIENT)) {
-                    // Create client for the given OAS
-                    generateClient(toolContext, codeGeneratorConfig);
-                }
-            } else {
+            TomlTableNode tomlTableNode = toolContext.optionsTable();
+            if (tomlTableNode == null) {
                 // Default generates client
                 generateClient(toolContext, codeGeneratorConfig);
+            } else {
+                Map<String, TopLevelNode> options = tomlTableNode.entries();
+                if (options.containsKey(MODE) && options.get(MODE).toString().contains(CLIENT)) {
+                        // Create client for the given OAS
+                        generateClient(toolContext, codeGeneratorConfig);
+                }
             }
         } catch (BallerinaOpenApiException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.PARSER_ERROR;
@@ -131,7 +131,7 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
 
     /**
      * This method uses to check whether given specification can be handled via the openapi client generation tool.
-     * This includes basic requirements like file extension check and file header check.
+     * This includes basic requirements like file extension check.
      */
     private static boolean canHandle(ToolContext toolContext) {
         String oasPath = toolContext.filePath();
@@ -197,9 +197,10 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
                     clientMetaDataBuilder.withResourceMode(Arrays.asList(values).contains(TRUE));
                     break;
                 case LICENSE:
-                    String licenseContent = !Objects.equals(values[0], "") ? getLicenseContent(toolContext,
-                            Paths.get(values[0])) : DO_NOT_MODIFY_FILE_HEADER;
-                    clientMetaDataBuilder.withLicense(licenseContent);
+                    String licenseContent = Objects.equals(values[0], "") ? null :
+                            getLicenseContent(toolContext, Paths.get(values[0]));
+                    clientMetaDataBuilder.withLicense(licenseContent != null ? licenseContent :
+                            DO_NOT_MODIFY_FILE_HEADER);
                     break;
                 default:
                     break;
@@ -280,38 +281,55 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
             return null;
         }
         try {
-            if (licensePath.toString().isBlank()) {
-                Constants.DiagnosticMessages error = Constants.DiagnosticMessages.LICENSE_PATH_BLANK;
-                reportDiagnostics(error, error.getDescription(), location);
-            } else {
-                Path finalLicensePath = Paths.get(licensePath.toString());
-                if (finalLicensePath.isAbsolute()) {
-                    relativePath = finalLicensePath;
-                } else {
-                    File openapiContract = new File(ballerinaFilePath.toString(), licensePath.toString());
-                    relativePath = Paths.get(openapiContract.getCanonicalPath());
-                }
-            }
+            relativePath = getLicensePath(licensePath, relativePath, location, ballerinaFilePath);
             if (relativePath != null) {
-                try {
-                    String newLine = System.lineSeparator();
-                    Path filePath = Paths.get((new File(relativePath.toString()).getCanonicalPath()));
-                    licenseHeader = Files.readString(Paths.get(filePath.toString()));
-                    if (!licenseHeader.endsWith(newLine)) {
-                        licenseHeader = licenseHeader + newLine + newLine;
-                    } else if (!licenseHeader.endsWith(newLine + newLine)) {
-                        licenseHeader = licenseHeader + newLine;
-                    }
-                } catch (IOException e) {
-                    Constants.DiagnosticMessages error = Constants.DiagnosticMessages
-                            .ERROR_WHILE_READING_LICENSE_FILE;
-                    reportDiagnostics(error, error.getDescription(), location);
-                    return null;
-                }
-                return licenseHeader;
+                return createLicenseContent(relativePath, location);
             }
         } catch (IOException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_READING_LICENSE_FILE;
+            reportDiagnostics(error, error.getDescription(), location);
+            return null;
+        }
+        return licenseHeader;
+    }
+
+    /**
+     * Util to get license path.
+     */
+    private static Path getLicensePath(Path licensePath, Path relativePath, Location location, Path ballerinaFilePath)
+            throws IOException {
+        if (licensePath.toString().isBlank()) {
+            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.LICENSE_PATH_BLANK;
+            reportDiagnostics(error, error.getDescription(), location);
+        } else {
+            Path finalLicensePath = Paths.get(licensePath.toString());
+            if (finalLicensePath.isAbsolute()) {
+                relativePath = finalLicensePath;
+            } else {
+                File openapiContract = new File(ballerinaFilePath.toString(), licensePath.toString());
+                relativePath = Paths.get(openapiContract.getCanonicalPath());
+            }
+        }
+        return relativePath;
+    }
+
+    /**
+     * Util to create license content.
+     */
+    private static String createLicenseContent(Path relativePath, Location location) {
+        String licenseHeader;
+        try {
+            String newLine = System.lineSeparator();
+            Path filePath = Paths.get((new File(relativePath.toString()).getCanonicalPath()));
+            licenseHeader = Files.readString(Paths.get(filePath.toString()));
+            if (!licenseHeader.endsWith(newLine)) {
+                licenseHeader = licenseHeader + newLine + newLine;
+            } else if (!licenseHeader.endsWith(newLine + newLine)) {
+                licenseHeader = licenseHeader + newLine;
+            }
+        } catch (IOException e) {
+            Constants.DiagnosticMessages error = Constants.DiagnosticMessages
+                    .ERROR_WHILE_READING_LICENSE_FILE;
             reportDiagnostics(error, error.getDescription(), location);
             return null;
         }
