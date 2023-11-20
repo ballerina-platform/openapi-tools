@@ -42,11 +42,11 @@ import io.ballerina.openapi.service.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.OpenAPIEndpointMapper;
 import io.ballerina.openapi.service.mapper.OpenAPIServiceMapper;
+import io.ballerina.openapi.service.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.model.OASResult;
 import io.ballerina.openapi.service.model.OpenAPIInfo;
 import io.ballerina.openapi.service.utils.MapperCommonUtils;
-import io.ballerina.openapi.service.utils.ModuleMemberVisitor;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Project;
 import io.ballerina.tools.diagnostics.Location;
@@ -204,7 +204,7 @@ public class ServiceToOpenAPIMapper {
      */
     public static OASResult generateOAS(OASGenerationMetaInfo oasGenerationMetaInfo) {
         ServiceDeclarationNode serviceDefinition = oasGenerationMetaInfo.getServiceDeclarationNode();
-        LinkedHashSet<ListenerDeclarationNode> listeners = collectListeners(oasGenerationMetaInfo.getProject());
+        ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(oasGenerationMetaInfo.getProject());
         Set<ListenerDeclarationNode> listeners = moduleMemberVisitor.getListenerDeclarationNodes();
         SemanticModel semanticModel = oasGenerationMetaInfo.getSemanticModel();
         String openApiFileName = oasGenerationMetaInfo.getOpenApiFileName();

@@ -16,13 +16,11 @@
 
 package io.ballerina.openapi.service.mapper.type;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.CommonData;
 import io.ballerina.openapi.service.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.media.Schema;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -31,17 +29,14 @@ public abstract class TypeMapper {
     final String name;
     final TypeReferenceTypeSymbol typeSymbol;
     final String description;
-    final SemanticModel semanticModel;
-    final List<OpenAPIMapperDiagnostic> diagnostics;
+    final CommonData commonData;
 
 
-    public TypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
-                      List<OpenAPIMapperDiagnostic> diagnostics) {
+    public TypeMapper(TypeReferenceTypeSymbol typeSymbol, CommonData commonData) {
         this.name = MapperCommonUtils.getTypeName(typeSymbol);
         this.typeSymbol = typeSymbol;
         this.description = MapperCommonUtils.getTypeDescription(typeSymbol);
-        this.semanticModel = semanticModel;
-        this.diagnostics = diagnostics;
+        this.commonData = commonData;
     }
 
     abstract Schema getReferenceTypeSchema(Map<String, Schema> components);

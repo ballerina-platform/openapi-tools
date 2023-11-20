@@ -18,7 +18,7 @@
 package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.openapi.cmd.OASContractGenerator;
-import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
+import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
@@ -60,7 +60,7 @@ public class TestUtils {
         compareWithGeneratedFile(new OASContractGenerator(), ballerinaFilePath, yamlFile);
     }
 
-    public static List<OpenAPIConverterDiagnostic> compareWithGeneratedFile(OASContractGenerator openApiConverter,
+    public static List<OpenAPIMapperDiagnostic> compareWithGeneratedFile(OASContractGenerator openApiConverter,
                                                                             Path ballerinaFilePath, String yamlFile)
                                                                             throws IOException {
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());

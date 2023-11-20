@@ -39,6 +39,7 @@ import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.type.ComponentMapper;
+import io.ballerina.openapi.service.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.model.OperationAdaptor;
 import io.ballerina.openapi.service.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.Components;
@@ -60,7 +61,6 @@ import static io.ballerina.openapi.service.Constants.HTTP_REQUEST;
 import static io.ballerina.openapi.service.Constants.WILD_CARD_CONTENT_KEY;
 import static io.ballerina.openapi.service.Constants.WILD_CARD_SUMMARY;
 import static io.ballerina.openapi.service.utils.MapperCommonUtils.extractCustomMediaType;
-import static io.ballerina.openapi.service.utils.ConverterCommonUtils.unescapeIdentifier;
 
 /**
  * OpenAPIParameterMapper provides functionality for converting ballerina parameter to OAS parameter model.

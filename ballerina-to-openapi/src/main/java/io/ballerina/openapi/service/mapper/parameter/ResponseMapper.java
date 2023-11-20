@@ -36,11 +36,13 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.CommonData;
 import io.ballerina.openapi.service.mapper.parameter.utils.CacheHeaderUtils;
 import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.ballerina.openapi.service.mapper.type.RecordTypeMapper;
 import io.ballerina.openapi.service.mapper.type.ReferenceTypeMapper;
 import io.ballerina.openapi.service.model.CacheConfigAnnotation;
+import io.ballerina.openapi.service.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.headers.Header;
@@ -81,15 +83,18 @@ public class ResponseMapper {
     private final TypeSymbol returnTypeSymbol;
     private final ApiResponses apiResponses = new ApiResponses();
     private final List<OpenAPIMapperDiagnostic> diagnostics;
+    private final ModuleMemberVisitor moduleMemberVisitor;
 
     public ResponseMapper(SemanticModel semanticModel, Components components, FunctionDefinitionNode resourceNode,
-                          String resourceMethod, List<OpenAPIMapperDiagnostic> diagnostics) {
+                          String resourceMethod, List<OpenAPIMapperDiagnostic> diagnostics,
+                          ModuleMemberVisitor moduleMemberVisitor) {
         this.semanticModel = semanticModel;
         this.components = components;
         this.defaultStatusCode = resourceMethod.equalsIgnoreCase(POST) ? "201" : "200";
         this.mediaTypeSubTypePrefix = extractCustomMediaType(resourceNode).orElse("");
         this.returnTypeSymbol = getReturnTypeSymbol(resourceNode);
         this.diagnostics = diagnostics;
+        this.moduleMemberVisitor = moduleMemberVisitor;
         extractAnnotationDetails(resourceNode);
     }
 
@@ -208,8 +213,8 @@ public class ResponseMapper {
             if (componentSchemas == null) {
                 componentSchemas = new HashMap<>();
             }
-            mediaTypeObj.setSchema(ComponentMapper.getTypeSchema(returnType, componentSchemas,
-                    semanticModel, diagnostics));
+            CommonData commonData = new CommonData(semanticModel, moduleMemberVisitor, diagnostics);
+            mediaTypeObj.setSchema(ComponentMapper.getTypeSchema(returnType, componentSchemas, commonData));
             if (!componentSchemas.isEmpty()) {
                 components.setSchemas(componentSchemas);
             }
@@ -418,6 +423,7 @@ public class ResponseMapper {
     public Map<String, Header> getHeadersFromStatusCodeResponse(TypeSymbol typeSymbol) {
         RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) ReferenceTypeMapper.getReferredType(typeSymbol);
         if (Objects.nonNull(recordTypeSymbol) && recordTypeSymbol.fieldDescriptors().containsKey("headers")) {
+            String recordName = MapperCommonUtils.getTypeName(recordTypeSymbol);
             TypeSymbol headersType = ReferenceTypeMapper.getReferredType(
                     recordTypeSymbol.fieldDescriptors().get("headers").typeDescriptor());
             if (Objects.nonNull(headersType) && headersType.typeKind().equals(TypeDescKind.RECORD)) {
@@ -428,7 +434,8 @@ public class ResponseMapper {
                     schemas = new HashMap<>();
                 }
                 Map<String, Schema> recordFieldsMapping = RecordTypeMapper.getRecordFieldsMapping(recordFieldMap,
-                        schemas, new HashSet<>(), semanticModel, diagnostics);
+                        schemas, new HashSet<>(), recordName,
+                        new CommonData(semanticModel, moduleMemberVisitor, diagnostics));
                 if (!schemas.isEmpty()) {
                     components.setSchemas(schemas);
                 }
@@ -500,5 +507,9 @@ public class ResponseMapper {
             return typeSymbol.subtypeOf(recordSymbol.typeDescriptor());
         }
         return false;
+    }
+
+    public ModuleMemberVisitor getModuleMemberVisitor() {
+        return moduleMemberVisitor;
     }
 }

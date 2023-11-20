@@ -74,7 +74,14 @@ public enum DiagnosticMessages {
             "tool, it may also not support interpolation within the REGEX pattern.", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_120("OAS_CONVERTER_120", "Ballerina Date constraints might not be reflected in the " +
             "OpenAPI definition", DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_121("OAS_CONVERTOR_117", "Unsupported type: %s found", DiagnosticSeverity.WARNING);
+    OAS_CONVERTOR_121("OAS_CONVERTOR_121", "Generated OpenAPI definition does not contain the mapping " +
+            "for the unsupported type: %s", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_122("OAS_CONVERTOR_122", "Generated OpenAPI definition does not contain the mapping " +
+            "for the unsupported union type: %s", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_123("OAS_CONVERTOR_123", "Generated OpenAPI definition does not contain the mapping " +
+            "for the unsupported tuple type: %s", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_124("OAS_CONVERTOR_124", "Generated OpenAPI definition does not contain the default " +
+            "value for the record field: %s", DiagnosticSeverity.WARNING);
 
     private final String code;
     private final String description;

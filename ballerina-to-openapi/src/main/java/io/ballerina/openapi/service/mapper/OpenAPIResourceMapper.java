@@ -34,6 +34,7 @@ import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.parameter.ResponseMapper;
+import io.ballerina.openapi.service.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.model.OperationAdaptor;
 import io.ballerina.openapi.service.utils.MapperCommonUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;

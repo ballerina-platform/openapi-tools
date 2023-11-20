@@ -16,37 +16,44 @@
 
 package io.ballerina.openapi.service.mapper.type;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.mapper.CommonData;
+import io.ballerina.openapi.service.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class TupleTypeMapper extends TypeMapper {
 
-    public TupleTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
-                           List<OpenAPIMapperDiagnostic> diagnostics) {
-        super(typeSymbol, semanticModel, diagnostics);
+    public TupleTypeMapper(TypeReferenceTypeSymbol typeSymbol, CommonData commonData) {
+        super(typeSymbol, commonData);
     }
 
     @Override
     public Schema getReferenceTypeSchema(Map<String, Schema> components) {
         TupleTypeSymbol referredType = (TupleTypeSymbol) typeSymbol.typeDescriptor();
-        return getSchema(referredType, components, semanticModel, diagnostics).description(description);
+        return getSchema(referredType, components, commonData).description(description);
     }
 
-    public static Schema getSchema(TupleTypeSymbol typeSymbol, Map<String, Schema> components,
-                                   SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
-        // Does not consider rest parameter
+    public static Schema getSchema(TupleTypeSymbol typeSymbol, Map<String, Schema> components, CommonData commonData) {
+        Optional<TypeSymbol> restTypeSymbol = typeSymbol.restTypeDescriptor();
+        if (restTypeSymbol.isPresent()) {
+            DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_123;
+            ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
+                    message.getDescription(), null, MapperCommonUtils.getTypeName(typeSymbol));
+            commonData.diagnostics().add(error);
+        }
         List<TypeSymbol> memberTypeSymbols = typeSymbol.memberTypeDescriptors();
         Schema memberSchema = new ComposedSchema().oneOf(memberTypeSymbols.stream().map(
-                type -> ComponentMapper.getTypeSchema(type, components, semanticModel, diagnostics)).toList());
+                type -> ComponentMapper.getTypeSchema(type, components, commonData)).toList());
         return new ArraySchema().items(memberSchema);
     }
 }

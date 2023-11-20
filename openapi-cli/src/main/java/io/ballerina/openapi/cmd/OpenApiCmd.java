@@ -245,24 +245,26 @@ public class OpenApiCmd implements BLauncherCmd {
         openApiConverter.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, service,
                 generatedFileType);
         errors.addAll(openApiConverter.getErrors());
+        boolean exitWithError = false;
         if (!errors.isEmpty()) {
             for (OpenAPIMapperDiagnostic error: errors) {
-                if (error instanceof ExceptionDiagnostic) {
+                if (error instanceof ExceptionDiagnostic exceptionDiagnostic) {
                     this.outStream = System.err;
-                    ExceptionDiagnostic exceptionDiagnostic = (ExceptionDiagnostic) error;
                     OpenAPIDiagnostic diagnostic = CmdUtils.constructOpenAPIDiagnostic(exceptionDiagnostic.getCode(),
                             exceptionDiagnostic.getMessage(), exceptionDiagnostic.getDiagnosticSeverity(),
                             exceptionDiagnostic.getLocation().orElse(null));
-                    outStream.println(diagnostic.toString());
-                    exitError(this.exitWhenFinish);
-                } else if (error instanceof IncompatibleResourceDiagnostic) {
-                    IncompatibleResourceDiagnostic incompatibleError = (IncompatibleResourceDiagnostic) error;
+                    outStream.println(diagnostic);
+                    exitWithError = true;
+                } else if (error instanceof IncompatibleResourceDiagnostic incompatibleError) {
                     OpenAPIDiagnostic diagnostic = CmdUtils.constructOpenAPIDiagnostic(incompatibleError.getCode(),
                             incompatibleError.getMessage(), incompatibleError.getDiagnosticSeverity(),
-                            incompatibleError.getLocation().get());
-                    outStream.println(diagnostic.toString());
+                            incompatibleError.getLocation().orElse(null));
+                    outStream.println(diagnostic);
                 }
             }
+        }
+        if (exitWithError) {
+            exitError(this.exitWhenFinish);
         }
     }
 

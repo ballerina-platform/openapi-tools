@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.service.utils;
+package io.ballerina.openapi.service.model;
 
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
@@ -51,5 +51,14 @@ public class ModuleMemberVisitor extends NodeVisitor {
 
     public Set<ListenerDeclarationNode> getListenerDeclarationNodes() {
         return listenerDeclarationNodes;
+    }
+
+    public TypeDefinitionNode getTypeDefinitionNode(String typeName) {
+        for (TypeDefinitionNode typeDefinitionNode : typeDefinitionNodes) {
+            if (typeDefinitionNode.typeName().text().equals(typeName)) {
+                return typeDefinitionNode;
+            }
+        }
+        return null;
     }
 }

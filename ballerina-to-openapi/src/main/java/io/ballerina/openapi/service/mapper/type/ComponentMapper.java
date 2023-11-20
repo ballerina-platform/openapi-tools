@@ -30,6 +30,8 @@ import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.CommonData;
+import io.ballerina.openapi.service.model.ModuleMemberVisitor;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -48,59 +50,57 @@ import static io.ballerina.openapi.service.utils.MapperCommonUtils.getTypeName;
 public class ComponentMapper {
 
     private final Components components;
-    private final List<OpenAPIMapperDiagnostic> diagnostics;
-    private final SemanticModel semanticModel;
+    private final CommonData commonData;
 
-    public ComponentMapper(Components components, SemanticModel semanticModel) {
+    public ComponentMapper(Components components, SemanticModel semanticModel,
+                           ModuleMemberVisitor moduleMemberVisitor) {
         this.components = components;
-        this.diagnostics = new ArrayList<>();
-        this.semanticModel = semanticModel;
+        this.commonData = new CommonData(semanticModel, moduleMemberVisitor,
+                new ArrayList<>());
     }
 
     public static Schema getTypeSchema(TypeSymbol typeSymbol, Map<String, Schema> components,
-                                       SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
+                                       CommonData componentMapperData) {
         return switch (typeSymbol.typeKind()) {
-            case MAP -> MapTypeMapper.getSchema((MapTypeSymbol) typeSymbol, components, semanticModel, diagnostics);
+            case MAP -> MapTypeMapper.getSchema((MapTypeSymbol) typeSymbol, components, componentMapperData);
             case ARRAY ->
-                    ArrayTypeMapper.getSchema((ArrayTypeSymbol) typeSymbol, components, semanticModel, diagnostics);
+                    ArrayTypeMapper.getSchema((ArrayTypeSymbol) typeSymbol, components, componentMapperData);
             case TYPE_REFERENCE -> ReferenceTypeMapper.getSchema((TypeReferenceTypeSymbol) typeSymbol, components,
-                    semanticModel, diagnostics);
-            case RECORD -> RecordTypeMapper.getSchema((RecordTypeSymbol) typeSymbol, components, semanticModel,
-                    diagnostics);
+                    componentMapperData);
+            case RECORD -> RecordTypeMapper.getSchema((RecordTypeSymbol) typeSymbol, components,
+                    null, componentMapperData);
             case INTERSECTION ->
-                    ReadOnlyTypeMapper.getSchema((IntersectionTypeSymbol) typeSymbol, components, semanticModel,
-                            diagnostics);
+                    ReadOnlyTypeMapper.getSchema((IntersectionTypeSymbol) typeSymbol, components, componentMapperData);
             case UNION ->
-                    UnionTypeMapper.getSchema((UnionTypeSymbol) typeSymbol, components, semanticModel, diagnostics);
+                    UnionTypeMapper.getSchema((UnionTypeSymbol) typeSymbol, components, componentMapperData);
             case TABLE ->
-                    TableTypeMapper.getSchema((TableTypeSymbol) typeSymbol, components, semanticModel, diagnostics);
+                    TableTypeMapper.getSchema((TableTypeSymbol) typeSymbol, components, componentMapperData);
             case TUPLE ->
-                    TupleTypeMapper.getSchema((TupleTypeSymbol) typeSymbol, components, semanticModel, diagnostics);
+                    TupleTypeMapper.getSchema((TupleTypeSymbol) typeSymbol, components, componentMapperData);
             case ERROR ->
-                    ErrorTypeMapper.getSchema((ErrorTypeSymbol) typeSymbol, components, semanticModel, diagnostics);
-            default -> SimpleTypeMapper.getTypeSchema(typeSymbol, diagnostics);
+                    ErrorTypeMapper.getSchema((ErrorTypeSymbol) typeSymbol, components, componentMapperData);
+            default -> SimpleTypeMapper.getTypeSchema(typeSymbol, componentMapperData);
         };
     }
 
     public static Map<String, Schema> createComponentMapping(TypeReferenceTypeSymbol typeSymbol,
                                                              Map<String, Schema> components,
-                                                             SemanticModel semanticModel,
-                                                             List<OpenAPIMapperDiagnostic> diagnostics) {
+                                                             CommonData componentMapperData) {
         if (components.containsKey(getTypeName(typeSymbol))) {
             return components;
         }
         TypeSymbol referredType = typeSymbol.typeDescriptor();
         TypeMapper mapper = switch (referredType.typeKind()) {
-            case TYPE_REFERENCE -> new ReferenceTypeMapper(typeSymbol, semanticModel, diagnostics);
-            case MAP -> new MapTypeMapper(typeSymbol, semanticModel, diagnostics);
-            case RECORD -> new RecordTypeMapper(typeSymbol, semanticModel, diagnostics);
-            case INTERSECTION -> new ReadOnlyTypeMapper(typeSymbol, semanticModel, diagnostics);
-            case ARRAY -> new ArrayTypeMapper(typeSymbol, semanticModel, diagnostics);
-            case UNION -> new UnionTypeMapper(typeSymbol, semanticModel, diagnostics);
-            case TABLE -> new TableTypeMapper(typeSymbol, semanticModel, diagnostics);
-            case TUPLE -> new TupleTypeMapper(typeSymbol, semanticModel, diagnostics);
-            case ERROR -> new ErrorTypeMapper(typeSymbol, semanticModel, diagnostics);
-            default -> new SimpleTypeMapper(typeSymbol, semanticModel, diagnostics);
+            case TYPE_REFERENCE -> new ReferenceTypeMapper(typeSymbol, componentMapperData);
+            case MAP -> new MapTypeMapper(typeSymbol, componentMapperData);
+            case RECORD -> new RecordTypeMapper(typeSymbol, componentMapperData);
+            case INTERSECTION -> new ReadOnlyTypeMapper(typeSymbol, componentMapperData);
+            case ARRAY -> new ArrayTypeMapper(typeSymbol, componentMapperData);
+            case UNION -> new UnionTypeMapper(typeSymbol, componentMapperData);
+            case TABLE -> new TableTypeMapper(typeSymbol, componentMapperData);
+            case TUPLE -> new TupleTypeMapper(typeSymbol, componentMapperData);
+            case ERROR -> new ErrorTypeMapper(typeSymbol, componentMapperData);
+            default -> new SimpleTypeMapper(typeSymbol, componentMapperData);
         };
         components.put(getTypeName(typeSymbol), null);
         mapper.addToComponents(components);
@@ -108,7 +108,7 @@ public class ComponentMapper {
     }
 
     public List<OpenAPIMapperDiagnostic> getDiagnostics() {
-        return diagnostics;
+        return commonData.diagnostics();
     }
 
     /**
@@ -122,7 +122,11 @@ public class ComponentMapper {
             schema = new HashMap<>();
         }
         Map<String, Schema> componentsSchema = createComponentMapping((TypeReferenceTypeSymbol) typeSymbol, schema,
-                semanticModel, diagnostics);
+                commonData);
         components.setSchemas(componentsSchema);
+    }
+
+    public ModuleMemberVisitor getModuleMemberVisitor() {
+        return commonData.moduleMemberVisitor();
     }
 }

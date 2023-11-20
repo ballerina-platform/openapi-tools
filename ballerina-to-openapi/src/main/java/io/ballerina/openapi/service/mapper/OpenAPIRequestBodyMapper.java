@@ -42,6 +42,7 @@ import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.type.ComponentMapper;
+import io.ballerina.openapi.service.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.model.OperationAdaptor;
 import io.ballerina.openapi.service.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.Components;
@@ -357,8 +358,7 @@ public class OpenAPIRequestBodyMapper {
         if (typeDescriptorNode.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE) ||
                 typeDescriptorNode.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
             //handle record for components
-            SimpleNameReferenceNode referenceNode = (SimpleNameReferenceNode) typeDescriptorNode;
-            TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(referenceNode));
+            TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(typeDescriptorNode));
             ComponentMapper componentMapper = new ComponentMapper(components, semanticModel, moduleMemberVisitor);
             componentMapper.createComponentsSchema(typeSymbol);
             diagnostics.addAll(componentMapper.getDiagnostics());
@@ -369,7 +369,7 @@ public class OpenAPIRequestBodyMapper {
             } else {
                 referenceName = ((QualifiedNameReferenceNode) typeDescriptorNode).identifier().text();
             }
-            arraySchema.setItems(itemSchema.$ref(ConverterCommonUtils.unescapeIdentifier(referenceName)));
+            arraySchema.setItems(itemSchema.$ref(MapperCommonUtils.unescapeIdentifier(referenceName)));
             media.setSchema(arraySchema);
         } else if (typeDescriptorNode.kind() == SyntaxKind.BYTE_TYPE_DESC) {
             StringSchema byteSchema = new StringSchema();

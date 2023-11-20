@@ -16,12 +16,11 @@
 
 package io.ballerina.openapi.service.mapper.type;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.CommonData;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
@@ -30,25 +29,24 @@ import java.util.Objects;
 
 public class ReadOnlyTypeMapper extends TypeMapper {
 
-    public ReadOnlyTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
-                              List<OpenAPIMapperDiagnostic> diagnostics) {
-        super(typeSymbol, semanticModel, diagnostics);
+    public ReadOnlyTypeMapper(TypeReferenceTypeSymbol typeSymbol, CommonData commonData) {
+        super(typeSymbol, commonData);
     }
 
     @Override
     public Schema getReferenceTypeSchema(Map<String, Schema> components) {
         IntersectionTypeSymbol referredType = (IntersectionTypeSymbol) typeSymbol.typeDescriptor();
-        Schema effectiveTypeSchema = getSchema(referredType, components, semanticModel, diagnostics);
+        Schema effectiveTypeSchema = getSchema(referredType, components, commonData);
         return Objects.nonNull(effectiveTypeSchema) ? effectiveTypeSchema.description(description) : null;
     }
 
     public static Schema getSchema(IntersectionTypeSymbol typeSymbol, Map<String, Schema> components,
-                                   SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
+                                   CommonData commonData) {
         TypeSymbol effectiveType = getEffectiveType(typeSymbol);
         if (Objects.isNull(effectiveType)) {
             return null;
         }
-        return ComponentMapper.getTypeSchema(effectiveType, components, semanticModel, diagnostics);
+        return ComponentMapper.getTypeSchema(effectiveType, components, commonData);
     }
 
     public static TypeSymbol getEffectiveType(IntersectionTypeSymbol typeSymbol) {
