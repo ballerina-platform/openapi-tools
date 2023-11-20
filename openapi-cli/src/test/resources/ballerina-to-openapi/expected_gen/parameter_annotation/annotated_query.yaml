@@ -39,7 +39,8 @@ paths:
               schema:
                 type: object
                 additionalProperties: true
-                default: "{Name : John}"
+                default:
+                  Name: John
       responses:
         "201":
           description: Created

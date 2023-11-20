@@ -18,6 +18,9 @@
 
 package io.ballerina.openapi.converter.utils;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
@@ -79,6 +82,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -521,5 +525,18 @@ public class ConverterCommonUtils {
     public static String unescapeIdentifier(String parameterName) {
         String unescapedParamName = IdentifierUtils.unescapeBallerina(parameterName);
         return unescapedParamName.replaceAll("\\\\", "").replaceAll("'", "");
+    }
+
+    public static void setDefaultValue(Schema schema, String defaultValue) {
+        if (Objects.isNull(schema) || Objects.isNull(defaultValue)) {
+            return;
+        }
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+            schema.setDefault(mapper.readValue(defaultValue, Object.class));
+        } catch (JsonProcessingException e) {
+            schema.setDefault(defaultValue);
+        }
     }
 }
