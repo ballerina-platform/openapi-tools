@@ -114,6 +114,13 @@ public class HeaderTests {
         Path ballerinaFilePath = RES_DIR.resolve("header_scenario12.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario12.yaml");
     }
+
+    @Test(description = "Default parameter scenarios")
+    public void testHeaderWithDefaultParameter() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("header_scenario13.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario13.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
