@@ -20,17 +20,11 @@ package io.ballerina.openapi.bal.tool;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 /**
- * This class includes constants for client IDL generator.
+ * This class includes constants for ballerina package build generator.
  *
  * @since 1.9.0
  */
 public class Constants {
-    public static final String OAS_PATH_SEPARATOR = "/";
-    public static final String TEST_DIR = "tests";
-    public static final String TEST_FILE_NAME = "test.bal";
-    public static final String CONFIG_FILE_NAME = "Config.toml";
-
-    public static final String OPENAPI_CLIENT_REFERENCE = "openapi:ClientConfig";
     public static final String TAGS = "tags";
     public static final String OPERATIONS = "operations";
     public static final String NULLABLE = "nullable";
@@ -55,7 +49,6 @@ public class Constants {
                 DiagnosticSeverity.ERROR),
         EMPTY_CONTRACT_PATH("OAS_IDK_CLIENT_06", "given OpenAPI contract file path is an empty string.",
                 DiagnosticSeverity.WARNING);
-
 
         private final String code;
         private final String description;
