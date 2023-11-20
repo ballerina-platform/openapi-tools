@@ -97,6 +97,7 @@ public class QueryParameterTests {
         Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario09.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario09.yaml");
     }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
