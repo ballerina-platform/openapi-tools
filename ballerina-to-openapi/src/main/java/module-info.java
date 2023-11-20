@@ -32,6 +32,7 @@ module io.ballerina.openapi.service {
     requires swagger.parser.v2.converter;
     requires swagger.parser.v3;
     requires org.apache.commons.lang3;
+    requires com.fasterxml.jackson.databind;
     exports io.ballerina.openapi.service;
     exports io.ballerina.openapi.service.diagnostic;
     exports io.ballerina.openapi.service.mapper;
