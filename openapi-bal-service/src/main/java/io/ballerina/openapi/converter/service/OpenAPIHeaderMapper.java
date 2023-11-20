@@ -142,10 +142,10 @@ public class OpenAPIHeaderMapper {
         allowedTypes.addAll(Arrays.asList(SyntaxKind.STRING_LITERAL, SyntaxKind.NUMERIC_LITERAL,
                 SyntaxKind.BOOLEAN_LITERAL));
         if (allowedTypes.contains(headerParam.expression().kind())) {
-            headerTypeSchema.setDefault(defaultValue);
+            headerTypeSchema = ConverterCommonUtils.setDefaultValue(headerTypeSchema, defaultValue);
         } else if (headerParam.expression().kind() == SyntaxKind.LIST_CONSTRUCTOR) {
             headerTypeSchema = new Schema<>();
-            headerTypeSchema.setDefault(defaultValue);
+            headerTypeSchema = ConverterCommonUtils.setDefaultValue(headerTypeSchema, defaultValue);
         }
         if (headerParam.typeName().kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
             headerTypeSchema.setNullable(true);

@@ -52,9 +52,10 @@ paths:
                 default: live
         - name: q-default-ref
           in: query
-          required: true
           schema:
-            $ref: '#/components/schemas/RoomNo'
+            allOf:
+              - $ref: '#/components/schemas/RoomNo'
+            default: R5
       responses:
         "200":
           description: Ok
