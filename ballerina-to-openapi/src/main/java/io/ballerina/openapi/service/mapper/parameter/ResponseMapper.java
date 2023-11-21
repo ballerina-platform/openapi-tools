@@ -515,8 +515,4 @@ public class ResponseMapper {
         }
         return false;
     }
-
-    public ModuleMemberVisitor getModuleMemberVisitor() {
-        return moduleMemberVisitor;
-    }
 }
