@@ -17,7 +17,7 @@
 package io.ballerina.openapi.service.mapper.parameter;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.ParameterSymbol;
+import io.ballerina.compiler.api.symbols.PathParameterSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.CommonData;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
@@ -42,7 +42,7 @@ public class PathParameterMapper implements ParameterMapper {
     private final SemanticModel semanticModel;
     private final List<OpenAPIMapperDiagnostic> diagnostics;
 
-    public PathParameterMapper(ParameterSymbol parameterSymbol, Map<String, String> apiDocs,
+    public PathParameterMapper(PathParameterSymbol parameterSymbol, Map<String, String> apiDocs,
                                SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
         this.type = parameterSymbol.typeDescriptor();
         this.name = unescapeIdentifier(parameterSymbol.getName().get());
