@@ -16,7 +16,7 @@
 
 package io.ballerina.openapi.build;
 
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;

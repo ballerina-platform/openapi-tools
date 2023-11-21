@@ -1,8 +1,8 @@
 package io.ballerina.openapi.service.mapper;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 
 import java.util.List;
 

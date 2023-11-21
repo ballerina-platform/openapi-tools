@@ -37,14 +37,13 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
-import io.ballerina.openapi.service.Constants;
-import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.diagnostic.IncompatibleResourceDiagnostic;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.type.ComponentMapper;
-import io.ballerina.openapi.service.model.ModuleMemberVisitor;
-import io.ballerina.openapi.service.model.OperationAdaptor;
-import io.ballerina.openapi.service.utils.MapperCommonUtils;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -62,17 +61,17 @@ import java.util.Optional;
 
 import javax.ws.rs.core.MediaType;
 
-import static io.ballerina.openapi.service.Constants.APPLICATION_PREFIX;
-import static io.ballerina.openapi.service.Constants.DELETE;
-import static io.ballerina.openapi.service.Constants.HTTP_PAYLOAD;
-import static io.ballerina.openapi.service.Constants.JSON_POSTFIX;
-import static io.ballerina.openapi.service.Constants.MEDIA_TYPE;
-import static io.ballerina.openapi.service.Constants.OCTECT_STREAM_POSTFIX;
-import static io.ballerina.openapi.service.Constants.TEXT_POSTFIX;
-import static io.ballerina.openapi.service.Constants.TEXT_PREFIX;
-import static io.ballerina.openapi.service.Constants.XML_POSTFIX;
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.extractAnnotationFieldDetails;
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.getOpenApiSchema;
+import static io.ballerina.openapi.service.mapper.Constants.APPLICATION_PREFIX;
+import static io.ballerina.openapi.service.mapper.Constants.DELETE;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP_PAYLOAD;
+import static io.ballerina.openapi.service.mapper.Constants.JSON_POSTFIX;
+import static io.ballerina.openapi.service.mapper.Constants.MEDIA_TYPE;
+import static io.ballerina.openapi.service.mapper.Constants.OCTECT_STREAM_POSTFIX;
+import static io.ballerina.openapi.service.mapper.Constants.TEXT_POSTFIX;
+import static io.ballerina.openapi.service.mapper.Constants.TEXT_PREFIX;
+import static io.ballerina.openapi.service.mapper.Constants.XML_POSTFIX;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractAnnotationFieldDetails;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpenApiSchema;
 
 /**
  * OpenAPIRequestBodyMapper provides functionality for converting ballerina payload to OAS request body model.

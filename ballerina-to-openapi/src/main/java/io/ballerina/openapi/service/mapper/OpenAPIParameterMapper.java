@@ -34,14 +34,13 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.openapi.service.Constants;
-import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.diagnostic.IncompatibleResourceDiagnostic;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.type.ComponentMapper;
-import io.ballerina.openapi.service.model.ModuleMemberVisitor;
-import io.ballerina.openapi.service.model.OperationAdaptor;
-import io.ballerina.openapi.service.utils.MapperCommonUtils;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -57,10 +56,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.openapi.service.Constants.HTTP_REQUEST;
-import static io.ballerina.openapi.service.Constants.WILD_CARD_CONTENT_KEY;
-import static io.ballerina.openapi.service.Constants.WILD_CARD_SUMMARY;
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.extractCustomMediaType;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP_REQUEST;
+import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_CONTENT_KEY;
+import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_SUMMARY;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractCustomMediaType;
 
 /**
  * OpenAPIParameterMapper provides functionality for converting ballerina parameter to OAS parameter model.

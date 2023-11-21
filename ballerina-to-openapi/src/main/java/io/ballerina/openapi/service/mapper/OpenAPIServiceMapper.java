@@ -25,8 +25,8 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.swagger.v3.oas.models.OpenAPI;
 
 import java.util.ArrayList;

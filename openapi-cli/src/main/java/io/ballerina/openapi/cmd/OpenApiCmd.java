@@ -20,10 +20,10 @@ package io.ballerina.openapi.cmd;
 import io.ballerina.cli.BLauncherCmd;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.model.Filter;
-import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.diagnostic.ExceptionDiagnostic;
-import io.ballerina.openapi.service.diagnostic.IncompatibleResourceDiagnostic;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;
 

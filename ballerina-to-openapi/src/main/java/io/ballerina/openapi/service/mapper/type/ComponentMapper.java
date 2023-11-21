@@ -29,9 +29,9 @@ import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.CommonData;
-import io.ballerina.openapi.service.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -40,7 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.getTypeName;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
 /**
  * This util class for processing the mapping in between ballerina record and openAPI object schema.

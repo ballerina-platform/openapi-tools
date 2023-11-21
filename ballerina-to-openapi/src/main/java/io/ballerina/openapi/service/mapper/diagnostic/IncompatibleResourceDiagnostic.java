@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.service.diagnostic;
+package io.ballerina.openapi.service.mapper.diagnostic;
 
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
@@ -68,6 +68,6 @@ public class IncompatibleResourceDiagnostic implements OpenAPIMapperDiagnostic {
      *  This method is to create message description with args values.
      */
     private static String generateDescription(DiagnosticMessages details, String[] args) {
-        return String.format(details.getDescription(), args);
+        return String.format(details.getDescription(), (Object[]) args);
     }
 }

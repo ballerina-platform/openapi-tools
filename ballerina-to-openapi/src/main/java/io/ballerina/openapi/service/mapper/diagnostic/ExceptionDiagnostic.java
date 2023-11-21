@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.ballerina.openapi.service.diagnostic;
+package io.ballerina.openapi.service.mapper.diagnostic;
 
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
@@ -35,7 +35,7 @@ public class ExceptionDiagnostic implements OpenAPIMapperDiagnostic {
 
     public ExceptionDiagnostic(String code, String message, Location location, String... args) {
         this.code = code;
-        this.message = String.format(message, args);
+        this.message = String.format(message, (Object[]) args);
         this.diagnosticSeverity = DiagnosticSeverity.ERROR;
         this.location = location;
     }

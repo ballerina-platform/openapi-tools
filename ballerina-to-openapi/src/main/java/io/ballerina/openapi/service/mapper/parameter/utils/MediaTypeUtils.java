@@ -8,7 +8,7 @@ import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.parameter.ResponseMapper;
-import io.ballerina.openapi.service.utils.MapperCommonUtils;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 
 import java.util.List;
 import java.util.Objects;

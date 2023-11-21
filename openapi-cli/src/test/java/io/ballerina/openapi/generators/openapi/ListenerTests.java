@@ -18,7 +18,7 @@
 package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.openapi.cmd.OASContractGenerator;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;

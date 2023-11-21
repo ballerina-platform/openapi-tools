@@ -29,14 +29,13 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.openapi.service.Constants;
-import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.diagnostic.IncompatibleResourceDiagnostic;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.parameter.ResponseMapper;
-import io.ballerina.openapi.service.model.ModuleMemberVisitor;
-import io.ballerina.openapi.service.model.OperationAdaptor;
-import io.ballerina.openapi.service.utils.MapperCommonUtils;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
@@ -53,8 +52,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.ballerina.openapi.service.Constants.DEFAULT;
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.getOperationId;
+import static io.ballerina.openapi.service.mapper.Constants.DEFAULT;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOperationId;
 
 /**
  * This class will do resource mapping from ballerina to openApi.

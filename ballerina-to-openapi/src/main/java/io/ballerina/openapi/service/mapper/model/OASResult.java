@@ -15,9 +15,9 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.model;
+package io.ballerina.openapi.service.mapper.model;
 
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;

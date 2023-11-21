@@ -1,4 +1,4 @@
-package io.ballerina.openapi.service.model;
+package io.ballerina.openapi.service.mapper.model;
 
 import java.util.Optional;
 

@@ -17,7 +17,7 @@
  */
 
 
-package io.ballerina.openapi.service.model;
+package io.ballerina.openapi.service.mapper.model;
 
 import io.swagger.v3.oas.models.Operation;
 

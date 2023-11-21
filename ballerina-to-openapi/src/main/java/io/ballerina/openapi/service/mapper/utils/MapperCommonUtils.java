@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.service.utils;
+package io.ballerina.openapi.service.mapper.utils;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -53,13 +53,13 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.openapi.service.Constants;
-import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.diagnostic.ExceptionDiagnostic;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.Constants;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.OASResult;
 import io.ballerina.openapi.service.mapper.type.ComponentMapper;
-import io.ballerina.openapi.service.model.ModuleMemberVisitor;
-import io.ballerina.openapi.service.model.OASResult;
 import io.ballerina.runtime.api.utils.IdentifierUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -98,14 +98,14 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.LIST_CONSTRUCTOR;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.NUMERIC_LITERAL;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
-import static io.ballerina.openapi.service.Constants.BALLERINA;
-import static io.ballerina.openapi.service.Constants.HTTP;
-import static io.ballerina.openapi.service.Constants.HYPHEN;
-import static io.ballerina.openapi.service.Constants.JSON_EXTENSION;
-import static io.ballerina.openapi.service.Constants.SLASH;
-import static io.ballerina.openapi.service.Constants.SPECIAL_CHAR_REGEX;
-import static io.ballerina.openapi.service.Constants.UNDERSCORE;
-import static io.ballerina.openapi.service.Constants.YAML_EXTENSION;
+import static io.ballerina.openapi.service.mapper.Constants.BALLERINA;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP;
+import static io.ballerina.openapi.service.mapper.Constants.HYPHEN;
+import static io.ballerina.openapi.service.mapper.Constants.JSON_EXTENSION;
+import static io.ballerina.openapi.service.mapper.Constants.SLASH;
+import static io.ballerina.openapi.service.mapper.Constants.SPECIAL_CHAR_REGEX;
+import static io.ballerina.openapi.service.mapper.Constants.UNDERSCORE;
+import static io.ballerina.openapi.service.mapper.Constants.YAML_EXTENSION;
 
 /**
  * Utilities used in Ballerina  to OpenAPI converter.

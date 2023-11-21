@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.service;
+package io.ballerina.openapi.service.mapper;
 
 import java.util.Collections;
 import java.util.HashMap;

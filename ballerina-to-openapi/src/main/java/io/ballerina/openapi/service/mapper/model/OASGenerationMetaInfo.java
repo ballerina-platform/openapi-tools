@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.service.model;
+package io.ballerina.openapi.service.mapper.model;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;

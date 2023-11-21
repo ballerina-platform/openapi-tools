@@ -17,20 +17,20 @@ import java.util.Map;
 import java.util.Spliterator;
 import java.util.stream.Collectors;
 
-import static io.ballerina.openapi.service.Constants.CACHE_CONTROL;
-import static io.ballerina.openapi.service.Constants.ETAG;
-import static io.ballerina.openapi.service.Constants.FALSE;
-import static io.ballerina.openapi.service.Constants.LAST_MODIFIED;
-import static io.ballerina.openapi.service.Constants.MAX_AGE;
-import static io.ballerina.openapi.service.Constants.MUST_REVALIDATE;
-import static io.ballerina.openapi.service.Constants.NO_CACHE;
-import static io.ballerina.openapi.service.Constants.NO_STORE;
-import static io.ballerina.openapi.service.Constants.NO_TRANSFORM;
-import static io.ballerina.openapi.service.Constants.PRIVATE;
-import static io.ballerina.openapi.service.Constants.PROXY_REVALIDATE;
-import static io.ballerina.openapi.service.Constants.PUBLIC;
-import static io.ballerina.openapi.service.Constants.S_MAX_AGE;
-import static io.ballerina.openapi.service.Constants.TRUE;
+import static io.ballerina.openapi.service.mapper.Constants.CACHE_CONTROL;
+import static io.ballerina.openapi.service.mapper.Constants.ETAG;
+import static io.ballerina.openapi.service.mapper.Constants.FALSE;
+import static io.ballerina.openapi.service.mapper.Constants.LAST_MODIFIED;
+import static io.ballerina.openapi.service.mapper.Constants.MAX_AGE;
+import static io.ballerina.openapi.service.mapper.Constants.MUST_REVALIDATE;
+import static io.ballerina.openapi.service.mapper.Constants.NO_CACHE;
+import static io.ballerina.openapi.service.mapper.Constants.NO_STORE;
+import static io.ballerina.openapi.service.mapper.Constants.NO_TRANSFORM;
+import static io.ballerina.openapi.service.mapper.Constants.PRIVATE;
+import static io.ballerina.openapi.service.mapper.Constants.PROXY_REVALIDATE;
+import static io.ballerina.openapi.service.mapper.Constants.PUBLIC;
+import static io.ballerina.openapi.service.mapper.Constants.S_MAX_AGE;
+import static io.ballerina.openapi.service.mapper.Constants.TRUE;
 
 public final class CacheHeaderUtils {
 

@@ -18,10 +18,10 @@ package io.ballerina.openapi.service.mapper.type;
 
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.CommonData;
-import io.ballerina.openapi.service.utils.MapperCommonUtils;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.NumberSchema;
@@ -32,11 +32,11 @@ import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.ballerina.openapi.service.Constants.BYTE;
-import static io.ballerina.openapi.service.Constants.DOUBLE;
-import static io.ballerina.openapi.service.Constants.FLOAT;
-import static io.ballerina.openapi.service.Constants.INT32;
-import static io.ballerina.openapi.service.Constants.INT64;
+import static io.ballerina.openapi.service.mapper.Constants.BYTE;
+import static io.ballerina.openapi.service.mapper.Constants.DOUBLE;
+import static io.ballerina.openapi.service.mapper.Constants.FLOAT;
+import static io.ballerina.openapi.service.mapper.Constants.INT32;
+import static io.ballerina.openapi.service.mapper.Constants.INT64;
 
 public class SimpleTypeMapper extends TypeMapper {
 

@@ -15,11 +15,11 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.model;
+package io.ballerina.openapi.service.mapper.model;
 
 import java.util.Optional;
 
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.normalizeTitle;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.normalizeTitle;
 
 /**
  * This {@code OpenAPIInfo} contains details related to openAPI info section.

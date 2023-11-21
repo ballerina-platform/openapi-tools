@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.service;
+package io.ballerina.openapi.service.mapper;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
@@ -37,16 +37,14 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.diagnostic.ExceptionDiagnostic;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.OpenAPIEndpointMapper;
-import io.ballerina.openapi.service.mapper.OpenAPIServiceMapper;
-import io.ballerina.openapi.service.model.ModuleMemberVisitor;
-import io.ballerina.openapi.service.model.OASGenerationMetaInfo;
-import io.ballerina.openapi.service.model.OASResult;
-import io.ballerina.openapi.service.model.OpenAPIInfo;
-import io.ballerina.openapi.service.utils.MapperCommonUtils;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
+import io.ballerina.openapi.service.mapper.model.OASResult;
+import io.ballerina.openapi.service.mapper.model.OpenAPIInfo;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Project;
 import io.ballerina.tools.diagnostics.Location;
@@ -66,16 +64,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.ballerina.openapi.service.Constants.CONTRACT;
-import static io.ballerina.openapi.service.Constants.HYPHEN;
-import static io.ballerina.openapi.service.Constants.OPENAPI_ANNOTATION;
-import static io.ballerina.openapi.service.Constants.SLASH;
-import static io.ballerina.openapi.service.Constants.SPECIAL_CHAR_REGEX;
-import static io.ballerina.openapi.service.Constants.TITLE;
-import static io.ballerina.openapi.service.Constants.VERSION;
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.containErrors;
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.getOpenApiFileName;
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.isHttpService;
+import static io.ballerina.openapi.service.mapper.Constants.CONTRACT;
+import static io.ballerina.openapi.service.mapper.Constants.HYPHEN;
+import static io.ballerina.openapi.service.mapper.Constants.OPENAPI_ANNOTATION;
+import static io.ballerina.openapi.service.mapper.Constants.SLASH;
+import static io.ballerina.openapi.service.mapper.Constants.SPECIAL_CHAR_REGEX;
+import static io.ballerina.openapi.service.mapper.Constants.TITLE;
+import static io.ballerina.openapi.service.mapper.Constants.VERSION;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.containErrors;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpenApiFileName;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.isHttpService;
 
 /**
  * The ServiceToOpenAPIConverterUtils provide API for convert ballerina service into openAPI specification.

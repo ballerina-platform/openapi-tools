@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.openapi.cmd.OASContractGenerator;
-import io.ballerina.openapi.service.OpenApiMapperException;
+import io.ballerina.openapi.service.mapper.OpenApiMapperException;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;

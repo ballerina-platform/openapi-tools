@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.ballerina.openapi.service.utils;
+package io.ballerina.openapi.service.mapper.utils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -27,8 +27,8 @@ import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Objects;
 
-import static io.ballerina.openapi.service.Constants.JSON_EXTENSION;
-import static io.ballerina.openapi.service.Constants.YAML_EXTENSION;
+import static io.ballerina.openapi.service.mapper.Constants.JSON_EXTENSION;
+import static io.ballerina.openapi.service.mapper.Constants.YAML_EXTENSION;
 
 /**
  * Utilities used by ballerina openapi code generator.

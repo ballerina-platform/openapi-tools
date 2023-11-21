@@ -18,7 +18,7 @@ package io.ballerina.openapi.service.mapper.type;
 
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.openapi.service.mapper.CommonData;
-import io.ballerina.openapi.service.utils.MapperCommonUtils;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Map;

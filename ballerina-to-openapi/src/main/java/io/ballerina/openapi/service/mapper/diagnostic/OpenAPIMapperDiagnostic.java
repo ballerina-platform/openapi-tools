@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.service.diagnostic;
+package io.ballerina.openapi.service.mapper.diagnostic;
 
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;

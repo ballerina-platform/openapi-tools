@@ -27,11 +27,11 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.CommonData;
-import io.ballerina.openapi.service.model.ModuleMemberVisitor;
-import io.ballerina.openapi.service.utils.MapperCommonUtils;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -44,8 +44,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.getRecordFieldTypeDescription;
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.getTypeName;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getRecordFieldTypeDescription;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
 public class RecordTypeMapper extends TypeMapper {
 
