@@ -20,7 +20,7 @@ import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.mapper.CommonData;
+import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
@@ -29,24 +29,24 @@ import java.util.Objects;
 
 public class ReadOnlyTypeMapper extends TypeMapper {
 
-    public ReadOnlyTypeMapper(TypeReferenceTypeSymbol typeSymbol, CommonData commonData) {
-        super(typeSymbol, commonData);
+    public ReadOnlyTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
+        super(typeSymbol, additionalData);
     }
 
     @Override
     public Schema getReferenceTypeSchema(Map<String, Schema> components) {
         IntersectionTypeSymbol referredType = (IntersectionTypeSymbol) typeSymbol.typeDescriptor();
-        Schema effectiveTypeSchema = getSchema(referredType, components, commonData);
+        Schema effectiveTypeSchema = getSchema(referredType, components, additionalData);
         return Objects.nonNull(effectiveTypeSchema) ? effectiveTypeSchema.description(description) : null;
     }
 
     public static Schema getSchema(IntersectionTypeSymbol typeSymbol, Map<String, Schema> components,
-                                   CommonData commonData) {
+                                   AdditionalData additionalData) {
         TypeSymbol effectiveType = getEffectiveType(typeSymbol);
         if (Objects.isNull(effectiveType)) {
             return null;
         }
-        return ComponentMapper.getTypeSchema(effectiveType, components, commonData);
+        return ComponentMapper.getTypeSchema(effectiveType, components, additionalData);
     }
 
     public static TypeSymbol getEffectiveType(IntersectionTypeSymbol typeSymbol) {

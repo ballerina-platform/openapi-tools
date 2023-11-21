@@ -29,7 +29,7 @@ import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
-import io.ballerina.openapi.service.mapper.CommonData;
+import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.swagger.v3.oas.models.Components;
@@ -50,17 +50,16 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTyp
 public class ComponentMapper {
 
     private final Components components;
-    private final CommonData commonData;
+    private final AdditionalData additionalData;
 
     public ComponentMapper(Components components, SemanticModel semanticModel,
                            ModuleMemberVisitor moduleMemberVisitor) {
         this.components = components;
-        this.commonData = new CommonData(semanticModel, moduleMemberVisitor,
-                new ArrayList<>());
+        this.additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, new ArrayList<>());
     }
 
     public static Schema getTypeSchema(TypeSymbol typeSymbol, Map<String, Schema> components,
-                                       CommonData componentMapperData) {
+                                       AdditionalData componentMapperData) {
         return switch (typeSymbol.typeKind()) {
             case MAP -> MapTypeMapper.getSchema((MapTypeSymbol) typeSymbol, components, componentMapperData);
             case ARRAY ->
@@ -85,7 +84,7 @@ public class ComponentMapper {
 
     public static Map<String, Schema> createComponentMapping(TypeReferenceTypeSymbol typeSymbol,
                                                              Map<String, Schema> components,
-                                                             CommonData componentMapperData) {
+                                                             AdditionalData componentMapperData) {
         if (components.containsKey(getTypeName(typeSymbol))) {
             return components;
         }
@@ -108,7 +107,7 @@ public class ComponentMapper {
     }
 
     public List<OpenAPIMapperDiagnostic> getDiagnostics() {
-        return commonData.diagnostics();
+        return additionalData.diagnostics();
     }
 
     public void createComponentsSchema(TypeSymbol typeSymbol) {
@@ -117,11 +116,11 @@ public class ComponentMapper {
             schema = new HashMap<>();
         }
         Map<String, Schema> componentsSchema = createComponentMapping((TypeReferenceTypeSymbol) typeSymbol, schema,
-                commonData);
+                additionalData);
         components.setSchemas(componentsSchema);
     }
 
     public ModuleMemberVisitor getModuleMemberVisitor() {
-        return commonData.moduleMemberVisitor();
+        return additionalData.moduleMemberVisitor();
     }
 }

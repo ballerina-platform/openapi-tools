@@ -5,7 +5,7 @@ import io.ballerina.compiler.api.symbols.AnnotationSymbol;
 import io.ballerina.compiler.api.symbols.ParameterKind;
 import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.mapper.CommonData;
+import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
@@ -66,8 +66,8 @@ public class HeaderParameterMapper implements ParameterMapper {
         if (Objects.isNull(componentSchemas)) {
             componentSchemas = new HashMap<>();
         }
-        CommonData commonData = new CommonData(semanticModel, null, diagnostics);
-        headerParameter.setSchema(ComponentMapper.getTypeSchema(type, componentSchemas, commonData));
+        AdditionalData additionalData = new AdditionalData(semanticModel, null, diagnostics);
+        headerParameter.setSchema(ComponentMapper.getTypeSchema(type, componentSchemas, additionalData));
         if (!componentSchemas.isEmpty()) {
             components.setSchemas(componentSchemas);
         }

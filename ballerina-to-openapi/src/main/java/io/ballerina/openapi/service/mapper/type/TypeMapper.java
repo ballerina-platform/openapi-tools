@@ -17,7 +17,7 @@
 package io.ballerina.openapi.service.mapper.type;
 
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
-import io.ballerina.openapi.service.mapper.CommonData;
+import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -29,14 +29,14 @@ public abstract class TypeMapper {
     final String name;
     final TypeReferenceTypeSymbol typeSymbol;
     final String description;
-    final CommonData commonData;
+    final AdditionalData additionalData;
 
 
-    public TypeMapper(TypeReferenceTypeSymbol typeSymbol, CommonData commonData) {
+    public TypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
         this.name = MapperCommonUtils.getTypeName(typeSymbol);
         this.typeSymbol = typeSymbol;
         this.description = MapperCommonUtils.getTypeDescription(typeSymbol);
-        this.commonData = commonData;
+        this.additionalData = additionalData;
     }
 
     abstract Schema getReferenceTypeSchema(Map<String, Schema> components);

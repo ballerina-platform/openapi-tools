@@ -20,7 +20,7 @@ import io.ballerina.compiler.api.symbols.ErrorTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
-import io.ballerina.openapi.service.mapper.CommonData;
+import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -31,21 +31,21 @@ import java.util.Optional;
 
 public class ErrorTypeMapper extends TypeMapper {
 
-    public ErrorTypeMapper(TypeReferenceTypeSymbol typeSymbol, CommonData commonData) {
-        super(typeSymbol, commonData);
+    public ErrorTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
+        super(typeSymbol, additionalData);
     }
 
     @Override
     Schema getReferenceTypeSchema(Map<String, Schema> components) {
         ErrorTypeSymbol errorTypeSymbol = (ErrorTypeSymbol) typeSymbol.typeDescriptor();
-        return getSchema(errorTypeSymbol, components, commonData);
+        return getSchema(errorTypeSymbol, components, additionalData);
     }
 
-    public static Schema getSchema(ErrorTypeSymbol typeSymbol, Map<String, Schema> components, CommonData commonData) {
-        Optional<Symbol> optErrorPayload = commonData.semanticModel().types().getTypeByName("ballerina", "http",
+    public static Schema getSchema(ErrorTypeSymbol typeSymbol, Map<String, Schema> components, AdditionalData additionalData) {
+        Optional<Symbol> optErrorPayload = additionalData.semanticModel().types().getTypeByName("ballerina", "http",
                 "", "ErrorPayload");
         if (optErrorPayload.isPresent() && optErrorPayload.get() instanceof TypeDefinitionSymbol errorPayload) {
-            Schema schema = ComponentMapper.getTypeSchema(errorPayload.typeDescriptor(), components, commonData);
+            Schema schema = ComponentMapper.getTypeSchema(errorPayload.typeDescriptor(), components, additionalData);
             if (Objects.nonNull(schema)) {
                 components.put("ErrorPayload", schema);
                 return new ObjectSchema().$ref("ErrorPayload");

@@ -25,7 +25,7 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
-import io.ballerina.openapi.service.mapper.CommonData;
+import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
@@ -43,8 +43,8 @@ public class UnionTypeMapper extends TypeMapper {
 
     private final boolean isEnumType;
 
-    public UnionTypeMapper(TypeReferenceTypeSymbol typeSymbol, CommonData commonData) {
-        super(typeSymbol, commonData);
+    public UnionTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
+        super(typeSymbol, additionalData);
         this.isEnumType = isEnumTypeDefinition(typeSymbol);
     }
 
@@ -55,14 +55,14 @@ public class UnionTypeMapper extends TypeMapper {
             schema = getEnumTypeSchema((EnumSymbol) typeSymbol.definition());
         } else {
             UnionTypeSymbol unionTypeSymbol = (UnionTypeSymbol) typeSymbol.typeDescriptor();
-            schema = getSchema(unionTypeSymbol, components, commonData);
+            schema = getSchema(unionTypeSymbol, components, additionalData);
         }
         return Objects.nonNull(schema) ? schema.description(description) : null;
     }
 
-    public static Schema getSchema(UnionTypeSymbol typeSymbol, Map<String, Schema> components, CommonData commonData) {
+    public static Schema getSchema(UnionTypeSymbol typeSymbol, Map<String, Schema> components, AdditionalData additionalData) {
         if (isUnionOfSingletons(typeSymbol)) {
-            return getSingletonUnionTypeSchema(typeSymbol, commonData.diagnostics());
+            return getSingletonUnionTypeSchema(typeSymbol, additionalData.diagnostics());
         }
         List<TypeSymbol> memberTypeSymbols = typeSymbol.memberTypeDescriptors();
         List<Schema> memberSchemas = new ArrayList<>();
@@ -71,7 +71,7 @@ public class UnionTypeMapper extends TypeMapper {
             if (memberTypeSymbol.typeKind().equals(TypeDescKind.NIL)) {
                 continue;
             }
-            Schema schema = ComponentMapper.getTypeSchema(memberTypeSymbol, components, commonData);
+            Schema schema = ComponentMapper.getTypeSchema(memberTypeSymbol, components, additionalData);
             if (Objects.nonNull(schema)) {
                 memberSchemas.add(schema);
             }

@@ -6,7 +6,7 @@ import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 
 import java.util.List;
 
-public record CommonData(SemanticModel semanticModel,
-                         ModuleMemberVisitor moduleMemberVisitor,
-                         List<OpenAPIMapperDiagnostic> diagnostics) {
+public record AdditionalData(SemanticModel semanticModel,
+                             ModuleMemberVisitor moduleMemberVisitor,
+                             List<OpenAPIMapperDiagnostic> diagnostics) {
 }

@@ -18,7 +18,7 @@ package io.ballerina.openapi.service.mapper.type;
 
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.mapper.CommonData;
+import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
@@ -40,18 +40,18 @@ import static io.ballerina.openapi.service.mapper.Constants.INT64;
 
 public class SimpleTypeMapper extends TypeMapper {
 
-    public SimpleTypeMapper(TypeReferenceTypeSymbol typeSymbol, CommonData commonData) {
-        super(typeSymbol, commonData);
+    public SimpleTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
+        super(typeSymbol, additionalData);
     }
 
     @Override
     public Schema getReferenceTypeSchema(Map<String, Schema> components) {
         TypeSymbol referredType = typeSymbol.typeDescriptor();
-        Schema schema = getTypeSchema(referredType, commonData);
+        Schema schema = getTypeSchema(referredType, additionalData);
         return Objects.nonNull(schema) ? schema.description(description) : null;
     }
 
-    public static Schema getTypeSchema(TypeSymbol typeSymbol, CommonData commonData) {
+    public static Schema getTypeSchema(TypeSymbol typeSymbol, AdditionalData additionalData) {
         switch (typeSymbol.typeKind()) {
             case STRING:
             case STRING_CHAR:
@@ -91,7 +91,7 @@ public class SimpleTypeMapper extends TypeMapper {
                 DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_121;
                 ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
                         message.getDescription(), null, MapperCommonUtils.getTypeName(typeSymbol));
-                commonData.diagnostics().add(error);
+                additionalData.diagnostics().add(error);
                 return null;
         }
     }

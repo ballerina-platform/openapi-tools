@@ -33,7 +33,7 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
-import io.ballerina.openapi.service.mapper.CommonData;
+import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
@@ -210,8 +210,8 @@ public class ResponseMapper {
             if (componentSchemas == null) {
                 componentSchemas = new HashMap<>();
             }
-            CommonData commonData = new CommonData(semanticModel, moduleMemberVisitor, diagnostics);
-            mediaTypeObj.setSchema(ComponentMapper.getTypeSchema(returnType, componentSchemas, commonData));
+            AdditionalData additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
+            mediaTypeObj.setSchema(ComponentMapper.getTypeSchema(returnType, componentSchemas, additionalData));
             if (!componentSchemas.isEmpty()) {
                 components.setSchemas(componentSchemas);
             }
@@ -442,7 +442,7 @@ public class ResponseMapper {
                 }
                 Map<String, Schema> recordFieldsMapping = RecordTypeMapper.mapRecordFields(recordFieldMap,
                         schemas, new HashSet<>(), recordName,
-                        new CommonData(semanticModel, moduleMemberVisitor, diagnostics));
+                        new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics));
                 if (!schemas.isEmpty()) {
                     components.setSchemas(schemas);
                 }
