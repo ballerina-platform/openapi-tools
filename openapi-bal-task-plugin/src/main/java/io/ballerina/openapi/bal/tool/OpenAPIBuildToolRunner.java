@@ -55,6 +55,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT;
 import static io.ballerina.openapi.bal.tool.Constants.IS_RESOURCE;
@@ -272,32 +273,25 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
      * Util to read license content.
      */
     private static String getLicenseContent(ToolContext context, Path licensePath) {
-        Path relativePath = null;
-        String licenseHeader = DO_NOT_MODIFY_FILE_HEADER;
         Package packageInstance = context.packageInstance();
         Location location = context.optionsTable().entries().get("license").location();
-        Path ballerinaFilePath = packageInstance.project().sourceRoot();
-        if (ballerinaFilePath == null) {
-            return null;
-        }
+        Path ballerinaFilePath = Optional.ofNullable(packageInstance.project().sourceRoot()).orElse(null);
         try {
-            relativePath = getLicensePath(licensePath, relativePath, location, ballerinaFilePath);
-            if (relativePath != null) {
-                return createLicenseContent(relativePath, location);
-            }
+            Path relativePath = getLicensePath(licensePath, location, ballerinaFilePath);
+            return (relativePath != null) ? createLicenseContent(relativePath, location) : null;
         } catch (IOException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_READING_LICENSE_FILE;
             reportDiagnostics(error, error.getDescription(), location);
             return null;
         }
-        return licenseHeader;
     }
 
     /**
      * Util to get license path.
      */
-    private static Path getLicensePath(Path licensePath, Path relativePath, Location location, Path ballerinaFilePath)
+    private static Path getLicensePath(Path licensePath, Location location, Path ballerinaFilePath)
             throws IOException {
+        Path relativePath = null;
         if (licensePath.toString().isBlank()) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.LICENSE_PATH_BLANK;
             reportDiagnostics(error, error.getDescription(), location);
