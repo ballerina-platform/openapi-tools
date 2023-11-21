@@ -111,11 +111,6 @@ public class ComponentMapper {
         return commonData.diagnostics();
     }
 
-    /**
-      * This function for doing the mapping with ballerina record to object schema.
-      *
-      * @param typeSymbol Record Name as a TypeSymbol
-      */
     public void createComponentsSchema(TypeSymbol typeSymbol) {
         Map<String, Schema> schema = components.getSchemas();
         if (schema == null) {

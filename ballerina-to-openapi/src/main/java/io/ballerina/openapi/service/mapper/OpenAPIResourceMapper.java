@@ -200,7 +200,7 @@ public class OpenAPIResourceMapper {
      * @return Operation Adaptor object of given resource
      */
     private Optional<OperationAdaptor> convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
-                                                        String generateRelativePath) {
+                                                                  String generateRelativePath) {
         OperationAdaptor op = new OperationAdaptor();
         op.setHttpOperation(httpMethod);
         op.setPath(generateRelativePath);
@@ -230,8 +230,8 @@ public class OpenAPIResourceMapper {
             }
         }
         errors.addAll(openAPIParameterMapper.getErrors());
-        ResponseMapper responseMapper = new ResponseMapper(semanticModel, components, resource,
-                op.getHttpOperation(), errors, moduleMemberVisitor);
+        ResponseMapper responseMapper = new ResponseMapper(semanticModel, components, resource, op,
+                errors, moduleMemberVisitor);
         ApiResponses apiResponses = responseMapper.getApiResponses();
         op.getOperation().setResponses(apiResponses);
         return Optional.of(op);

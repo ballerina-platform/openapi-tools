@@ -42,7 +42,6 @@ import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -139,14 +138,11 @@ public class OpenAPIHeaderMapper {
                 defaultValue.charAt(defaultValue.length() - 1) == '"') {
             defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
         }
-        List<SyntaxKind> allowedTypes = new ArrayList<>();
-        allowedTypes.addAll(Arrays.asList(SyntaxKind.STRING_LITERAL, SyntaxKind.NUMERIC_LITERAL,
-                SyntaxKind.BOOLEAN_LITERAL));
-        if (allowedTypes.contains(headerParam.expression().kind())) {
-            headerTypeSchema = ConverterCommonUtils.setDefaultValue(headerTypeSchema, defaultValue);
+        if (MapperCommonUtils.isSimpleValueLiteralKind(headerParam.expression().kind())) {
+            headerTypeSchema = MapperCommonUtils.setDefaultValue(headerTypeSchema, defaultValue);
         } else if (headerParam.expression().kind() == SyntaxKind.LIST_CONSTRUCTOR) {
             headerTypeSchema = new Schema<>();
-            headerTypeSchema = ConverterCommonUtils.setDefaultValue(headerTypeSchema, defaultValue);
+            headerTypeSchema = MapperCommonUtils.setDefaultValue(headerTypeSchema, defaultValue);
         }
         if (headerParam.typeName().kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
             headerTypeSchema.setNullable(true);

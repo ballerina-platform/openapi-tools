@@ -7,7 +7,7 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.openapi.service.model.CacheConfigAnnotation;
+import io.ballerina.openapi.service.mapper.parameter.model.CacheConfigAnnotation;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.StringSchema;
 
@@ -80,9 +80,9 @@ public final class CacheHeaderUtils {
             } catch (NumberFormatException ignored) {
             }
         } else if ("sMaxAge".equals(fieldName)) {
-            String smaxAge = expressionNode.toString();
+            String sMaxAge = expressionNode.toString();
             try {
-                int maxA = Integer.parseInt(smaxAge);
+                int maxA = Integer.parseInt(sMaxAge);
                 cacheConfig.setsMaxAge(maxA);
             } catch (NumberFormatException ignored) {
             }

@@ -54,7 +54,6 @@ public class ReadOnlyTypeMapper extends TypeMapper {
         if (memberTypes.size() == 2) {
             TypeSymbol firstMember = memberTypes.get(0);
             TypeSymbol secondMember = memberTypes.get(1);
-            // Do not map readonly to the schema
             if (firstMember.typeKind().equals(TypeDescKind.READONLY)) {
                 return secondMember;
             } else if (secondMember.typeKind().equals(TypeDescKind.READONLY)) {

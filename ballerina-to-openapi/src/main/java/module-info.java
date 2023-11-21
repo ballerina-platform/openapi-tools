@@ -39,5 +39,6 @@ module io.ballerina.openapi.service {
     exports io.ballerina.openapi.service.mapper.type;
     exports io.ballerina.openapi.service.model;
     exports io.ballerina.openapi.service.utils;
+    exports io.ballerina.openapi.service.mapper.parameter.model;
 }
 

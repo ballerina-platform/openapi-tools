@@ -2,10 +2,17 @@ package io.ballerina.openapi.service.mapper.parameter.utils;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.parameter.ResponseMapper;
+import io.ballerina.openapi.service.utils.MapperCommonUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
@@ -72,5 +79,18 @@ public final class MediaTypeUtils {
         }
         return typeSymbol.subtypeOf(semanticModel.types().JSON) && !semanticModel.types().STRING.subtypeOf(typeSymbol)
                 && !semanticModel.types().NIL.subtypeOf(typeSymbol);
+    }
+
+    public static Optional<String> extractCustomMediaType(FunctionDefinitionNode functionDefNode) {
+        ServiceDeclarationNode serviceDefNode = (ServiceDeclarationNode) functionDefNode.parent();
+        if (serviceDefNode.metadata().isPresent()) {
+            MetadataNode metadataNode = serviceDefNode.metadata().get();
+            NodeList<AnnotationNode> annotations = metadataNode.annotations();
+            if (!annotations.isEmpty()) {
+                return MapperCommonUtils.extractServiceAnnotationDetails(annotations,
+                        "http:ServiceConfig", "mediaTypeSubtypePrefix");
+            }
+        }
+        return Optional.empty();
     }
 }

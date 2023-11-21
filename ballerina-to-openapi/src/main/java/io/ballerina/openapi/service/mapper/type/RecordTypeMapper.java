@@ -21,6 +21,7 @@ import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
@@ -66,7 +67,7 @@ public class RecordTypeMapper extends TypeMapper {
         Map<String, RecordFieldSymbol> recordFieldMap = new LinkedHashMap<>(typeSymbol.fieldDescriptors());
         List<Schema> allOfSchemaList = mapIncludedRecords(typeSymbol, components, recordFieldMap, commonData);
 
-        Map<String, Schema> properties = getRecordFieldsMapping(recordFieldMap, components, requiredFields,
+        Map<String, Schema> properties = mapRecordFields(recordFieldMap, components, requiredFields,
                 recordName, commonData);
 
         Optional<TypeSymbol> restFieldType = typeSymbol.restTypeDescriptor();
@@ -114,9 +115,9 @@ public class RecordTypeMapper extends TypeMapper {
         return allOfSchemaList;
     }
 
-    public static Map<String, Schema> getRecordFieldsMapping(Map<String, RecordFieldSymbol> recordFieldMap,
-                                                             Map<String, Schema> components, Set<String> requiredFields,
-                                                             String recordName, CommonData commonData) {
+    public static Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
+                                                      Map<String, Schema> components, Set<String> requiredFields,
+                                                      String recordName, CommonData commonData) {
         Map<String, Schema> properties = new LinkedHashMap<>();
         for (Map.Entry<String, RecordFieldSymbol> recordField : recordFieldMap.entrySet()) {
             RecordFieldSymbol recordFieldSymbol = recordField.getValue();
@@ -131,7 +132,7 @@ public class RecordTypeMapper extends TypeMapper {
                 recordFieldSchema = recordFieldSchema.description(recordFieldDescription);
             }
             if (recordFieldSymbol.hasDefaultValue()) {
-                String recordFieldDefaultValue = getRecordFieldDefaultValue(recordName, recordFieldName,
+                Object recordFieldDefaultValue = getRecordFieldDefaultValue(recordName, recordFieldName,
                         commonData.moduleMemberVisitor());
                 if (Objects.nonNull(recordFieldDefaultValue)) {
                     recordFieldSchema.setDefault(recordFieldDefaultValue);
@@ -147,19 +148,24 @@ public class RecordTypeMapper extends TypeMapper {
         return properties;
     }
 
-    public static String getRecordFieldDefaultValue(String recordName, String fieldName,
+    public static Object getRecordFieldDefaultValue(String recordName, String fieldName,
                                                     ModuleMemberVisitor moduleMemberVisitor) {
         TypeDefinitionNode recordDefNode = moduleMemberVisitor.getTypeDefinitionNode(recordName);
         if (Objects.isNull(recordDefNode)) {
             return null;
         }
         NodeList<Node> recordFields = ((RecordTypeDescriptorNode) recordDefNode.typeDescriptor()).fields();
-        return recordFields.stream().filter(field -> field instanceof RecordFieldWithDefaultValueNode)
+        RecordFieldWithDefaultValueNode defaultValueNode = recordFields.stream()
+                .filter(field -> field instanceof RecordFieldWithDefaultValueNode)
                 .map(field -> (RecordFieldWithDefaultValueNode) field)
-                .filter(field -> field.fieldName().toString().trim().equals(fieldName))
-                .findFirst()
-                .map(RecordFieldWithDefaultValueNode::expression)
-                .map(Object::toString)
-                .orElse(null);
+                .filter(field -> field.fieldName().toString().trim().equals(fieldName)).findFirst().orElse(null);
+        if (Objects.isNull(defaultValueNode)) {
+            return null;
+        }
+        ExpressionNode defaultValueExpression = defaultValueNode.expression();
+        if (!MapperCommonUtils.isSimpleValueLiteralKind(defaultValueExpression.kind())) {
+            return null;
+        }
+        return MapperCommonUtils.parseBalSimpleLiteral(defaultValueExpression.toString().trim());
     }
 }

@@ -43,18 +43,11 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.BOOLEAN_LITERAL;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.LIST_CONSTRUCTOR;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.NIL_LITERAL;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.NUMERIC_LITERAL;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPTIONAL_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SIMPLE_NAME_REFERENCE;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.service.utils.MapperCommonUtils.getAnnotationNodesFromServiceNode;
 import static io.ballerina.openapi.service.utils.MapperCommonUtils.handleReference;
 import static io.ballerina.openapi.service.utils.MapperCommonUtils.unescapeIdentifier;
@@ -69,8 +62,6 @@ public class OpenAPIQueryParameterMapper {
     private final SemanticModel semanticModel;
     private final Map<String, String> apidocs;
     private final ModuleMemberVisitor moduleMemberVisitor;
-    private final SyntaxKind[] validExpressionKind = {STRING_LITERAL, NUMERIC_LITERAL, BOOLEAN_LITERAL,
-            LIST_CONSTRUCTOR, NIL_LITERAL, MAPPING_CONSTRUCTOR};
 
     public OpenAPIQueryParameterMapper(Map<String, String> apidocs, Components components,
                                        SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
@@ -192,24 +183,20 @@ public class OpenAPIQueryParameterMapper {
             }
         }
 
-        if (Arrays.stream(validExpressionKind).anyMatch(syntaxKind -> syntaxKind ==
-                defaultableQueryParam.expression().kind())) {
+        if (MapperCommonUtils.isSimpleValueLiteralKind(defaultableQueryParam.expression().kind())) {
             String defaultValue = defaultableQueryParam.expression().toString();
-            if (defaultableQueryParam.expression().kind() == NIL_LITERAL) {
-                defaultValue = null;
-            }
             if (queryParameter.getContent() != null) {
                 Content content = queryParameter.getContent();
                 for (Map.Entry<String, MediaType> stringMediaTypeEntry : content.entrySet()) {
                     Schema schema = stringMediaTypeEntry.getValue().getSchema();
-                    schema = ConverterCommonUtils.setDefaultValue(schema, defaultValue);
+                    schema = MapperCommonUtils.setDefaultValue(schema, defaultValue);
                     io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
                     media.setSchema(schema);
                     content.addMediaType(stringMediaTypeEntry.getKey(), media);
                 }
             } else {
                 Schema schema = queryParameter.getSchema();
-                schema = ConverterCommonUtils.setDefaultValue(schema, defaultValue);
+                schema = MapperCommonUtils.setDefaultValue(schema, defaultValue);
                 queryParameter.setSchema(schema);
             }
         }

@@ -93,6 +93,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.BOOLEAN_LITERAL;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.LIST_CONSTRUCTOR;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.NUMERIC_LITERAL;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.service.Constants.BALLERINA;
 import static io.ballerina.openapi.service.Constants.HTTP;
 import static io.ballerina.openapi.service.Constants.HYPHEN;
@@ -106,6 +111,9 @@ import static io.ballerina.openapi.service.Constants.YAML_EXTENSION;
  * Utilities used in Ballerina  to OpenAPI converter.
  */
 public class MapperCommonUtils {
+
+    private static final SyntaxKind[] validExpressionKind = {STRING_LITERAL, NUMERIC_LITERAL, BOOLEAN_LITERAL,
+            LIST_CONSTRUCTOR, MAPPING_CONSTRUCTOR};
 
     /**
      * Retrieves a matching OpenApi {@link Schema} for a provided ballerina type.
@@ -583,13 +591,22 @@ public class MapperCommonUtils {
             compoundSchema.setAllOf(List.of(schema));
             schema = compoundSchema;
         }
+        schema.setDefault(parseBalSimpleLiteral(defaultValue));
+        return schema;
+    }
+
+    public static Object parseBalSimpleLiteral(String literal) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-            schema.setDefault(mapper.readValue(defaultValue, Object.class));
+            return mapper.readValue(literal, Object.class);
         } catch (JsonProcessingException e) {
-            schema.setDefault(defaultValue);
+            return literal;
         }
-        return schema;
+    }
+
+    public static boolean isSimpleValueLiteralKind(SyntaxKind valueExpressionKind) {
+        return Arrays.stream(validExpressionKind).anyMatch(syntaxKind -> syntaxKind ==
+                valueExpressionKind);
     }
 }

@@ -21,6 +21,8 @@ package io.ballerina.openapi.service.model;
 
 import io.swagger.v3.oas.models.Operation;
 
+import java.util.Objects;
+
 /**
  * This class will hold operation details specific to HTTP operation.
  */
@@ -60,6 +62,10 @@ public class OperationAdaptor {
 
     public void setHttpOperation(String httpOperation) {
         this.httpOperation = httpOperation;
+    }
+
+    public boolean hasDataBinding() {
+        return Objects.nonNull(this.operation.getRequestBody()) || Objects.nonNull(this.operation.getParameters());
     }
 
 }
