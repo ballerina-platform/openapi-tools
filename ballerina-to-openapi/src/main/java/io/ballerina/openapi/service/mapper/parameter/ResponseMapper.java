@@ -177,9 +177,9 @@ public class ResponseMapper {
             for (Map.Entry<String, TypeSymbol> entry : mediaTypes.entrySet()) {
                 TypeSymbol typeSymbol = entry.getValue();
                 if (isSubTypeOfNil(typeSymbol, semanticModel)) {
-                    getResponseMappingForNil();
+                    addResponseMappingForNil();
                 } else if (isSubTypeOfHttpResponse(typeSymbol, semanticModel)) {
-                    getResponseMappingForHttpResponse();
+                    addResponseMappingForHttpResponse();
                 } else {
                     String mediaType = entry.getKey();
                     ApiResponse apiResponse = new ApiResponse();
@@ -233,14 +233,15 @@ public class ResponseMapper {
 
     private void updateExistingApiResponse(ApiResponse apiResponse, String statusCode) {
         ApiResponse res = apiResponses.get(statusCode);
-        Content content = res.getContent();
-        if (content == null) {
-            content = new Content();
-        }
         if (apiResponse.getContent() != null) {
+            Content content = res.getContent();
+            if (content == null) {
+                content = new Content();
+            }
+
             updateApiResponseContentWithMediaType(apiResponse, content);
+            res.setContent(content);
         }
-        res.setContent(content);
         apiResponses.put(statusCode, res);
     }
 
@@ -275,7 +276,7 @@ public class ResponseMapper {
         apiResponse.setContent(content);
     }
 
-    private void getResponseMappingForNil() {
+    private void addResponseMappingForNil() {
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.description(ACCEPTED);
         addApiResponse(apiResponse, HTTP_202);
@@ -284,10 +285,12 @@ public class ResponseMapper {
     private void addResponseMappingForDataBindingFailures() {
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.description(BAD_REQUEST);
+        TypeSymbol errorType = semanticModel.types().ERROR;
+        addResponseContent(errorType, apiResponse, "application/json");
         addApiResponse(apiResponse, HTTP_400);
     }
 
-    private void getResponseMappingForHttpResponse() {
+    private void addResponseMappingForHttpResponse() {
         MediaType mediaTypeObj = new MediaType();
         mediaTypeObj.setSchema(new Schema().description("Any type of entity body"));
         ApiResponse apiResponse = new ApiResponse();
@@ -298,9 +301,9 @@ public class ResponseMapper {
 
     private void addResponseMappingForSimpleType(TypeSymbol returnType, String defaultStatusCode) {
         if (isSubTypeOfNil(returnType, semanticModel)) {
-            getResponseMappingForNil();
+            addResponseMappingForNil();
         } else if (isSubTypeOfHttpResponse(returnType, semanticModel)) {
-            getResponseMappingForHttpResponse();
+            addResponseMappingForHttpResponse();
         } else if (isSubTypeOfHttpStatusCodeResponse(returnType, semanticModel)) {
             TypeSymbol bodyType = getBodyTypeFromStatusCodeResponse(returnType, semanticModel);
             Map<String, Header> headersFromStatusCodeResponse = getHeadersFromStatusCodeResponse(returnType);
