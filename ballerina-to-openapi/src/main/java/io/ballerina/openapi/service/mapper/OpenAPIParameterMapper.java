@@ -19,7 +19,7 @@
 package io.ballerina.openapi.service.mapper;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.PathParameterSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -31,22 +31,19 @@ import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.service.Constants;
 import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.type.ComponentMapper;
+import io.ballerina.openapi.service.mapper.parameter.PathParameterMapper;
 import io.ballerina.openapi.service.model.OperationAdaptor;
-import io.ballerina.openapi.service.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
@@ -68,12 +65,12 @@ public class OpenAPIParameterMapper {
     private final FunctionDefinitionNode functionDefinitionNode;
     private final OperationAdaptor operationAdaptor;
     private final Map<String, String> apidocs;
-    private final List<OpenAPIMapperDiagnostic> errors = new ArrayList<>();
+    private final List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
     private final Components components;
     private final SemanticModel semanticModel;
 
     public List<OpenAPIMapperDiagnostic> getErrors() {
-        return errors;
+        return diagnostics;
     }
 
     public OpenAPIParameterMapper(FunctionDefinitionNode functionDefinitionNode,
@@ -115,7 +112,7 @@ public class OpenAPIParameterMapper {
                         DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
                         IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
                                 referenceNode.location());
-                        errors.add(error);
+                        diagnostics.add(error);
                     } else if (typeName.equals(HTTP_REQUEST)) {
                         RequestBody requestBody = new RequestBody();
                         MediaType mediaType = new MediaType();
@@ -156,31 +153,17 @@ public class OpenAPIParameterMapper {
      */
     private void createPathParameters(List<Parameter> parameters, NodeList<Node> pathParams) {
         for (Node param: pathParams) {
-            if (param instanceof ResourcePathParameterNode) {
-                PathParameter pathParameterOAS = new PathParameter();
-                ResourcePathParameterNode pathParam = (ResourcePathParameterNode) param;
-                if (pathParam.typeDescriptor().kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
-                    SimpleNameReferenceNode queryNode = (SimpleNameReferenceNode) pathParam.typeDescriptor();
-                    ComponentMapper componentMapper = new ComponentMapper(components, semanticModel);
-                    TypeSymbol typeSymbol = (TypeSymbol) semanticModel.symbol(queryNode).orElseThrow();
-                    componentMapper.createComponentsSchema(typeSymbol);
-                    Schema schema = new Schema();
-                    schema.set$ref(MapperCommonUtils.unescapeIdentifier(queryNode.name().text().trim()));
-                    pathParameterOAS.setSchema(schema);
+            if (param instanceof ResourcePathParameterNode pathParam) {
+                if (!pathParam.children().get(2).toString().trim().equals("...")) {
+                    PathParameterMapper pathParameterMapper = new PathParameterMapper(
+                            (PathParameterSymbol) semanticModel.symbol(pathParam).get(),
+                            apidocs, semanticModel, diagnostics);
+                    parameters.add(pathParameterMapper.getParameterSchema(components));
                 } else {
-                    pathParameterOAS.schema(MapperCommonUtils.getOpenApiSchema(
-                            pathParam.typeDescriptor().toString().trim()));
+                    DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_118;
+                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                            pathParam.location(), pathParam.toString());
                 }
-
-                pathParameterOAS.setName(MapperCommonUtils.unescapeIdentifier(pathParam.paramName().get().text()));
-
-                // Check the parameter has doc
-                if (!apidocs.isEmpty() && apidocs.containsKey(pathParam.paramName().get().text().trim())) {
-                    pathParameterOAS.setDescription(apidocs.get(pathParam.paramName().get().text().trim()));
-                }
-                // Set param description
-                pathParameterOAS.setRequired(true);
-                parameters.add(pathParameterOAS);
             }
         }
     }
@@ -215,13 +198,13 @@ public class OpenAPIParameterMapper {
                         operationAdaptor, semanticModel, value)).orElse(new OpenAPIRequestBodyMapper(components,
                         operationAdaptor, semanticModel));
                 openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema, annotation, apidocs);
-                errors.addAll(openAPIRequestBodyMapper.getDiagnostics());
+                diagnostics.addAll(openAPIRequestBodyMapper.getDiagnostics());
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
                     (Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
                 IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
                         annotation.location());
-                errors.add(error);
+                diagnostics.add(error);
             }
         }
     }

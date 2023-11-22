@@ -67,7 +67,9 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_116("OAS_CONVERTOR_116", "Generated OpenAPI definition does not contain `%s` request" +
             " body information, as it's not supported by the OpenAPI tool.",
             DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_117("OAS_CONVERTOR_117", "Unsupported type: %s found", DiagnosticSeverity.WARNING);
+    OAS_CONVERTOR_117("OAS_CONVERTOR_117", "Unsupported type: %s found", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_118("OAS_CONVERTOR_118", "Generated OpenAPI specification " +
+            "may not contain rest parameter information in the resource path", DiagnosticSeverity.WARNING);
 
     private final String code;
     private final String description;
