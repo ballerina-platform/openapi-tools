@@ -1,0 +1,11 @@
+[project]
+org-name = "test"
+version = "0.1.0"
+
+[[tool.openapi]]
+id = "client"
+filePath = "sample.yaml"
+targetModule = "delivery"
+options.mode = "client"
+options.tags = ["1","2","3"]
+options.nullable = true

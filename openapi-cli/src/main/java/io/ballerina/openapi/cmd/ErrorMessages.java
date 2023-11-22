@@ -29,6 +29,9 @@ public class ErrorMessages {
 
     public static final String MISSING_CONTRACT_PATH = "An OpenAPI definition path is required to generate the " +
             "service. \ne.g: bal openapi --input <OpenAPIContract> or <Ballerina file>";
+    public static final String INVALID_BALLERINA_PACKAGE = "ERROR: invalid Ballerina package directory: %s, " +
+            "cannot find 'Ballerina.toml' file.%n%n";
+    public static final String INVALID_INPUT_PATH = "ERROR: provide input oas contract path.%n%n";
 
     private ErrorMessages() {
         throw new AssertionError();

@@ -50,6 +50,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.openapi.HateoasTests" />
             <class name="io.ballerina.openapi.cmd.OpenApiGenServiceCmdTest"/>
             <class name="io.ballerina.openapi.cmd.BallerinaToOASTests"/>
+            <class name="io.ballerina.openapi.cmd.NegativeCmdTests"/>
             <class name="io.ballerina.openapi.CodeGeneratorTest"/>
             <class name="io.ballerina.openapi.generators.common.GeneratorUtilsTests"/>
             <class name="io.ballerina.openapi.generators.common.SwaggerParserTests"/>
