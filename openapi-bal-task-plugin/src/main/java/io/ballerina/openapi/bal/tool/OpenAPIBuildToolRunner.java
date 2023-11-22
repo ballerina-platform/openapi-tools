@@ -33,6 +33,7 @@ import io.ballerina.projects.ToolContext;
 import io.ballerina.toml.semantic.ast.TomlKeyValueNode;
 import io.ballerina.toml.semantic.ast.TomlTableNode;
 import io.ballerina.toml.semantic.ast.TopLevelNode;
+import io.ballerina.toml.semantic.diagnostics.TomlNodeLocation;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
@@ -96,16 +97,15 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
     public void executeTool(ToolContext toolContext) {
 
         ImmutablePair<OASClientConfig, OASServiceMetadata> codeGeneratorConfig;
+        TomlNodeLocation location = toolContext.packageInstance().ballerinaToml().get().tomlAstNode().location();
         try {
             // Validate the OAS file whether we can handle within OpenAPI tool
             if (!canHandle(toolContext)) {
                 return;
             }
-
             String oasFilePath = toolContext.filePath();
             Path packagePath = toolContext.packageInstance().project().sourceRoot();
-            OpenAPI openAPI = getOpenAPIContract(packagePath, Path.of(oasFilePath),
-                    toolContext.optionsTable().location());
+            OpenAPI openAPI = getOpenAPIContract(packagePath, Path.of(oasFilePath), location);
             if (openAPI == null) {
                 return;
             }
@@ -123,10 +123,10 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
             }
         } catch (BallerinaOpenApiException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.PARSER_ERROR;
-            reportDiagnostics(error, e.getMessage(), toolContext.optionsTable().location());
+            reportDiagnostics(error, e.getMessage(), location);
         } catch (IOException | FormatterException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_GENERATING_CLIENT;
-            reportDiagnostics(error, e.getMessage(), toolContext.optionsTable().location());
+            reportDiagnostics(error, e.getMessage(), location);
         }
     }
 
@@ -173,12 +173,18 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
                                                                                           OpenAPI openAPI) throws
             IOException, BallerinaOpenApiException {
 
-        Map<String, TopLevelNode> options = toolContext.optionsTable().entries();
         Filter filter = new Filter();
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASServiceMetadata.Builder serviceMetaDataBuilder = new OASServiceMetadata.Builder();
         clientMetaDataBuilder.withOpenAPI(openAPI);
         serviceMetaDataBuilder.withOpenAPI(openAPI);
+        TomlTableNode tomlTableNode = toolContext.optionsTable();
+        if (tomlTableNode == null) {
+            clientMetaDataBuilder.withFilters(filter);
+            serviceMetaDataBuilder.withFilters(filter);
+            return new ImmutablePair<>(clientMetaDataBuilder.build(), serviceMetaDataBuilder.build());
+        }
+        Map<String, TopLevelNode> options = toolContext.optionsTable().entries();
         for (Map.Entry<String, TopLevelNode> field : options.entrySet()) {
             String tomlKeyValue = ((TomlKeyValueNode) field.getValue()).value().toNativeValue().toString();
             String[] values = tomlKeyValue.split(",");

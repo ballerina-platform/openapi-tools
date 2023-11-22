@@ -192,8 +192,8 @@ public class TestUtil {
     public static File[] getMatchingFiles(String project, List<String> ids) throws IOException, InterruptedException {
         List<String> buildArgs = new LinkedList<>();
         //TODO: Change this function after fixing module name with client declaration alias.
-        Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve(project), buildArgs);
-        Assert.assertEquals(process.waitFor(), 0);
+        boolean isExit = executeBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve(project), buildArgs);
+        Assert.assertTrue(isExit);
         File dir = new File(RESOURCE.resolve("client-bal-task-projects/" + project + "/generated/").toString());
         File[] matchingFiles = dir.listFiles(new FileFilter() {
             public boolean accept(File pathname) {
