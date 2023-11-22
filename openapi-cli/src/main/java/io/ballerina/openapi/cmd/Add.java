@@ -207,7 +207,7 @@ public class Add implements BLauncherCmd {
             moduleMembers = moduleMembers.add(SampleNodeGenerator.createStringKV("options.mode",
                     optionsBuilder.getMode(), null));
         }
-        if (optionsBuilder.getTags() != null && !optionsBuilder.getTags().isEmpty()) {
+        if (optionsBuilder.getTags() != null && optionsBuilder.getTags().size() != 0) {
             Node[] arrayItems = getArrayItemNodes(getTags());
             SeparatedNodeList<ValueNode> value = createSeparatedNodeList(arrayItems);
             ArrayNode arrayNode = NodeFactory.createArrayNode(createToken(SyntaxKind.OPEN_BRACKET_TOKEN), value,
@@ -216,8 +216,8 @@ public class Add implements BLauncherCmd {
                     arrayNode);
             moduleMembers = moduleMembers.add(tagNodes);
         }
-        if (optionsBuilder.getOperations() != null && !optionsBuilder.getOperations().isEmpty()) {
-            if (optionsBuilder.getTags() != null && !optionsBuilder.getTags().isEmpty()) {
+        if (optionsBuilder.getOperations() != null && optionsBuilder.getOperations().size() != 0) {
+            if (optionsBuilder.getTags() != null && optionsBuilder.getTags().size() != 0) {
                 moduleMembers = addNewLine(moduleMembers, 1);
             }
             Node[] arrayItems = getArrayItemNodes(getOperations());

@@ -762,6 +762,28 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Assert.assertTrue(tomlContent.contains(generatedTool));
     }
 
+    @Test(description = "Test openapi add sub command")
+    public void testAddCmd() throws IOException {
+        Path resourceDir = Paths.get(System.getProperty("user.dir")).resolve("build/resources/test");
+        Path packagePath = resourceDir.resolve(Paths.get("cmd/bal-task-client"));
+        String[] addArgs = {"--input", "petstore.yaml", "-p", packagePath.toString(),
+                "--module", "delivery", "--nullable", "--license", "license.txt", "--mode", "client",
+                "--client-methods", "resource"};
+        Add add = new Add(printStream,  false);
+        new CommandLine(add).parseArgs(addArgs);
+        add.execute();
+        String tomlContent = Files.readString(packagePath.resolve("Ballerina.toml"));
+        String generatedTool = "[[tool.openapi]]\n" +
+                "id = \"oas_client_petstore\"\n" +
+                "filePath = \"petstore.yaml\"\n" +
+                "targetModule = \"delivery\"\n" +
+                "options.mode = \"client\"\n" +
+                "options.nullable = true\n" +
+                "options.clientMethods = \"resource\"\n" +
+                "options.licensePath = \"license.txt\"\n";
+        Assert.assertTrue(tomlContent.contains(generatedTool));
+    }
+
     @AfterTest
     public void clean() {
         System.setErr(null);
