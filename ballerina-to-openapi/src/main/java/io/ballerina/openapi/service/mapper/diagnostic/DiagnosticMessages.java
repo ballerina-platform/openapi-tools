@@ -15,7 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.diagnostic;
+package io.ballerina.openapi.service.mapper.diagnostic;
 
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
@@ -64,11 +64,26 @@ public enum DiagnosticMessages {
 
     OAS_CONVERTOR_115("OAS_CONVERTOR_115", "Given Ballerina file does not contain any HTTP service.",
             DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_116("OAS_CONVERTOR_116", "Generated OpenAPI definition does not contain `%s` request" +
+    OAS_CONVERTOR_116("OAS_CONVERTOR_116", "Failed to parse the Number value due to: %s ",
+            DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_117("OAS_CONVERTOR_117", "Generated OpenAPI definition does not contain `%s` request" +
             " body information, as it's not supported by the OpenAPI tool.",
             DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_117("OAS_CONVERTOR_117", "Unsupported type: %s found", DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_118("OAS_CONVERTOR_118", "Generated OpenAPI specification " +
+    OAS_CONVERTOR_118("OAS_CONVERTOR_118", "Generated OpenAPI definition does not contain variable " +
+            "assignment '%s' in constraint validation.", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_119("OAS_CONVERTOR_119", "Given REGEX pattern '%s' is not supported by the OpenAPI " +
+            "tool, it may also not support interpolation within the REGEX pattern.", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_120("OAS_CONVERTER_120", "Ballerina Date constraints might not be reflected in the " +
+            "OpenAPI definition", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_121("OAS_CONVERTOR_121", "Generated OpenAPI definition does not contain the mapping " +
+            "for the unsupported type: %s", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_122("OAS_CONVERTOR_122", "Generated OpenAPI definition does not contain the mapping " +
+            "for the unsupported union type: %s", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_123("OAS_CONVERTOR_123", "Generated OpenAPI definition does not contain the mapping " +
+            "for the unsupported tuple type: %s", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_124("OAS_CONVERTOR_124", "Generated OpenAPI definition does not contain the default " +
+            "value for the record field: %s", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_125("OAS_CONVERTOR_125", "Generated OpenAPI specification " +
             "may not contain rest parameter information in the resource path", DiagnosticSeverity.WARNING);
 
     private final String code;

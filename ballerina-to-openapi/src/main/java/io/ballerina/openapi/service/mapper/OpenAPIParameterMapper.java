@@ -33,12 +33,12 @@ import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.openapi.service.Constants;
-import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.diagnostic.IncompatibleResourceDiagnostic;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.parameter.PathParameterMapper;
-import io.ballerina.openapi.service.model.OperationAdaptor;
+import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -53,16 +53,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.openapi.service.Constants.HTTP_REQUEST;
-import static io.ballerina.openapi.service.Constants.WILD_CARD_CONTENT_KEY;
-import static io.ballerina.openapi.service.Constants.WILD_CARD_SUMMARY;
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.extractCustomMediaType;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP_REQUEST;
+import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_CONTENT_KEY;
+import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_SUMMARY;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractCustomMediaType;
 
 /**
  * OpenAPIParameterMapper provides functionality for converting ballerina parameter to OAS parameter model.
  */
 public class OpenAPIParameterMapper {
     private final FunctionDefinitionNode functionDefinitionNode;
+    private final ModuleMemberVisitor moduleMemberVisitor;
     private final OperationAdaptor operationAdaptor;
     private final Map<String, String> apidocs;
     private final List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
@@ -73,15 +74,16 @@ public class OpenAPIParameterMapper {
         return diagnostics;
     }
 
-    public OpenAPIParameterMapper(FunctionDefinitionNode functionDefinitionNode,
-                                  OperationAdaptor operationAdaptor, Map<String, String> apidocs,
-                                  Components components, SemanticModel semanticModel) {
+    public OpenAPIParameterMapper(FunctionDefinitionNode functionDefinitionNode, OperationAdaptor operationAdaptor,
+                                  Map<String, String> apidocs, Components components, SemanticModel semanticModel,
+                                  ModuleMemberVisitor moduleMemberVisitor) {
 
         this.functionDefinitionNode = functionDefinitionNode;
         this.operationAdaptor = operationAdaptor;
         this.apidocs = apidocs;
         this.components = components;
         this.semanticModel = semanticModel;
+        this.moduleMemberVisitor = moduleMemberVisitor;
     }
 
 
@@ -99,7 +101,7 @@ public class OpenAPIParameterMapper {
         SeparatedNodeList<ParameterNode> parameterList = functionSignature.parameters();
         for (ParameterNode parameterNode : parameterList) {
             OpenAPIQueryParameterMapper queryParameterMapper = new OpenAPIQueryParameterMapper(apidocs, components,
-                    semanticModel);
+                    semanticModel, moduleMemberVisitor);
             if (parameterNode.kind() == SyntaxKind.REQUIRED_PARAM) {
                 RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
                 // Handle query parameter
@@ -160,9 +162,10 @@ public class OpenAPIParameterMapper {
                             apidocs, semanticModel, diagnostics);
                     parameters.add(pathParameterMapper.getParameterSchema(components));
                 } else {
-                    DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_118;
+                    DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_125;
                     IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
                             pathParam.location(), pathParam.toString());
+                    diagnostics.add(error);
                 }
             }
         }
@@ -180,12 +183,13 @@ public class OpenAPIParameterMapper {
         for (AnnotationNode annotation: annotations) {
             if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
                 // Handle headers.
-                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(components, semanticModel, apidocs);
+                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(components, semanticModel, apidocs,
+                        moduleMemberVisitor);
                 parameters.addAll(openAPIHeaderMapper.setHeaderParameter(requiredParameterNode));
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_QUERY)) {
                 // Handle query parameter.
                 OpenAPIQueryParameterMapper openAPIQueryParameterMapper = new OpenAPIQueryParameterMapper(apidocs,
-                        components, semanticModel);
+                        components, semanticModel, moduleMemberVisitor);
                 parameters.add(openAPIQueryParameterMapper.createQueryParameter(requiredParameterNode));
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
                     (!Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(
@@ -195,8 +199,8 @@ public class OpenAPIParameterMapper {
                 Optional<String> customMediaType = extractCustomMediaType(functionDefinitionNode);
                 OpenAPIRequestBodyMapper openAPIRequestBodyMapper = customMediaType.map(
                         value -> new OpenAPIRequestBodyMapper(components,
-                        operationAdaptor, semanticModel, value)).orElse(new OpenAPIRequestBodyMapper(components,
-                        operationAdaptor, semanticModel));
+                        operationAdaptor, semanticModel, moduleMemberVisitor)).orElse(new OpenAPIRequestBodyMapper(components,
+                        operationAdaptor, semanticModel, moduleMemberVisitor));
                 openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema, annotation, apidocs);
                 diagnostics.addAll(openAPIRequestBodyMapper.getDiagnostics());
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
@@ -218,12 +222,13 @@ public class OpenAPIParameterMapper {
         for (AnnotationNode annotation: annotations) {
             if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
                 // Handle headers.
-                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(components, semanticModel, apidocs);
+                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(components, semanticModel, apidocs,
+                        moduleMemberVisitor);
                 parameters = openAPIHeaderMapper.setHeaderParameter(defaultableParameterNode);
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_QUERY)) {
                 // Handle query parameter.
                 OpenAPIQueryParameterMapper openAPIQueryParameterMapper = new OpenAPIQueryParameterMapper(apidocs,
-                        components, semanticModel);
+                        components, semanticModel, moduleMemberVisitor);
                 parameters.add(openAPIQueryParameterMapper.createQueryParameter(defaultableParameterNode));
             }
         }

@@ -19,7 +19,8 @@ package io.ballerina.openapi.service.mapper.parameter;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.PathParameterSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.AdditionalData;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
@@ -31,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.unescapeIdentifier;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 public class PathParameterMapper implements ParameterMapper {
 
@@ -59,7 +60,8 @@ public class PathParameterMapper implements ParameterMapper {
         if (Objects.isNull(componentSchemas)) {
             componentSchemas = new HashMap<>();
         }
-        pathParameter.setSchema(ComponentMapper.getTypeSchema(type, componentSchemas, semanticModel, diagnostics));
+        AdditionalData additionalData = new AdditionalData(semanticModel, null, diagnostics);
+        pathParameter.setSchema(ComponentMapper.getTypeSchema(type, componentSchemas, additionalData));
         if (!componentSchemas.isEmpty()) {
             components.setSchemas(componentSchemas);
         }
