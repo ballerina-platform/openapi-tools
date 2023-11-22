@@ -16,12 +16,11 @@
 
 package io.ballerina.openapi.service.mapper.type;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
@@ -30,25 +29,24 @@ import java.util.Objects;
 
 public class ReadOnlyTypeMapper extends TypeMapper {
 
-    public ReadOnlyTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
-                              List<OpenAPIMapperDiagnostic> diagnostics) {
-        super(typeSymbol, semanticModel, diagnostics);
+    public ReadOnlyTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
+        super(typeSymbol, additionalData);
     }
 
     @Override
     public Schema getReferenceTypeSchema(Map<String, Schema> components) {
         IntersectionTypeSymbol referredType = (IntersectionTypeSymbol) typeSymbol.typeDescriptor();
-        Schema effectiveTypeSchema = getSchema(referredType, components, semanticModel, diagnostics);
+        Schema effectiveTypeSchema = getSchema(referredType, components, additionalData);
         return Objects.nonNull(effectiveTypeSchema) ? effectiveTypeSchema.description(description) : null;
     }
 
     public static Schema getSchema(IntersectionTypeSymbol typeSymbol, Map<String, Schema> components,
-                                   SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
+                                   AdditionalData additionalData) {
         TypeSymbol effectiveType = getEffectiveType(typeSymbol);
         if (Objects.isNull(effectiveType)) {
             return null;
         }
-        return ComponentMapper.getTypeSchema(effectiveType, components, semanticModel, diagnostics);
+        return ComponentMapper.getTypeSchema(effectiveType, components, additionalData);
     }
 
     public static TypeSymbol getEffectiveType(IntersectionTypeSymbol typeSymbol) {
@@ -56,7 +54,6 @@ public class ReadOnlyTypeMapper extends TypeMapper {
         if (memberTypes.size() == 2) {
             TypeSymbol firstMember = memberTypes.get(0);
             TypeSymbol secondMember = memberTypes.get(1);
-            // Do not map readonly to the schema
             if (firstMember.typeKind().equals(TypeDescKind.READONLY)) {
                 return secondMember;
             } else if (secondMember.typeKind().equals(TypeDescKind.READONLY)) {

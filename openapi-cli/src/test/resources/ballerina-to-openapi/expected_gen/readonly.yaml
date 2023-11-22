@@ -40,6 +40,10 @@ paths:
           schema:
             type: string
       responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
         "200":
           description: Ok
           content:

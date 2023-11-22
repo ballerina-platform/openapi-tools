@@ -36,8 +36,7 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.openapi.service.Constants;
-import io.ballerina.openapi.service.utils.MapperCommonUtils;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
@@ -45,12 +44,12 @@ import io.swagger.v3.oas.models.servers.ServerVariables;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
-import static io.ballerina.openapi.service.Constants.PORT;
-import static io.ballerina.openapi.service.Constants.SERVER;
+import static io.ballerina.openapi.service.mapper.Constants.PORT;
+import static io.ballerina.openapi.service.mapper.Constants.SERVER;
 
 /**
  * Extract OpenApi server information from and Ballerina endpoint.
@@ -66,7 +65,7 @@ public class OpenAPIEndpointMapper {
      * @param service   mapper node with bound endpoints
      * @return openapi definition with Server information
      */
-    public OpenAPI getServers(OpenAPI openAPI, LinkedHashSet<ListenerDeclarationNode> endpoints,
+    public OpenAPI getServers(OpenAPI openAPI, Set<ListenerDeclarationNode> endpoints,
                               ServiceDeclarationNode service) {
         openAPI = extractServerForExpressionNode(openAPI, service.expressions(), service);
         List<Server> servers = openAPI.getServers();

@@ -30,9 +30,9 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.openapi.service.Constants;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.type.ComponentMapper;
-import io.ballerina.openapi.service.utils.MapperCommonUtils;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -42,22 +42,14 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.BOOLEAN_LITERAL;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.LIST_CONSTRUCTOR;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.NIL_LITERAL;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.NUMERIC_LITERAL;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPTIONAL_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SIMPLE_NAME_REFERENCE;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.getAnnotationNodesFromServiceNode;
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.handleReference;
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.unescapeIdentifier;
-
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getAnnotationNodesFromServiceNode;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.handleReference;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 /**
  * This class processes mapping query parameters in between Ballerina and OAS.
@@ -68,14 +60,14 @@ public class OpenAPIQueryParameterMapper {
     private final Components components;
     private final SemanticModel semanticModel;
     private final Map<String, String> apidocs;
-    private final SyntaxKind[] validExpressionKind = {STRING_LITERAL, NUMERIC_LITERAL, BOOLEAN_LITERAL,
-            LIST_CONSTRUCTOR, NIL_LITERAL, MAPPING_CONSTRUCTOR};
+    private final ModuleMemberVisitor moduleMemberVisitor;
 
     public OpenAPIQueryParameterMapper(Map<String, String> apidocs, Components components,
-                                       SemanticModel semanticModel) {
+                                       SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
         this.apidocs = apidocs;
         this.components = components;
         this.semanticModel = semanticModel;
+        this.moduleMemberVisitor = moduleMemberVisitor;
     }
 
     /**
@@ -116,7 +108,7 @@ public class OpenAPIQueryParameterMapper {
             QueryParameter queryParameter = new QueryParameter();
             queryParameter.setName(unescapeIdentifier(queryParamName));
             SimpleNameReferenceNode queryNode = (SimpleNameReferenceNode) queryParam.typeName();
-            ComponentMapper componentMapper = new ComponentMapper(components, semanticModel);
+            ComponentMapper componentMapper = new ComponentMapper(components, semanticModel, moduleMemberVisitor);
             TypeSymbol typeSymbol = (TypeSymbol) semanticModel.symbol(queryNode).orElseThrow();
             componentMapper.createComponentsSchema(typeSymbol);
             Schema<?> schema = new Schema<>();
@@ -130,7 +122,7 @@ public class OpenAPIQueryParameterMapper {
         } else if (queryParam.typeName().kind() == SIMPLE_NAME_REFERENCE) {
             QueryParameter queryParameter = new QueryParameter();
             Schema<?> refSchema = handleReference(semanticModel, components, (SimpleNameReferenceNode)
-                    queryParam.typeName());
+                    queryParam.typeName(), moduleMemberVisitor);
             queryParameter.setSchema(refSchema);
             queryParameter.setRequired(true);
             if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
@@ -177,9 +169,8 @@ public class OpenAPIQueryParameterMapper {
         } else if (defaultableQueryParam.typeName().kind() == SIMPLE_NAME_REFERENCE) {
             queryParameter.setName(unescapeIdentifier(queryParamName));
             Schema<?> refSchema = handleReference(semanticModel, components,
-                    (SimpleNameReferenceNode) defaultableQueryParam.typeName());
+                    (SimpleNameReferenceNode) defaultableQueryParam.typeName(), moduleMemberVisitor);
             queryParameter.setSchema(refSchema);
-            queryParameter.setRequired(true);
             if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
                 queryParameter.setDescription(apidocs.get(queryParamName));
             }
@@ -191,24 +182,20 @@ public class OpenAPIQueryParameterMapper {
             }
         }
 
-        if (Arrays.stream(validExpressionKind).anyMatch(syntaxKind -> syntaxKind ==
-                defaultableQueryParam.expression().kind())) {
-            String defaultValue = defaultableQueryParam.expression().toString().replaceAll("\"", "");
-            if (defaultableQueryParam.expression().kind() == NIL_LITERAL) {
-                defaultValue = null;
-            }
+        if (MapperCommonUtils.isSimpleValueLiteralKind(defaultableQueryParam.expression().kind())) {
+            String defaultValue = defaultableQueryParam.expression().toString();
             if (queryParameter.getContent() != null) {
                 Content content = queryParameter.getContent();
                 for (Map.Entry<String, MediaType> stringMediaTypeEntry : content.entrySet()) {
                     Schema schema = stringMediaTypeEntry.getValue().getSchema();
-                    schema.setDefault(defaultValue);
+                    schema = MapperCommonUtils.setDefaultValue(schema, defaultValue);
                     io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
                     media.setSchema(schema);
                     content.addMediaType(stringMediaTypeEntry.getKey(), media);
                 }
             } else {
                 Schema schema = queryParameter.getSchema();
-                schema.setDefault(defaultValue);
+                schema = MapperCommonUtils.setDefaultValue(schema, defaultValue);
                 queryParameter.setSchema(schema);
             }
         }
@@ -244,7 +231,7 @@ public class OpenAPIQueryParameterMapper {
 
     private Schema<?> getItemSchemaForReference(ArrayTypeDescriptorNode arrayNode) {
         SimpleNameReferenceNode record = (SimpleNameReferenceNode) arrayNode.memberTypeDesc();
-        return handleReference(semanticModel, components, record);
+        return handleReference(semanticModel, components, record, moduleMemberVisitor);
     }
 
     /**
@@ -287,7 +274,8 @@ public class OpenAPIQueryParameterMapper {
             }
             return queryParameter;
         } else if (node.kind() == SIMPLE_NAME_REFERENCE) {
-            Schema<?> refSchema = handleReference(semanticModel, components, (SimpleNameReferenceNode) node);
+            Schema<?> refSchema = handleReference(semanticModel, components, (SimpleNameReferenceNode) node,
+                    moduleMemberVisitor);
             queryParameter.setSchema(refSchema);
             if (isOptional.equals(Constants.FALSE)) {
                 queryParameter.setRequired(true);

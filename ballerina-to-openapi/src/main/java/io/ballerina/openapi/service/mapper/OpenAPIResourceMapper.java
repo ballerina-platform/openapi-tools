@@ -29,13 +29,13 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.openapi.service.Constants;
-import io.ballerina.openapi.service.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.diagnostic.IncompatibleResourceDiagnostic;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.parameter.ResponseMapper;
-import io.ballerina.openapi.service.model.OperationAdaptor;
-import io.ballerina.openapi.service.utils.MapperCommonUtils;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
@@ -52,8 +52,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.ballerina.openapi.service.Constants.DEFAULT;
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.getOperationId;
+import static io.ballerina.openapi.service.mapper.Constants.DEFAULT;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOperationId;
 
 /**
  * This class will do resource mapping from ballerina to openApi.
@@ -62,6 +62,7 @@ import static io.ballerina.openapi.service.utils.MapperCommonUtils.getOperationI
  */
 public class OpenAPIResourceMapper {
     private final SemanticModel semanticModel;
+    private final ModuleMemberVisitor moduleMemberVisitor;
     private final Paths pathObject = new Paths();
     private final Components components = new Components();
     private final List<OpenAPIMapperDiagnostic> errors;
@@ -73,9 +74,10 @@ public class OpenAPIResourceMapper {
     /**
      * Initializes a resource parser for openApi.
      */
-    OpenAPIResourceMapper(SemanticModel semanticModel) {
+    OpenAPIResourceMapper(SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
         this.semanticModel = semanticModel;
         this.errors = new ArrayList<>();
+        this.moduleMemberVisitor = moduleMemberVisitor;
     }
 
     public Components getComponents() {
@@ -197,7 +199,7 @@ public class OpenAPIResourceMapper {
      * @return Operation Adaptor object of given resource
      */
     private Optional<OperationAdaptor> convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
-                                                        String generateRelativePath) {
+                                                                  String generateRelativePath) {
         OperationAdaptor op = new OperationAdaptor();
         op.setHttpOperation(httpMethod);
         op.setPath(generateRelativePath);
@@ -215,7 +217,7 @@ public class OpenAPIResourceMapper {
         Map<String, String> apiDocs = listAPIDocumentations(resource, op);
         //Add path parameters if in path and query parameters
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs, components,
-                semanticModel);
+                semanticModel, moduleMemberVisitor);
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
         if (openAPIParameterMapper.getErrors().size() > 1 || (openAPIParameterMapper.getErrors().size() == 1 &&
                 !openAPIParameterMapper.getErrors().get(0).getCode().equals("OAS_CONVERTOR_113"))) {
@@ -227,16 +229,10 @@ public class OpenAPIResourceMapper {
             }
         }
         errors.addAll(openAPIParameterMapper.getErrors());
-        ResponseMapper responseMapper = new ResponseMapper(semanticModel, components, resource,
-                op.getHttpOperation(), errors);
+        ResponseMapper responseMapper = new ResponseMapper(semanticModel, components, resource, op,
+                errors, moduleMemberVisitor);
         ApiResponses apiResponses = responseMapper.getApiResponses();
         op.getOperation().setResponses(apiResponses);
-//        OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components);
-//        openAPIResponseMapper.getResourceOutput(resource, op);
-//        if (!openAPIResponseMapper.getErrors().isEmpty()) {
-//            errors.addAll(openAPIResponseMapper.getErrors());
-//            return Optional.empty();
-//        }
         return Optional.of(op);
     }
 

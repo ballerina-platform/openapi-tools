@@ -26,9 +26,9 @@ import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.openapi.extension.Constants;
 import io.ballerina.openapi.extension.OpenApiDiagnosticCode;
 import io.ballerina.openapi.extension.context.OpenApiDocContext;
-import io.ballerina.openapi.service.ServiceToOpenAPIMapper;
-import io.ballerina.openapi.service.model.OASGenerationMetaInfo;
-import io.ballerina.openapi.service.model.OASResult;
+import io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper;
+import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
+import io.ballerina.openapi.service.mapper.model.OASResult;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
@@ -41,8 +41,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import static io.ballerina.openapi.service.Constants.SLASH;
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.normalizeTitle;
+import static io.ballerina.openapi.service.mapper.Constants.SLASH;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.normalizeTitle;
 import static io.ballerina.openapi.extension.context.OpenApiDocContextHandler.getContextHandler;
 import static io.ballerina.openapi.extension.doc.DocGenerationUtils.getDiagnostics;
 

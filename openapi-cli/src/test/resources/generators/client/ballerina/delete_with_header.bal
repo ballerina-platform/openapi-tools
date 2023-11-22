@@ -39,43 +39,39 @@ public isolated client class Client {
     # + order_id - Order ID
     # + risk_id - Order Risk ID
     # + return - Status OK
-    remote isolated function delete_order_risk(string order_id, string risk_id) returns http:Response|error {
+    remote isolated function delete_order_risk(string order_id, string risk_id) returns error? {
         string resourcePath = string `/admin/api/2021-10/orders/${getEncodedUri(order_id)}/risks/${getEncodedUri(risk_id)}.json`;
-        http:Response response = check self.clientEp-> delete(resourcePath);
-        return response;
+        return self.clientEp-> delete(resourcePath);
     }
     # Delete with request body.
     #
     # + return - Status OK
-    remote isolated function order_risk(json payload) returns http:Response|error {
+    remote isolated function order_risk(json payload) returns error? {
         string resourcePath = string `/request-body`;
         http:Request request = new;
         request.setPayload(payload, "application/json");
-        http:Response response = check self.clientEp->delete(resourcePath, request);
-        return response;
+        return self.clientEp->delete(resourcePath, request);
     }
     # Delete with header.
     #
     # + xRequestId - Tests header 01
     # + return - Status OK
-    remote isolated function deleteHeader(string xRequestId) returns http:Response|error {
+    remote isolated function deleteHeader(string xRequestId) returns error? {
         string resourcePath = string `/header`;
         map<any> headerValues = {"X-Request-ID": xRequestId};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        http:Response response = check self.clientEp->delete(resourcePath, headers = httpHeaders);
-        return response;
+        return self.clientEp->delete(resourcePath, headers = httpHeaders);
     }
     # Delete with header and request body.
     #
     # + xRequestId - Tests header 01
     # + return - Status OK
-    remote isolated function deleteHeaderRequestBody(string xRequestId, json payload) returns http:Response|error {
+    remote isolated function deleteHeaderRequestBody(string xRequestId, json payload) returns error? {
         string resourcePath = string `/header-with-request-body`;
         map<any> headerValues = {"X-Request-ID": xRequestId};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         request.setPayload(payload, "application/json");
-        http:Response response = check self.clientEp->delete(resourcePath, request, httpHeaders);
-        return response;
+        return self.clientEp->delete(resourcePath, request, httpHeaders);
     }
 }

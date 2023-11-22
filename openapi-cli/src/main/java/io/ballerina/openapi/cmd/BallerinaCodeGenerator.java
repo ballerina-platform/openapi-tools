@@ -31,7 +31,7 @@ import io.ballerina.openapi.core.generators.service.BallerinaServiceObjectGenera
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.core.model.GenSrcFile;
-import io.ballerina.openapi.service.utils.CodegenUtils;
+import io.ballerina.openapi.service.mapper.utils.CodegenUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;

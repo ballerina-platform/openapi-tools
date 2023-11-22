@@ -1,0 +1,140 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /query:
+    get:
+      operationId: getQuery
+      parameters:
+        - name: q0
+          in: query
+          schema:
+            type: string
+            default: ""
+        - name: q1
+          in: query
+          schema:
+            type: string
+        - name: q2
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+            default: []
+        - name: q3
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+            default:
+              - one
+              - two
+              - three
+        - name: q4
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+            default:
+              - 1
+              - 2
+              - 3
+        - name: q5
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: number
+              format: float
+            default:
+              - 1
+              - 2.3
+              - 4.56
+        - name: q6
+          in: query
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                default:
+                  name: John
+                  city: London
+        - name: q7
+          in: query
+          required: true
+          schema:
+            type: array
+            items: {}
+            default:
+              - name: John
+                age: "25"
+              - name: David
+                age: "30"
+        - name: q8
+          in: query
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Record'
+            default:
+              name: John
+              address:
+                number: 14/7
+                streetName: 2nd cross street
+                city: London
+        - name: q9
+          in: query
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                default: {}
+        - name: q10
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: boolean
+            default:
+              - true
+              - false
+              - true
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  schemas:
+    Record:
+      required:
+        - address
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: object
+          additionalProperties:
+            type: string

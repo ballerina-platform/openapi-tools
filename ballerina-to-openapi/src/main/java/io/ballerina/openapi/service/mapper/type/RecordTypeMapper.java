@@ -16,14 +16,22 @@
 
 package io.ballerina.openapi.service.mapper.type;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.utils.MapperCommonUtils;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
+import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.service.mapper.AdditionalData;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -36,39 +44,36 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.getRecordFieldTypeDescription;
-import static io.ballerina.openapi.service.utils.MapperCommonUtils.getTypeName;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getRecordFieldTypeDescription;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
 public class RecordTypeMapper extends TypeMapper {
 
-    public RecordTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
-                            List<OpenAPIMapperDiagnostic> diagnostics) {
-        super(typeSymbol, semanticModel, diagnostics);
+    public RecordTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
+        super(typeSymbol, additionalData);
     }
 
     @Override
     public Schema getReferenceTypeSchema(Map<String, Schema> components) {
         RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeSymbol.typeDescriptor();
-        return getSchema(recordTypeSymbol, components, semanticModel, diagnostics).description(description);
+        return getSchema(recordTypeSymbol, components, name, additionalData).description(description);
     }
 
     public static Schema getSchema(RecordTypeSymbol typeSymbol, Map<String, Schema> components,
-                                   SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
+                                   String recordName, AdditionalData additionalData) {
         ObjectSchema schema = new ObjectSchema();
         Set<String> requiredFields = new HashSet<>();
 
         Map<String, RecordFieldSymbol> recordFieldMap = new LinkedHashMap<>(typeSymbol.fieldDescriptors());
-        List<Schema> allOfSchemaList = mapIncludedRecords(typeSymbol, components, recordFieldMap, semanticModel,
-                diagnostics);
+        List<Schema> allOfSchemaList = mapIncludedRecords(typeSymbol, components, recordFieldMap, additionalData);
 
-        Map<String, Schema> properties = getRecordFieldsMapping(recordFieldMap, components,
-                requiredFields, semanticModel, diagnostics);
+        Map<String, Schema> properties = mapRecordFields(recordFieldMap, components, requiredFields,
+                recordName, additionalData);
 
         Optional<TypeSymbol> restFieldType = typeSymbol.restTypeDescriptor();
         if (restFieldType.isPresent()) {
             if (!restFieldType.get().typeKind().equals(TypeDescKind.ANYDATA)) {
-                Schema restFieldSchema = ComponentMapper.getTypeSchema(restFieldType.get(),
-                        components, semanticModel, diagnostics);
+                Schema restFieldSchema = ComponentMapper.getTypeSchema(restFieldType.get(), components, additionalData);
                 schema.additionalProperties(restFieldSchema);
             }
         } else {
@@ -87,8 +92,7 @@ public class RecordTypeMapper extends TypeMapper {
     }
 
     static List<Schema> mapIncludedRecords(RecordTypeSymbol typeSymbol, Map<String, Schema> components,
-                                           Map<String, RecordFieldSymbol> recordFieldMap, SemanticModel semanticModel,
-                                           List<OpenAPIMapperDiagnostic> diagnostics) {
+                                           Map<String, RecordFieldSymbol> recordFieldMap, AdditionalData additionalData) {
         List<Schema> allOfSchemaList = new ArrayList<>();
         List<TypeSymbol> typeInclusions = typeSymbol.typeInclusions();
         for (TypeSymbol typeInclusion : typeInclusions) {
@@ -98,8 +102,7 @@ public class RecordTypeMapper extends TypeMapper {
                 Schema includedRecordSchema = new Schema();
                 includedRecordSchema.set$ref(getTypeName(typeInclusion));
                 allOfSchemaList.add(includedRecordSchema);
-                ComponentMapper.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion,
-                        components, semanticModel, diagnostics);
+                ComponentMapper.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion, components, additionalData);
 
                 RecordTypeSymbol includedRecordTypeSymbol = (RecordTypeSymbol) ((TypeReferenceTypeSymbol) typeInclusion)
                         .typeDescriptor();
@@ -112,10 +115,9 @@ public class RecordTypeMapper extends TypeMapper {
         return allOfSchemaList;
     }
 
-    public static Map<String, Schema> getRecordFieldsMapping(Map<String, RecordFieldSymbol> recordFieldMap,
-                                                             Map<String, Schema> components, Set<String> requiredFields,
-                                                             SemanticModel semanticModel,
-                                                             List<OpenAPIMapperDiagnostic> diagnostics) {
+    public static Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
+                                                      Map<String, Schema> components, Set<String> requiredFields,
+                                                      String recordName, AdditionalData additionalData) {
         Map<String, Schema> properties = new LinkedHashMap<>();
         for (Map.Entry<String, RecordFieldSymbol> recordField : recordFieldMap.entrySet()) {
             RecordFieldSymbol recordFieldSymbol = recordField.getValue();
@@ -125,13 +127,45 @@ public class RecordTypeMapper extends TypeMapper {
             }
             String recordFieldDescription = getRecordFieldTypeDescription(recordFieldSymbol);
             Schema recordFieldSchema = ComponentMapper.getTypeSchema(recordFieldSymbol.typeDescriptor(),
-                    components, semanticModel, diagnostics);
+                    components, additionalData);
             if (Objects.nonNull(recordFieldDescription) && Objects.nonNull(recordFieldSchema)) {
                 recordFieldSchema = recordFieldSchema.description(recordFieldDescription);
             }
-            // Does not consider the default values
+            if (recordFieldSymbol.hasDefaultValue()) {
+                Object recordFieldDefaultValue = getRecordFieldDefaultValue(recordName, recordFieldName,
+                        additionalData.moduleMemberVisitor());
+                if (Objects.nonNull(recordFieldDefaultValue)) {
+                    recordFieldSchema.setDefault(recordFieldDefaultValue);
+                } else {
+                    DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_124;
+                    ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(), message.getDescription(),
+                            null, recordFieldName);
+                    additionalData.diagnostics().add(error);
+                }
+            }
             properties.put(recordFieldName, recordFieldSchema);
         }
         return properties;
+    }
+
+    public static Object getRecordFieldDefaultValue(String recordName, String fieldName,
+                                                    ModuleMemberVisitor moduleMemberVisitor) {
+        TypeDefinitionNode recordDefNode = moduleMemberVisitor.getTypeDefinitionNode(recordName);
+        if (Objects.isNull(recordDefNode)) {
+            return null;
+        }
+        NodeList<Node> recordFields = ((RecordTypeDescriptorNode) recordDefNode.typeDescriptor()).fields();
+        RecordFieldWithDefaultValueNode defaultValueNode = recordFields.stream()
+                .filter(field -> field instanceof RecordFieldWithDefaultValueNode)
+                .map(field -> (RecordFieldWithDefaultValueNode) field)
+                .filter(field -> field.fieldName().toString().trim().equals(fieldName)).findFirst().orElse(null);
+        if (Objects.isNull(defaultValueNode)) {
+            return null;
+        }
+        ExpressionNode defaultValueExpression = defaultValueNode.expression();
+        if (!MapperCommonUtils.isSimpleValueLiteralKind(defaultValueExpression.kind())) {
+            return null;
+        }
+        return MapperCommonUtils.parseBalSimpleLiteral(defaultValueExpression.toString().trim());
     }
 }

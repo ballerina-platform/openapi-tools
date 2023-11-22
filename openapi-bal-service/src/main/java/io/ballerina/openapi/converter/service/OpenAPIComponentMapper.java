@@ -36,7 +36,22 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
+import io.ballerina.compiler.syntax.tree.IntersectionTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.RecordFieldNode;
+import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.TemplateExpressionNode;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
@@ -49,6 +64,9 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,11 +75,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static io.ballerina.openapi.converter.Constants.DOUBLE;
 import static io.ballerina.openapi.converter.Constants.FLOAT;
 import static io.ballerina.openapi.converter.Constants.HTTP;
 import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
+import static io.ballerina.openapi.converter.Constants.REGEX_INTERPOLATION_PATTERN;
+import static io.ballerina.openapi.converter.Constants.DATE_CONSTRAINT_ANNOTATION;
 
 /**
  * This util class for processing the mapping in between ballerina record and openAPI object schema.
@@ -69,14 +90,15 @@ import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
  * @since 2.0.0
  */
 public class OpenAPIComponentMapper {
-
     private final Components components;
     private final List<OpenAPIConverterDiagnostic> diagnostics;
     private final HashSet<String> visitedTypeDefinitionNames = new HashSet<>();
+    private final Set<TypeDefinitionNode> typeDefinitionNodes;
 
-    public OpenAPIComponentMapper(Components components) {
-        this.components = components;
-        this.diagnostics = new ArrayList<>();
+    public OpenAPIComponentMapper(Components components, ModuleMemberVisitor moduleMemberVisitor) {
+         this.components = components;
+         this.diagnostics = new ArrayList<>();
+         this.typeDefinitionNodes = moduleMemberVisitor.getTypeDefinitionNodes();
     }
 
     public List<OpenAPIConverterDiagnostic> getDiagnostics() {
@@ -102,10 +124,21 @@ public class OpenAPIComponentMapper {
         }
         TypeReferenceTypeSymbol typeRef = (TypeReferenceTypeSymbol) typeSymbol;
         TypeSymbol type = typeRef.typeDescriptor();
-
         if (type.typeKind() == TypeDescKind.INTERSECTION) {
             type = excludeReadonlyIfPresent(type);
         }
+
+        //Access module part node for finding the node to given typeSymbol.
+        ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder =
+                new ConstraintAnnotation.ConstraintAnnotationBuilder();
+        ((TypeReferenceTypeSymbol) typeSymbol).definition().getName().ifPresent(name -> {
+            for (TypeDefinitionNode typeDefinitionNode : typeDefinitionNodes) {
+                if (typeDefinitionNode.typeName().text().equals(name) && typeDefinitionNode.metadata().isPresent()) {
+                        extractedConstraintAnnotation(typeDefinitionNode.metadata().get(), constraintBuilder);
+                }
+            }
+        });
+        ConstraintAnnotation constraintAnnot = constraintBuilder.build();
 
         switch (type.typeKind()) {
             case RECORD:
@@ -123,7 +156,9 @@ public class OpenAPIComponentMapper {
                 }
                 break;
             case STRING:
-                schema.put(componentName, new StringSchema().description(typeDoc));
+                Schema stringSchema = new StringSchema().description(typeDoc);
+                setConstraintValueToSchema(constraintAnnot, stringSchema);
+                schema.put(componentName, stringSchema);
                 components.setSchemas(schema);
                 break;
             case JSON:
@@ -132,21 +167,28 @@ public class OpenAPIComponentMapper {
                 components.setSchemas(schema);
                 break;
             case INT:
-                schema.put(componentName, new IntegerSchema().description(typeDoc));
+                Schema intSchema = new IntegerSchema().description(typeDoc);
+                setConstraintValueToSchema(constraintAnnot, intSchema);
+                schema.put(componentName, intSchema);
                 components.setSchemas(schema);
                 break;
             case DECIMAL:
-                schema.put(componentName, new NumberSchema().format(DOUBLE).description(typeDoc));
+                Schema decimalSchema = new NumberSchema().format(DOUBLE).description(typeDoc);
+                setConstraintValueToSchema(constraintAnnot, decimalSchema);
+                schema.put(componentName, decimalSchema);
                 components.setSchemas(schema);
                 break;
             case FLOAT:
-                schema.put(componentName, new NumberSchema().format(FLOAT).description(typeDoc));
+                Schema floatSchema = new NumberSchema().format(FLOAT).description(typeDoc);
+                setConstraintValueToSchema(constraintAnnot, floatSchema);
+                schema.put(componentName, floatSchema);
                 components.setSchemas(schema);
                 break;
             case ARRAY:
             case TUPLE:
                 ArraySchema arraySchema = mapArrayToArraySchema(schema, type, componentName);
-                schema.put(componentName, arraySchema.description(typeDoc));
+                setConstraintValueToSchema(constraintAnnot, arraySchema.description(typeDoc));
+                schema.put(componentName, arraySchema);
                 components.setSchemas(schema);
                 break;
             case UNION:
@@ -326,7 +368,43 @@ public class OpenAPIComponentMapper {
         List<String> required = new ArrayList<>();
         componentSchema.setDescription(apiDocs.get(componentName));
         Map<String, Schema> schemaProperties = new LinkedHashMap<>();
+        RecordTypeDescriptorNode recordNode = null;
+        // Get the recordNode type descriptor node from given recordNode type symbol
+        for (TypeDefinitionNode typeDefinitionNode : typeDefinitionNodes) {
+            if (typeDefinitionNode.typeName().text().equals(componentName)) {
+                if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
+                    recordNode = (RecordTypeDescriptorNode) typeDefinitionNode.typeDescriptor();
+                } else if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.INTERSECTION_TYPE_DESC)) {
+                    IntersectionTypeDescriptorNode intersecNode =
+                            (IntersectionTypeDescriptorNode) typeDefinitionNode.typeDescriptor();
+                    Node leftTypeDesc = intersecNode.leftTypeDesc();
+                    Node rightTypeDesc = intersecNode.rightTypeDesc();
+                    if (leftTypeDesc.kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
+                        recordNode = (RecordTypeDescriptorNode) leftTypeDesc;
+                    }
+                    if (rightTypeDesc.kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
+                        recordNode = (RecordTypeDescriptorNode) rightTypeDesc;
+                    }
+                }
+            }
+        }
+
         for (Map.Entry<String, RecordFieldSymbol> field : rfields.entrySet()) {
+            ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder =
+                    new ConstraintAnnotation.ConstraintAnnotationBuilder();
+            if (recordNode != null) {
+                for (Node node : recordNode.fields()) {
+                    if (node instanceof RecordFieldNode) {
+                        RecordFieldNode fieldNode = (RecordFieldNode) node;
+                        if (fieldNode.fieldName().toString().equals(field.getKey())) {
+                            Optional<MetadataNode> metadata = fieldNode.metadata();
+                            metadata.ifPresent(metadataNode -> extractedConstraintAnnotation(metadataNode,
+                                    constraintBuilder));
+                        }
+                    }
+                }
+            }
+            ConstraintAnnotation constraintAnnot = constraintBuilder.build();
             String fieldName = ConverterCommonUtils.unescapeIdentifier(field.getKey().trim());
             if (!field.getValue().isOptional()) {
                 required.add(fieldName);
@@ -362,10 +440,12 @@ public class OpenAPIComponentMapper {
                 property.setNullable(nullable);
                 schema = components.getSchemas();
             }
-            // Add API documentation for record field
+            // Add API documentation for recordNode field
             if (apiDocs.containsKey(fieldName)) {
                 property.setDescription(apiDocs.get(fieldName));
             }
+            // Assign value to property - string, number, array
+            setConstraintValueToSchema(constraintAnnot, property);
             schemaProperties.put(fieldName, property);
         }
         componentSchema.setProperties(schemaProperties);
@@ -406,7 +486,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This function uses to handle the field datatype has TypeReference(ex: Record or Enum).
+     * This function is used to handle the field datatype has TypeReference(ex: Record or Enum).
      */
     private Schema<?> handleTypeReference(Map<String, Schema> schema, TypeReferenceTypeSymbol typeReferenceSymbol,
                                           Schema<?> property, boolean isCyclicRecord) {
@@ -424,7 +504,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This function uses to generate schema when field has union type as data type.
+     * This function is used to generate schema when field has union type as data type.
      * <pre>
      *     type Pet record {
      *         Dog|Cat type;
@@ -493,7 +573,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This function generate oneOf composed schema for record fields.
+     * This function generates oneOf composed schema for record fields.
      */
     private Schema generateOneOfSchema(Schema property, List<Schema> properties) {
         boolean isTypeReference = properties.size() == 1 && properties.get(0).get$ref() == null;
@@ -610,7 +690,7 @@ public class OpenAPIComponentMapper {
     }
 
     /**
-     * This util function is to handle the type reference symbol is record type or enum type.
+     * This util function is used to handle the type reference symbol is record type or enum type.
      */
     private Schema getSchemaForTypeReferenceSymbol(TypeSymbol referenceType, Schema symbolProperty,
                                                    String componentName, Map<String, Schema> schema) {
@@ -641,5 +721,238 @@ public class OpenAPIComponentMapper {
             arrayProperty.setItems(property);
         }
         return arrayProperty;
+    }
+
+    /**
+     * This util is used to set the integer constraint values for relevant schema field.
+     */
+    private void setIntegerConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, IntegerSchema properties) {
+        BigDecimal minimum = null;
+        BigDecimal maximum = null;
+        if (constraintAnnot.getMinValue().isPresent()) {
+            minimum = BigDecimal.valueOf(Integer.parseInt(constraintAnnot.getMinValue().get()));
+        } else if (constraintAnnot.getMinValueExclusive().isPresent()) {
+            minimum = BigDecimal.valueOf(Integer.parseInt(constraintAnnot.getMinValueExclusive().get()));
+            properties.setExclusiveMinimum(true);
+        }
+
+        if (constraintAnnot.getMaxValue().isPresent()) {
+            maximum = BigDecimal.valueOf(Integer.parseInt(constraintAnnot.getMaxValue().get()));
+        } else if (constraintAnnot.getMaxValueExclusive().isPresent()) {
+            maximum = BigDecimal.valueOf(Integer.parseInt(constraintAnnot.getMaxValueExclusive().get()));
+            properties.setExclusiveMaximum(true);
+        }
+        properties.setMinimum(minimum);
+        properties.setMaximum(maximum);
+    }
+
+    /**
+     * This util is used to set the number (float, double) constraint values for relevant schema field.
+     */
+    private void setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, NumberSchema properties)
+                                                        throws ParseException {
+        BigDecimal minimum = null;
+        BigDecimal maximum = null;
+        if (constraintAnnot.getMinValue().isPresent()) {
+            minimum = BigDecimal.valueOf((NumberFormat.getInstance()
+                    .parse(constraintAnnot.getMinValue().get()).doubleValue()));
+        } else if (constraintAnnot.getMinValueExclusive().isPresent()) {
+            minimum = BigDecimal.valueOf((NumberFormat.getInstance()
+                    .parse(constraintAnnot.getMinValueExclusive().get()).doubleValue()));
+            properties.setExclusiveMinimum(true);
+        }
+
+        if (constraintAnnot.getMaxValue().isPresent()) {
+            maximum = BigDecimal.valueOf((NumberFormat.getInstance()
+                    .parse(constraintAnnot.getMaxValue().get()).doubleValue()));
+        } else if (constraintAnnot.getMaxValueExclusive().isPresent()) {
+            maximum = BigDecimal.valueOf((NumberFormat.getInstance()
+                    .parse(constraintAnnot.getMaxValueExclusive().get()).doubleValue()));
+            properties.setExclusiveMaximum(true);
+        }
+        properties.setMinimum(minimum);
+        properties.setMaximum(maximum);
+    }
+
+    /**
+     * This util is used to set the string constraint values for relevant schema field.
+     */
+    private void setStringConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, StringSchema properties) {
+        if (constraintAnnot.getLength().isPresent()) {
+            properties.setMinLength(Integer.valueOf(constraintAnnot.getLength().get()));
+            properties.setMaxLength(Integer.valueOf(constraintAnnot.getLength().get()));
+        } else {
+            properties.setMaxLength(constraintAnnot.getMaxLength().isPresent() ?
+                    Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
+            properties.setMinLength(constraintAnnot.getMinLength().isPresent() ?
+                    Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
+        }
+
+        if (constraintAnnot.getPattern().isPresent()) {
+            String regexPattern = constraintAnnot.getPattern().get();
+            properties.setPattern(regexPattern);
+        }
+    }
+
+    /**
+     * This util is used to set the array constraint values for relevant schema field.
+     */
+    private void setArrayConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, ArraySchema properties) {
+        if (constraintAnnot.getLength().isPresent()) {
+            properties.setMinItems(Integer.valueOf(constraintAnnot.getLength().get()));
+            properties.setMaxItems(Integer.valueOf(constraintAnnot.getLength().get()));
+        } else {
+            properties.setMaxItems(constraintAnnot.getMaxLength().isPresent() ?
+                    Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
+            properties.setMinItems(constraintAnnot.getMinLength().isPresent() ?
+                    Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
+        }
+    }
+
+    /**
+     * This util is used to set the constraint values for relevant schema field.
+     */
+    private void setConstraintValueToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+        try {
+            //Ballerina currently supports only Int, Number (Float, Decimal), String & Array constraints,
+            //with plans to extend constraint support in the future.
+            if (properties instanceof ArraySchema arraySchema) {
+                setArrayConstraintValuesToSchema(constraintAnnot, arraySchema);
+            } else if (properties instanceof StringSchema stringSchema) {
+                setStringConstraintValuesToSchema(constraintAnnot, stringSchema);
+            } else if (properties instanceof IntegerSchema integerSchema) {
+                setIntegerConstraintValuesToSchema(constraintAnnot, integerSchema);
+            } else if (properties instanceof NumberSchema numberSchema) {
+                setNumberConstraintValuesToSchema(constraintAnnot, numberSchema);
+            }
+        } catch (ParseException parseException) {
+            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_114;
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
+                    error.getDescription(), null, parseException.getMessage());
+            diagnostics.add(diagnostic);
+        }
+    }
+
+    /**
+     * This util is used to extract the annotation values in `@constraint` and store it in builder.
+     */
+    private void extractedConstraintAnnotation(MetadataNode metadata,
+                                               ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
+        NodeList<AnnotationNode> annotations = metadata.annotations();
+        annotations.stream()
+                .filter(this::isConstraintAnnotation)
+                .filter(annotation -> annotation.annotValue().isPresent())
+                .forEach(annotation -> {
+                    if (isDateConstraint(annotation)) {
+                        DiagnosticMessages errorMsg = DiagnosticMessages.OAS_CONVERTOR_120;
+                        IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMsg,
+                                annotation.location(), annotation.toString());
+                        diagnostics.add(error);
+                        return;
+                    }
+                    MappingConstructorExpressionNode annotationValue = annotation.annotValue().get();
+                    annotationValue.fields().stream()
+                            .filter(field -> SyntaxKind.SPECIFIC_FIELD.equals(field.kind()))
+                            .forEach(field -> {
+                                String name = ((SpecificFieldNode) field).fieldName().toString().trim();
+                                processConstraintAnnotation((SpecificFieldNode) field, name, constraintBuilder);
+                            });
+                });
+    }
+
+    /**
+     * This util is used to check whether an annotation is a constraint annotation.
+     */
+    private boolean isConstraintAnnotation(AnnotationNode annotation) {
+        if (annotation.annotReference() instanceof QualifiedNameReferenceNode qualifiedNameRef) {
+            return qualifiedNameRef.modulePrefix().text().equals("constraint");
+        }
+        return false;
+    }
+
+    /*
+     * This util is used to check whether an annotation is a constraint:Date annotation.
+     * Currently, we don't have support for mapping Date constraints to OAS hence we skip them.
+     * {@link <a href="https://github.com/ballerina-platform/ballerina-standard-library/issues/5049">...</a>}
+     * Once the above improvement is completed this method should be removed!
+     */
+    private boolean isDateConstraint(AnnotationNode annotation) {
+        return annotation.annotReference().toString().trim().equals(DATE_CONSTRAINT_ANNOTATION);
+    }
+
+    /**
+     * This util is used to process the content of a constraint annotation.
+     */
+    private void processConstraintAnnotation(SpecificFieldNode specificFieldNode, String fieldName,
+                                             ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
+        specificFieldNode.valueExpr()
+                .flatMap(this::extractFieldValue)
+                .ifPresent(fieldValue -> fillConstraintValue(constraintBuilder, fieldName, fieldValue));
+    }
+
+    private Optional<String> extractFieldValue(ExpressionNode exprNode) {
+        SyntaxKind syntaxKind = exprNode.kind();
+        switch (syntaxKind) {
+            case NUMERIC_LITERAL:
+                return Optional.of(exprNode.toString().trim());
+            case REGEX_TEMPLATE_EXPRESSION:
+                String regexContent = ((TemplateExpressionNode) exprNode).content().get(0).toString();
+                if (regexContent.matches(REGEX_INTERPOLATION_PATTERN)) {
+                    return Optional.of(regexContent);
+                } else {
+                    DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_119;
+                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                            exprNode.location(), regexContent);
+                    diagnostics.add(error);
+                    return Optional.empty();
+                }
+            case MAPPING_CONSTRUCTOR:
+                return ((MappingConstructorExpressionNode) exprNode).fields().stream()
+                    .filter(fieldNode -> ((SpecificFieldNode) fieldNode).fieldName().toString().trim().equals("value"))
+                    .findFirst()
+                    .flatMap(node -> ((SpecificFieldNode) node).valueExpr()
+                           .flatMap(this::extractFieldValue));
+            default:
+                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_118;
+                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                        exprNode.location(), exprNode.toString());
+                diagnostics.add(error);
+                return Optional.empty();
+        }
+    }
+
+    /**
+     * This util is used to build the constraint builder with available constraint annotation field value.
+     */
+    private void fillConstraintValue(ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder,
+                                     String name, String constraintValue) {
+        switch (name) {
+            case "minValue":
+                constraintBuilder.withMinValue(constraintValue);
+                break;
+            case "maxValue":
+                constraintBuilder.withMaxValue(constraintValue);
+                break;
+            case "minValueExclusive":
+                constraintBuilder.withMinValueExclusive(constraintValue);
+                break;
+            case "maxValueExclusive":
+                constraintBuilder.withMaxValueExclusive(constraintValue);
+                break;
+            case "length":
+                constraintBuilder.withLength(constraintValue);
+                break;
+            case "maxLength":
+                constraintBuilder.withMaxLength(constraintValue);
+                break;
+            case "minLength":
+                constraintBuilder.withMinLength(constraintValue);
+                break;
+            case "pattern":
+                constraintBuilder.withPattern(constraintValue);
+                break;
+            default:
+                break;
+        }
     }
 }

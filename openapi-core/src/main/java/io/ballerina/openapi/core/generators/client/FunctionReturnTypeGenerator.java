@@ -48,6 +48,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_RETURN;
 import static io.ballerina.openapi.core.GeneratorConstants.ERROR;
+import static io.ballerina.openapi.core.GeneratorConstants.OPTIONAL_ERROR;
 import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
@@ -95,6 +96,7 @@ public class FunctionReturnTypeGenerator {
         if (operation.getResponses() != null) {
             ApiResponses responses = operation.getResponses();
             for (Map.Entry<String, ApiResponse> entry : responses.entrySet()) {
+                noContentResponseFound = false;
                 String statusCode = entry.getKey();
                 ApiResponse response = entry.getValue();
                 if (statusCode.startsWith("2")) {
@@ -117,6 +119,10 @@ public class FunctionReturnTypeGenerator {
                         noContentResponseFound = true;
                     }
                 }
+                if ((statusCode.startsWith("1") || statusCode.startsWith("2") || statusCode.startsWith("3")) &&
+                        response.getContent() == null) {
+                    noContentResponseFound = true;
+                }
             }
         }
         if (returnTypes.size() > 0) {
@@ -128,6 +134,8 @@ public class FunctionReturnTypeGenerator {
                 finalReturnType.append(NILLABLE);
             }
             return finalReturnType.toString();
+        } else if (noContentResponseFound) {
+            return OPTIONAL_ERROR;
         } else {
             return DEFAULT_RETURN;
         }

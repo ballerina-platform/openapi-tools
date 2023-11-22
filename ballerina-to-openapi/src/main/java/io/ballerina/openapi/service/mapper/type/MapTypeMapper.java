@@ -16,34 +16,30 @@
 
 package io.ballerina.openapi.service.mapper.type;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.MapTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-import java.util.List;
 import java.util.Map;
 
 public class MapTypeMapper extends TypeMapper {
 
-    public MapTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
-                         List<OpenAPIMapperDiagnostic> diagnostics) {
-        super(typeSymbol, semanticModel, diagnostics);
+    public MapTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
+        super(typeSymbol, additionalData);
     }
 
     @Override
     public Schema getReferenceTypeSchema(Map<String, Schema> components) {
         MapTypeSymbol referredType = (MapTypeSymbol) typeSymbol.typeDescriptor();
-        return getSchema(referredType, components, semanticModel, diagnostics).description(description);
+        return getSchema(referredType, components, additionalData).description(description);
     }
 
-    public static Schema getSchema(MapTypeSymbol typeSymbol, Map<String, Schema> components,
-                                   SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
+    public static Schema getSchema(MapTypeSymbol typeSymbol, Map<String, Schema> components, AdditionalData additionalData) {
         TypeSymbol memberType = typeSymbol.typeParam();
         return new ObjectSchema().additionalProperties(ComponentMapper.getTypeSchema(memberType,
-                components, semanticModel, diagnostics));
+                components, additionalData));
     }
 }

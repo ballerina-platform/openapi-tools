@@ -102,7 +102,7 @@ public class FunctionSignatureNodeTests {
         Assert.assertEquals(param01.typeName().toString(), "xml");
 
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
-        Assert.assertEquals(returnTypeNode.type().toString(), "http:Response|error");
+        Assert.assertEquals(returnTypeNode.type().toString(), "error?");
     }
 
     @Test(description = "Test for generate function signature for json request body")
@@ -120,7 +120,7 @@ public class FunctionSignatureNodeTests {
         Assert.assertEquals(param01.typeName().toString(), "json");
 
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
-        Assert.assertEquals(returnTypeNode.type().toString(), "http:Response|error");
+        Assert.assertEquals(returnTypeNode.type().toString(), "error?");
     }
 
     @Test(description = "Test for generate function signature for multipart custom header")
@@ -147,7 +147,7 @@ public class FunctionSignatureNodeTests {
         Assert.assertEquals(param03.typeName().toString(), "string?");
 
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
-        Assert.assertEquals(returnTypeNode.type().toString(), "http:Response|error");
+        Assert.assertEquals(returnTypeNode.type().toString(), "error?");
     }
 
     @Test(description = "Test for generate function signature with nested array return type")

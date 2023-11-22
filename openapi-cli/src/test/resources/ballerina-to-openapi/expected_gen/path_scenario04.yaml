@@ -23,6 +23,8 @@ paths:
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
     post:
       operationId: post
       responses:
@@ -46,4 +48,6 @@ paths:
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
 components: {}

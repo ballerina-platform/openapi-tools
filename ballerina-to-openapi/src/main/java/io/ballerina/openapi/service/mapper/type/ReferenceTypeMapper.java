@@ -16,17 +16,15 @@
 
 package io.ballerina.openapi.service.mapper.type;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.utils.MapperCommonUtils;
+import io.ballerina.openapi.service.mapper.AdditionalData;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -34,15 +32,14 @@ import static io.ballerina.openapi.service.mapper.type.ComponentMapper.createCom
 
 public class ReferenceTypeMapper extends TypeMapper {
 
-    public ReferenceTypeMapper(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
-                               List<OpenAPIMapperDiagnostic> diagnostics) {
-        super(typeSymbol, semanticModel, diagnostics);
+    public ReferenceTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
+        super(typeSymbol, additionalData);
     }
 
     @Override
     public Schema getReferenceTypeSchema(Map<String, Schema> components) {
         TypeReferenceTypeSymbol referredType = (TypeReferenceTypeSymbol) typeSymbol.typeDescriptor();
-        Schema schema = getSchema(referredType, components, semanticModel, diagnostics);
+        Schema schema = getSchema(referredType, components, additionalData);
         if (Objects.nonNull(schema)) {
             schema.description(description);
         }
@@ -50,9 +47,9 @@ public class ReferenceTypeMapper extends TypeMapper {
     }
 
     public static Schema getSchema(TypeReferenceTypeSymbol typeSymbol, Map<String, Schema> components,
-                                   SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
+                                   AdditionalData additionalData) {
         if (!components.containsKey(MapperCommonUtils.getTypeName(typeSymbol))) {
-            createComponentMapping(typeSymbol, components, semanticModel, diagnostics);
+            createComponentMapping(typeSymbol, components, additionalData);
             if (!components.containsKey(MapperCommonUtils.getTypeName(typeSymbol)) || Objects.isNull(
                     components.get(MapperCommonUtils.getTypeName(typeSymbol)))) {
                 return null;
