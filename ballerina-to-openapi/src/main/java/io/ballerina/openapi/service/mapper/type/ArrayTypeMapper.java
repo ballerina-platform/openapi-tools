@@ -37,7 +37,8 @@ public class ArrayTypeMapper extends TypeMapper {
         return getSchema(referredType, components, additionalData).description(description);
     }
 
-    public static Schema getSchema(ArrayTypeSymbol typeSymbol, Map<String, Schema> components, AdditionalData additionalData) {
+    public static Schema getSchema(ArrayTypeSymbol typeSymbol, Map<String, Schema> components,
+                                   AdditionalData additionalData) {
         TypeSymbol elementType = typeSymbol.memberTypeDescriptor();
         return new ArraySchema().items(ComponentMapper.getTypeSchema(elementType, components, additionalData));
     }

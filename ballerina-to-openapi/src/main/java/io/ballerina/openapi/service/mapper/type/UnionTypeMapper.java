@@ -60,7 +60,8 @@ public class UnionTypeMapper extends TypeMapper {
         return Objects.nonNull(schema) ? schema.description(description) : null;
     }
 
-    public static Schema getSchema(UnionTypeSymbol typeSymbol, Map<String, Schema> components, AdditionalData additionalData) {
+    public static Schema getSchema(UnionTypeSymbol typeSymbol, Map<String, Schema> components,
+                                   AdditionalData additionalData) {
         if (isUnionOfSingletons(typeSymbol)) {
             return getSingletonUnionTypeSchema(typeSymbol, additionalData.diagnostics());
         }

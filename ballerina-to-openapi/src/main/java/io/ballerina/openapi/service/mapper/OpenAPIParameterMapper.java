@@ -37,8 +37,8 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
-import io.ballerina.openapi.service.mapper.parameter.PathParameterMapper;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
+import io.ballerina.openapi.service.mapper.parameter.PathParameterMapper;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -199,8 +199,9 @@ public class OpenAPIParameterMapper {
                 Optional<String> customMediaType = extractCustomMediaType(functionDefinitionNode);
                 OpenAPIRequestBodyMapper openAPIRequestBodyMapper = customMediaType.map(
                         value -> new OpenAPIRequestBodyMapper(components,
-                        operationAdaptor, semanticModel, moduleMemberVisitor)).orElse(new OpenAPIRequestBodyMapper(components,
-                        operationAdaptor, semanticModel, moduleMemberVisitor));
+                        operationAdaptor, semanticModel, moduleMemberVisitor))
+                        .orElse(new OpenAPIRequestBodyMapper(components, operationAdaptor,
+                                semanticModel, moduleMemberVisitor));
                 openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema, annotation, apidocs);
                 diagnostics.addAll(openAPIRequestBodyMapper.getDiagnostics());
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&

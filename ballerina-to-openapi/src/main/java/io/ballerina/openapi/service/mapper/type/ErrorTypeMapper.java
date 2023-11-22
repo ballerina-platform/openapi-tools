@@ -41,9 +41,10 @@ public class ErrorTypeMapper extends TypeMapper {
         return getSchema(errorTypeSymbol, components, additionalData);
     }
 
-    public static Schema getSchema(ErrorTypeSymbol typeSymbol, Map<String, Schema> components, AdditionalData additionalData) {
-        Optional<Symbol> optErrorPayload = additionalData.semanticModel().types().getTypeByName("ballerina", "http",
-                "", "ErrorPayload");
+    public static Schema getSchema(ErrorTypeSymbol typeSymbol, Map<String, Schema> components,
+                                   AdditionalData additionalData) {
+        Optional<Symbol> optErrorPayload = additionalData.semanticModel().types().getTypeByName("ballerina",
+                "http", "", "ErrorPayload");
         if (optErrorPayload.isPresent() && optErrorPayload.get() instanceof TypeDefinitionSymbol errorPayload) {
             Schema schema = ComponentMapper.getTypeSchema(errorPayload.typeDescriptor(), components, additionalData);
             if (Objects.nonNull(schema)) {

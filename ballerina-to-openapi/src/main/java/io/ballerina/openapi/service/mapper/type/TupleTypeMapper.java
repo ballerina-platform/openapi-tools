@@ -43,7 +43,8 @@ public class TupleTypeMapper extends TypeMapper {
         return getSchema(referredType, components, additionalData).description(description);
     }
 
-    public static Schema getSchema(TupleTypeSymbol typeSymbol, Map<String, Schema> components, AdditionalData additionalData) {
+    public static Schema getSchema(TupleTypeSymbol typeSymbol, Map<String, Schema> components,
+                                   AdditionalData additionalData) {
         Optional<TypeSymbol> restTypeSymbol = typeSymbol.restTypeDescriptor();
         if (restTypeSymbol.isPresent()) {
             DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_123;

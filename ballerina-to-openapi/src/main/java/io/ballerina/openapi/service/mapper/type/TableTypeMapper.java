@@ -37,7 +37,8 @@ public class TableTypeMapper extends TypeMapper {
         return getSchema(referredType, components, additionalData).description(description);
     }
 
-    public static Schema getSchema(TableTypeSymbol typeSymbol, Map<String, Schema> components, AdditionalData additionalData) {
+    public static Schema getSchema(TableTypeSymbol typeSymbol, Map<String, Schema> components,
+                                   AdditionalData additionalData) {
         TypeSymbol elementType = typeSymbol.rowTypeParameter();
         return new ArraySchema().items(ComponentMapper.getTypeSchema(elementType, components, additionalData));
     }

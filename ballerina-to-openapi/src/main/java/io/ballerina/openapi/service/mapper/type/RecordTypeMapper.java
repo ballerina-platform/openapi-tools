@@ -92,7 +92,8 @@ public class RecordTypeMapper extends TypeMapper {
     }
 
     static List<Schema> mapIncludedRecords(RecordTypeSymbol typeSymbol, Map<String, Schema> components,
-                                           Map<String, RecordFieldSymbol> recordFieldMap, AdditionalData additionalData) {
+                                           Map<String, RecordFieldSymbol> recordFieldMap,
+                                           AdditionalData additionalData) {
         List<Schema> allOfSchemaList = new ArrayList<>();
         List<TypeSymbol> typeInclusions = typeSymbol.typeInclusions();
         for (TypeSymbol typeInclusion : typeInclusions) {
@@ -102,7 +103,8 @@ public class RecordTypeMapper extends TypeMapper {
                 Schema includedRecordSchema = new Schema();
                 includedRecordSchema.set$ref(getTypeName(typeInclusion));
                 allOfSchemaList.add(includedRecordSchema);
-                ComponentMapper.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion, components, additionalData);
+                ComponentMapper.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion, components,
+                        additionalData);
 
                 RecordTypeSymbol includedRecordTypeSymbol = (RecordTypeSymbol) ((TypeReferenceTypeSymbol) typeInclusion)
                         .typeDescriptor();
