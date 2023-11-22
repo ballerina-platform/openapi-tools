@@ -204,4 +204,6 @@ public class CmdConstants {
     public static final String DOUBLE_LINE_SEPARATOR = LINE_SEPARATOR + LINE_SEPARATOR;
     public static final List<String> SUPPORTED_OPENAPI_VERSIONS =
             List.of("2.0", "3.0.0", "3.0.1", "3.0.2", "3.0.3", "3.1.0");
+    public static final String DEFAULT_CLIENT_ID = "oas_%s_%s";
+    public static final String OPENAPI_ADD_CMD = "add";
 }

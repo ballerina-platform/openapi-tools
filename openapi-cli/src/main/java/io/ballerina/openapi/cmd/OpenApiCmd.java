@@ -58,7 +58,8 @@ import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
  */
 @CommandLine.Command(
         name = "openapi",
-        description = "Generate the Ballerina sources for a given OpenAPI definition and vice versa."
+        description = "Generate the Ballerina sources for a given OpenAPI definition and vice versa.",
+        subcommands = {Add.class}
 )
 public class OpenApiCmd implements BLauncherCmd {
     private static final String CMD_NAME = "openapi";
@@ -68,35 +69,18 @@ public class OpenApiCmd implements BLauncherCmd {
     private boolean exitWhenFinish;
     private boolean clientResourceMode;
 
+    @CommandLine.Mixin
+    private BaseCmd baseCmd = new BaseCmd();
     @CommandLine.Option(names = {"-h", "--help"}, hidden = true)
     private boolean helpFlag;
-
-    @CommandLine.Option(names = {"-i", "--input"}, description = "Generating the client and service both files")
-    private boolean inputPath;
-
-    @CommandLine.Option(names = {"--license"}, description = "Location of the file which contains the license header")
-    private String licenseFilePath;
 
     @CommandLine.Option(names = {"-o", "--output"}, description = "Location of the generated Ballerina service, " +
             "client and model files.")
     private String outputPath;
 
-    @CommandLine.Option(names = {"--mode"}, description = "Generate only service file or client file according to the" +
-            " given mode type")
-    private String mode;
-
-    @CommandLine.Option(names = {"-n", "--nullable"}, description = "Generate the code by setting nullable true")
-    private boolean nullable;
-
     @CommandLine.Option(names = {"-s", "--service"}, description = "Service name that need to documented as openapi " +
             "contract")
     private String service;
-
-    @CommandLine.Option(names = {"--tags"}, description = "Tag that need to write service")
-    private String tags;
-
-    @CommandLine.Option(names = {"--operations"}, description = "Operations that need to write service")
-    private String operations;
 
     @CommandLine.Option(names = {"--service-name"}, description = "Service name for generated files")
     private String generatedServiceName;
@@ -106,10 +90,6 @@ public class OpenApiCmd implements BLauncherCmd {
 
     @CommandLine.Option(names = {"--with-tests"}, hidden = true, description = "Generate test files")
     private boolean includeTestFiles;
-
-    @CommandLine.Option(names = {"--client-methods"}, hidden = true, description = "Generate the client methods" +
-            " with provided type . Only \"resource\"(default) and \"remote\" options are supported.")
-    private String generateClientMethods;
 
     @CommandLine.Option(names = {"--with-service-type"}, hidden = true, description = "Generate service type")
     private boolean generateServiceType;
@@ -138,89 +118,87 @@ public class OpenApiCmd implements BLauncherCmd {
     }
     @Override
     public void execute() {
-
-        if (helpFlag) {
+        if (isHelp()) {
             String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(getName());
             outStream.println(commandUsageInfo);
             return;
         }
         //Check if cli input argument is present
-        if (inputPath) {
-            //Check if an OpenApi definition is provided
-            if (argList == null) {
-                outStream.println(ErrorMessages.MISSING_CONTRACT_PATH);
-                exitError(this.exitWhenFinish);
-                return;
-            }
-            // If given input is yaml contract, it generates service file and client stub
-            // else if given ballerina service file it generates openapi contract file
-            // else it generates error message to enter correct input file
-            String fileName = argList.get(0);
-            if (fileName.endsWith(YAML_EXTENSION) || fileName.endsWith(JSON_EXTENSION) ||
-                    fileName.endsWith(YML_EXTENSION)) {
-                List<String> tag = new ArrayList<>();
-                List<String> operation = new ArrayList<>();
-                if (tags != null) {
-                    tag.addAll(Arrays.asList(tags.split(",")));
-                }
-                if (operations != null) {
-                    String[] ids = operations.split(",");
-                    List<String> normalizedOperationIds =
-                            Arrays.stream(ids).map(operationId -> getValidName(operationId, false))
-                                    .collect(Collectors.toList());
-                    operation.addAll(normalizedOperationIds);
-                }
-                Filter filter = new Filter(tag, operation);
-
-                if (generateClientMethods != null && !generateClientMethods.isBlank() &&
-                        (!generateClientMethods.equals(RESOURCE) && !generateClientMethods.equals(REMOTE))) {
-                    // Exit the code generation process
-                    outStream.println("'--client-methods' only supports `remote` or `resource` options.");
-                    exitError(this.exitWhenFinish);
-                }
-                // Add the resource flag enable
-                clientResourceMode = generateClientMethods == null || generateClientMethods.isBlank() ||
-                        (!generateClientMethods.equals(REMOTE));
-                
-                if (!clientResourceMode && mode != null && mode.equals(SERVICE)) {
-                    // Exit the code generation process
-                    outStream.println("'--client-methods' option is only available in client generation mode.");
-                    exitError(this.exitWhenFinish);
-                }
-
-                if (generateWithoutDataBinding && mode != null && mode.equals(CLIENT)) {
-                    // Exit the code generation process
-                    outStream.println("'--without-data-binding' option is only available in service generation mode.");
-                    exitError(this.exitWhenFinish);
-                }
-                try {
-                    openApiToBallerina(fileName, filter);
-                } catch (IOException e) {
-                    outStream.println(e.getLocalizedMessage());
-                    exitError(this.exitWhenFinish);
-                }
-            } else if (fileName.endsWith(BAL_EXTENSION)) {
-                // Add the resource flag enable
-                if (generateClientMethods != null && !generateClientMethods.isBlank()) {
-                    // Exit the code generation process
-                    outStream.println("'--client-methods' option is only available in client generation mode.");
-                    exitError(this.exitWhenFinish);
-                }
-                ballerinaToOpenApi(fileName);
-            } else {
-                outStream.println(ErrorMessages.MISSING_CONTRACT_PATH);
-                exitError(this.exitWhenFinish);
-            }
-        } else {
-            String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(getName());
-            outStream.println(commandUsageInfo);
+        //Check if an OpenApi definition is provided
+        if (baseCmd.inputPath == null || baseCmd.inputPath.isBlank()) {
+            outStream.println(ErrorMessages.MISSING_CONTRACT_PATH);
             exitError(this.exitWhenFinish);
             return;
+        }
+        // If given input is yaml contract, it generates service file and client stub
+        // else if given ballerina service file it generates openapi contract file
+        // else it generates error message to enter correct input file
+        String fileName = baseCmd.inputPath;
+        if (fileName.endsWith(YAML_EXTENSION) || fileName.endsWith(JSON_EXTENSION) ||
+                fileName.endsWith(YML_EXTENSION)) {
+            List<String> tag = new ArrayList<>();
+            List<String> operation = new ArrayList<>();
+            if (baseCmd.tags != null) {
+                tag.addAll(Arrays.asList(baseCmd.tags.split(",")));
+            }
+            if (baseCmd.operations != null) {
+                String[] ids = baseCmd.operations.split(",");
+                List<String> normalizedOperationIds =
+                        Arrays.stream(ids).map(operationId -> getValidName(operationId, false))
+                                .collect(Collectors.toList());
+                operation.addAll(normalizedOperationIds);
+            }
+            Filter filter = new Filter(tag, operation);
+
+            if (baseCmd.generateClientMethods != null && !baseCmd.generateClientMethods.isBlank() &&
+                    (!baseCmd.generateClientMethods.equals(RESOURCE) &&
+                            !baseCmd.generateClientMethods.equals(REMOTE))) {
+                // Exit the code generation process
+                outStream.println("'--client-methods' only supports `remote` or `resource` options.");
+                exitError(this.exitWhenFinish);
+            }
+            // Add the resource flag enable
+            clientResourceMode = baseCmd.generateClientMethods == null || baseCmd.generateClientMethods.isBlank() ||
+                    (!baseCmd.generateClientMethods.equals(REMOTE));
+
+            if (!clientResourceMode && baseCmd.mode != null && baseCmd.mode.equals(SERVICE)) {
+                // Exit the code generation process
+                outStream.println("'--client-methods' option is only available in client generation mode.");
+                exitError(this.exitWhenFinish);
+            }
+
+            if (generateWithoutDataBinding && baseCmd.mode != null && baseCmd.mode.equals(CLIENT)) {
+                // Exit the code generation process
+                outStream.println("'--without-data-binding' option is only available in service generation mode.");
+                exitError(this.exitWhenFinish);
+            }
+            try {
+                openApiToBallerina(fileName, filter);
+            } catch (IOException e) {
+                outStream.println(e.getLocalizedMessage());
+                exitError(this.exitWhenFinish);
+            }
+        } else if (fileName.endsWith(BAL_EXTENSION)) {
+            // Add the resource flag enable
+            if (baseCmd.generateClientMethods != null && !baseCmd.generateClientMethods.isBlank()) {
+                // Exit the code generation process
+                outStream.println("'--client-methods' option is only available in client generation mode.");
+                exitError(this.exitWhenFinish);
+            }
+            ballerinaToOpenApi(fileName);
+        } else {
+            outStream.println(ErrorMessages.MISSING_CONTRACT_PATH);
+            exitError(this.exitWhenFinish);
         }
 
         if (this.exitWhenFinish) {
             Runtime.getRuntime().exit(0);
         }
+    }
+
+    private boolean isHelp() {
+        return helpFlag || (argList != null && argList.get(0).equals("help"))
+                || (argList == null && baseCmd.inputPath == null);
     }
 
     /**
@@ -284,12 +262,12 @@ public class OpenApiCmd implements BLauncherCmd {
         }
         getTargetOutputPath();
         Path resourcePath = Paths.get(openApiFile.getCanonicalPath());
-        if (nullable) {
+        if (baseCmd.nullable) {
             outStream.println("WARNING: All the constraints in the OpenAPI contract will be ignored when generating" +
                     " the Ballerina client/service with the `--nullable` option");
         }
-        if (mode != null) {
-            switch (mode) {
+        if (baseCmd.mode != null) {
+            switch (baseCmd.mode) {
                 case "service":
                     generateServiceFile(generator, serviceName, resourcePath, filter);
                     break;
@@ -340,8 +318,8 @@ public class OpenApiCmd implements BLauncherCmd {
     private String setLicenseHeader() {
         String licenseHeader = "";
         try {
-            if (this.licenseFilePath != null && !this.licenseFilePath.isBlank()) {
-                Path filePath = Paths.get((new File(this.licenseFilePath).getCanonicalPath()));
+            if (this.baseCmd.licenseFilePath != null && !this.baseCmd.licenseFilePath.isBlank()) {
+                Path filePath = Paths.get((new File(this.baseCmd.licenseFilePath).getCanonicalPath()));
                 licenseHeader = Files.readString(Paths.get(filePath.toString()));
                 if (!licenseHeader.endsWith("\n")) {
                     licenseHeader = licenseHeader + "\n\n";
@@ -350,7 +328,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 }
             }
         } catch (IOException e) {
-            outStream.println("Invalid license file path : " + this.licenseFilePath +
+            outStream.println("Invalid license file path : " + this.baseCmd.licenseFilePath +
                     ". " + e.getMessage() + ".");
             exitError(this.exitWhenFinish);
         }
@@ -366,7 +344,7 @@ public class OpenApiCmd implements BLauncherCmd {
     private void generatesClientFile(BallerinaCodeGenerator generator, Path resourcePath, Filter filter,
                                      boolean resourceMode) {
         try {
-            generator.generateClient(resourcePath.toString(), targetOutputPath.toString(), filter, nullable,
+            generator.generateClient(resourcePath.toString(), targetOutputPath.toString(), filter, baseCmd.nullable,
                     resourceMode);
         } catch (IOException | FormatterException | BallerinaOpenApiException e) {
             if (e.getLocalizedMessage() != null) {
@@ -391,7 +369,7 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             assert resourcePath != null;
             generator.generateService(resourcePath.toString(), serviceName, targetOutputPath.toString(), filter,
-                    nullable, generateServiceType, generateWithoutDataBinding);
+                    baseCmd.nullable, generateServiceType, generateWithoutDataBinding);
         } catch (IOException | FormatterException | BallerinaOpenApiException e) {
             outStream.println("Error occurred when generating service for OpenAPI contract at " + argList.get(0) +
                     ". " + e.getMessage() + ".");
@@ -410,7 +388,7 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             assert resourcePath != null;
             generator.generateClientAndService(resourcePath.toString(), fileName, targetOutputPath.toString(), filter,
-                    nullable, generateClientResourceFunctions, generateServiceType, generateWithoutDataBinding);
+                    baseCmd.nullable, generateClientResourceFunctions, generateServiceType, generateWithoutDataBinding);
         } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             outStream.println("Error occurred when generating service for openAPI contract at " + argList.get(0) + "." +
                     " " + e.getMessage() + ".");
