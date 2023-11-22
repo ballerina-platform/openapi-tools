@@ -24,7 +24,6 @@ module io.ballerina.openapi.bal.tool {
     requires io.ballerina.cli;
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
-    requires java.ws.rs;
     requires jsr305;
     requires org.apache.commons.io;
     requires org.slf4j;
