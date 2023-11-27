@@ -10,17 +10,6 @@ servers:
       port:
         default: "9090"
 paths:
-  /:
-    get:
-      operationId: get
-      responses:
-        "202":
-          description: Accepted
-    post:
-      operationId: post
-      responses:
-        "202":
-          description: Accepted
   /v1/{id}:
     get:
       operationId: getV1Id

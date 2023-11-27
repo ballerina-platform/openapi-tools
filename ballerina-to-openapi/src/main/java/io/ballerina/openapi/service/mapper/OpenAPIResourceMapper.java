@@ -228,12 +228,27 @@ public class OpenAPIResourceMapper {
                 return Optional.empty();
             }
         }
+
+        if (checkRestParamInResourcePath(openAPIParameterMapper)) {
+            return Optional.empty();
+        }
         errors.addAll(openAPIParameterMapper.getErrors());
         ResponseMapper responseMapper = new ResponseMapper(semanticModel, components, resource, op,
                 errors, moduleMemberVisitor);
         ApiResponses apiResponses = responseMapper.getApiResponses();
         op.getOperation().setResponses(apiResponses);
         return Optional.of(op);
+    }
+
+    private boolean checkRestParamInResourcePath(OpenAPIParameterMapper openAPIParameterMapper) {
+        if (!openAPIParameterMapper.getErrors().isEmpty()) {
+            if (openAPIParameterMapper.getErrors().stream().anyMatch(
+                    error -> "OAS_CONVERTOR_125".equals(error.getCode()))) {
+                errors.addAll(openAPIParameterMapper.getErrors());
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
