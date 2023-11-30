@@ -47,7 +47,7 @@ public class NegativePathParameterTests {
         List<OpenAPIMapperDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
                 ballerinaFilePath, "path_with_rest_param.yaml");
         errors.forEach(error -> Assert.assertEquals(error.getMessage(), "Generated OpenAPI specification " +
-                "may not contain rest parameter information in the resource path"));
+                "excludes details for operation with rest parameter in the resource path"));
     }
 
     @Test(description = "When path parameters has invalid types.")
