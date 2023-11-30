@@ -241,12 +241,10 @@ public class OpenAPIResourceMapper {
     }
 
     private boolean checkRestParamInResourcePath(OpenAPIParameterMapper openAPIParameterMapper) {
-        if (!openAPIParameterMapper.getErrors().isEmpty()) {
-            if (openAPIParameterMapper.getErrors().stream().anyMatch(
-                    error -> "OAS_CONVERTOR_125".equals(error.getCode()))) {
-                errors.addAll(openAPIParameterMapper.getErrors());
-                return true;
-            }
+        List<OpenAPIMapperDiagnostic> errorList = openAPIParameterMapper.getErrors();
+        if (!errorList.isEmpty() && errorList.stream().anyMatch(error -> "OAS_CONVERTOR_125".equals(error.getCode()))) {
+            errors.addAll(errorList);
+            return true;
         }
         return false;
     }

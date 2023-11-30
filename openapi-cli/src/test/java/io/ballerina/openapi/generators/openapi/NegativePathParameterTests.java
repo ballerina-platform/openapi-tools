@@ -51,7 +51,7 @@ public class NegativePathParameterTests {
     }
 
     @Test(description = "When path parameters has invalid types.")
-    public void testInvalidInteger() throws ProjectException {
+    public void testInvalidPathParameterTypes() throws ProjectException {
         Path ballerinaFilePath = RES_DIR.resolve("invalid_path_param_type.bal");
         Project project = ProjectLoader.loadProject(ballerinaFilePath);
         DiagnosticResult diagnostic = getCompilation(project);
