@@ -28,7 +28,7 @@ public class Constants {
     public static final String TAGS = "tags";
     public static final String OPERATIONS = "operations";
     public static final String NULLABLE = "nullable";
-    public static final String IS_RESOURCE = "isResource";
+    public static final String CLIENT_METHODS = "clientMethods";
     public static final String LICENSE = "license";
     public static final String TRUE = "true";
     public static final String MODE = "mode";
@@ -38,16 +38,21 @@ public class Constants {
      * Enum class for containing diagnostic messages.
      */
     public enum DiagnosticMessages {
-        LICENSE_PATH_BLANK("OAS_IDL_CLIENT_01", "given license file path is an empty string.",
+        LICENSE_PATH_BLANK("OAS_CLIENT_01", "given license file path is an empty string.",
                 DiagnosticSeverity.WARNING),
-        ERROR_WHILE_READING_LICENSE_FILE("OAS_IDL_CLIENT_02", "unexpected error occurred while reading the license",
+        ERROR_WHILE_READING_LICENSE_FILE("OAS_CLIENT_02", "unexpected error occurred while reading the license",
                 DiagnosticSeverity.ERROR),
-        ERROR_WHILE_GENERATING_CLIENT("OAS_IDL_CLIENT_03", "unexpected error occurred while generating the client",
+        ERROR_WHILE_GENERATING_CLIENT("OAS_CLIENT_03", "unexpected error occurred while generating the client",
                 DiagnosticSeverity.ERROR),
-        PARSER_ERROR("OAS_IDL_CLIENT_04", "", DiagnosticSeverity.ERROR),
-        UNEXPECTED_EXCEPTIONS("OAS_IDK_CLIENT_05", "unexpected error occurred while reading the contract",
+        PARSER_ERROR("OAS_CLIENT_04", "", DiagnosticSeverity.ERROR),
+        UNEXPECTED_EXCEPTIONS("OAS_CLIENT_05", "unexpected error occurred while reading the contract",
                 DiagnosticSeverity.ERROR),
-        EMPTY_CONTRACT_PATH("OAS_IDK_CLIENT_06", "given OpenAPI contract file path is an empty string.",
+        EMPTY_CONTRACT_PATH("OAS_CLIENT_06", "given OpenAPI contract file path is an empty string.",
+                DiagnosticSeverity.WARNING),
+        WARNING_FOR_OTHER_GENERATION("OAS_CLIENT_07", "given code generation `%s` mode does not support.",
+                DiagnosticSeverity.WARNING),
+        WARNING_FOR_UNSUPPORTED_CONTRACT("OAS_CLIENT_08", "unsupported contract type. please use .yml, " +
+                ".yaml, or .json files for code generation.",
                 DiagnosticSeverity.WARNING);
 
         private final String code;

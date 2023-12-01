@@ -59,7 +59,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT;
-import static io.ballerina.openapi.bal.tool.Constants.IS_RESOURCE;
+import static io.ballerina.openapi.bal.tool.Constants.CLIENT_METHODS;
 import static io.ballerina.openapi.bal.tool.Constants.LICENSE;
 import static io.ballerina.openapi.bal.tool.Constants.MODE;
 import static io.ballerina.openapi.bal.tool.Constants.NULLABLE;
@@ -101,6 +101,8 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         try {
             // Validate the OAS file whether we can handle within OpenAPI tool
             if (!canHandle(toolContext)) {
+                Constants.DiagnosticMessages error = Constants.DiagnosticMessages.WARNING_FOR_UNSUPPORTED_CONTRACT;
+                reportDiagnostics(error, error.getDescription(), location);
                 return;
             }
             String oasFilePath = toolContext.filePath();
@@ -109,16 +111,26 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
             if (openAPI == null) {
                 return;
             }
-            codeGeneratorConfig = extractOptionDetails(toolContext, openAPI);
             TomlTableNode tomlTableNode = toolContext.optionsTable();
             if (tomlTableNode == null) {
-                // Default generates client
+                // Default generate client
+                Filter filter = new Filter();
+                OASClientConfig clientConfig = new OASClientConfig.Builder()
+                        .withFilters(filter).withOpenAPI(openAPI).build();
+                OASServiceMetadata serviceMetaData = new OASServiceMetadata.Builder()
+                        .withFilters(filter).withOpenAPI(openAPI).build();
+                codeGeneratorConfig =  new ImmutablePair<>(clientConfig, serviceMetaData);
                 generateClient(toolContext, codeGeneratorConfig);
             } else {
+                codeGeneratorConfig = extractOptionDetails(toolContext, openAPI);
                 Map<String, TopLevelNode> options = tomlTableNode.entries();
                 if (options.containsKey(MODE) && options.get(MODE).toString().contains(CLIENT)) {
-                        // Create client for the given OAS
-                        generateClient(toolContext, codeGeneratorConfig);
+                    // Create client for the given OAS
+                    generateClient(toolContext, codeGeneratorConfig);
+                } else {
+                    Constants.DiagnosticMessages error = Constants.DiagnosticMessages.WARNING_FOR_OTHER_GENERATION;
+                    reportDiagnostics(error, String.format(error.getDescription(), options.get(MODE).toString()),
+                            location);
                 }
             }
         } catch (BallerinaOpenApiException e) {
@@ -136,6 +148,12 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
      */
     private static boolean canHandle(ToolContext toolContext) {
         String oasPath = toolContext.filePath();
+        if (oasPath.isBlank()) {
+            TomlNodeLocation location = toolContext.packageInstance().ballerinaToml().get().tomlAstNode().location();
+            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.EMPTY_CONTRACT_PATH;
+            reportDiagnostics(error, error.getDescription(), location);
+            return false;
+        }
         return (oasPath.endsWith(YAML_EXTENSION) || oasPath.endsWith(JSON_EXTENSION) ||
                 oasPath.endsWith(YML_EXTENSION));
     }
@@ -144,12 +162,9 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
      * This method uses to read the openapi contract and return the {@code OpenAPI} object.
      */
     private OpenAPI getOpenAPIContract(Path ballerinaFilePath, Path openAPIPath, Location location) {
-        Path relativePath = null;
+        Path relativePath;
         try {
-            if (openAPIPath.toString().isBlank()) {
-                Constants.DiagnosticMessages error = Constants.DiagnosticMessages.EMPTY_CONTRACT_PATH;
-                reportDiagnostics(error, error.getDescription(), location);
-            } else if (Paths.get(openAPIPath.toString()).isAbsolute()) {
+            if (Paths.get(openAPIPath.toString()).isAbsolute()) {
                 relativePath = Paths.get(openAPIPath.toString());
             } else {
                 File file = new File(ballerinaFilePath.toString());
@@ -178,12 +193,6 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         OASServiceMetadata.Builder serviceMetaDataBuilder = new OASServiceMetadata.Builder();
         clientMetaDataBuilder.withOpenAPI(openAPI);
         serviceMetaDataBuilder.withOpenAPI(openAPI);
-        TomlTableNode tomlTableNode = toolContext.optionsTable();
-        if (tomlTableNode == null) {
-            clientMetaDataBuilder.withFilters(filter);
-            serviceMetaDataBuilder.withFilters(filter);
-            return new ImmutablePair<>(clientMetaDataBuilder.build(), serviceMetaDataBuilder.build());
-        }
         Map<String, TopLevelNode> options = toolContext.optionsTable().entries();
         for (Map.Entry<String, TopLevelNode> field : options.entrySet()) {
             String tomlKeyValue = ((TomlKeyValueNode) field.getValue()).value().toNativeValue().toString();
@@ -200,8 +209,8 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
                     serviceMetaDataBuilder.withNullable(Arrays.asList(values).contains(TRUE));
                     clientMetaDataBuilder.withNullable(Arrays.asList(values).contains(TRUE));
                     break;
-                case IS_RESOURCE:
-                    clientMetaDataBuilder.withResourceMode(Arrays.asList(values).contains(TRUE));
+                case CLIENT_METHODS:
+                    clientMetaDataBuilder.withResourceMode(Arrays.asList(values).contains("resource"));
                     break;
                 case LICENSE:
                     String licenseContent = Objects.equals(values[0], "") ? null :
