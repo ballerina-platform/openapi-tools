@@ -25,6 +25,10 @@ paths:
           description: Accepted
         "400":
           description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /getOrder:
     post:
       operationId: postGetorder
@@ -38,32 +42,12 @@ paths:
           description: Accepted
         "400":
           description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Order:
-      required:
-        - rel
-      type: object
-      properties:
-        rel:
-          type: string
-        actions:
-          $ref: '#/components/schemas/OrderType'
-      additionalProperties: false
-    Action:
-      type: string
-      enum:
-        - PATCH
-        - DELETE
-        - PUT
-        - POST
-        - GET
-    OrderType:
-      type: string
-      enum:
-        - custom size
-        - Half "Portion"
-        - full
     Link:
       required:
         - rel
@@ -74,3 +58,50 @@ components:
         actions:
           $ref: '#/components/schemas/Action'
       additionalProperties: false
+    Action:
+      type: string
+      enum:
+        - PATCH
+        - DELETE
+        - PUT
+        - POST
+        - GET
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Order:
+      required:
+        - rel
+      type: object
+      properties:
+        rel:
+          type: string
+        actions:
+          $ref: '#/components/schemas/OrderType'
+      additionalProperties: false
+    OrderType:
+      type: string
+      enum:
+        - custom size
+        - Half "Portion"
+        - full

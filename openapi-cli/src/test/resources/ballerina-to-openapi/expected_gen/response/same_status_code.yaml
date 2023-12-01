@@ -23,7 +23,6 @@ paths:
                   - type: boolean
                   - type: integer
                     format: int64
-                  - $ref: '#/components/schemas/Pet'
                   - $ref: '#/components/schemas/Cat'
             text/plain:
               schema:
@@ -36,6 +35,32 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    Pet:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          type: string
+        type:
+          type: string
+    Cat:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
     ErrorPayload:
       required:
         - message
@@ -58,30 +83,4 @@ components:
         path:
           type: string
         method:
-          type: string
-    Cat:
-      required:
-        - id
-        - name
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
-    Pet:
-      required:
-        - id
-        - name
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
-        tag:
-          type: string
-        type:
           type: string

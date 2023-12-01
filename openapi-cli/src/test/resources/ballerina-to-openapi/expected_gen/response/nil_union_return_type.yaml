@@ -18,7 +18,7 @@ paths:
         "202":
           description: Accepted
         "500":
-          description: Internal server error
+          description: InternalServerError
           content:
             application/json:
               schema:
@@ -28,14 +28,14 @@ paths:
       summary: for `get` method with nil return type and success status code
       operationId: getPathGet
       responses:
-        "202":
-          description: Accepted
         "200":
           description: Ok
           content:
             text/plain:
               schema:
                 type: string
+        "202":
+          description: Accepted
   /path_get_query_param:
     get:
       summary: for `get` method with nil return type and success status code with
@@ -48,16 +48,20 @@ paths:
           schema:
             type: string
       responses:
-        "202":
-          description: Accepted
-        "400":
-          description: BadRequest
         "200":
           description: Ok
           content:
             text/plain:
               schema:
                 type: string
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /path_post:
     post:
       summary: for `post` method with 201 payload with error status code and nil type
@@ -101,14 +105,20 @@ paths:
       responses:
         "202":
           description: Accepted
-        "404":
-          description: NotFound
+          content:
+            application/json:
+              schema: {}
         "400":
           description: BadRequest
           content:
             text/plain:
               schema:
                 type: string
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "404":
+          description: NotFound
   /path_with_query:
     get:
       summary: "resource has 4 status codes that explicitly returns (200, 404) while\
@@ -129,10 +139,14 @@ paths:
                 type: string
         "202":
           description: Accepted
-        "400":
-          description: BadRequest
         "404":
           description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /path_with_path/{id}:
     post:
       summary: "resource has 3 status codes that explicitly returns (404) while ?\
@@ -147,10 +161,14 @@ paths:
       responses:
         "202":
           description: Accepted
-        "400":
-          description: BadRequest
         "404":
           description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /path_with_headers:
     post:
       summary: "method has 3 status codes that explicitly returns (404) while ? type\
@@ -165,10 +183,14 @@ paths:
       responses:
         "202":
           description: Accepted
-        "400":
-          description: BadRequest
         "404":
           description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /path_with_request_body:
     post:
       operationId: postPathWithRequestBody
@@ -180,34 +202,39 @@ paths:
       responses:
         "202":
           description: Accepted
-        "400":
-          description: BadRequest
         "404":
           description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        reason:
-          type: string
-          description: Reason phrase
-        path:
-          type: string
-          description: Request path
-        method:
-          type: string
-          description: Method type of the request
-        message:
-          type: string
-          description: Error message
         timestamp:
           type: string
-          description: Timestamp of the error
         status:
           type: integer
-          description: Relevant HTTP status code
-          format: int32
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Links:
       required:
         - id
@@ -221,3 +248,4 @@ components:
           type: array
           items:
             type: string
+      additionalProperties: false

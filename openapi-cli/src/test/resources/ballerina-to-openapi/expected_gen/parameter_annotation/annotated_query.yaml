@@ -10,17 +10,14 @@ servers:
       port:
         default: "443"
 paths:
-  /student8:
+  /student1:
     post:
-      operationId: postStudent8
-      parameters:
-        - name: student
-          in: query
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: true
+      operationId: postStudent1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Student'
       responses:
         "201":
           description: Created
@@ -28,19 +25,26 @@ paths:
             application/json:
               schema:
                 type: object
-  /student9:
-    post:
-      operationId: postStudent9
-      parameters:
-        - name: students
-          in: query
+        "400":
+          description: BadRequest
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
-                default:
-                  Name: John
+                $ref: '#/components/schemas/ErrorPayload'
+  /student2:
+    post:
+      operationId: postStudent2
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Student'
       responses:
         "201":
           description: Created
@@ -48,3 +52,64 @@ paths:
             application/json:
               schema:
                 type: object
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /student3:
+    post:
+      operationId: postStudent3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Student'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    Student:
+      required:
+        - Name
+      type: object
+      properties:
+        Name:
+          type: string
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

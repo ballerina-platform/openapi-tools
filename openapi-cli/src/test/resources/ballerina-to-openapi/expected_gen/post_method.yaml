@@ -27,9 +27,7 @@ paths:
         "201":
           description: Created
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
+            application/json: {}
   /cachingBackEnd:
     post:
       operationId: postCachingbackend
