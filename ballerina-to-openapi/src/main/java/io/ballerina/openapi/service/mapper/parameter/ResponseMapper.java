@@ -44,7 +44,7 @@ import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.ballerina.openapi.service.mapper.type.RecordTypeMapper;
 import io.ballerina.openapi.service.mapper.type.ReferenceTypeMapper;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
-import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -80,7 +80,7 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extrac
 public class ResponseMapper {
 
     private final SemanticModel semanticModel;
-    private final Components components;
+    private final OpenAPI openAPI;
     private List<String> allowedMediaTypes = new ArrayList<>();
     private final Map<String, Header> cacheHeaders = new HashMap<>();
     private final Map<String, Map<String, Header>> headersMap = new HashMap<>();
@@ -90,15 +90,15 @@ public class ResponseMapper {
     private final ModuleMemberVisitor moduleMemberVisitor;
     private final boolean hasDataBinding;
 
-    public ResponseMapper(SemanticModel semanticModel, Components components, FunctionDefinitionNode resourceNode,
+    public ResponseMapper(SemanticModel semanticModel, OpenAPI openAPI, FunctionDefinitionNode resourceNode,
                           OperationAdaptor operationAdaptor, List<OpenAPIMapperDiagnostic> diagnostics,
                           ModuleMemberVisitor moduleMemberVisitor) {
         this.semanticModel = semanticModel;
-        this.components = components;
         this.hasDataBinding = operationAdaptor.hasDataBinding();
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
         this.diagnostics = diagnostics;
         this.moduleMemberVisitor = moduleMemberVisitor;
+        this.openAPI = openAPI;
         extractAnnotationDetails(resourceNode);
 
         String defaultStatusCode = operationAdaptor.getHttpOperation().equalsIgnoreCase(POST) ? HTTP_201 : HTTP_200;
@@ -206,15 +206,8 @@ public class ResponseMapper {
     private void addResponseContent(TypeSymbol returnType, ApiResponse apiResponse, String mediaType) {
         if (!isPlainAnyDataType(returnType)) {
             MediaType mediaTypeObj = new MediaType();
-            Map<String, Schema> componentSchemas = components.getSchemas();
-            if (componentSchemas == null) {
-                componentSchemas = new HashMap<>();
-            }
             AdditionalData additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
-            mediaTypeObj.setSchema(ComponentMapper.getTypeSchema(returnType, componentSchemas, additionalData));
-            if (!componentSchemas.isEmpty()) {
-                components.setSchemas(componentSchemas);
-            }
+            mediaTypeObj.setSchema(ComponentMapper.getTypeSchema(returnType, openAPI, additionalData));
             updateApiResponseContentWithMediaType(apiResponse, mediaType, mediaTypeObj);
         }
     }
@@ -436,16 +429,9 @@ public class ResponseMapper {
             if (Objects.nonNull(headersType) && headersType.typeKind().equals(TypeDescKind.RECORD)) {
                 RecordTypeSymbol recordType = (RecordTypeSymbol) headersType;
                 Map<String, RecordFieldSymbol> recordFieldMap = new HashMap<>(recordType.fieldDescriptors());
-                Map<String, Schema> schemas = components.getSchemas();
-                if (Objects.isNull(schemas)) {
-                    schemas = new HashMap<>();
-                }
-                Map<String, Schema> recordFieldsMapping = RecordTypeMapper.mapRecordFields(recordFieldMap,
-                        schemas, new HashSet<>(), recordName,
+                Map<String, Schema> recordFieldsMapping = RecordTypeMapper.mapRecordFields(recordFieldMap, openAPI,
+                        new HashSet<>(), recordName,
                         new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics));
-                if (!schemas.isEmpty()) {
-                    components.setSchemas(schemas);
-                }
                 return mapRecordFieldToHeaders(recordFieldsMapping);
             }
         }

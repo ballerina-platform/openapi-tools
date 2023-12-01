@@ -1,4 +1,4 @@
-package io.ballerina.openapi.service.mapper.model;
+package io.ballerina.openapi.service.mapper.constraint.model;
 
 import java.util.Optional;
 
