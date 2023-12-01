@@ -16,10 +16,9 @@
 
 package io.ballerina.openapi.service.mapper.parameter;
 
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
 public interface ParameterMapper {
 
-    Parameter getParameterSchema(Components components);
+    Parameter getParameterSchema();
 }

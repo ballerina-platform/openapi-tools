@@ -16,4 +16,3 @@ paths:
       responses:
         "511":
           description: NetworkAuthenticationRequired
-components: {}

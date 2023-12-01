@@ -10,6 +10,9 @@ paths:
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content: {}
 components:
   schemas:
     Pet:

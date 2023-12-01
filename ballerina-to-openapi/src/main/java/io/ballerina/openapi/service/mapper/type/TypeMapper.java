@@ -19,6 +19,7 @@ package io.ballerina.openapi.service.mapper.type;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Map;
@@ -39,15 +40,16 @@ public abstract class TypeMapper {
         this.additionalData = additionalData;
     }
 
-    abstract Schema getReferenceTypeSchema(Map<String, Schema> components);
+    abstract Schema getReferenceTypeSchema(OpenAPI openAPI);
 
-    public void addToComponents(Map<String, Schema> components) {
-        if (components.containsKey(name) && Objects.nonNull(components.get(name))) {
+    public void addToComponents(OpenAPI openAPI) {
+        Map<String, Schema> schemas = MapperCommonUtils.getComponentsSchema(openAPI);
+        if (schemas.containsKey(name) && Objects.nonNull(schemas.get(name))) {
             return;
         }
-        Schema schema = getReferenceTypeSchema(components);
+        Schema schema = getReferenceTypeSchema(openAPI);
         if (Objects.nonNull(schema)) {
-            components.put(name, schema);
+            openAPI.schema(name, schema);
         }
     }
 }

@@ -59,4 +59,3 @@ paths:
                 additionalProperties:
                   type: integer
                   format: int64
-components: {}

@@ -21,11 +21,11 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.openapi.service.mapper.AdditionalData;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -36,19 +36,18 @@ public class ErrorTypeMapper extends TypeMapper {
     }
 
     @Override
-    Schema getReferenceTypeSchema(Map<String, Schema> components) {
+    Schema getReferenceTypeSchema(OpenAPI openAPI) {
         ErrorTypeSymbol errorTypeSymbol = (ErrorTypeSymbol) typeSymbol.typeDescriptor();
-        return getSchema(errorTypeSymbol, components, additionalData);
+        return getSchema(errorTypeSymbol, openAPI, additionalData);
     }
 
-    public static Schema getSchema(ErrorTypeSymbol typeSymbol, Map<String, Schema> components,
-                                   AdditionalData additionalData) {
-        Optional<Symbol> optErrorPayload = additionalData.semanticModel().types().getTypeByName("ballerina",
-                "http", "", "ErrorPayload");
+    public static Schema getSchema(ErrorTypeSymbol typeSymbol, OpenAPI openAPI, AdditionalData additionalData) {
+        Optional<Symbol> optErrorPayload = additionalData.semanticModel().types().getTypeByName("ballerina", "http",
+                "", "ErrorPayload");
         if (optErrorPayload.isPresent() && optErrorPayload.get() instanceof TypeDefinitionSymbol errorPayload) {
-            Schema schema = ComponentMapper.getTypeSchema(errorPayload.typeDescriptor(), components, additionalData);
+            Schema schema = ComponentMapper.getTypeSchema(errorPayload.typeDescriptor(), openAPI, additionalData);
             if (Objects.nonNull(schema)) {
-                components.put("ErrorPayload", schema);
+                openAPI.schema("ErrorPayload", schema);
                 return new ObjectSchema().$ref("ErrorPayload");
             }
         }

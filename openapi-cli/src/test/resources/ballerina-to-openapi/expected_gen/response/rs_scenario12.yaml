@@ -30,4 +30,3 @@ paths:
                   body:
                     type: string
                 additionalProperties: false
-components: {}

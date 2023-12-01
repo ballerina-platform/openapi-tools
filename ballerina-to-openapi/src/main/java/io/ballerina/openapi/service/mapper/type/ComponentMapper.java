@@ -32,61 +32,70 @@ import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
-import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getComponentsSchema;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
 /**
- * This util class for processing the mapping in between ballerina record and openAPI object schema.
+ * The mapper class to map ballerina types to OAS components.
  *
- * @since 2.0.0
+ * @since 1.9.0
  */
 public class ComponentMapper {
 
-    private final Components components;
-    private final AdditionalData additionalData;
+    private final OpenAPI openAPI;
+    private final SemanticModel semanticModel;
+    private final ModuleMemberVisitor moduleMemberVisitor;
+    private final List<OpenAPIMapperDiagnostic> diagnostics;
 
-    public ComponentMapper(Components components, SemanticModel semanticModel,
-                           ModuleMemberVisitor moduleMemberVisitor) {
-        this.components = components;
-        this.additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, new ArrayList<>());
+    public ComponentMapper(OpenAPI openAPI, SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
+                           List<OpenAPIMapperDiagnostic> diagnostics) {
+        this.openAPI = openAPI;
+        this.semanticModel = semanticModel;
+        this.moduleMemberVisitor = moduleMemberVisitor;
+        this.diagnostics = diagnostics;
     }
 
-    public static Schema getTypeSchema(TypeSymbol typeSymbol, Map<String, Schema> components,
-                                       AdditionalData componentMapperData) {
+    public void addMapping(TypeSymbol typeSymbol) {
+        if (typeSymbol instanceof TypeReferenceTypeSymbol referenceTypeSymbol) {
+            AdditionalData componentMapperData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
+            createComponentMapping(referenceTypeSymbol, openAPI, componentMapperData);
+        }
+    }
+
+    public static Schema getTypeSchema(TypeSymbol typeSymbol, OpenAPI openAPI, AdditionalData componentMapperData) {
         return switch (typeSymbol.typeKind()) {
-            case MAP -> MapTypeMapper.getSchema((MapTypeSymbol) typeSymbol, components, componentMapperData);
+            case MAP -> MapTypeMapper.getSchema((MapTypeSymbol) typeSymbol, openAPI, componentMapperData);
             case ARRAY ->
-                    ArrayTypeMapper.getSchema((ArrayTypeSymbol) typeSymbol, components, componentMapperData);
-            case TYPE_REFERENCE -> ReferenceTypeMapper.getSchema((TypeReferenceTypeSymbol) typeSymbol, components,
+                    ArrayTypeMapper.getSchema((ArrayTypeSymbol) typeSymbol, openAPI, componentMapperData);
+            case TYPE_REFERENCE -> ReferenceTypeMapper.getSchema((TypeReferenceTypeSymbol) typeSymbol, openAPI,
                     componentMapperData);
-            case RECORD -> RecordTypeMapper.getSchema((RecordTypeSymbol) typeSymbol, components,
+            case RECORD -> RecordTypeMapper.getSchema((RecordTypeSymbol) typeSymbol, openAPI,
                     null, componentMapperData);
             case INTERSECTION ->
-                    ReadOnlyTypeMapper.getSchema((IntersectionTypeSymbol) typeSymbol, components, componentMapperData);
+                    ReadOnlyTypeMapper.getSchema((IntersectionTypeSymbol) typeSymbol, openAPI, componentMapperData);
             case UNION ->
-                    UnionTypeMapper.getSchema((UnionTypeSymbol) typeSymbol, components, componentMapperData);
+                    UnionTypeMapper.getSchema((UnionTypeSymbol) typeSymbol, openAPI, componentMapperData);
             case TABLE ->
-                    TableTypeMapper.getSchema((TableTypeSymbol) typeSymbol, components, componentMapperData);
+                    TableTypeMapper.getSchema((TableTypeSymbol) typeSymbol, openAPI, componentMapperData);
             case TUPLE ->
-                    TupleTypeMapper.getSchema((TupleTypeSymbol) typeSymbol, components, componentMapperData);
+                    TupleTypeMapper.getSchema((TupleTypeSymbol) typeSymbol, openAPI, componentMapperData);
             case ERROR ->
-                    ErrorTypeMapper.getSchema((ErrorTypeSymbol) typeSymbol, components, componentMapperData);
+                    ErrorTypeMapper.getSchema((ErrorTypeSymbol) typeSymbol, openAPI, componentMapperData);
             default -> SimpleTypeMapper.getTypeSchema(typeSymbol, componentMapperData);
         };
     }
 
-    public static Map<String, Schema> createComponentMapping(TypeReferenceTypeSymbol typeSymbol,
-                                                             Map<String, Schema> components,
-                                                             AdditionalData componentMapperData) {
-        if (components.containsKey(getTypeName(typeSymbol))) {
-            return components;
+    protected static void createComponentMapping(TypeReferenceTypeSymbol typeSymbol, OpenAPI openAPI,
+                                                 AdditionalData componentMapperData) {
+        Map<String, Schema> schemas = getComponentsSchema(openAPI);
+        if (schemas.containsKey(getTypeName(typeSymbol))) {
+            return;
         }
         TypeSymbol referredType = typeSymbol.typeDescriptor();
         TypeMapper mapper = switch (referredType.typeKind()) {
@@ -101,26 +110,7 @@ public class ComponentMapper {
             case ERROR -> new ErrorTypeMapper(typeSymbol, componentMapperData);
             default -> new SimpleTypeMapper(typeSymbol, componentMapperData);
         };
-        components.put(getTypeName(typeSymbol), null);
-        mapper.addToComponents(components);
-        return components;
-    }
-
-    public List<OpenAPIMapperDiagnostic> getDiagnostics() {
-        return additionalData.diagnostics();
-    }
-
-    public void createComponentsSchema(TypeSymbol typeSymbol) {
-        Map<String, Schema> schema = components.getSchemas();
-        if (schema == null) {
-            schema = new HashMap<>();
-        }
-        Map<String, Schema> componentsSchema = createComponentMapping((TypeReferenceTypeSymbol) typeSymbol, schema,
-                additionalData);
-        components.setSchemas(componentsSchema);
-    }
-
-    public ModuleMemberVisitor getModuleMemberVisitor() {
-        return additionalData.moduleMemberVisitor();
+        openAPI.schema(getTypeName(typeSymbol), null);
+        mapper.addToComponents(openAPI);
     }
 }

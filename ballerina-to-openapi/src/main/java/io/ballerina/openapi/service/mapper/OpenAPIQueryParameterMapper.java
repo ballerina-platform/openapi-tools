@@ -33,7 +33,6 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -57,17 +56,17 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unesca
  * @since 2.0.0
  */
 public class OpenAPIQueryParameterMapper {
-    private final Components components;
     private final SemanticModel semanticModel;
-    private final Map<String, String> apidocs;
+    private final Map<String, String> apiDocs;
     private final ModuleMemberVisitor moduleMemberVisitor;
+    private final ComponentMapper componentMapper;
 
-    public OpenAPIQueryParameterMapper(Map<String, String> apidocs, Components components,
-                                       SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
-        this.apidocs = apidocs;
-        this.components = components;
+    public OpenAPIQueryParameterMapper(Map<String, String> apiDocs, SemanticModel semanticModel,
+                                       ModuleMemberVisitor moduleMemberVisitor, ComponentMapper componentMapper) {
+        this.apiDocs = apiDocs;
         this.semanticModel = semanticModel;
         this.moduleMemberVisitor = moduleMemberVisitor;
+        this.componentMapper = componentMapper;
     }
 
     /**
@@ -83,8 +82,8 @@ public class OpenAPIQueryParameterMapper {
             Schema openApiSchema = MapperCommonUtils.getOpenApiSchema(queryParam.typeName().toString().trim());
             queryParameter.setSchema(openApiSchema);
             queryParameter.setRequired(true);
-            if (!apidocs.isEmpty() && queryParam.paramName().isPresent() && apidocs.containsKey(queryParamName)) {
-                queryParameter.setDescription(apidocs.get(queryParamName.trim()));
+            if (!apiDocs.isEmpty() && queryParam.paramName().isPresent() && apiDocs.containsKey(queryParamName)) {
+                queryParameter.setDescription(apiDocs.get(queryParamName.trim()));
             }
             return queryParameter;
         } else if (queryParam.typeName().kind() == OPTIONAL_TYPE_DESC && isQuery) {
@@ -104,35 +103,33 @@ public class OpenAPIQueryParameterMapper {
             // Handle required array type query parameter
             ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) queryParam.typeName();
             return handleArrayTypeQueryParameter(queryParamName, arrayNode);
-        } else if (queryParam.typeName() instanceof SimpleNameReferenceNode && isQuery) {
+        } else if (queryParam.typeName() instanceof SimpleNameReferenceNode queryNode && isQuery) {
             QueryParameter queryParameter = new QueryParameter();
             queryParameter.setName(unescapeIdentifier(queryParamName));
-            SimpleNameReferenceNode queryNode = (SimpleNameReferenceNode) queryParam.typeName();
-            ComponentMapper componentMapper = new ComponentMapper(components, semanticModel, moduleMemberVisitor);
             TypeSymbol typeSymbol = (TypeSymbol) semanticModel.symbol(queryNode).orElseThrow();
-            componentMapper.createComponentsSchema(typeSymbol);
+            componentMapper.addMapping(typeSymbol);
             Schema<?> schema = new Schema<>();
             schema.set$ref(unescapeIdentifier(queryNode.name().text().trim()));
             queryParameter.setSchema(schema);
             queryParameter.setRequired(true);
-            if (!apidocs.isEmpty() && queryParam.paramName().isPresent() && apidocs.containsKey(queryParamName)) {
-                queryParameter.setDescription(apidocs.get(queryParamName.trim()));
+            if (!apiDocs.isEmpty() && queryParam.paramName().isPresent() && apiDocs.containsKey(queryParamName)) {
+                queryParameter.setDescription(apiDocs.get(queryParamName.trim()));
             }
             return queryParameter;
         } else if (queryParam.typeName().kind() == SIMPLE_NAME_REFERENCE) {
             QueryParameter queryParameter = new QueryParameter();
-            Schema<?> refSchema = handleReference(semanticModel, components, (SimpleNameReferenceNode)
-                    queryParam.typeName(), moduleMemberVisitor);
+            Schema<?> refSchema = handleReference(semanticModel, (SimpleNameReferenceNode) queryParam.typeName(),
+                    moduleMemberVisitor, componentMapper);
             queryParameter.setSchema(refSchema);
             queryParameter.setRequired(true);
-            if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
-                queryParameter.setDescription(apidocs.get(queryParamName));
+            if (!apiDocs.isEmpty() && apiDocs.containsKey(queryParamName)) {
+                queryParameter.setDescription(apiDocs.get(queryParamName));
             }
             return queryParameter;
         } else {
             QueryParameter queryParameter = createContentTypeForMapJson(queryParamName, false);
-            if (!apidocs.isEmpty() && queryParam.paramName().isPresent() && apidocs.containsKey(queryParamName)) {
-                queryParameter.setDescription(apidocs.get(queryParamName.trim()));
+            if (!apiDocs.isEmpty() && queryParam.paramName().isPresent() && apiDocs.containsKey(queryParamName)) {
+                queryParameter.setDescription(apiDocs.get(queryParamName.trim()));
             }
             return queryParameter;
         }
@@ -153,32 +150,31 @@ public class OpenAPIQueryParameterMapper {
             Schema openApiSchema = MapperCommonUtils.getOpenApiSchema(
                     defaultableQueryParam.typeName().toString().trim());
             queryParameter.setSchema(openApiSchema);
-            if (!apidocs.isEmpty() && defaultableQueryParam.paramName().isPresent() &&
-                    apidocs.containsKey(queryParamName)) {
-                queryParameter.setDescription(apidocs.get(queryParamName.trim()));
+            if (!apiDocs.isEmpty() && defaultableQueryParam.paramName().isPresent() &&
+                    apiDocs.containsKey(queryParamName)) {
+                queryParameter.setDescription(apiDocs.get(queryParamName.trim()));
             }
         } else if (defaultableQueryParam.typeName().kind() == OPTIONAL_TYPE_DESC && isQuery) {
             // Handle optional query parameter
             queryParameter = setOptionalQueryParameter(queryParamName,
                     ((OptionalTypeDescriptorNode) defaultableQueryParam.typeName()),
                     Constants.TRUE);
-        } else if (defaultableQueryParam.typeName() instanceof ArrayTypeDescriptorNode && isQuery) {
+        } else if (defaultableQueryParam.typeName() instanceof ArrayTypeDescriptorNode arrayNode && isQuery) {
             // Handle required array type query parameter
-            ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) defaultableQueryParam.typeName();
             queryParameter = handleArrayTypeQueryParameter(queryParamName, arrayNode);
         } else if (defaultableQueryParam.typeName().kind() == SIMPLE_NAME_REFERENCE) {
             queryParameter.setName(unescapeIdentifier(queryParamName));
-            Schema<?> refSchema = handleReference(semanticModel, components,
-                    (SimpleNameReferenceNode) defaultableQueryParam.typeName(), moduleMemberVisitor);
+            Schema<?> refSchema = handleReference(semanticModel,
+                    (SimpleNameReferenceNode) defaultableQueryParam.typeName(), moduleMemberVisitor, componentMapper);
             queryParameter.setSchema(refSchema);
-            if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
-                queryParameter.setDescription(apidocs.get(queryParamName));
+            if (!apiDocs.isEmpty() && apiDocs.containsKey(queryParamName)) {
+                queryParameter.setDescription(apiDocs.get(queryParamName));
             }
         } else {
             queryParameter = createContentTypeForMapJson(queryParamName, false);
-            if (!apidocs.isEmpty() && defaultableQueryParam.paramName().isPresent() &&
-                    apidocs.containsKey(queryParamName)) {
-                queryParameter.setDescription(apidocs.get(queryParamName.trim()));
+            if (!apiDocs.isEmpty() && defaultableQueryParam.paramName().isPresent() &&
+                    apiDocs.containsKey(queryParamName)) {
+                queryParameter.setDescription(apiDocs.get(queryParamName.trim()));
             }
         }
 
@@ -223,15 +219,15 @@ public class OpenAPIQueryParameterMapper {
         arraySchema.setItems(itemSchema);
         queryParameter.schema(arraySchema);
         queryParameter.setRequired(true);
-        if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
-            queryParameter.setDescription(apidocs.get(queryParamName));
+        if (!apiDocs.isEmpty() && apiDocs.containsKey(queryParamName)) {
+            queryParameter.setDescription(apiDocs.get(queryParamName));
         }
         return queryParameter;
     }
 
     private Schema<?> getItemSchemaForReference(ArrayTypeDescriptorNode arrayNode) {
         SimpleNameReferenceNode record = (SimpleNameReferenceNode) arrayNode.memberTypeDesc();
-        return handleReference(semanticModel, components, record, moduleMemberVisitor);
+        return handleReference(semanticModel, record, moduleMemberVisitor, componentMapper);
     }
 
     /**
@@ -260,8 +256,8 @@ public class OpenAPIQueryParameterMapper {
             arraySchema.setItems(itemSchema);
             queryParameter.schema(arraySchema);
             queryParameter.setName(unescapeIdentifier(queryParamName));
-            if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
-                queryParameter.setDescription(apidocs.get(queryParamName));
+            if (!apiDocs.isEmpty() && apiDocs.containsKey(queryParamName)) {
+                queryParameter.setDescription(apiDocs.get(queryParamName));
             }
             return queryParameter;
         } else if (node.kind() == SyntaxKind.MAP_TYPE_DESC) {
@@ -269,27 +265,27 @@ public class OpenAPIQueryParameterMapper {
             if (isOptional.equals(Constants.FALSE)) {
                 queryParameter.setRequired(true);
             }
-            if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
-                queryParameter.setDescription(apidocs.get(queryParamName));
+            if (!apiDocs.isEmpty() && apiDocs.containsKey(queryParamName)) {
+                queryParameter.setDescription(apiDocs.get(queryParamName));
             }
             return queryParameter;
         } else if (node.kind() == SIMPLE_NAME_REFERENCE) {
-            Schema<?> refSchema = handleReference(semanticModel, components, (SimpleNameReferenceNode) node,
-                    moduleMemberVisitor);
+            Schema<?> refSchema = handleReference(semanticModel, (SimpleNameReferenceNode) node, moduleMemberVisitor,
+                    componentMapper);
             queryParameter.setSchema(refSchema);
             if (isOptional.equals(Constants.FALSE)) {
                 queryParameter.setRequired(true);
             }
-            if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
-                queryParameter.setDescription(apidocs.get(queryParamName));
+            if (!apiDocs.isEmpty() && apiDocs.containsKey(queryParamName)) {
+                queryParameter.setDescription(apiDocs.get(queryParamName));
             }
             return queryParameter;
         } else {
             Schema<?> openApiSchema = MapperCommonUtils.getOpenApiSchema(node.toString().trim());
             openApiSchema.setNullable(true);
             queryParameter.setSchema(openApiSchema);
-            if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
-                queryParameter.setDescription(apidocs.get(queryParamName));
+            if (!apiDocs.isEmpty() && apiDocs.containsKey(queryParamName)) {
+                queryParameter.setDescription(apiDocs.get(queryParamName));
             }
             return queryParameter;
         }

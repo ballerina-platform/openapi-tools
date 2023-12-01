@@ -33,4 +33,3 @@ paths:
               schema:
                 type: number
                 format: double
-components: {}

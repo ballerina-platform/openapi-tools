@@ -32,6 +32,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -54,26 +55,26 @@ public class RecordTypeMapper extends TypeMapper {
     }
 
     @Override
-    public Schema getReferenceTypeSchema(Map<String, Schema> components) {
+    public Schema getReferenceTypeSchema(OpenAPI openAPI) {
         RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeSymbol.typeDescriptor();
-        return getSchema(recordTypeSymbol, components, name, additionalData).description(description);
+        return getSchema(recordTypeSymbol, openAPI, name, additionalData).description(description);
     }
 
-    public static Schema getSchema(RecordTypeSymbol typeSymbol, Map<String, Schema> components,
+    public static Schema getSchema(RecordTypeSymbol typeSymbol, OpenAPI openAPI,
                                    String recordName, AdditionalData additionalData) {
         ObjectSchema schema = new ObjectSchema();
         Set<String> requiredFields = new HashSet<>();
 
         Map<String, RecordFieldSymbol> recordFieldMap = new LinkedHashMap<>(typeSymbol.fieldDescriptors());
-        List<Schema> allOfSchemaList = mapIncludedRecords(typeSymbol, components, recordFieldMap, additionalData);
+        List<Schema> allOfSchemaList = mapIncludedRecords(typeSymbol, openAPI, recordFieldMap, additionalData);
 
-        Map<String, Schema> properties = mapRecordFields(recordFieldMap, components, requiredFields,
+        Map<String, Schema> properties = mapRecordFields(recordFieldMap, openAPI, requiredFields,
                 recordName, additionalData);
 
         Optional<TypeSymbol> restFieldType = typeSymbol.restTypeDescriptor();
         if (restFieldType.isPresent()) {
             if (!restFieldType.get().typeKind().equals(TypeDescKind.ANYDATA)) {
-                Schema restFieldSchema = ComponentMapper.getTypeSchema(restFieldType.get(), components, additionalData);
+                Schema restFieldSchema = ComponentMapper.getTypeSchema(restFieldType.get(), openAPI, additionalData);
                 schema.additionalProperties(restFieldSchema);
             }
         } else {
@@ -91,7 +92,7 @@ public class RecordTypeMapper extends TypeMapper {
         return schema;
     }
 
-    static List<Schema> mapIncludedRecords(RecordTypeSymbol typeSymbol, Map<String, Schema> components,
+    static List<Schema> mapIncludedRecords(RecordTypeSymbol typeSymbol, OpenAPI openAPI,
                                            Map<String, RecordFieldSymbol> recordFieldMap,
                                            AdditionalData additionalData) {
         List<Schema> allOfSchemaList = new ArrayList<>();
@@ -103,7 +104,7 @@ public class RecordTypeMapper extends TypeMapper {
                 Schema includedRecordSchema = new Schema();
                 includedRecordSchema.set$ref(getTypeName(typeInclusion));
                 allOfSchemaList.add(includedRecordSchema);
-                ComponentMapper.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion, components,
+                ComponentMapper.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion, openAPI,
                         additionalData);
 
                 RecordTypeSymbol includedRecordTypeSymbol = (RecordTypeSymbol) ((TypeReferenceTypeSymbol) typeInclusion)
@@ -118,7 +119,7 @@ public class RecordTypeMapper extends TypeMapper {
     }
 
     public static Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
-                                                      Map<String, Schema> components, Set<String> requiredFields,
+                                                      OpenAPI openAPI, Set<String> requiredFields,
                                                       String recordName, AdditionalData additionalData) {
         Map<String, Schema> properties = new LinkedHashMap<>();
         for (Map.Entry<String, RecordFieldSymbol> recordField : recordFieldMap.entrySet()) {
@@ -129,7 +130,7 @@ public class RecordTypeMapper extends TypeMapper {
             }
             String recordFieldDescription = getRecordFieldTypeDescription(recordFieldSymbol);
             Schema recordFieldSchema = ComponentMapper.getTypeSchema(recordFieldSymbol.typeDescriptor(),
-                    components, additionalData);
+                    openAPI, additionalData);
             if (Objects.nonNull(recordFieldDescription) && Objects.nonNull(recordFieldSchema)) {
                 recordFieldSchema = recordFieldSchema.description(recordFieldDescription);
             }

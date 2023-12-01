@@ -22,6 +22,7 @@ import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -37,21 +38,22 @@ public class ReferenceTypeMapper extends TypeMapper {
     }
 
     @Override
-    public Schema getReferenceTypeSchema(Map<String, Schema> components) {
+    public Schema getReferenceTypeSchema(OpenAPI openAPI) {
         TypeReferenceTypeSymbol referredType = (TypeReferenceTypeSymbol) typeSymbol.typeDescriptor();
-        Schema schema = getSchema(referredType, components, additionalData);
+        Schema schema = getSchema(referredType, openAPI, additionalData);
         if (Objects.nonNull(schema)) {
             schema.description(description);
         }
         return schema;
     }
 
-    public static Schema getSchema(TypeReferenceTypeSymbol typeSymbol, Map<String, Schema> components,
+    public static Schema getSchema(TypeReferenceTypeSymbol typeSymbol, OpenAPI openAPI,
                                    AdditionalData additionalData) {
-        if (!components.containsKey(MapperCommonUtils.getTypeName(typeSymbol))) {
-            createComponentMapping(typeSymbol, components, additionalData);
-            if (!components.containsKey(MapperCommonUtils.getTypeName(typeSymbol)) || Objects.isNull(
-                    components.get(MapperCommonUtils.getTypeName(typeSymbol)))) {
+        Map<String, Schema> schemas = MapperCommonUtils.getComponentsSchema(openAPI);
+        if (!schemas.containsKey(MapperCommonUtils.getTypeName(typeSymbol))) {
+            createComponentMapping(typeSymbol, openAPI, additionalData);
+            if (!schemas.containsKey(MapperCommonUtils.getTypeName(typeSymbol)) || Objects.isNull(
+                    schemas.get(MapperCommonUtils.getTypeName(typeSymbol)))) {
                 return null;
             }
         }

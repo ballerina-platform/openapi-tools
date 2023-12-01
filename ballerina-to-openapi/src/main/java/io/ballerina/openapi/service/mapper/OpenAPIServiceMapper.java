@@ -25,8 +25,10 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.openapi.service.mapper.constraint.ConstraintMapper;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 
 import java.util.ArrayList;
@@ -65,18 +67,19 @@ public class OpenAPIServiceMapper {
      */
     public OpenAPI convertServiceToOpenAPI(ServiceDeclarationNode service, OpenAPI openapi) {
         NodeList<Node> functions = service.members();
-        List<FunctionDefinitionNode> resource = new ArrayList<>();
+        List<FunctionDefinitionNode> resources = new ArrayList<>();
         for (Node function: functions) {
             SyntaxKind kind = function.kind();
             if (kind.equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
-                resource.add((FunctionDefinitionNode) function);
+                resources.add((FunctionDefinitionNode) function);
             }
         }
-        OpenAPIResourceMapper resourceMapper = new OpenAPIResourceMapper(this.semanticModel, this.moduleMemberVisitor);
-        openapi.setPaths(resourceMapper.getPaths(resource));
-        openapi.setComponents(resourceMapper.getComponents());
-        errors.addAll(resourceMapper.getErrors());
-
+        ComponentMapper componentMapper = new ComponentMapper(openapi, semanticModel, moduleMemberVisitor, errors);
+        OpenAPIResourceMapper resourceMapper = new OpenAPIResourceMapper(openapi, resources, semanticModel,
+                moduleMemberVisitor, errors, componentMapper);
+        resourceMapper.addMapping();
+        ConstraintMapper constraintMapper = new ConstraintMapper(openapi, moduleMemberVisitor, errors);
+        constraintMapper.addMapping();
         return openapi;
     }
 }

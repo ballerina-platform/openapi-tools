@@ -18,6 +18,7 @@
 package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.openapi.cmd.OASContractGenerator;
+import io.ballerina.openapi.service.mapper.constraint.model.ConstraintAnnotation;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Project;
@@ -37,7 +38,7 @@ import static io.ballerina.openapi.generators.openapi.TestUtils.getCompilation;
 
 /**
  * This test class for the covering the negative tests for constraint
- * {@link io.ballerina.openapi.converter.service.ConstraintAnnotation} scenarios.
+ * {@link ConstraintAnnotation} scenarios.
  *
  */
 public class NegativeConstraintTests {

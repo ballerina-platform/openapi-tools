@@ -30,13 +30,13 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class UnionTypeMapper extends TypeMapper {
@@ -49,19 +49,18 @@ public class UnionTypeMapper extends TypeMapper {
     }
 
     @Override
-    public Schema getReferenceTypeSchema(Map<String, Schema> components) {
+    public Schema getReferenceTypeSchema(OpenAPI openAPI) {
         Schema schema;
         if (isEnumType) {
             schema = getEnumTypeSchema((EnumSymbol) typeSymbol.definition());
         } else {
             UnionTypeSymbol unionTypeSymbol = (UnionTypeSymbol) typeSymbol.typeDescriptor();
-            schema = getSchema(unionTypeSymbol, components, additionalData);
+            schema = getSchema(unionTypeSymbol, openAPI, additionalData);
         }
         return Objects.nonNull(schema) ? schema.description(description) : null;
     }
 
-    public static Schema getSchema(UnionTypeSymbol typeSymbol, Map<String, Schema> components,
-                                   AdditionalData additionalData) {
+    public static Schema getSchema(UnionTypeSymbol typeSymbol, OpenAPI openAPI, AdditionalData additionalData) {
         if (isUnionOfSingletons(typeSymbol)) {
             return getSingletonUnionTypeSchema(typeSymbol, additionalData.diagnostics());
         }
@@ -72,7 +71,7 @@ public class UnionTypeMapper extends TypeMapper {
             if (memberTypeSymbol.typeKind().equals(TypeDescKind.NIL)) {
                 continue;
             }
-            Schema schema = ComponentMapper.getTypeSchema(memberTypeSymbol, components, additionalData);
+            Schema schema = ComponentMapper.getTypeSchema(memberTypeSymbol, openAPI, additionalData);
             if (Objects.nonNull(schema)) {
                 memberSchemas.add(schema);
             }

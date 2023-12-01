@@ -87,8 +87,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -542,16 +544,14 @@ public class MapperCommonUtils {
         return unescapedParamName.replaceAll("\\\\", "").replaceAll("'", "");
     }
 
-    public static Schema<?> handleReference(SemanticModel semanticModel, Components components,
-                                            SimpleNameReferenceNode recordNode,
-                                            ModuleMemberVisitor moduleMemberVisitor) {
+    public static Schema<?> handleReference(SemanticModel semanticModel, SimpleNameReferenceNode recordNode,
+                                            ModuleMemberVisitor moduleMemberVisitor, ComponentMapper componentMapper) {
         Schema<?> refSchema = new Schema<>();
         // Creating request body - required.
         Optional<Symbol> symbol = semanticModel.symbol(recordNode);
         if (symbol.isPresent() && symbol.get() instanceof TypeSymbol) {
             String recordName = recordNode.name().toString().trim();
-            ComponentMapper componentMapper = new ComponentMapper(components, semanticModel, moduleMemberVisitor);
-            componentMapper.createComponentsSchema((TypeSymbol) symbol.get());
+            componentMapper.addMapping((TypeSymbol) symbol.get());
             refSchema.set$ref(MapperCommonUtils.unescapeIdentifier(recordName));
         }
         return refSchema;
@@ -608,5 +608,17 @@ public class MapperCommonUtils {
     public static boolean isSimpleValueLiteralKind(SyntaxKind valueExpressionKind) {
         return Arrays.stream(validExpressionKind).anyMatch(syntaxKind -> syntaxKind ==
                 valueExpressionKind);
+    }
+
+    public static Map<String, Schema> getComponentsSchema(OpenAPI openAPI) {
+        Components components = openAPI.getComponents();
+        if (Objects.isNull(components)) {
+            return new HashMap<>();
+        }
+        Map<String, Schema> schemas = components.getSchemas();
+        if (Objects.isNull(schemas)) {
+            return new HashMap<>();
+        }
+        return schemas;
     }
 }

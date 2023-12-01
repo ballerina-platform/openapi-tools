@@ -24,15 +24,12 @@ import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
@@ -45,11 +42,13 @@ public class QueryParameterMapper implements ParameterMapper {
     private final boolean treatNilableAsOptional;
     private final SemanticModel semanticModel;
     private final List<OpenAPIMapperDiagnostic> diagnostics;
+    private final OpenAPI openAPI;
 
-    public QueryParameterMapper(ParameterSymbol parameterSymbol, Map<String, String> apiDocs,
+    public QueryParameterMapper(ParameterSymbol parameterSymbol, OpenAPI openAPI, Map<String, String> apiDocs,
                                 boolean treatNilableAsOptional, SemanticModel semanticModel,
                                 List<OpenAPIMapperDiagnostic> diagnostics) {
         this.type = parameterSymbol.typeDescriptor();
+        this.openAPI = openAPI;
         this.name = unescapeIdentifier(parameterSymbol.getName().get());
         this.isRequired = parameterSymbol.paramKind().equals(ParameterKind.REQUIRED);
         this.description = apiDocs.get(name);
@@ -59,21 +58,14 @@ public class QueryParameterMapper implements ParameterMapper {
     }
 
     @Override
-    public Parameter getParameterSchema(Components components) {
+    public Parameter getParameterSchema() {
         QueryParameter queryParameter = new QueryParameter();
         queryParameter.setName(name);
         if (isRequired && (!treatNilableAsOptional || !UnionTypeMapper.hasNilableType(type))) {
             queryParameter.setRequired(true);
         }
-        Map<String, Schema> componentSchemas = components.getSchemas();
-        if (Objects.isNull(componentSchemas)) {
-            componentSchemas = new HashMap<>();
-        }
         AdditionalData additionalData = new AdditionalData(semanticModel, null, diagnostics);
-        queryParameter.setSchema(ComponentMapper.getTypeSchema(type, componentSchemas, additionalData));
-        if (!componentSchemas.isEmpty()) {
-            components.setSchemas(componentSchemas);
-        }
+        queryParameter.setSchema(ComponentMapper.getTypeSchema(type, openAPI, additionalData));
         queryParameter.setDescription(description);
         return queryParameter;
     }
