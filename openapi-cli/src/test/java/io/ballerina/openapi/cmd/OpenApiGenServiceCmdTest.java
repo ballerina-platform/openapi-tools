@@ -17,8 +17,10 @@
  */
 package io.ballerina.openapi.cmd;
 
+import io.ballerina.cli.launcher.BLauncherException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import picocli.CommandLine;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -109,6 +111,45 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
             }
         } else {
             Assert.fail("Service generation for OneOf Schema type failed.");
+        }
+    }
+
+    @Test(description = "Test for --without-data-binding flag")
+    public void testWithoutDataBinding() throws IOException {
+        Path yamlPath = resourceDir.resolve(Paths.get("withoutDataBinding.yaml"));
+        String[] args = {"--input", yamlPath.toString(), "--without-data-binding", "-o",
+                this.tmpDir.toString(), "--mode", "service"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, this.tmpDir);
+        new CommandLine(cmd).parseArgs(args);
+        String output = "";
+        try {
+            cmd.execute();
+        } catch (BLauncherException e) {
+            output = e.getDetailedMessages().get(0);
+        }
+        Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen",
+                "without-data-binding-type.bal"));
+        Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile);
+        String expectedSchema = expectedSchemaLines.collect(Collectors.joining("\n"));
+        expectedSchemaLines.close();
+
+        Path expectedServiceFile = resourceDir.resolve(Paths.get("expected_gen",
+                "without-data-binding.bal"));
+        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile);
+        String expectedService = expectedServiceLines.collect(Collectors.joining("\n"));
+        expectedSchemaLines.close();
+        if (Files.exists(this.tmpDir.resolve("withoutdatabinding_service.bal")) &&
+                Files.exists(this.tmpDir.resolve("types.bal"))) {
+            String generatedSchema = getStringFromFile(this.tmpDir.resolve("types.bal"));
+            String generatedService = getStringFromFile(this.tmpDir.resolve("withoutdatabinding_service.bal"));
+            Assert.assertEquals(replaceWhiteSpace(generatedSchema), replaceWhiteSpace(expectedSchema),
+                    "Expected content and actual generated content is mismatched for: " + yamlPath);
+            Assert.assertEquals(replaceWhiteSpace(generatedService), replaceWhiteSpace(expectedService),
+                    "Expected content and actual generated content is mismatched for: " + yamlPath);
+            deleteGeneratedFiles("without-data-binding-service.bal");
+
+        } else {
+            Assert.fail("Service generation for All Of Schema type failed.");
         }
     }
 }

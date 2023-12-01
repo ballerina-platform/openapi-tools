@@ -1,0 +1,58 @@
+openapi: 3.0.1
+info:
+  title: V1
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/v1"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /coupons/{couponCode}:
+    get:
+      operationId: getCoupon
+      parameters:
+        - $ref: '#/components/parameters/ngwCouponCodePathParam'
+      responses:
+        '200':
+          description: Successful operation, coupon was found by requested code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cat'
+components:
+  parameters:
+    ngwCouponCodePathParam:
+      in: path
+      name: couponCode
+      required: true
+      schema:
+        $ref: '#/components/schemas/Coupon'
+  schemas:
+    Coupon:
+      type: string
+    Address:
+      type: string
+    Pet:
+      type: object
+      properties:
+        name:
+          type: string
+        tag:
+          type: string
+      required:
+        - name
+        - tag
+    Cat:
+      type: object
+      properties:
+        name:
+          type: string
+        parent:
+          $ref: '#/components/schemas/Pet'
+        petType:
+          $ref: '#/components/schemas/Cat'
+      required:
+        - name
