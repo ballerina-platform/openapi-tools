@@ -214,7 +214,7 @@ public class OpenAPIResourceMapper {
         Map<String, String> apiDocs = listAPIDocumentations(resource, op);
         //Add path parameters if in path and query parameters
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs, semanticModel,
-                moduleMemberVisitor, errors, componentMapper);
+                moduleMemberVisitor, errors, componentMapper, openAPI);
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
         if (errors.size() > 1 || (errors.size() == 1 && !errors.get(0).getCode().equals("OAS_CONVERTOR_113"))) {
             boolean isErrorIncluded = errors.stream().anyMatch(d ->
@@ -228,7 +228,7 @@ public class OpenAPIResourceMapper {
             return Optional.empty();
         }
         errors.addAll(openAPIParameterMapper.getErrors());
-        ResponseMapper responseMapper = new ResponseMapper(semanticModel, components, resource, op,
+        ResponseMapper responseMapper = new ResponseMapper(semanticModel, openAPI, resource, op,
                 errors, moduleMemberVisitor);
         ApiResponses apiResponses = responseMapper.getApiResponses();
         op.getOperation().setResponses(apiResponses);

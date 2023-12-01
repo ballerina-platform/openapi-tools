@@ -41,6 +41,7 @@ import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.parameter.PathParameterMapper;
 import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -70,6 +71,7 @@ public class OpenAPIParameterMapper {
     private final SemanticModel semanticModel;
     private final ModuleMemberVisitor moduleMemberVisitor;
     private final ComponentMapper componentMapper;
+    private final OpenAPI openAPI;
 
     public List<OpenAPIMapperDiagnostic> getErrors() {
         return diagnostics;
@@ -78,13 +80,14 @@ public class OpenAPIParameterMapper {
     public OpenAPIParameterMapper(FunctionDefinitionNode functionDefinitionNode, OperationAdaptor operationAdaptor,
                                   Map<String, String> apiDocs, SemanticModel semanticModel,
                                   ModuleMemberVisitor moduleMemberVisitor, List<OpenAPIMapperDiagnostic> errors,
-                                  ComponentMapper componentMapper) {
+                                  ComponentMapper componentMapper, OpenAPI openAPI) {
         this.functionDefinitionNode = functionDefinitionNode;
         this.operationAdaptor = operationAdaptor;
         this.apidocs = apiDocs;
         this.semanticModel = semanticModel;
         this.moduleMemberVisitor = moduleMemberVisitor;
         this.componentMapper = componentMapper;
+        this.openAPI = openAPI;
     }
 
 
@@ -159,8 +162,8 @@ public class OpenAPIParameterMapper {
             if (param instanceof ResourcePathParameterNode pathParam) {
                 if (!pathParam.children().get(2).toString().trim().equals("...")) {
                     PathParameterMapper pathParameterMapper = new PathParameterMapper(
-                            (PathParameterSymbol) semanticModel.symbol(pathParam).get(),
-                            apidocs, semanticModel, diagnostics);
+                            (PathParameterSymbol) semanticModel.symbol(pathParam).get()
+                            ,openAPI, apidocs, semanticModel, diagnostics);
                     parameters.add(pathParameterMapper.getParameterSchema());
                 } else {
                     DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_125;
