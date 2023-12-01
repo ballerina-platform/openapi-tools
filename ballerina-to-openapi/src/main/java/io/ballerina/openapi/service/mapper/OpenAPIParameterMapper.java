@@ -162,8 +162,8 @@ public class OpenAPIParameterMapper {
             if (param instanceof ResourcePathParameterNode pathParam) {
                 if (!pathParam.children().get(2).toString().trim().equals("...")) {
                     PathParameterMapper pathParameterMapper = new PathParameterMapper(
-                            (PathParameterSymbol) semanticModel.symbol(pathParam).get()
-                            ,openAPI, apidocs, semanticModel, diagnostics);
+                            (PathParameterSymbol) semanticModel.symbol(pathParam).get(),
+                            openAPI, apidocs, semanticModel, diagnostics);
                     parameters.add(pathParameterMapper.getParameterSchema());
                 } else {
                     DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_125;
