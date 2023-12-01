@@ -26,6 +26,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReadOnlyPet'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /res2:
     get:
       operationId: getRes2
@@ -42,6 +48,12 @@ paths:
             text/plain:
               schema:
                 $ref: '#/components/schemas/ReadOnlyStr'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /res3:
     get:
       operationId: getRes3
@@ -60,6 +72,12 @@ paths:
                 type: string
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /res4:
     get:
       operationId: getRes4
@@ -76,6 +94,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReadOnlyStrArray'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /res5:
     get:
       operationId: getRes5
@@ -92,6 +116,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReadOnlyMapJson'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /res6:
     get:
       operationId: getRes6
@@ -108,6 +138,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReadOnlyJson'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /res7:
     get:
       operationId: getRes7
@@ -124,6 +160,12 @@ paths:
             application/xml:
               schema:
                 $ref: '#/components/schemas/ReadOnlyXML'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /res8:
     get:
       operationId: getRes8
@@ -140,6 +182,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReadOnlyError'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /res9:
     get:
       operationId: getRes9
@@ -160,6 +208,12 @@ paths:
             text/plain:
               schema:
                 type: string
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /res10:
     get:
       operationId: getRes10
@@ -180,6 +234,12 @@ paths:
             text/plain:
               schema:
                 type: string
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /res11:
     get:
       operationId: getRes11
@@ -196,8 +256,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReadOnlyRec'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    ReadOnlyPet:
+      $ref: '#/components/schemas/Pet'
+    Pet:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
     ErrorPayload:
       required:
         - message
@@ -221,8 +296,22 @@ components:
           type: string
         method:
           type: string
-    ReadOnlyPet:
-      $ref: '#/components/schemas/Pet'
+    ReadOnlyStr:
+      type: string
+    ReadOnlyStrArray:
+      type: array
+      items:
+        type: string
+    ReadOnlyMapJson:
+      type: object
+      additionalProperties:
+        type: object
+    ReadOnlyJson:
+      type: object
+    ReadOnlyXML:
+      type: object
+    ReadOnlyError:
+      $ref: '#/components/schemas/ErrorPayload'
     ReadOnlyRec:
       required:
         - id
@@ -234,26 +323,3 @@ components:
         name:
           type: string
       additionalProperties: false
-    ReadOnlyStr:
-      type: string
-    ReadOnlyError:
-      $ref: '#/components/schemas/ErrorPayload'
-    ReadOnlyMapJson:
-      type: object
-      additionalProperties:
-        type: object
-    ReadOnlyJson:
-      type: object
-    ReadOnlyStrArray:
-      type: array
-      items:
-        type: string
-    Pet:
-      required:
-        - name
-      type: object
-      properties:
-        name:
-          type: string
-    ReadOnlyXML:
-      type: object

@@ -28,7 +28,7 @@ paths:
           in: header
           schema:
             type: string
-            default: \"John\"
+            default: '"John"'
         - name: h2
           in: header
           schema:
@@ -71,11 +71,24 @@ paths:
         - name: h6
           in: header
           schema:
-            $ref: '#/components/schemas/Record'
+            allOf:
+              - $ref: '#/components/schemas/Record'
+            default:
+              name: John
+              city: London
         - name: h7
           in: header
           schema:
-            $ref: '#/components/schemas/Header'
+            allOf:
+              - $ref: '#/components/schemas/Header'
+            default:
+              header1: header1
+              header2:
+                - 1
+                - 2
+                - 3
+              header4: false
+              header3: []
       responses:
         "200":
           description: Ok
@@ -83,6 +96,12 @@ paths:
             text/plain:
               schema:
                 type: string
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     Header:
@@ -107,6 +126,7 @@ components:
             format: float
         header4:
           type: boolean
+      additionalProperties: false
     Record:
       required:
         - city
@@ -116,4 +136,28 @@ components:
         name:
           type: string
         city:
+          type: string
+      additionalProperties: false
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
           type: string

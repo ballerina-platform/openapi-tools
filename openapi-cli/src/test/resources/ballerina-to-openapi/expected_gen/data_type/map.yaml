@@ -22,23 +22,6 @@ paths:
                 $ref: '#/components/schemas/Location'
 components:
   schemas:
-    Link:
-      required:
-        - href
-      type: object
-      properties:
-        rel:
-          type: string
-        href:
-          type: string
-        types:
-          type: array
-          items:
-            type: string
-        methods:
-          type: array
-          items:
-            type: string
     Location:
       required:
         - _links
@@ -88,3 +71,20 @@ components:
             additionalProperties:
               type: string
       additionalProperties: false
+    Link:
+      required:
+        - href
+      type: object
+      properties:
+        rel:
+          type: string
+        href:
+          type: string
+        types:
+          type: array
+          items:
+            type: string
+        methods:
+          type: array
+          items:
+            type: string

@@ -10,8 +10,42 @@ paths:
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    Pet:
+      required:
+        - id
+        - name
+        - tag
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          $ref: '#/components/schemas/Tag'
+    Tag:
+      required:
+        - id
+        - name
+        - tagType
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tagType:
+          $ref: '#/components/schemas/TagType'
     TagType:
       required:
         - category
@@ -31,31 +65,26 @@ components:
                 type: array
                 items:
                   type: string
-    Tag:
+    ErrorPayload:
       required:
-        - id
-        - name
-        - tagType
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        id:
+        timestamp:
+          type: string
+        status:
           type: integer
           format: int64
-        name:
+        reason:
           type: string
-        tagType:
-          $ref: '#/components/schemas/TagType'
-    Pet:
-      required:
-        - id
-        - name
-        - tag
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
+        message:
           type: string
-        tag:
-          $ref: '#/components/schemas/Tag'
+        path:
+          type: string
+        method:
+          type: string

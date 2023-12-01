@@ -29,21 +29,48 @@ paths:
             application/fhir+xml:
               schema:
                 type: object
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    Patient:
+      type: object
+      properties:
+        ext:
+          type: array
+          items:
+            $ref: '#/components/schemas/Extension'
+        id:
+          type: string
+        ref:
+          $ref: '#/components/schemas/Reference'
+      additionalProperties: false
     Extension:
       $ref: '#/components/schemas/ExtensionExtension'
-    Identifier:
+    ExtensionExtension:
       type: object
       allOf:
         - $ref: '#/components/schemas/Element'
         - type: object
           properties:
-            value:
-              type: string
-            assigner:
-              $ref: '#/components/schemas/Reference'
+            extension:
+              type: array
+              items:
+                $ref: '#/components/schemas/Extension'
           additionalProperties: false
+    Element:
+      type: object
+      properties:
+        id:
+          type: string
+        element:
+          type: integer
+          format: int64
+      additionalProperties: false
     Reference:
       type: object
       allOf:
@@ -59,35 +86,37 @@ components:
             display:
               type: string
           additionalProperties: false
-    Element:
-      type: object
-      properties:
-        id:
-          type: string
-        element:
-          type: integer
-          format: int64
-      additionalProperties: false
-    ExtensionExtension:
+    Identifier:
       type: object
       allOf:
         - $ref: '#/components/schemas/Element'
         - type: object
           properties:
-            extension:
-              type: array
-              items:
-                $ref: '#/components/schemas/Extension'
+            value:
+              type: string
+            assigner:
+              $ref: '#/components/schemas/Reference'
           additionalProperties: false
-    Patient:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        ext:
-          type: array
-          items:
-            $ref: '#/components/schemas/Extension'
-        id:
+        timestamp:
           type: string
-        ref:
-          $ref: '#/components/schemas/Reference'
-      additionalProperties: false
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

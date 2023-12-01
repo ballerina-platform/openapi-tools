@@ -23,8 +23,21 @@ paths:
           description: Accepted
         "400":
           description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    ReservationReceipt:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Links'
+        - type: object
+          properties:
+            id:
+              type: string
+          additionalProperties: false
     Links:
       type: object
       properties:
@@ -36,15 +49,6 @@ components:
           type: integer
           format: int64
       additionalProperties: false
-    ReservationReceipt:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Links'
-        - type: object
-          properties:
-            id:
-              type: string
-          additionalProperties: false
     Link:
       type: object
       properties:
@@ -57,3 +61,26 @@ components:
           items:
             type: string
       additionalProperties: false
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

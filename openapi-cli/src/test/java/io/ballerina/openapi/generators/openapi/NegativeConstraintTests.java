@@ -49,7 +49,7 @@ public class NegativeConstraintTests {
         Path ballerinaFilePath = RES_DIR.resolve("constraint-negative/negative_patternInterpolation.bal");
         List<OpenAPIMapperDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
                                     ballerinaFilePath, "constraint-negative/negative_patternInterpolation.yaml");
-        List<String> expectedPatterns = Arrays.asList("^${i}[a-zA-Z]+$", "^[A-Z]${j}+$", "^[\\${2}a-z]+$"
+        List<String> expectedPatterns = Arrays.asList("^[A-Z]${j}+$", "^${i}[a-zA-Z]+$", "^[\\${2}a-z]+$"
                                                      , "^[a-z${2}]+$");
         for (int i = 0; i < errors.size(); i++) {
             Assert.assertEquals(errors.get(i).getMessage(), "Given REGEX pattern '" + expectedPatterns.get(i) +
@@ -63,7 +63,7 @@ public class NegativeConstraintTests {
         Path ballerinaFilePath = RES_DIR.resolve("constraint-negative/negative_constNameRef.bal");
         List<OpenAPIMapperDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
                 ballerinaFilePath, "constraint-negative/negative_constNameRef.yaml");
-        List<String> expectedVariables = Arrays.asList("maxVal", "5 + minVal", "Value");
+        List<String> expectedVariables = Arrays.asList("Value", "maxVal", "5 + minVal");
         for (int i = 0; i < errors.size(); i++) {
             Assert.assertEquals(errors.get(i).getMessage(), "Generated OpenAPI definition does not contain" +
                     " variable assignment '" + expectedVariables.get(i) + "' in constraint validation.");
@@ -81,8 +81,13 @@ public class NegativeConstraintTests {
         Path ballerinaFilePath = RES_DIR.resolve("constraint-negative/negative_date.bal");
         List<OpenAPIMapperDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
                 ballerinaFilePath, "constraint-negative/negative_date.yaml");
-        errors.forEach(error -> Assert.assertEquals(error.getMessage(), "Ballerina Date constraints might " +
-                "not be reflected in the OpenAPI definition"));
+        Assert.assertEquals(errors.size(), 3);
+        Assert.assertEquals(errors.get(0).getMessage(), "Generated OpenAPI definition does not contain the default " +
+                "value for the record field: minutes");
+        Assert.assertEquals(errors.get(1).getMessage(), "Ballerina Date constraints might not be reflected in the " +
+                "OpenAPI definition");
+        Assert.assertEquals(errors.get(2).getMessage(), "Ballerina Date constraints might not be reflected in the " +
+                "OpenAPI definition");
     }
 
     /*

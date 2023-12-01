@@ -1,28 +1,5 @@
 components:
   schemas:
-    Cat:
-      required:
-        - id
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        eat:
-          type: string
-      additionalProperties: false
-    Dog:
-      required:
-        - id
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          nullable: true
-        name:
-          type: string
-      additionalProperties: false
     Link:
       required:
         - pet
@@ -36,3 +13,49 @@ components:
             - $ref: '#/components/schemas/Dog'
             - $ref: '#/components/schemas/Cat'
       additionalProperties: false
+    Dog:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          nullable: true
+        name:
+          type: string
+      additionalProperties: false
+    Cat:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        eat:
+          type: string
+      additionalProperties: false
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

@@ -1,3 +1,14 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /pets:
     get:
@@ -11,6 +22,12 @@ paths:
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /ping:
     get:
       operationId: getPing
@@ -24,6 +41,12 @@ paths:
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /ping02:
     get:
       operationId: getPing02
@@ -37,6 +60,12 @@ paths:
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /ping03:
     get:
       operationId: getPing03
@@ -49,6 +78,12 @@ paths:
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /ping04:
     get:
       operationId: getPing04
@@ -62,6 +97,12 @@ paths:
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /ping05:
     get:
       operationId: getPing05
@@ -82,6 +123,12 @@ paths:
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /ping06:
     get:
       operationId: getPing06
@@ -95,6 +142,12 @@ paths:
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /ping07:
     get:
       operationId: getPing07
@@ -113,6 +166,12 @@ paths:
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /ping08:
     get:
       summary: Mock resource function
@@ -132,3 +191,34 @@ paths:
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

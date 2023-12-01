@@ -52,6 +52,27 @@ components:
             $ref: '#/components/schemas/Location'
       additionalProperties: false
       description: Represents a collection of locations
+    Location:
+      type: object
+      description: Represents location
+      allOf:
+        - $ref: '#/components/schemas/Links'
+        - required:
+            - address
+            - id
+            - name
+          type: object
+          properties:
+            name:
+              type: string
+              description: Name of the location
+            id:
+              type: string
+              description: Unique identification
+            address:
+              type: string
+              description: Address of the location
+          additionalProperties: false
     Links:
       required:
         - _links
@@ -64,17 +85,6 @@ components:
           description: Map of available links
       additionalProperties: false
       description: Represents available server-provided links
-    Method:
-      type: string
-      description: Represents HTTP methods.
-      enum:
-        - OPTIONS
-        - HEAD
-        - PATCH
-        - DELETE
-        - PUT
-        - POST
-        - GET
     Link:
       required:
         - href
@@ -98,24 +108,14 @@ components:
           items:
             $ref: '#/components/schemas/Method'
       description: Represents a server-provided hyperlink
-    Location:
-      type: object
-      description: Represents location
-      allOf:
-        - $ref: '#/components/schemas/Links'
-        - required:
-            - address
-            - id
-            - name
-          type: object
-          properties:
-            name:
-              type: string
-              description: Name of the location
-            id:
-              type: string
-              description: Unique identification
-            address:
-              type: string
-              description: Address of the location
-          additionalProperties: false
+    Method:
+      type: string
+      description: Represents HTTP methods.
+      enum:
+        - OPTIONS
+        - HEAD
+        - PATCH
+        - DELETE
+        - PUT
+        - POST
+        - GET

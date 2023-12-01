@@ -65,32 +65,37 @@ paths:
                 $ref: '#/components/schemas/MeetingList'
         "404":
           description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Status:
+    MeetingGroup:
       type: string
       enum:
-        - PENDING
-        - AVAILABLE
+        - ENGINEERING
+        - HR
+        - ADMIN
     RoomNo:
       type: string
       enum:
         - R6
         - R5
         - R3
+    Status:
+      type: string
+      enum:
+        - PENDING
+        - AVAILABLE
     Format:
       type: string
       enum:
         - MSGPACK
         - JSONP
         - JSON
-    Meeting:
-      required:
-        - topic
-      type: object
-      properties:
-        topic:
-          type: string
     MeetingList:
       required:
         - meetings
@@ -100,9 +105,33 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Meeting'
-    MeetingGroup:
-      type: string
-      enum:
-        - ENGINEERING
-        - HR
-        - ADMIN
+    Meeting:
+      required:
+        - topic
+      type: object
+      properties:
+        topic:
+          type: string
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
