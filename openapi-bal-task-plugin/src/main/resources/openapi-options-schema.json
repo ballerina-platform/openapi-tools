@@ -2,17 +2,23 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "client-methods": {
+    "clientMethods": {
       "type": "string"
     },
     "operations": {
-      "type": "string"
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "tags": {
-      "type": "string"
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "nullable": {
-      "type": "string"
+      "type": "boolean"
     },
     "mode": {
       "type": "string"
