@@ -25,6 +25,10 @@ paths:
           description: Accepted
         "400":
           description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /reservation/{id}:
     get:
       operationId: getReservationId
@@ -39,51 +43,12 @@ paths:
           description: Accepted
         "400":
           description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    PriceMap:
-      required:
-        - price
-        - salary
-      type: object
-      properties:
-        price:
-          type: integer
-          format: int64
-        salary:
-          type: number
-          format: double
-      additionalProperties: false
-    Salary:
-      oneOf:
-        - type: integer
-          format: int64
-        - type: number
-          format: float
-        - type: number
-          format: double
-    Action:
-      type: string
-      description: Adding doc
-    Price:
-      oneOf:
-        - type: number
-          format: float
-        - $ref: '#/components/schemas/PriceMap'
-    Count:
-      type: integer
-      format: int64
-    Rels:
-      type: array
-      items:
-        type: string
-    Books:
-      type: object
-      additionalProperties:
-        type: string
-    PetId:
-      type: integer
-      format: int64
     Link:
       required:
         - count
@@ -107,3 +72,69 @@ components:
         salary:
           $ref: '#/components/schemas/Salary'
       additionalProperties: false
+    Rels:
+      type: array
+      items:
+        type: string
+    Action:
+      type: string
+      description: Adding doc
+    Count:
+      type: integer
+      format: int64
+    Books:
+      type: object
+      additionalProperties:
+        type: string
+    Price:
+      oneOf:
+        - type: number
+          format: float
+        - $ref: '#/components/schemas/PriceMap'
+    PriceMap:
+      required:
+        - price
+        - salary
+      type: object
+      properties:
+        price:
+          type: integer
+          format: int64
+        salary:
+          type: number
+          format: double
+      additionalProperties: false
+    Salary:
+      oneOf:
+        - type: integer
+          format: int64
+        - type: number
+          format: float
+        - type: number
+          format: double
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    PetId:
+      type: integer
+      format: int64

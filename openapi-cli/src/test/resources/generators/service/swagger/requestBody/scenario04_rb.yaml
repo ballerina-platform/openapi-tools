@@ -37,4 +37,3 @@ paths:
           text/csv:
             schema:
               type: string
-components: {}

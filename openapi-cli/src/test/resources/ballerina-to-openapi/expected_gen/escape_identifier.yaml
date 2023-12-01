@@ -30,9 +30,13 @@ paths:
         "200":
           description: Ok
           content:
+            application/json: {}
+        "400":
+          description: BadRequest
+          content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pet-Task'
+                $ref: '#/components/schemas/ErrorPayload'
   /v2/say-hello:
     post:
       summary: Description
@@ -54,6 +58,10 @@ paths:
           description: Accepted
         "400":
           description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     Pet-Task:
@@ -81,3 +89,26 @@ components:
         id:
           type: integer
           format: int64
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

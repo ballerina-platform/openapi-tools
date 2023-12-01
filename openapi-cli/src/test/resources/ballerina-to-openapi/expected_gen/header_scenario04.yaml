@@ -28,4 +28,4 @@ paths:
       responses:
         "200":
           description: Ok
-  components: {}
+  

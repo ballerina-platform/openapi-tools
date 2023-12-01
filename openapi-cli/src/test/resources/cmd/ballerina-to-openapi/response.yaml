@@ -20,4 +20,3 @@ paths:
             '*/*':
               schema:
                 description: Any type of entity body
-components: {}

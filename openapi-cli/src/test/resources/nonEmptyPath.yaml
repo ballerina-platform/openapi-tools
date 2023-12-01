@@ -33,4 +33,3 @@ paths:
           content:
             application/json:
               example: Ok
-components: {}

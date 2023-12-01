@@ -130,4 +130,3 @@ paths:
           description: InsufficientStorage
         "508":
           description: LoopDetected
-components: {}
