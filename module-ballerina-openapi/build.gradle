@@ -338,6 +338,7 @@ ballerinaBuild.dependsOn ":${packageName}-ls-extension:build"
 ballerinaBuild.dependsOn ":${packageName}-validator:build"
 ballerinaBuild.dependsOn ":${packageName}-extension:build"
 ballerinaBuild.dependsOn ":${packageName}-build-extension:build"
+ballerinaBuild.dependsOn ":${packageName}-bal-task-plugin:build"
 ballerinaBuild.dependsOn updateCompilerTomlFile
 ballerinaBuild.dependsOn initializeVariables
 ballerinaBuild.dependsOn generatePomFileForMavenJavaPublication

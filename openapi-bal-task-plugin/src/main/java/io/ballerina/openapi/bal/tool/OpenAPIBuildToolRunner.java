@@ -30,8 +30,10 @@ import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.core.model.GenSrcFile;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.ToolContext;
+import io.ballerina.toml.semantic.ast.TomlArrayValueNode;
 import io.ballerina.toml.semantic.ast.TomlKeyValueNode;
 import io.ballerina.toml.semantic.ast.TomlTableNode;
+import io.ballerina.toml.semantic.ast.TomlValueNode;
 import io.ballerina.toml.semantic.ast.TopLevelNode;
 import io.ballerina.toml.semantic.diagnostics.TomlNodeLocation;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -51,7 +53,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -124,13 +125,13 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
             } else {
                 codeGeneratorConfig = extractOptionDetails(toolContext, openAPI);
                 Map<String, TopLevelNode> options = tomlTableNode.entries();
-                if (options.containsKey(MODE) && options.get(MODE).toString().contains(CLIENT)) {
+                if (options.containsKey(MODE)) {
+                    TopLevelNode value = options.get(MODE);
+                    String mode = value.toNativeObject().toString().trim();
+                    handleCodeGenerationMode(toolContext, codeGeneratorConfig, location, mode);
+                } else {
                     // Create client for the given OAS
                     generateClient(toolContext, codeGeneratorConfig);
-                } else {
-                    Constants.DiagnosticMessages error = Constants.DiagnosticMessages.WARNING_FOR_OTHER_GENERATION;
-                    reportDiagnostics(error, String.format(error.getDescription(), options.get(MODE).toString()),
-                            location);
                 }
             }
         } catch (BallerinaOpenApiException e) {
@@ -139,6 +140,23 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         } catch (IOException | FormatterException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_GENERATING_CLIENT;
             reportDiagnostics(error, e.getMessage(), location);
+        }
+    }
+
+    /**
+     * This method uses to handle the code generation mode. ex: client, service
+     */
+    private void handleCodeGenerationMode(ToolContext toolContext,
+                                          ImmutablePair<OASClientConfig, OASServiceMetadata> codeGeneratorConfig,
+                                          TomlNodeLocation location, String mode)
+            throws BallerinaOpenApiException, IOException, FormatterException {
+        if (mode.equals(CLIENT)) {
+            // Create client for the given OAS
+            generateClient(toolContext, codeGeneratorConfig);
+        } else {
+            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.WARNING_FOR_OTHER_GENERATION;
+            reportDiagnostics(error, String.format(error.getDescription(), mode),
+                    location);
         }
     }
 
@@ -164,16 +182,15 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
     private OpenAPI getOpenAPIContract(Path ballerinaFilePath, Path openAPIPath, Location location) {
         Path relativePath;
         try {
-            if (Paths.get(openAPIPath.toString()).isAbsolute()) {
-                relativePath = Paths.get(openAPIPath.toString());
+            Path inputPath = Paths.get(openAPIPath.toString());
+            if (inputPath.isAbsolute()) {
+                relativePath = inputPath;
             } else {
                 File file = new File(ballerinaFilePath.toString());
                 File openapiContract = new File(file, openAPIPath.toString());
                 relativePath = Paths.get(openapiContract.getCanonicalPath());
             }
-            if (relativePath != null) {
-                return normalizeOpenAPI(Path.of(relativePath.toString()), true);
-            }
+            return normalizeOpenAPI(Path.of(relativePath.toString()), true);
         } catch (IOException | BallerinaOpenApiException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.UNEXPECTED_EXCEPTIONS;
             reportDiagnostics(error, error.getDescription(), location);
@@ -195,26 +212,26 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         serviceMetaDataBuilder.withOpenAPI(openAPI);
         Map<String, TopLevelNode> options = toolContext.optionsTable().entries();
         for (Map.Entry<String, TopLevelNode> field : options.entrySet()) {
-            String tomlKeyValue = ((TomlKeyValueNode) field.getValue()).value().toNativeValue().toString();
-            String[] values = tomlKeyValue.split(",");
+            TomlValueNode valueNode = ((TomlKeyValueNode) field.getValue()).value();
+            String value = valueNode.toNativeValue().toString().trim();
             String fieldName = field.getKey();
             switch (fieldName) {
                 case TAGS:
-                    filter.setTags(List.of(values));
+                    filter.setTags(getArrayItems(valueNode));
                     break;
                 case OPERATIONS:
-                    filter.setOperations(List.of(values));
+                    filter.setOperations(getArrayItems(valueNode));
                     break;
                 case NULLABLE:
-                    serviceMetaDataBuilder.withNullable(Arrays.asList(values).contains(TRUE));
-                    clientMetaDataBuilder.withNullable(Arrays.asList(values).contains(TRUE));
+                    serviceMetaDataBuilder.withNullable(value.contains(TRUE));
+                    clientMetaDataBuilder.withNullable(value.contains(TRUE));
                     break;
                 case CLIENT_METHODS:
-                    clientMetaDataBuilder.withResourceMode(Arrays.asList(values).contains("resource"));
+                    clientMetaDataBuilder.withResourceMode(value.contains("resource"));
                     break;
                 case LICENSE:
-                    String licenseContent = Objects.equals(values[0], "") ? null :
-                            getLicenseContent(toolContext, Paths.get(values[0]));
+                    String licenseContent = Objects.equals(value, "") ? null :
+                            getLicenseContent(toolContext, Paths.get(value));
                     clientMetaDataBuilder.withLicense(licenseContent != null ? licenseContent :
                             DO_NOT_MODIFY_FILE_HEADER);
                     break;
@@ -227,6 +244,19 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         return new ImmutablePair<>(clientMetaDataBuilder.build(), serviceMetaDataBuilder.build());
     }
 
+    private static List<String> getArrayItems(TomlValueNode valueNode) {
+        List<String> arrayItems = new ArrayList<>();
+        if (valueNode instanceof TomlArrayValueNode arrayValueNode) {
+            arrayValueNode.elements().forEach(element -> {
+                arrayItems.add(element.toNativeValue().toString());
+            });
+        }
+        return arrayItems;
+    }
+
+    /**
+     * This method uses to generate the client module for the given openapi contract.
+     */
     private void generateClient(ToolContext toolContext, ImmutablePair<OASClientConfig,
             OASServiceMetadata> codeGeneratorConfig) throws BallerinaOpenApiException, IOException, FormatterException {
         OASClientConfig clientConfig = codeGeneratorConfig.getLeft();
