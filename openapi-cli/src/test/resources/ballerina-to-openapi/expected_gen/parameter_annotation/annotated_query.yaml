@@ -10,41 +10,17 @@ servers:
       port:
         default: "443"
 paths:
-  /student1:
+  /student8:
     post:
-      operationId: postStudent1
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Student'
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
-  /student2:
-    post:
-      operationId: postStudent2
+      operationId: postStudent8
       parameters:
-        - name: id
+        - name: student
           in: query
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Student'
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
       responses:
         "201":
           description: Created
@@ -58,16 +34,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorPayload'
-  /student3:
+  /student9:
     post:
-      operationId: postStudent3
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/Student'
+      operationId: postStudent9
+      parameters:
+        - name: students
+          in: query
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                default:
+                  Name: John
       responses:
         "201":
           description: Created
@@ -83,13 +62,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Student:
-      required:
-        - Name
-      type: object
-      properties:
-        Name:
-          type: string
     ErrorPayload:
       required:
         - message
