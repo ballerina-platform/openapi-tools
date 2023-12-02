@@ -49,7 +49,7 @@ public class Constants {
                 DiagnosticSeverity.ERROR),
         EMPTY_CONTRACT_PATH("OAS_CLIENT_06", "given OpenAPI contract file path is an empty string.",
                 DiagnosticSeverity.WARNING),
-        WARNING_FOR_OTHER_GENERATION("OAS_CLIENT_07", "given code generation `%s` mode does not support.",
+        WARNING_FOR_OTHER_GENERATION("OAS_CLIENT_07", "`%s` mode does not support for bal build code generation.",
                 DiagnosticSeverity.WARNING),
         WARNING_FOR_UNSUPPORTED_CONTRACT("OAS_CLIENT_08", "unsupported contract type. please use .yml, " +
                 ".yaml, or .json files for code generation.",
