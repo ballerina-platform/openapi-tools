@@ -749,15 +749,16 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Add add = new Add(printStream,  false);
         new CommandLine(add).parseArgs(addArgs);
         add.execute();
+        String newLine = System.lineSeparator();
         String tomlContent = Files.readString(packagePath.resolve("Ballerina.toml"));
-        String generatedTool = "[[tool.openapi]]\n" +
-                "id = \"oas_client_petstore\"\n" +
-                "filePath = \"petstore.yaml\"\n" +
-                "targetModule = \"delivery\"\n" +
-                "options.mode = \"client\"\n" +
-                "options.nullable = true\n" +
-                "options.clientMethods = \"resource\"\n" +
-                "options.licensePath = \"license.txt\"\n";
+        String generatedTool = "[[tool.openapi]]" + newLine +
+                "id = \"oas_client_petstore\"" + newLine +
+                "filePath = \"petstore.yaml\"" + newLine +
+                "targetModule = \"delivery\"" + newLine +
+                "options.mode = \"client\"" + newLine +
+                "options.nullable = true" + newLine +
+                "options.clientMethods = \"resource\"" + newLine +
+                "options.licensePath = \"license.txt\"" + newLine;
         Assert.assertTrue(tomlContent.contains(generatedTool));
     }
 
