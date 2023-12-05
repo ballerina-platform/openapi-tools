@@ -90,8 +90,6 @@ public class OpenAPIParameterMapper {
         this.openAPI = openAPI;
     }
 
-
-
     /**
      * Create {@code Parameters} model for openAPI operation.
      */
@@ -99,7 +97,9 @@ public class OpenAPIParameterMapper {
         List<Parameter> parameters = new LinkedList<>();
         //Set path parameters
         NodeList<Node> pathParams = functionDefinitionNode.relativeResourcePath();
-        createPathParameters(parameters, pathParams);
+        if (!pathParams.isEmpty()) {
+            createPathParameters(parameters, pathParams);
+        }
         // Set query parameters, headers and requestBody
         FunctionSignatureNode functionSignature = functionDefinitionNode.functionSignature();
         SeparatedNodeList<ParameterNode> parameterList = functionSignature.parameters();
@@ -155,22 +155,15 @@ public class OpenAPIParameterMapper {
     }
 
     /**
-     * Map path parameter data to OAS path parameter.
+     *Map path parameters to OpenAPI specification
      */
-    private void createPathParameters(List<Parameter> parameters, NodeList<Node> pathParams) {
+    public void createPathParameters(List<Parameter> parameters, NodeList<Node> pathParams) {
         for (Node param: pathParams) {
             if (param instanceof ResourcePathParameterNode pathParam) {
-                if (!pathParam.children().get(2).toString().trim().equals("...")) {
-                    PathParameterMapper pathParameterMapper = new PathParameterMapper(
-                            (PathParameterSymbol) semanticModel.symbol(pathParam).get(),
-                            openAPI, apidocs, semanticModel, diagnostics);
-                    parameters.add(pathParameterMapper.getParameterSchema());
-                } else {
-                    DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_125;
-                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
-                            pathParam.location(), pathParam.toString());
-                    diagnostics.add(error);
-                }
+                PathParameterMapper pathParameterMapper = new PathParameterMapper(
+                        (PathParameterSymbol) semanticModel.symbol(pathParam).get(), openAPI, apidocs,
+                        semanticModel, diagnostics);
+                pathParameterMapper.mapPathParameter(parameters, pathParam);
             }
         }
     }

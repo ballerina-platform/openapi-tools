@@ -19,7 +19,12 @@ package io.ballerina.openapi.service.mapper.parameter;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.PathParameterSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.openapi.service.mapper.AdditionalData;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -48,6 +53,20 @@ public class PathParameterMapper implements ParameterMapper {
         this.description = apiDocs.get(name);
         this.semanticModel = semanticModel;
         this.diagnostics = diagnostics;
+    }
+
+    /**
+     * Map path parameter data to OAS path parameter.
+     */
+    public void mapPathParameter(List<Parameter> parameters, Node pathParam) {
+        if (!pathParam.kind().toString().equals("RESOURCE_PATH_REST_PARAM")) {
+            parameters.add(getParameterSchema());
+        } else {
+            DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_125;
+            IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                    pathParam.location(), pathParam.toString());
+            diagnostics.add(error);
+        }
     }
 
     @Override
