@@ -157,7 +157,7 @@ public class OpenAPIParameterMapper {
     /**
      *Map path parameters to OpenAPI specification.
      */
-    public void createPathParameters(List<Parameter> parameters, NodeList<Node> pathParams) {
+    private void createPathParameters(List<Parameter> parameters, NodeList<Node> pathParams) {
         for (Node param: pathParams) {
             if (param instanceof ResourcePathParameterNode pathParam) {
                 PathParameterMapper pathParameterMapper = new PathParameterMapper(
