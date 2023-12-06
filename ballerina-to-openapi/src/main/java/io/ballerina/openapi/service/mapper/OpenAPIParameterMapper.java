@@ -73,10 +73,6 @@ public class OpenAPIParameterMapper {
     private final ComponentMapper componentMapper;
     private final OpenAPI openAPI;
 
-    public List<OpenAPIMapperDiagnostic> getErrors() {
-        return diagnostics;
-    }
-
     public OpenAPIParameterMapper(FunctionDefinitionNode functionDefinitionNode, OperationAdaptor operationAdaptor,
                                   Map<String, String> apiDocs, SemanticModel semanticModel,
                                   ModuleMemberVisitor moduleMemberVisitor, List<OpenAPIMapperDiagnostic> errors,
@@ -88,6 +84,10 @@ public class OpenAPIParameterMapper {
         this.moduleMemberVisitor = moduleMemberVisitor;
         this.componentMapper = componentMapper;
         this.openAPI = openAPI;
+    }
+
+    public List<OpenAPIMapperDiagnostic> getDiagnostics() {
+        return diagnostics;
     }
 
     /**

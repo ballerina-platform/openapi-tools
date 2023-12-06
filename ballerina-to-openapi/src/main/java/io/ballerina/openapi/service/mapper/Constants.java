@@ -86,6 +86,8 @@ public final class Constants {
     public static final String TUPLE = "tuple";
     public static final String REGEX_INTERPOLATION_PATTERN = "^(?!.*\\$\\{).+$";
     public static final String DATE_CONSTRAINT_ANNOTATION = "constraint:Date";
+    public static final String OAS_CONVERTOR_113 = "OAS_CONVERTOR_113";
+    public static final String OAS_CONVERTOR_125 = "OAS_CONVERTOR_125";
 
     /**
      * Enum to select the Ballerina Type.

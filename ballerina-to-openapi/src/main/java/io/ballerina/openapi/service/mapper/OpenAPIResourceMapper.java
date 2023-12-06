@@ -55,6 +55,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.ballerina.openapi.service.mapper.Constants.DEFAULT;
+import static io.ballerina.openapi.service.mapper.Constants.OAS_CONVERTOR_113;
+import static io.ballerina.openapi.service.mapper.Constants.OAS_CONVERTOR_125;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOperationId;
 
 /**
@@ -216,7 +218,7 @@ public class OpenAPIResourceMapper {
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs, semanticModel,
                 moduleMemberVisitor, errors, componentMapper, openAPI);
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
-        if (errors.size() > 1 || (errors.size() == 1 && !errors.get(0).getCode().equals("OAS_CONVERTOR_113"))) {
+        if (errors.size() > 1 || (errors.size() == 1 && !errors.get(0).getCode().equals(OAS_CONVERTOR_113))) {
             boolean isErrorIncluded = errors.stream().anyMatch(d ->
                     DiagnosticSeverity.ERROR.equals(d.getDiagnosticSeverity()));
             if (isErrorIncluded) {
@@ -227,7 +229,7 @@ public class OpenAPIResourceMapper {
         if (checkRestParamInResourcePath(openAPIParameterMapper)) {
             return Optional.empty();
         }
-        errors.addAll(openAPIParameterMapper.getErrors());
+        errors.addAll(openAPIParameterMapper.getDiagnostics());
         ResponseMapper responseMapper = new ResponseMapper(semanticModel, openAPI, resource, op,
                 errors, moduleMemberVisitor);
         ApiResponses apiResponses = responseMapper.getApiResponses();
@@ -236,8 +238,8 @@ public class OpenAPIResourceMapper {
     }
 
     private boolean checkRestParamInResourcePath(OpenAPIParameterMapper openAPIParameterMapper) {
-        List<OpenAPIMapperDiagnostic> errorList = openAPIParameterMapper.getErrors();
-        if (!errorList.isEmpty() && errorList.stream().anyMatch(error -> "OAS_CONVERTOR_125".equals(error.getCode()))) {
+        List<OpenAPIMapperDiagnostic> errorList = openAPIParameterMapper.getDiagnostics();
+        if (!errorList.isEmpty() && errorList.stream().anyMatch(error -> OAS_CONVERTOR_125.equals(error.getCode()))) {
             errors.addAll(errorList);
             return true;
         }
@@ -301,8 +303,7 @@ public class OpenAPIResourceMapper {
         relativePath.append("/");
         if (!resource.relativeResourcePath().isEmpty()) {
             for (Node node: resource.relativeResourcePath()) {
-                if (node instanceof ResourcePathParameterNode) {
-                    ResourcePathParameterNode pathNode = (ResourcePathParameterNode) node;
+                if (node instanceof ResourcePathParameterNode pathNode) {
                     relativePath.append("{");
                     relativePath.append(pathNode.paramName().get());
                     relativePath.append("}");
