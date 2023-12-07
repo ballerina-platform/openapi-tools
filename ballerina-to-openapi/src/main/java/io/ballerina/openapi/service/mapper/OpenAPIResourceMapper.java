@@ -55,8 +55,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.ballerina.openapi.service.mapper.Constants.DEFAULT;
-import static io.ballerina.openapi.service.mapper.Constants.OAS_CONVERTOR_113;
-import static io.ballerina.openapi.service.mapper.Constants.OAS_CONVERTOR_125;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOperationId;
 
 /**
@@ -218,7 +216,8 @@ public class OpenAPIResourceMapper {
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs, semanticModel,
                 moduleMemberVisitor, errors, componentMapper, openAPI);
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
-        if (errors.size() > 1 || (errors.size() == 1 && !errors.get(0).getCode().equals(OAS_CONVERTOR_113))) {
+        if (errors.size() > 1 || (errors.size() == 1 && !errors.get(0).getCode().equals(DiagnosticMessages
+                .OAS_CONVERTOR_113.getCode()))) {
             boolean isErrorIncluded = errors.stream().anyMatch(d ->
                     DiagnosticSeverity.ERROR.equals(d.getDiagnosticSeverity()));
             if (isErrorIncluded) {
@@ -239,7 +238,8 @@ public class OpenAPIResourceMapper {
 
     private boolean checkRestParamInResourcePath(OpenAPIParameterMapper openAPIParameterMapper) {
         List<OpenAPIMapperDiagnostic> errorList = openAPIParameterMapper.getDiagnostics();
-        if (!errorList.isEmpty() && errorList.stream().anyMatch(error -> OAS_CONVERTOR_125.equals(error.getCode()))) {
+        if (!errorList.isEmpty() && errorList.stream().anyMatch(error ->
+                DiagnosticMessages.OAS_CONVERTOR_125.getCode().equals(error.getCode()))) {
             errors.addAll(errorList);
             return true;
         }

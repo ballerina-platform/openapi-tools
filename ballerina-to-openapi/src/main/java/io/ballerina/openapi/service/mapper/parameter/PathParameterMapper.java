@@ -20,6 +20,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.PathParameterSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
@@ -57,7 +58,7 @@ public class PathParameterMapper implements ParameterMapper {
      * Map path parameter data to OAS path parameter.
      */
     public void mapPathParameter(List<Parameter> parameters, Node pathParam) {
-        if (!pathParam.kind().toString().equals("RESOURCE_PATH_REST_PARAM")) {
+        if (!pathParam.kind().equals(SyntaxKind.RESOURCE_PATH_REST_PARAM)) {
             parameters.add(getParameterSchema());
         } else {
             DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_125;
