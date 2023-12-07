@@ -17,6 +17,7 @@
 package io.ballerina.openapi.service.mapper.type;
 
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -51,5 +52,16 @@ public abstract class TypeMapper {
         if (Objects.nonNull(schema)) {
             openAPI.schema(name, schema);
         }
+    }
+
+    static boolean hasMappingForType(OpenAPI openAPI, TypeSymbol typeSymbol) {
+        Map<String, Schema> schemas = MapperCommonUtils.getComponentsSchema(openAPI);
+        return schemas.containsKey(MapperCommonUtils.getTypeName(typeSymbol));
+    }
+
+    static boolean hasFullMappingForType(OpenAPI openAPI, TypeSymbol typeSymbol) {
+        Map<String, Schema> schemas = MapperCommonUtils.getComponentsSchema(openAPI);
+        return schemas.containsKey(MapperCommonUtils.getTypeName(typeSymbol)) && Objects.nonNull(
+                schemas.get(MapperCommonUtils.getTypeName(typeSymbol)));
     }
 }

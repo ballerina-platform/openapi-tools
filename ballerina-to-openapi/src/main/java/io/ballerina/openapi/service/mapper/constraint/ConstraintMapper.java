@@ -8,6 +8,7 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
+import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
@@ -190,9 +191,15 @@ public class ConstraintMapper {
         if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
             NodeList<Node> fieldNodes = ((RecordTypeDescriptorNode) typeDefinitionNode.typeDescriptor()).fields();
             for (Node fieldNode : fieldNodes) {
-                RecordFieldNode recordFieldNode = (RecordFieldNode) fieldNode;
-                MetadataNode metadata = recordFieldNode.metadata().orElse(null);
-                String fieldName = recordFieldNode.fieldName().toString().trim();
+                MetadataNode metadata = null;
+                String fieldName = null;
+                if (fieldNode instanceof RecordFieldNode recordFieldNode) {
+                    metadata = recordFieldNode.metadata().orElse(null);
+                    fieldName = recordFieldNode.fieldName().toString().trim();
+                } else if (fieldNode instanceof RecordFieldWithDefaultValueNode recordFieldNode) {
+                    metadata = recordFieldNode.metadata().orElse(null);
+                    fieldName = recordFieldNode.fieldName().toString().trim();
+                }
                 if (Objects.isNull(metadata)) {
                     continue;
                 }
@@ -201,7 +208,7 @@ public class ConstraintMapper {
                 extractedConstraintAnnotation(metadata, constraintBuilder);
                 ConstraintAnnotation constraintAnnot = constraintBuilder.build();
                 Map<String, Schema> properties = typeSchema.getProperties();
-                if (properties.containsKey(fieldName)) {
+                if (Objects.nonNull(properties) && properties.containsKey(fieldName)) {
                     setConstraintValueToSchema(constraintAnnot, properties.get(fieldName));
                 }
             }

@@ -29,7 +29,7 @@ import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -141,7 +141,7 @@ public class RecordTypeMapper extends TypeMapper {
                     recordFieldSchema.setDefault(recordFieldDefaultValue);
                 } else {
                     DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_124;
-                    ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(), message.getDescription(),
+                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(message,
                             null, recordFieldName);
                     additionalData.diagnostics().add(error);
                 }

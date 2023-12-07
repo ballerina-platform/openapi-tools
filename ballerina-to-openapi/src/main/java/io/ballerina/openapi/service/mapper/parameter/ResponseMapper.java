@@ -88,13 +88,11 @@ public class ResponseMapper {
     private final ApiResponses apiResponses = new ApiResponses();
     private final List<OpenAPIMapperDiagnostic> diagnostics;
     private final ModuleMemberVisitor moduleMemberVisitor;
-    private final boolean hasDataBinding;
 
     public ResponseMapper(SemanticModel semanticModel, OpenAPI openAPI, FunctionDefinitionNode resourceNode,
                           OperationAdaptor operationAdaptor, List<OpenAPIMapperDiagnostic> diagnostics,
                           ModuleMemberVisitor moduleMemberVisitor) {
         this.semanticModel = semanticModel;
-        this.hasDataBinding = operationAdaptor.hasDataBinding();
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
         this.diagnostics = diagnostics;
         this.moduleMemberVisitor = moduleMemberVisitor;
@@ -104,6 +102,9 @@ public class ResponseMapper {
         String defaultStatusCode = operationAdaptor.getHttpOperation().equalsIgnoreCase(POST) ? HTTP_201 : HTTP_200;
         TypeSymbol returnTypeSymbol = getReturnTypeSymbol(resourceNode);
         createResponseMapping(returnTypeSymbol, defaultStatusCode);
+        if (operationAdaptor.hasDataBinding()) {
+            addResponseMappingForDataBindingFailures();
+        }
     }
 
     public ApiResponses getApiResponses() {
@@ -149,9 +150,6 @@ public class ResponseMapper {
             addResponseMappingForUnion(defaultStatusCode, unionType);
         } else {
             addResponseMappingForSimpleType(returnType, defaultStatusCode);
-        }
-        if (hasDataBinding) {
-            addResponseMappingForDataBindingFailures();
         }
     }
 

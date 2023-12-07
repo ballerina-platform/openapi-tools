@@ -105,7 +105,7 @@ public class OpenAPIHeaderMapper {
             headerParameter.setDescription(apidocs.get(headerName.trim()));
         }
         completeHeaderParameter(parameters, headerName, headerParameter, headerTypeSchema, headerParam.annotations(),
-                headerDetailNode);
+                headerDetailNode, null);
         return parameters;
     }
 
@@ -132,16 +132,9 @@ public class OpenAPIHeaderMapper {
         } else {
             headerTypeSchema = MapperCommonUtils.getOpenApiSchema(getHeaderType(headerParam));
         }
-        String defaultValue = headerParam.expression().toString().trim();
-        if (defaultValue.length() > 1 && defaultValue.charAt(0) == '"' &&
-                defaultValue.charAt(defaultValue.length() - 1) == '"') {
-            defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
-        }
+        String defaultValueExpression = null;
         if (MapperCommonUtils.isSimpleValueLiteralKind(headerParam.expression().kind())) {
-            headerTypeSchema = MapperCommonUtils.setDefaultValue(headerTypeSchema, defaultValue);
-        } else if (headerParam.expression().kind() == SyntaxKind.LIST_CONSTRUCTOR) {
-            headerTypeSchema = new Schema<>();
-            headerTypeSchema = MapperCommonUtils.setDefaultValue(headerTypeSchema, defaultValue);
+            defaultValueExpression = headerParam.expression().toString().trim();
         }
         if (headerParam.typeName().kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
             headerTypeSchema.setNullable(true);
@@ -150,7 +143,7 @@ public class OpenAPIHeaderMapper {
             headerParameter.setDescription(apidocs.get(headerName.trim()));
         }
         completeHeaderParameter(parameters, headerName, headerParameter, headerTypeSchema, headerParam.annotations(),
-                headerParam.typeName());
+                headerParam.typeName(), defaultValueExpression);
         return parameters;
     }
 
@@ -170,7 +163,8 @@ public class OpenAPIHeaderMapper {
      * Assign header values to OAS header parameter.
      */
     private void completeHeaderParameter(List<Parameter> parameters, String headerName, HeaderParameter headerParameter,
-                                         Schema<?> headerSchema, NodeList<AnnotationNode> annotations, Node node) {
+                                         Schema<?> headerSchema, NodeList<AnnotationNode> annotations, Node node,
+                                         String defaultValueExpression) {
 
         if (!annotations.isEmpty()) {
             AnnotationNode annotationNode = annotations.get(0);
@@ -186,14 +180,11 @@ public class OpenAPIHeaderMapper {
             } else {
                 itemSchema = MapperCommonUtils.getOpenApiSchema(kind);
             }
-            if (headerSchema.getDefault() != null) {
-                arraySchema.setDefault(headerSchema.getDefault());
-            }
             arraySchema.setItems(itemSchema);
-            headerParameter.schema(arraySchema);
-        } else {
-            headerParameter.schema(headerSchema);
+            headerSchema = arraySchema;
         }
+        headerSchema = MapperCommonUtils.setDefaultValue(headerSchema, defaultValueExpression);
+        headerParameter.schema(headerSchema);
         headerParameter.setName(headerName);
         parameters.add(headerParameter);
     }
