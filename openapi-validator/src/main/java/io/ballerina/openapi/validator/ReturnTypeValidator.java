@@ -32,6 +32,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.validator.error.CompilationError;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -170,7 +172,8 @@ public class ReturnTypeValidator extends NodeValidator {
                 RecordTypeSymbol typeSymbol = (RecordTypeSymbol) type;
                 List<TypeSymbol> typeInclusions = typeSymbol.typeInclusions();
                 boolean isHttp = false;
-                Map<String, Schema> oasSchemas = validatorContext.getOpenAPI().getComponents().getSchemas();
+                Components components = validatorContext.getOpenAPI().getComponents();
+                Map<String, Schema> oasSchemas = Objects.nonNull(components) ? components.getSchemas() : new HashMap<>();
                 if (!typeInclusions.isEmpty()) {
                     for (TypeSymbol typeInSymbol : typeInclusions) {
                         if (HTTP.equals(typeInSymbol.getModule().orElseThrow().getName().orElseThrow())) {
