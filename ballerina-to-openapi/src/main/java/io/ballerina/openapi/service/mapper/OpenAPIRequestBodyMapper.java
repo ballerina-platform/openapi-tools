@@ -41,7 +41,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
-import io.ballerina.openapi.service.mapper.type.ComponentMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -81,7 +81,7 @@ public class OpenAPIRequestBodyMapper {
     private final SemanticModel semanticModel;
     private final String customMediaPrefix;
     private final List<OpenAPIMapperDiagnostic> diagnostics;
-    private final ComponentMapper componentMapper;
+    private final TypeMapper typeMapper;
 
     /**
      * This constructor uses to create OpenAPIRequestBodyMapper instance when customMedia type enable.
@@ -89,11 +89,11 @@ public class OpenAPIRequestBodyMapper {
      * @param operationAdaptor - Model of operation
      * @param semanticModel    - Semantic model for given ballerina service
      * @param customMediaType  - custom media type
-     * @param componentMapper  - Component mapper
+     * @param typeMapper  - Component mapper
      */
     public OpenAPIRequestBodyMapper(OperationAdaptor operationAdaptor, SemanticModel semanticModel,
-                                    String customMediaType, ComponentMapper componentMapper) {
-        this.componentMapper = componentMapper;
+                                    String customMediaType, TypeMapper typeMapper) {
+        this.typeMapper = typeMapper;
         this.operationAdaptor = operationAdaptor;
         this.semanticModel = semanticModel;
         this.customMediaPrefix = customMediaType;
@@ -105,11 +105,11 @@ public class OpenAPIRequestBodyMapper {
      *
      * @param operationAdaptor  - Model of operation
      * @param semanticModel     - Semantic model for given ballerina service
-     * @param componentMapper   - Component mapper
+     * @param typeMapper   - Component mapper
      */
     public OpenAPIRequestBodyMapper(OperationAdaptor operationAdaptor, SemanticModel semanticModel,
-                                    ComponentMapper componentMapper) {
-        this(operationAdaptor, semanticModel, null, componentMapper);
+                                    TypeMapper typeMapper) {
+        this(operationAdaptor, semanticModel, null, typeMapper);
     }
 
     public List<OpenAPIMapperDiagnostic> getDiagnostics() {
@@ -353,7 +353,7 @@ public class OpenAPIRequestBodyMapper {
                 typeDescriptorNode.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
             //handle record for components
             TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(typeDescriptorNode));
-            componentMapper.addMapping(typeSymbol);
+            typeMapper.addMapping(typeSymbol);
             Schema itemSchema = new Schema();
             String referenceName;
             if (typeDescriptorNode.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
@@ -428,7 +428,7 @@ public class OpenAPIRequestBodyMapper {
     private void handleReferencePayload(TypeSymbol typeSymbol, String mediaType, String recordName,
                                         Map<String, Schema> schema, RequestBody bodyParameter) {
         //handle record for components
-        componentMapper.addMapping(typeSymbol);
+        typeMapper.addMapping(typeSymbol);
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
         media.setSchema(new Schema().$ref(MapperCommonUtils.unescapeIdentifier(recordName)));
         if (bodyParameter.getContent() != null) {

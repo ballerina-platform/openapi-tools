@@ -28,7 +28,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.constraint.ConstraintMapper;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
-import io.ballerina.openapi.service.mapper.type.ComponentMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 
 import java.util.ArrayList;
@@ -74,9 +74,9 @@ public class OpenAPIServiceMapper {
                 resources.add((FunctionDefinitionNode) function);
             }
         }
-        ComponentMapper componentMapper = new ComponentMapper(openapi, semanticModel, moduleMemberVisitor, errors);
+        TypeMapper typeMapper = new TypeMapper(openapi, semanticModel, moduleMemberVisitor, errors);
         OpenAPIResourceMapper resourceMapper = new OpenAPIResourceMapper(openapi, resources, semanticModel,
-                moduleMemberVisitor, errors, componentMapper);
+                moduleMemberVisitor, errors, typeMapper);
         resourceMapper.addMapping();
         ConstraintMapper constraintMapper = new ConstraintMapper(openapi, moduleMemberVisitor, errors);
         constraintMapper.addMapping();

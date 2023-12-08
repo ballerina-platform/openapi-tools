@@ -33,7 +33,7 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
-import io.ballerina.openapi.service.mapper.type.ComponentMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -58,12 +58,12 @@ public class OpenAPIHeaderMapper {
     private final SemanticModel semanticModel;
     private final Map<String, String> apidocs;
     private final ModuleMemberVisitor moduleMemberVisitor;
-    private final ComponentMapper componentMapper;
+    private final TypeMapper typeMapper;
 
     public OpenAPIHeaderMapper(SemanticModel semanticModel, Map<String, String> apidocs,
-                               ModuleMemberVisitor moduleMemberVisitor, ComponentMapper componentMapper) {
+                               ModuleMemberVisitor moduleMemberVisitor, TypeMapper typeMapper) {
         this.apidocs = apidocs;
-        this.componentMapper = componentMapper;
+        this.typeMapper = typeMapper;
         this.semanticModel = semanticModel;
         this.moduleMemberVisitor = moduleMemberVisitor;
     }
@@ -88,7 +88,7 @@ public class OpenAPIHeaderMapper {
 
         if (headerDetailNode.kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
             SimpleNameReferenceNode refNode = (SimpleNameReferenceNode) headerDetailNode;
-            headerTypeSchema = handleReference(semanticModel, refNode, moduleMemberVisitor, componentMapper);
+            headerTypeSchema = handleReference(semanticModel, refNode, moduleMemberVisitor, typeMapper);
         } else {
             headerTypeSchema = MapperCommonUtils.getOpenApiSchema(getHeaderType(headerParam));
         }
@@ -128,7 +128,7 @@ public class OpenAPIHeaderMapper {
         Schema<?> headerTypeSchema;
         if (headerParam.typeName().kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
             SimpleNameReferenceNode refNode = (SimpleNameReferenceNode) headerParam.typeName();
-            headerTypeSchema = handleReference(semanticModel, refNode, moduleMemberVisitor, componentMapper);
+            headerTypeSchema = handleReference(semanticModel, refNode, moduleMemberVisitor, typeMapper);
         } else {
             headerTypeSchema = MapperCommonUtils.getOpenApiSchema(getHeaderType(headerParam));
         }
@@ -176,7 +176,7 @@ public class OpenAPIHeaderMapper {
             Schema<?> itemSchema;
             if (kind == SyntaxKind.SIMPLE_NAME_REFERENCE) {
                 SimpleNameReferenceNode refNode = (SimpleNameReferenceNode) arrayNode.memberTypeDesc();
-                itemSchema = handleReference(semanticModel, refNode, moduleMemberVisitor, componentMapper);
+                itemSchema = handleReference(semanticModel, refNode, moduleMemberVisitor, typeMapper);
             } else {
                 itemSchema = MapperCommonUtils.getOpenApiSchema(kind);
             }

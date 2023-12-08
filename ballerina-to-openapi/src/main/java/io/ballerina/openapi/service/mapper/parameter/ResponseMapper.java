@@ -40,7 +40,7 @@ import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.parameter.model.CacheConfigAnnotation;
 import io.ballerina.openapi.service.mapper.parameter.utils.CacheHeaderUtils;
 import io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils;
-import io.ballerina.openapi.service.mapper.type.ComponentMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.RecordTypeMapper;
 import io.ballerina.openapi.service.mapper.type.ReferenceTypeMapper;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
@@ -205,7 +205,7 @@ public class ResponseMapper {
         if (!isPlainAnyDataType(returnType)) {
             MediaType mediaTypeObj = new MediaType();
             AdditionalData additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
-            mediaTypeObj.setSchema(ComponentMapper.getTypeSchema(returnType, openAPI, additionalData));
+            mediaTypeObj.setSchema(TypeMapper.getTypeSchema(returnType, openAPI, additionalData));
             updateApiResponseContentWithMediaType(apiResponse, mediaType, mediaTypeObj);
         }
     }

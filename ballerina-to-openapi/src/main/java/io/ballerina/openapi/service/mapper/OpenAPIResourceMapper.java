@@ -35,7 +35,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.parameter.ResponseMapper;
-import io.ballerina.openapi.service.mapper.type.ComponentMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.Components;
@@ -68,7 +68,7 @@ public class OpenAPIResourceMapper {
     private final Paths pathObject = new Paths();
     private final Components components = new Components();
     private final List<OpenAPIMapperDiagnostic> errors;
-    private final ComponentMapper componentMapper;
+    private final TypeMapper typeMapper;
     private final OpenAPI openAPI;
     private final List<FunctionDefinitionNode> resources;
 
@@ -77,13 +77,13 @@ public class OpenAPIResourceMapper {
      */
     OpenAPIResourceMapper(OpenAPI openAPI, List<FunctionDefinitionNode> resources, SemanticModel semanticModel,
                           ModuleMemberVisitor moduleMemberVisitor, List<OpenAPIMapperDiagnostic> errors,
-                          ComponentMapper componentMapper) {
+                          TypeMapper typeMapper) {
         this.openAPI = openAPI;
         this.resources = resources;
         this.semanticModel = semanticModel;
         this.errors = errors;
         this.moduleMemberVisitor = moduleMemberVisitor;
-        this.componentMapper = componentMapper;
+        this.typeMapper = typeMapper;
     }
 
     public void addMapping() {
@@ -214,7 +214,7 @@ public class OpenAPIResourceMapper {
         Map<String, String> apiDocs = listAPIDocumentations(resource, op);
         //Add path parameters if in path and query parameters
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs, semanticModel,
-                moduleMemberVisitor, errors, componentMapper);
+                moduleMemberVisitor, errors, typeMapper);
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
         if (errors.size() > 1 || (errors.size() == 1 && !errors.get(0).getCode().equals("OAS_CONVERTOR_113"))) {
             boolean isErrorIncluded = errors.stream().anyMatch(d ->

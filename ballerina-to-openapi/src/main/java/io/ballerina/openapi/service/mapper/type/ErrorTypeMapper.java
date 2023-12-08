@@ -29,14 +29,14 @@ import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ErrorTypeMapper extends TypeMapper {
+public class ErrorTypeMapper extends AbstractTypeMapper {
 
     public ErrorTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
         super(typeSymbol, additionalData);
     }
 
     @Override
-    Schema getReferenceTypeSchema(OpenAPI openAPI) {
+    Schema getReferenceSchema(OpenAPI openAPI) {
         ErrorTypeSymbol errorTypeSymbol = (ErrorTypeSymbol) typeSymbol.typeDescriptor();
         return getSchema(errorTypeSymbol, openAPI, additionalData);
     }
@@ -45,7 +45,7 @@ public class ErrorTypeMapper extends TypeMapper {
         Optional<Symbol> optErrorPayload = additionalData.semanticModel().types().getTypeByName("ballerina", "http",
                 "", "ErrorPayload");
         if (optErrorPayload.isPresent() && optErrorPayload.get() instanceof TypeDefinitionSymbol errorPayload) {
-            Schema schema = ComponentMapper.getTypeSchema(errorPayload.typeDescriptor(), openAPI, additionalData);
+            Schema schema = TypeMapper.getTypeSchema(errorPayload.typeDescriptor(), openAPI, additionalData);
             if (Objects.nonNull(schema)) {
                 openAPI.schema("ErrorPayload", schema);
                 return new ObjectSchema().$ref("ErrorPayload");

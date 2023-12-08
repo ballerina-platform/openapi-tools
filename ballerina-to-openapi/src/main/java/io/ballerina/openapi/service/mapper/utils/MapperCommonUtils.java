@@ -59,7 +59,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASResult;
-import io.ballerina.openapi.service.mapper.type.ComponentMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.runtime.api.utils.IdentifierUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -545,13 +545,13 @@ public class MapperCommonUtils {
     }
 
     public static Schema<?> handleReference(SemanticModel semanticModel, SimpleNameReferenceNode recordNode,
-                                            ModuleMemberVisitor moduleMemberVisitor, ComponentMapper componentMapper) {
+                                            ModuleMemberVisitor moduleMemberVisitor, TypeMapper typeMapper) {
         Schema<?> refSchema = new Schema<>();
         // Creating request body - required.
         Optional<Symbol> symbol = semanticModel.symbol(recordNode);
         if (symbol.isPresent() && symbol.get() instanceof TypeSymbol) {
             String recordName = recordNode.name().toString().trim();
-            componentMapper.addMapping((TypeSymbol) symbol.get());
+            typeMapper.addMapping((TypeSymbol) symbol.get());
             refSchema.set$ref(MapperCommonUtils.unescapeIdentifier(recordName));
         }
         return refSchema;

@@ -24,21 +24,21 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-public class MapTypeMapper extends TypeMapper {
+public class MapTypeMapper extends AbstractTypeMapper {
 
     public MapTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
         super(typeSymbol, additionalData);
     }
 
     @Override
-    public Schema getReferenceTypeSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(OpenAPI openAPI) {
         MapTypeSymbol referredType = (MapTypeSymbol) typeSymbol.typeDescriptor();
         return getSchema(referredType, openAPI, additionalData).description(description);
     }
 
     public static Schema getSchema(MapTypeSymbol typeSymbol, OpenAPI openAPI, AdditionalData additionalData) {
         TypeSymbol memberType = typeSymbol.typeParam();
-        return new ObjectSchema().additionalProperties(ComponentMapper.getTypeSchema(memberType,
+        return new ObjectSchema().additionalProperties(TypeMapper.getTypeSchema(memberType,
                 openAPI, additionalData));
     }
 }

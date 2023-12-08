@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class UnionTypeMapper extends TypeMapper {
+public class UnionTypeMapper extends AbstractTypeMapper {
 
     private final boolean isEnumType;
 
@@ -49,7 +49,7 @@ public class UnionTypeMapper extends TypeMapper {
     }
 
     @Override
-    public Schema getReferenceTypeSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(OpenAPI openAPI) {
         Schema schema;
         if (isEnumType) {
             schema = getEnumTypeSchema((EnumSymbol) typeSymbol.definition());
@@ -71,7 +71,7 @@ public class UnionTypeMapper extends TypeMapper {
             if (memberTypeSymbol.typeKind().equals(TypeDescKind.NIL)) {
                 continue;
             }
-            Schema schema = ComponentMapper.getTypeSchema(memberTypeSymbol, openAPI, additionalData);
+            Schema schema = TypeMapper.getTypeSchema(memberTypeSymbol, openAPI, additionalData);
             if (Objects.nonNull(schema)) {
                 memberSchemas.add(schema);
             }

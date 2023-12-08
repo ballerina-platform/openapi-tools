@@ -38,14 +38,14 @@ import static io.ballerina.openapi.service.mapper.Constants.FLOAT;
 import static io.ballerina.openapi.service.mapper.Constants.INT32;
 import static io.ballerina.openapi.service.mapper.Constants.INT64;
 
-public class SimpleTypeMapper extends TypeMapper {
+public class SimpleTypeMapper extends AbstractTypeMapper {
 
     public SimpleTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
         super(typeSymbol, additionalData);
     }
 
     @Override
-    public Schema getReferenceTypeSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(OpenAPI openAPI) {
         TypeSymbol referredType = typeSymbol.typeDescriptor();
         Schema schema = getTypeSchema(referredType, additionalData);
         return Objects.nonNull(schema) ? schema.description(description) : null;

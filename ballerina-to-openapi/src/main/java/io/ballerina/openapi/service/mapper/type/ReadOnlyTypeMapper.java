@@ -27,14 +27,14 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.List;
 import java.util.Objects;
 
-public class ReadOnlyTypeMapper extends TypeMapper {
+public class ReadOnlyTypeMapper extends AbstractTypeMapper {
 
     public ReadOnlyTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
         super(typeSymbol, additionalData);
     }
 
     @Override
-    public Schema getReferenceTypeSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(OpenAPI openAPI) {
         IntersectionTypeSymbol referredType = (IntersectionTypeSymbol) typeSymbol.typeDescriptor();
         Schema effectiveTypeSchema = getSchema(referredType, openAPI, additionalData);
         return Objects.nonNull(effectiveTypeSchema) ? effectiveTypeSchema.description(description) : null;
@@ -45,7 +45,7 @@ public class ReadOnlyTypeMapper extends TypeMapper {
         if (Objects.isNull(effectiveType)) {
             return null;
         }
-        return ComponentMapper.getTypeSchema(effectiveType, openAPI, additionalData);
+        return TypeMapper.getTypeSchema(effectiveType, openAPI, additionalData);
     }
 
     public static TypeSymbol getEffectiveType(IntersectionTypeSymbol typeSymbol) {

@@ -28,16 +28,16 @@ import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Objects;
 
-import static io.ballerina.openapi.service.mapper.type.ComponentMapper.createComponentMapping;
+import static io.ballerina.openapi.service.mapper.type.TypeMapper.createComponentMapping;
 
-public class ReferenceTypeMapper extends TypeMapper {
+public class ReferenceTypeMapper extends AbstractTypeMapper {
 
     public ReferenceTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
         super(typeSymbol, additionalData);
     }
 
     @Override
-    public Schema getReferenceTypeSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(OpenAPI openAPI) {
         TypeReferenceTypeSymbol referredType = (TypeReferenceTypeSymbol) typeSymbol.typeDescriptor();
         Schema schema = getSchema(referredType, openAPI, additionalData);
         if (Objects.nonNull(schema)) {
@@ -48,9 +48,9 @@ public class ReferenceTypeMapper extends TypeMapper {
 
     public static Schema getSchema(TypeReferenceTypeSymbol typeSymbol, OpenAPI openAPI,
                                    AdditionalData additionalData) {
-        if (!TypeMapper.hasMappingForType(openAPI, typeSymbol)) {
+        if (!AbstractTypeMapper.hasMapping(openAPI, typeSymbol)) {
             createComponentMapping(typeSymbol, openAPI, additionalData);
-            if (!TypeMapper.hasFullMappingForType(openAPI, typeSymbol)) {
+            if (!AbstractTypeMapper.hasFullMapping(openAPI, typeSymbol)) {
                 return null;
             }
         }

@@ -21,7 +21,7 @@ import io.ballerina.compiler.api.symbols.PathParameterSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.type.ComponentMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
@@ -56,7 +56,7 @@ public class PathParameterMapper implements ParameterMapper {
         pathParameter.setName(name);
         pathParameter.setRequired(true);
         AdditionalData additionalData = new AdditionalData(semanticModel, null, diagnostics);
-        pathParameter.setSchema(ComponentMapper.getTypeSchema(type, openAPI, additionalData));
+        pathParameter.setSchema(TypeMapper.getTypeSchema(type, openAPI, additionalData));
         pathParameter.setDescription(description);
         return pathParameter;
     }
