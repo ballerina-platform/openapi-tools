@@ -64,21 +64,20 @@ paths:
                 $ref: '#/components/schemas/MeetingList'
         "404":
           description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    TimeZone:
+    MeetingGroup:
       type: string
       enum:
-        - UTC
-        - GMT
-        - IST
-    Meeting:
-      required:
-        - topic
-      type: object
-      properties:
-        topic:
-          type: string
+        - ENGINEERING
+        - HR
+        - ADMIN
     DateFormat:
       type: string
       enum:
@@ -86,6 +85,12 @@ components:
         - OFFSET
         - LOCAL
         - UTC
+    TimeZone:
+      type: string
+      enum:
+        - UTC
+        - GMT
+        - IST
     MeetingList:
       required:
         - meetings
@@ -95,9 +100,33 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Meeting'
-    MeetingGroup:
-      type: string
-      enum:
-        - ENGINEERING
-        - HR
-        - ADMIN
+    Meeting:
+      required:
+        - topic
+      type: object
+      properties:
+        topic:
+          type: string
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

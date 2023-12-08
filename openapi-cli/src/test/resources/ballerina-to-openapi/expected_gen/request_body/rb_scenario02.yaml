@@ -1,3 +1,14 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /pets:
     post:
@@ -12,7 +23,12 @@ paths:
           description: Ok
         "400":
           description: BadRequest
-          content: {}
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorPayload'
+                  - $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     Pet:
@@ -25,4 +41,27 @@ components:
           type: integer
           format: int64
         name:
+          type: string
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
           type: string

@@ -25,34 +25,12 @@ paths:
           description: Accepted
         "400":
           description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Salary:
-      nullable: true
-      oneOf:
-        - type: integer
-          format: int64
-        - type: number
-          format: float
-        - type: number
-          format: double
-    Action:
-      type: string
-      nullable: true
-    Count:
-      type: number
-      format: double
-      nullable: true
-    Rels:
-      type: array
-      nullable: true
-      items:
-        type: string
-    Books:
-      type: object
-      additionalProperties:
-        type: string
-      nullable: true
     Link:
       required:
         - actions
@@ -72,3 +50,52 @@ components:
         salary:
           $ref: '#/components/schemas/Salary'
       additionalProperties: false
+    Rels:
+      type: array
+      nullable: true
+      items:
+        type: string
+    Action:
+      type: string
+      nullable: true
+    Count:
+      type: number
+      format: double
+      nullable: true
+    Books:
+      type: object
+      additionalProperties:
+        type: string
+      nullable: true
+    Salary:
+      nullable: true
+      oneOf:
+        - type: integer
+          format: int64
+        - type: number
+          format: float
+        - type: number
+          format: double
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

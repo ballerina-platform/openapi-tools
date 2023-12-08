@@ -25,6 +25,24 @@ paths:
                   $ref: '#/components/schemas/Product'
 components:
   schemas:
+    Product:
+      required:
+        - description
+        - name
+        - price
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          maxLength: 14
+          type: string
+        description:
+          type: string
+        price:
+          $ref: '#/components/schemas/Price'
+      additionalProperties: false
+      description: Represents a product
     Price:
       required:
         - amount
@@ -44,21 +62,3 @@ components:
         - SGD
         - LKR
         - USD
-    Product:
-      required:
-        - description
-        - name
-        - price
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          maxLength: 14
-          type: string
-        description:
-          type: string
-        price:
-          $ref: '#/components/schemas/Price'
-      additionalProperties: false
-      description: Represents a product

@@ -25,23 +25,12 @@ paths:
           description: Accepted
         "400":
           description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    ReserveRoom:
-      required:
-        - count
-        - id
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique identification of the room
-        count:
-          type: integer
-          description: Number of rooms
-          format: int64
-      additionalProperties: false
-      description: Represents rooms be reserved
     Reservation:
       required:
         - endDate
@@ -62,3 +51,41 @@ components:
           description: End date in yyyy-mm-dd
       additionalProperties: false
       description: Represents a reservation of rooms
+    ReserveRoom:
+      required:
+        - count
+        - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identification of the room
+        count:
+          type: integer
+          description: Number of rooms
+          format: int64
+      additionalProperties: false
+      description: Represents rooms be reserved
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

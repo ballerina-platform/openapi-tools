@@ -17,9 +17,7 @@ paths:
         "200":
           description: Ok
           content:
-            application/snowflake+json:
-              schema:
-                $ref: '#/components/schemas/User'
+            application/snowflake+json: {}
   /pet02:
     get:
       operationId: getPet02

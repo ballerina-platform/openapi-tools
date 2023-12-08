@@ -129,64 +129,64 @@ public class OpenAPIResourceMapper {
     private void generatePathItem(String httpMethod, Paths path, Operation operation, String pathName) {
         PathItem pathItem = new PathItem();
         switch (httpMethod.trim().toUpperCase(Locale.ENGLISH)) {
-            case Constants.GET:
+            case Constants.GET -> {
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setGet(operation);
                 } else {
                     pathItem.setGet(operation);
                     path.addPathItem(pathName, pathItem);
                 }
-                break;
-            case Constants.PUT:
+            }
+            case Constants.PUT -> {
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setPut(operation);
                 } else {
                     pathItem.setPut(operation);
                     path.addPathItem(pathName, pathItem);
                 }
-                break;
-            case Constants.POST:
+            }
+            case Constants.POST -> {
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setPost(operation);
                 } else {
                     pathItem.setPost(operation);
                     path.addPathItem(pathName, pathItem);
                 }
-                break;
-            case Constants.DELETE:
+            }
+            case Constants.DELETE -> {
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setDelete(operation);
                 } else {
                     pathItem.setDelete(operation);
                     path.addPathItem(pathName, pathItem);
                 }
-                break;
-            case Constants.OPTIONS:
+            }
+            case Constants.OPTIONS -> {
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setOptions(operation);
                 } else {
                     pathItem.setOptions(operation);
                     path.addPathItem(pathName, pathItem);
                 }
-                break;
-            case Constants.PATCH:
+            }
+            case Constants.PATCH -> {
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setPatch(operation);
                 } else {
                     pathItem.setPatch(operation);
                     path.addPathItem(pathName, pathItem);
                 }
-                break;
-            case Constants.HEAD:
+            }
+            case Constants.HEAD -> {
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setHead(operation);
                 } else {
                     pathItem.setHead(operation);
                     path.addPathItem(pathName, pathItem);
                 }
-                break;
-            default:
-                break;
+            }
+            default -> {
+            }
         }
     }
 
@@ -214,20 +214,36 @@ public class OpenAPIResourceMapper {
         Map<String, String> apiDocs = listAPIDocumentations(resource, op);
         //Add path parameters if in path and query parameters
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs, semanticModel,
-                moduleMemberVisitor, errors, componentMapper);
+                moduleMemberVisitor, errors, componentMapper, openAPI);
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
-        if (errors.size() > 1 || (errors.size() == 1 && !errors.get(0).getCode().equals("OAS_CONVERTOR_113"))) {
+        if (errors.size() > 1 || (errors.size() == 1 && !errors.get(0).getCode().equals(DiagnosticMessages
+                .OAS_CONVERTOR_113.getCode()))) {
             boolean isErrorIncluded = errors.stream().anyMatch(d ->
                     DiagnosticSeverity.ERROR.equals(d.getDiagnosticSeverity()));
             if (isErrorIncluded) {
                 return Optional.empty();
             }
         }
+
+        if (checkRestParamInResourcePath(openAPIParameterMapper)) {
+            return Optional.empty();
+        }
+        errors.addAll(openAPIParameterMapper.getDiagnostics());
         ResponseMapper responseMapper = new ResponseMapper(semanticModel, openAPI, resource, op,
                 errors, moduleMemberVisitor);
         ApiResponses apiResponses = responseMapper.getApiResponses();
         op.getOperation().setResponses(apiResponses);
         return Optional.of(op);
+    }
+
+    private boolean checkRestParamInResourcePath(OpenAPIParameterMapper openAPIParameterMapper) {
+        List<OpenAPIMapperDiagnostic> errorList = openAPIParameterMapper.getDiagnostics();
+        if (!errorList.isEmpty() && errorList.stream().anyMatch(error ->
+                DiagnosticMessages.OAS_CONVERTOR_125.getCode().equals(error.getCode()))) {
+            errors.addAll(errorList);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -289,7 +305,7 @@ public class OpenAPIResourceMapper {
             for (Node node: resource.relativeResourcePath()) {
                 if (node instanceof ResourcePathParameterNode pathNode) {
                     relativePath.append("{");
-                    relativePath.append(pathNode.paramName().orElse(null));
+                    relativePath.append(pathNode.paramName().get());
                     relativePath.append("}");
                 } else if ((resource.relativeResourcePath().size() == 1) && (node.toString().trim().equals("."))) {
                     return relativePath.toString();
