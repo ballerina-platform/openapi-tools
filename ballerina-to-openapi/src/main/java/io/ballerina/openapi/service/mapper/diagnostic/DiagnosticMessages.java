@@ -81,7 +81,9 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_123("OAS_CONVERTOR_123", "Generated OpenAPI definition does not contain the mapping " +
             "for the unsupported tuple type: %s", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_124("OAS_CONVERTOR_124", "Generated OpenAPI definition does not contain the default " +
-            "value for the record field: %s", DiagnosticSeverity.WARNING);
+            "value for the record field: %s", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_125("OAS_CONVERTOR_125", "Generated OpenAPI specification excludes details for " +
+            "operation with rest parameter in the resource path", DiagnosticSeverity.WARNING);
 
     private final String code;
     private final String description;

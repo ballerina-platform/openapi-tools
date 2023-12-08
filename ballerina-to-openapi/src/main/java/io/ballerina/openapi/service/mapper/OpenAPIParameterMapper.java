@@ -19,7 +19,7 @@
 package io.ballerina.openapi.service.mapper;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.PathParameterSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -31,7 +31,6 @@ import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
@@ -39,14 +38,14 @@ import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagno
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
+import io.ballerina.openapi.service.mapper.parameter.PathParameterMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
-import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
@@ -68,25 +67,28 @@ public class OpenAPIParameterMapper {
     private final FunctionDefinitionNode functionDefinitionNode;
     private final OperationAdaptor operationAdaptor;
     private final Map<String, String> apidocs;
-    private final List<OpenAPIMapperDiagnostic> errors;
+    private final List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
     private final SemanticModel semanticModel;
     private final ModuleMemberVisitor moduleMemberVisitor;
     private final TypeMapper typeMapper;
+    private final OpenAPI openAPI;
 
     public OpenAPIParameterMapper(FunctionDefinitionNode functionDefinitionNode, OperationAdaptor operationAdaptor,
                                   Map<String, String> apiDocs, SemanticModel semanticModel,
                                   ModuleMemberVisitor moduleMemberVisitor, List<OpenAPIMapperDiagnostic> errors,
-                                  TypeMapper typeMapper) {
+                                  TypeMapper typeMapper, OpenAPI openAPI) {
         this.functionDefinitionNode = functionDefinitionNode;
         this.operationAdaptor = operationAdaptor;
         this.apidocs = apiDocs;
         this.semanticModel = semanticModel;
         this.moduleMemberVisitor = moduleMemberVisitor;
         this.typeMapper = typeMapper;
-        this.errors = errors;
+        this.openAPI = openAPI;
     }
 
-
+    public List<OpenAPIMapperDiagnostic> getDiagnostics() {
+        return diagnostics;
+    }
 
     /**
      * Create {@code Parameters} model for openAPI operation.
@@ -95,7 +97,9 @@ public class OpenAPIParameterMapper {
         List<Parameter> parameters = new LinkedList<>();
         //Set path parameters
         NodeList<Node> pathParams = functionDefinitionNode.relativeResourcePath();
-        createPathParameters(parameters, pathParams);
+        if (!pathParams.isEmpty()) {
+            createPathParameters(parameters, pathParams);
+        }
         // Set query parameters, headers and requestBody
         FunctionSignatureNode functionSignature = functionDefinitionNode.functionSignature();
         SeparatedNodeList<ParameterNode> parameterList = functionSignature.parameters();
@@ -114,7 +118,7 @@ public class OpenAPIParameterMapper {
                         DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
                         IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
                                 referenceNode.location());
-                        errors.add(error);
+                        diagnostics.add(error);
                     } else if (typeName.equals(HTTP_REQUEST)) {
                         RequestBody requestBody = new RequestBody();
                         MediaType mediaType = new MediaType();
@@ -151,33 +155,15 @@ public class OpenAPIParameterMapper {
     }
 
     /**
-     * Map path parameter data to OAS path parameter.
+     * Map path parameters to OpenAPI specification.
      */
     private void createPathParameters(List<Parameter> parameters, NodeList<Node> pathParams) {
         for (Node param: pathParams) {
             if (param instanceof ResourcePathParameterNode pathParam) {
-                PathParameter pathParameterOAS = new PathParameter();
-                if (pathParam.typeDescriptor().kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
-                    SimpleNameReferenceNode queryNode = (SimpleNameReferenceNode) pathParam.typeDescriptor();
-                    TypeSymbol typeSymbol = (TypeSymbol) semanticModel.symbol(queryNode).orElseThrow();
-                    typeMapper.addMapping(typeSymbol);
-                    Schema schema = new Schema();
-                    schema.set$ref(MapperCommonUtils.unescapeIdentifier(queryNode.name().text().trim()));
-                    pathParameterOAS.setSchema(schema);
-                } else {
-                    pathParameterOAS.schema(MapperCommonUtils.getOpenApiSchema(
-                            pathParam.typeDescriptor().toString().trim()));
-                }
-
-                pathParameterOAS.setName(MapperCommonUtils.unescapeIdentifier(pathParam.paramName().get().text()));
-
-                // Check the parameter has doc
-                if (!apidocs.isEmpty() && apidocs.containsKey(pathParam.paramName().get().text().trim())) {
-                    pathParameterOAS.setDescription(apidocs.get(pathParam.paramName().get().text().trim()));
-                }
-                // Set param description
-                pathParameterOAS.setRequired(true);
-                parameters.add(pathParameterOAS);
+                PathParameterMapper pathParameterMapper = new PathParameterMapper(
+                        (PathParameterSymbol) semanticModel.symbol(pathParam).get(), openAPI, apidocs,
+                        semanticModel, diagnostics);
+                pathParameterMapper.mapPathParameter(parameters, pathParam);
             }
         }
     }
@@ -213,13 +199,13 @@ public class OpenAPIParameterMapper {
                                 typeMapper)).orElse(
                                 new OpenAPIRequestBodyMapper(operationAdaptor, semanticModel, typeMapper));
                 openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema, annotation, apidocs);
-                errors.addAll(openAPIRequestBodyMapper.getDiagnostics());
+                diagnostics.addAll(openAPIRequestBodyMapper.getDiagnostics());
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
                     (Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
                 IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
                         annotation.location());
-                errors.add(error);
+                diagnostics.add(error);
             }
         }
     }
