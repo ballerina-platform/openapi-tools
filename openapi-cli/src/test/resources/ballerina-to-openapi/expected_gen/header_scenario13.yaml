@@ -35,14 +35,17 @@ paths:
             type: array
             items:
               type: string
-            default: "[]"
+            default: []
         - name: h3
           in: header
           schema:
             type: array
             items:
               type: string
-            default: "[one, two, three]"
+            default:
+              - one
+              - two
+              - three
         - name: h4
           in: header
           schema:
@@ -50,6 +53,10 @@ paths:
             items:
               type: integer
               format: int64
+            default:
+              - 1
+              - 2
+              - 3
         - name: h5
           in: header
           schema:
@@ -57,6 +64,10 @@ paths:
             items:
               type: number
               format: float
+            default:
+              - 1
+              - 2.3
+              - 4.56
         - name: h6
           in: header
           schema:

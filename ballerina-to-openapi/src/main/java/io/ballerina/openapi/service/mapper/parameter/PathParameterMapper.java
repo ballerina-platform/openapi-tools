@@ -49,7 +49,7 @@ public class PathParameterMapper implements ParameterMapper {
         this.type = pathParameterSymbol.typeDescriptor();
         this.openAPI = openAPI;
         this.name = unescapeIdentifier(pathParameterSymbol.getName().get());
-        this.description = apiDocs.get(name);
+        this.description = apiDocs.get(pathParameterSymbol.getName().get());
         this.semanticModel = semanticModel;
         this.diagnostics = diagnostics;
     }

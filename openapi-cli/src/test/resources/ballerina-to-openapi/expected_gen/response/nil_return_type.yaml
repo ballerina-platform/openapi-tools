@@ -385,6 +385,11 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
     delete:
       operationId: deletePathWithRequestBody
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
       responses:
         "202":
           description: Accepted

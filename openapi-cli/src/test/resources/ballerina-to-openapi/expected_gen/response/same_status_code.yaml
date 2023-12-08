@@ -23,6 +23,7 @@ paths:
                   - type: boolean
                   - type: integer
                     format: int64
+                  - $ref: '#/components/schemas/Pet'
                   - $ref: '#/components/schemas/Cat'
             text/plain:
               schema:

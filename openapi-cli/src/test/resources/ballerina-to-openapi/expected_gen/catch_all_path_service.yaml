@@ -24,7 +24,9 @@ paths:
         "200":
           description: Ok
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
         "500":
           description: InternalServerError
           content:

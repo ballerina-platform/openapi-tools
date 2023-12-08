@@ -17,6 +17,7 @@ paths:
       parameters:
         - name: path-param
           in: path
+          description: Path Parameter Description
           required: true
           schema:
             type: string

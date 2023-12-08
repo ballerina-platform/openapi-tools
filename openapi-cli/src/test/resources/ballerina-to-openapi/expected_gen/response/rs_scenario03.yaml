@@ -17,7 +17,9 @@ paths:
         "200":
           description: Ok
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
 components:
   schemas:
     User:
