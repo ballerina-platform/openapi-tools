@@ -29,8 +29,26 @@ paths:
             application/fhir+xml:
               schema:
                 type: object
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    Patient:
+      type: object
+      properties:
+        ext:
+          type: array
+          items:
+            $ref: '#/components/schemas/Extension'
+        id:
+          type: string
+        ref:
+          $ref: '#/components/schemas/Reference'
+      additionalProperties: false
     Extension:
       oneOf:
         - $ref: '#/components/schemas/ExtensionExtension'
@@ -38,29 +56,7 @@ components:
         - $ref: '#/components/schemas/CodingExtension'
         - $ref: '#/components/schemas/CodeExtension'
         - $ref: '#/components/schemas/IntegerExtension'
-    CodeExtension:
-      required:
-        - url
-        - valueCode
-      type: object
-      properties:
-        url:
-          $ref: '#/components/schemas/uri'
-        valueCode:
-          type: string
-      additionalProperties: false
-    Identifier:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Element'
-        - type: object
-          properties:
-            value:
-              type: string
-            assigner:
-              $ref: '#/components/schemas/Reference'
-          additionalProperties: false
-    Coding:
+    ExtensionExtension:
       type: object
       allOf:
         - $ref: '#/components/schemas/Element'
@@ -70,40 +66,6 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Extension'
-            system:
-              $ref: '#/components/schemas/uri'
-            version:
-              type: string
-            display:
-              type: string
-            userSelected:
-              type: boolean
-          additionalProperties: false
-    CodingExtension:
-      required:
-        - url
-        - valueCoding
-      type: object
-      properties:
-        url:
-          $ref: '#/components/schemas/uri'
-        valueCoding:
-          $ref: '#/components/schemas/Coding'
-      additionalProperties: false
-    Reference:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Element'
-        - type: object
-          properties:
-            reference:
-              type: string
-            type:
-              type: string
-            identifier:
-              $ref: '#/components/schemas/Identifier'
-            display:
-              type: string
           additionalProperties: false
     Element:
       type: object
@@ -125,7 +87,20 @@ components:
         valueString:
           type: string
       additionalProperties: false
-    ExtensionExtension:
+    uri:
+      type: string
+    CodingExtension:
+      required:
+        - url
+        - valueCoding
+      type: object
+      properties:
+        url:
+          $ref: '#/components/schemas/uri'
+        valueCoding:
+          $ref: '#/components/schemas/Coding'
+      additionalProperties: false
+    Coding:
       type: object
       allOf:
         - $ref: '#/components/schemas/Element'
@@ -135,18 +110,25 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Extension'
+            system:
+              $ref: '#/components/schemas/uri'
+            version:
+              type: string
+            display:
+              type: string
+            userSelected:
+              type: boolean
           additionalProperties: false
-    Patient:
+    CodeExtension:
+      required:
+        - url
+        - valueCode
       type: object
       properties:
-        ext:
-          type: array
-          items:
-            $ref: '#/components/schemas/Extension'
-        id:
+        url:
+          $ref: '#/components/schemas/uri'
+        valueCode:
           type: string
-        ref:
-          $ref: '#/components/schemas/Reference'
       additionalProperties: false
     IntegerExtension:
       required:
@@ -160,5 +142,52 @@ components:
           type: integer
           format: int64
       additionalProperties: false
-    uri:
-      type: string
+    Reference:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Element'
+        - type: object
+          properties:
+            reference:
+              type: string
+            type:
+              type: string
+            identifier:
+              $ref: '#/components/schemas/Identifier'
+            display:
+              type: string
+          additionalProperties: false
+    Identifier:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Element'
+        - type: object
+          properties:
+            value:
+              type: string
+            assigner:
+              $ref: '#/components/schemas/Reference'
+          additionalProperties: false
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

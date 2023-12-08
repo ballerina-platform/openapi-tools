@@ -29,7 +29,9 @@ paths:
         "200":
           description: Ok
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet-Task'
         "400":
           description: BadRequest
           content:

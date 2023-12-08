@@ -7,7 +7,7 @@ import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.type.ComponentMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
@@ -62,7 +62,7 @@ public class HeaderParameterMapper implements ParameterMapper {
             headerParameter.setRequired(true);
         }
         AdditionalData additionalData = new AdditionalData(semanticModel, null, diagnostics);
-        headerParameter.setSchema(ComponentMapper.getTypeSchema(type, openAPI, additionalData));
+        headerParameter.setSchema(TypeMapper.getTypeSchema(type, openAPI, additionalData));
         headerParameter.setDescription(description);
         return headerParameter;
     }

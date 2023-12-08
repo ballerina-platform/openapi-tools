@@ -40,9 +40,9 @@ import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.parameter.model.CacheConfigAnnotation;
 import io.ballerina.openapi.service.mapper.parameter.utils.CacheHeaderUtils;
 import io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils;
-import io.ballerina.openapi.service.mapper.type.ComponentMapper;
 import io.ballerina.openapi.service.mapper.type.RecordTypeMapper;
 import io.ballerina.openapi.service.mapper.type.ReferenceTypeMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.headers.Header;
@@ -88,13 +88,11 @@ public class ResponseMapper {
     private final ApiResponses apiResponses = new ApiResponses();
     private final List<OpenAPIMapperDiagnostic> diagnostics;
     private final ModuleMemberVisitor moduleMemberVisitor;
-    private final boolean hasDataBinding;
 
     public ResponseMapper(SemanticModel semanticModel, OpenAPI openAPI, FunctionDefinitionNode resourceNode,
                           OperationAdaptor operationAdaptor, List<OpenAPIMapperDiagnostic> diagnostics,
                           ModuleMemberVisitor moduleMemberVisitor) {
         this.semanticModel = semanticModel;
-        this.hasDataBinding = operationAdaptor.hasDataBinding();
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
         this.diagnostics = diagnostics;
         this.moduleMemberVisitor = moduleMemberVisitor;
@@ -104,6 +102,9 @@ public class ResponseMapper {
         String defaultStatusCode = operationAdaptor.getHttpOperation().equalsIgnoreCase(POST) ? HTTP_201 : HTTP_200;
         TypeSymbol returnTypeSymbol = getReturnTypeSymbol(resourceNode);
         createResponseMapping(returnTypeSymbol, defaultStatusCode);
+        if (operationAdaptor.hasDataBinding()) {
+            addResponseMappingForDataBindingFailures();
+        }
     }
 
     public ApiResponses getApiResponses() {
@@ -149,9 +150,6 @@ public class ResponseMapper {
             addResponseMappingForUnion(defaultStatusCode, unionType);
         } else {
             addResponseMappingForSimpleType(returnType, defaultStatusCode);
-        }
-        if (hasDataBinding) {
-            addResponseMappingForDataBindingFailures();
         }
     }
 
@@ -207,7 +205,7 @@ public class ResponseMapper {
         if (!isPlainAnyDataType(returnType)) {
             MediaType mediaTypeObj = new MediaType();
             AdditionalData additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
-            mediaTypeObj.setSchema(ComponentMapper.getTypeSchema(returnType, openAPI, additionalData));
+            mediaTypeObj.setSchema(TypeMapper.getTypeSchema(returnType, openAPI, additionalData));
             updateApiResponseContentWithMediaType(apiResponse, mediaType, mediaTypeObj);
         }
     }

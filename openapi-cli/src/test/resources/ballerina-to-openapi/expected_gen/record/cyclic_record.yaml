@@ -108,6 +108,32 @@ paths:
                   $ref: '#/components/schemas/AidPackage'
 components:
   schemas:
+    ResponseError:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          nullable: true
+        resError:
+          $ref: '#/components/schemas/ResponseError'
+      additionalProperties: false
+    ResponseError02:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          nullable: true
+        resError:
+          oneOf:
+            - $ref: '#/components/schemas/ResponseError02'
+            - type: string
+      additionalProperties: false
     ResponseError03:
       required:
         - id
@@ -121,18 +147,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ResponseError03'
-      additionalProperties: false
-    AidPackage:
-      required:
-        - status
-      type: object
-      properties:
-        status:
-          type: string
-        aidPackageItems:
-          type: array
-          items:
-            $ref: '#/components/schemas/AidPackageItem'
       additionalProperties: false
     ResponseError04:
       required:
@@ -149,48 +163,6 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/ResponseError04'
-      additionalProperties: false
-    ResponseError02:
-      required:
-        - id
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          nullable: true
-        resError:
-          oneOf:
-            - $ref: '#/components/schemas/ResponseError02'
-            - type: string
-      additionalProperties: false
-    ResponseError07:
-      required:
-        - id
-        - resError
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          nullable: true
-        resError:
-          type: array
-          nullable: true
-          items:
-            $ref: '#/components/schemas/ResponseError07'
-      additionalProperties: false
-    ResponseError:
-      required:
-        - id
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          nullable: true
-        resError:
-          $ref: '#/components/schemas/ResponseError'
       additionalProperties: false
     ResponseError05:
       required:
@@ -221,12 +193,41 @@ components:
           items:
             $ref: '#/components/schemas/ResponseError06'
       additionalProperties: false
+    ResponseError07:
+      required:
+        - id
+        - resError
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          nullable: true
+        resError:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/ResponseError07'
+      additionalProperties: false
+    AidPackage:
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          type: string
+        aidPackageItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/AidPackageItem'
+      additionalProperties: false
     AidPackageItem:
       type: object
       properties:
         totalAmount:
           type: number
           format: double
+          default: 0
         aidPackage:
           $ref: '#/components/schemas/AidPackage'
       additionalProperties: false

@@ -29,7 +29,7 @@ import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -48,14 +48,14 @@ import java.util.Set;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getRecordFieldTypeDescription;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
-public class RecordTypeMapper extends TypeMapper {
+public class RecordTypeMapper extends AbstractTypeMapper {
 
     public RecordTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
         super(typeSymbol, additionalData);
     }
 
     @Override
-    public Schema getReferenceTypeSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(OpenAPI openAPI) {
         RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeSymbol.typeDescriptor();
         return getSchema(recordTypeSymbol, openAPI, name, additionalData).description(description);
     }
@@ -74,7 +74,7 @@ public class RecordTypeMapper extends TypeMapper {
         Optional<TypeSymbol> restFieldType = typeSymbol.restTypeDescriptor();
         if (restFieldType.isPresent()) {
             if (!restFieldType.get().typeKind().equals(TypeDescKind.ANYDATA)) {
-                Schema restFieldSchema = ComponentMapper.getTypeSchema(restFieldType.get(), openAPI, additionalData);
+                Schema restFieldSchema = TypeMapper.getTypeSchema(restFieldType.get(), openAPI, additionalData);
                 schema.additionalProperties(restFieldSchema);
             }
         } else {
@@ -104,7 +104,7 @@ public class RecordTypeMapper extends TypeMapper {
                 Schema includedRecordSchema = new Schema();
                 includedRecordSchema.set$ref(getTypeName(typeInclusion));
                 allOfSchemaList.add(includedRecordSchema);
-                ComponentMapper.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion, openAPI,
+                TypeMapper.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion, openAPI,
                         additionalData);
 
                 RecordTypeSymbol includedRecordTypeSymbol = (RecordTypeSymbol) ((TypeReferenceTypeSymbol) typeInclusion)
@@ -129,7 +129,7 @@ public class RecordTypeMapper extends TypeMapper {
                 requiredFields.add(recordFieldName);
             }
             String recordFieldDescription = getRecordFieldTypeDescription(recordFieldSymbol);
-            Schema recordFieldSchema = ComponentMapper.getTypeSchema(recordFieldSymbol.typeDescriptor(),
+            Schema recordFieldSchema = TypeMapper.getTypeSchema(recordFieldSymbol.typeDescriptor(),
                     openAPI, additionalData);
             if (Objects.nonNull(recordFieldDescription) && Objects.nonNull(recordFieldSchema)) {
                 recordFieldSchema = recordFieldSchema.description(recordFieldDescription);
@@ -141,7 +141,7 @@ public class RecordTypeMapper extends TypeMapper {
                     recordFieldSchema.setDefault(recordFieldDefaultValue);
                 } else {
                     DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_124;
-                    ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(), message.getDescription(),
+                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(message,
                             null, recordFieldName);
                     additionalData.diagnostics().add(error);
                 }

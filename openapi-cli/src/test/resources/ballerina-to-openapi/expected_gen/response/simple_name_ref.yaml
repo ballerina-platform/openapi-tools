@@ -23,7 +23,9 @@ paths:
         "200":
           description: Ok
           content:
-            text/plain: {}
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ReturnValueStr'
         "400":
           description: BadRequest
           content:
@@ -270,9 +272,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
   /res14:
     get:
       operationId: getRes14

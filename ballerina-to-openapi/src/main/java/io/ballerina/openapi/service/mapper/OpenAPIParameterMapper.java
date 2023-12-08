@@ -39,7 +39,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.parameter.PathParameterMapper;
-import io.ballerina.openapi.service.mapper.type.ComponentMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Content;
@@ -70,19 +70,19 @@ public class OpenAPIParameterMapper {
     private final List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
     private final SemanticModel semanticModel;
     private final ModuleMemberVisitor moduleMemberVisitor;
-    private final ComponentMapper componentMapper;
+    private final TypeMapper typeMapper;
     private final OpenAPI openAPI;
 
     public OpenAPIParameterMapper(FunctionDefinitionNode functionDefinitionNode, OperationAdaptor operationAdaptor,
                                   Map<String, String> apiDocs, SemanticModel semanticModel,
                                   ModuleMemberVisitor moduleMemberVisitor, List<OpenAPIMapperDiagnostic> errors,
-                                  ComponentMapper componentMapper, OpenAPI openAPI) {
+                                  TypeMapper typeMapper, OpenAPI openAPI) {
         this.functionDefinitionNode = functionDefinitionNode;
         this.operationAdaptor = operationAdaptor;
         this.apidocs = apiDocs;
         this.semanticModel = semanticModel;
         this.moduleMemberVisitor = moduleMemberVisitor;
-        this.componentMapper = componentMapper;
+        this.typeMapper = typeMapper;
         this.openAPI = openAPI;
     }
 
@@ -105,7 +105,7 @@ public class OpenAPIParameterMapper {
         SeparatedNodeList<ParameterNode> parameterList = functionSignature.parameters();
         for (ParameterNode parameterNode : parameterList) {
             OpenAPIQueryParameterMapper queryParameterMapper = new OpenAPIQueryParameterMapper(apidocs, semanticModel,
-                    moduleMemberVisitor, componentMapper);
+                    moduleMemberVisitor, typeMapper);
             if (parameterNode.kind() == SyntaxKind.REQUIRED_PARAM) {
                 RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
                 // Handle query parameter
@@ -155,7 +155,7 @@ public class OpenAPIParameterMapper {
     }
 
     /**
-     *Map path parameters to OpenAPI specification.
+     * Map path parameters to OpenAPI specification.
      */
     private void createPathParameters(List<Parameter> parameters, NodeList<Node> pathParams) {
         for (Node param: pathParams) {
@@ -181,12 +181,12 @@ public class OpenAPIParameterMapper {
             if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
                 // Handle headers.
                 OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(semanticModel, apidocs,
-                        moduleMemberVisitor, componentMapper);
+                        moduleMemberVisitor, typeMapper);
                 parameters.addAll(openAPIHeaderMapper.setHeaderParameter(requiredParameterNode));
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_QUERY)) {
                 // Handle query parameter.
                 OpenAPIQueryParameterMapper openAPIQueryParameterMapper = new OpenAPIQueryParameterMapper(apidocs,
-                        semanticModel, moduleMemberVisitor, componentMapper);
+                        semanticModel, moduleMemberVisitor, typeMapper);
                 parameters.add(openAPIQueryParameterMapper.createQueryParameter(requiredParameterNode));
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
                     (!Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(
@@ -196,8 +196,8 @@ public class OpenAPIParameterMapper {
                 Optional<String> customMediaType = extractCustomMediaType(functionDefinitionNode);
                 OpenAPIRequestBodyMapper openAPIRequestBodyMapper = customMediaType.map(
                         value -> new OpenAPIRequestBodyMapper(operationAdaptor, semanticModel, value,
-                                componentMapper)).orElse(
-                                new OpenAPIRequestBodyMapper(operationAdaptor, semanticModel, componentMapper));
+                                typeMapper)).orElse(
+                                new OpenAPIRequestBodyMapper(operationAdaptor, semanticModel, typeMapper));
                 openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema, annotation, apidocs);
                 diagnostics.addAll(openAPIRequestBodyMapper.getDiagnostics());
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
@@ -220,12 +220,12 @@ public class OpenAPIParameterMapper {
             if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
                 // Handle headers.
                 OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(semanticModel, apidocs,
-                        moduleMemberVisitor, componentMapper);
+                        moduleMemberVisitor, typeMapper);
                 parameters = openAPIHeaderMapper.setHeaderParameter(defaultableParameterNode);
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_QUERY)) {
                 // Handle query parameter.
                 OpenAPIQueryParameterMapper openAPIQueryParameterMapper = new OpenAPIQueryParameterMapper(apidocs,
-                        semanticModel, moduleMemberVisitor, componentMapper);
+                        semanticModel, moduleMemberVisitor, typeMapper);
                 parameters.add(openAPIQueryParameterMapper.createQueryParameter(defaultableParameterNode));
             }
         }

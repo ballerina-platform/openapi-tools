@@ -28,7 +28,7 @@ paths:
           in: header
           schema:
             type: string
-            default: \"John\"
+            default: '"John"'
         - name: h2
           in: header
           schema:

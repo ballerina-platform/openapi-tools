@@ -20,7 +20,9 @@ paths:
             type: array
             items:
               type: boolean
-            default: false
+            default:
+              - true
+              - false
       responses:
         "200":
           description: Ok
@@ -29,9 +31,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     ErrorPayload:

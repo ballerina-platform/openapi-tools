@@ -26,9 +26,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
   /pet:
     get:
       operationId: getPet
@@ -45,9 +43,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
   /ping:
     get:
       operationId: getPing
@@ -65,9 +61,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
   /ping02:
     get:
       operationId: getPing02
@@ -84,9 +78,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     ErrorPayload:

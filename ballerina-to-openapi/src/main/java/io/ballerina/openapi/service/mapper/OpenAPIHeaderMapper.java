@@ -33,7 +33,7 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
-import io.ballerina.openapi.service.mapper.type.ComponentMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -58,12 +58,12 @@ public class OpenAPIHeaderMapper {
     private final SemanticModel semanticModel;
     private final Map<String, String> apidocs;
     private final ModuleMemberVisitor moduleMemberVisitor;
-    private final ComponentMapper componentMapper;
+    private final TypeMapper typeMapper;
 
     public OpenAPIHeaderMapper(SemanticModel semanticModel, Map<String, String> apidocs,
-                               ModuleMemberVisitor moduleMemberVisitor, ComponentMapper componentMapper) {
+                               ModuleMemberVisitor moduleMemberVisitor, TypeMapper typeMapper) {
         this.apidocs = apidocs;
-        this.componentMapper = componentMapper;
+        this.typeMapper = typeMapper;
         this.semanticModel = semanticModel;
         this.moduleMemberVisitor = moduleMemberVisitor;
     }
@@ -88,7 +88,7 @@ public class OpenAPIHeaderMapper {
 
         if (headerDetailNode.kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
             SimpleNameReferenceNode refNode = (SimpleNameReferenceNode) headerDetailNode;
-            headerTypeSchema = handleReference(semanticModel, refNode, moduleMemberVisitor, componentMapper);
+            headerTypeSchema = handleReference(semanticModel, refNode, moduleMemberVisitor, typeMapper);
         } else {
             headerTypeSchema = MapperCommonUtils.getOpenApiSchema(getHeaderType(headerParam));
         }
@@ -105,7 +105,7 @@ public class OpenAPIHeaderMapper {
             headerParameter.setDescription(apidocs.get(headerName.trim()));
         }
         completeHeaderParameter(parameters, headerName, headerParameter, headerTypeSchema, headerParam.annotations(),
-                headerDetailNode);
+                headerDetailNode, null);
         return parameters;
     }
 
@@ -128,20 +128,13 @@ public class OpenAPIHeaderMapper {
         Schema<?> headerTypeSchema;
         if (headerParam.typeName().kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
             SimpleNameReferenceNode refNode = (SimpleNameReferenceNode) headerParam.typeName();
-            headerTypeSchema = handleReference(semanticModel, refNode, moduleMemberVisitor, componentMapper);
+            headerTypeSchema = handleReference(semanticModel, refNode, moduleMemberVisitor, typeMapper);
         } else {
             headerTypeSchema = MapperCommonUtils.getOpenApiSchema(getHeaderType(headerParam));
         }
-        String defaultValue = headerParam.expression().toString().trim();
-        if (defaultValue.length() > 1 && defaultValue.charAt(0) == '"' &&
-                defaultValue.charAt(defaultValue.length() - 1) == '"') {
-            defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
-        }
+        String defaultValueExpression = null;
         if (MapperCommonUtils.isSimpleValueLiteralKind(headerParam.expression().kind())) {
-            headerTypeSchema = MapperCommonUtils.setDefaultValue(headerTypeSchema, defaultValue);
-        } else if (headerParam.expression().kind() == SyntaxKind.LIST_CONSTRUCTOR) {
-            headerTypeSchema = new Schema<>();
-            headerTypeSchema = MapperCommonUtils.setDefaultValue(headerTypeSchema, defaultValue);
+            defaultValueExpression = headerParam.expression().toString().trim();
         }
         if (headerParam.typeName().kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
             headerTypeSchema.setNullable(true);
@@ -150,7 +143,7 @@ public class OpenAPIHeaderMapper {
             headerParameter.setDescription(apidocs.get(headerName.trim()));
         }
         completeHeaderParameter(parameters, headerName, headerParameter, headerTypeSchema, headerParam.annotations(),
-                headerParam.typeName());
+                headerParam.typeName(), defaultValueExpression);
         return parameters;
     }
 
@@ -170,7 +163,8 @@ public class OpenAPIHeaderMapper {
      * Assign header values to OAS header parameter.
      */
     private void completeHeaderParameter(List<Parameter> parameters, String headerName, HeaderParameter headerParameter,
-                                         Schema<?> headerSchema, NodeList<AnnotationNode> annotations, Node node) {
+                                         Schema<?> headerSchema, NodeList<AnnotationNode> annotations, Node node,
+                                         String defaultValueExpression) {
 
         if (!annotations.isEmpty()) {
             AnnotationNode annotationNode = annotations.get(0);
@@ -182,18 +176,15 @@ public class OpenAPIHeaderMapper {
             Schema<?> itemSchema;
             if (kind == SyntaxKind.SIMPLE_NAME_REFERENCE) {
                 SimpleNameReferenceNode refNode = (SimpleNameReferenceNode) arrayNode.memberTypeDesc();
-                itemSchema = handleReference(semanticModel, refNode, moduleMemberVisitor, componentMapper);
+                itemSchema = handleReference(semanticModel, refNode, moduleMemberVisitor, typeMapper);
             } else {
                 itemSchema = MapperCommonUtils.getOpenApiSchema(kind);
             }
-            if (headerSchema.getDefault() != null) {
-                arraySchema.setDefault(headerSchema.getDefault());
-            }
             arraySchema.setItems(itemSchema);
-            headerParameter.schema(arraySchema);
-        } else {
-            headerParameter.schema(headerSchema);
+            headerSchema = arraySchema;
         }
+        headerSchema = MapperCommonUtils.setDefaultValue(headerSchema, defaultValueExpression);
+        headerParameter.schema(headerSchema);
         headerParameter.setName(headerName);
         parameters.add(headerParameter);
     }

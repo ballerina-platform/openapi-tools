@@ -27,9 +27,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
   /ping:
     get:
       operationId: getPing
@@ -48,9 +46,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
   /ping02:
     get:
       operationId: getPing02
@@ -69,9 +65,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
   /ping03:
     get:
       operationId: getPing03
@@ -89,9 +83,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
   /ping04:
     get:
       operationId: getPing04
@@ -110,9 +102,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
   /ping05:
     get:
       operationId: getPing05
@@ -138,9 +128,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
   /ping06:
     get:
       operationId: getPing06
@@ -159,9 +147,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
   /ping07:
     get:
       operationId: getPing07
@@ -185,9 +171,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
   /ping08:
     get:
       summary: Mock resource function
@@ -212,9 +196,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     ErrorPayload:

@@ -21,41 +21,20 @@ paths:
       responses:
         "202":
           description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
         "400":
           description: BadRequest
-        "500":
-          description: Internal server error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    ErrorPayload:
-      type: object
-      properties:
-        reason:
-          type: string
-          description: Reason phrase
-        path:
-          type: string
-          description: Request path
-        method:
-          type: string
-          description: Method type of the request
-        message:
-          type: string
-          description: Error message
-        timestamp:
-          type: string
-          description: Timestamp of the error
-        status:
-          type: integer
-          description: Relevant HTTP status code
-          format: int32
-    Address:
-      minLength: 5
-      type: string
     Person:
       required:
         - id
@@ -90,3 +69,29 @@ components:
           exclusiveMinimum: true
           type: number
           format: double
+    Address:
+      minLength: 5
+      type: string
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

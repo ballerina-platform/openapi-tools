@@ -28,9 +28,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
   /pets02:
     post:
       operationId: postPets02
@@ -49,9 +47,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
   /pets03:
     post:
       operationId: postPets03
@@ -70,9 +66,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
   /pets04:
     post:
       operationId: postPets04
@@ -91,9 +85,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayload'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     ErrorPayload:

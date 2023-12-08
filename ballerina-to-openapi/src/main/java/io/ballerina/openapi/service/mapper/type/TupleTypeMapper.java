@@ -31,14 +31,14 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.List;
 import java.util.Optional;
 
-public class TupleTypeMapper extends TypeMapper {
+public class TupleTypeMapper extends AbstractTypeMapper {
 
     public TupleTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
         super(typeSymbol, additionalData);
     }
 
     @Override
-    public Schema getReferenceTypeSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(OpenAPI openAPI) {
         TupleTypeSymbol referredType = (TupleTypeSymbol) typeSymbol.typeDescriptor();
         return getSchema(referredType, openAPI, additionalData).description(description);
     }
@@ -53,7 +53,7 @@ public class TupleTypeMapper extends TypeMapper {
         }
         List<TypeSymbol> memberTypeSymbols = typeSymbol.memberTypeDescriptors();
         Schema memberSchema = new ComposedSchema().oneOf(memberTypeSymbols.stream().map(
-                type -> ComponentMapper.getTypeSchema(type, openAPI, additionalData)).toList());
+                type -> TypeMapper.getTypeSchema(type, openAPI, additionalData)).toList());
         return new ArraySchema().items(memberSchema);
     }
 }

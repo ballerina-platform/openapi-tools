@@ -29,19 +29,22 @@ paths:
             application/fhir+xml:
               schema:
                 type: object
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Identifier:
+    Patient:
       type: object
-      allOf:
-        - $ref: '#/components/schemas/Element'
-        - type: object
-          properties:
-            value:
-              type: string
-            assigner:
-              $ref: '#/components/schemas/Reference'
-          additionalProperties: false
+      properties:
+        id:
+          type: string
+        ref:
+          $ref: '#/components/schemas/Reference'
+      additionalProperties: false
     Reference:
       type: object
       allOf:
@@ -66,11 +69,37 @@ components:
           type: integer
           format: int64
       additionalProperties: false
-    Patient:
+    Identifier:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Element'
+        - type: object
+          properties:
+            value:
+              type: string
+            assigner:
+              $ref: '#/components/schemas/Reference'
+          additionalProperties: false
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        id:
+        timestamp:
           type: string
-        ref:
-          $ref: '#/components/schemas/Reference'
-      additionalProperties: false
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
