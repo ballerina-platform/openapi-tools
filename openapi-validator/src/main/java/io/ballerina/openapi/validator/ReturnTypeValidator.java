@@ -173,7 +173,8 @@ public class ReturnTypeValidator extends NodeValidator {
                 List<TypeSymbol> typeInclusions = typeSymbol.typeInclusions();
                 boolean isHttp = false;
                 Components components = validatorContext.getOpenAPI().getComponents();
-                Map<String, Schema> oasSchemas = Objects.nonNull(components) ? components.getSchemas() : new HashMap<>();
+                Map<String, Schema> oasSchemas = Objects.nonNull(components) ?
+                        components.getSchemas() : new HashMap<>();
                 if (!typeInclusions.isEmpty()) {
                     for (TypeSymbol typeInSymbol : typeInclusions) {
                         if (HTTP.equals(typeInSymbol.getModule().orElseThrow().getName().orElseThrow())) {
