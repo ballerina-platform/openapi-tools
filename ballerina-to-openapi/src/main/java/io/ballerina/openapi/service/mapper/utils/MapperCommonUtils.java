@@ -585,10 +585,9 @@ public class MapperCommonUtils {
         if (Objects.isNull(schema) || Objects.isNull(defaultValue)) {
             return schema;
         }
-        String ref = schema.get$ref();
-        if (!Objects.isNull(ref)) {
+        if (!Objects.isNull(schema.get$ref())) {
             Schema<?> compoundSchema = new Schema<>();
-            compoundSchema.setAllOf(List.of(schema));
+            compoundSchema.addAllOfItem(schema);
             schema = compoundSchema;
         }
         schema.setDefault(parseBalSimpleLiteral(defaultValue));

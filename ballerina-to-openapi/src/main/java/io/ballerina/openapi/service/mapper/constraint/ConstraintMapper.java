@@ -71,8 +71,9 @@ public class ConstraintMapper {
                 ConstraintAnnotation constraintAnnot = constraintBuilder.build();
                 setConstraintValueToSchema(constraintAnnot, schemaEntry.getValue());
             }
-            if (schemaEntry.getValue() instanceof ObjectSchema objectSchema) {
-                setObjectConstraintValuesToSchema(objectSchema, typeDefinitionNode);
+            if (schemaEntry.getValue() instanceof ObjectSchema objectSchema &&
+                    typeDefinitionNode.typeDescriptor() instanceof RecordTypeDescriptorNode recordTypeDescriptorNode) {
+                setObjectConstraintValuesToSchema(objectSchema, recordTypeDescriptorNode);
             }
         }
     }
@@ -84,14 +85,12 @@ public class ConstraintMapper {
         try {
             //Ballerina currently supports only Int, Number (Float, Decimal), String & Array constraints,
             //with plans to extend constraint support in the future.
-            if (properties instanceof ArraySchema arraySchema) {
-                setArrayConstraintValuesToSchema(constraintAnnot, arraySchema);
-            } else if (properties instanceof StringSchema stringSchema) {
-                setStringConstraintValuesToSchema(constraintAnnot, stringSchema);
-            } else if (properties instanceof IntegerSchema integerSchema) {
-                setIntegerConstraintValuesToSchema(constraintAnnot, integerSchema);
-            } else if (properties instanceof NumberSchema numberSchema) {
-                setNumberConstraintValuesToSchema(constraintAnnot, numberSchema);
+            String schemaType = getEffectiveSchemaType(properties);
+            switch (schemaType) {
+                case "array" -> setArrayConstraintValuesToSchema(constraintAnnot, properties);
+                case "string" -> setStringConstraintValuesToSchema(constraintAnnot, properties);
+                case "integer" -> setIntegerConstraintValuesToSchema(constraintAnnot, properties);
+                case "number" -> setNumberConstraintValuesToSchema(constraintAnnot, properties);
             }
         } catch (ParseException parseException) {
             DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_114;
@@ -101,10 +100,44 @@ public class ConstraintMapper {
         }
     }
 
+    private String getEffectiveSchemaType(Schema schema) {
+        if (schema instanceof ArraySchema) {
+            return "array";
+        } else if (schema instanceof IntegerSchema) {
+            return "integer";
+        } else if (schema instanceof NumberSchema) {
+            return "number";
+        } else if (schema instanceof StringSchema) {
+            return "string";
+        } else if (schema instanceof ObjectSchema) {
+            String ref = schema.get$ref();
+            if (Objects.nonNull(ref)) {
+                Components components = openAPI.getComponents();
+                if (Objects.nonNull(components)) {
+                    Map<String, Schema> schemas = components.getSchemas();
+                    if (Objects.nonNull(schemas)) {
+                        Schema schemaObj = schemas.get(ref.substring(ref.lastIndexOf('/') + 1));
+                        if (Objects.nonNull(schemaObj)) {
+                            return getEffectiveSchemaType(schemaObj);
+                        }
+                    }
+                }
+            }
+        }
+        return "object";
+    }
+
     /**
      * This util is used to set the integer constraint values for relevant schema field.
      */
-    private void setIntegerConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, IntegerSchema properties) {
+    private void setIntegerConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+        if (Objects.nonNull(properties.get$ref()) && constraintAnnot.hasConstraints()) {
+            Schema refSchema = new Schema<>();
+            refSchema.set$ref(properties.get$ref());
+            properties.set$ref(null);
+            properties.addAllOfItem(refSchema);
+            properties.setType(null);
+        }
         BigDecimal minimum = null;
         BigDecimal maximum = null;
         if (constraintAnnot.getMinValue().isPresent()) {
@@ -127,8 +160,15 @@ public class ConstraintMapper {
     /**
      * This util is used to set the number (float, double) constraint values for relevant schema field.
      */
-    private void setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, NumberSchema properties)
+    private void setNumberConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties)
             throws ParseException {
+        if (Objects.nonNull(properties.get$ref()) && constraintAnnot.hasConstraints()) {
+            Schema refSchema = new Schema<>();
+            refSchema.set$ref(properties.get$ref());
+            properties.set$ref(null);
+            properties.addAllOfItem(refSchema);
+            properties.setType(null);
+        }
         BigDecimal minimum = null;
         BigDecimal maximum = null;
         if (constraintAnnot.getMinValue().isPresent()) {
@@ -155,7 +195,14 @@ public class ConstraintMapper {
     /**
      * This util is used to set the string constraint values for relevant schema field.
      */
-    private void setStringConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, StringSchema properties) {
+    private void setStringConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+        if (Objects.nonNull(properties.get$ref()) && constraintAnnot.hasConstraints()) {
+            Schema refSchema = new Schema<>();
+            refSchema.set$ref(properties.get$ref());
+            properties.set$ref(null);
+            properties.addAllOfItem(refSchema);
+            properties.setType(null);
+        }
         if (constraintAnnot.getLength().isPresent()) {
             properties.setMinLength(Integer.valueOf(constraintAnnot.getLength().get()));
             properties.setMaxLength(Integer.valueOf(constraintAnnot.getLength().get()));
@@ -175,7 +222,14 @@ public class ConstraintMapper {
     /**
      * This util is used to set the array constraint values for relevant schema field.
      */
-    private void setArrayConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, ArraySchema properties) {
+    private void setArrayConstraintValuesToSchema(ConstraintAnnotation constraintAnnot, Schema properties) {
+        if (Objects.nonNull(properties.get$ref()) && constraintAnnot.hasConstraints()) {
+            Schema refSchema = new Schema<>();
+            refSchema.set$ref(properties.get$ref());
+            properties.set$ref(null);
+            properties.addAllOfItem(refSchema);
+            properties.setType(null);
+        }
         if (constraintAnnot.getLength().isPresent()) {
             properties.setMinItems(Integer.valueOf(constraintAnnot.getLength().get()));
             properties.setMaxItems(Integer.valueOf(constraintAnnot.getLength().get()));
@@ -187,30 +241,44 @@ public class ConstraintMapper {
         }
     }
 
-    private void setObjectConstraintValuesToSchema(ObjectSchema typeSchema, TypeDefinitionNode typeDefinitionNode) {
-        if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
-            NodeList<Node> fieldNodes = ((RecordTypeDescriptorNode) typeDefinitionNode.typeDescriptor()).fields();
+    private void setObjectConstraintValuesToSchema(ObjectSchema typeSchema,
+                                                   RecordTypeDescriptorNode recordTypeDescriptorNode) {
+            NodeList<Node> fieldNodes = recordTypeDescriptorNode.fields();
             for (Node fieldNode : fieldNodes) {
                 MetadataNode metadata = null;
                 String fieldName = null;
+                Node fieldTypeNode = null;
                 if (fieldNode instanceof RecordFieldNode recordFieldNode) {
                     metadata = recordFieldNode.metadata().orElse(null);
                     fieldName = recordFieldNode.fieldName().toString().trim();
+                    fieldTypeNode = recordFieldNode.typeName();
                 } else if (fieldNode instanceof RecordFieldWithDefaultValueNode recordFieldNode) {
                     metadata = recordFieldNode.metadata().orElse(null);
                     fieldName = recordFieldNode.fieldName().toString().trim();
+                    fieldTypeNode = recordFieldNode.typeName();
                 }
+                Map<String, Schema> properties = typeSchema.getProperties();
                 if (Objects.isNull(metadata)) {
+                    handleInlineRecordFieldType(fieldTypeNode, properties, fieldName);
                     continue;
                 }
                 ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder =
                         new ConstraintAnnotation.ConstraintAnnotationBuilder();
                 extractedConstraintAnnotation(metadata, constraintBuilder);
                 ConstraintAnnotation constraintAnnot = constraintBuilder.build();
-                Map<String, Schema> properties = typeSchema.getProperties();
                 if (Objects.nonNull(properties) && properties.containsKey(fieldName)) {
                     setConstraintValueToSchema(constraintAnnot, properties.get(fieldName));
                 }
+            }
+    }
+
+    private void handleInlineRecordFieldType(Node fieldTypeNode, Map<String, Schema> properties, String fieldName) {
+        if (Objects.nonNull(fieldTypeNode) && Objects.nonNull(properties) &&
+                fieldTypeNode instanceof RecordTypeDescriptorNode recordFieldTypeDescriptorNode &&
+                properties.containsKey(fieldName)) {
+            Schema fieldTypeSchema = properties.get(fieldName);
+            if (fieldTypeSchema instanceof ObjectSchema fieldTypeObjSchema) {
+                setObjectConstraintValuesToSchema(fieldTypeObjSchema, recordFieldTypeDescriptorNode);
             }
         }
     }
@@ -313,32 +381,14 @@ public class ConstraintMapper {
     private void fillConstraintValue(ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder,
                                      String name, String constraintValue) {
         switch (name) {
-            case "minValue":
-                constraintBuilder.withMinValue(constraintValue);
-                break;
-            case "maxValue":
-                constraintBuilder.withMaxValue(constraintValue);
-                break;
-            case "minValueExclusive":
-                constraintBuilder.withMinValueExclusive(constraintValue);
-                break;
-            case "maxValueExclusive":
-                constraintBuilder.withMaxValueExclusive(constraintValue);
-                break;
-            case "length":
-                constraintBuilder.withLength(constraintValue);
-                break;
-            case "maxLength":
-                constraintBuilder.withMaxLength(constraintValue);
-                break;
-            case "minLength":
-                constraintBuilder.withMinLength(constraintValue);
-                break;
-            case "pattern":
-                constraintBuilder.withPattern(constraintValue);
-                break;
-            default:
-                break;
+            case "minValue" -> constraintBuilder.withMinValue(constraintValue);
+            case "maxValue" -> constraintBuilder.withMaxValue(constraintValue);
+            case "minValueExclusive" -> constraintBuilder.withMinValueExclusive(constraintValue);
+            case "maxValueExclusive" -> constraintBuilder.withMaxValueExclusive(constraintValue);
+            case "length" -> constraintBuilder.withLength(constraintValue);
+            case "maxLength" -> constraintBuilder.withMaxLength(constraintValue);
+            case "minLength" -> constraintBuilder.withMinLength(constraintValue);
+            case "pattern" -> constraintBuilder.withPattern(constraintValue);
         }
     }
 }

@@ -28,6 +28,11 @@ public class ConstraintAnnotation {
         this.pattern = builder.pattern;
     }
 
+    public boolean hasConstraints() {
+        return minValue != null || maxValue != null || length != null || minLength != null || maxLength != null
+                || minValueExclusive != null || maxValueExclusive != null || pattern != null;
+    }
+
     public Optional<String> getMinValue() {
         return Optional.ofNullable(minValue);
     }
@@ -73,44 +78,36 @@ public class ConstraintAnnotation {
         private String maxValueExclusive;
         private String pattern;
 
-        public ConstraintAnnotationBuilder withMinValue(String minValue) {
+        public void withMinValue(String minValue) {
             this.minValue = minValue;
-            return this;
         }
 
-        public ConstraintAnnotationBuilder withLength(String length) {
+        public void withLength(String length) {
             this.length = length;
-            return this;
         }
 
-        public ConstraintAnnotationBuilder withMaxValue(String maxValue) {
+        public void withMaxValue(String maxValue) {
             this.maxValue = maxValue;
-            return this;
         }
 
-        public ConstraintAnnotationBuilder withMinLength(String minLength) {
+        public void withMinLength(String minLength) {
             this.minLength = minLength;
-            return this;
         }
 
-        public ConstraintAnnotationBuilder withMaxLength(String maxLength) {
+        public void withMaxLength(String maxLength) {
             this.maxLength = maxLength;
-            return this;
         }
 
-        public ConstraintAnnotationBuilder withMinValueExclusive(String minValueExclusive) {
+        public void withMinValueExclusive(String minValueExclusive) {
             this.minValueExclusive = minValueExclusive;
-            return this;
         }
 
-        public ConstraintAnnotationBuilder withMaxValueExclusive(String maxValueExclusive) {
+        public void withMaxValueExclusive(String maxValueExclusive) {
             this.maxValueExclusive = maxValueExclusive;
-            return this;
         }
 
-        public ConstraintAnnotationBuilder withPattern(String pattern) {
+        public void withPattern(String pattern) {
             this.pattern = pattern;
-            return this;
         }
 
         public ConstraintAnnotation build() {

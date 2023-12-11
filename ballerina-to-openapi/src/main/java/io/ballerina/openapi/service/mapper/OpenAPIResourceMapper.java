@@ -185,8 +185,6 @@ public class OpenAPIResourceMapper {
                     path.addPathItem(pathName, pathItem);
                 }
             }
-            default -> {
-            }
         }
     }
 
