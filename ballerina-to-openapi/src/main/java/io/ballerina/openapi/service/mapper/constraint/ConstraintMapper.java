@@ -91,6 +91,7 @@ public class ConstraintMapper {
                 case "string" -> setStringConstraintValuesToSchema(constraintAnnot, properties);
                 case "integer" -> setIntegerConstraintValuesToSchema(constraintAnnot, properties);
                 case "number" -> setNumberConstraintValuesToSchema(constraintAnnot, properties);
+                default -> { }
             }
         } catch (ParseException parseException) {
             DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_114;
@@ -389,6 +390,7 @@ public class ConstraintMapper {
             case "maxLength" -> constraintBuilder.withMaxLength(constraintValue);
             case "minLength" -> constraintBuilder.withMinLength(constraintValue);
             case "pattern" -> constraintBuilder.withPattern(constraintValue);
+            default -> { }
         }
     }
 }
