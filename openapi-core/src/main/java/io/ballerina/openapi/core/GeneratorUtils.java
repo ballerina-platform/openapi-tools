@@ -1017,7 +1017,8 @@ public class GeneratorUtils {
                         unusedTypeDefinitionNameList.add(symbol.getName().get());
                     } else if (references.size() == 2) {
                         if (symbol.kind().equals(SymbolKind.TYPE_DEFINITION)) {
-                            handleCyclicRecord(unusedTypeDefinitionNameList, symbol);
+                            TypeDefinitionSymbol typeDef = (TypeDefinitionSymbol) symbol;
+                            handleCyclicType(unusedTypeDefinitionNameList, typeDef);
                         }
                     }
                 }
@@ -1033,10 +1034,10 @@ public class GeneratorUtils {
         return unusedTypeDefinitionNameList;
     }
 
-    private static void handleCyclicRecord(List<String> unusedTypeDefinitionNameList, Symbol symbol) {
-        TypeDefinitionSymbol typeDef = (TypeDefinitionSymbol) symbol;
-        if (typeDef.typeDescriptor().typeKind().equals(TypeDescKind.RECORD)) {
-            RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeDef.typeDescriptor();
+    private static void handleCyclicType(List<String> unusedTypeDefinitionNameList, TypeDefinitionSymbol symbol) {
+        TypeDescKind typeDescKind = symbol.typeDescriptor().typeKind();
+        if (typeDescKind.equals(TypeDescKind.RECORD)) {
+            RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) symbol.typeDescriptor();
             Map<String, RecordFieldSymbol> fields = recordTypeSymbol.fieldDescriptors();
             Collection<RecordFieldSymbol> values = fields.values();
             boolean isCyclic = false;
@@ -1052,6 +1053,8 @@ public class GeneratorUtils {
                 unusedTypeDefinitionNameList.add(symbol.getName().get());
             }
         }
+        //TODO: Handle cyclic type for other ex: array after this fix
+        //https://github.com/ballerina-platform/ballerina-lang/issues/36442
     }
 
     private static void writeFilesTemp(Map<String, String> srcFiles, Path tmpDir) throws IOException {
