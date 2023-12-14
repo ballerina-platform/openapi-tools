@@ -74,8 +74,12 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.IntegerSchema;
+import io.swagger.v3.oas.models.media.NumberSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
@@ -207,7 +211,8 @@ public class GeneratorUtils {
      * @return - node lists
      * @throws BallerinaOpenApiException
      */
-    public static List<Node> getRelativeResourcePath(String path, Operation operation, List<Node> resourceFunctionDocs)
+    public static List<Node> getRelativeResourcePath(String path, Operation operation, List<Node> resourceFunctionDocs,
+                                                     Components components, boolean isWithoutDataBinding)
             throws BallerinaOpenApiException {
 
         List<Node> functionRelativeResourcePath = new ArrayList<>();
@@ -227,7 +232,7 @@ public class GeneratorUtils {
                      */
                     if (operation.getParameters() != null) {
                         extractPathParameterDetails(operation, functionRelativeResourcePath, pathNode,
-                                pathParam, resourceFunctionDocs);
+                                pathParam, resourceFunctionDocs, components, isWithoutDataBinding);
                     }
                 } else if (!pathNode.isBlank()) {
                     IdentifierToken idToken = createIdentifierToken(escapeIdentifier(pathNode.trim()));
@@ -247,7 +252,9 @@ public class GeneratorUtils {
     }
 
     private static void extractPathParameterDetails(Operation operation, List<Node> functionRelativeResourcePath,
-                                                    String pathNode, String pathParam, List<Node> resourceFunctionDocs)
+                                                    String pathNode, String pathParam,
+                                                    List<Node> resourceFunctionDocs,
+                                                    Components components, boolean isWithoutDataBinding)
             throws BallerinaOpenApiException {
         // check whether path parameter segment has special character
         String[] split = pathNode.split(CLOSE_CURLY_BRACE, 2);
@@ -263,9 +270,10 @@ public class GeneratorUtils {
                     && parameter.getIn().equals("path")) {
                 String paramType;
                 if (parameter.getSchema().get$ref() != null) {
-                    paramType = getValidName(extractReferenceType(parameter.getSchema().get$ref()), true);
+                    paramType = resolveReferenceType(parameter.getSchema(), components, isWithoutDataBinding,
+                            pathParam);
                 } else {
-                    paramType = convertOpenAPITypeToBallerina(parameter.getSchema());
+                    paramType = getPathParameterType(parameter.getSchema(), pathParam);
                 }
 
                 // TypeDescriptor
@@ -1017,5 +1025,38 @@ public class GeneratorUtils {
         } catch (ProjectException e) {
             throw new ProjectException(e.getMessage());
         }
+    }
+
+    public static String resolveReferenceType(Schema<?> schema, Components components, boolean isWithoutDataBinding,
+                                              String pathParam) throws BallerinaOpenApiException {
+        String type = GeneratorUtils.extractReferenceType(schema.get$ref());
+
+        if (isWithoutDataBinding) {
+            Schema<?> referencedSchema = components.getSchemas().get(getValidName(type, true));
+            if (referencedSchema != null) {
+                if (referencedSchema.get$ref() != null) {
+                    type = resolveReferenceType(referencedSchema, components, isWithoutDataBinding, pathParam);
+                } else {
+                    type = getPathParameterType(referencedSchema, pathParam);
+                }
+            }
+        } else {
+            type = getValidName(type, true);
+        }
+        return type;
+    }
+
+    private static String getPathParameterType(Schema<?> typeSchema, String pathParam)
+            throws BallerinaOpenApiException {
+        String type;
+        if (!(typeSchema instanceof StringSchema || typeSchema instanceof NumberSchema ||
+                typeSchema instanceof BooleanSchema || typeSchema instanceof IntegerSchema)) {
+            type = "string";
+            LOGGER.warn("unsupported path parameter type found in the parameter `" + pathParam + "`. hence the " +
+                    "parameter type is set to string.");
+        } else {
+            type = GeneratorUtils.convertOpenAPITypeToBallerina(typeSchema);
+        }
+        return type;
     }
 }

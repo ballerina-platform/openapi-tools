@@ -431,7 +431,7 @@ public class BallerinaCodeGenerator {
                 openAPIDef, nullable, preGeneratedTypeDefNodes);
         String schemaContent = Formatter.format(
                 ballerinaSchemaGenerator.generateSyntaxTree()).toString();
-        if (!schemaContent.isBlank()) {
+        if (!schemaContent.isBlank() && !generateWithoutDataBinding) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME,
                     schemaContent));
         }
