@@ -30,9 +30,22 @@ public type BalSubTypes record {|
     BalXmls xmls;
 |};
 
+type Unsigned8 int:Unsigned8;
+type Unsigned16 int:Unsigned16;
+type Unsigned32 int:Unsigned32;
+type Signed8 int:Signed8;
+type Signed16 int:Signed16;
+type Signed32 int:Signed32;
+type Char string:Char;
+type XmlElement xml:Element;
+type XmlComment xml:Comment;
+type XmlText xml:Text;
+type XmlProcessingInstruction xml:ProcessingInstruction;
+
+
 service /payloadV on new http:Listener(9090) {
 
-    resource function get path() returns BalSubTypes {
+    resource function get path1() returns BalSubTypes {
         return {
             char: "a",
             ints: {
@@ -54,5 +67,13 @@ service /payloadV on new http:Listener(9090) {
                 text: xml`text`
             }
         };
+    }
+
+    resource function get path2() returns Unsigned8|Unsigned16|Unsigned32|
+        Signed8|Signed16|Signed32|
+        XmlElement|XmlComment|XmlText|XmlProcessingInstruction|
+        Char {
+
+        return 32;
     }
 }
