@@ -161,16 +161,14 @@ public class ConverterCommonUtils {
                 schema = new ObjectSchema();
                 schema.setAdditionalProperties(new StringSchema());
                 break;
+            case Constants.TYPE_REFERENCE:
+            case Constants.TYPEREFERENCE:
             case Constants.XML:
             case Constants.XML_ELEMENT:
             case Constants.XML_PROCESSING_INSTRUCTION:
             case Constants.XML_TEXT:
             case Constants.XML_COMMENT:
             case Constants.JSON:
-                schema = new ObjectSchema();
-                break;
-            case Constants.TYPE_REFERENCE:
-            case Constants.TYPEREFERENCE:
             default:
                 schema = new Schema<>();
                 break;

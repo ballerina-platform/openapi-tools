@@ -56,14 +56,10 @@ components:
         - text
       type: object
       properties:
-        comment:
-          type: object
-        element:
-          type: object
-        processingInstruction:
-          type: object
-        text:
-          type: object
+        comment: {}
+        element: {}
+        processingInstruction: {}
+        text: {}
     BalInts:
       required:
         - signed
