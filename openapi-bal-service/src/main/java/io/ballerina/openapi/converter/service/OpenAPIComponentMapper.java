@@ -141,7 +141,6 @@ public class OpenAPIComponentMapper {
                 break;
             case INT_SIGNED32:
                 Schema int32Schema = new IntegerSchema().description(typeDoc).format("int32");
-                setConstraintValueToSchema(constraintAnnot, int32Schema);
                 schema.put(componentName, int32Schema);
                 components.setSchemas(schema);
                 break;
@@ -151,7 +150,6 @@ public class OpenAPIComponentMapper {
             case INT_UNSIGNED8:
             case INT_SIGNED8:
                 Schema subIntSchema = new IntegerSchema().description(typeDoc).format(null);
-                setConstraintValueToSchema(constraintAnnot, subIntSchema);
                 schema.put(componentName, subIntSchema);
                 components.setSchemas(schema);
                 break;
@@ -218,13 +216,22 @@ public class OpenAPIComponentMapper {
 
     public static boolean isBuiltInSubTypes(TypeReferenceTypeSymbol typeSymbol) {
         TypeSymbol referredType = typeSymbol.typeDescriptor();
-        return switch (referredType.typeKind()) {
-            case INT_SIGNED8, INT_SIGNED16, INT_SIGNED32, INT_UNSIGNED8, INT_UNSIGNED16, INT_UNSIGNED32,
-                    XML_COMMENT, XML_ELEMENT, XML_PROCESSING_INSTRUCTION, XML_TEXT,
-                    STRING_CHAR->
-                    true;
-            default -> false;
-        };
+        switch (referredType.typeKind()) {
+            case INT_SIGNED8:
+            case INT_SIGNED16:
+            case INT_SIGNED32:
+            case INT_UNSIGNED8:
+            case INT_UNSIGNED16:
+            case INT_UNSIGNED32:
+            case XML_COMMENT:
+            case XML_ELEMENT:
+            case XML_PROCESSING_INSTRUCTION:
+            case XML_TEXT:
+            case STRING_CHAR:
+                return true;
+            default:
+                return false;
+        }
     }
 
     /**
