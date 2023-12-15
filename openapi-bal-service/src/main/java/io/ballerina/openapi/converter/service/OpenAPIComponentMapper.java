@@ -141,7 +141,6 @@ public class OpenAPIComponentMapper {
                 break;
             case INT_SIGNED32:
                 Schema int32Schema = new IntegerSchema().description(typeDoc).format("int32");
-                setConstraintValueToSchema(constraintAnnot, int32Schema);
                 schema.put(componentName, int32Schema);
                 components.setSchemas(schema);
                 break;
@@ -151,7 +150,6 @@ public class OpenAPIComponentMapper {
             case INT_UNSIGNED8:
             case INT_SIGNED8:
                 Schema subIntSchema = new IntegerSchema().description(typeDoc).format(null);
-                setConstraintValueToSchema(constraintAnnot, subIntSchema);
                 schema.put(componentName, subIntSchema);
                 components.setSchemas(schema);
                 break;
