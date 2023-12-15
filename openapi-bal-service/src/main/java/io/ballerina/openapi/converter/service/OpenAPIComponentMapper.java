@@ -124,6 +124,9 @@ public class OpenAPIComponentMapper {
         }
         TypeReferenceTypeSymbol typeRef = (TypeReferenceTypeSymbol) typeSymbol;
         TypeSymbol type = typeRef.typeDescriptor();
+        if (type instanceof TypeReferenceTypeSymbol && isBuiltInSubTypes((TypeReferenceTypeSymbol) type)) {
+            type = ((TypeReferenceTypeSymbol) type).typeDescriptor();
+        }
         if (type.typeKind() == TypeDescKind.INTERSECTION) {
             type = excludeReadonlyIfPresent(type);
         }
@@ -146,10 +149,6 @@ public class OpenAPIComponentMapper {
                 handleRecordTypeSymbol((RecordTypeSymbol) type, schema, componentName, apiDocs);
                 break;
             case TYPE_REFERENCE:
-                if (isBuiltInSubTypes((TypeReferenceTypeSymbol) type)) {
-                     createComponentSchema(schema, ((TypeReferenceTypeSymbol) type).typeDescriptor());
-                     break;
-                }
                 schema.put(componentName, new ObjectSchema().$ref(ConverterCommonUtils.unescapeIdentifier(
                         type.getName().orElseThrow().trim())));
                 components.setSchemas(schema);
@@ -160,6 +159,7 @@ public class OpenAPIComponentMapper {
                 }
                 break;
             case STRING:
+            case STRING_CHAR:
                 Schema stringSchema = new StringSchema().description(typeDoc);
                 setConstraintValueToSchema(constraintAnnot, stringSchema);
                 schema.put(componentName, stringSchema);
@@ -167,6 +167,10 @@ public class OpenAPIComponentMapper {
                 break;
             case JSON:
             case XML:
+            case XML_ELEMENT:
+            case XML_PROCESSING_INSTRUCTION:
+            case XML_TEXT:
+            case XML_COMMENT:
                 schema.put(componentName, new ObjectSchema().description(typeDoc));
                 components.setSchemas(schema);
                 break;
