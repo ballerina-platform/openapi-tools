@@ -10,9 +10,9 @@ servers:
       port:
         default: "9090"
 paths:
-  /path:
+  /path1:
     get:
-      operationId: getPath
+      operationId: getPath1
       responses:
         "200":
           description: Ok
@@ -20,8 +20,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BalSubTypes'
+  /path2:
+    get:
+      operationId: getPath2
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Unsigned8'
+                  - $ref: '#/components/schemas/Unsigned16'
+                  - $ref: '#/components/schemas/Unsigned32'
+                  - $ref: '#/components/schemas/Signed8'
+                  - $ref: '#/components/schemas/Signed16'
+                  - $ref: '#/components/schemas/Signed32'
+                  - $ref: '#/components/schemas/XmlElement'
+                  - $ref: '#/components/schemas/XmlComment'
+                  - $ref: '#/components/schemas/XmlText'
+                  - $ref: '#/components/schemas/XmlProcessingInstruction'
+                  - $ref: '#/components/schemas/Char'
 components:
   schemas:
+    BalInts:
+      required:
+        - signed
+        - unsigned
+      type: object
+      properties:
+        signed:
+          $ref: '#/components/schemas/BalSignedInts'
+        unsigned:
+          $ref: '#/components/schemas/BalUnsignedInts'
+    Signed32:
+      type: integer
+      format: int32
+    Signed8:
+      type: integer
     BalSubTypes:
       required:
         - char
@@ -35,6 +71,10 @@ components:
           $ref: '#/components/schemas/BalInts'
         xmls:
           $ref: '#/components/schemas/BalXmls'
+    Unsigned8:
+      type: integer
+    Signed16:
+      type: integer
     BalUnsignedInts:
       required:
         - unsigned16
@@ -48,6 +88,10 @@ components:
           type: integer
         unsigned8:
           type: integer
+    XmlProcessingInstruction:
+      type: object
+    Unsigned32:
+      type: integer
     BalXmls:
       required:
         - comment
@@ -60,16 +104,12 @@ components:
         element: {}
         processingInstruction: {}
         text: {}
-    BalInts:
-      required:
-        - signed
-        - unsigned
+    Char:
+      type: string
+    XmlComment:
       type: object
-      properties:
-        signed:
-          $ref: '#/components/schemas/BalSignedInts'
-        unsigned:
-          $ref: '#/components/schemas/BalUnsignedInts'
+    XmlElement:
+      type: object
     BalSignedInts:
       required:
         - signed16
@@ -84,3 +124,7 @@ components:
           type: integer
         signed8:
           type: integer
+    Unsigned16:
+      type: integer
+    XmlText:
+      type: object
