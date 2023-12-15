@@ -113,6 +113,10 @@ public class OpenAPIComponentMapper {
                 handleRecordTypeSymbol((RecordTypeSymbol) type, schema, componentName, apiDocs);
                 break;
             case TYPE_REFERENCE:
+                if (isBuiltInSubTypes((TypeReferenceTypeSymbol) type)) {
+                     createComponentSchema(schema, ((TypeReferenceTypeSymbol) type).typeDescriptor());
+                     break;
+                }
                 schema.put(componentName, new ObjectSchema().$ref(ConverterCommonUtils.unescapeIdentifier(
                         type.getName().orElseThrow().trim())));
                 components.setSchemas(schema);
@@ -133,6 +137,22 @@ public class OpenAPIComponentMapper {
                 break;
             case INT:
                 schema.put(componentName, new IntegerSchema().description(typeDoc));
+                components.setSchemas(schema);
+                break;
+            case INT_SIGNED32:
+                Schema int32Schema = new IntegerSchema().description(typeDoc).format("int32");
+                setConstraintValueToSchema(constraintAnnot, int32Schema);
+                schema.put(componentName, int32Schema);
+                components.setSchemas(schema);
+                break;
+            case INT_UNSIGNED32:
+            case INT_UNSIGNED16:
+            case INT_SIGNED16:
+            case INT_UNSIGNED8:
+            case INT_SIGNED8:
+                Schema subIntSchema = new IntegerSchema().description(typeDoc).format(null);
+                setConstraintValueToSchema(constraintAnnot, subIntSchema);
+                schema.put(componentName, subIntSchema);
                 components.setSchemas(schema);
                 break;
             case DECIMAL:
@@ -194,6 +214,17 @@ public class OpenAPIComponentMapper {
                 diagnostics.add(error);
                 break;
         }
+    }
+
+    public static boolean isBuiltInSubTypes(TypeReferenceTypeSymbol typeSymbol) {
+        TypeSymbol referredType = typeSymbol.typeDescriptor();
+        return switch (referredType.typeKind()) {
+            case INT_SIGNED8, INT_SIGNED16, INT_SIGNED32, INT_UNSIGNED8, INT_UNSIGNED16, INT_UNSIGNED32,
+                    XML_COMMENT, XML_ELEMENT, XML_PROCESSING_INSTRUCTION, XML_TEXT,
+                    STRING_CHAR->
+                    true;
+            default -> false;
+        };
     }
 
     /**
@@ -325,28 +356,33 @@ public class OpenAPIComponentMapper {
             if (!field.getValue().isOptional()) {
                 required.add(fieldName);
             }
-            TypeDescKind fieldTypeKind = field.getValue().typeDescriptor().typeKind();
+            TypeSymbol fieldType = field.getValue().typeDescriptor();
+            if (fieldType instanceof TypeReferenceTypeSymbol &&
+                    isBuiltInSubTypes((TypeReferenceTypeSymbol) fieldType)) {
+                fieldType = ((TypeReferenceTypeSymbol) fieldType).typeDescriptor();
+            }
+            TypeDescKind fieldTypeKind = fieldType.typeKind();
             String type = fieldTypeKind.toString().toLowerCase(Locale.ENGLISH);
             Schema property = ConverterCommonUtils.getOpenApiSchema(type);
 
             if (fieldTypeKind == TypeDescKind.TYPE_REFERENCE) {
-                TypeReferenceTypeSymbol typeReference = (TypeReferenceTypeSymbol) field.getValue().typeDescriptor();
+                TypeReferenceTypeSymbol typeReference = (TypeReferenceTypeSymbol) fieldType;
                 property = handleTypeReference(schema, typeReference, property,
                         isSameRecord(ConverterCommonUtils.unescapeIdentifier(
                                         typeReference.definition().getName().get()), typeReference));
                 schema = components.getSchemas();
             } else if (fieldTypeKind == TypeDescKind.UNION) {
-                property = handleUnionType((UnionTypeSymbol) field.getValue().typeDescriptor(), property,
+                property = handleUnionType((UnionTypeSymbol) fieldType, property,
                         componentName);
                 schema = components.getSchemas();
             } else if (fieldTypeKind == TypeDescKind.MAP) {
-                MapTypeSymbol mapTypeSymbol = (MapTypeSymbol) field.getValue().typeDescriptor();
+                MapTypeSymbol mapTypeSymbol = (MapTypeSymbol) fieldType;
                 property = handleMapType(schema, componentName, property, mapTypeSymbol);
                 schema = components.getSchemas();
             }
             if (property instanceof ArraySchema && !(((ArraySchema) property).getItems() instanceof ComposedSchema)) {
                 Boolean nullable = property.getNullable();
-                property = mapArrayToArraySchema(schema, field.getValue().typeDescriptor(), componentName);
+                property = mapArrayToArraySchema(schema, fieldType, componentName);
                 property.setNullable(nullable);
                 schema = components.getSchemas();
             }
