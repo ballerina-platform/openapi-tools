@@ -11,7 +11,6 @@ import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
-import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.List;
 import java.util.Map;
@@ -55,7 +54,7 @@ public class HeaderParameterMapper implements ParameterMapper {
     }
 
     @Override
-    public Parameter getParameterSchema() {
+    public HeaderParameter getParameterSchema() {
         HeaderParameter headerParameter = new HeaderParameter();
         headerParameter.setName(name);
         if (isRequired && (!treatNilableAsOptional || !UnionTypeMapper.hasNilableType(type))) {

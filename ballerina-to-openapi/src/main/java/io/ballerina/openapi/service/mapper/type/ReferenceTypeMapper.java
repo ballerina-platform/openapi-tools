@@ -48,6 +48,9 @@ public class ReferenceTypeMapper extends AbstractTypeMapper {
 
     public static Schema getSchema(TypeReferenceTypeSymbol typeSymbol, OpenAPI openAPI,
                                    AdditionalData additionalData) {
+        if (isBuiltInSubTypes(typeSymbol)) {
+            return SimpleTypeMapper.getTypeSchema(typeSymbol.typeDescriptor(), additionalData);
+        }
         if (!AbstractTypeMapper.hasMapping(openAPI, typeSymbol)) {
             createComponentMapping(typeSymbol, openAPI, additionalData);
             if (!AbstractTypeMapper.hasFullMapping(openAPI, typeSymbol)) {
@@ -55,6 +58,17 @@ public class ReferenceTypeMapper extends AbstractTypeMapper {
             }
         }
         return new ObjectSchema().$ref(MapperCommonUtils.getTypeName(typeSymbol));
+    }
+
+    public static boolean isBuiltInSubTypes(TypeReferenceTypeSymbol typeSymbol) {
+        TypeSymbol referredType = typeSymbol.typeDescriptor();
+        return switch (referredType.typeKind()) {
+            case INT_SIGNED8, INT_SIGNED16, INT_SIGNED32, INT_UNSIGNED8, INT_UNSIGNED16, INT_UNSIGNED32,
+                    XML_COMMENT, XML_ELEMENT, XML_PROCESSING_INSTRUCTION, XML_TEXT,
+                    STRING_CHAR->
+                    true;
+            default -> false;
+        };
     }
 
     public static TypeSymbol getReferredType(TypeSymbol typeSymbol) {

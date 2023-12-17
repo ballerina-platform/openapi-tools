@@ -544,6 +544,10 @@ public class MapperCommonUtils {
         return unescapedParamName.replaceAll("\\\\", "").replaceAll("'", "");
     }
 
+    public static String removeStartingSingleQuote(String parameterName) {
+        return parameterName.replaceAll("^'", "");
+    }
+
     public static Schema<?> handleReference(SemanticModel semanticModel, SimpleNameReferenceNode recordNode,
                                             ModuleMemberVisitor moduleMemberVisitor, TypeMapper typeMapper) {
         Schema<?> refSchema = new Schema<>();

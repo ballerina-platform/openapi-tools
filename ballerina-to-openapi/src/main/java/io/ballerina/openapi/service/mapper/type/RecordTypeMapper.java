@@ -73,7 +73,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
 
         Optional<TypeSymbol> restFieldType = typeSymbol.restTypeDescriptor();
         if (restFieldType.isPresent()) {
-            if (!restFieldType.get().typeKind().equals(TypeDescKind.ANYDATA)) {
+            if (!additionalData.semanticModel().types().JSON.subtypeOf(restFieldType.get())) {
                 Schema restFieldSchema = TypeMapper.getTypeSchema(restFieldType.get(), openAPI, additionalData);
                 schema.additionalProperties(restFieldSchema);
             }
@@ -138,7 +138,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                 Object recordFieldDefaultValue = getRecordFieldDefaultValue(recordName, recordFieldName,
                         additionalData.moduleMemberVisitor());
                 if (Objects.nonNull(recordFieldDefaultValue)) {
-                    recordFieldSchema.setDefault(recordFieldDefaultValue);
+                    TypeMapper.setDefaultValue(recordFieldSchema, recordFieldDefaultValue);
                 } else {
                     DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_124;
                     IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(message,

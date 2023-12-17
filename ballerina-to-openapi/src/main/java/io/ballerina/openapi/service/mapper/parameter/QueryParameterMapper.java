@@ -16,56 +16,73 @@
 
 package io.ballerina.openapi.service.mapper.parameter;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ParameterKind;
 import io.ballerina.compiler.api.symbols.ParameterSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.mapper.AdditionalData;
-import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 public class QueryParameterMapper implements ParameterMapper {
 
-    private final TypeSymbol type;
-    private final String name;
-    private final boolean isRequired;
-    private final String description;
-    private final boolean treatNilableAsOptional;
-    private final SemanticModel semanticModel;
-    private final List<OpenAPIMapperDiagnostic> diagnostics;
-    private final OpenAPI openAPI;
+    private TypeSymbol type = null;
+    private String name = null;
+    private boolean isRequired = false;
+    private String description = null;
+    private boolean treatNilableAsOptional = false;
+    private TypeMapper typeMapper = null;
+    private Object defaultValue = null;
 
-    public QueryParameterMapper(ParameterSymbol parameterSymbol, OpenAPI openAPI, Map<String, String> apiDocs,
-                                boolean treatNilableAsOptional, SemanticModel semanticModel,
-                                List<OpenAPIMapperDiagnostic> diagnostics) {
-        this.type = parameterSymbol.typeDescriptor();
-        this.openAPI = openAPI;
-        this.name = unescapeIdentifier(parameterSymbol.getName().get());
-        this.isRequired = parameterSymbol.paramKind().equals(ParameterKind.REQUIRED);
-        this.description = apiDocs.get(name);
-        this.treatNilableAsOptional = treatNilableAsOptional;
-        this.semanticModel = semanticModel;
-        this.diagnostics = diagnostics;
+    public QueryParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs,
+                                boolean treatNilableAsOptional, TypeMapper typeMapper) {
+        Symbol parameterSymbol = typeMapper.getComponentMapperData().
+                semanticModel().symbol(parameterNode).orElse(null);
+        if (Objects.nonNull(parameterSymbol) && (parameterSymbol instanceof ParameterSymbol queryParameter)) {
+            this.type = queryParameter.typeDescriptor();
+            this.name = unescapeIdentifier(queryParameter.getName().get());
+            this.isRequired = queryParameter.paramKind().equals(ParameterKind.REQUIRED);
+            this.description = apiDocs.get(removeStartingSingleQuote(queryParameter.getName().get()));
+            this.treatNilableAsOptional = treatNilableAsOptional;
+            this.typeMapper = typeMapper;
+            if (parameterNode instanceof DefaultableParameterNode defaultableQueryParam) {
+                this.defaultValue = ParameterMapper.getDefaultValue(defaultableQueryParam);
+            }
+        }
     }
 
     @Override
-    public Parameter getParameterSchema() {
+    public QueryParameter getParameterSchema() {
+        if (Objects.isNull(type)) {
+            return null;
+        }
         QueryParameter queryParameter = new QueryParameter();
         queryParameter.setName(name);
         if (isRequired && (!treatNilableAsOptional || !UnionTypeMapper.hasNilableType(type))) {
             queryParameter.setRequired(true);
         }
-        AdditionalData additionalData = new AdditionalData(semanticModel, null, diagnostics);
-        queryParameter.setSchema(TypeMapper.getTypeSchema(type, openAPI, additionalData));
+        Schema typeSchema = typeMapper.getTypeSchema(type);
+        if (Objects.nonNull(defaultValue)) {
+            TypeMapper.setDefaultValue(typeSchema, defaultValue);
+        }
+        if (ParameterMapper.hasObjectType(typeMapper.getComponentMapperData().semanticModel(), type)) {
+            Content content = new Content();
+            content.put("application/json", new MediaType().schema(typeSchema));
+            queryParameter.setContent(content);
+        } else {
+            queryParameter.setSchema(typeSchema);
+        }
         queryParameter.setDescription(description);
         return queryParameter;
     }

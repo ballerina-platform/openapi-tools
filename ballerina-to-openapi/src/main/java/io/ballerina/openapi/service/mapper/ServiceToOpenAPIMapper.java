@@ -214,14 +214,14 @@ public class ServiceToOpenAPIMapper {
             OpenAPI openapi = oasResult.getOpenAPI().get();
             if (openapi.getPaths() == null) {
                 // Take base path of service
-                OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel,
-                        moduleMemberVisitor);
+                OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(serviceDefinition, openapi,
+                        semanticModel, moduleMemberVisitor);
                 // 02. Filter and set the ServerURLs according to endpoints. Complete the server section in OAS
                 openapi = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServers(openapi, listeners, serviceDefinition);
                 // 03. Filter path and component sections in OAS.
                 // Generate openApi string for the mentioned service name.
-                openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi);
-                return new OASResult(openapi, openAPIServiceMapper.getErrors());
+                openAPIServiceMapper.convertServiceToOpenAPI();
+                return new OASResult(openapi, openAPIServiceMapper.getDiagnostics());
             } else {
                 return new OASResult(openapi, oasResult.getDiagnostics());
             }

@@ -16,9 +16,34 @@
 
 package io.ballerina.openapi.service.mapper.parameter;
 
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
 public interface ParameterMapper {
 
     Parameter getParameterSchema();
+
+    static Object getDefaultValue(DefaultableParameterNode parameterNode) {
+        Node defaultValueExpression = parameterNode.expression();
+        if (!MapperCommonUtils.isSimpleValueLiteralKind(defaultValueExpression.kind())) {
+            return null;
+        }
+        return MapperCommonUtils.parseBalSimpleLiteral(defaultValueExpression.toString().trim());
+    }
+
+    static boolean hasObjectType(SemanticModel semanticModel, TypeSymbol parameterType) {
+        TypeSymbol mapOfAnydata = semanticModel.types().builder().MAP_TYPE.withTypeParam(
+                semanticModel.types().ANYDATA).build();
+        TypeSymbol arrayOfMapOfAnydata = semanticModel.types().builder().ARRAY_TYPE.withType(
+                mapOfAnydata).build();
+        return parameterType.subtypeOf(semanticModel.types().builder().UNION_TYPE.withMemberTypes(
+                mapOfAnydata,
+                arrayOfMapOfAnydata,
+                semanticModel.types().NIL).build()
+        );
+    }
 }

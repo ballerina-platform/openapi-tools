@@ -20,7 +20,9 @@
 package io.ballerina.openapi.service.mapper;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
@@ -33,6 +35,9 @@ import io.swagger.v3.oas.models.OpenAPI;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractServiceAnnotationDetails;
 
 /**
  * OpenAPIServiceMapper provides functionality for reading and writing OpenApi, either to and from ballerina service, or
@@ -42,31 +47,29 @@ import java.util.List;
  */
 public class OpenAPIServiceMapper {
     private final SemanticModel semanticModel;
-    private final List<OpenAPIMapperDiagnostic> errors = new ArrayList<>();
+    private final List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
     private final ModuleMemberVisitor moduleMemberVisitor;
+    private final OpenAPI openAPI;
+    private final ServiceDeclarationNode serviceNode;
 
-    public List<OpenAPIMapperDiagnostic> getErrors() {
-        return errors;
+    public List<OpenAPIMapperDiagnostic> getDiagnostics() {
+        return diagnostics;
     }
 
     /**
      * Initializes a service parser for OpenApi.
      */
-    public OpenAPIServiceMapper(SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
+    public OpenAPIServiceMapper(ServiceDeclarationNode serviceNode, OpenAPI openAPI,
+                                SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
         // Default object mapper is JSON mapper available in openApi utils.
         this.semanticModel = semanticModel;
         this.moduleMemberVisitor = moduleMemberVisitor;
+        this.serviceNode = serviceNode;
+        this.openAPI = openAPI;
     }
 
-    /**
-     * This method will convert ballerina @Service to openApi @OpenApi object.
-     *
-     * @param service   - Ballerina @Service object to be map to openApi definition
-     * @param openapi   - OpenApi model to populate
-     * @return OpenApi object which represent current service.
-     */
-    public OpenAPI convertServiceToOpenAPI(ServiceDeclarationNode service, OpenAPI openapi) {
-        NodeList<Node> functions = service.members();
+    public void convertServiceToOpenAPI() {
+        NodeList<Node> functions = serviceNode.members();
         List<FunctionDefinitionNode> resources = new ArrayList<>();
         for (Node function: functions) {
             SyntaxKind kind = function.kind();
@@ -74,12 +77,29 @@ public class OpenAPIServiceMapper {
                 resources.add((FunctionDefinitionNode) function);
             }
         }
-        TypeMapper typeMapper = new TypeMapper(openapi, semanticModel, moduleMemberVisitor, errors);
-        OpenAPIResourceMapper resourceMapper = new OpenAPIResourceMapper(openapi, resources, semanticModel,
-                moduleMemberVisitor, errors, typeMapper);
+        TypeMapper typeMapper = new TypeMapper(openAPI, semanticModel, moduleMemberVisitor, diagnostics);
+        OpenAPIResourceMapper resourceMapper = new OpenAPIResourceMapper(openAPI, resources, semanticModel,
+                moduleMemberVisitor, diagnostics, typeMapper, isTreatNilableAsOptionalParameter());
         resourceMapper.addMapping();
-        ConstraintMapper constraintMapper = new ConstraintMapper(openapi, moduleMemberVisitor, errors);
+        ConstraintMapper constraintMapper = new ConstraintMapper(openAPI, moduleMemberVisitor, diagnostics);
         constraintMapper.addMapping();
-        return openapi;
+    }
+
+    private boolean isTreatNilableAsOptionalParameter() {
+        if (serviceNode.metadata().isEmpty()) {
+            return true;
+        }
+
+        MetadataNode metadataNode = serviceNode.metadata().get();
+        NodeList<AnnotationNode> annotations = metadataNode.annotations();
+
+        if (!annotations.isEmpty()) {
+            Optional<String> values = extractServiceAnnotationDetails(annotations,
+                    "http:ServiceConfig", "treatNilableAsOptional");
+            if (values.isPresent()) {
+                return values.get().equals(Constants.TRUE);
+            }
+        }
+        return true;
     }
 }

@@ -43,7 +43,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
-import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,19 +70,21 @@ public class OpenAPIResourceMapper {
     private final TypeMapper typeMapper;
     private final OpenAPI openAPI;
     private final List<FunctionDefinitionNode> resources;
+    private final boolean treatNilableAsOptional;
 
     /**
      * Initializes a resource parser for openApi.
      */
     OpenAPIResourceMapper(OpenAPI openAPI, List<FunctionDefinitionNode> resources, SemanticModel semanticModel,
                           ModuleMemberVisitor moduleMemberVisitor, List<OpenAPIMapperDiagnostic> errors,
-                          TypeMapper typeMapper) {
+                          TypeMapper typeMapper, boolean treatNilableAsOptional) {
         this.openAPI = openAPI;
         this.resources = resources;
         this.semanticModel = semanticModel;
         this.errors = errors;
         this.moduleMemberVisitor = moduleMemberVisitor;
         this.typeMapper = typeMapper;
+        this.treatNilableAsOptional = treatNilableAsOptional;
     }
 
     public void addMapping() {
@@ -201,7 +202,7 @@ public class OpenAPIResourceMapper {
         op.setPath(generateRelativePath);
         /* Set operation id */
         String resName = (resource.functionName().text() + "_" +
-                generateRelativePath).replaceAll("\\{///\\}", "_");
+                generateRelativePath).replaceAll("\\{///}", "_");
 
         if (generateRelativePath.equals("/")) {
             resName = resource.functionName().text();
@@ -213,7 +214,7 @@ public class OpenAPIResourceMapper {
         Map<String, String> apiDocs = listAPIDocumentations(resource, op);
         //Add path parameters if in path and query parameters
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs, semanticModel,
-                moduleMemberVisitor, errors, typeMapper, openAPI);
+                moduleMemberVisitor, treatNilableAsOptional, typeMapper, openAPI);
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
         if (errors.size() > 1 || (errors.size() == 1 && !errors.get(0).getCode().equals(DiagnosticMessages
                 .OAS_CONVERTOR_113.getCode()))) {
@@ -228,10 +229,8 @@ public class OpenAPIResourceMapper {
             return Optional.empty();
         }
         errors.addAll(openAPIParameterMapper.getDiagnostics());
-        ResponseMapper responseMapper = new ResponseMapper(semanticModel, openAPI, resource, op,
-                errors, moduleMemberVisitor);
-        ApiResponses apiResponses = responseMapper.getApiResponses();
-        op.getOperation().setResponses(apiResponses);
+        ResponseMapper responseMapper = new ResponseMapper(semanticModel, openAPI, resource, op, typeMapper);
+        responseMapper.setApiResponses();
         return Optional.of(op);
     }
 

@@ -38,6 +38,9 @@ public class MapTypeMapper extends AbstractTypeMapper {
 
     public static Schema getSchema(MapTypeSymbol typeSymbol, OpenAPI openAPI, AdditionalData additionalData) {
         TypeSymbol memberType = typeSymbol.typeParam();
+        if (additionalData.semanticModel().types().JSON.subtypeOf(memberType)) {
+            return new ObjectSchema();
+        }
         return new ObjectSchema().additionalProperties(TypeMapper.getTypeSchema(memberType,
                 openAPI, additionalData));
     }

@@ -33,9 +33,6 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
-import io.ballerina.openapi.service.mapper.AdditionalData;
-import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.parameter.model.CacheConfigAnnotation;
 import io.ballerina.openapi.service.mapper.parameter.utils.CacheHeaderUtils;
@@ -86,17 +83,16 @@ public class ResponseMapper {
     private final Map<String, Map<String, Header>> headersMap = new HashMap<>();
     private final String mediaTypeSubTypePrefix;
     private final ApiResponses apiResponses = new ApiResponses();
-    private final List<OpenAPIMapperDiagnostic> diagnostics;
-    private final ModuleMemberVisitor moduleMemberVisitor;
+    private final TypeMapper typeMapper;
+    private final OperationAdaptor operationAdaptor;
 
     public ResponseMapper(SemanticModel semanticModel, OpenAPI openAPI, FunctionDefinitionNode resourceNode,
-                          OperationAdaptor operationAdaptor, List<OpenAPIMapperDiagnostic> diagnostics,
-                          ModuleMemberVisitor moduleMemberVisitor) {
+                          OperationAdaptor operationAdaptor, TypeMapper typeMapper) {
         this.semanticModel = semanticModel;
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
-        this.diagnostics = diagnostics;
-        this.moduleMemberVisitor = moduleMemberVisitor;
         this.openAPI = openAPI;
+        this.typeMapper = typeMapper;
+        this.operationAdaptor = operationAdaptor;
         extractAnnotationDetails(resourceNode);
 
         String defaultStatusCode = operationAdaptor.getHttpOperation().equalsIgnoreCase(POST) ? HTTP_201 : HTTP_200;
@@ -107,8 +103,8 @@ public class ResponseMapper {
         }
     }
 
-    public ApiResponses getApiResponses() {
-        return apiResponses;
+    public void setApiResponses() {
+        operationAdaptor.getOperation().setResponses(apiResponses);
     }
 
     private TypeSymbol getReturnTypeSymbol(FunctionDefinitionNode resourceNode) {
@@ -204,8 +200,7 @@ public class ResponseMapper {
     private void addResponseContent(TypeSymbol returnType, ApiResponse apiResponse, String mediaType) {
         if (!isPlainAnyDataType(returnType)) {
             MediaType mediaTypeObj = new MediaType();
-            AdditionalData additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
-            mediaTypeObj.setSchema(TypeMapper.getTypeSchema(returnType, openAPI, additionalData));
+            mediaTypeObj.setSchema(typeMapper.getTypeSchema(returnType));
             updateApiResponseContentWithMediaType(apiResponse, mediaType, mediaTypeObj);
         }
     }
@@ -428,8 +423,7 @@ public class ResponseMapper {
                 RecordTypeSymbol recordType = (RecordTypeSymbol) headersType;
                 Map<String, RecordFieldSymbol> recordFieldMap = new HashMap<>(recordType.fieldDescriptors());
                 Map<String, Schema> recordFieldsMapping = RecordTypeMapper.mapRecordFields(recordFieldMap, openAPI,
-                        new HashSet<>(), recordName,
-                        new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics));
+                        new HashSet<>(), recordName, typeMapper.getComponentMapperData());
                 return mapRecordFieldToHeaders(recordFieldsMapping);
             }
         }

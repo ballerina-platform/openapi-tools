@@ -37,6 +37,7 @@ import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getComponentsSchema;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
@@ -49,26 +50,34 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTyp
 public class TypeMapper {
 
     private final OpenAPI openAPI;
-    private final SemanticModel semanticModel;
-    private final ModuleMemberVisitor moduleMemberVisitor;
-    private final List<OpenAPIMapperDiagnostic> diagnostics;
+    private final AdditionalData componentMapperData;
 
     public TypeMapper(OpenAPI openAPI, SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
                       List<OpenAPIMapperDiagnostic> diagnostics) {
         this.openAPI = openAPI;
-        this.semanticModel = semanticModel;
-        this.moduleMemberVisitor = moduleMemberVisitor;
-        this.diagnostics = diagnostics;
+        this.componentMapperData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
+    }
+
+    public AdditionalData getComponentMapperData() {
+        return componentMapperData;
     }
 
     public void addMapping(TypeSymbol typeSymbol) {
         if (typeSymbol instanceof TypeReferenceTypeSymbol referenceTypeSymbol) {
-            AdditionalData componentMapperData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
             createComponentMapping(referenceTypeSymbol, openAPI, componentMapperData);
         }
     }
 
+    public Schema getTypeSchema(TypeSymbol typeSymbol) {
+        return getTypeSchema(typeSymbol, openAPI, componentMapperData);
+    }
+
     public static Schema getTypeSchema(TypeSymbol typeSymbol, OpenAPI openAPI, AdditionalData componentMapperData) {
+        return getTypeSchema(typeSymbol, openAPI, componentMapperData, false);
+    }
+
+    public static Schema getTypeSchema(TypeSymbol typeSymbol, OpenAPI openAPI, AdditionalData componentMapperData,
+                                       boolean skipNilType) {
         return switch (typeSymbol.typeKind()) {
             case MAP -> MapTypeMapper.getSchema((MapTypeSymbol) typeSymbol, openAPI, componentMapperData);
             case ARRAY ->
@@ -80,7 +89,7 @@ public class TypeMapper {
             case INTERSECTION ->
                     ReadOnlyTypeMapper.getSchema((IntersectionTypeSymbol) typeSymbol, openAPI, componentMapperData);
             case UNION ->
-                    UnionTypeMapper.getSchema((UnionTypeSymbol) typeSymbol, openAPI, componentMapperData);
+                    UnionTypeMapper.getSchema((UnionTypeSymbol) typeSymbol, openAPI, componentMapperData, skipNilType);
             case TABLE ->
                     TableTypeMapper.getSchema((TableTypeSymbol) typeSymbol, openAPI, componentMapperData);
             case TUPLE ->
@@ -112,5 +121,19 @@ public class TypeMapper {
         };
         openAPI.schema(getTypeName(typeSymbol), null);
         mapper.addToComponents(openAPI);
+    }
+
+    public static void setDefaultValue(Schema schema, Object defaultValue) {
+        if (Objects.isNull(defaultValue)) {
+            return;
+        }
+        if (Objects.nonNull(schema.get$ref())) {
+            Schema refSchema = new Schema<>();
+            refSchema.set$ref(schema.get$ref());
+            schema.set$ref(null);
+            schema.addAllOfItem(refSchema);
+            schema.setType(null);
+        }
+        schema.setDefault(defaultValue);
     }
 }

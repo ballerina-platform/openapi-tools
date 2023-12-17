@@ -33,6 +33,7 @@ import io.swagger.v3.oas.models.parameters.PathParameter;
 import java.util.List;
 import java.util.Map;
 
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 public class PathParameterMapper implements ParameterMapper {
@@ -49,7 +50,7 @@ public class PathParameterMapper implements ParameterMapper {
         this.type = pathParameterSymbol.typeDescriptor();
         this.openAPI = openAPI;
         this.name = unescapeIdentifier(pathParameterSymbol.getName().get());
-        this.description = apiDocs.get(pathParameterSymbol.getName().get());
+        this.description = apiDocs.get(removeStartingSingleQuote(pathParameterSymbol.getName().get()));
         this.semanticModel = semanticModel;
         this.diagnostics = diagnostics;
     }
@@ -69,7 +70,7 @@ public class PathParameterMapper implements ParameterMapper {
     }
 
     @Override
-    public Parameter getParameterSchema() {
+    public PathParameter getParameterSchema() {
         PathParameter pathParameter = new PathParameter();
         pathParameter.setName(name);
         pathParameter.setRequired(true);
