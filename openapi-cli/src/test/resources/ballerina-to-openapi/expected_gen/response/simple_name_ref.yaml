@@ -401,8 +401,6 @@ components:
         format: int64
     ReturnValueMapJson:
       type: object
-      additionalProperties:
-        type: object
     ReturnValueJson:
       type: object
     ReturnValueMapRec:

@@ -25,7 +25,6 @@ paths:
             type: string
         - name: q2
           in: query
-          required: true
           schema:
             type: array
             items:
@@ -33,7 +32,6 @@ paths:
             default: []
         - name: q3
           in: query
-          required: true
           schema:
             type: array
             items:
@@ -44,7 +42,6 @@ paths:
               - three
         - name: q4
           in: query
-          required: true
           schema:
             type: array
             items:
@@ -56,7 +53,6 @@ paths:
               - 3
         - name: q5
           in: query
-          required: true
           schema:
             type: array
             items:
@@ -72,43 +68,51 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
+                additionalProperties:
+                  type: string
                 default:
                   name: John
                   city: London
         - name: q7
           in: query
-          required: true
-          schema:
-            type: array
-            items: {}
-            default:
-              - name: John
-                age: "25"
-              - name: David
-                age: "30"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties:
+                    type: string
+                default:
+                  - name: John
+                    age: "25"
+                  - name: David
+                    age: "30"
         - name: q8
           in: query
-          schema:
-            allOf:
-              - $ref: '#/components/schemas/Record'
-            default:
-              name: John
-              address:
-                number: 14/7
-                streetName: 2nd cross street
-                city: London
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Record'
+                default:
+                  name: John
+                  address:
+                    number: 14/7
+                    streetName: 2nd cross street
+                    city: London
         - name: q9
           in: query
           content:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
+                additionalProperties:
+                  type: number
+                  format: float
                 default: {}
         - name: q10
           in: query
-          required: true
           schema:
             type: array
             items:

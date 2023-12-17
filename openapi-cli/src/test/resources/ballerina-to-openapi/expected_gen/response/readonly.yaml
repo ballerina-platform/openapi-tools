@@ -304,8 +304,6 @@ components:
         type: string
     ReadOnlyMapJson:
       type: object
-      additionalProperties:
-        type: object
     ReadOnlyJson:
       type: object
     ReadOnlyXML:

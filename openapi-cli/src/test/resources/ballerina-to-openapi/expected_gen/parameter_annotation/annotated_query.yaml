@@ -16,11 +16,11 @@ paths:
       parameters:
         - name: student
           in: query
+          required: true
           content:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
       responses:
         "201":
           description: Created
@@ -44,7 +44,6 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
                 default:
                   Name: John
       responses:
