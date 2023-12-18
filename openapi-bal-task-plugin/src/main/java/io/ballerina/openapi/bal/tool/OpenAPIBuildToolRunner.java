@@ -41,6 +41,7 @@ import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -52,12 +53,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT;
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT_METHODS;
@@ -83,6 +79,7 @@ import static io.ballerina.openapi.core.GeneratorUtils.normalizeOpenAPI;
  */
 public class OpenAPIBuildToolRunner implements BuildToolRunner {
     static List<Diagnostic> diagnostics = new ArrayList<>();
+    static String md5HexOpenAPI;
 
     @Override
     public String getToolName() {
@@ -99,6 +96,8 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
 
         ImmutablePair<OASClientConfig, OASServiceMetadata> codeGeneratorConfig;
         TomlNodeLocation location = toolContext.packageInstance().ballerinaToml().get().tomlAstNode().location();
+        Path cachePath = toolContext.cachePath();
+
         try {
             // Validate the OAS file whether we can handle within OpenAPI tool
             if (!canHandle(toolContext)) {
@@ -113,6 +112,7 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
                 return;
             }
             TomlTableNode tomlTableNode = toolContext.optionsTable();
+
             if (tomlTableNode == null) {
                 // Default generate client
                 Filter filter = new Filter();
@@ -121,10 +121,16 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
                 OASServiceMetadata serviceMetaData = new OASServiceMetadata.Builder()
                         .withFilters(filter).withOpenAPI(openAPI).build();
                 codeGeneratorConfig =  new ImmutablePair<>(clientConfig, serviceMetaData);
+                if (validateCache(toolContext, cachePath, clientConfig)) {
+                    return;
+                }
                 generateClient(toolContext, codeGeneratorConfig);
             } else {
                 codeGeneratorConfig = extractOptionDetails(toolContext, openAPI);
                 Map<String, TopLevelNode> options = tomlTableNode.entries();
+                if (validateCache(toolContext, cachePath, codeGeneratorConfig.getLeft())) {
+                    return;
+                }
                 if (options.containsKey(MODE)) {
                     TopLevelNode value = options.get(MODE);
                     String mode = value.toNativeObject().toString().trim();
@@ -141,6 +147,25 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_GENERATING_CLIENT;
             reportDiagnostics(error, e.getMessage(), location);
         }
+    }
+
+    private static boolean validateCache(ToolContext toolContext, Path cachePath, OASClientConfig clientConfig) throws IOException {
+        String cacheDir = toolContext.toolId();
+        Path toolCachePath = cachePath.getParent();
+        File directoryPath = new File(toolCachePath.toString());
+        String[] cacheDirs = directoryPath.list();
+        md5HexOpenAPI = getHashValue(clientConfig, toolContext.targetModule());
+        for (String path : cacheDirs) {
+            if (path.equals(cacheDir)) {
+                // read the cache file
+                Path cacheFilePath = Paths.get(cachePath.toString(), "openapi-cache.txt");
+                String cacheContent = Files.readString(Paths.get(cacheFilePath.toString()));
+                if (cacheContent.equals(md5HexOpenAPI)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -263,6 +288,36 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         List<GenSrcFile> sources = generateClientFiles(clientConfig);
         Path outputPath = toolContext.outputPath();
         writeGeneratedSources(sources, outputPath);
+        // Update the cache file
+        Path cachePath = toolContext.cachePath();
+        List<GenSrcFile> sourcesForCache = new ArrayList<>();
+        GenSrcFile genSrcFile = new GenSrcFile(GenSrcFile.GenFileType.CACHE_SRC, null,
+                "openapi-cache.txt", md5HexOpenAPI);
+        sourcesForCache.add(genSrcFile);
+        writeGeneratedSources(sourcesForCache, cachePath);
+    }
+
+    private static String getHashValue(OASClientConfig clientConfig, String targetPath) {
+        String openAPIDefinitions = clientConfig.getOpenAPI().toString().trim().replaceAll("\\s+", "");
+        StringBuilder summaryOfCodegen = new StringBuilder();
+        summaryOfCodegen.append(openAPIDefinitions)
+                .append(targetPath)
+                .append(clientConfig.isResourceMode())
+                .append(clientConfig.getLicense())
+                .append(clientConfig.isNullable());
+        List<String> tags = clientConfig.getFilters().getTags();
+        tags.sort(String.CASE_INSENSITIVE_ORDER);
+        for (String str : tags) {
+            summaryOfCodegen.append(str);
+        }
+        List<String> operations = clientConfig.getFilters().getOperations();
+        operations.sort(String.CASE_INSENSITIVE_ORDER);
+        for (String str : operations) {
+            summaryOfCodegen.append(str);
+        }
+
+        String md5HexOpenAPI = DigestUtils.md5Hex(summaryOfCodegen.toString()).toUpperCase(Locale.ENGLISH);
+        return md5HexOpenAPI;
     }
 
     /**
