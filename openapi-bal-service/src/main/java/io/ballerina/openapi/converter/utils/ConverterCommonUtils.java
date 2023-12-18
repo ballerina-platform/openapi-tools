@@ -110,6 +110,7 @@ public class ConverterCommonUtils {
         Schema<?> schema;
         switch (type) {
             case Constants.STRING:
+            case Constants.STRING_CHAR:
             case Constants.PLAIN:
                 schema = new StringSchema();
                 break;
@@ -124,6 +125,18 @@ public class ConverterCommonUtils {
             case Constants.INTEGER:
                 schema = new IntegerSchema();
                 schema.setFormat("int64");
+                break;
+            case Constants.INT_SIGNED32:
+                schema = new IntegerSchema();
+                schema.setFormat("int32");
+                break;
+            case Constants.INT_UNSIGNED32:
+            case Constants.INT_UNSIGNED16:
+            case Constants.INT_SIGNED16:
+            case Constants.INT_UNSIGNED8:
+            case Constants.INT_SIGNED8:
+                schema = new IntegerSchema();
+                schema.setFormat(null);
                 break;
             case Constants.BYTE_ARRAY:
             case Constants.OCTET_STREAM:
@@ -151,6 +164,10 @@ public class ConverterCommonUtils {
             case Constants.TYPE_REFERENCE:
             case Constants.TYPEREFERENCE:
             case Constants.XML:
+            case Constants.XML_ELEMENT:
+            case Constants.XML_PROCESSING_INSTRUCTION:
+            case Constants.XML_TEXT:
+            case Constants.XML_COMMENT:
             case Constants.JSON:
             default:
                 schema = new Schema<>();
