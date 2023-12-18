@@ -30,4 +30,5 @@ module io.ballerina.openapi.bal.tool {
     requires org.apache.commons.lang3;
     requires io.ballerina.openapi.core;
     requires io.ballerina.toml;
+    requires org.apache.commons.codec;
 }

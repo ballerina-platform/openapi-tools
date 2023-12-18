@@ -39,6 +39,7 @@ ext.netLingalaZip4jVersion = project.netLingalaZip4jVersion
 ext.slf4jVersion = project.slf4jVersion
 ext.commonsLang3Version = project.commonsLang3Version
 ext.commonsIoVersion = project.commonsIoVersion
+ext.commonsCodecVersion = project.commonsCodecVersion
 ext.netLingalaZip4jVersion = project.netLingalaZip4jVersion
 ext.stdlibIoVersion = project.stdlibIoVersion
 ext.stdlibLogVersion = project.stdlibLogVersion
