@@ -36,8 +36,8 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
+import io.ballerina.openapi.service.mapper.parameter.HeaderParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.PathParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.QueryParameterMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
@@ -70,20 +70,18 @@ public class OpenAPIParameterMapper {
     private final Map<String, String> apidocs;
     private final List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
     private final SemanticModel semanticModel;
-    private final ModuleMemberVisitor moduleMemberVisitor;
     private final TypeMapper typeMapper;
     private final OpenAPI openAPI;
     private final boolean treatNilableAsOptional;
 
     public OpenAPIParameterMapper(FunctionDefinitionNode functionDefinitionNode, OperationAdaptor operationAdaptor,
                                   Map<String, String> apiDocs, SemanticModel semanticModel,
-                                  ModuleMemberVisitor moduleMemberVisitor, Boolean treatNilableAsOptional,
+                                  Boolean treatNilableAsOptional,
                                   TypeMapper typeMapper, OpenAPI openAPI) {
         this.functionDefinitionNode = functionDefinitionNode;
         this.operationAdaptor = operationAdaptor;
         this.apidocs = apiDocs;
         this.semanticModel = semanticModel;
-        this.moduleMemberVisitor = moduleMemberVisitor;
         this.typeMapper = typeMapper;
         this.openAPI = openAPI;
         this.treatNilableAsOptional = treatNilableAsOptional;
@@ -183,9 +181,9 @@ public class OpenAPIParameterMapper {
         for (AnnotationNode annotation: annotations) {
             if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
                 // Handle headers.
-                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(semanticModel, apidocs,
-                        moduleMemberVisitor, typeMapper);
-                parameters.addAll(openAPIHeaderMapper.setHeaderParameter(requiredParameterNode));
+                HeaderParameterMapper headerParameterMapper = new HeaderParameterMapper(requiredParameterNode,
+                        apidocs, treatNilableAsOptional, typeMapper);
+                parameters.addAll(headerParameterMapper.getParameterSchemaList());
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_QUERY)) {
                 // Handle query parameter.
                 QueryParameterMapper openAPIQueryParameterMapper = new QueryParameterMapper(requiredParameterNode,
@@ -222,9 +220,9 @@ public class OpenAPIParameterMapper {
         for (AnnotationNode annotation: annotations) {
             if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
                 // Handle headers.
-                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(semanticModel, apidocs,
-                        moduleMemberVisitor, typeMapper);
-                parameters = openAPIHeaderMapper.setHeaderParameter(defaultableParameterNode);
+                HeaderParameterMapper headerParameterMapper = new HeaderParameterMapper(defaultableParameterNode,
+                        apidocs, treatNilableAsOptional, typeMapper);
+                parameters.addAll(headerParameterMapper.getParameterSchemaList());
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_QUERY)) {
                 // Handle query parameter.
                 QueryParameterMapper openAPIQueryParameterMapper = new QueryParameterMapper(defaultableParameterNode,

@@ -62,6 +62,10 @@ public class TypeMapper {
         return componentMapperData;
     }
 
+    public OpenAPI getOpenAPI() {
+        return openAPI;
+    }
+
     public void addMapping(TypeSymbol typeSymbol) {
         if (typeSymbol instanceof TypeReferenceTypeSymbol referenceTypeSymbol) {
             createComponentMapping(referenceTypeSymbol, openAPI, componentMapperData);

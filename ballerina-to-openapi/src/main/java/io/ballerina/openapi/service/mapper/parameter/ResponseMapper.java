@@ -423,7 +423,7 @@ public class ResponseMapper {
                 RecordTypeSymbol recordType = (RecordTypeSymbol) headersType;
                 Map<String, RecordFieldSymbol> recordFieldMap = new HashMap<>(recordType.fieldDescriptors());
                 Map<String, Schema> recordFieldsMapping = RecordTypeMapper.mapRecordFields(recordFieldMap, openAPI,
-                        new HashSet<>(), recordName, typeMapper.getComponentMapperData());
+                        new HashSet<>(), recordName, false, typeMapper.getComponentMapperData());
                 return mapRecordFieldToHeaders(recordFieldsMapping);
             }
         }

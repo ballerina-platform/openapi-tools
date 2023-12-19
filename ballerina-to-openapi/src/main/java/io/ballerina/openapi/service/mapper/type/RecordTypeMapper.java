@@ -16,11 +16,13 @@
 
 package io.ballerina.openapi.service.mapper.type;
 
+import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -69,7 +71,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         List<Schema> allOfSchemaList = mapIncludedRecords(typeSymbol, openAPI, recordFieldMap, additionalData);
 
         Map<String, Schema> properties = mapRecordFields(recordFieldMap, openAPI, requiredFields,
-                recordName, additionalData);
+                recordName, false, additionalData);
 
         Optional<TypeSymbol> restFieldType = typeSymbol.restTypeDescriptor();
         if (restFieldType.isPresent()) {
@@ -118,14 +120,15 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         return allOfSchemaList;
     }
 
-    public static Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
-                                                      OpenAPI openAPI, Set<String> requiredFields,
-                                                      String recordName, AdditionalData additionalData) {
+    public static Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap, OpenAPI openAPI,
+                                                      Set<String> requiredFields, String recordName,
+                                                      boolean treatNilableAsOptional, AdditionalData additionalData) {
         Map<String, Schema> properties = new LinkedHashMap<>();
         for (Map.Entry<String, RecordFieldSymbol> recordField : recordFieldMap.entrySet()) {
             RecordFieldSymbol recordFieldSymbol = recordField.getValue();
             String recordFieldName = MapperCommonUtils.unescapeIdentifier(recordField.getKey().trim());
-            if (!recordFieldSymbol.isOptional() && !recordFieldSymbol.hasDefaultValue()) {
+            if (!recordFieldSymbol.isOptional() && !recordFieldSymbol.hasDefaultValue() &&
+                    (!treatNilableAsOptional || !UnionTypeMapper.hasNilableType(recordFieldSymbol.typeDescriptor()))) {
                 requiredFields.add(recordFieldName);
             }
             String recordFieldDescription = getRecordFieldTypeDescription(recordFieldSymbol);
@@ -154,10 +157,14 @@ public class RecordTypeMapper extends AbstractTypeMapper {
     public static Object getRecordFieldDefaultValue(String recordName, String fieldName,
                                                     ModuleMemberVisitor moduleMemberVisitor) {
         TypeDefinitionNode recordDefNode = moduleMemberVisitor.getTypeDefinitionNode(recordName);
-        if (Objects.isNull(recordDefNode)) {
+        if (Objects.isNull(recordDefNode) || !(recordDefNode.typeDescriptor() instanceof RecordTypeDescriptorNode)) {
             return null;
         }
-        NodeList<Node> recordFields = ((RecordTypeDescriptorNode) recordDefNode.typeDescriptor()).fields();
+        return getRecordFieldDefaultValue(fieldName, (RecordTypeDescriptorNode) recordDefNode.typeDescriptor());
+    }
+
+    private static Object getRecordFieldDefaultValue(String fieldName, RecordTypeDescriptorNode recordDefNode) {
+        NodeList<Node> recordFields = recordDefNode.fields();
         RecordFieldWithDefaultValueNode defaultValueNode = recordFields.stream()
                 .filter(field -> field instanceof RecordFieldWithDefaultValueNode)
                 .map(field -> (RecordFieldWithDefaultValueNode) field)
@@ -170,5 +177,40 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             return null;
         }
         return MapperCommonUtils.parseBalSimpleLiteral(defaultValueExpression.toString().trim());
+    }
+
+    public static RecordTypeInfo getDirectRecordType(TypeSymbol typeSymbol, String recordName) {
+        if (typeSymbol.typeKind() == TypeDescKind.RECORD) {
+            return new RecordTypeInfo(recordName, (RecordTypeSymbol) typeSymbol);
+        } else if (typeSymbol.typeKind() == TypeDescKind.TYPE_REFERENCE) {
+            TypeSymbol referredType = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
+            String referredRecordName = MapperCommonUtils.getTypeName(typeSymbol);
+            return getDirectRecordType(referredType, referredRecordName);
+        } else if (typeSymbol.typeKind() == TypeDescKind.INTERSECTION) {
+            // Only readonly record intersection types are supported
+            List<TypeSymbol> memberTypeSymbols = ((IntersectionTypeSymbol) typeSymbol).memberTypeDescriptors();
+            if (memberTypeSymbols.size() == 2) {
+                if (memberTypeSymbols.get(0).typeKind() == TypeDescKind.READONLY) {
+                    return getDirectRecordType(memberTypeSymbols.get(1), recordName);
+                } else if (memberTypeSymbols.get(1).typeKind() == TypeDescKind.READONLY) {
+                    return getDirectRecordType(memberTypeSymbols.get(0), recordName);
+                }
+            }
+        } else if (typeSymbol.typeKind() == TypeDescKind.UNION) {
+            // Only nilable record union types are supported
+            List<TypeSymbol> memberTypeSymbols = ((UnionTypeSymbol) typeSymbol).memberTypeDescriptors();
+            if (memberTypeSymbols.size() == 2) {
+                if (memberTypeSymbols.get(0).typeKind() == TypeDescKind.NIL) {
+                    return getDirectRecordType(memberTypeSymbols.get(1), recordName);
+                } else if (memberTypeSymbols.get(1).typeKind() == TypeDescKind.NIL) {
+                    return getDirectRecordType(memberTypeSymbols.get(0), recordName);
+                }
+            }
+        }
+        return null;
+    }
+
+    public record RecordTypeInfo(String name, RecordTypeSymbol typeSymbol) {
+
     }
 }

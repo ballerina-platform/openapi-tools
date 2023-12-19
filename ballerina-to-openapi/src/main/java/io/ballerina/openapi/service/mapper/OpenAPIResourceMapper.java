@@ -32,7 +32,6 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.parameter.ResponseMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
@@ -63,7 +62,6 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpe
  */
 public class OpenAPIResourceMapper {
     private final SemanticModel semanticModel;
-    private final ModuleMemberVisitor moduleMemberVisitor;
     private final Paths pathObject = new Paths();
     private final Components components = new Components();
     private final List<OpenAPIMapperDiagnostic> errors;
@@ -76,13 +74,12 @@ public class OpenAPIResourceMapper {
      * Initializes a resource parser for openApi.
      */
     OpenAPIResourceMapper(OpenAPI openAPI, List<FunctionDefinitionNode> resources, SemanticModel semanticModel,
-                          ModuleMemberVisitor moduleMemberVisitor, List<OpenAPIMapperDiagnostic> errors,
+                          List<OpenAPIMapperDiagnostic> errors,
                           TypeMapper typeMapper, boolean treatNilableAsOptional) {
         this.openAPI = openAPI;
         this.resources = resources;
         this.semanticModel = semanticModel;
         this.errors = errors;
-        this.moduleMemberVisitor = moduleMemberVisitor;
         this.typeMapper = typeMapper;
         this.treatNilableAsOptional = treatNilableAsOptional;
     }
@@ -214,7 +211,7 @@ public class OpenAPIResourceMapper {
         Map<String, String> apiDocs = listAPIDocumentations(resource, op);
         //Add path parameters if in path and query parameters
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs, semanticModel,
-                moduleMemberVisitor, treatNilableAsOptional, typeMapper, openAPI);
+                treatNilableAsOptional, typeMapper, openAPI);
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
         if (errors.size() > 1 || (errors.size() == 1 && !errors.get(0).getCode().equals(DiagnosticMessages
                 .OAS_CONVERTOR_113.getCode()))) {

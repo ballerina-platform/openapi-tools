@@ -79,7 +79,7 @@ public class OpenAPIServiceMapper {
         }
         TypeMapper typeMapper = new TypeMapper(openAPI, semanticModel, moduleMemberVisitor, diagnostics);
         OpenAPIResourceMapper resourceMapper = new OpenAPIResourceMapper(openAPI, resources, semanticModel,
-                moduleMemberVisitor, diagnostics, typeMapper, isTreatNilableAsOptionalParameter());
+                diagnostics, typeMapper, isTreatNilableAsOptionalParameter());
         resourceMapper.addMapping();
         ConstraintMapper constraintMapper = new ConstraintMapper(openAPI, moduleMemberVisitor, diagnostics);
         constraintMapper.addMapping();
