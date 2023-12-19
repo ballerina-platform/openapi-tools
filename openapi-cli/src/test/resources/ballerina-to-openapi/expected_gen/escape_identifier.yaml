@@ -47,6 +47,7 @@ paths:
       parameters:
         - name: x-client
           in: header
+          description: Header Parameter Description
           required: true
           schema:
             type: string
