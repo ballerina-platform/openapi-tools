@@ -28,6 +28,17 @@ import java.util.Map;
 public final class Constants {
     public static final String ATTR_HOST = "host";
     public static final String INT = "int";
+    public static final String INT_SIGNED8 = "int_signed8";
+    public static final String INT_SIGNED16 = "int_signed16";
+    public static final String INT_SIGNED32 = "int_signed32";
+    public static final String INT_UNSIGNED8 = "int_unsigned8";
+    public static final String INT_UNSIGNED16 = "int_unsigned16";
+    public static final String INT_UNSIGNED32 = "int_unsigned32";
+    public static final String XML_COMMENT = "xml_comment";
+    public static final String XML_ELEMENT = "xml_element";
+    public static final String XML_PROCESSING_INSTRUCTION = "xml_processing_instruction";
+    public static final String XML_TEXT = "xml_text";
+    public static final String STRING_CHAR = "string_char";
     public static final String INTEGER = "integer";
     public static final String NUMBER = "number";
     public static final String STRING = "string";
