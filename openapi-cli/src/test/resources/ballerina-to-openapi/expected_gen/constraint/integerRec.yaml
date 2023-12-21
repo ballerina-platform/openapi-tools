@@ -18,6 +18,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Child'
+        required: true
       responses:
         "202":
           description: Accepted

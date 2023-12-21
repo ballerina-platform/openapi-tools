@@ -57,6 +57,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Pet-Task'
+        required: true
       responses:
         "202":
           description: Accepted

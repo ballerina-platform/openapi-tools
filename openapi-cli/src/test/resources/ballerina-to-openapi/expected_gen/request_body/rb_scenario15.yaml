@@ -20,6 +20,7 @@ paths:
               type: object
               additionalProperties:
                 type: string
+        required: true
       responses:
         "200":
           description: Ok
@@ -39,6 +40,7 @@ paths:
               type: object
               additionalProperties:
                 type: string
+        required: true
       responses:
         "200":
           description: Ok
@@ -58,6 +60,7 @@ paths:
               type: object
               additionalProperties:
                 type: string
+        required: true
       responses:
         "200":
           description: Ok
@@ -77,6 +80,7 @@ paths:
               type: object
               additionalProperties:
                 type: string
+        required: true
       responses:
         "200":
           description: Ok

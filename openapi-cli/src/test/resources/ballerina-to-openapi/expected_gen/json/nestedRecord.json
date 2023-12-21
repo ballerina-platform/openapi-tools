@@ -26,7 +26,8 @@
                 "$ref" : "#/components/schemas/Dog"
               }
             }
-          }
+          },
+          "required" : true
         },
         "responses" : {
           "202" : {

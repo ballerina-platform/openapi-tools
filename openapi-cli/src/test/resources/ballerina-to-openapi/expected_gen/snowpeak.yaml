@@ -78,6 +78,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Reservation'
+        required: true
       responses:
         "200":
           description: Ok
@@ -106,6 +107,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Reservation'
+        required: true
       responses:
         "201":
           description: Created
@@ -153,6 +155,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Payment'
+        required: true
       responses:
         "201":
           description: Created

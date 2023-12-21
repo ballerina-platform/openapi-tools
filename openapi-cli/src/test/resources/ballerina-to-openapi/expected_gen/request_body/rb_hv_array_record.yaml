@@ -9,6 +9,7 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/Pet'
+        required: true
       responses:
         "200":
           description: Ok

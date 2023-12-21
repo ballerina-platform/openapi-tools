@@ -87,6 +87,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Pet'
+        required: true
       responses:
         "404":
           description: NotFound

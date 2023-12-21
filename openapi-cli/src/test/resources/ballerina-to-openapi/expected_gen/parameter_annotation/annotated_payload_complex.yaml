@@ -26,6 +26,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Student'
+        required: true
       responses:
         "201":
           description: Created
@@ -53,6 +54,7 @@ paths:
           text/plain:
             schema:
               type: string
+        required: true
       responses:
         "201":
           description: Created
