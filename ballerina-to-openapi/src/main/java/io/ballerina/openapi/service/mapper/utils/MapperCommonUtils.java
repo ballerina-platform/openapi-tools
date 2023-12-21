@@ -34,32 +34,24 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
-import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.NonTerminalNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
-import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.Constants;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASResult;
-import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.runtime.api.utils.IdentifierUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -69,13 +61,7 @@ import io.ballerina.tools.text.LineRange;
 import io.ballerina.tools.text.TextRange;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.BooleanSchema;
-import io.swagger.v3.oas.models.media.IntegerSchema;
-import io.swagger.v3.oas.models.media.NumberSchema;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
@@ -116,126 +102,6 @@ public class MapperCommonUtils {
 
     private static final SyntaxKind[] validExpressionKind = {STRING_LITERAL, NUMERIC_LITERAL, BOOLEAN_LITERAL,
             LIST_CONSTRUCTOR, MAPPING_CONSTRUCTOR};
-
-    /**
-     * Retrieves a matching OpenApi {@link Schema} for a provided ballerina type.
-     *
-     * @param type ballerina type name as a String
-     * @return OpenApi {@link Schema} for type defined by {@code type}
-     */
-    public static Schema<?> getOpenApiSchema(String type) {
-        Schema<?> schema;
-        switch (type) {
-            case Constants.STRING:
-            case Constants.STRING_CHAR:
-            case Constants.PLAIN:
-                schema = new StringSchema();
-                break;
-            case Constants.BOOLEAN:
-                schema = new BooleanSchema();
-                break;
-            case Constants.ARRAY:
-            case Constants.TUPLE:
-                schema = new ArraySchema();
-                break;
-            case Constants.INT:
-            case Constants.INTEGER:
-                schema = new IntegerSchema();
-                schema.setFormat("int64");
-                break;
-            case Constants.INT_SIGNED32:
-                schema = new IntegerSchema();
-                schema.setFormat("int32");
-                break;
-            case Constants.INT_UNSIGNED32:
-            case Constants.INT_UNSIGNED16:
-            case Constants.INT_SIGNED16:
-            case Constants.INT_UNSIGNED8:
-            case Constants.INT_SIGNED8:
-                schema = new IntegerSchema();
-                schema.setFormat(null);
-                break;
-            case Constants.BYTE_ARRAY:
-            case Constants.OCTET_STREAM:
-                schema = new StringSchema();
-                schema.setFormat("byte");
-                break;
-            case Constants.NUMBER:
-            case Constants.DECIMAL:
-                schema = new NumberSchema();
-                schema.setFormat(Constants.DOUBLE);
-                break;
-            case Constants.FLOAT:
-                schema = new NumberSchema();
-                schema.setFormat(Constants.FLOAT);
-                break;
-            case Constants.MAP_JSON:
-            case Constants.MAP:
-                schema = new ObjectSchema();
-                schema.additionalProperties(true);
-                break;
-            case Constants.X_WWW_FORM_URLENCODED:
-                schema = new ObjectSchema();
-                schema.setAdditionalProperties(new StringSchema());
-                break;
-            case Constants.TYPE_REFERENCE:
-            case Constants.TYPEREFERENCE:
-            case Constants.XML:
-            case Constants.XML_ELEMENT:
-            case Constants.XML_PROCESSING_INSTRUCTION:
-            case Constants.XML_TEXT:
-            case Constants.XML_COMMENT:
-            case Constants.JSON:
-            default:
-                schema = new Schema<>();
-                break;
-        }
-        return schema;
-    }
-
-    /**
-     * Retrieves a matching OpenApi {@link Schema} for a provided ballerina type.
-     *
-     * @param type ballerina type with SYNTAX KIND
-     * @return OpenApi {@link Schema} for type defined by {@code type}
-     */
-    public static Schema<?> getOpenApiSchema(SyntaxKind type) {
-        Schema<?> schema;
-        switch (type) {
-            case STRING_TYPE_DESC:
-                schema = new StringSchema();
-                break;
-            case BOOLEAN_TYPE_DESC:
-                schema = new BooleanSchema();
-                break;
-            case ARRAY_TYPE_DESC:
-                schema = new ArraySchema();
-                break;
-            case INT_TYPE_DESC:
-                schema = new IntegerSchema();
-                schema.setFormat("int64");
-                break;
-            case BYTE_TYPE_DESC:
-                schema = new StringSchema();
-                schema.setFormat("byte");
-                break;
-            case DECIMAL_TYPE_DESC:
-                schema = new NumberSchema();
-                schema.setFormat(Constants.DOUBLE);
-                break;
-            case FLOAT_TYPE_DESC:
-                schema = new NumberSchema();
-                schema.setFormat(Constants.FLOAT);
-                break;
-            case MAP_TYPE_DESC:
-                schema = new ObjectSchema();
-                break;
-            default:
-                schema = new Schema<>();
-                break;
-        }
-        return schema;
-    }
 
     /**
      * Generate operationId by removing special characters.
@@ -314,8 +180,7 @@ public class MapperCommonUtils {
                         }
                         mediaTypes.add(((BasicLiteralNode) mime).literalToken().text().trim().replaceAll("\"", ""));
                     }
-                } else if (expressionNode instanceof QualifiedNameReferenceNode && semanticModel != null) {
-                    QualifiedNameReferenceNode moduleRef = (QualifiedNameReferenceNode) expressionNode;
+                } else if (expressionNode instanceof QualifiedNameReferenceNode moduleRef && semanticModel != null) {
                     Optional<Symbol> refSymbol = semanticModel.symbol(moduleRef);
                     if (refSymbol.isPresent() && (refSymbol.get().kind() == SymbolKind.CONSTANT)
                             && ((ConstantSymbol) refSymbol.get()).resolvedValue().isPresent()) {
@@ -328,45 +193,6 @@ public class MapperCommonUtils {
             }
         }
         return mediaTypes;
-    }
-
-    /**
-     * This function uses to take the service declaration node from given required node and return all the annotation
-     * nodes that attached to service node.
-     */
-    public static NodeList<AnnotationNode> getAnnotationNodesFromServiceNode(RequiredParameterNode headerParam) {
-        NodeList<AnnotationNode> annotations = AbstractNodeFactory.createEmptyNodeList();
-        NonTerminalNode parent = headerParam.parent();
-        while (parent.kind() != SyntaxKind.SERVICE_DECLARATION) {
-            parent = parent.parent();
-        }
-        ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) parent;
-        if (serviceNode.metadata().isPresent()) {
-            MetadataNode metadataNode = serviceNode.metadata().get();
-            annotations = metadataNode.annotations();
-        }
-        return annotations;
-    }
-
-    /**
-     * This function for taking the specific media-type subtype prefix from http service configuration annotation.
-     * <pre>
-     *     @http:ServiceConfig {
-     *          mediaTypeSubtypePrefix : "vnd.exm.sales"
-     *  }
-     * </pre>
-     */
-    public static Optional<String> extractCustomMediaType(FunctionDefinitionNode functionDefNode) {
-        ServiceDeclarationNode serviceDefNode = (ServiceDeclarationNode) functionDefNode.parent();
-        if (serviceDefNode.metadata().isPresent()) {
-            MetadataNode metadataNode = serviceDefNode.metadata().get();
-            NodeList<AnnotationNode> annotations = metadataNode.annotations();
-            if (!annotations.isEmpty()) {
-                return MapperCommonUtils.extractServiceAnnotationDetails(annotations,
-                        "http:ServiceConfig", "mediaTypeSubtypePrefix");
-            }
-        }
-        return Optional.empty();
     }
 
     /**
@@ -565,19 +391,6 @@ public class MapperCommonUtils {
         return parameterName.replaceAll("^'", "");
     }
 
-    public static Schema<?> handleReference(SemanticModel semanticModel, SimpleNameReferenceNode recordNode,
-                                            ModuleMemberVisitor moduleMemberVisitor, TypeMapper typeMapper) {
-        Schema<?> refSchema = new Schema<>();
-        // Creating request body - required.
-        Optional<Symbol> symbol = semanticModel.symbol(recordNode);
-        if (symbol.isPresent() && symbol.get() instanceof TypeSymbol) {
-            String recordName = recordNode.name().toString().trim();
-            typeMapper.addMapping((TypeSymbol) symbol.get());
-            refSchema.set$ref(MapperCommonUtils.unescapeIdentifier(recordName));
-        }
-        return refSchema;
-    }
-
     public static String getTypeDescription(TypeReferenceTypeSymbol typeSymbol) {
         Symbol definition = typeSymbol.definition();
         if (definition instanceof Documentable) {
@@ -602,19 +415,6 @@ public class MapperCommonUtils {
         return unescapeIdentifier(typeName);
     }
 
-    public static Schema setDefaultValue(Schema schema, String defaultValue) {
-        if (Objects.isNull(schema) || Objects.isNull(defaultValue)) {
-            return schema;
-        }
-        if (!Objects.isNull(schema.get$ref())) {
-            Schema<?> compoundSchema = new Schema<>();
-            compoundSchema.addAllOfItem(schema);
-            schema = compoundSchema;
-        }
-        schema.setDefault(parseBalSimpleLiteral(defaultValue));
-        return schema;
-    }
-
     public static Object parseBalSimpleLiteral(String literal) {
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -625,8 +425,8 @@ public class MapperCommonUtils {
         }
     }
 
-    public static boolean isSimpleValueLiteralKind(SyntaxKind valueExpressionKind) {
-        return Arrays.stream(validExpressionKind).anyMatch(syntaxKind -> syntaxKind ==
+    public static boolean isNotSimpleValueLiteralKind(SyntaxKind valueExpressionKind) {
+        return Arrays.stream(validExpressionKind).noneMatch(syntaxKind -> syntaxKind ==
                 valueExpressionKind);
     }
 

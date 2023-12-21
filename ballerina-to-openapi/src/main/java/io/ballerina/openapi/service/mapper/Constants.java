@@ -28,42 +28,20 @@ import java.util.Map;
 public final class Constants {
     public static final String ATTR_HOST = "host";
     public static final String INT = "int";
-    public static final String INT_SIGNED8 = "int_signed8";
-    public static final String INT_SIGNED16 = "int_signed16";
-    public static final String INT_SIGNED32 = "int_signed32";
-    public static final String INT_UNSIGNED8 = "int_unsigned8";
-    public static final String INT_UNSIGNED16 = "int_unsigned16";
-    public static final String INT_UNSIGNED32 = "int_unsigned32";
-    public static final String XML_COMMENT = "xml_comment";
-    public static final String XML_ELEMENT = "xml_element";
-    public static final String XML_PROCESSING_INSTRUCTION = "xml_processing_instruction";
-    public static final String XML_TEXT = "xml_text";
-    public static final String STRING_CHAR = "string_char";
-    public static final String INTEGER = "integer";
     public static final String NUMBER = "number";
     public static final String STRING = "string";
-    public static final String BOOLEAN = "boolean";
-    public static final String DECIMAL = "decimal";
-    public static final String ARRAY = "array";
     public static final String INT64 = "int64";
     public static final String INT32 = "int32";
     public static final String FLOAT = "float";
     public static final String DOUBLE = "double";
-    public static final String TYPE_REFERENCE = "type_reference";
-    public static final String PATH = "path";
-    public static final String BODY = "body";
     public static final String HTTP_PAYLOAD = "http:Payload";
     public static final String HTTP_QUERY = "http:Query";
     public static final String HTTP = "http";
     public static final String BALLERINA = "ballerina";
-    public static final String TYPEREFERENCE = "typeReference";
     public static final String HTTP_HEADER = "http:Header";
-    public static final String BYTE_ARRAY = "byte[]";
     public static final String BYTE = "byte";
-    public static final String OCTET_STREAM = "octet-stream";
     public static final String XML = "xml";
     public static final String JSON = "json";
-    public static final String PLAIN = "plain";
     public static final String GET = "GET";
     public static final String POST = "POST";
     public static final String PATCH = "PATCH";
@@ -74,27 +52,11 @@ public final class Constants {
     public static final String OPENAPI_SUFFIX = "_openapi";
     public static final String SERVER = "server";
     public static final String PORT = "port";
-    public static final String APPLICATION_PREFIX = "application/";
-    public static final String JSON_POSTFIX = "+json";
-    public static final String XML_POSTFIX = "+xml";
-    public static final String TEXT_POSTFIX = "+plain";
-    public static final String HTML_POSTFIX = "+plain";
-    public static final String OCTECT_STREAM_POSTFIX = "+octet-stream";
-    public static final String X_WWW_FORM_URLENCODED_POSTFIX = "+x-www-form-urlencoded";
-    public static final String X_WWW_FORM_URLENCODED = "x-www-form-urlencoded";
-
-    public static final String TEXT_PREFIX = "text/";
-    public static final String MAP_JSON = "map<json>";
-    public static final String MAP_STRING = "map<string>";
-    public static final String MAP = "map";
     public static final String HTTP_REQUEST = "http:Request";
     public static final String DEFAULT = "default";
-    public static final String HTTP_RESPONSE = "http:Response";
-    public static final String RESPONSE_HEADERS = "headers";
     public static final String WILD_CARD_CONTENT_KEY = "*/*";
     public static final String WILD_CARD_SUMMARY = "Any type of entity body";
     public static final String MEDIA_TYPE = "mediaType";
-    public static final String TUPLE = "tuple";
     public static final String REGEX_INTERPOLATION_PATTERN = "^(?!.*\\$\\{).+$";
     public static final String DATE_CONSTRAINT_ANNOTATION = "constraint:Date";
 
@@ -110,7 +72,7 @@ public final class Constants {
         RECORD("record"),
         ARRAY("array");
 
-        private String name;
+        private final String name;
 
         BallerinaType(String name) {
             this.name = name;
@@ -134,7 +96,7 @@ public final class Constants {
         RECORD("object"),
         ARRAY("array");
 
-        private String name;
+        private final String name;
 
         OpenAPIType(String name) {
             this.name = name;
@@ -285,10 +247,6 @@ public final class Constants {
     public static final String HTTP_200 = "200";
     public static final String HTTP_201 = "201";
     public static final String HTTP_500 = "500";
-    public static final String HTTP_200_DESCRIPTION = "Ok";
-    public static final String HTTP_201_DESCRIPTION = "Created";
-    public static final String HTTP_500_DESCRIPTION = "Internal server error";
-    public static final String HTTP_204 = "204";
     public static final String SPECIAL_CHAR_REGEX = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
 
     //Cache config constant
@@ -318,7 +276,6 @@ public final class Constants {
     public static final String YAML_EXTENSION = ".yaml";
     public static final String JSON_EXTENSION = ".json";
     public static final String YML_EXTENSION = ".yml";
-    public static final String PLUS = "+";
     public static final String UNDERSCORE = "_";
     public static final String HTTP_202 = "202";
     public static final String HTTP_400 = "400";

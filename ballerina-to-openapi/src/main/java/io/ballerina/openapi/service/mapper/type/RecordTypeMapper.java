@@ -173,7 +173,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             return null;
         }
         ExpressionNode defaultValueExpression = defaultValueNode.expression();
-        if (!MapperCommonUtils.isSimpleValueLiteralKind(defaultValueExpression.kind())) {
+        if (MapperCommonUtils.isNotSimpleValueLiteralKind(defaultValueExpression.kind())) {
             return null;
         }
         return MapperCommonUtils.parseBalSimpleLiteral(defaultValueExpression.toString().trim());

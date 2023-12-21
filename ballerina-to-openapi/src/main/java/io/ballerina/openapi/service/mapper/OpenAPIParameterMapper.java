@@ -44,7 +44,6 @@ import io.ballerina.openapi.service.mapper.parameter.PathParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.QueryParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.RequestBodyMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -96,7 +95,7 @@ public class OpenAPIParameterMapper {
     /**
      * Create {@code Parameters} model for openAPI operation.
      */
-    public void getResourceInputs(Components components, SemanticModel semanticModel) {
+    public void getResourceInputs(SemanticModel semanticModel) {
         List<Parameter> parameters = new LinkedList<>();
         //Set path parameters
         NodeList<Node> pathParams = functionDefinitionNode.relativeResourcePath();
@@ -137,7 +136,7 @@ public class OpenAPIParameterMapper {
                 // Handle header, payload parameter
                 if (requiredParameterNode.typeName() instanceof TypeDescriptorNode &&
                         !requiredParameterNode.annotations().isEmpty()) {
-                    handleAnnotationParameters(components, semanticModel, parameters, requiredParameterNode);
+                    handleAnnotationParameters(semanticModel, parameters, requiredParameterNode);
                 }
             } else if (parameterNode.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
                 DefaultableParameterNode defaultableParameterNode = (DefaultableParameterNode) parameterNode;
@@ -174,9 +173,7 @@ public class OpenAPIParameterMapper {
     /**
      * This function for handle the payload and header parameters with annotation @http:Payload, @http:Header.
      */
-    private void handleAnnotationParameters(Components components,
-                                            SemanticModel semanticModel,
-                                            List<Parameter> parameters,
+    private void handleAnnotationParameters(SemanticModel semanticModel, List<Parameter> parameters,
                                             RequiredParameterNode requiredParameterNode) {
 
         NodeList<AnnotationNode> annotations = requiredParameterNode.annotations();
@@ -194,7 +191,6 @@ public class OpenAPIParameterMapper {
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
                     (!Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(
                             operationAdaptor.getHttpOperation()))) {
-                Map<String, Schema> schema = components.getSchemas();
                 // Handle request payload.
                 Optional<Symbol> symbol = semanticModel.symbol(requiredParameterNode);
                 if (symbol.isEmpty() || !(symbol.get() instanceof ParameterSymbol)) {

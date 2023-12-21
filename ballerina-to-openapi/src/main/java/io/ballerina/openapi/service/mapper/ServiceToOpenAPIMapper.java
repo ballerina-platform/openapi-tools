@@ -460,19 +460,22 @@ public class ServiceToOpenAPIMapper {
             ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
                     error.getDescription(), location);
             diagnostics.add(diagnostic);
-        } else if (Paths.get(openapiPath.toString()).isAbsolute()) {
-            relativePath = Paths.get(openapiPath.toString());
         } else {
-            File file = new File(ballerinaFilePath.toString());
-            File parentFolder = new File(file.getParent());
-            File openapiContract = new File(parentFolder, openapiPath.toString());
-            try {
-                relativePath = Paths.get(openapiContract.getCanonicalPath());
-            } catch (IOException e) {
-                DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
-                ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode()
-                        , error.getDescription(), location, e.toString());
-                diagnostics.add(diagnostic);
+            Path path = Paths.get(openapiPath.toString());
+            if (path.isAbsolute()) {
+                relativePath = path;
+            } else {
+                File file = new File(ballerinaFilePath.toString());
+                File parentFolder = new File(file.getParent());
+                File openapiContract = new File(parentFolder, openapiPath.toString());
+                try {
+                    relativePath = Paths.get(openapiContract.getCanonicalPath());
+                } catch (IOException e) {
+                    DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
+                    ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode()
+                            , error.getDescription(), location, e.toString());
+                    diagnostics.add(diagnostic);
+                }
             }
         }
         if (relativePath != null && Files.exists(relativePath)) {

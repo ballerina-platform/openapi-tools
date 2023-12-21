@@ -29,7 +29,7 @@ public interface ParameterMapper {
 
     static Object getDefaultValue(DefaultableParameterNode parameterNode) {
         Node defaultValueExpression = parameterNode.expression();
-        if (!MapperCommonUtils.isSimpleValueLiteralKind(defaultValueExpression.kind())) {
+        if (MapperCommonUtils.isNotSimpleValueLiteralKind(defaultValueExpression.kind())) {
             return null;
         }
         return MapperCommonUtils.parseBalSimpleLiteral(defaultValueExpression.toString().trim());

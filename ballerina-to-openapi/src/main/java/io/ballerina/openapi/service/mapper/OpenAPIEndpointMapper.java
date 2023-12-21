@@ -67,7 +67,7 @@ public class OpenAPIEndpointMapper {
      */
     public OpenAPI getServers(OpenAPI openAPI, Set<ListenerDeclarationNode> endpoints,
                               ServiceDeclarationNode service) {
-        openAPI = extractServerForExpressionNode(openAPI, service.expressions(), service);
+        extractServerForExpressionNode(openAPI, service.expressions(), service);
         List<Server> servers = openAPI.getServers();
         //Handle ImplicitNewExpressionNode in listener
         if (!endpoints.isEmpty()) {
@@ -91,9 +91,8 @@ public class OpenAPIEndpointMapper {
     private void updateServerDetails(ServiceDeclarationNode service, List<Server> servers,
                                      ListenerDeclarationNode endPoint, ExpressionNode expNode) {
 
-        if (expNode instanceof QualifiedNameReferenceNode) {
+        if (expNode instanceof QualifiedNameReferenceNode refNode) {
             //Handle QualifiedNameReferenceNode in listener
-            QualifiedNameReferenceNode refNode = (QualifiedNameReferenceNode) expNode;
             if (refNode.identifier().text().trim().equals(endPoint.variableName().text().trim())) {
                 String serviceBasePath = getServiceBasePath(service);
                 Server server = extractServer(endPoint, serviceBasePath);
@@ -155,7 +154,7 @@ public class OpenAPIEndpointMapper {
     }
 
     // Function to handle ExplicitNewExpressionNode in listener.
-    private OpenAPI extractServerForExpressionNode(OpenAPI openAPI, SeparatedNodeList<ExpressionNode> bTypeExplicit,
+    private void extractServerForExpressionNode(OpenAPI openAPI, SeparatedNodeList<ExpressionNode> bTypeExplicit,
                                                                     ServiceDeclarationNode service) {
         String serviceBasePath = getServiceBasePath(service);
         Optional<ParenthesizedArgList> list;
@@ -169,7 +168,6 @@ public class OpenAPIEndpointMapper {
             }
         }
         openAPI.setServers(servers);
-        return openAPI;
     }
 
     //Assign host and port values
@@ -223,29 +221,25 @@ public class OpenAPIEndpointMapper {
             server.setVariables(serverVariables);
 
         } else if (port != null) {
+            ServerVariable serverUrlVariable = new ServerVariable();
             if (port.equals("443")) {
-                ServerVariable serverUrlVariable = new ServerVariable();
                 serverUrlVariable._default("https://localhost");
                 ServerVariable portVariable =  new ServerVariable();
                 portVariable._default("443");
 
                 serverVariables.addServerVariable(SERVER, serverUrlVariable);
                 serverVariables.addServerVariable(PORT, portVariable);
-                serverUrl = "{server}:{port}" + serviceBasePath;
-                server.setUrl(serverUrl);
-                server.setVariables(serverVariables);
             } else {
-                ServerVariable serverUrlVariable = new ServerVariable();
                 serverUrlVariable._default("http://localhost");
                 ServerVariable portVariable =  new ServerVariable();
                 portVariable._default(port);
 
                 serverVariables.addServerVariable(SERVER, serverUrlVariable);
                 serverVariables.addServerVariable(PORT, portVariable);
-                serverUrl = "{server}:{port}" + serviceBasePath;
-                server.setUrl(serverUrl);
-                server.setVariables(serverVariables);
             }
+            serverUrl = "{server}:{port}" + serviceBasePath;
+            server.setUrl(serverUrl);
+            server.setVariables(serverVariables);
         }
     }
 
@@ -256,7 +250,7 @@ public class OpenAPIEndpointMapper {
             SeparatedNodeList<MappingFieldNode> recordFields = bLangRecordLiteral.fields();
             host = concatenateServerURL(host, recordFields);
         }
-        if (!host.equals("")) {
+        if (!host.isEmpty()) {
            host = host.replaceAll("\"", "");
         }
         return host;

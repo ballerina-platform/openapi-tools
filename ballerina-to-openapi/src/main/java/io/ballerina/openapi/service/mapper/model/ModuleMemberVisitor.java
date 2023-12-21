@@ -45,10 +45,6 @@ public class ModuleMemberVisitor extends NodeVisitor {
         listenerDeclarationNodes.add(listenerDeclarationNode);
     }
 
-    public Set<TypeDefinitionNode> getTypeDefinitionNodes() {
-        return typeDefinitionNodes;
-    }
-
     public Set<ListenerDeclarationNode> getListenerDeclarationNodes() {
         return listenerDeclarationNodes;
     }
