@@ -19,7 +19,9 @@
 package io.ballerina.openapi.service.mapper;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.PathParameterSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -40,6 +42,7 @@ import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.parameter.HeaderParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.PathParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.QueryParameterMapper;
+import io.ballerina.openapi.service.mapper.parameter.RequestBodyMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -59,7 +62,6 @@ import java.util.Optional;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_REQUEST;
 import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_CONTENT_KEY;
 import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_SUMMARY;
-import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractCustomMediaType;
 
 /**
  * OpenAPIParameterMapper provides functionality for converting ballerina parameter to OAS parameter model.
@@ -194,13 +196,14 @@ public class OpenAPIParameterMapper {
                             operationAdaptor.getHttpOperation()))) {
                 Map<String, Schema> schema = components.getSchemas();
                 // Handle request payload.
-                Optional<String> customMediaType = extractCustomMediaType(functionDefinitionNode);
-                OpenAPIRequestBodyMapper openAPIRequestBodyMapper = customMediaType.map(
-                        value -> new OpenAPIRequestBodyMapper(operationAdaptor, semanticModel, value,
-                                typeMapper)).orElse(
-                                new OpenAPIRequestBodyMapper(operationAdaptor, semanticModel, typeMapper));
-                openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema, annotation, apidocs);
-                diagnostics.addAll(openAPIRequestBodyMapper.getDiagnostics());
+                Optional<Symbol> symbol = semanticModel.symbol(requiredParameterNode);
+                if (symbol.isEmpty() || !(symbol.get() instanceof ParameterSymbol)) {
+                    return;
+                }
+                RequestBodyMapper requestBodyMapper = new RequestBodyMapper(semanticModel,
+                        (ParameterSymbol) symbol.get(), annotation, operationAdaptor, typeMapper,
+                        functionDefinitionNode, apidocs);
+                requestBodyMapper.setRequestBody();
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
                     (Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
