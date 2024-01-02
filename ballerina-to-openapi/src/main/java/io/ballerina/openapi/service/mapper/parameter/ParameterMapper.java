@@ -29,12 +29,9 @@ import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.service.mapper.Constants;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
@@ -49,8 +46,8 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_REQUEST;
@@ -87,134 +84,117 @@ public class ParameterMapper {
         return diagnostics;
     }
 
-    /**
-     * Create {@code Parameters} model for openAPI operation.
-     */
-    public void getResourceInputs(SemanticModel semanticModel) {
-        //Set path parameters
+    public void setParameters() {
         NodeList<Node> pathParams = functionDefinitionNode.relativeResourcePath();
         if (!pathParams.isEmpty()) {
-            createPathParameters(pathParams);
+            setPathParameters(pathParams);
         }
-        // Set query parameters, headers and requestBody
+
         FunctionSignatureNode functionSignature = functionDefinitionNode.functionSignature();
         SeparatedNodeList<ParameterNode> parameterList = functionSignature.parameters();
         for (ParameterNode parameterNode : parameterList) {
-            QueryParameterMapper queryParameterMapper = new QueryParameterMapper(parameterNode, apidocs,
-                    operationAdaptor, treatNilableAsOptional, typeMapper);
-            if (parameterNode.kind() == SyntaxKind.REQUIRED_PARAM) {
-                RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
-                // Handle query parameter
-                if (requiredParameterNode.typeName().kind() == SyntaxKind.QUALIFIED_NAME_REFERENCE) {
-                    QualifiedNameReferenceNode referenceNode =
-                            (QualifiedNameReferenceNode) requiredParameterNode.typeName();
-                    String typeName = (referenceNode).modulePrefix().text() + ":" + (referenceNode).identifier().text();
-                    if (typeName.equals(HTTP_REQUEST) &&
-                            (Constants.GET.equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
-                        DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
-                        IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
-                                referenceNode.location());
-                        diagnostics.add(error);
-                    } else if (typeName.equals(HTTP_REQUEST)) {
-                        RequestBody requestBody = new RequestBody();
-                        MediaType mediaType = new MediaType();
-                        mediaType.setSchema(new Schema<>().description(WILD_CARD_SUMMARY));
-                        requestBody.setContent(new Content().addMediaType(WILD_CARD_CONTENT_KEY, mediaType));
-                        operationAdaptor.getOperation().setRequestBody(requestBody);
-                    }
+            String parameterType = getParameterType(parameterNode);
+            if (Objects.isNull(parameterType)) {
+                continue;
+            }
+            if ((parameterType.equals("REQUEST") || parameterType.equals("PAYLOAD")) &&
+                    (Constants.GET.equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
+                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
+                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                        parameterNode.location());
+                diagnostics.add(error);
+                continue;
+            }
+            setParameter(parameterNode, parameterType);
+        }
+    }
+
+    private void setParameter(ParameterNode parameterNode, String parameterType) {
+        switch (parameterType) {
+            case "QUERY" -> {
+                QueryParameterMapper queryParameterMapper = new QueryParameterMapper(parameterNode, apidocs,
+                        operationAdaptor, treatNilableAsOptional, typeMapper);
+                queryParameterMapper.setParameter();
+            }
+            case "HEADER" -> {
+                HeaderParameterMapper headerParameterMapper = new HeaderParameterMapper(parameterNode, apidocs,
+                        operationAdaptor, treatNilableAsOptional, typeMapper);
+                headerParameterMapper.setParameter();
+            }
+            case "PAYLOAD" -> {
+                Optional<Symbol> symbol = semanticModel.symbol(parameterNode);
+                if (symbol.isEmpty() || !(symbol.get() instanceof ParameterSymbol)) {
+                    return;
                 }
-                if (requiredParameterNode.typeName().kind() != SyntaxKind.QUALIFIED_NAME_REFERENCE &&
-                        requiredParameterNode.annotations().isEmpty()) {
-                    queryParameterMapper.setParameter();
-                }
-                // Handle header, payload parameter
-                if (requiredParameterNode.typeName() instanceof TypeDescriptorNode &&
-                        !requiredParameterNode.annotations().isEmpty()) {
-                    handleAnnotationParameters(semanticModel, requiredParameterNode);
-                }
-            } else if (parameterNode.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
-                DefaultableParameterNode defaultableParameterNode = (DefaultableParameterNode) parameterNode;
-                // Handle header parameter
-                if (defaultableParameterNode.typeName() instanceof TypeDescriptorNode &&
-                        !defaultableParameterNode.annotations().isEmpty()) {
-                    handleDefaultableAnnotationParameters(defaultableParameterNode);
-                } else {
-                    queryParameterMapper.setParameter();
-                }
+                AnnotationNode annotation = getPayloadAnnotation(parameterNode);
+                RequestBodyMapper requestBodyMapper = new RequestBodyMapper(semanticModel,
+                        (ParameterSymbol) symbol.get(), annotation, operationAdaptor,
+                        typeMapper, functionDefinitionNode, apidocs);
+                requestBodyMapper.setRequestBody();
+            }
+            case "REQUEST" -> {
+                RequestBody requestBody = new RequestBody();
+                MediaType mediaType = new MediaType();
+                mediaType.setSchema(new Schema<>().description(WILD_CARD_SUMMARY));
+                requestBody.setContent(new Content().addMediaType(WILD_CARD_CONTENT_KEY, mediaType));
+                operationAdaptor.setRequestBody(requestBody);
+            }
+            default -> {
+
             }
         }
     }
 
-    /**
-     * Map path parameters to OpenAPI specification.
-     */
-    private void createPathParameters(NodeList<Node> pathParams) {
+    private AnnotationNode getPayloadAnnotation(ParameterNode parameterNode) {
+        if (parameterNode instanceof DefaultableParameterNode defaultableParameterNode) {
+            return defaultableParameterNode.annotations().stream()
+                    .filter(annotationNode -> annotationNode.annotReference().toString().trim()
+                            .equals(Constants.HTTP_PAYLOAD))
+                    .findFirst().orElse(null);
+        } else if (parameterNode instanceof RequiredParameterNode requiredParameterNode) {
+            return requiredParameterNode.annotations().stream()
+                    .filter(annotationNode -> annotationNode.annotReference().toString().trim()
+                            .equals(Constants.HTTP_PAYLOAD))
+                    .findFirst().orElse(null);
+        }
+        return null;
+    }
+
+    private void setPathParameters(NodeList<Node> pathParams) {
         for (Node param: pathParams) {
             if (param instanceof ResourcePathParameterNode pathParam) {
-                PathParameterMapper pathParameterMapper = new PathParameterMapper(
-                        (PathParameterSymbol) semanticModel.symbol(pathParam).get(), openAPI, apidocs, operationAdaptor,
-                        semanticModel, diagnostics);
+                PathParameterSymbol pathParameterSymbol = (PathParameterSymbol) semanticModel.symbol(pathParam).get();
+                PathParameterMapper pathParameterMapper = new PathParameterMapper(pathParameterSymbol, openAPI, apidocs,
+                        operationAdaptor, semanticModel, diagnostics);
                 pathParameterMapper.setParameter();
             }
         }
     }
 
-    /**
-     * This function for handle the payload and header parameters with annotation @http:Payload, @http:Header.
-     */
-    private void handleAnnotationParameters(SemanticModel semanticModel, RequiredParameterNode requiredParameterNode) {
-
-        NodeList<AnnotationNode> annotations = requiredParameterNode.annotations();
-        for (AnnotationNode annotation: annotations) {
-            if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
-                // Handle headers.
-                HeaderParameterMapper headerParameterMapper = new HeaderParameterMapper(requiredParameterNode,
-                        apidocs, operationAdaptor, treatNilableAsOptional, typeMapper);
-                headerParameterMapper.setParameter();
-            } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_QUERY)) {
-                // Handle query parameter.
-                QueryParameterMapper queryParameterMapper = new QueryParameterMapper(requiredParameterNode,
-                        apidocs, operationAdaptor, treatNilableAsOptional, typeMapper);
-                queryParameterMapper.setParameter();
-            } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
-                    (!Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(
-                            operationAdaptor.getHttpOperation()))) {
-                // Handle request payload.
-                Optional<Symbol> symbol = semanticModel.symbol(requiredParameterNode);
-                if (symbol.isEmpty() || !(symbol.get() instanceof ParameterSymbol)) {
-                    return;
-                }
-                RequestBodyMapper requestBodyMapper = new RequestBodyMapper(semanticModel,
-                        (ParameterSymbol) symbol.get(), annotation, operationAdaptor, typeMapper,
-                        functionDefinitionNode, apidocs);
-                requestBodyMapper.setRequestBody();
-            } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
-                    (Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
-                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
-                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
-                        annotation.location());
-                diagnostics.add(error);
+    private String getParameterType(ParameterNode parameterNode) {
+        NodeList<AnnotationNode> annotationNodes = null;
+        if (parameterNode instanceof DefaultableParameterNode defaultableParameterNode) {
+            annotationNodes = defaultableParameterNode.annotations();
+        } else if (parameterNode instanceof RequiredParameterNode requiredParameterNode) {
+            String parameterTypeName = requiredParameterNode.typeName().toString().trim();
+            if (parameterTypeName.equals(HTTP_REQUEST)) {
+                return "REQUEST";
+            } else if (parameterTypeName.startsWith("http:")) {
+                return null;
+            }
+            annotationNodes = requiredParameterNode.annotations();
+        }
+        if (Objects.isNull(annotationNodes) || annotationNodes.isEmpty()) {
+            return "QUERY";
+        }
+        for (AnnotationNode annotationNode: annotationNodes) {
+            String annotationTypeName = annotationNode.annotReference().toString().trim();
+            if (annotationTypeName.equals(Constants.HTTP_HEADER)) {
+                return "HEADER";
+            } else if (annotationTypeName.equals(Constants.HTTP_PAYLOAD)) {
+                return "PAYLOAD";
             }
         }
-    }
-
-    /**
-     * This function for handle the payload and header parameters with annotation @http:Payload, @http:Header.
-     */
-    private void handleDefaultableAnnotationParameters(DefaultableParameterNode defaultableParameterNode) {
-        NodeList<AnnotationNode> annotations = defaultableParameterNode.annotations();
-        for (AnnotationNode annotation: annotations) {
-            if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
-                // Handle headers.
-                HeaderParameterMapper headerParameterMapper = new HeaderParameterMapper(defaultableParameterNode,
-                        apidocs, operationAdaptor, treatNilableAsOptional, typeMapper);
-                headerParameterMapper.setParameter();
-            } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_QUERY)) {
-                // Handle query parameter.
-                QueryParameterMapper queryParameterMapper = new QueryParameterMapper(defaultableParameterNode,
-                        apidocs, operationAdaptor, treatNilableAsOptional, typeMapper);
-                queryParameterMapper.setParameter();
-            }
-        }
+        return "QUERY";
     }
 }

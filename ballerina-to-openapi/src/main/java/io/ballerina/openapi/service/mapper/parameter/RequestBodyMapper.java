@@ -65,7 +65,7 @@ public class RequestBodyMapper {
     }
 
     public void setRequestBody() {
-        operationAdaptor.getOperation().setRequestBody(requestBody);
+        operationAdaptor.overrideRequestBody(requestBody);
     }
 
     private void extractAnnotationDetails(AnnotationNode annotation) {

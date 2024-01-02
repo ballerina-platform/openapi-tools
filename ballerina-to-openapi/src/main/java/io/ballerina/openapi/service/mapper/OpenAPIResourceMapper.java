@@ -211,7 +211,7 @@ public class OpenAPIResourceMapper {
         //Add path parameters if in path and query parameters
         ParameterMapper parameterMapper = new ParameterMapper(resource, op, apiDocs, semanticModel,
                 treatNilableAsOptional, typeMapper, openAPI);
-        parameterMapper.getResourceInputs(semanticModel);
+        parameterMapper.setParameters();
         if (errors.size() > 1 || (errors.size() == 1 && !errors.get(0).getCode().equals(DiagnosticMessages
                 .OAS_CONVERTOR_113.getCode()))) {
             boolean isErrorIncluded = errors.stream().anyMatch(d ->
