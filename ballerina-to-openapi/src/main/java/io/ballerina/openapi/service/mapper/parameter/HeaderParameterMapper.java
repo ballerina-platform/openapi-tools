@@ -15,11 +15,13 @@ import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
+import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.type.RecordTypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
+import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +36,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
-public class HeaderParameterMapper implements ParameterMapper {
+public class HeaderParameterMapper extends AbstractParameterMapper {
 
     private TypeSymbol type = null;
     private String name = null;
@@ -45,7 +47,9 @@ public class HeaderParameterMapper implements ParameterMapper {
     private Object defaultValue = null;
 
     public HeaderParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs,
-                                boolean treatNilableAsOptional, TypeMapper typeMapper) {
+                                 OperationAdaptor operationAdaptor, boolean treatNilableAsOptional,
+                                 TypeMapper typeMapper) {
+        super(operationAdaptor);
         Symbol parameterSymbol = typeMapper.getComponentMapperData().
                 semanticModel().symbol(parameterNode).orElse(null);
         if (Objects.nonNull(parameterSymbol) && (parameterSymbol instanceof ParameterSymbol queryParameter)) {
@@ -57,7 +61,7 @@ public class HeaderParameterMapper implements ParameterMapper {
             this.treatNilableAsOptional = treatNilableAsOptional;
             this.typeMapper = typeMapper;
             if (parameterNode instanceof DefaultableParameterNode defaultableQueryParam) {
-                this.defaultValue = ParameterMapper.getDefaultValue(defaultableQueryParam);
+                this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableQueryParam);
             }
         }
     }
@@ -103,12 +107,12 @@ public class HeaderParameterMapper implements ParameterMapper {
         return null;
     }
 
-    public List<HeaderParameter> getParameterSchemaList() {
+    public List<Parameter> getParameterSchemaList() {
         if (Objects.isNull(type)) {
             return new ArrayList<>();
         }
 
-        List<HeaderParameter> headerParameters = getRecordParameterSchema();
+        List<Parameter> headerParameters = getRecordParameterSchema();
         if (Objects.nonNull(headerParameters)) {
             return headerParameters;
         }
@@ -132,7 +136,7 @@ public class HeaderParameterMapper implements ParameterMapper {
         return headerParameter;
     }
 
-    public List<HeaderParameter> getRecordParameterSchema() {
+    public List<Parameter> getRecordParameterSchema() {
         RecordTypeMapper.RecordTypeInfo recordTypeInfo = RecordTypeMapper.getDirectRecordType(type, null);
         if (Objects.isNull(recordTypeInfo)) {
             return null;
@@ -143,7 +147,7 @@ public class HeaderParameterMapper implements ParameterMapper {
         Map<String, Schema> headerSchemaMap = RecordTypeMapper.mapRecordFields(headerMap, typeMapper.getOpenAPI(),
                 requiredHeaders, recordTypeInfo.name(), treatNilableAsOptional, typeMapper.getComponentMapperData());
 
-        List<HeaderParameter> headerParameters = new ArrayList<>();
+        List<Parameter> headerParameters = new ArrayList<>();
         for (Map.Entry<String, Schema> entry : headerSchemaMap.entrySet()) {
             HeaderParameter headerParameter = createHeaderParameter(entry.getKey(), entry.getValue(),
                     requiredHeaders.contains(entry.getKey()), getDefaultValueForHeaderField(entry.getKey()));

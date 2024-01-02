@@ -22,6 +22,7 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
 import io.swagger.v3.oas.models.media.Content;
@@ -35,7 +36,7 @@ import java.util.Objects;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
-public class QueryParameterMapper implements ParameterMapper {
+public class QueryParameterMapper extends AbstractParameterMapper {
 
     private TypeSymbol type = null;
     private String name = null;
@@ -46,7 +47,9 @@ public class QueryParameterMapper implements ParameterMapper {
     private Object defaultValue = null;
 
     public QueryParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs,
-                                boolean treatNilableAsOptional, TypeMapper typeMapper) {
+                                OperationAdaptor operationAdaptor, boolean treatNilableAsOptional,
+                                TypeMapper typeMapper) {
+        super(operationAdaptor);
         Symbol parameterSymbol = typeMapper.getComponentMapperData().
                 semanticModel().symbol(parameterNode).orElse(null);
         if (Objects.nonNull(parameterSymbol) && (parameterSymbol instanceof ParameterSymbol queryParameter)) {
@@ -57,7 +60,7 @@ public class QueryParameterMapper implements ParameterMapper {
             this.treatNilableAsOptional = treatNilableAsOptional;
             this.typeMapper = typeMapper;
             if (parameterNode instanceof DefaultableParameterNode defaultableQueryParam) {
-                this.defaultValue = ParameterMapper.getDefaultValue(defaultableQueryParam);
+                this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableQueryParam);
             }
         }
     }
@@ -76,7 +79,7 @@ public class QueryParameterMapper implements ParameterMapper {
         if (Objects.nonNull(defaultValue)) {
             TypeMapper.setDefaultValue(typeSchema, defaultValue);
         }
-        if (ParameterMapper.hasObjectType(typeMapper.getComponentMapperData().semanticModel(), type)) {
+        if (AbstractParameterMapper.hasObjectType(typeMapper.getComponentMapperData().semanticModel(), type)) {
             Content content = new Content();
             content.put("application/json", new MediaType().schema(typeSchema));
             queryParameter.setContent(content);

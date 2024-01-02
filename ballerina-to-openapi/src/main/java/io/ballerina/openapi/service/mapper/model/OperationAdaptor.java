@@ -20,6 +20,7 @@
 package io.ballerina.openapi.service.mapper.model;
 
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.Objects;
 
@@ -68,4 +69,7 @@ public class OperationAdaptor {
         return Objects.nonNull(this.operation.getRequestBody()) || Objects.nonNull(this.operation.getParameters());
     }
 
+    public void setParameter(Parameter parameter) {
+        operation.addParametersItem(parameter);
+    }
 }
