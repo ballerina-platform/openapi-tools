@@ -28,7 +28,6 @@ import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Node;
-//import io.swagger.v3.oas.models.links.Link;
 
 import java.util.HashMap;
 import java.util.List;

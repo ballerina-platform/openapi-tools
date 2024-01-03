@@ -18,11 +18,7 @@
 package io.ballerina.openapi.service.mapper.hateoas;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ServiceNodeVisitor;
-import io.swagger.v3.oas.models.OpenAPI;
-
-import java.util.List;
 
 public class HateoasMapper {
 
