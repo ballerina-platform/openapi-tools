@@ -35,8 +35,10 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+//import io.ballerina.openapi.service.mapper.hateoas.HateoasMapper;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
+//import io.ballerina.openapi.service.mapper.model.ServiceNodeVisitor;
 import io.ballerina.openapi.service.mapper.parameter.model.CacheConfigAnnotation;
 import io.ballerina.openapi.service.mapper.parameter.utils.CacheHeaderUtils;
 import io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils;
@@ -46,6 +48,7 @@ import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.headers.Header;
+//import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -210,6 +213,11 @@ public class ResponseMapper {
         }
     }
 
+//    private void addResponseLinks(ApiResponse apiResponse, ServiceNodeVisitor serviceNodeVisitor) {
+//        HateoasMapper hateoasMapper = new HateoasMapper(semanticModel, serviceNodeVisitor);
+//        apiResponse.setLinks(serviceNodeVisitor.resourceMap);
+//    }
+
     public void addApiResponse(ApiResponse apiResponse, String statusCode) {
         addHeaders(apiResponse, statusCode);
         if (apiResponses.containsKey(statusCode)) {
@@ -287,6 +295,7 @@ public class ResponseMapper {
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setDescription("Any Response");
         apiResponse.setContent(new Content().addMediaType("*/*", mediaTypeObj));
+//        addResponseLinks(apiResponse, new ServiceNodeVisitor());
         addApiResponse(apiResponse, "default");
     }
 
