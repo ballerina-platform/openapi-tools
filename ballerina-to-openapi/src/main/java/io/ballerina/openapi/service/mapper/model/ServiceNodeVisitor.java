@@ -18,20 +18,20 @@
 
 package io.ballerina.openapi.service.mapper.model;
 
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
-import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.compiler.syntax.tree.Node;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+//
+//import java.util.HashMap;
+//import java.util.List;
+//import java.util.Map;
 
 /**
  * Visitor to get the ServiceDeclarationNode.
@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class ServiceNodeVisitor extends NodeVisitor {
 
-    public Map<String, List<Map<String, String>>> resourceMap = new HashMap<>();
+//    public Map<String, List<Map<String, String>>> resourceMap = new HashMap<>();
 //    private String resourceName;
 //    private String method;
 //    private String operationId;
@@ -51,7 +51,6 @@ public class ServiceNodeVisitor extends NodeVisitor {
                 child.accept(this);
             }
         }
-        System.out.println(resourceMap);
     }
 
     @Override
