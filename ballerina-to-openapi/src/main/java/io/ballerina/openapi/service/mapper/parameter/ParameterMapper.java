@@ -22,6 +22,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.PathParameterSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -179,8 +180,15 @@ public class ParameterMapper {
             String parameterTypeName = requiredParameterNode.typeName().toString().trim();
             if (parameterTypeName.equals(HTTP_REQUEST)) {
                 return "REQUEST";
-            } else if (parameterTypeName.startsWith("http:")) {
-                return null;
+            } else {
+                Symbol parameterSymbol = semanticModel.symbol(requiredParameterNode).orElse(null);
+                if (Objects.isNull(parameterSymbol) || !(parameterSymbol instanceof ParameterSymbol)) {
+                    return null;
+                }
+                TypeSymbol parameterTypeSymbol = ((ParameterSymbol) parameterSymbol).typeDescriptor();
+                if (!parameterTypeSymbol.subtypeOf(semanticModel.types().ANYDATA)) {
+                    return null;
+                }
             }
             annotationNodes = requiredParameterNode.annotations();
         }
