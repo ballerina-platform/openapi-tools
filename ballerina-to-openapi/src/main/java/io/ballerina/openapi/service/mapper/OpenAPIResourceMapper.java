@@ -26,7 +26,6 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
@@ -101,7 +100,8 @@ public class OpenAPIResourceMapper {
      * @param httpMethods   Sibling methods related to operation.
      */
     private void getResourcePath(FunctionDefinitionNode resource, List<String> httpMethods) {
-        String path = MapperCommonUtils.unescapeIdentifier(generateRelativePath(resource));
+        String relativePath = MapperCommonUtils.generateRelativePath(resource);
+        String cleanResourcePath = MapperCommonUtils.unescapeIdentifier(relativePath);
         Operation operation;
         for (String httpMethod : httpMethods) {
             //Iterate through http methods and fill path map.
@@ -113,10 +113,10 @@ public class OpenAPIResourceMapper {
                     errors.add(error);
                 } else {
                     Optional<OperationAdaptor> operationAdaptor = convertResourceToOperation(resource, httpMethod,
-                            path);
+                            cleanResourcePath);
                     if (operationAdaptor.isPresent()) {
                         operation = operationAdaptor.get().getOperation();
-                        generatePathItem(httpMethod, pathObject, operation, path);
+                        generatePathItem(httpMethod, pathObject, operation, cleanResourcePath);
                     } else {
                         break;
                     }
@@ -281,38 +281,18 @@ public class OpenAPIResourceMapper {
         ServiceDeclarationNode parentNode = (ServiceDeclarationNode) resource.parent();
         NodeList<Node> siblings = parentNode.members();
         httpMethods.add(resource.functionName().text());
-        String relativePath = generateRelativePath(resource);
+        String relativePath = MapperCommonUtils.generateRelativePath(resource);
         for (Node function: siblings) {
             SyntaxKind kind = function.kind();
             if (kind.equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
                 FunctionDefinitionNode sibling = (FunctionDefinitionNode) function;
                 //need to build relative path
-                String siblingRelativePath = generateRelativePath(sibling);
+                String siblingRelativePath = MapperCommonUtils.generateRelativePath(sibling);
                 if (relativePath.equals(siblingRelativePath)) {
                     httpMethods.add(sibling.functionName().text());
                 }
             }
         }
         return new ArrayList<>(httpMethods);
-    }
-
-    private String generateRelativePath(FunctionDefinitionNode resource) {
-
-        StringBuilder relativePath = new StringBuilder();
-        relativePath.append("/");
-        if (!resource.relativeResourcePath().isEmpty()) {
-            for (Node node: resource.relativeResourcePath()) {
-                if (node instanceof ResourcePathParameterNode pathNode) {
-                    relativePath.append("{");
-                    relativePath.append(pathNode.paramName().get());
-                    relativePath.append("}");
-                } else if ((resource.relativeResourcePath().size() == 1) && (node.toString().trim().equals("."))) {
-                    return relativePath.toString();
-                } else {
-                    relativePath.append(node.toString().trim());
-                }
-            }
-        }
-        return relativePath.toString();
     }
 }

@@ -48,6 +48,7 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NonTerminalNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
@@ -218,6 +219,26 @@ public class MapperCommonUtils {
                 break;
         }
         return schema;
+    }
+
+    public static String generateRelativePath(FunctionDefinitionNode resourceFunction) {
+        StringBuilder relativePath = new StringBuilder();
+        relativePath.append("/");
+        if (!resourceFunction.relativeResourcePath().isEmpty()) {
+            for (Node node: resourceFunction.relativeResourcePath()) {
+                if (node instanceof ResourcePathParameterNode pathNode) {
+                    relativePath.append("{");
+                    relativePath.append(pathNode.paramName().get());
+                    relativePath.append("}");
+                } else if ((resourceFunction.relativeResourcePath().size() == 1)
+                        && (node.toString().trim().equals("."))) {
+                    return relativePath.toString();
+                } else {
+                    relativePath.append(node.toString().trim());
+                }
+            }
+        }
+        return relativePath.toString();
     }
 
     /**
