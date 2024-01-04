@@ -34,25 +34,7 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
-import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
-import io.ballerina.compiler.syntax.tree.ExpressionNode;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MappingFieldNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
-import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.NonTerminalNode;
-import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
-import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.*;
 import io.ballerina.openapi.service.mapper.Constants;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
@@ -218,6 +200,26 @@ public class MapperCommonUtils {
                 break;
         }
         return schema;
+    }
+
+    public static String generateRelativePath(FunctionDefinitionNode resourceFunction) {
+        StringBuilder relativePath = new StringBuilder();
+        relativePath.append("/");
+        if (!resourceFunction.relativeResourcePath().isEmpty()) {
+            for (Node node: resourceFunction.relativeResourcePath()) {
+                if (node instanceof ResourcePathParameterNode pathNode) {
+                    relativePath.append("{");
+                    relativePath.append(pathNode.paramName().get());
+                    relativePath.append("}");
+                } else if ((resourceFunction.relativeResourcePath().size() == 1)
+                        && (node.toString().trim().equals("."))) {
+                    return relativePath.toString();
+                } else {
+                    relativePath.append(node.toString().trim());
+                }
+            }
+        }
+        return relativePath.toString();
     }
 
     /**
