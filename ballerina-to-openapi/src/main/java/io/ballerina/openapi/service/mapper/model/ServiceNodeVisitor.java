@@ -39,7 +39,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
  */
 public class ServiceNodeVisitor extends NodeVisitor {
 
-    public Map<String, List<Map<String, String>>> resourceMap = new HashMap<>();
+//    public Map<String, List<Map<String, String>>> resourceMap = new HashMap<>();
 //    private String resourceName;
 //    private String method;
 //    private String operationId;
@@ -51,7 +51,6 @@ public class ServiceNodeVisitor extends NodeVisitor {
                 child.accept(this);
             }
         }
-//        System.out.println(resourceMap);
     }
 
     @Override
