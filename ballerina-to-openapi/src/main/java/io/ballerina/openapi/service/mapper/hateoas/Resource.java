@@ -18,20 +18,5 @@
 
 package io.ballerina.openapi.service.mapper.hateoas;
 
-public class Resource {
-    private final String resourceMethod;
-    private final String operationId;
-
-    public Resource(String resourceName, String resourceMethod, String operationId) {
-        this.resourceMethod = resourceMethod;
-        this.operationId = operationId;
-    }
-
-    public String getResourceMethod() {
-        return resourceMethod;
-    }
-
-    public String getOperationId() {
-        return operationId;
-    }
+public record Resource(String resourceMethod, String operationId) {
 }
