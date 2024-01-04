@@ -60,10 +60,10 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpe
  *
  * @since 2.0.0
  */
-public class OpenAPIResourceMapper {
+public class ResourceMapper {
     private final SemanticModel semanticModel;
     private final Paths pathObject = new Paths();
-    private final List<OpenAPIMapperDiagnostic> errors;
+    private final List<OpenAPIMapperDiagnostic> diagnostics;
     private final TypeMapper typeMapper;
     private final OpenAPI openAPI;
     private final List<FunctionDefinitionNode> resources;
@@ -72,13 +72,13 @@ public class OpenAPIResourceMapper {
     /**
      * Initializes a resource parser for openApi.
      */
-    OpenAPIResourceMapper(OpenAPI openAPI, List<FunctionDefinitionNode> resources, SemanticModel semanticModel,
-                          List<OpenAPIMapperDiagnostic> errors,
-                          TypeMapper typeMapper, boolean treatNilableAsOptional) {
+    ResourceMapper(OpenAPI openAPI, List<FunctionDefinitionNode> resources, SemanticModel semanticModel,
+                   List<OpenAPIMapperDiagnostic> diagnostics, TypeMapper typeMapper,
+                   boolean treatNilableAsOptional) {
         this.openAPI = openAPI;
         this.resources = resources;
         this.semanticModel = semanticModel;
-        this.errors = errors;
+        this.diagnostics = diagnostics;
         this.typeMapper = typeMapper;
         this.treatNilableAsOptional = treatNilableAsOptional;
     }
@@ -107,7 +107,7 @@ public class OpenAPIResourceMapper {
                     DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_100;
                     IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
                             resource.location());
-                    errors.add(error);
+                    diagnostics.add(error);
                 } else {
                     Optional<OperationAdaptor> operationAdaptor = convertResourceToOperation(resource, httpMethod,
                             path);
@@ -212,9 +212,9 @@ public class OpenAPIResourceMapper {
         ParameterMapper parameterMapper = new ParameterMapper(resource, op, apiDocs, semanticModel,
                 treatNilableAsOptional, typeMapper, openAPI);
         parameterMapper.setParameters();
-        if (errors.size() > 1 || (errors.size() == 1 && !errors.get(0).getCode().equals(DiagnosticMessages
-                .OAS_CONVERTOR_113.getCode()))) {
-            boolean isErrorIncluded = errors.stream().anyMatch(d ->
+        if (diagnostics.size() > 1 || (diagnostics.size() == 1 && !diagnostics.get(0).getCode().equals(
+                DiagnosticMessages.OAS_CONVERTOR_113.getCode()))) {
+            boolean isErrorIncluded = diagnostics.stream().anyMatch(d ->
                     DiagnosticSeverity.ERROR.equals(d.getDiagnosticSeverity()));
             if (isErrorIncluded) {
                 return Optional.empty();
@@ -224,7 +224,7 @@ public class OpenAPIResourceMapper {
         if (checkRestParamInResourcePath(parameterMapper)) {
             return Optional.empty();
         }
-        errors.addAll(parameterMapper.getDiagnostics());
+        diagnostics.addAll(parameterMapper.getDiagnostics());
         ResponseMapper responseMapper = new ResponseMapper(semanticModel, openAPI, resource, op, typeMapper);
         responseMapper.setApiResponses();
         return Optional.of(op);
@@ -234,7 +234,7 @@ public class OpenAPIResourceMapper {
         List<OpenAPIMapperDiagnostic> errorList = parameterMapper.getDiagnostics();
         if (!errorList.isEmpty() && errorList.stream().anyMatch(error ->
                 DiagnosticMessages.OAS_CONVERTOR_125.getCode().equals(error.getCode()))) {
-            errors.addAll(errorList);
+            diagnostics.addAll(errorList);
             return true;
         }
         return false;

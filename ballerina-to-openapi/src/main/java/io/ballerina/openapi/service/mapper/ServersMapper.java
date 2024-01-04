@@ -54,8 +54,7 @@ import static io.ballerina.openapi.service.mapper.Constants.SERVER;
 /**
  * Extract OpenApi server information from and Ballerina endpoint.
  */
-public class OpenAPIEndpointMapper {
-    public static final OpenAPIEndpointMapper ENDPOINT_MAPPER = new OpenAPIEndpointMapper();
+public final class ServersMapper {
 
     /**
      * Convert endpoints bound to {@code mapper} openapi server information.
@@ -63,10 +62,9 @@ public class OpenAPIEndpointMapper {
      * @param openAPI   openapi definition to attach extracted information
      * @param endpoints all endpoints defined in ballerina source
      * @param service   mapper node with bound endpoints
-     * @return openapi definition with Server information
      */
-    public OpenAPI getServers(OpenAPI openAPI, Set<ListenerDeclarationNode> endpoints,
-                              ServiceDeclarationNode service) {
+    public static void setServers(OpenAPI openAPI, Set<ListenerDeclarationNode> endpoints,
+                                  ServiceDeclarationNode service) {
         extractServerForExpressionNode(openAPI, service.expressions(), service);
         List<Server> servers = openAPI.getServers();
         //Handle ImplicitNewExpressionNode in listener
@@ -82,13 +80,12 @@ public class OpenAPIEndpointMapper {
             Server mainServer = addEnumValues(servers);
             openAPI.setServers(Collections.singletonList(mainServer));
         }
-        return openAPI;
     }
 
     /**
      * This util is for extracting the server details from endpoints and update server list.
      */
-    private void updateServerDetails(ServiceDeclarationNode service, List<Server> servers,
+    private static void updateServerDetails(ServiceDeclarationNode service, List<Server> servers,
                                      ListenerDeclarationNode endPoint, ExpressionNode expNode) {
 
         if (expNode instanceof QualifiedNameReferenceNode refNode) {
@@ -105,7 +102,7 @@ public class OpenAPIEndpointMapper {
         }
     }
 
-    private Server addEnumValues(List<Server> servers) {
+    private static Server addEnumValues(List<Server> servers) {
 
         Server mainServer = servers.get(0);
         List<Server> rotated = new ArrayList<>(servers);
@@ -130,7 +127,7 @@ public class OpenAPIEndpointMapper {
     /**
      * Extract server URL from given listener node.
      */
-    private Server extractServer(ListenerDeclarationNode ep, String serviceBasePath) {
+    private static Server extractServer(ListenerDeclarationNode ep, String serviceBasePath) {
         Optional<ParenthesizedArgList> list;
         if (ep.initializer().kind() == SyntaxKind.CHECK_EXPRESSION) {
             ExpressionNode expression = ((CheckExpressionNode) ep.initializer()).expression();
@@ -141,7 +138,7 @@ public class OpenAPIEndpointMapper {
         return generateServer(serviceBasePath, list);
     }
 
-    private Optional<ParenthesizedArgList> extractListenerNodeType(Node expression2) {
+    private static Optional<ParenthesizedArgList> extractListenerNodeType(Node expression2) {
         Optional<ParenthesizedArgList> list = Optional.empty();
         if (expression2.kind() == SyntaxKind.EXPLICIT_NEW_EXPRESSION) {
             ExplicitNewExpressionNode bTypeExplicit = (ExplicitNewExpressionNode) expression2;
@@ -154,7 +151,7 @@ public class OpenAPIEndpointMapper {
     }
 
     // Function to handle ExplicitNewExpressionNode in listener.
-    private void extractServerForExpressionNode(OpenAPI openAPI, SeparatedNodeList<ExpressionNode> bTypeExplicit,
+    private static void extractServerForExpressionNode(OpenAPI openAPI, SeparatedNodeList<ExpressionNode> bTypeExplicit,
                                                                     ServiceDeclarationNode service) {
         String serviceBasePath = getServiceBasePath(service);
         Optional<ParenthesizedArgList> list;
@@ -171,7 +168,7 @@ public class OpenAPIEndpointMapper {
     }
 
     //Assign host and port values
-    private Server generateServer(String serviceBasePath, Optional<ParenthesizedArgList> list) {
+    private static Server generateServer(String serviceBasePath, Optional<ParenthesizedArgList> list) {
 
         String port = null;
         String host = null;
@@ -196,7 +193,7 @@ public class OpenAPIEndpointMapper {
     /**
      * Set server variables port and server.
      */
-    private void setServerVariableValues(String serviceBasePath, String port, String host,
+    private static void setServerVariableValues(String serviceBasePath, String port, String host,
                                          ServerVariables serverVariables, Server server) {
 
         String serverUrl;
@@ -244,7 +241,7 @@ public class OpenAPIEndpointMapper {
     }
 
     // Extract host value for creating URL.
-    private String extractHost(MappingConstructorExpressionNode bLangRecordLiteral) {
+    private static String extractHost(MappingConstructorExpressionNode bLangRecordLiteral) {
         String host = "";
         if (bLangRecordLiteral.fields() != null && !bLangRecordLiteral.fields().isEmpty()) {
             SeparatedNodeList<MappingFieldNode> recordFields = bLangRecordLiteral.fields();
@@ -256,7 +253,7 @@ public class OpenAPIEndpointMapper {
         return host;
     }
 
-    private String concatenateServerURL(String host, SeparatedNodeList<MappingFieldNode> recordFields) {
+    private static String concatenateServerURL(String host, SeparatedNodeList<MappingFieldNode> recordFields) {
 
         for (MappingFieldNode filed: recordFields) {
             if (filed instanceof SpecificFieldNode) {
@@ -277,7 +274,7 @@ public class OpenAPIEndpointMapper {
      * @param serviceDefinition The mapper definition node.
      * @return The base path.
      */
-    public String getServiceBasePath(ServiceDeclarationNode serviceDefinition) {
+    public static String getServiceBasePath(ServiceDeclarationNode serviceDefinition) {
         StringBuilder currentServiceName = new StringBuilder();
         NodeList<Node> serviceNameNodes = serviceDefinition.absoluteResourcePath();
         for (Node serviceBasedPathNode : serviceNameNodes) {
