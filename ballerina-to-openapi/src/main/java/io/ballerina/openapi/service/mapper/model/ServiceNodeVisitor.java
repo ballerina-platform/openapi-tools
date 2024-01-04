@@ -18,6 +18,10 @@
 
 package io.ballerina.openapi.service.mapper.model;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
@@ -28,10 +32,6 @@ import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-//
-//import java.util.HashMap;
-//import java.util.List;
-//import java.util.Map;
 
 /**
  * Visitor to get the ServiceDeclarationNode.
