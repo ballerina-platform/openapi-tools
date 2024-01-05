@@ -40,6 +40,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.hateoas.HateoasMetadataVisitor;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
@@ -203,6 +204,7 @@ public class ServiceToOpenAPIMapper {
     public static OASResult generateOAS(OASGenerationMetaInfo oasGenerationMetaInfo) {
         ServiceDeclarationNode serviceDefinition = oasGenerationMetaInfo.getServiceDeclarationNode();
         ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(oasGenerationMetaInfo.getProject());
+        extractHateoasLinkMetadata(oasGenerationMetaInfo.getProject());
         Set<ListenerDeclarationNode> listeners = moduleMemberVisitor.getListenerDeclarationNodes();
         SemanticModel semanticModel = oasGenerationMetaInfo.getSemanticModel();
         String openApiFileName = oasGenerationMetaInfo.getOpenApiFileName();
@@ -500,5 +502,17 @@ public class ServiceToOpenAPIMapper {
             });
         });
         return balNodeVisitor;
+    }
+
+    public static void extractHateoasLinkMetadata(Project project) {
+        project.currentPackage().moduleIds().forEach(moduleId -> {
+            Module module = project.currentPackage().module(moduleId);
+            SemanticModel semanticModel = project.currentPackage().getCompilation().getSemanticModel(moduleId);
+            HateoasMetadataVisitor hateoasMetadataVisitor = new HateoasMetadataVisitor(semanticModel);
+            module.documentIds().forEach(documentId -> {
+                SyntaxTree syntaxTreeDoc = module.document(documentId).syntaxTree();
+                syntaxTreeDoc.rootNode().accept(hateoasMetadataVisitor);
+            });
+        });
     }
 }
