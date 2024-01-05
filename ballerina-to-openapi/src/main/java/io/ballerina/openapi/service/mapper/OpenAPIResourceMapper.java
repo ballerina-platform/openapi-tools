@@ -105,7 +105,8 @@ public class OpenAPIResourceMapper {
      * @param resource The ballerina resource.
      * @param httpMethods   Sibling methods related to operation.
      */
-    private void getResourcePath(FunctionDefinitionNode resource, List<String> httpMethods, ServiceDeclarationNode service) {
+    private void getResourcePath(FunctionDefinitionNode resource, List<String> httpMethods,
+                                 ServiceDeclarationNode service) {
         String relativePath = MapperCommonUtils.generateRelativePath(resource);
         String cleanResourcePath = MapperCommonUtils.unescapeIdentifier(relativePath);
         Operation operation;
@@ -242,11 +243,12 @@ public class OpenAPIResourceMapper {
         ServiceDeclarationSymbol serviceSymbol = (ServiceDeclarationSymbol) serviceDeclarationOpt.get();
         int serviceId = serviceSymbol.hashCode();
         Map<String, Link> swaggerLinks = this.hateoasMapper.mapHateoasLinksToSwaggerLinks(serviceId, resource);
-        for (Map.Entry<String, ApiResponse> entry : apiResponses.entrySet()) {
-            int statusCode = Integer.parseInt(entry.getKey());
-            if (statusCode >= 200 && statusCode < 300) {
-                entry.getValue().getLinks().putAll(swaggerLinks);
-                System.out.println("chipi chipi chapa chapa");
+        if (!swaggerLinks.isEmpty()) {
+            for (Map.Entry<String, ApiResponse> entry : apiResponses.entrySet()) {
+                int statusCode = Integer.parseInt(entry.getKey());
+                if (statusCode >= 200 && statusCode < 300) {
+                    entry.getValue().setLinks(swaggerLinks);
+                }
             }
         }
         op.getOperation().setResponses(apiResponses);
