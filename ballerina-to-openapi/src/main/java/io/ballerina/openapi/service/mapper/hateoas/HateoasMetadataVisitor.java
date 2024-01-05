@@ -21,21 +21,18 @@ package io.ballerina.openapi.service.mapper.hateoas;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
-import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 
 import java.util.Optional;
 
 import static io.ballerina.openapi.service.mapper.hateoas.ContextHolder.getHateoasContextHolder;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getResourceConfigAnnotation;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getValueForAnnotationFields;
 
 public class HateoasMetadataVisitor extends NodeVisitor {
     private final SemanticModel semanticModel;
@@ -77,36 +74,9 @@ public class HateoasMetadataVisitor extends NodeVisitor {
         String cleanResourcePath = MapperCommonUtils.unescapeIdentifier(relativePath);
         String resName = (resourceFunction.functionName().text() + "_" +
                 cleanResourcePath).replaceAll("\\{///\\}", "_");
-
         if (cleanResourcePath.equals("/")) {
             resName = resourceFunction.functionName().text();
         }
         return MapperCommonUtils.getOperationId(resName);
-    }
-
-    private Optional<AnnotationNode> getResourceConfigAnnotation(FunctionDefinitionNode resourceFunction) {
-        Optional<MetadataNode> metadata = resourceFunction.metadata();
-        if (metadata.isEmpty()) {
-            return Optional.empty();
-        }
-        MetadataNode metaData = metadata.get();
-        NodeList<AnnotationNode> annotations = metaData.annotations();
-        return annotations.stream()
-                .filter(ann -> "http:ResourceConfig".equals(ann.annotReference().toString().trim()))
-                .findFirst();
-    }
-
-    private Optional<String> getValueForAnnotationFields(AnnotationNode resourceConfigAnnotation, String fieldName) {
-        return resourceConfigAnnotation
-                .annotValue()
-                .map(MappingConstructorExpressionNode::fields)
-                .flatMap(fields ->
-                        fields.stream()
-                                .filter(fld -> fld instanceof SpecificFieldNode)
-                                .map(fld -> (SpecificFieldNode) fld)
-                                .filter(fld -> fieldName.equals(fld.fieldName().toString().trim()))
-                                .findFirst()
-                ).flatMap(SpecificFieldNode::valueExpr)
-                .map(en -> en.toString().trim());
     }
 }

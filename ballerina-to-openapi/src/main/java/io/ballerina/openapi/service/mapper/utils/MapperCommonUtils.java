@@ -641,4 +641,31 @@ public class MapperCommonUtils {
         }
         return schemas;
     }
+
+    public static Optional<AnnotationNode> getResourceConfigAnnotation(FunctionDefinitionNode resourceFunction) {
+        Optional<MetadataNode> metadata = resourceFunction.metadata();
+        if (metadata.isEmpty()) {
+            return Optional.empty();
+        }
+        MetadataNode metaData = metadata.get();
+        NodeList<AnnotationNode> annotations = metaData.annotations();
+        return annotations.stream()
+                .filter(ann -> "http:ResourceConfig".equals(ann.annotReference().toString().trim()))
+                .findFirst();
+    }
+
+    public static Optional<String> getValueForAnnotationFields(AnnotationNode resourceConfigAnnotation,
+                                                               String fieldName) {
+        return resourceConfigAnnotation
+                .annotValue()
+                .map(MappingConstructorExpressionNode::fields)
+                .flatMap(fields ->
+                        fields.stream()
+                                .filter(fld -> fld instanceof SpecificFieldNode)
+                                .map(fld -> (SpecificFieldNode) fld)
+                                .filter(fld -> fieldName.equals(fld.fieldName().toString().trim()))
+                                .findFirst()
+                ).flatMap(SpecificFieldNode::valueExpr)
+                .map(en -> en.toString().trim());
+    }
 }
