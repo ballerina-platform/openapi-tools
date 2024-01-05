@@ -28,13 +28,11 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
-import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
@@ -212,14 +210,6 @@ public class ResponseMapper {
         }
     }
 
-    private void addResponseLinks(ApiResponse apiResponse, ServiceDeclarationNode serviceNode) {
-        Optional<Symbol> serviceDeclarationOpt = semanticModel.symbol(serviceNode);
-        ServiceDeclarationSymbol serviceSymbol = (ServiceDeclarationSymbol) serviceDeclarationOpt.get();
-        int serviceId = serviceSymbol.hashCode();
-        HateoasMapper hateoasMapper = new HateoasMapper();
-//        apiResponse.setLinks();
-    }
-
     public void addApiResponse(ApiResponse apiResponse, String statusCode) {
         addHeaders(apiResponse, statusCode);
         if (apiResponses.containsKey(statusCode)) {
@@ -297,7 +287,6 @@ public class ResponseMapper {
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setDescription("Any Response");
         apiResponse.setContent(new Content().addMediaType("*/*", mediaTypeObj));
-//        addResponseLinks(apiResponse,);
         addApiResponse(apiResponse, "default");
     }
 
