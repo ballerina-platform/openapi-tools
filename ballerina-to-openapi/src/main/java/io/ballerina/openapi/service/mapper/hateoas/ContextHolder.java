@@ -28,7 +28,7 @@ public final class ContextHolder {
 
     private final List<Service> hateoasServices;
 
-    private ContextHolder() {
+    public ContextHolder() {
         this.hateoasServices = new ArrayList<>();
     }
 
@@ -66,6 +66,5 @@ public final class ContextHolder {
                         .filter(resource -> resourceMethod.equals(resource.resourceMethod()))
                         .findFirst()
                 );
-
     }
 }

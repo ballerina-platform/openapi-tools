@@ -18,46 +18,79 @@
 
 package io.ballerina.openapi.service.mapper.parameter;
 
-import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
-import io.ballerina.compiler.api.symbols.Symbol;
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.HashMap;
+
+import io.swagger.v3.oas.models.links.Link;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.openapi.service.mapper.hateoas.ContextHolder;
+import io.ballerina.openapi.service.mapper.hateoas.Resource;
 import io.ballerina.openapi.service.mapper.parameter.model.HateoasLink;
 
-import java.util.List;
-import java.util.Optional;
-
 public class HateoasMapper {
-    private int serviceId;
-    public HateoasMapper(int serviceId) {
-        this.serviceId = serviceId;
+    Map<String, Link> hateoasLinks;
+    public HateoasMapper() {
+
     }
 
-    private int getServiceId(SemanticModel semanticModel, ServiceDeclarationNode serviceNode) {
-        Optional<Symbol> serviceDeclarationOpt = semanticModel.symbol(serviceNode);
-        ServiceDeclarationSymbol serviceSymbol = (ServiceDeclarationSymbol) serviceDeclarationOpt.get();
-        serviceId = serviceSymbol.hashCode();
-        return serviceId;
-    }
-
-    public void mapHateoasLink(int serviceId, FunctionDefinitionNode resourceFunction) {
+    public Map<String, Link> mapHateoasLinks(int serviceId, FunctionDefinitionNode resourceFunction,
+                                                       ApiResponse apiResponse) {
         Optional<String> linkedTo = getResourceConfigAnnotation(resourceFunction)
                 .flatMap(resourceConfig -> getValueForAnnotationFields(resourceConfig, "linkedTo"));
         if (linkedTo.isEmpty()) {
-            return;
+            return Collections.emptyMap();
         }
         List<HateoasLink> links = getLinks(linkedTo.get());
+        ContextHolder contextHolder = new ContextHolder();
+        Link swaggerLink = new Link();
+        for (HateoasLink link : links) {
+            Optional<Resource> resource = contextHolder.getHateoasResource(serviceId, link.getResourceName(),
+                    link.getResourceMethod());
+            if (resource.isPresent()) {
+                String operationId = resource.get().operationId();
+                swaggerLink.setOperationId(operationId);
+                hateoasLinks.put(link.getRel(), swaggerLink);
+            }
+        }
+        return hateoasLinks;
     }
 
-    // todo: implement this properly
     private List<HateoasLink> getLinks(String linkedTo) {
-        return List.of();
+        List<HateoasLink> links = new ArrayList<>();
+        String[] linkArray = linkedTo.replaceAll("[\\[\\]]", "").split(",\\s*");
+        for (String linkString : linkArray) {
+            HateoasLink link = parseHateoasLink(linkString);
+            links.add(link);
+        }
+        return links;
+    }
+
+    public static HateoasLink parseHateoasLink(String input) {
+        HateoasLink hateoasLink = new HateoasLink();
+        HashMap<String, String> keyValueMap = new HashMap<>();
+        String[] keyValuePairs = input.replaceAll("[{}]", "").split(",\\s*");
+        for (String pair : keyValuePairs) {
+            String[] parts = pair.split(":\\s*");
+            if (parts.length == 2) {
+                String key = parts[0].trim();
+                String value = parts[1].replaceAll("\"", "").trim();
+                keyValueMap.put(key, value);
+            }
+        }
+        hateoasLink.setResourceName(keyValueMap.get("name"));
+        hateoasLink.setRel(keyValueMap.get("rel"));
+        hateoasLink.setResourceMethod(keyValueMap.get("method"));
+        return hateoasLink;
     }
 
     private Optional<AnnotationNode> getResourceConfigAnnotation(FunctionDefinitionNode resourceFunction) {
