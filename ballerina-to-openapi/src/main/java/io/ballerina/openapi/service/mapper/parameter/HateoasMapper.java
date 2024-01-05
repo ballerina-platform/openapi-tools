@@ -26,15 +26,13 @@ import java.util.Optional;
 import java.util.HashMap;
 
 import io.swagger.v3.oas.models.links.Link;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
-import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
-import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.openapi.service.mapper.hateoas.ContextHolder;
 import io.ballerina.openapi.service.mapper.hateoas.Resource;
 import io.ballerina.openapi.service.mapper.parameter.model.HateoasLink;
+
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getResourceConfigAnnotation;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getValueForAnnotationFields;
 
 public class HateoasMapper {
 
@@ -87,31 +85,5 @@ public class HateoasMapper {
         hateoasLink.setRel(keyValueMap.get("rel"));
         hateoasLink.setResourceMethod(keyValueMap.get("method"));
         return hateoasLink;
-    }
-
-    private Optional<AnnotationNode> getResourceConfigAnnotation(FunctionDefinitionNode resourceFunction) {
-        Optional<MetadataNode> metadata = resourceFunction.metadata();
-        if (metadata.isEmpty()) {
-            return Optional.empty();
-        }
-        MetadataNode metaData = metadata.get();
-        NodeList<AnnotationNode> annotations = metaData.annotations();
-        return annotations.stream()
-                .filter(ann -> "http:ResourceConfig".equals(ann.annotReference().toString().trim()))
-                .findFirst();
-    }
-
-    private Optional<String> getValueForAnnotationFields(AnnotationNode resourceConfigAnnotation, String fieldName) {
-        return resourceConfigAnnotation
-                .annotValue()
-                .map(MappingConstructorExpressionNode::fields)
-                .flatMap(fields ->
-                        fields.stream()
-                                .filter(fld -> fld instanceof SpecificFieldNode)
-                                .map(fld -> (SpecificFieldNode) fld)
-                                .filter(fld -> fieldName.equals(fld.fieldName().toString().trim()))
-                                .findFirst()
-                ).flatMap(SpecificFieldNode::valueExpr)
-                .map(en -> en.toString().trim());
     }
 }
