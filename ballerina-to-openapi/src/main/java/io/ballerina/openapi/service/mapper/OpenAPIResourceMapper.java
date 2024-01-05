@@ -248,6 +248,8 @@ public class OpenAPIResourceMapper {
                 int statusCode = Integer.parseInt(entry.getKey());
                 if (statusCode >= 200 && statusCode < 300) {
                     entry.getValue().setLinks(swaggerLinks);
+                    ApiResponse apiResponse = new ApiResponse();
+                    apiResponse.setLinks(swaggerLinks);
                 }
             }
         }
