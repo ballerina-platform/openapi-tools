@@ -18,19 +18,19 @@
 
 package io.ballerina.openapi.service.mapper.parameter;
 
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.HashMap;
-
-import io.swagger.v3.oas.models.links.Link;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.openapi.service.mapper.hateoas.ContextHolder;
 import io.ballerina.openapi.service.mapper.hateoas.Resource;
 import io.ballerina.openapi.service.mapper.parameter.model.HateoasLink;
+import io.swagger.v3.oas.models.links.Link;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static io.ballerina.openapi.service.mapper.hateoas.ContextHolder.getHateoasContextHolder;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getResourceConfigAnnotation;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getValueForAnnotationFields;
 
@@ -44,11 +44,10 @@ public class HateoasMapper {
             return Collections.emptyMap();
         }
         List<HateoasLink> links = getLinks(linkedTo.get());
-        ContextHolder contextHolder = new ContextHolder();
         Map<String, Link> hateoasLinks = new HashMap<>();
         for (HateoasLink link : links) {
-            Optional<Resource> resource = contextHolder.getHateoasResource(serviceId, link.getResourceName(),
-                    link.getResourceMethod());
+            Optional<Resource> resource = getHateoasContextHolder()
+                    .getHateoasResource(serviceId, link.getResourceName(), link.getResourceMethod());
             if (resource.isPresent()) {
                 Link swaggerLink = new Link();
                 String operationId = resource.get().operationId();
