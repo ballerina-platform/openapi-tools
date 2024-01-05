@@ -63,8 +63,9 @@ public class HateoasMetadataVisitor extends NodeVisitor {
                 if (resourceName.isEmpty()) {
                     return;
                 }
+                String cleanedResourceName = resourceName.get().replaceAll("\"", "");
                 Resource hateoasResource = new Resource(resourceMethod, operationId);
-                getHateoasContextHolder().updateHateoasResource(serviceId, resourceName.get(), hateoasResource);
+                getHateoasContextHolder().updateHateoasResource(serviceId, cleanedResourceName, hateoasResource);
             }
         }
     }
