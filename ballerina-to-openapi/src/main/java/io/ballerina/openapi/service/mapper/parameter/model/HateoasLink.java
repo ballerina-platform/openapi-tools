@@ -20,7 +20,7 @@ package io.ballerina.openapi.service.mapper.parameter.model;
 
 public class HateoasLink {
     private String resourceName;
-    private String rel;
+    private String relation;
     private String resourceMethod;
 
     public String getResourceName() {
@@ -32,11 +32,11 @@ public class HateoasLink {
     }
 
     public String getRel() {
-        return rel;
+        return relation;
     }
 
-    public void setRel(String rel) {
-        this.rel = rel;
+    public void setRel(String relation) {
+        this.relation = relation;
     }
 
     public String getResourceMethod() {

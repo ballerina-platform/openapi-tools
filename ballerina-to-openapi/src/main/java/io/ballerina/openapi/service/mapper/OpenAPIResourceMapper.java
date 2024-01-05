@@ -22,6 +22,7 @@ package io.ballerina.openapi.service.mapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Documentable;
 import io.ballerina.compiler.api.symbols.Documentation;
+import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -33,6 +34,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagno
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
+import io.ballerina.openapi.service.mapper.parameter.HateoasMapper;
 import io.ballerina.openapi.service.mapper.parameter.ResponseMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
@@ -42,6 +44,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.links.Link;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
@@ -70,6 +74,7 @@ public class OpenAPIResourceMapper {
     private final TypeMapper typeMapper;
     private final OpenAPI openAPI;
     private final List<FunctionDefinitionNode> resources;
+    private final HateoasMapper hateoasMapper;
 
     /**
      * Initializes a resource parser for openApi.
@@ -83,12 +88,13 @@ public class OpenAPIResourceMapper {
         this.errors = errors;
         this.moduleMemberVisitor = moduleMemberVisitor;
         this.typeMapper = typeMapper;
+        this.hateoasMapper = new HateoasMapper();
     }
 
-    public void addMapping() {
+    public void addMapping(ServiceDeclarationNode service) {
         for (FunctionDefinitionNode resource : resources) {
             List<String> methods = this.getHttpMethods(resource);
-            getResourcePath(resource, methods);
+            getResourcePath(resource, methods, service);
         }
         openAPI.setPaths(pathObject);
     }
@@ -99,7 +105,7 @@ public class OpenAPIResourceMapper {
      * @param resource The ballerina resource.
      * @param httpMethods   Sibling methods related to operation.
      */
-    private void getResourcePath(FunctionDefinitionNode resource, List<String> httpMethods) {
+    private void getResourcePath(FunctionDefinitionNode resource, List<String> httpMethods, ServiceDeclarationNode service) {
         String relativePath = MapperCommonUtils.generateRelativePath(resource);
         String cleanResourcePath = MapperCommonUtils.unescapeIdentifier(relativePath);
         Operation operation;
@@ -113,7 +119,7 @@ public class OpenAPIResourceMapper {
                     errors.add(error);
                 } else {
                     Optional<OperationAdaptor> operationAdaptor = convertResourceToOperation(resource, httpMethod,
-                            cleanResourcePath);
+                            cleanResourcePath, service);
                     if (operationAdaptor.isPresent()) {
                         operation = operationAdaptor.get().getOperation();
                         generatePathItem(httpMethod, pathObject, operation, cleanResourcePath);
@@ -195,7 +201,8 @@ public class OpenAPIResourceMapper {
      * @return Operation Adaptor object of given resource
      */
     private Optional<OperationAdaptor> convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
-                                                                  String generateRelativePath) {
+                                                                  String generateRelativePath,
+                                                                  ServiceDeclarationNode service) {
         OperationAdaptor op = new OperationAdaptor();
         op.setHttpOperation(httpMethod);
         op.setPath(generateRelativePath);
@@ -231,6 +238,17 @@ public class OpenAPIResourceMapper {
         ResponseMapper responseMapper = new ResponseMapper(semanticModel, openAPI, resource, op,
                 errors, moduleMemberVisitor);
         ApiResponses apiResponses = responseMapper.getApiResponses();
+        Optional<Symbol> serviceDeclarationOpt = semanticModel.symbol(service);
+        ServiceDeclarationSymbol serviceSymbol = (ServiceDeclarationSymbol) serviceDeclarationOpt.get();
+        int serviceId = serviceSymbol.hashCode();
+        Map<String, Link> swaggerLinks = this.hateoasMapper.mapHateoasLinksToSwaggerLinks(serviceId, resource);
+        for (Map.Entry<String, ApiResponse> entry : apiResponses.entrySet()) {
+            int statusCode = Integer.parseInt(entry.getKey());
+            if (statusCode >= 200 && statusCode < 300) {
+                entry.getValue().getLinks().putAll(swaggerLinks);
+                System.out.println("chipi chipi chapa chapa");
+            }
+        }
         op.getOperation().setResponses(apiResponses);
         return Optional.of(op);
     }
