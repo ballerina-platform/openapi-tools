@@ -243,10 +243,12 @@ public class OpenAPIResourceMapper {
         ServiceDeclarationSymbol serviceSymbol = (ServiceDeclarationSymbol) serviceDeclarationOpt.get();
         int serviceId = serviceSymbol.hashCode();
         Map<String, Link> swaggerLinks = this.hateoasMapper.mapHateoasLinksToSwaggerLinks(serviceId, resource);
-        for (Map.Entry<String, ApiResponse> entry : apiResponses.entrySet()) {
-            int statusCode = Integer.parseInt(entry.getKey());
-            if (statusCode >= 200 && statusCode < 300) {
-                entry.getValue().getLinks().putAll(swaggerLinks);
+        if (!swaggerLinks.isEmpty()) {
+            for (Map.Entry<String, ApiResponse> entry : apiResponses.entrySet()) {
+                int statusCode = Integer.parseInt(entry.getKey());
+                if (statusCode >= 200 && statusCode < 300) {
+                    entry.getValue().setLinks(swaggerLinks);
+                }
             }
         }
         op.getOperation().setResponses(apiResponses);
