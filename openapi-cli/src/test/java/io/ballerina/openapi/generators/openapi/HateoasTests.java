@@ -26,9 +26,15 @@ import java.nio.file.Paths;
 public class HateoasTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi").toAbsolutePath();
 
-    @Test(description = "Automatic linking between resoruce functions")
+    @Test(description = "Automatic linking between resource functions")
     public void testHateoasAutomaticLinking() throws IOException {
         Path ballerinafilePath = RES_DIR.resolve("hateoas/hateoas_automatic_linking.bal");
         TestUtils.compareWithGeneratedFile(ballerinafilePath, "hateoas/hateoas_automatic_linking.yaml");
+    }
+
+    @Test(description = "Multiple reference links to a resource")
+    public void testHateoasMultipleLinks() throws IOException {
+        Path ballerinafilePath = RES_DIR.resolve("hateoas/hateoas_multiple_links.bal");
+        TestUtils.compareWithGeneratedFile(ballerinafilePath, "hateoas/hateoas_multiple_links.yaml");
     }
 }
