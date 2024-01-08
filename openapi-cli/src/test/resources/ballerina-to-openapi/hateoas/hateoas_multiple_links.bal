@@ -26,7 +26,7 @@ service /payloadV on new http:Listener(9090) {
     @http:ResourceConfig {
         name: "Locations",
         linkedTo: [ {name: "Rooms", relation: "room", method: "get"},
-                    {name: "Payments", relation: "payment", method: "get"}]
+        {name: "Payments", relation: "payment", method: "get"}]
     }
     resource function get locations() returns Location {
        return {name: "Cinnamon Lodge", id: "1001", address: "Habarana"};

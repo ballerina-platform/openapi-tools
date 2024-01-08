@@ -32,7 +32,6 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.hateoas.Resource;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.parameter.HateoasMapper;
@@ -245,8 +244,8 @@ public class OpenAPIResourceMapper {
         return Optional.of(op);
     }
 
-    private void setSwaggerLinksInApiResponse(SemanticModel semanticModel, ServiceDeclarationNode service, ApiResponses apiResponses,
-                                 FunctionDefinitionNode resource) {
+    private void setSwaggerLinksInApiResponse(SemanticModel semanticModel, ServiceDeclarationNode service,
+                                              ApiResponses apiResponses, FunctionDefinitionNode resource) {
         Optional<Symbol> serviceDeclarationOpt = semanticModel.symbol(service);
         ServiceDeclarationSymbol serviceSymbol = (ServiceDeclarationSymbol) serviceDeclarationOpt.get();
         int serviceId = serviceSymbol.hashCode();
@@ -256,8 +255,6 @@ public class OpenAPIResourceMapper {
                 int statusCode = Integer.parseInt(entry.getKey());
                 if (statusCode >= 200 && statusCode < 300) {
                     entry.getValue().setLinks(swaggerLinks);
-                    ApiResponse apiResponse = new ApiResponse();
-                    apiResponse.setLinks(swaggerLinks);
                 }
             }
         }

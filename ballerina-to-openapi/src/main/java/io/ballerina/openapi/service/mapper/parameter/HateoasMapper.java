@@ -60,7 +60,7 @@ public class HateoasMapper {
 
     private List<HateoasLink> getLinks(String linkedTo) {
         List<HateoasLink> links = new ArrayList<>();
-        String[] linkArray = linkedTo.replaceAll("[\\[\\]]", "").split("},\\\\s*");
+        String[] linkArray = linkedTo.replaceAll("[\\[\\]]", "").split("\\},\\s*");
         for (String linkString : linkArray) {
             HateoasLink link = parseHateoasLink(linkString);
             links.add(link);

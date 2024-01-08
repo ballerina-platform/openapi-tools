@@ -21,10 +21,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Location'
           links:
-            room:
-              operationId: getLocationsIdRooms
             payment:
               operationId: getLocationsIdPayments
+            room:
+              operationId: getLocationsIdRooms
   /locations/{id}/rooms:
     get:
       operationId: getLocationsIdRooms
