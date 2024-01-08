@@ -37,4 +37,10 @@ public class HateoasTests {
         Path ballerinafilePath = RES_DIR.resolve("hateoas/hateoas_multiple_links.bal");
         TestUtils.compareWithGeneratedFile(ballerinafilePath, "hateoas/hateoas_multiple_links.yaml");
     }
+
+    @Test(description = "Self relation to a resource (default relation value)")
+    public void testHateoasSelfRelation() throws  IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("hateoas/hateoas_self_rel.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "hateoas/hateoas_self_rel.yaml");
+    }
 }
