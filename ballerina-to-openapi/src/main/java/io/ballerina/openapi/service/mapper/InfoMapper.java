@@ -62,8 +62,8 @@ public final class InfoMapper {
      * @param ballerinaFilePath Ballerina file path.
      * @return {@code OASResult}
      */
-    static OASResult addInfoSection(ServiceDeclarationNode serviceNode, SemanticModel semanticModel,
-                                    String openapiFileName, Path ballerinaFilePath) {
+    static OASResult getOASResultWithInfo(ServiceDeclarationNode serviceNode, SemanticModel semanticModel,
+                                          String openapiFileName, Path ballerinaFilePath) {
         Optional<MetadataNode> metadata = serviceNode.metadata();
         List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
         OpenAPI openAPI = new OpenAPI();

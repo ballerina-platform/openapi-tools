@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.service.mapper.type;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.ErrorTypeSymbol;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
@@ -29,13 +28,10 @@ import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
-import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -47,28 +43,7 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTyp
  *
  * @since 1.9.0
  */
-public class TypeMapper {
-
-    private final OpenAPI openAPI;
-    private final AdditionalData componentMapperData;
-
-    public TypeMapper(OpenAPI openAPI, SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
-                      List<OpenAPIMapperDiagnostic> diagnostics) {
-        this.openAPI = openAPI;
-        this.componentMapperData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
-    }
-
-    public AdditionalData getComponentMapperData() {
-        return componentMapperData;
-    }
-
-    public OpenAPI getOpenAPI() {
-        return openAPI;
-    }
-
-    public Schema getTypeSchema(TypeSymbol typeSymbol) {
-        return getTypeSchema(typeSymbol, openAPI, componentMapperData);
-    }
+public abstract class TypeMapper {
 
     public static Schema getTypeSchema(TypeSymbol typeSymbol, OpenAPI openAPI, AdditionalData componentMapperData) {
         return getTypeSchema(typeSymbol, openAPI, componentMapperData, false);

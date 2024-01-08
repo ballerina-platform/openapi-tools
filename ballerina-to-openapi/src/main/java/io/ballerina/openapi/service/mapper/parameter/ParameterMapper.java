@@ -36,17 +36,14 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.openapi.service.mapper.Constants;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
-import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
-import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -62,27 +59,19 @@ public class ParameterMapper {
     private final FunctionDefinitionNode functionDefinitionNode;
     private final OperationAdaptor operationAdaptor;
     private final Map<String, String> apidocs;
-    private final List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
-    private final SemanticModel semanticModel;
-    private final TypeMapper typeMapper;
+    private final AdditionalData additionalData;
     private final OpenAPI openAPI;
     private final boolean treatNilableAsOptional;
 
     public ParameterMapper(FunctionDefinitionNode functionDefinitionNode, OperationAdaptor operationAdaptor,
-                           Map<String, String> apiDocs, SemanticModel semanticModel,
-                           Boolean treatNilableAsOptional,
-                           TypeMapper typeMapper, OpenAPI openAPI) {
+                           OpenAPI openAPI, Map<String, String> apiDocs, AdditionalData additionalData,
+                           Boolean treatNilableAsOptional) {
         this.functionDefinitionNode = functionDefinitionNode;
         this.operationAdaptor = operationAdaptor;
         this.apidocs = apiDocs;
-        this.semanticModel = semanticModel;
-        this.typeMapper = typeMapper;
+        this.additionalData = additionalData;
         this.openAPI = openAPI;
         this.treatNilableAsOptional = treatNilableAsOptional;
-    }
-
-    public List<OpenAPIMapperDiagnostic> getDiagnostics() {
-        return diagnostics;
     }
 
     public void setParameters() {
@@ -103,7 +92,7 @@ public class ParameterMapper {
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
                 IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
                         parameterNode.location());
-                diagnostics.add(error);
+                additionalData.diagnostics().add(error);
                 continue;
             }
             setParameter(parameterNode, parameterType);
@@ -114,23 +103,22 @@ public class ParameterMapper {
         switch (parameterType) {
             case "QUERY" -> {
                 QueryParameterMapper queryParameterMapper = new QueryParameterMapper(parameterNode, apidocs,
-                        operationAdaptor, treatNilableAsOptional, typeMapper);
+                        operationAdaptor, openAPI, treatNilableAsOptional, additionalData);
                 queryParameterMapper.setParameter();
             }
             case "HEADER" -> {
                 HeaderParameterMapper headerParameterMapper = new HeaderParameterMapper(parameterNode, apidocs,
-                        operationAdaptor, treatNilableAsOptional, typeMapper);
+                        operationAdaptor, openAPI, treatNilableAsOptional, additionalData);
                 headerParameterMapper.setParameter();
             }
             case "PAYLOAD" -> {
-                Optional<Symbol> symbol = semanticModel.symbol(parameterNode);
+                Optional<Symbol> symbol = additionalData.semanticModel().symbol(parameterNode);
                 if (symbol.isEmpty() || !(symbol.get() instanceof ParameterSymbol)) {
                     return;
                 }
                 AnnotationNode annotation = getPayloadAnnotation(parameterNode);
-                RequestBodyMapper requestBodyMapper = new RequestBodyMapper(semanticModel,
-                        (ParameterSymbol) symbol.get(), annotation, operationAdaptor,
-                        typeMapper, functionDefinitionNode, apidocs);
+                RequestBodyMapper requestBodyMapper = new RequestBodyMapper((ParameterSymbol) symbol.get(), annotation,
+                        operationAdaptor, functionDefinitionNode, openAPI, apidocs, additionalData);
                 requestBodyMapper.setRequestBody();
             }
             case "REQUEST" -> {
@@ -164,9 +152,10 @@ public class ParameterMapper {
     private void setPathParameters(NodeList<Node> pathParams) {
         for (Node param: pathParams) {
             if (param instanceof ResourcePathParameterNode pathParam) {
+                SemanticModel semanticModel = additionalData.semanticModel();
                 PathParameterSymbol pathParameterSymbol = (PathParameterSymbol) semanticModel.symbol(pathParam).get();
                 PathParameterMapper pathParameterMapper = new PathParameterMapper(pathParameterSymbol, openAPI, apidocs,
-                        operationAdaptor, semanticModel, diagnostics);
+                        operationAdaptor, additionalData);
                 pathParameterMapper.setParameter();
             }
         }
@@ -181,6 +170,7 @@ public class ParameterMapper {
             if (parameterTypeName.equals(HTTP_REQUEST)) {
                 return "REQUEST";
             } else {
+                SemanticModel semanticModel = additionalData.semanticModel();
                 Symbol parameterSymbol = semanticModel.symbol(requiredParameterNode).orElse(null);
                 if (Objects.isNull(parameterSymbol) || !(parameterSymbol instanceof ParameterSymbol)) {
                     return null;

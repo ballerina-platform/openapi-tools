@@ -35,10 +35,10 @@ import io.ballerina.openapi.service.mapper.constraint.ConstraintMapper;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
-import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Project;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -190,7 +190,7 @@ public class ServiceToOpenAPIMapper {
         String openApiFileName = oasGenerationMetaInfo.getOpenApiFileName();
         Path ballerinaFilePath = oasGenerationMetaInfo.getBallerinaFilePath();
         // 01.Fill the openAPI info section
-        OASResult oasResult = InfoMapper.addInfoSection(serviceDefinition, semanticModel,
+        OASResult oasResult = InfoMapper.getOASResultWithInfo(serviceDefinition, semanticModel,
                 openApiFileName, ballerinaFilePath);
         if (oasResult.getOpenAPI().isPresent() && oasResult.getDiagnostics().isEmpty()) {
             OpenAPI openapi = oasResult.getOpenAPI().get();
@@ -241,9 +241,9 @@ public class ServiceToOpenAPIMapper {
                 resources.add((FunctionDefinitionNode) function);
             }
         }
-        TypeMapper typeMapper = new TypeMapper(openAPI, semanticModel, moduleMemberVisitor, diagnostics);
-        ResourceMapper resourceMapper = new ResourceMapper(openAPI, resources, semanticModel,
-                diagnostics, typeMapper, isTreatNilableAsOptionalParameter(serviceNode));
+        AdditionalData additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
+        ResourceMapper resourceMapper = new ResourceMapper(openAPI, resources, additionalData,
+                isTreatNilableAsOptionalParameter(serviceNode));
         resourceMapper.addMapping();
     }
 

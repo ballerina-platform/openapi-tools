@@ -16,13 +16,11 @@
 
 package io.ballerina.openapi.service.mapper.parameter;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.PathParameterSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.resourcepath.util.PathSegment;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
-import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
@@ -30,7 +28,6 @@ import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 
-import java.util.List;
 import java.util.Map;
 
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
@@ -41,15 +38,13 @@ public class PathParameterMapper extends AbstractParameterMapper {
     private final TypeSymbol type;
     private final String name;
     private final String description;
-    private final SemanticModel semanticModel;
-    private final List<OpenAPIMapperDiagnostic> diagnostics;
+    private final AdditionalData additionalData;
     private final OpenAPI openAPI;
     private final Location location;
     private final PathSegment.Kind pathSegmentKind;
 
     public PathParameterMapper(PathParameterSymbol pathParameterSymbol, OpenAPI openAPI, Map<String, String> apiDocs,
-                               OperationAdaptor operationAdaptor, SemanticModel semanticModel,
-                               List<OpenAPIMapperDiagnostic> diagnostics) {
+                               OperationAdaptor operationAdaptor, AdditionalData additionalData) {
         super(operationAdaptor);
         this.location = pathParameterSymbol.getLocation().orElse(null);
         this.pathSegmentKind = pathParameterSymbol.pathSegmentKind();
@@ -57,8 +52,7 @@ public class PathParameterMapper extends AbstractParameterMapper {
         this.openAPI = openAPI;
         this.name = unescapeIdentifier(pathParameterSymbol.getName().get());
         this.description = apiDocs.get(removeStartingSingleQuote(pathParameterSymbol.getName().get()));
-        this.semanticModel = semanticModel;
-        this.diagnostics = diagnostics;
+        this.additionalData = additionalData;
     }
 
     @Override
@@ -66,13 +60,12 @@ public class PathParameterMapper extends AbstractParameterMapper {
         if (pathSegmentKind.equals(PathSegment.Kind.PATH_REST_PARAMETER)) {
             DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_125;
             IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage, location, name);
-            diagnostics.add(error);
+            additionalData.diagnostics().add(error);
             return null;
         }
         PathParameter pathParameter = new PathParameter();
         pathParameter.setName(name);
         pathParameter.setRequired(true);
-        AdditionalData additionalData = new AdditionalData(semanticModel, null, diagnostics);
         pathParameter.setSchema(TypeMapper.getTypeSchema(type, openAPI, additionalData));
         pathParameter.setDescription(description);
         return pathParameter;

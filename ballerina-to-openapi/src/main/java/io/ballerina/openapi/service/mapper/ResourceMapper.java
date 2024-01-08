@@ -19,7 +19,6 @@
 
 package io.ballerina.openapi.service.mapper;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Documentable;
 import io.ballerina.compiler.api.symbols.Documentation;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -32,10 +31,10 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.ResponseMapper;
-import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -61,10 +60,8 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpe
  * @since 2.0.0
  */
 public class ResourceMapper {
-    private final SemanticModel semanticModel;
     private final Paths pathObject = new Paths();
-    private final List<OpenAPIMapperDiagnostic> diagnostics;
-    private final TypeMapper typeMapper;
+    private final AdditionalData additionalData;
     private final OpenAPI openAPI;
     private final List<FunctionDefinitionNode> resources;
     private final boolean treatNilableAsOptional;
@@ -72,14 +69,11 @@ public class ResourceMapper {
     /**
      * Initializes a resource parser for openApi.
      */
-    ResourceMapper(OpenAPI openAPI, List<FunctionDefinitionNode> resources, SemanticModel semanticModel,
-                   List<OpenAPIMapperDiagnostic> diagnostics, TypeMapper typeMapper,
+    ResourceMapper(OpenAPI openAPI, List<FunctionDefinitionNode> resources, AdditionalData additionalData,
                    boolean treatNilableAsOptional) {
         this.openAPI = openAPI;
         this.resources = resources;
-        this.semanticModel = semanticModel;
-        this.diagnostics = diagnostics;
-        this.typeMapper = typeMapper;
+        this.additionalData = additionalData;
         this.treatNilableAsOptional = treatNilableAsOptional;
     }
 
@@ -107,7 +101,7 @@ public class ResourceMapper {
                     DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_100;
                     IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
                             resource.location());
-                    diagnostics.add(error);
+                    additionalData.diagnostics().add(error);
                 } else {
                     Optional<OperationAdaptor> operationAdaptor = convertResourceToOperation(resource, httpMethod,
                             path);
@@ -209,35 +203,24 @@ public class ResourceMapper {
         // Map API documentation
         Map<String, String> apiDocs = listAPIDocumentations(resource, op);
         //Add path parameters if in path and query parameters
-        ParameterMapper parameterMapper = new ParameterMapper(resource, op, apiDocs, semanticModel,
-                treatNilableAsOptional, typeMapper, openAPI);
+        ParameterMapper parameterMapper = new ParameterMapper(resource, op, openAPI, apiDocs, additionalData,
+                treatNilableAsOptional);
         parameterMapper.setParameters();
+        List<OpenAPIMapperDiagnostic> diagnostics = additionalData.diagnostics();
         if (diagnostics.size() > 1 || (diagnostics.size() == 1 && !diagnostics.get(0).getCode().equals(
                 DiagnosticMessages.OAS_CONVERTOR_113.getCode()))) {
-            boolean isErrorIncluded = diagnostics.stream().anyMatch(d ->
-                    DiagnosticSeverity.ERROR.equals(d.getDiagnosticSeverity()));
-            if (isErrorIncluded) {
+            boolean isErrorIncluded = diagnostics.stream().anyMatch(diagnostic ->
+                    DiagnosticSeverity.ERROR.equals(diagnostic.getDiagnosticSeverity()));
+            boolean hasRestPathParam = diagnostics.stream().anyMatch(diagnostic ->
+                    DiagnosticMessages.OAS_CONVERTOR_125.getCode().equals(diagnostic.getCode()));
+            if (isErrorIncluded || hasRestPathParam) {
                 return Optional.empty();
             }
         }
 
-        if (checkRestParamInResourcePath(parameterMapper)) {
-            return Optional.empty();
-        }
-        diagnostics.addAll(parameterMapper.getDiagnostics());
-        ResponseMapper responseMapper = new ResponseMapper(semanticModel, openAPI, resource, op, typeMapper);
+        ResponseMapper responseMapper = new ResponseMapper(resource, op, openAPI, additionalData);
         responseMapper.setApiResponses();
         return Optional.of(op);
-    }
-
-    private boolean checkRestParamInResourcePath(ParameterMapper parameterMapper) {
-        List<OpenAPIMapperDiagnostic> errorList = parameterMapper.getDiagnostics();
-        if (!errorList.isEmpty() && errorList.stream().anyMatch(error ->
-                DiagnosticMessages.OAS_CONVERTOR_125.getCode().equals(error.getCode()))) {
-            diagnostics.addAll(errorList);
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -247,7 +230,7 @@ public class ResourceMapper {
 
         Map<String, String> apiDocs = new HashMap<>();
         if (resource.metadata().isPresent()) {
-            Optional<Symbol> resourceSymbol = semanticModel.symbol(resource);
+            Optional<Symbol> resourceSymbol = additionalData.semanticModel().symbol(resource);
             if (resourceSymbol.isPresent()) {
                 Symbol symbol = resourceSymbol.get();
                 Optional<Documentation> documentation = ((Documentable) symbol).documentation();

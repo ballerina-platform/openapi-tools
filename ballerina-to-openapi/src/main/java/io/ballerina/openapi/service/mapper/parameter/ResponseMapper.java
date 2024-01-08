@@ -33,6 +33,7 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
+import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.parameter.model.CacheConfigAnnotation;
 import io.ballerina.openapi.service.mapper.parameter.utils.CacheHeaderUtils;
@@ -75,23 +76,20 @@ import static io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractAnnotationFieldDetails;
 
 public class ResponseMapper {
-
-    private final SemanticModel semanticModel;
     private final OpenAPI openAPI;
     private List<String> allowedMediaTypes = new ArrayList<>();
     private final Map<String, Header> cacheHeaders = new HashMap<>();
     private final Map<String, Map<String, Header>> headersMap = new HashMap<>();
     private final String mediaTypeSubTypePrefix;
     private final ApiResponses apiResponses = new ApiResponses();
-    private final TypeMapper typeMapper;
+    private final AdditionalData additionalData;
     private final OperationAdaptor operationAdaptor;
 
-    public ResponseMapper(SemanticModel semanticModel, OpenAPI openAPI, FunctionDefinitionNode resourceNode,
-                          OperationAdaptor operationAdaptor, TypeMapper typeMapper) {
-        this.semanticModel = semanticModel;
+    public ResponseMapper(FunctionDefinitionNode resourceNode, OperationAdaptor operationAdaptor,
+                          OpenAPI openAPI, AdditionalData additionalData) {
+        this.additionalData = additionalData;
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
         this.openAPI = openAPI;
-        this.typeMapper = typeMapper;
         this.operationAdaptor = operationAdaptor;
         extractAnnotationDetails(resourceNode);
 
@@ -108,7 +106,7 @@ public class ResponseMapper {
     }
 
     private TypeSymbol getReturnTypeSymbol(FunctionDefinitionNode resourceNode) {
-        Optional<Symbol> symbol = semanticModel.symbol(resourceNode);
+        Optional<Symbol> symbol = additionalData.semanticModel().symbol(resourceNode);
         if (symbol.isEmpty() || !(symbol.get() instanceof ResourceMethodSymbol resourceMethodSymbol)) {
             return null;
         }
@@ -133,7 +131,7 @@ public class ResponseMapper {
                                         cacheConfigAnn));
                     } else if (annotation.annotReference().toString().trim().equals(HTTP_PAYLOAD)) {
                         allowedMediaTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, MEDIA_TYPE,
-                                annotation, semanticModel);
+                                annotation, additionalData.semanticModel());
                     }
                 }
             }
@@ -141,7 +139,7 @@ public class ResponseMapper {
     }
 
     private void createResponseMapping(TypeSymbol returnType, String defaultStatusCode) {
-        UnionTypeSymbol unionType = getUnionType(returnType, semanticModel);
+        UnionTypeSymbol unionType = getUnionType(returnType, additionalData.semanticModel());
         if (Objects.nonNull(unionType)) {
             addResponseMappingForUnion(defaultStatusCode, unionType);
         } else {
@@ -170,9 +168,9 @@ public class ResponseMapper {
             String responseCode = mediaTypeEntry.getKey();
             for (Map.Entry<String, TypeSymbol> entry : mediaTypes.entrySet()) {
                 TypeSymbol typeSymbol = entry.getValue();
-                if (isSubTypeOfNil(typeSymbol, semanticModel)) {
+                if (isSubTypeOfNil(typeSymbol, additionalData.semanticModel())) {
                     addResponseMappingForNil();
-                } else if (isSubTypeOfHttpResponse(typeSymbol, semanticModel)) {
+                } else if (isSubTypeOfHttpResponse(typeSymbol, additionalData.semanticModel())) {
                     addResponseMappingForHttpResponse();
                 } else {
                     String mediaType = entry.getKey();
@@ -200,7 +198,7 @@ public class ResponseMapper {
     private void addResponseContent(TypeSymbol returnType, ApiResponse apiResponse, String mediaType) {
         if (!isPlainAnyDataType(returnType)) {
             MediaType mediaTypeObj = new MediaType();
-            mediaTypeObj.setSchema(typeMapper.getTypeSchema(returnType));
+            mediaTypeObj.setSchema(TypeMapper.getTypeSchema(returnType, openAPI, additionalData));
             updateApiResponseContentWithMediaType(apiResponse, mediaType, mediaTypeObj);
         }
     }
@@ -271,7 +269,7 @@ public class ResponseMapper {
     private void addResponseMappingForDataBindingFailures() {
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.description(BAD_REQUEST);
-        TypeSymbol errorType = semanticModel.types().ERROR;
+        TypeSymbol errorType = additionalData.semanticModel().types().ERROR;
         addResponseContent(errorType, apiResponse, "application/json");
         addApiResponse(apiResponse, HTTP_400);
     }
@@ -286,6 +284,7 @@ public class ResponseMapper {
     }
 
     private void addResponseMappingForSimpleType(TypeSymbol returnType, String defaultStatusCode) {
+        SemanticModel semanticModel = additionalData.semanticModel();
         if (isSubTypeOfNil(returnType, semanticModel)) {
             addResponseMappingForNil();
         } else if (isSubTypeOfHttpResponse(returnType, semanticModel)) {
@@ -321,6 +320,7 @@ public class ResponseMapper {
                     updateResponseCodeMap(responseCodeMap, code, mediaType, typeSymbols.get(0));
                 } else {
                     TypeSymbol[] typeSymbolArray = typeSymbols.toArray(TypeSymbol[]::new);
+                    SemanticModel semanticModel = additionalData.semanticModel();
                     TypeSymbol unionTypeSymbol = semanticModel.types().builder().UNION_TYPE.withMemberTypes(
                             typeSymbolArray).build();
                     updateResponseCodeMap(responseCodeMap, code, mediaType, unionTypeSymbol);
@@ -360,6 +360,7 @@ public class ResponseMapper {
 
     private void extractBasicMembers(UnionTypeSymbol unionTypeSymbol, String defaultCode,
                                      Map<String, Map<String, List<TypeSymbol>>> responses) {
+        SemanticModel semanticModel = additionalData.semanticModel();
         if (isSameMediaType(unionTypeSymbol, semanticModel)) {
             String mediaType = getMediaTypeFromType(unionTypeSymbol, mediaTypeSubTypePrefix, allowedMediaTypes,
                     semanticModel);
@@ -423,7 +424,7 @@ public class ResponseMapper {
                 RecordTypeSymbol recordType = (RecordTypeSymbol) headersType;
                 Map<String, RecordFieldSymbol> recordFieldMap = new HashMap<>(recordType.fieldDescriptors());
                 Map<String, Schema> recordFieldsMapping = RecordTypeMapper.mapRecordFields(recordFieldMap, openAPI,
-                        new HashSet<>(), recordName, false, typeMapper.getComponentMapperData());
+                        new HashSet<>(), recordName, false, additionalData);
                 return mapRecordFieldToHeaders(recordFieldsMapping);
             }
         }

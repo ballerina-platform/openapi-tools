@@ -15,10 +15,12 @@ import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
+import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
 import io.ballerina.openapi.service.mapper.type.RecordTypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -43,15 +45,15 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
     private boolean isRequired = false;
     private String description = null;
     private  boolean treatNilableAsOptional = false;
-    private TypeMapper typeMapper = null;
+    private AdditionalData additionalData;
     private Object defaultValue = null;
+    private OpenAPI openAPI = null;
 
     public HeaderParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs,
-                                 OperationAdaptor operationAdaptor, boolean treatNilableAsOptional,
-                                 TypeMapper typeMapper) {
+                                 OperationAdaptor operationAdaptor, OpenAPI openAPI, boolean treatNilableAsOptional,
+                                 AdditionalData additionalData) {
         super(operationAdaptor);
-        Symbol parameterSymbol = typeMapper.getComponentMapperData().
-                semanticModel().symbol(parameterNode).orElse(null);
+        Symbol parameterSymbol = additionalData.semanticModel().symbol(parameterNode).orElse(null);
         if (Objects.nonNull(parameterSymbol) && (parameterSymbol instanceof ParameterSymbol queryParameter)) {
             this.type = queryParameter.typeDescriptor();
             String paramName = unescapeIdentifier(parameterSymbol.getName().get());
@@ -59,7 +61,8 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
             this.isRequired = queryParameter.paramKind().equals(ParameterKind.REQUIRED);
             this.description = apiDocs.get(removeStartingSingleQuote(queryParameter.getName().get()));
             this.treatNilableAsOptional = treatNilableAsOptional;
-            this.typeMapper = typeMapper;
+            this.additionalData = additionalData;
+            this.openAPI = openAPI;
             if (parameterNode instanceof DefaultableParameterNode defaultableQueryParam) {
                 this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableQueryParam);
             }
@@ -127,7 +130,7 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
         if (isRequired && (!treatNilableAsOptional || !UnionTypeMapper.hasNilableType(type))) {
             headerParameter.setRequired(true);
         }
-        Schema typeSchema = typeMapper.getTypeSchema(type);
+        Schema typeSchema = TypeMapper.getTypeSchema(type, openAPI, additionalData);
         if (Objects.nonNull(defaultValue)) {
             TypeMapper.setDefaultValue(typeSchema, defaultValue);
         }
@@ -144,8 +147,8 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
 
         Set<String> requiredHeaders = new HashSet<>();
         HashMap<String, RecordFieldSymbol> headerMap = new HashMap<>(recordTypeInfo.typeSymbol().fieldDescriptors());
-        Map<String, Schema> headerSchemaMap = RecordTypeMapper.mapRecordFields(headerMap, typeMapper.getOpenAPI(),
-                requiredHeaders, recordTypeInfo.name(), treatNilableAsOptional, typeMapper.getComponentMapperData());
+        Map<String, Schema> headerSchemaMap = RecordTypeMapper.mapRecordFields(headerMap, openAPI, requiredHeaders,
+                recordTypeInfo.name(), treatNilableAsOptional, additionalData);
 
         List<Parameter> headerParameters = new ArrayList<>();
         for (Map.Entry<String, Schema> entry : headerSchemaMap.entrySet()) {
