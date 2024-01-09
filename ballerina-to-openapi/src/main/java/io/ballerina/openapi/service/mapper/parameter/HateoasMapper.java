@@ -82,7 +82,7 @@ public class HateoasMapper {
         }
         hateoasLink.setResourceName(keyValueMap.get("name"));
         if (keyValueMap.get("relation") == null) {
-            hateoasLink.setRel("self");
+            hateoasLink.setRel("_self");
         } else {
             hateoasLink.setRel(keyValueMap.get("relation"));
         }

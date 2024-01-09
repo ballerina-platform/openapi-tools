@@ -21,7 +21,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Location'
           links:
-            self:
+            _self:
               operationId: getLocationsIdRooms
   /locations/{id}/rooms:
     get:
