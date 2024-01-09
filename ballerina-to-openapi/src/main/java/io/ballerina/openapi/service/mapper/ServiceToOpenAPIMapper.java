@@ -202,8 +202,7 @@ public class ServiceToOpenAPIMapper {
                 // 03. Filter path and component sections in OAS.
                 // Generate openApi string for the mentioned service name.
                 convertServiceToOpenAPI(serviceDefinition, openapi, semanticModel, moduleMemberVisitor, diagnostics);
-                ConstraintMapper constraintMapper = new ConstraintMapper(openapi, moduleMemberVisitor, semanticModel,
-                        diagnostics);
+                ConstraintMapper constraintMapper = new ConstraintMapper(openapi, moduleMemberVisitor, diagnostics);
                 constraintMapper.addMapping();
                 return new OASResult(openapi, diagnostics);
             } else {

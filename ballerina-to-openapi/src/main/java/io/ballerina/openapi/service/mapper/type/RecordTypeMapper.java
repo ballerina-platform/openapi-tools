@@ -16,7 +16,6 @@
 
 package io.ballerina.openapi.service.mapper.type;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
@@ -140,7 +139,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             }
             if (recordFieldSymbol.hasDefaultValue()) {
                 Object recordFieldDefaultValue = getRecordFieldDefaultValue(recordName, recordFieldName,
-                        additionalData.semanticModel(), additionalData.moduleMemberVisitor());
+                        additionalData.moduleMemberVisitor());
                 if (Objects.nonNull(recordFieldDefaultValue)) {
                     TypeMapper.setDefaultValue(recordFieldSchema, recordFieldDefaultValue);
                 } else {
@@ -155,9 +154,9 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         return properties;
     }
 
-    public static Object getRecordFieldDefaultValue(String recordName, String fieldName, SemanticModel semanticModel,
+    public static Object getRecordFieldDefaultValue(String recordName, String fieldName,
                                                     ModuleMemberVisitor moduleMemberVisitor) {
-        TypeDefinitionNode recordDefNode = moduleMemberVisitor.getTypeDefinitionNode(recordName, semanticModel);
+        TypeDefinitionNode recordDefNode = moduleMemberVisitor.getTypeDefinitionNode(recordName);
         if (Objects.isNull(recordDefNode) || !(recordDefNode.typeDescriptor() instanceof RecordTypeDescriptorNode)) {
             return null;
         }

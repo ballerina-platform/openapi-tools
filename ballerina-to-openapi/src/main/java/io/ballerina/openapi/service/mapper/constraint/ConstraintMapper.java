@@ -1,6 +1,5 @@
 package io.ballerina.openapi.service.mapper.constraint;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
@@ -45,14 +44,12 @@ public class ConstraintMapper {
 
     private final OpenAPI openAPI;
     private final ModuleMemberVisitor moduleMemberVisitor;
-    private final SemanticModel semanticModel;
     private final List<OpenAPIMapperDiagnostic> diagnostics;
 
-    public ConstraintMapper(OpenAPI openAPI, ModuleMemberVisitor moduleMemberVisitor, SemanticModel semanticModel,
+    public ConstraintMapper(OpenAPI openAPI, ModuleMemberVisitor moduleMemberVisitor,
                             List<OpenAPIMapperDiagnostic> diagnostics) {
         this.openAPI = openAPI;
         this.moduleMemberVisitor = moduleMemberVisitor;
-        this.semanticModel = semanticModel;
         this.diagnostics = diagnostics;
     }
 
@@ -63,8 +60,7 @@ public class ConstraintMapper {
         }
         Map<String, Schema> schemas = components.getSchemas();
         for (Map.Entry<String, Schema> schemaEntry : schemas.entrySet()) {
-            TypeDefinitionNode typeDefinitionNode = moduleMemberVisitor.getTypeDefinitionNode(schemaEntry.getKey(),
-                    semanticModel);
+            TypeDefinitionNode typeDefinitionNode = moduleMemberVisitor.getTypeDefinitionNode(schemaEntry.getKey());
             if (Objects.isNull(typeDefinitionNode)) {
                 continue;
             }
