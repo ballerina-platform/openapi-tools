@@ -54,17 +54,17 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
                                  AdditionalData additionalData) {
         super(operationAdaptor);
         Symbol parameterSymbol = additionalData.semanticModel().symbol(parameterNode).orElse(null);
-        if (Objects.nonNull(parameterSymbol) && (parameterSymbol instanceof ParameterSymbol queryParameter)) {
-            this.type = queryParameter.typeDescriptor();
+        if (Objects.nonNull(parameterSymbol) && (parameterSymbol instanceof ParameterSymbol headerParameter)) {
+            this.type = headerParameter.typeDescriptor();
             String paramName = unescapeIdentifier(parameterSymbol.getName().get());
             this.name = getHeaderName(parameterNode, paramName);
-            this.isRequired = queryParameter.paramKind().equals(ParameterKind.REQUIRED);
-            this.description = apiDocs.get(removeStartingSingleQuote(queryParameter.getName().get()));
+            this.isRequired = headerParameter.paramKind().equals(ParameterKind.REQUIRED);
+            this.description = apiDocs.get(removeStartingSingleQuote(headerParameter.getName().get()));
             this.treatNilableAsOptional = treatNilableAsOptional;
             this.additionalData = additionalData;
             this.openAPI = openAPI;
-            if (parameterNode instanceof DefaultableParameterNode defaultableQueryParam) {
-                this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableQueryParam);
+            if (parameterNode instanceof DefaultableParameterNode defaultableHeaderParam) {
+                this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableHeaderParam);
             }
         }
     }
