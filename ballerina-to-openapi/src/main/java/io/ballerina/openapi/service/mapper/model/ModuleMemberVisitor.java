@@ -18,12 +18,16 @@
 
 package io.ballerina.openapi.service.mapper.model;
 
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -50,9 +54,11 @@ public class ModuleMemberVisitor extends NodeVisitor {
         return listenerDeclarationNodes;
     }
 
-    public TypeDefinitionNode getTypeDefinitionNode(String typeName) {
+    public TypeDefinitionNode getTypeDefinitionNode(String typeName, SemanticModel semanticModel) {
         for (TypeDefinitionNode typeDefinitionNode : typeDefinitionNodes) {
-            if (MapperCommonUtils.unescapeIdentifier(typeDefinitionNode.typeName().text()).equals(typeName)) {
+            Optional<Symbol> symbol = semanticModel.symbol(typeDefinitionNode);
+            if (symbol.isPresent() && symbol.get() instanceof TypeSymbol typeSymbol &&
+                    MapperCommonUtils.getTypeName(typeSymbol).equals(typeName)) {
                 return typeDefinitionNode;
             }
         }
