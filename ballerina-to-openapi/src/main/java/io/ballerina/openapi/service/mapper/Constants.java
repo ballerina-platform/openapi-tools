@@ -61,6 +61,7 @@ public final class Constants {
     public static final String OPTIONS = "OPTIONS";
     public static final String HEAD = "HEAD";
     public static final String OPENAPI_SUFFIX = "_openapi";
+    public static final String OPENAPI_LINK_DEFAULT_REL = "_self";
     public static final String SERVER = "server";
     public static final String PORT = "port";
     public static final String APPLICATION_PREFIX = "application/";

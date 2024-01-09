@@ -43,4 +43,10 @@ public class HateoasTests {
         Path ballerinaFilePath = RES_DIR.resolve("hateoas/hateoas_self_rel.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "hateoas/hateoas_self_rel.yaml");
     }
+
+    @Test(description = "Hateoas with snowpeak example")
+    public void testHateoasSnowpeakExample() throws  IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("hateoas/snowpeak_hateoas.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "hateoas/snowpeak_hateoas.yaml");
+    }
 }

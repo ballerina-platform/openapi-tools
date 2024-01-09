@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.openapi.service.mapper.Constants.OPENAPI_LINK_DEFAULT_REL;
 import static io.ballerina.openapi.service.mapper.hateoas.ContextHolder.getHateoasContextHolder;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getResourceConfigAnnotation;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getValueForAnnotationFields;
@@ -82,7 +83,7 @@ public class HateoasMapper {
         }
         hateoasLink.setResourceName(keyValueMap.get("name"));
         if (keyValueMap.get("relation") == null) {
-            hateoasLink.setRel("_self");
+            hateoasLink.setRel(OPENAPI_LINK_DEFAULT_REL);
         } else {
             hateoasLink.setRel(keyValueMap.get("relation"));
         }
