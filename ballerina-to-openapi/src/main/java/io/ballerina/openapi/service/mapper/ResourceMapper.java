@@ -24,10 +24,7 @@ import io.ballerina.compiler.api.symbols.Documentation;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
@@ -42,14 +39,11 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import static io.ballerina.openapi.service.mapper.Constants.DEFAULT;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOperationId;
@@ -79,40 +73,25 @@ public class ResourceMapper {
 
     public void addMapping() {
         for (FunctionDefinitionNode resource : resources) {
-            List<String> methods = this.getHttpMethods(resource);
-            getResourcePath(resource, methods);
+            generateResourceMapping(resource);
         }
         openAPI.setPaths(pathObject);
     }
 
-    /**
-     * Resource mapper when a resource has more than 1 http method.
-     *
-     * @param resource The ballerina resource.
-     * @param httpMethods   Sibling methods related to operation.
-     */
-    private void getResourcePath(FunctionDefinitionNode resource, List<String> httpMethods) {
+    private void generateResourceMapping(FunctionDefinitionNode resource) {
         String path = MapperCommonUtils.unescapeIdentifier(generateRelativePath(resource));
-        Operation operation;
-        for (String httpMethod : httpMethods) {
-            //Iterate through http methods and fill path map.
-            if (resource.functionName().toString().trim().equals(httpMethod)) {
-                if (httpMethod.equals("'" + DEFAULT) || httpMethod.equals(DEFAULT)) {
-                    DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_100;
-                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
-                            resource.location());
-                    additionalData.diagnostics().add(error);
-                } else {
-                    Optional<OperationAdaptor> operationAdaptor = convertResourceToOperation(resource, httpMethod,
-                            path);
-                    if (operationAdaptor.isPresent()) {
-                        operation = operationAdaptor.get().getOperation();
-                        generatePathItem(httpMethod, pathObject, operation, path);
-                    } else {
-                        break;
-                    }
-                }
-                break;
+        String httpMethod = resource.functionName().toString().trim();
+        if (httpMethod.equals("'" + DEFAULT) || httpMethod.equals(DEFAULT)) {
+            DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_100;
+            IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                    resource.location());
+            additionalData.diagnostics().add(error);
+        } else {
+            Optional<OperationAdaptor> operationAdaptor = convertResourceToOperation(resource, httpMethod,
+                    path);
+            if (operationAdaptor.isPresent()) {
+                Operation operation = operationAdaptor.get().getOperation();
+                generatePathItem(httpMethod, pathObject, operation, path);
             }
         }
     }
@@ -246,32 +225,6 @@ public class ResourceMapper {
             }
         }
         return apiDocs;
-    }
-
-    /**
-     * Gets the http methods of a resource.
-     *
-     * @param resource    The ballerina resource.
-     * @return A list of http methods.
-     */
-    private List<String> getHttpMethods(FunctionDefinitionNode resource) {
-        Set<String> httpMethods = new LinkedHashSet<>();
-        ServiceDeclarationNode parentNode = (ServiceDeclarationNode) resource.parent();
-        NodeList<Node> siblings = parentNode.members();
-        httpMethods.add(resource.functionName().text());
-        String relativePath = generateRelativePath(resource);
-        for (Node function: siblings) {
-            SyntaxKind kind = function.kind();
-            if (kind.equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
-                FunctionDefinitionNode sibling = (FunctionDefinitionNode) function;
-                //need to build relative path
-                String siblingRelativePath = generateRelativePath(sibling);
-                if (relativePath.equals(siblingRelativePath)) {
-                    httpMethods.add(sibling.functionName().text());
-                }
-            }
-        }
-        return new ArrayList<>(httpMethods);
     }
 
     private String generateRelativePath(FunctionDefinitionNode resource) {
