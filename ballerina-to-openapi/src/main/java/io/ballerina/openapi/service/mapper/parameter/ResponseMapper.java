@@ -406,22 +406,25 @@ public class ResponseMapper {
     }
 
     public static TypeSymbol getBodyTypeFromStatusCodeResponse(TypeSymbol typeSymbol, SemanticModel semanticModel) {
-        TypeSymbol recordTypeSymbol = ReferenceTypeMapper.getReferredType(typeSymbol);
-        if (Objects.nonNull(recordTypeSymbol) &&
-                ((RecordTypeSymbol) recordTypeSymbol).fieldDescriptors().containsKey("body")) {
-            return ((RecordTypeSymbol) recordTypeSymbol).fieldDescriptors().get("body").typeDescriptor();
+        TypeSymbol refTypeSymbol = ReferenceTypeMapper.getReferredType(typeSymbol);
+        if (Objects.nonNull(refTypeSymbol) && refTypeSymbol instanceof TypeReferenceTypeSymbol recordRefTypeSymbol &&
+                recordRefTypeSymbol.typeDescriptor() instanceof RecordTypeSymbol recordTypeSymbol &&
+                recordTypeSymbol.fieldDescriptors().containsKey("body")) {
+            return recordTypeSymbol.fieldDescriptors().get("body").typeDescriptor();
         }
         return semanticModel.types().ANYDATA;
     }
 
     public Map<String, Header> getHeadersFromStatusCodeResponse(TypeSymbol typeSymbol) {
-        RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) ReferenceTypeMapper.getReferredType(typeSymbol);
-        if (Objects.nonNull(recordTypeSymbol) && recordTypeSymbol.fieldDescriptors().containsKey("headers")) {
-            String recordName = MapperCommonUtils.getTypeName(recordTypeSymbol);
+        TypeSymbol refTypeSymbol = ReferenceTypeMapper.getReferredType(typeSymbol);
+        if (Objects.nonNull(refTypeSymbol) && refTypeSymbol instanceof TypeReferenceTypeSymbol recordRefTypeSymbol &&
+                recordRefTypeSymbol.typeDescriptor() instanceof RecordTypeSymbol recordTypeSymbol &&
+                recordTypeSymbol.fieldDescriptors().containsKey("headers")) {
             TypeSymbol headersType = ReferenceTypeMapper.getReferredType(
                     recordTypeSymbol.fieldDescriptors().get("headers").typeDescriptor());
-            if (Objects.nonNull(headersType) && headersType.typeKind().equals(TypeDescKind.RECORD)) {
-                RecordTypeSymbol recordType = (RecordTypeSymbol) headersType;
+            if (Objects.nonNull(headersType) && headersType instanceof TypeReferenceTypeSymbol headersRefType &&
+                    headersRefType.typeDescriptor() instanceof RecordTypeSymbol recordType) {
+                String recordName = MapperCommonUtils.getTypeName(headersType);
                 Map<String, RecordFieldSymbol> recordFieldMap = new HashMap<>(recordType.fieldDescriptors());
                 Map<String, Schema> recordFieldsMapping = RecordTypeMapper.mapRecordFields(recordFieldMap, openAPI,
                         new HashSet<>(), recordName, false, additionalData);
