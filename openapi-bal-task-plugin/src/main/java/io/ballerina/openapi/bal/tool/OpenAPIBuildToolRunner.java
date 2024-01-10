@@ -53,7 +53,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT;
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT_METHODS;
@@ -149,12 +155,15 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         }
     }
 
-    private static boolean validateCache(ToolContext toolContext, Path cachePath, OASClientConfig clientConfig) throws IOException {
+    private static boolean validateCache(ToolContext toolContext, Path cachePath, OASClientConfig clientConfig)
+            throws IOException {
         String cacheDir = toolContext.toolId();
         Path toolCachePath = cachePath.getParent();
+        assert toolCachePath != null;
         File directoryPath = new File(toolCachePath.toString());
         String[] cacheDirs = directoryPath.list();
         md5HexOpenAPI = getHashValue(clientConfig, toolContext.targetModule());
+        assert cacheDirs != null;
         for (String path : cacheDirs) {
             if (path.equals(cacheDir)) {
                 // read the cache file
@@ -316,8 +325,7 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
             summaryOfCodegen.append(str);
         }
 
-        String md5HexOpenAPI = DigestUtils.md5Hex(summaryOfCodegen.toString()).toUpperCase(Locale.ENGLISH);
-        return md5HexOpenAPI;
+        return DigestUtils.md5Hex(summaryOfCodegen.toString()).toUpperCase(Locale.ENGLISH);
     }
 
     /**

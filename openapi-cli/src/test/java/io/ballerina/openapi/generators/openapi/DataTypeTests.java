@@ -59,6 +59,12 @@ public class DataTypeTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/tuple_type.yaml");
     }
 
+    @Test(description = "test for Ballerina built-in subtypes as record fields")
+    public void testForBuiltInSubTypes() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("data_type/built_in_sub_types_in_record.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/built_in_sub_types_in_record.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
