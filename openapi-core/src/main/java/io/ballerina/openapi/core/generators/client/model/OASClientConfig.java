@@ -20,6 +20,8 @@ package io.ballerina.openapi.core.generators.client.model;
 import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 
+import static io.ballerina.openapi.core.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
+
 /**
  * This class stores metadata that related to client code generations.
  *
@@ -31,6 +33,7 @@ public class OASClientConfig {
     private final boolean nullable;
     private final boolean resourceMode;
     private final boolean isPlugin;
+    private final String license;
 
 
     private OASClientConfig(Builder clientConfigBuilder) {
@@ -39,6 +42,7 @@ public class OASClientConfig {
         this.nullable = clientConfigBuilder.nullable;
         this.isPlugin = clientConfigBuilder.isPlugin;
         this.resourceMode = clientConfigBuilder.resourceMode;
+        this.license = clientConfigBuilder.license;
     }
 
     public OpenAPI getOpenAPI() {
@@ -60,6 +64,9 @@ public class OASClientConfig {
     public boolean isPlugin() {
         return isPlugin;
     }
+    public String getLicense() {
+        return license;
+    }
 
     /**
      * Client IDL plugin meta data builder class.
@@ -70,6 +77,7 @@ public class OASClientConfig {
         private boolean nullable = false;
         private boolean resourceMode = true;
         private boolean isPlugin = false;
+        private String license = DO_NOT_MODIFY_FILE_HEADER;
 
         public Builder withOpenAPI(OpenAPI openAPI) {
             this.openAPI = openAPI;
@@ -93,6 +101,11 @@ public class OASClientConfig {
 
         public Builder withPlugin(boolean isPlugin) {
             this.isPlugin = isPlugin;
+            return this;
+        }
+
+        public Builder withLicense(String license) {
+            this.license = license;
             return this;
         }
 

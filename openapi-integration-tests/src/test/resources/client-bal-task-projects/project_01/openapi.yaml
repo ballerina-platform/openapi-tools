@@ -8,8 +8,9 @@ servers:
 paths:
   /users:
     get:
+      operationId: listUsers
       summary: Returns a list of users.
       description: Optional extended description in Markdown.
       responses:
-        '200':
+        200:
           description: OK

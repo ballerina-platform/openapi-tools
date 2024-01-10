@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.idl.client;
+package io.ballerina.openapi.bal.task.client;
 
 import io.ballerina.openapi.OpenAPITest;
 import io.ballerina.openapi.TestUtil;
@@ -43,10 +43,10 @@ import static io.ballerina.openapi.extension.build.ValidatorTests.WHITESPACE_PAT
 /**
  * Negative tests for OpenAPI client IDL import.
  */
-public class IDLClientGenPluginNegativeTests extends OpenAPITest {
+public class ClientGenPluginNegativeTests extends OpenAPITest {
 
     public static final String DISTRIBUTION_FILE_NAME = DISTRIBUTIONS_DIR.toString();
-    public static final Path TEST_RESOURCE = Paths.get(RESOURCES_PATH.toString() + "/client-idl-projects");
+    public static final Path TEST_RESOURCE = Paths.get(RESOURCES_PATH.toString() + "/client-bal-task-projects");
     @BeforeClass
     public void setupDistributions() throws IOException {
         TestUtil.cleanDistribution();
@@ -56,7 +56,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
     public void testClientDeclarationInsideFunction() throws IOException, InterruptedException {
         Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_04"),
                 new ArrayList<>());
-        File dir = new File(RESOURCE.resolve("client-idl-projects/project_04/generated/").toString());
+        File dir = new File(RESOURCE.resolve("client-bal-task-projects/project_04/generated/").toString());
         Assert.assertFalse(dir.exists());
         String msg = "ERROR [main.bal:(2:5,2:11)] 'client' qualifier not allowed";
         assertOnErrorStream(process, msg);
@@ -66,7 +66,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
     public void testNonOpenAPIClientDeclaration() throws IOException, InterruptedException {
         Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_07"),
                 new ArrayList<>());
-        File dir = new File(RESOURCE.resolve("client-idl-projects/project_07/generated/").toString());
+        File dir = new File(RESOURCE.resolve("client-bal-task-projects/project_07/generated/").toString());
         Assert.assertFalse(dir.exists());
         String msg = "ERROR [main.bal:(1:1,1:176)] no matching plugin found for client declaration";
         assertOnErrorStream(process, msg);
@@ -76,7 +76,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
     public void testInvalidSwaggerRemotePath() throws IOException, InterruptedException {
         Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_10"),
                 new ArrayList<>());
-        File dir = new File(RESOURCE.resolve("client-idl-projects/project_10/generated/").toString());
+        File dir = new File(RESOURCE.resolve("client-bal-task-projects/project_10/generated/").toString());
         Assert.assertFalse(dir.exists());
         String msg = "ERROR [main.bal:(1:1,1:132)] unable to get resource from uri, reason: ";
         assertOnErrorStream(process, msg);
@@ -86,7 +86,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
     public void testInvalidSwaggerLocalPath() throws IOException, InterruptedException {
         Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_11"),
                 new ArrayList<>());
-        File dir = new File(RESOURCE.resolve("client-idl-projects/project_11/generated/").toString());
+        File dir = new File(RESOURCE.resolve("client-bal-task-projects/project_11/generated/").toString());
         Assert.assertFalse(dir.exists());
         String msg = "ERROR [main.bal:(1:1,1:31)] could not locate the file:";
         assertOnErrorStream(process, msg);
@@ -96,7 +96,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
     public void testInvalidSwaggerContract() throws IOException, InterruptedException {
         Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_12"),
                 new ArrayList<>());
-        File dir = new File(RESOURCE.resolve("client-idl-projects/project_12/generated/").toString());
+        File dir = new File(RESOURCE.resolve("client-bal-task-projects/project_12/generated/").toString());
         Assert.assertFalse(dir.exists());
         String msg = "ERROR [main.bal:(1:1,1:30)] OpenAPI definition has errors:";
         assertOnErrorStream(process, msg);
@@ -108,7 +108,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
     public void testUnsupportedSwaggerVersion() throws IOException, InterruptedException {
         Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_13"),
                 new ArrayList<>());
-        File dir = new File(RESOURCE.resolve("client-idl-projects/project_13/generated/").toString());
+        File dir = new File(RESOURCE.resolve("client-bal-task-projects/project_13/generated/").toString());
         Assert.assertFalse(dir.exists());
         String msg = "ERROR [main.bal:(2:5,2:119)] provided openAPI contract version is not supported";
         assertOnErrorStream(process, msg);
