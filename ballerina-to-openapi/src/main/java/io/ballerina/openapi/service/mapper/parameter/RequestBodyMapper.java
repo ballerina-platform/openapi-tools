@@ -138,6 +138,10 @@ public class RequestBodyMapper {
             List<TypeSymbol> typeSymbols = entry.getValue();
             String mediaType = entry.getKey();
             if (typeSymbols.size() == 1) {
+                if (isSubTypeOfNil(typeSymbols.get(0), additionalData.semanticModel())) {
+                    requestBody.required(null);
+                    continue;
+                }
                 reqContents.put(mediaType, typeSymbols.get(0));
             } else {
                 SemanticModel semanticModel = additionalData.semanticModel();

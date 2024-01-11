@@ -73,7 +73,12 @@ public class ReferenceTypeMapper extends AbstractTypeMapper {
 
     public static TypeSymbol getReferredType(TypeSymbol typeSymbol) {
         if (typeSymbol.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
-            return getReferredType(((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor());
+            TypeSymbol referencedType = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
+            if (referencedType.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
+                return getReferredType(referencedType);
+            } else {
+                return typeSymbol;
+            }
         }
         if (typeSymbol.typeKind().equals(TypeDescKind.INTERSECTION)) {
             TypeSymbol effectiveType = ReadOnlyTypeMapper.getEffectiveType((IntersectionTypeSymbol) typeSymbol);
