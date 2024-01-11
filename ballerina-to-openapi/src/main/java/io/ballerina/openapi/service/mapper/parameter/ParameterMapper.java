@@ -126,6 +126,7 @@ public class ParameterMapper {
                 MediaType mediaType = new MediaType();
                 mediaType.setSchema(new Schema<>().description(WILD_CARD_SUMMARY));
                 requestBody.setContent(new Content().addMediaType(WILD_CARD_CONTENT_KEY, mediaType));
+                // The following method will only add the request body if it is not already set.
                 operationAdaptor.setRequestBody(requestBody);
             }
             default -> {
