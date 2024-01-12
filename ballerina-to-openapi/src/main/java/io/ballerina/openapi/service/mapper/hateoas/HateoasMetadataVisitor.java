@@ -30,7 +30,7 @@ import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 
 import java.util.Optional;
 
-import static io.ballerina.openapi.service.mapper.hateoas.ContextHolder.getHateoasContextHolder;
+import static io.ballerina.openapi.service.mapper.hateoas.HateoasContextHolder.getHateoasContextHolder;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getResourceConfigAnnotation;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getValueForAnnotationFields;
 
