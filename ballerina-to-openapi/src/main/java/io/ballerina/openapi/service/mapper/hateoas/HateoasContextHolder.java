@@ -23,19 +23,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class ContextHolder {
-    private static ContextHolder instance;
+public final class HateoasContextHolder {
+    private static HateoasContextHolder instance;
 
     private final List<Service> hateoasServices;
 
-    public ContextHolder() {
+    public HateoasContextHolder() {
         this.hateoasServices = new ArrayList<>();
     }
 
-    public static ContextHolder getHateoasContextHolder() {
-        synchronized (ContextHolder.class) {
+    public static HateoasContextHolder getHateoasContextHolder() {
+        synchronized (HateoasContextHolder.class) {
             if (Objects.isNull(instance)) {
-                instance = new ContextHolder();
+                instance = new HateoasContextHolder();
             }
         }
         return instance;
