@@ -34,7 +34,7 @@ import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
+import io.ballerina.openapi.service.mapper.model.OperationDTO;
 import io.ballerina.openapi.service.mapper.parameter.model.CacheConfigAnnotation;
 import io.ballerina.openapi.service.mapper.parameter.utils.CacheHeaderUtils;
 import io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils;
@@ -42,7 +42,7 @@ import io.ballerina.openapi.service.mapper.type.RecordTypeMapper;
 import io.ballerina.openapi.service.mapper.type.ReferenceTypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -76,33 +76,33 @@ import static io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractAnnotationFieldDetails;
 
 public class ResponseMapper {
-    private final OpenAPI openAPI;
+    private final Components components;
     private List<String> allowedMediaTypes = new ArrayList<>();
     private final Map<String, Header> cacheHeaders = new HashMap<>();
     private final Map<String, Map<String, Header>> headersMap = new HashMap<>();
     private final String mediaTypeSubTypePrefix;
     private final ApiResponses apiResponses = new ApiResponses();
     private final AdditionalData additionalData;
-    private final OperationAdaptor operationAdaptor;
+    private final OperationDTO operationDTO;
 
-    public ResponseMapper(FunctionDefinitionNode resourceNode, OperationAdaptor operationAdaptor,
-                          OpenAPI openAPI, AdditionalData additionalData) {
+    public ResponseMapper(FunctionDefinitionNode resourceNode, OperationDTO operationDTO, Components components,
+                          AdditionalData additionalData) {
         this.additionalData = additionalData;
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
-        this.openAPI = openAPI;
-        this.operationAdaptor = operationAdaptor;
+        this.components = components;
+        this.operationDTO = operationDTO;
         extractAnnotationDetails(resourceNode);
 
-        String defaultStatusCode = operationAdaptor.getHttpOperation().equalsIgnoreCase(POST) ? HTTP_201 : HTTP_200;
+        String defaultStatusCode = operationDTO.getHttpOperation().equalsIgnoreCase(POST) ? HTTP_201 : HTTP_200;
         TypeSymbol returnTypeSymbol = getReturnTypeSymbol(resourceNode);
         createResponseMapping(returnTypeSymbol, defaultStatusCode);
-        if (operationAdaptor.hasDataBinding()) {
+        if (operationDTO.hasDataBinding()) {
             addResponseMappingForDataBindingFailures();
         }
     }
 
     public void setApiResponses() {
-        operationAdaptor.getOperation().setResponses(apiResponses);
+        operationDTO.getOperation().setResponses(apiResponses);
     }
 
     private TypeSymbol getReturnTypeSymbol(FunctionDefinitionNode resourceNode) {
@@ -198,7 +198,7 @@ public class ResponseMapper {
     private void addResponseContent(TypeSymbol returnType, ApiResponse apiResponse, String mediaType) {
         if (!isPlainAnyDataType(returnType)) {
             MediaType mediaTypeObj = new MediaType();
-            mediaTypeObj.setSchema(TypeMapper.getTypeSchema(returnType, openAPI, additionalData));
+            mediaTypeObj.setSchema(TypeMapper.getTypeSchema(returnType, components, additionalData));
             updateApiResponseContentWithMediaType(apiResponse, mediaType, mediaTypeObj);
         }
     }
@@ -426,7 +426,7 @@ public class ResponseMapper {
 
         Map<String, RecordFieldSymbol> recordFieldMap = new HashMap<>(headersInfo.headerRecordType().
                 fieldDescriptors());
-        Map<String, Schema> recordFieldsMapping = RecordTypeMapper.mapRecordFields(recordFieldMap, openAPI,
+        Map<String, Schema> recordFieldsMapping = RecordTypeMapper.mapRecordFields(recordFieldMap, components,
                 new HashSet<>(), headersInfo.recordName(), false, additionalData);
         return mapRecordFieldToHeaders(recordFieldsMapping);
     }

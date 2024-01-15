@@ -25,10 +25,10 @@ import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
+import io.ballerina.openapi.service.mapper.model.OperationDTO;
 import io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -50,16 +50,16 @@ public class RequestBodyMapper {
     private List<String> allowedMediaTypes = new ArrayList<>();
     private final RequestBody requestBody = new RequestBody().required(true);
     private final AdditionalData additionalData;
-    private final OperationAdaptor operationAdaptor;
+    private final OperationDTO operationDTO;
     private final String mediaTypeSubTypePrefix;
-    private final OpenAPI openAPI;
+    private final Components components;
 
-    public RequestBodyMapper(ParameterSymbol reqParameter, AnnotationNode annotation,
-                             OperationAdaptor operationAdaptor, FunctionDefinitionNode resourceNode,
-                             OpenAPI openAPI, Map<String, String> apiDocs, AdditionalData additionalData) {
+    public RequestBodyMapper(ParameterSymbol reqParameter, AnnotationNode annotation, OperationDTO operationDTO,
+                             FunctionDefinitionNode resourceNode, Components components,
+                             Map<String, String> apiDocs, AdditionalData additionalData) {
         this.additionalData = additionalData;
-        this.operationAdaptor = operationAdaptor;
-        this.openAPI = openAPI;
+        this.operationDTO = operationDTO;
+        this.components = components;
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
         requestBody.description(apiDocs.get(removeStartingSingleQuote(reqParameter.getName().get())));
         extractAnnotationDetails(annotation);
@@ -67,7 +67,7 @@ public class RequestBodyMapper {
     }
 
     public void setRequestBody() {
-        operationAdaptor.overrideRequestBody(requestBody);
+        operationDTO.overrideRequestBody(requestBody);
     }
 
     private void extractAnnotationDetails(AnnotationNode annotation) {
@@ -111,7 +111,7 @@ public class RequestBodyMapper {
 
     private void addRequestContent(TypeSymbol reqBodyType, String mediaType) {
         MediaType mediaTypeObj = new MediaType();
-        mediaTypeObj.setSchema(TypeMapper.getTypeSchema(reqBodyType, openAPI, additionalData));
+        mediaTypeObj.setSchema(TypeMapper.getTypeSchema(reqBodyType, components, additionalData));
         updateReqBodyContentWithMediaType(mediaType, mediaTypeObj);
     }
 
