@@ -37,8 +37,8 @@ import io.ballerina.openapi.service.mapper.Constants;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.ballerina.openapi.service.mapper.model.OperationDTO;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -57,20 +57,20 @@ import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_SUMMARY;
  */
 public class ParameterMapper {
     private final FunctionDefinitionNode functionDefinitionNode;
-    private final OperationAdaptor operationAdaptor;
+    private final OperationDTO operationDTO;
     private final Map<String, String> apidocs;
     private final AdditionalData additionalData;
-    private final OpenAPI openAPI;
+    private final Components components;
     private final boolean treatNilableAsOptional;
 
-    public ParameterMapper(FunctionDefinitionNode functionDefinitionNode, OperationAdaptor operationAdaptor,
-                           OpenAPI openAPI, Map<String, String> apiDocs, AdditionalData additionalData,
+    public ParameterMapper(FunctionDefinitionNode functionDefinitionNode, OperationDTO operationDTO,
+                           Components components, Map<String, String> apiDocs, AdditionalData additionalData,
                            Boolean treatNilableAsOptional) {
         this.functionDefinitionNode = functionDefinitionNode;
-        this.operationAdaptor = operationAdaptor;
+        this.operationDTO = operationDTO;
         this.apidocs = apiDocs;
         this.additionalData = additionalData;
-        this.openAPI = openAPI;
+        this.components = components;
         this.treatNilableAsOptional = treatNilableAsOptional;
     }
 
@@ -88,7 +88,7 @@ public class ParameterMapper {
                 continue;
             }
             if ((parameterType.equals("REQUEST") || parameterType.equals("PAYLOAD")) &&
-                    (Constants.GET.equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
+                    (Constants.GET.equalsIgnoreCase(operationDTO.getHttpOperation()))) {
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
                 IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
                         parameterNode.location());
@@ -103,12 +103,12 @@ public class ParameterMapper {
         switch (parameterType) {
             case "QUERY" -> {
                 QueryParameterMapper queryParameterMapper = new QueryParameterMapper(parameterNode, apidocs,
-                        operationAdaptor, openAPI, treatNilableAsOptional, additionalData);
+                        operationDTO, components, treatNilableAsOptional, additionalData);
                 queryParameterMapper.setParameter();
             }
             case "HEADER" -> {
                 HeaderParameterMapper headerParameterMapper = new HeaderParameterMapper(parameterNode, apidocs,
-                        operationAdaptor, openAPI, treatNilableAsOptional, additionalData);
+                        operationDTO, components, treatNilableAsOptional, additionalData);
                 headerParameterMapper.setParameter();
             }
             case "PAYLOAD" -> {
@@ -118,7 +118,7 @@ public class ParameterMapper {
                 }
                 AnnotationNode annotation = getPayloadAnnotation(parameterNode);
                 RequestBodyMapper requestBodyMapper = new RequestBodyMapper((ParameterSymbol) symbol.get(), annotation,
-                        operationAdaptor, functionDefinitionNode, openAPI, apidocs, additionalData);
+                        operationDTO, functionDefinitionNode, components, apidocs, additionalData);
                 requestBodyMapper.setRequestBody();
             }
             case "REQUEST" -> {
@@ -127,7 +127,7 @@ public class ParameterMapper {
                 mediaType.setSchema(new Schema<>().description(WILD_CARD_SUMMARY));
                 requestBody.setContent(new Content().addMediaType(WILD_CARD_CONTENT_KEY, mediaType));
                 // The following method will only add the request body if it is not already set.
-                operationAdaptor.setRequestBody(requestBody);
+                operationDTO.setRequestBody(requestBody);
             }
             default -> {
 
@@ -155,8 +155,8 @@ public class ParameterMapper {
             if (param instanceof ResourcePathParameterNode pathParam) {
                 SemanticModel semanticModel = additionalData.semanticModel();
                 PathParameterSymbol pathParameterSymbol = (PathParameterSymbol) semanticModel.symbol(pathParam).get();
-                PathParameterMapper pathParameterMapper = new PathParameterMapper(pathParameterSymbol, openAPI, apidocs,
-                        operationAdaptor, additionalData);
+                PathParameterMapper pathParameterMapper = new PathParameterMapper(pathParameterSymbol, components,
+                        apidocs, operationDTO, additionalData);
                 pathParameterMapper.setParameter();
             }
         }

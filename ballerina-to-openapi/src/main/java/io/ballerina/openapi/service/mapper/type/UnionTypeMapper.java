@@ -30,7 +30,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -49,18 +49,18 @@ public class UnionTypeMapper extends AbstractTypeMapper {
     }
 
     @Override
-    public Schema getReferenceSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(Components components) {
         Schema schema;
         if (isEnumType) {
             schema = getEnumTypeSchema((EnumSymbol) typeSymbol.definition());
         } else {
             UnionTypeSymbol unionTypeSymbol = (UnionTypeSymbol) typeSymbol.typeDescriptor();
-            schema = getSchema(unionTypeSymbol, openAPI, additionalData, false);
+            schema = getSchema(unionTypeSymbol, components, additionalData, false);
         }
         return Objects.nonNull(schema) ? schema.description(description) : null;
     }
 
-    public static Schema getSchema(UnionTypeSymbol typeSymbol, OpenAPI openAPI, AdditionalData additionalData,
+    public static Schema getSchema(UnionTypeSymbol typeSymbol, Components components, AdditionalData additionalData,
                                    boolean skipNilType) {
         if (isUnionOfSingletons(typeSymbol)) {
             return getSingletonUnionTypeSchema(typeSymbol, additionalData.diagnostics());
@@ -72,7 +72,7 @@ public class UnionTypeMapper extends AbstractTypeMapper {
             if (memberTypeSymbol.typeKind().equals(TypeDescKind.NIL)) {
                 continue;
             }
-            Schema schema = TypeMapper.getTypeSchema(memberTypeSymbol, openAPI, additionalData, nullable);
+            Schema schema = TypeMapper.getTypeSchema(memberTypeSymbol, components, additionalData, nullable);
             if (Objects.nonNull(schema)) {
                 memberSchemas.add(schema);
             }

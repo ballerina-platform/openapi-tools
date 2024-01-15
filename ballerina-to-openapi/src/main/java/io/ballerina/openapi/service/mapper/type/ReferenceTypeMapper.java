@@ -22,7 +22,7 @@ import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -37,23 +37,23 @@ public class ReferenceTypeMapper extends AbstractTypeMapper {
     }
 
     @Override
-    public Schema getReferenceSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(Components components) {
         TypeReferenceTypeSymbol referredType = (TypeReferenceTypeSymbol) typeSymbol.typeDescriptor();
-        Schema schema = getSchema(referredType, openAPI, additionalData);
+        Schema schema = getSchema(referredType, components, additionalData);
         if (Objects.nonNull(schema)) {
             schema.description(description);
         }
         return schema;
     }
 
-    public static Schema getSchema(TypeReferenceTypeSymbol typeSymbol, OpenAPI openAPI,
+    public static Schema getSchema(TypeReferenceTypeSymbol typeSymbol, Components components,
                                    AdditionalData additionalData) {
         if (isBuiltInSubTypes(typeSymbol)) {
             return SimpleTypeMapper.getTypeSchema(typeSymbol.typeDescriptor(), additionalData);
         }
-        if (!AbstractTypeMapper.hasMapping(openAPI, typeSymbol)) {
-            createComponentMapping(typeSymbol, openAPI, additionalData);
-            if (!AbstractTypeMapper.hasFullMapping(openAPI, typeSymbol)) {
+        if (!AbstractTypeMapper.hasMapping(components, typeSymbol)) {
+            createComponentMapping(typeSymbol, components, additionalData);
+            if (!AbstractTypeMapper.hasFullMapping(components, typeSymbol)) {
                 return null;
             }
         }

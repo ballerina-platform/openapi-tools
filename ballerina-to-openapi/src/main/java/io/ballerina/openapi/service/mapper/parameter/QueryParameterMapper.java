@@ -23,10 +23,10 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
+import io.ballerina.openapi.service.mapper.model.OperationDTO;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -47,12 +47,11 @@ public class QueryParameterMapper extends AbstractParameterMapper {
     private boolean treatNilableAsOptional = false;
     private AdditionalData additionalData;
     private Object defaultValue = null;
-    private OpenAPI openAPI;
+    private Components components = null;
 
-    public QueryParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs,
-                                OperationAdaptor operationAdaptor, OpenAPI openAPI, boolean treatNilableAsOptional,
-                                AdditionalData additionalData) {
-        super(operationAdaptor);
+    public QueryParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs, OperationDTO operationDTO,
+                                Components components, boolean treatNilableAsOptional, AdditionalData additionalData) {
+        super(operationDTO);
         Symbol parameterSymbol = additionalData.semanticModel().symbol(parameterNode).orElse(null);
         if (Objects.nonNull(parameterSymbol) && (parameterSymbol instanceof ParameterSymbol queryParameter)) {
             this.type = queryParameter.typeDescriptor();
@@ -60,7 +59,7 @@ public class QueryParameterMapper extends AbstractParameterMapper {
             this.isRequired = queryParameter.paramKind().equals(ParameterKind.REQUIRED);
             this.description = apiDocs.get(removeStartingSingleQuote(queryParameter.getName().get()));
             this.treatNilableAsOptional = treatNilableAsOptional;
-            this.openAPI = openAPI;
+            this.components = components;
             this.additionalData = additionalData;
             if (parameterNode instanceof DefaultableParameterNode defaultableQueryParam) {
                 this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableQueryParam);
@@ -78,7 +77,7 @@ public class QueryParameterMapper extends AbstractParameterMapper {
         if (isRequired && (!treatNilableAsOptional || !UnionTypeMapper.hasNilableType(type))) {
             queryParameter.setRequired(true);
         }
-        Schema typeSchema = TypeMapper.getTypeSchema(type, openAPI, additionalData);
+        Schema typeSchema = TypeMapper.getTypeSchema(type, components, additionalData);
         if (Objects.nonNull(defaultValue)) {
             TypeMapper.setDefaultValue(typeSchema, defaultValue);
         }
