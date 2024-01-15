@@ -16,11 +16,11 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
+import io.ballerina.openapi.service.mapper.model.OperationDTO;
 import io.ballerina.openapi.service.mapper.type.RecordTypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -47,12 +47,12 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
     private  boolean treatNilableAsOptional = false;
     private AdditionalData additionalData;
     private Object defaultValue = null;
-    private OpenAPI openAPI = null;
+    private Components components = null;
 
-    public HeaderParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs,
-                                 OperationAdaptor operationAdaptor, OpenAPI openAPI, boolean treatNilableAsOptional,
+    public HeaderParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs, OperationDTO operationDTO,
+                                 Components components, boolean treatNilableAsOptional,
                                  AdditionalData additionalData) {
-        super(operationAdaptor);
+        super(operationDTO);
         Symbol parameterSymbol = additionalData.semanticModel().symbol(parameterNode).orElse(null);
         if (Objects.nonNull(parameterSymbol) && (parameterSymbol instanceof ParameterSymbol headerParameter)) {
             this.type = headerParameter.typeDescriptor();
@@ -62,7 +62,7 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
             this.description = apiDocs.get(removeStartingSingleQuote(headerParameter.getName().get()));
             this.treatNilableAsOptional = treatNilableAsOptional;
             this.additionalData = additionalData;
-            this.openAPI = openAPI;
+            this.components = components;
             if (parameterNode instanceof DefaultableParameterNode defaultableHeaderParam) {
                 this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableHeaderParam);
             }
@@ -130,7 +130,7 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
         if (isRequired && (!treatNilableAsOptional || !UnionTypeMapper.hasNilableType(type))) {
             headerParameter.setRequired(true);
         }
-        Schema typeSchema = TypeMapper.getTypeSchema(type, openAPI, additionalData);
+        Schema typeSchema = TypeMapper.getTypeSchema(type, components, additionalData);
         if (Objects.nonNull(defaultValue)) {
             TypeMapper.setDefaultValue(typeSchema, defaultValue);
         }
@@ -147,7 +147,7 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
 
         Set<String> requiredHeaders = new HashSet<>();
         HashMap<String, RecordFieldSymbol> headerMap = new HashMap<>(recordTypeInfo.typeSymbol().fieldDescriptors());
-        Map<String, Schema> headerSchemaMap = RecordTypeMapper.mapRecordFields(headerMap, openAPI, requiredHeaders,
+        Map<String, Schema> headerSchemaMap = RecordTypeMapper.mapRecordFields(headerMap, components, requiredHeaders,
                 recordTypeInfo.name(), treatNilableAsOptional, additionalData);
 
         List<Parameter> headerParameters = new ArrayList<>();

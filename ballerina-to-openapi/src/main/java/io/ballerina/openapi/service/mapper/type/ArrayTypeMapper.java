@@ -20,7 +20,7 @@ import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -31,13 +31,13 @@ public class ArrayTypeMapper extends AbstractTypeMapper {
     }
 
     @Override
-    public Schema getReferenceSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(Components components) {
         ArrayTypeSymbol referredType = (ArrayTypeSymbol) typeSymbol.typeDescriptor();
-        return getSchema(referredType, openAPI, additionalData).description(description);
+        return getSchema(referredType, components, additionalData).description(description);
     }
 
-    public static Schema getSchema(ArrayTypeSymbol typeSymbol, OpenAPI openAPI, AdditionalData additionalData) {
+    public static Schema getSchema(ArrayTypeSymbol typeSymbol, Components components, AdditionalData additionalData) {
         TypeSymbol elementType = typeSymbol.memberTypeDescriptor();
-        return new ArraySchema().items(TypeMapper.getTypeSchema(elementType, openAPI, additionalData));
+        return new ArraySchema().items(TypeMapper.getTypeSchema(elementType, components, additionalData));
     }
 }

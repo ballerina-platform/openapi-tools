@@ -29,13 +29,12 @@ import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Map;
 import java.util.Objects;
 
-import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getComponentsSchema;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
 /**
@@ -45,37 +44,39 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTyp
  */
 public abstract class TypeMapper {
 
-    public static Schema getTypeSchema(TypeSymbol typeSymbol, OpenAPI openAPI, AdditionalData componentMapperData) {
-        return getTypeSchema(typeSymbol, openAPI, componentMapperData, false);
+    public static Schema getTypeSchema(TypeSymbol typeSymbol, Components components,
+                                       AdditionalData componentMapperData) {
+        return getTypeSchema(typeSymbol, components, componentMapperData, false);
     }
 
-    public static Schema getTypeSchema(TypeSymbol typeSymbol, OpenAPI openAPI, AdditionalData componentMapperData,
+    public static Schema getTypeSchema(TypeSymbol typeSymbol, Components components, AdditionalData componentMapperData,
                                        boolean skipNilType) {
         return switch (typeSymbol.typeKind()) {
-            case MAP -> MapTypeMapper.getSchema((MapTypeSymbol) typeSymbol, openAPI, componentMapperData);
+            case MAP -> MapTypeMapper.getSchema((MapTypeSymbol) typeSymbol, components, componentMapperData);
             case ARRAY ->
-                    ArrayTypeMapper.getSchema((ArrayTypeSymbol) typeSymbol, openAPI, componentMapperData);
-            case TYPE_REFERENCE -> ReferenceTypeMapper.getSchema((TypeReferenceTypeSymbol) typeSymbol, openAPI,
+                    ArrayTypeMapper.getSchema((ArrayTypeSymbol) typeSymbol, components, componentMapperData);
+            case TYPE_REFERENCE -> ReferenceTypeMapper.getSchema((TypeReferenceTypeSymbol) typeSymbol, components,
                     componentMapperData);
-            case RECORD -> RecordTypeMapper.getSchema((RecordTypeSymbol) typeSymbol, openAPI,
+            case RECORD -> RecordTypeMapper.getSchema((RecordTypeSymbol) typeSymbol, components,
                     null, componentMapperData);
             case INTERSECTION ->
-                    ReadOnlyTypeMapper.getSchema((IntersectionTypeSymbol) typeSymbol, openAPI, componentMapperData);
+                    ReadOnlyTypeMapper.getSchema((IntersectionTypeSymbol) typeSymbol, components, componentMapperData);
             case UNION ->
-                    UnionTypeMapper.getSchema((UnionTypeSymbol) typeSymbol, openAPI, componentMapperData, skipNilType);
+                    UnionTypeMapper.getSchema((UnionTypeSymbol) typeSymbol, components, componentMapperData,
+                            skipNilType);
             case TABLE ->
-                    TableTypeMapper.getSchema((TableTypeSymbol) typeSymbol, openAPI, componentMapperData);
+                    TableTypeMapper.getSchema((TableTypeSymbol) typeSymbol, components, componentMapperData);
             case TUPLE ->
-                    TupleTypeMapper.getSchema((TupleTypeSymbol) typeSymbol, openAPI, componentMapperData);
+                    TupleTypeMapper.getSchema((TupleTypeSymbol) typeSymbol, components, componentMapperData);
             case ERROR ->
-                    ErrorTypeMapper.getSchema((ErrorTypeSymbol) typeSymbol, openAPI, componentMapperData);
+                    ErrorTypeMapper.getSchema((ErrorTypeSymbol) typeSymbol, components, componentMapperData);
             default -> SimpleTypeMapper.getTypeSchema(typeSymbol, componentMapperData);
         };
     }
 
-    protected static void createComponentMapping(TypeReferenceTypeSymbol typeSymbol, OpenAPI openAPI,
+    protected static void createComponentMapping(TypeReferenceTypeSymbol typeSymbol, Components components,
                                                  AdditionalData componentMapperData) {
-        Map<String, Schema> schemas = getComponentsSchema(openAPI);
+        Map<String, Schema> schemas = components.getSchemas();
         if (schemas.containsKey(getTypeName(typeSymbol))) {
             return;
         }
@@ -92,8 +93,8 @@ public abstract class TypeMapper {
             case ERROR -> new ErrorTypeMapper(typeSymbol, componentMapperData);
             default -> new SimpleTypeMapper(typeSymbol, componentMapperData);
         };
-        openAPI.schema(getTypeName(typeSymbol), null);
-        mapper.addToComponents(openAPI);
+        components.addSchemas(getTypeName(typeSymbol), null);
+        mapper.addToComponents(components);
     }
 
     public static void setDefaultValue(Schema schema, Object defaultValue) {

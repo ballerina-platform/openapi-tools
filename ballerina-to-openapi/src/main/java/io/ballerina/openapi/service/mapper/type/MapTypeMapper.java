@@ -20,7 +20,7 @@ import io.ballerina.compiler.api.symbols.MapTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -31,17 +31,17 @@ public class MapTypeMapper extends AbstractTypeMapper {
     }
 
     @Override
-    public Schema getReferenceSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(Components components) {
         MapTypeSymbol referredType = (MapTypeSymbol) typeSymbol.typeDescriptor();
-        return getSchema(referredType, openAPI, additionalData).description(description);
+        return getSchema(referredType, components, additionalData).description(description);
     }
 
-    public static Schema getSchema(MapTypeSymbol typeSymbol, OpenAPI openAPI, AdditionalData additionalData) {
+    public static Schema getSchema(MapTypeSymbol typeSymbol, Components components, AdditionalData additionalData) {
         TypeSymbol memberType = typeSymbol.typeParam();
         if (additionalData.semanticModel().types().JSON.subtypeOf(memberType)) {
             return new ObjectSchema();
         }
-        return new ObjectSchema().additionalProperties(TypeMapper.getTypeSchema(memberType,
-                openAPI, additionalData));
+        return new ObjectSchema().additionalProperties(TypeMapper.getTypeSchema(memberType, components,
+                additionalData));
     }
 }

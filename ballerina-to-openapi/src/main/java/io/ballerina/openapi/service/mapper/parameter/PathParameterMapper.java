@@ -22,10 +22,10 @@ import io.ballerina.compiler.api.symbols.resourcepath.util.PathSegment;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
+import io.ballerina.openapi.service.mapper.model.OperationDTO;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.tools.diagnostics.Location;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 
 import java.util.Map;
@@ -39,17 +39,17 @@ public class PathParameterMapper extends AbstractParameterMapper {
     private final String name;
     private final String description;
     private final AdditionalData additionalData;
-    private final OpenAPI openAPI;
+    private final Components components;
     private final Location location;
     private final PathSegment.Kind pathSegmentKind;
 
-    public PathParameterMapper(PathParameterSymbol pathParameterSymbol, OpenAPI openAPI, Map<String, String> apiDocs,
-                               OperationAdaptor operationAdaptor, AdditionalData additionalData) {
-        super(operationAdaptor);
+    public PathParameterMapper(PathParameterSymbol pathParameterSymbol, Components components,
+                               Map<String, String> apiDocs, OperationDTO operationDTO, AdditionalData additionalData) {
+        super(operationDTO);
         this.location = pathParameterSymbol.getLocation().orElse(null);
         this.pathSegmentKind = pathParameterSymbol.pathSegmentKind();
         this.type = pathParameterSymbol.typeDescriptor();
-        this.openAPI = openAPI;
+        this.components = components;
         this.name = unescapeIdentifier(pathParameterSymbol.getName().get());
         this.description = apiDocs.get(removeStartingSingleQuote(pathParameterSymbol.getName().get()));
         this.additionalData = additionalData;
@@ -66,7 +66,7 @@ public class PathParameterMapper extends AbstractParameterMapper {
         PathParameter pathParameter = new PathParameter();
         pathParameter.setName(name);
         pathParameter.setRequired(true);
-        pathParameter.setSchema(TypeMapper.getTypeSchema(type, openAPI, additionalData));
+        pathParameter.setSchema(TypeMapper.getTypeSchema(type, components, additionalData));
         pathParameter.setDescription(description);
         return pathParameter;
     }
