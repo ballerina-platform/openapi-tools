@@ -64,6 +64,7 @@ public class ResourceMapper implements ResourceMapperInterface {
     private final Paths pathObject = new Paths();
     private final AdditionalData additionalData;
     private final OpenAPI openAPI;
+    private final SemanticModel semanticModel;
     private final List<FunctionDefinitionNode> resources;
     private final boolean treatNilableAsOptional;
     private final HateoasMapper hateoasMapper;
@@ -74,6 +75,7 @@ public class ResourceMapper implements ResourceMapperInterface {
     ResourceMapper(OpenAPI openAPI, List<FunctionDefinitionNode> resources, SemanticModel semanticModel,
                    AdditionalData additionalData, boolean treatNilableAsOptional) {
         this.openAPI = openAPI;
+        this.semanticModel = semanticModel;
         this.resources = resources;
         this.additionalData = additionalData;
         this.treatNilableAsOptional = treatNilableAsOptional;
@@ -109,8 +111,8 @@ public class ResourceMapper implements ResourceMapperInterface {
                     resource.location());
             additionalData.diagnostics().add(error);
         } else {
-            Optional<OperationBuilder> operationBuilder = convertResourceToOperation(resource, httpMethod, cleanResourcePath,
-                    components);
+            Optional<OperationBuilder> operationBuilder = convertResourceToOperation(resource, httpMethod,
+                    cleanResourcePath, components, service);
             if (operationBuilder.isPresent()) {
                 Operation operation = operationBuilder.get().getOperation();
                 generatePathItem(httpMethod, pathObject, operation, cleanResourcePath);
@@ -187,7 +189,8 @@ public class ResourceMapper implements ResourceMapperInterface {
      * @return Operation Adaptor object of given resource
      */
     private Optional<OperationBuilder> convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
-                                                                  String generateRelativePath, Components components) {
+                                                                  String generateRelativePath, Components components,
+                                                                  ServiceDeclarationNode service) {
         OperationBuilder operationBuilder = new OperationBuilder();
         operationBuilder.setHttpOperation(httpMethod);
         operationBuilder.setPath(generateRelativePath);
@@ -220,6 +223,7 @@ public class ResourceMapper implements ResourceMapperInterface {
 
         ResponseMapperInterface responseMapper = new ResponseMapper(resource, operationBuilder, components,
                 additionalData);
+        setSwaggerLinksInApiResponse(semanticModel, service, responseMapper.getApiResponses(), resource);
         responseMapper.setApiResponses();
         return Optional.of(operationBuilder);
     }
@@ -264,25 +268,5 @@ public class ResourceMapper implements ResourceMapperInterface {
             }
         }
         return apiDocs;
-    }
-
-    private String generateRelativePath(FunctionDefinitionNode resource) {
-
-        StringBuilder relativePath = new StringBuilder();
-        relativePath.append("/");
-        if (!resource.relativeResourcePath().isEmpty()) {
-            for (Node node: resource.relativeResourcePath()) {
-                if (node instanceof ResourcePathParameterNode pathNode) {
-                    relativePath.append("{");
-                    relativePath.append(pathNode.paramName().get());
-                    relativePath.append("}");
-                } else if ((resource.relativeResourcePath().size() == 1) && (node.toString().trim().equals("."))) {
-                    return relativePath.toString();
-                } else {
-                    relativePath.append(node.toString().trim());
-                }
-            }
-        }
-        return relativePath.toString();
     }
 }

@@ -168,6 +168,19 @@ components:
           type: string
         method:
           type: string
+    Location:
+      required:
+        - address
+        - id
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: string
+        address:
+          type: string
     Room:
       required:
         - category
@@ -195,15 +208,3 @@ components:
         count:
           type: integer
           format: int64
-    Location:
-      required:
-        - address
-        - id
-        - name
-      type: object
-      properties:
-        name:
-          type: string
-        id:
-          type: string
-        address:

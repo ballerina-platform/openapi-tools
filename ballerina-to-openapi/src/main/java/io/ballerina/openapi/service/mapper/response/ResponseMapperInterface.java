@@ -17,7 +17,10 @@
  */
 package io.ballerina.openapi.service.mapper.response;
 
+import io.swagger.v3.oas.models.responses.ApiResponses;
+
 public interface ResponseMapperInterface {
 
     void setApiResponses();
+    ApiResponses getApiResponses();
 }
