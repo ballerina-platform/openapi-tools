@@ -15,8 +15,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
-
 package io.ballerina.openapi.service.mapper;
 
 import io.ballerina.compiler.api.SemanticModel;
@@ -30,10 +28,12 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationDTO;
+import io.ballerina.openapi.service.mapper.model.OperationBuilder;
 import io.ballerina.openapi.service.mapper.parameter.HateoasMapper;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
-import io.ballerina.openapi.service.mapper.parameter.ResponseMapper;
+import io.ballerina.openapi.service.mapper.parameter.ParameterMapperInterface;
+import io.ballerina.openapi.service.mapper.response.ResponseMapper;
+import io.ballerina.openapi.service.mapper.response.ResponseMapperInterface;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.Components;
@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import static io.ballerina.openapi.service.mapper.Constants.DEFAULT;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOperationId;
@@ -59,7 +60,7 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpe
  *
  * @since 2.0.0
  */
-public class ResourceMapper {
+public class ResourceMapper implements ResourceMapperInterface {
     private final Paths pathObject = new Paths();
     private final AdditionalData additionalData;
     private final OpenAPI openAPI;
@@ -86,7 +87,7 @@ public class ResourceMapper {
             openAPI.setComponents(components);
         }
         if (components.getSchemas() == null) {
-            components.setSchemas(new HashMap<>());
+            components.setSchemas(new TreeMap<>());
         }
         for (FunctionDefinitionNode resource : resources) {
             generateResourceMapping(semanticModel, resource, components, service);
@@ -108,10 +109,10 @@ public class ResourceMapper {
                     resource.location());
             additionalData.diagnostics().add(error);
         } else {
-            Optional<OperationDTO> operationDTO = convertResourceToOperation(semanticModel, resource, httpMethod,
-                    components, cleanResourcePath, service);
-            if (operationDTO.isPresent()) {
-                Operation operation = operationDTO.get().getOperation();
+            Optional<OperationBuilder> operationBuilder = convertResourceToOperation(resource, httpMethod, cleanResourcePath,
+                    components);
+            if (operationBuilder.isPresent()) {
+                Operation operation = operationBuilder.get().getOperation();
                 generatePathItem(httpMethod, pathObject, operation, cleanResourcePath);
             }
         }
@@ -185,13 +186,11 @@ public class ResourceMapper {
      *
      * @return Operation Adaptor object of given resource
      */
-    private Optional<OperationDTO> convertResourceToOperation(SemanticModel semanticModel,
-                                                              FunctionDefinitionNode resource, String httpMethod,
-                                                              Components components, String generateRelativePath,
-                                                              ServiceDeclarationNode service) {
-        OperationDTO op = new OperationDTO();
-        op.setHttpOperation(httpMethod);
-        op.setPath(generateRelativePath);
+    private Optional<OperationBuilder> convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
+                                                                  String generateRelativePath, Components components) {
+        OperationBuilder operationBuilder = new OperationBuilder();
+        operationBuilder.setHttpOperation(httpMethod);
+        operationBuilder.setPath(generateRelativePath);
         /* Set operation id */
         String resName = (resource.functionName().text() + "_" +
                 generateRelativePath).replaceAll("\\{///}", "_");
@@ -199,14 +198,13 @@ public class ResourceMapper {
         if (generateRelativePath.equals("/")) {
             resName = resource.functionName().text();
         }
-        op.getOperation().setOperationId(getOperationId(resName));
-        op.getOperation().setParameters(null);
+        operationBuilder.setOperationId(getOperationId(resName));
         // Set operation summary
         // Map API documentation
-        Map<String, String> apiDocs = listAPIDocumentations(resource, op);
+        Map<String, String> apiDocs = listAPIDocumentations(resource, operationBuilder);
         //Add path parameters if in path and query parameters
-        ParameterMapper parameterMapper = new ParameterMapper(resource, op, components, apiDocs, additionalData,
-                treatNilableAsOptional);
+        ParameterMapperInterface parameterMapper = new ParameterMapper(resource, operationBuilder, components, apiDocs,
+                additionalData, treatNilableAsOptional);
         parameterMapper.setParameters();
         List<OpenAPIMapperDiagnostic> diagnostics = additionalData.diagnostics();
         if (diagnostics.size() > 1 || (diagnostics.size() == 1 && !diagnostics.get(0).getCode().equals(
@@ -220,11 +218,10 @@ public class ResourceMapper {
             }
         }
 
-        ResponseMapper responseMapper = new ResponseMapper(resource, op, components, additionalData);
-        ApiResponses apiResponses = responseMapper.getApiResponses();
-        setSwaggerLinksInApiResponse(semanticModel, service, apiResponses, resource);
-        op.getOperation().setResponses(apiResponses);
-        return Optional.of(op);
+        ResponseMapperInterface responseMapper = new ResponseMapper(resource, operationBuilder, components,
+                additionalData);
+        responseMapper.setApiResponses();
+        return Optional.of(operationBuilder);
     }
 
     private void setSwaggerLinksInApiResponse(SemanticModel semanticModel, ServiceDeclarationNode service,
@@ -246,7 +243,8 @@ public class ResourceMapper {
     /**
      * Filter the API documentations from resource function node.
      */
-    private Map<String, String> listAPIDocumentations(FunctionDefinitionNode resource, OperationDTO op) {
+    private Map<String, String> listAPIDocumentations(FunctionDefinitionNode resource,
+                                                      OperationBuilder operationBuilder) {
 
         Map<String, String> apiDocs = new HashMap<>();
         if (resource.metadata().isPresent()) {
@@ -260,11 +258,31 @@ public class ResourceMapper {
                     if (description.isPresent()) {
                         String resourceFunctionAPI = description.get().trim();
                         apiDocs = documentation1.parameterMap();
-                        op.getOperation().setSummary(resourceFunctionAPI);
+                        operationBuilder.setSummary(resourceFunctionAPI);
                     }
                 }
             }
         }
         return apiDocs;
+    }
+
+    private String generateRelativePath(FunctionDefinitionNode resource) {
+
+        StringBuilder relativePath = new StringBuilder();
+        relativePath.append("/");
+        if (!resource.relativeResourcePath().isEmpty()) {
+            for (Node node: resource.relativeResourcePath()) {
+                if (node instanceof ResourcePathParameterNode pathNode) {
+                    relativePath.append("{");
+                    relativePath.append(pathNode.paramName().get());
+                    relativePath.append("}");
+                } else if ((resource.relativeResourcePath().size() == 1) && (node.toString().trim().equals("."))) {
+                    return relativePath.toString();
+                } else {
+                    relativePath.append(node.toString().trim());
+                }
+            }
+        }
+        return relativePath.toString();
     }
 }

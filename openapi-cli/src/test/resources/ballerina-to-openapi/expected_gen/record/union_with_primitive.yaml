@@ -30,19 +30,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Link:
-      required:
-        - pet
-        - rel
-      type: object
-      properties:
-        rel:
-          type: string
-        pet:
-          oneOf:
-            - type: string
-            - $ref: '#/components/schemas/Cat'
-      additionalProperties: false
     Cat:
       required:
         - id
@@ -77,3 +64,16 @@ components:
           type: string
         method:
           type: string
+    Link:
+      required:
+        - pet
+        - rel
+      type: object
+      properties:
+        rel:
+          type: string
+        pet:
+          oneOf:
+            - type: string
+            - $ref: '#/components/schemas/Cat'
+      additionalProperties: false

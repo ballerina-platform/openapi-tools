@@ -37,31 +37,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Patient:
-      type: object
-      properties:
-        ext:
-          type: array
-          items:
-            $ref: '#/components/schemas/Extension'
-        id:
-          type: string
-        ref:
-          $ref: '#/components/schemas/Reference'
-      additionalProperties: false
-    Extension:
-      $ref: '#/components/schemas/ExtensionExtension'
-    ExtensionExtension:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Element'
-        - type: object
-          properties:
-            extension:
-              type: array
-              items:
-                $ref: '#/components/schemas/Extension'
-          additionalProperties: false
     Element:
       type: object
       properties:
@@ -71,32 +46,6 @@ components:
           type: integer
           format: int64
       additionalProperties: false
-    Reference:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Element'
-        - type: object
-          properties:
-            reference:
-              type: string
-            type:
-              type: string
-            identifier:
-              $ref: '#/components/schemas/Identifier'
-            display:
-              type: string
-          additionalProperties: false
-    Identifier:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Element'
-        - type: object
-          properties:
-            value:
-              type: string
-            assigner:
-              $ref: '#/components/schemas/Reference'
-          additionalProperties: false
     ErrorPayload:
       required:
         - message
@@ -120,3 +69,54 @@ components:
           type: string
         method:
           type: string
+    Extension:
+      $ref: '#/components/schemas/ExtensionExtension'
+    ExtensionExtension:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Element'
+        - type: object
+          properties:
+            extension:
+              type: array
+              items:
+                $ref: '#/components/schemas/Extension'
+          additionalProperties: false
+    Identifier:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Element'
+        - type: object
+          properties:
+            value:
+              type: string
+            assigner:
+              $ref: '#/components/schemas/Reference'
+          additionalProperties: false
+    Patient:
+      type: object
+      properties:
+        ext:
+          type: array
+          items:
+            $ref: '#/components/schemas/Extension'
+        id:
+          type: string
+        ref:
+          $ref: '#/components/schemas/Reference'
+      additionalProperties: false
+    Reference:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Element'
+        - type: object
+          properties:
+            reference:
+              type: string
+            type:
+              type: string
+            identifier:
+              $ref: '#/components/schemas/Identifier'
+            display:
+              type: string
+          additionalProperties: false

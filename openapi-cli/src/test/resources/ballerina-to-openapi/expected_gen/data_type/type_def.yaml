@@ -50,69 +50,16 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Link:
-      required:
-        - count
-        - price
-        - rels
-        - salary
-      type: object
-      properties:
-        rels:
-          $ref: '#/components/schemas/Rels'
-        actions:
-          $ref: '#/components/schemas/Action'
-        count:
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/Count'
-        books:
-          $ref: '#/components/schemas/Books'
-        price:
-          $ref: '#/components/schemas/Price'
-        salary:
-          $ref: '#/components/schemas/Salary'
-      additionalProperties: false
-    Rels:
-      type: array
-      items:
-        type: string
     Action:
       type: string
       description: Adding doc
-    Count:
-      type: integer
-      format: int64
     Books:
       type: object
       additionalProperties:
         type: string
-    Price:
-      oneOf:
-        - type: number
-          format: float
-        - $ref: '#/components/schemas/PriceMap'
-    PriceMap:
-      required:
-        - price
-        - salary
-      type: object
-      properties:
-        price:
-          type: integer
-          format: int64
-        salary:
-          type: number
-          format: double
-      additionalProperties: false
-    Salary:
-      oneOf:
-        - type: integer
-          format: int64
-        - type: number
-          format: float
-        - type: number
-          format: double
+    Count:
+      type: integer
+      format: int64
     ErrorPayload:
       required:
         - message
@@ -136,6 +83,59 @@ components:
           type: string
         method:
           type: string
+    Link:
+      required:
+        - count
+        - price
+        - rels
+        - salary
+      type: object
+      properties:
+        rels:
+          $ref: '#/components/schemas/Rels'
+        actions:
+          $ref: '#/components/schemas/Action'
+        count:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Count'
+        books:
+          $ref: '#/components/schemas/Books'
+        price:
+          $ref: '#/components/schemas/Price'
+        salary:
+          $ref: '#/components/schemas/Salary'
+      additionalProperties: false
     PetId:
       type: integer
       format: int64
+    Price:
+      oneOf:
+        - type: number
+          format: float
+        - $ref: '#/components/schemas/PriceMap'
+    PriceMap:
+      required:
+        - price
+        - salary
+      type: object
+      properties:
+        price:
+          type: integer
+          format: int64
+        salary:
+          type: number
+          format: double
+      additionalProperties: false
+    Rels:
+      type: array
+      items:
+        type: string
+    Salary:
+      oneOf:
+        - type: integer
+          format: int64
+        - type: number
+          format: float
+        - type: number
+          format: double

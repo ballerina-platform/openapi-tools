@@ -30,6 +30,29 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Pet:
       required:
         - address
@@ -66,6 +89,14 @@ components:
                 format: int64
               - type: number
                 format: double
+    ReturnTypes:
+      type: array
+      items:
+        oneOf:
+          - type: integer
+            format: int64
+          - type: number
+            format: double
     User:
       required:
         - age
@@ -79,34 +110,3 @@ components:
           type: integer
           format: int64
       additionalProperties: false
-    ReturnTypes:
-      type: array
-      items:
-        oneOf:
-          - type: integer
-            format: int64
-          - type: number
-            format: double
-    ErrorPayload:
-      required:
-        - message
-        - method
-        - path
-        - reason
-        - status
-        - timestamp
-      type: object
-      properties:
-        timestamp:
-          type: string
-        status:
-          type: integer
-          format: int64
-        reason:
-          type: string
-        message:
-          type: string
-        path:
-          type: string
-        method:
-          type: string

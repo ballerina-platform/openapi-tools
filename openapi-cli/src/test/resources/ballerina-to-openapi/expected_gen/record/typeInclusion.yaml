@@ -30,38 +30,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    ReservationReceipt:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Links'
-        - type: object
-          properties:
-            id:
-              type: string
-          additionalProperties: false
-    Links:
-      type: object
-      properties:
-        links:
-          type: array
-          items:
-            $ref: '#/components/schemas/Link'
-        linkid:
-          type: integer
-          format: int64
-      additionalProperties: false
-    Link:
-      type: object
-      properties:
-        rel:
-          type: string
-        href:
-          type: string
-        mediaTypes:
-          type: array
-          items:
-            type: string
-      additionalProperties: false
     ErrorPayload:
       required:
         - message
@@ -85,3 +53,35 @@ components:
           type: string
         method:
           type: string
+    Link:
+      type: object
+      properties:
+        rel:
+          type: string
+        href:
+          type: string
+        mediaTypes:
+          type: array
+          items:
+            type: string
+      additionalProperties: false
+    Links:
+      type: object
+      properties:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+        linkid:
+          type: integer
+          format: int64
+      additionalProperties: false
+    ReservationReceipt:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Links'
+        - type: object
+          properties:
+            id:
+              type: string
+          additionalProperties: false

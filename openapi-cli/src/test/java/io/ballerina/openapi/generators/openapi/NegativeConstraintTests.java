@@ -49,8 +49,8 @@ public class NegativeConstraintTests {
         Path ballerinaFilePath = RES_DIR.resolve("constraint-negative/negative_patternInterpolation.bal");
         List<OpenAPIMapperDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
                                     ballerinaFilePath, "constraint-negative/negative_patternInterpolation.yaml");
-        List<String> expectedPatterns = Arrays.asList("^[A-Z]${j}+$", "^${i}[a-zA-Z]+$", "^[\\${2}a-z]+$"
-                                                     , "^[a-z${2}]+$");
+        List<String> expectedPatterns = Arrays.asList("^[A-Z]${j}+$", "^[\\${2}a-z]+$", "^[a-z${2}]+$",
+                "^${i}[a-zA-Z]+$");
         for (int i = 0; i < errors.size(); i++) {
             Assert.assertEquals(errors.get(i).getMessage(), "Given REGEX pattern '" + expectedPatterns.get(i) +
                     "' is not supported by the OpenAPI tool, it may also not support interpolation within the " +
@@ -63,7 +63,7 @@ public class NegativeConstraintTests {
         Path ballerinaFilePath = RES_DIR.resolve("constraint-negative/negative_constNameRef.bal");
         List<OpenAPIMapperDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
                 ballerinaFilePath, "constraint-negative/negative_constNameRef.yaml");
-        List<String> expectedVariables = Arrays.asList("Value", "maxVal", "5 + minVal");
+        List<String> expectedVariables = Arrays.asList("maxVal", "5 + minVal", "Value");
         for (int i = 0; i < errors.size(); i++) {
             Assert.assertEquals(errors.get(i).getMessage(), "Generated OpenAPI definition does not contain" +
                     " variable assignment '" + expectedVariables.get(i) + "' in constraint validation.");

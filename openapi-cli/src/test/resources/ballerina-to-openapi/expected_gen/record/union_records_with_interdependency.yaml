@@ -37,68 +37,16 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Patient:
-      type: object
-      properties:
-        ext:
-          type: array
-          items:
-            $ref: '#/components/schemas/Extension'
-        id:
-          type: string
-        ref:
-          $ref: '#/components/schemas/Reference'
-      additionalProperties: false
-    Extension:
-      oneOf:
-        - $ref: '#/components/schemas/ExtensionExtension'
-        - $ref: '#/components/schemas/StringExtension'
-        - $ref: '#/components/schemas/CodingExtension'
-        - $ref: '#/components/schemas/CodeExtension'
-        - $ref: '#/components/schemas/IntegerExtension'
-    ExtensionExtension:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Element'
-        - type: object
-          properties:
-            extension:
-              type: array
-              items:
-                $ref: '#/components/schemas/Extension'
-          additionalProperties: false
-    Element:
-      type: object
-      properties:
-        id:
-          type: string
-        element:
-          type: integer
-          format: int64
-      additionalProperties: false
-    StringExtension:
+    CodeExtension:
       required:
         - url
-        - valueString
+        - valueCode
       type: object
       properties:
         url:
           $ref: '#/components/schemas/uri'
-        valueString:
+        valueCode:
           type: string
-      additionalProperties: false
-    uri:
-      type: string
-    CodingExtension:
-      required:
-        - url
-        - valueCoding
-      type: object
-      properties:
-        url:
-          $ref: '#/components/schemas/uri'
-        valueCoding:
-          $ref: '#/components/schemas/Coding'
       additionalProperties: false
     Coding:
       type: object
@@ -119,55 +67,26 @@ components:
             userSelected:
               type: boolean
           additionalProperties: false
-    CodeExtension:
+    CodingExtension:
       required:
         - url
-        - valueCode
+        - valueCoding
       type: object
       properties:
         url:
           $ref: '#/components/schemas/uri'
-        valueCode:
-          type: string
+        valueCoding:
+          $ref: '#/components/schemas/Coding'
       additionalProperties: false
-    IntegerExtension:
-      required:
-        - url
-        - valueInteger
+    Element:
       type: object
       properties:
-        url:
-          $ref: '#/components/schemas/uri'
-        valueInteger:
+        id:
+          type: string
+        element:
           type: integer
           format: int64
       additionalProperties: false
-    Reference:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Element'
-        - type: object
-          properties:
-            reference:
-              type: string
-            type:
-              type: string
-            identifier:
-              $ref: '#/components/schemas/Identifier'
-            display:
-              type: string
-          additionalProperties: false
-    Identifier:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Element'
-        - type: object
-          properties:
-            value:
-              type: string
-            assigner:
-              $ref: '#/components/schemas/Reference'
-          additionalProperties: false
     ErrorPayload:
       required:
         - message
@@ -191,3 +110,84 @@ components:
           type: string
         method:
           type: string
+    Extension:
+      oneOf:
+        - $ref: '#/components/schemas/ExtensionExtension'
+        - $ref: '#/components/schemas/StringExtension'
+        - $ref: '#/components/schemas/CodingExtension'
+        - $ref: '#/components/schemas/CodeExtension'
+        - $ref: '#/components/schemas/IntegerExtension'
+    ExtensionExtension:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Element'
+        - type: object
+          properties:
+            extension:
+              type: array
+              items:
+                $ref: '#/components/schemas/Extension'
+          additionalProperties: false
+    Identifier:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Element'
+        - type: object
+          properties:
+            value:
+              type: string
+            assigner:
+              $ref: '#/components/schemas/Reference'
+          additionalProperties: false
+    IntegerExtension:
+      required:
+        - url
+        - valueInteger
+      type: object
+      properties:
+        url:
+          $ref: '#/components/schemas/uri'
+        valueInteger:
+          type: integer
+          format: int64
+      additionalProperties: false
+    Patient:
+      type: object
+      properties:
+        ext:
+          type: array
+          items:
+            $ref: '#/components/schemas/Extension'
+        id:
+          type: string
+        ref:
+          $ref: '#/components/schemas/Reference'
+      additionalProperties: false
+    Reference:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Element'
+        - type: object
+          properties:
+            reference:
+              type: string
+            type:
+              type: string
+            identifier:
+              $ref: '#/components/schemas/Identifier'
+            display:
+              type: string
+          additionalProperties: false
+    StringExtension:
+      required:
+        - url
+        - valueString
+      type: object
+      properties:
+        url:
+          $ref: '#/components/schemas/uri'
+        valueString:
+          type: string
+      additionalProperties: false
+    uri:
+      type: string

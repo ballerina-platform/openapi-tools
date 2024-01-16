@@ -75,12 +75,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    MeetingGroup:
-      type: string
-      enum:
-        - ENGINEERING
-        - HR
-        - ADMIN
     DateFormat:
       type: string
       enum:
@@ -88,28 +82,6 @@ components:
         - OFFSET
         - LOCAL
         - UTC
-    TimeZone:
-      type: string
-      enum:
-        - UTC
-        - GMT
-        - IST
-    MeetingList:
-      required:
-        - meetings
-      type: object
-      properties:
-        meetings:
-          type: array
-          items:
-            $ref: '#/components/schemas/Meeting'
-    Meeting:
-      required:
-        - topic
-      type: object
-      properties:
-        topic:
-          type: string
     ErrorPayload:
       required:
         - message
@@ -133,3 +105,31 @@ components:
           type: string
         method:
           type: string
+    Meeting:
+      required:
+        - topic
+      type: object
+      properties:
+        topic:
+          type: string
+    MeetingGroup:
+      type: string
+      enum:
+        - ENGINEERING
+        - HR
+        - ADMIN
+    MeetingList:
+      required:
+        - meetings
+      type: object
+      properties:
+        meetings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Meeting'
+    TimeZone:
+      type: string
+      enum:
+        - UTC
+        - GMT
+        - IST

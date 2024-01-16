@@ -36,17 +36,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    RegDate:
-      required:
-        - date
-      type: object
-      properties:
-        date:
-          $ref: '#/components/schemas/MyDate'
-        lastLogin:
-          $ref: '#/components/schemas/Date'
-    MyDate:
-      $ref: '#/components/schemas/Date'
     Date:
       type: object
       description: Date in proleptic Gregorian calendar.
@@ -74,47 +63,6 @@ components:
           type: integer
           format: int64
       description: Fields of the Date record.
-    OptionalTimeOfDayFields:
-      type: object
-      properties:
-        hour:
-          type: integer
-          format: int64
-        minute:
-          type: integer
-          format: int64
-        second:
-          $ref: '#/components/schemas/Seconds'
-      description: TimeOfDay with all the fields beign optional.
-    Seconds:
-      type: number
-      description: Holds the seconds as a decimal value.
-      format: double
-    ZoneOffset:
-      required:
-        - hours
-      type: object
-      properties:
-        hours:
-          type: integer
-          format: int64
-        minutes:
-          type: integer
-          format: int64
-        seconds:
-          type: number
-          description: |-
-            IETF zone files have historical zones that are offset by
-            integer seconds; we use Seconds type so that this is a subtype
-            of Delta
-          format: double
-      additionalProperties: false
-      description: |-
-        This is closed so it is a subtype of Delta
-        Fields can negative
-        if any of the three fields are > 0, then all must be >= 0
-        if any of the three fields are < 0, then all must be <= 0
-        Semantic is that durations should be left out
     ErrorPayload:
       required:
         - message
@@ -138,3 +86,49 @@ components:
           type: string
         method:
           type: string
+    MyDate:
+      $ref: '#/components/schemas/Date'
+    OptionalTimeOfDayFields:
+      type: object
+      properties:
+        hour:
+          type: integer
+          format: int64
+        minute:
+          type: integer
+          format: int64
+        second:
+          $ref: '#/components/schemas/Seconds'
+      description: TimeOfDay with all the fields beign optional.
+    RegDate:
+      required:
+        - date
+      type: object
+      properties:
+        date:
+          $ref: '#/components/schemas/MyDate'
+        lastLogin:
+          $ref: '#/components/schemas/Date'
+    Seconds:
+      type: number
+      description: Holds the seconds as a decimal value.
+      format: double
+    ZoneOffset:
+      required:
+        - hours
+      type: object
+      properties:
+        hours:
+          type: integer
+          format: int64
+        minutes:
+          type: integer
+          format: int64
+        seconds:
+          type: number
+          description: |-
+            IETF zone files have historical zones that are offset by
+            integer seconds; we use Seconds type so that this is a subtype
+            of Delta
+          format: double
+      additionalProperties: false

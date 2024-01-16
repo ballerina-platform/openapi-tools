@@ -136,19 +136,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Record:
-      required:
-        - address
-        - name
-      type: object
-      properties:
-        name:
-          type: string
-        address:
-          type: object
-          additionalProperties:
-            type: string
-      additionalProperties: false
     ErrorPayload:
       required:
         - message
@@ -172,3 +159,16 @@ components:
           type: string
         method:
           type: string
+    Record:
+      required:
+        - address
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: object
+          additionalProperties:
+            type: string
+      additionalProperties: false

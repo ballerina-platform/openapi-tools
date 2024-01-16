@@ -1,7 +1,7 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License.
  *  You may obtain a copy of the License at
@@ -15,28 +15,27 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
-
 package io.ballerina.openapi.service.mapper.model;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.Objects;
 
 /**
  * This class will hold operation details specific to HTTP operation.
  */
-public class OperationDTO {
+public class OperationBuilder {
 
     private Operation operation;
     private String path;
     private String httpOperation;
     private Components components;
 
-    public OperationDTO() {
+    public OperationBuilder() {
         this.operation = new io.swagger.v3.oas.models.Operation();
     }
 
@@ -92,5 +91,17 @@ public class OperationDTO {
 
     public void overrideRequestBody(RequestBody requestBody) {
         operation.setRequestBody(requestBody);
+    }
+
+    public void setApiResponses(ApiResponses apiResponses) {
+        operation.setResponses(apiResponses);
+    }
+
+    public void setOperationId(String operationId) {
+        operation.setOperationId(operationId);
+    }
+
+    public void setSummary(String summary) {
+        operation.setSummary(summary);
     }
 }

@@ -19,24 +19,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Reservation:
-      required:
-        - count
-        - endDate
-        - roomId
-        - startDate
-      type: object
-      properties:
-        roomId:
-          type: string
-        count:
-          type: integer
-          format: int64
-        startDate:
-          type: string
-        endDate:
-          type: string
-      additionalProperties: false
     ErrorPayload:
       required:
         - message
@@ -60,3 +42,21 @@ components:
           type: string
         method:
           type: string
+    Reservation:
+      required:
+        - count
+        - endDate
+        - roomId
+        - startDate
+      type: object
+      properties:
+        roomId:
+          type: string
+        count:
+          type: integer
+          format: int64
+        startDate:
+          type: string
+        endDate:
+          type: string
+      additionalProperties: false

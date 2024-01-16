@@ -1,7 +1,7 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License.
  *  You may obtain a copy of the License at
@@ -15,7 +15,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package io.ballerina.openapi.service.mapper.parameter;
 
 import io.ballerina.compiler.api.SemanticModel;
@@ -37,7 +36,7 @@ import io.ballerina.openapi.service.mapper.Constants;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationDTO;
+import io.ballerina.openapi.service.mapper.model.OperationBuilder;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -55,19 +54,19 @@ import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_SUMMARY;
 /**
  * OpenAPIParameterMapper provides functionality for converting ballerina parameter to OAS parameter model.
  */
-public class ParameterMapper {
+public class ParameterMapper implements ParameterMapperInterface {
     private final FunctionDefinitionNode functionDefinitionNode;
-    private final OperationDTO operationDTO;
+    private final OperationBuilder operationBuilder;
     private final Map<String, String> apidocs;
     private final AdditionalData additionalData;
     private final Components components;
     private final boolean treatNilableAsOptional;
 
-    public ParameterMapper(FunctionDefinitionNode functionDefinitionNode, OperationDTO operationDTO,
+    public ParameterMapper(FunctionDefinitionNode functionDefinitionNode, OperationBuilder operationBuilder,
                            Components components, Map<String, String> apiDocs, AdditionalData additionalData,
                            Boolean treatNilableAsOptional) {
         this.functionDefinitionNode = functionDefinitionNode;
-        this.operationDTO = operationDTO;
+        this.operationBuilder = operationBuilder;
         this.apidocs = apiDocs;
         this.additionalData = additionalData;
         this.components = components;
@@ -88,7 +87,7 @@ public class ParameterMapper {
                 continue;
             }
             if ((parameterType.equals("REQUEST") || parameterType.equals("PAYLOAD")) &&
-                    (Constants.GET.equalsIgnoreCase(operationDTO.getHttpOperation()))) {
+                    (Constants.GET.equalsIgnoreCase(operationBuilder.getHttpOperation()))) {
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
                 IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
                         parameterNode.location());
@@ -103,12 +102,12 @@ public class ParameterMapper {
         switch (parameterType) {
             case "QUERY" -> {
                 QueryParameterMapper queryParameterMapper = new QueryParameterMapper(parameterNode, apidocs,
-                        operationDTO, components, treatNilableAsOptional, additionalData);
+                        operationBuilder, components, treatNilableAsOptional, additionalData);
                 queryParameterMapper.setParameter();
             }
             case "HEADER" -> {
                 HeaderParameterMapper headerParameterMapper = new HeaderParameterMapper(parameterNode, apidocs,
-                        operationDTO, components, treatNilableAsOptional, additionalData);
+                        operationBuilder, components, treatNilableAsOptional, additionalData);
                 headerParameterMapper.setParameter();
             }
             case "PAYLOAD" -> {
@@ -118,7 +117,7 @@ public class ParameterMapper {
                 }
                 AnnotationNode annotation = getPayloadAnnotation(parameterNode);
                 RequestBodyMapper requestBodyMapper = new RequestBodyMapper((ParameterSymbol) symbol.get(), annotation,
-                        operationDTO, functionDefinitionNode, components, apidocs, additionalData);
+                        operationBuilder, functionDefinitionNode, components, apidocs, additionalData);
                 requestBodyMapper.setRequestBody();
             }
             case "REQUEST" -> {
@@ -127,7 +126,7 @@ public class ParameterMapper {
                 mediaType.setSchema(new Schema<>().description(WILD_CARD_SUMMARY));
                 requestBody.setContent(new Content().addMediaType(WILD_CARD_CONTENT_KEY, mediaType));
                 // The following method will only add the request body if it is not already set.
-                operationDTO.setRequestBody(requestBody);
+                operationBuilder.setRequestBody(requestBody);
             }
             default -> {
 
@@ -156,7 +155,7 @@ public class ParameterMapper {
                 SemanticModel semanticModel = additionalData.semanticModel();
                 PathParameterSymbol pathParameterSymbol = (PathParameterSymbol) semanticModel.symbol(pathParam).get();
                 PathParameterMapper pathParameterMapper = new PathParameterMapper(pathParameterSymbol, components,
-                        apidocs, operationDTO, additionalData);
+                        apidocs, operationBuilder, additionalData);
                 pathParameterMapper.setParameter();
             }
         }
