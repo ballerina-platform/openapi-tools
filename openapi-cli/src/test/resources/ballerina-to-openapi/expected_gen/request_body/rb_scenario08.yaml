@@ -7,9 +7,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Pet'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/Pet'
+        required: true
       responses:
         "200":
           description: Ok

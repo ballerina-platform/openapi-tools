@@ -25,12 +25,12 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
-import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -49,29 +49,30 @@ public class UnionTypeMapper extends AbstractTypeMapper {
     }
 
     @Override
-    public Schema getReferenceSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(Components components) {
         Schema schema;
         if (isEnumType) {
             schema = getEnumTypeSchema((EnumSymbol) typeSymbol.definition());
         } else {
             UnionTypeSymbol unionTypeSymbol = (UnionTypeSymbol) typeSymbol.typeDescriptor();
-            schema = getSchema(unionTypeSymbol, openAPI, additionalData);
+            schema = getSchema(unionTypeSymbol, components, additionalData, false);
         }
         return Objects.nonNull(schema) ? schema.description(description) : null;
     }
 
-    public static Schema getSchema(UnionTypeSymbol typeSymbol, OpenAPI openAPI, AdditionalData additionalData) {
+    public static Schema getSchema(UnionTypeSymbol typeSymbol, Components components, AdditionalData additionalData,
+                                   boolean skipNilType) {
         if (isUnionOfSingletons(typeSymbol)) {
             return getSingletonUnionTypeSchema(typeSymbol, additionalData.diagnostics());
         }
-        List<TypeSymbol> memberTypeSymbols = typeSymbol.memberTypeDescriptors();
+        List<TypeSymbol> memberTypeSymbols = typeSymbol.userSpecifiedMemberTypes();
         List<Schema> memberSchemas = new ArrayList<>();
-        boolean nullable = hasNilableType(typeSymbol);
+        boolean nullable = !skipNilType && hasNilableType(typeSymbol);
         for (TypeSymbol memberTypeSymbol : memberTypeSymbols) {
             if (memberTypeSymbol.typeKind().equals(TypeDescKind.NIL)) {
                 continue;
             }
-            Schema schema = TypeMapper.getTypeSchema(memberTypeSymbol, openAPI, additionalData);
+            Schema schema = TypeMapper.getTypeSchema(memberTypeSymbol, components, additionalData, nullable);
             if (Objects.nonNull(schema)) {
                 memberSchemas.add(schema);
             }
@@ -82,7 +83,7 @@ public class UnionTypeMapper extends AbstractTypeMapper {
         Schema schema;
         if (memberSchemas.size() == 1) {
             schema = memberSchemas.get(0);
-            if (Objects.nonNull(schema.get$ref())) {
+            if (Objects.nonNull(schema.get$ref()) && nullable) {
                 schema = new ComposedSchema().allOf(List.of(schema));
             }
         } else {
@@ -95,7 +96,7 @@ public class UnionTypeMapper extends AbstractTypeMapper {
     }
 
     static boolean isUnionOfSingletons(UnionTypeSymbol typeSymbol) {
-        List<TypeSymbol> memberTypeSymbols = typeSymbol.memberTypeDescriptors();
+        List<TypeSymbol> memberTypeSymbols = typeSymbol.userSpecifiedMemberTypes();
         return memberTypeSymbols.stream().allMatch(symbol -> symbol.typeKind().equals(TypeDescKind.SINGLETON) ||
                 symbol.typeKind().equals(TypeDescKind.NIL));
     }
@@ -107,12 +108,13 @@ public class UnionTypeMapper extends AbstractTypeMapper {
                 List<TypeSymbol> memberTypeSymbols = ((UnionTypeSymbol) typeSymbol).memberTypeDescriptors();
                 yield memberTypeSymbols.stream().anyMatch(symbol -> symbol.typeKind().equals(TypeDescKind.NIL));
             }
+            case NIL -> true;
             default -> false;
         };
     }
 
     static Schema getSingletonUnionTypeSchema(UnionTypeSymbol typeSymbol, List<OpenAPIMapperDiagnostic> diagnostics) {
-        List<TypeSymbol> memberTypeSymbols = typeSymbol.memberTypeDescriptors();
+        List<TypeSymbol> memberTypeSymbols = typeSymbol.userSpecifiedMemberTypes();
         List<String> enumValues = new ArrayList<>();
         boolean nullable = hasNilableType(typeSymbol);
         for (TypeSymbol memberTypeSymbol : memberTypeSymbols) {

@@ -358,6 +358,7 @@ paths:
           text/plain:
             schema:
               type: string
+        required: true
       responses:
         "202":
           description: Accepted
@@ -374,6 +375,7 @@ paths:
           text/plain:
             schema:
               type: string
+        required: true
       responses:
         "202":
           description: Accepted
@@ -390,6 +392,7 @@ paths:
           text/plain:
             schema:
               type: string
+        required: true
       responses:
         "202":
           description: Accepted
@@ -406,6 +409,7 @@ paths:
           text/plain:
             schema:
               type: string
+        required: true
       responses:
         "202":
           description: Accepted

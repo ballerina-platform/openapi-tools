@@ -67,14 +67,12 @@ public class OpenAPIInfo {
             return this;
         }
 
-        public OpenAPIInfoBuilder contractPath(String contractPath) {
+        public void contractPath(String contractPath) {
             this.contractPath = contractPath;
-            return this;
         }
 
         public OpenAPIInfo build() {
-            OpenAPIInfo openAPIInfo = new OpenAPIInfo(this);
-            return openAPIInfo;
+            return new OpenAPIInfo(this);
         }
     }
 }

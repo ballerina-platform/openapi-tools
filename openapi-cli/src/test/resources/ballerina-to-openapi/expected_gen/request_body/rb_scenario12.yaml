@@ -7,6 +7,7 @@ paths:
           application/vnd.snowpeak.reservation+json:
             schema:
               $ref: '#/components/schemas/Tag'
+        required: true
       responses:
         "200":
           description: Ok
@@ -23,6 +24,7 @@ paths:
           application/vnd.snowpeak.reservation+json:
             schema:
               $ref: '#/components/schemas/Pet'
+        required: true
       responses:
         "200":
           description: Ok

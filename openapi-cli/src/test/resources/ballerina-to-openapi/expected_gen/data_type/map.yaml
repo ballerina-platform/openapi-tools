@@ -50,8 +50,6 @@ components:
             format: float
         item:
           type: object
-          additionalProperties:
-            type: object
         mapArray:
           type: object
           additionalProperties:
@@ -62,8 +60,6 @@ components:
           type: object
           additionalProperties:
             type: object
-            additionalProperties:
-              type: object
         arrayItemMap:
           type: array
           items:

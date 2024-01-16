@@ -109,7 +109,6 @@ paths:
       parameters:
         - name: offset
           in: query
-          required: true
           schema:
             type: array
             items:
@@ -158,7 +157,6 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
                 nullable: true
                 default:
                   x:
@@ -184,7 +182,6 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
                 default:
                   x:
                     id: sss

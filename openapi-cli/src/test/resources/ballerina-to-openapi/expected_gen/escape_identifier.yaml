@@ -23,6 +23,7 @@ paths:
             type: string
         - name: q-paramter
           in: query
+          description: Query Parameter Description
           required: true
           schema:
             type: string
@@ -46,6 +47,7 @@ paths:
       parameters:
         - name: x-client
           in: header
+          description: Header Parameter Description
           required: true
           schema:
             type: string
@@ -55,6 +57,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Pet-Task'
+        required: true
       responses:
         "202":
           description: Accepted

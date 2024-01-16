@@ -96,9 +96,8 @@ public class OASGenerationMetaInfo {
             return this;
         }
 
-        public Project setProject(Project project) {
+        public void setProject(Project project) {
             this.project = project;
-            return project;
         }
 
         public OASGenerationMetaInfo build() {

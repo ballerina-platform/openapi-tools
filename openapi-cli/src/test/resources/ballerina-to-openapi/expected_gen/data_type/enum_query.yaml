@@ -41,15 +41,18 @@ paths:
         - name: format
           in: query
           schema:
-            $ref: '#/components/schemas/Format'
+            nullable: true
+            allOf:
+              - $ref: '#/components/schemas/Format'
         - name: type
           in: query
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: true
-                default: live
+          schema:
+            type: string
+            default: live
+            enum:
+              - scheduled
+              - live
+              - upcoming
         - name: q-default-ref
           in: query
           schema:

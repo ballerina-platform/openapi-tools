@@ -16,16 +16,17 @@ paths:
       parameters:
         - name: q
           in: query
+          required: true
           content:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Student'
+        required: true
       responses:
         "201":
           description: Created
@@ -53,6 +54,7 @@ paths:
           text/plain:
             schema:
               type: string
+        required: true
       responses:
         "201":
           description: Created

@@ -24,7 +24,7 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.service.mapper.OpenAPIEndpointMapper;
+import io.ballerina.openapi.service.mapper.ServersMapper;
 import io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
@@ -174,7 +174,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                     // module by checking listener type that attached to service endpoints.
                     Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
                     if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
-                        String service = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
+                        String service = ServersMapper.getServiceBasePath(serviceNode);
                         String updateServiceName = service;
                         if (allServices.contains(service)) {
                             updateServiceName = service + HYPHEN + serviceSymbol.get().hashCode();

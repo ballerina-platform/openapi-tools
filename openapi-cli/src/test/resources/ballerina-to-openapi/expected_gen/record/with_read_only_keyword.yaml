@@ -29,6 +29,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Album'
+        required: true
       responses:
         "201":
           description: Created

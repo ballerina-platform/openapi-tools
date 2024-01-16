@@ -14,11 +14,32 @@ paths:
     get:
       operationId: getHeader
       parameters:
-        - name: h
+        - name: header12
           in: header
           required: true
           schema:
-            $ref: '#/components/schemas/Header'
+            type: array
+            items:
+              type: integer
+              format: int64
+        - name: header13
+          in: header
+          required: true
+          schema:
+            type: array
+            items:
+              type: number
+              format: float
+        - name: header11
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: header14
+          in: header
+          required: true
+          schema:
+            type: boolean
         - name: h0
           in: header
           schema:
@@ -68,27 +89,51 @@ paths:
               - 1
               - 2.3
               - 4.56
-        - name: h6
+        - name: name
           in: header
+          required: true
           schema:
-            allOf:
-              - $ref: '#/components/schemas/Record'
-            default:
-              name: John
-              city: London
-        - name: h7
+            type: string
+            default: John
+        - name: city
           in: header
+          required: true
           schema:
-            allOf:
-              - $ref: '#/components/schemas/Header'
+            type: string
+            default: London
+        - name: header23
+          in: header
+          required: true
+          schema:
+            type: array
+            items:
+              type: number
+              format: float
+            default: []
+        - name: header24
+          in: header
+          required: true
+          schema:
+            type: boolean
+            default: false
+        - name: header21
+          in: header
+          required: true
+          schema:
+            type: string
+            default: header1
+        - name: header22
+          in: header
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
             default:
-              header1: header1
-              header2:
-                - 1
-                - 2
-                - 3
-              header4: false
-              header3: []
+              - 1
+              - 2
+              - 3
       responses:
         "200":
           description: Ok
@@ -104,40 +149,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Header:
-      required:
-        - header1
-        - header2
-        - header3
-        - header4
-      type: object
-      properties:
-        header1:
-          type: string
-        header2:
-          type: array
-          items:
-            type: integer
-            format: int64
-        header3:
-          type: array
-          items:
-            type: number
-            format: float
-        header4:
-          type: boolean
-      additionalProperties: false
-    Record:
-      required:
-        - city
-        - name
-      type: object
-      properties:
-        name:
-          type: string
-        city:
-          type: string
-      additionalProperties: false
     ErrorPayload:
       required:
         - message

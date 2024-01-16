@@ -27,6 +27,7 @@ paths:
           application/vnd.wso2.sales+json:
             schema:
               $ref: '#/components/schemas/Pet'
+        required: true
       responses:
         "201":
           description: Created

@@ -25,18 +25,15 @@ import io.ballerina.compiler.api.symbols.Documentation;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
-import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
+import io.ballerina.openapi.service.mapper.model.AdditionalData;
+import io.ballerina.openapi.service.mapper.model.OperationDTO;
 import io.ballerina.openapi.service.mapper.parameter.HateoasMapper;
+import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.ResponseMapper;
-import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.Components;
@@ -48,14 +45,11 @@ import io.swagger.v3.oas.models.links.Link;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import static io.ballerina.openapi.service.mapper.Constants.DEFAULT;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOperationId;
@@ -65,70 +59,60 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpe
  *
  * @since 2.0.0
  */
-public class OpenAPIResourceMapper {
-    private final SemanticModel semanticModel;
-    private final ModuleMemberVisitor moduleMemberVisitor;
+public class ResourceMapper {
     private final Paths pathObject = new Paths();
-    private final Components components = new Components();
-    private final List<OpenAPIMapperDiagnostic> errors;
-    private final TypeMapper typeMapper;
+    private final AdditionalData additionalData;
     private final OpenAPI openAPI;
     private final List<FunctionDefinitionNode> resources;
+    private final boolean treatNilableAsOptional;
     private final HateoasMapper hateoasMapper;
 
     /**
      * Initializes a resource parser for openApi.
      */
-    OpenAPIResourceMapper(OpenAPI openAPI, List<FunctionDefinitionNode> resources, SemanticModel semanticModel,
-                          ModuleMemberVisitor moduleMemberVisitor, List<OpenAPIMapperDiagnostic> errors,
-                          TypeMapper typeMapper) {
+    ResourceMapper(OpenAPI openAPI, List<FunctionDefinitionNode> resources, SemanticModel semanticModel,
+                   AdditionalData additionalData, boolean treatNilableAsOptional) {
         this.openAPI = openAPI;
         this.resources = resources;
-        this.semanticModel = semanticModel;
-        this.errors = errors;
-        this.moduleMemberVisitor = moduleMemberVisitor;
-        this.typeMapper = typeMapper;
+        this.additionalData = additionalData;
+        this.treatNilableAsOptional = treatNilableAsOptional;
         this.hateoasMapper = new HateoasMapper();
     }
 
-    public void addMapping(ServiceDeclarationNode service) {
+    public void addMapping(SemanticModel semanticModel, ServiceDeclarationNode service) {
+        Components components = openAPI.getComponents();
+        if (components == null) {
+            components = new Components();
+            openAPI.setComponents(components);
+        }
+        if (components.getSchemas() == null) {
+            components.setSchemas(new HashMap<>());
+        }
         for (FunctionDefinitionNode resource : resources) {
-            List<String> methods = this.getHttpMethods(resource);
-            getResourcePath(resource, methods, service);
+            generateResourceMapping(semanticModel, resource, components, service);
+        }
+        if (components.getSchemas().isEmpty()) {
+            openAPI.setComponents(null);
         }
         openAPI.setPaths(pathObject);
     }
 
-    /**
-     * Resource mapper when a resource has more than 1 http method.
-     *
-     * @param resource The ballerina resource.
-     * @param httpMethods   Sibling methods related to operation.
-     */
-    private void getResourcePath(FunctionDefinitionNode resource, List<String> httpMethods,
-                                 ServiceDeclarationNode service) {
+    private void generateResourceMapping(SemanticModel semanticModel, FunctionDefinitionNode resource, Components components,
+                                         ServiceDeclarationNode service) {
         String relativePath = MapperCommonUtils.generateRelativePath(resource);
         String cleanResourcePath = MapperCommonUtils.unescapeIdentifier(relativePath);
-        Operation operation;
-        for (String httpMethod : httpMethods) {
-            //Iterate through http methods and fill path map.
-            if (resource.functionName().toString().trim().equals(httpMethod)) {
-                if (httpMethod.equals("'" + DEFAULT) || httpMethod.equals(DEFAULT)) {
-                    DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_100;
-                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
-                            resource.location());
-                    errors.add(error);
-                } else {
-                    Optional<OperationAdaptor> operationAdaptor = convertResourceToOperation(resource, httpMethod,
-                            cleanResourcePath, service);
-                    if (operationAdaptor.isPresent()) {
-                        operation = operationAdaptor.get().getOperation();
-                        generatePathItem(httpMethod, pathObject, operation, cleanResourcePath);
-                    } else {
-                        break;
-                    }
-                }
-                break;
+        String httpMethod = resource.functionName().toString().trim();
+        if (httpMethod.equals("'" + DEFAULT) || httpMethod.equals(DEFAULT)) {
+            DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_100;
+            IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                    resource.location());
+            additionalData.diagnostics().add(error);
+        } else {
+            Optional<OperationDTO> operationDTO = convertResourceToOperation(semanticModel, resource, httpMethod, components,
+                    cleanResourcePath, service);
+            if (operationDTO.isPresent()) {
+                Operation operation = operationDTO.get().getOperation();
+                generatePathItem(httpMethod, pathObject, operation, cleanResourcePath);
             }
         }
     }
@@ -201,15 +185,15 @@ public class OpenAPIResourceMapper {
      *
      * @return Operation Adaptor object of given resource
      */
-    private Optional<OperationAdaptor> convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
-                                                                  String generateRelativePath,
-                                                                  ServiceDeclarationNode service) {
-        OperationAdaptor op = new OperationAdaptor();
+    private Optional<OperationDTO> convertResourceToOperation(SemanticModel semanticModel, FunctionDefinitionNode resource, String httpMethod,
+                                                              Components components, String generateRelativePath,
+                                                              ServiceDeclarationNode service) {
+        OperationDTO op = new OperationDTO();
         op.setHttpOperation(httpMethod);
         op.setPath(generateRelativePath);
         /* Set operation id */
         String resName = (resource.functionName().text() + "_" +
-                generateRelativePath).replaceAll("\\{///\\}", "_");
+                generateRelativePath).replaceAll("\\{///}", "_");
 
         if (generateRelativePath.equals("/")) {
             resName = resource.functionName().text();
@@ -220,24 +204,22 @@ public class OpenAPIResourceMapper {
         // Map API documentation
         Map<String, String> apiDocs = listAPIDocumentations(resource, op);
         //Add path parameters if in path and query parameters
-        OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs, semanticModel,
-                moduleMemberVisitor, errors, typeMapper, openAPI);
-        openAPIParameterMapper.getResourceInputs(components, semanticModel);
-        if (errors.size() > 1 || (errors.size() == 1 && !errors.get(0).getCode().equals(DiagnosticMessages
-                .OAS_CONVERTOR_113.getCode()))) {
-            boolean isErrorIncluded = errors.stream().anyMatch(d ->
-                    DiagnosticSeverity.ERROR.equals(d.getDiagnosticSeverity()));
-            if (isErrorIncluded) {
+        ParameterMapper parameterMapper = new ParameterMapper(resource, op, components, apiDocs, additionalData,
+                treatNilableAsOptional);
+        parameterMapper.setParameters();
+        List<OpenAPIMapperDiagnostic> diagnostics = additionalData.diagnostics();
+        if (diagnostics.size() > 1 || (diagnostics.size() == 1 && !diagnostics.get(0).getCode().equals(
+                DiagnosticMessages.OAS_CONVERTOR_113.getCode()))) {
+            boolean isErrorIncluded = diagnostics.stream().anyMatch(diagnostic ->
+                    DiagnosticSeverity.ERROR.equals(diagnostic.getDiagnosticSeverity()));
+            boolean hasRestPathParam = diagnostics.stream().anyMatch(diagnostic ->
+                    DiagnosticMessages.OAS_CONVERTOR_125.getCode().equals(diagnostic.getCode()));
+            if (isErrorIncluded || hasRestPathParam) {
                 return Optional.empty();
             }
         }
 
-        if (checkRestParamInResourcePath(openAPIParameterMapper)) {
-            return Optional.empty();
-        }
-        errors.addAll(openAPIParameterMapper.getDiagnostics());
-        ResponseMapper responseMapper = new ResponseMapper(semanticModel, openAPI, resource, op,
-                errors, moduleMemberVisitor);
+        ResponseMapper responseMapper = new ResponseMapper(resource, op, components, additionalData);
         ApiResponses apiResponses = responseMapper.getApiResponses();
         setSwaggerLinksInApiResponse(semanticModel, service, apiResponses, resource);
         op.getOperation().setResponses(apiResponses);
@@ -260,24 +242,14 @@ public class OpenAPIResourceMapper {
         }
     }
 
-    private boolean checkRestParamInResourcePath(OpenAPIParameterMapper openAPIParameterMapper) {
-        List<OpenAPIMapperDiagnostic> errorList = openAPIParameterMapper.getDiagnostics();
-        if (!errorList.isEmpty() && errorList.stream().anyMatch(error ->
-                DiagnosticMessages.OAS_CONVERTOR_125.getCode().equals(error.getCode()))) {
-            errors.addAll(errorList);
-            return true;
-        }
-        return false;
-    }
-
     /**
      * Filter the API documentations from resource function node.
      */
-    private Map<String, String> listAPIDocumentations(FunctionDefinitionNode resource, OperationAdaptor op) {
+    private Map<String, String> listAPIDocumentations(FunctionDefinitionNode resource, OperationDTO op) {
 
         Map<String, String> apiDocs = new HashMap<>();
         if (resource.metadata().isPresent()) {
-            Optional<Symbol> resourceSymbol = semanticModel.symbol(resource);
+            Optional<Symbol> resourceSymbol = additionalData.semanticModel().symbol(resource);
             if (resourceSymbol.isPresent()) {
                 Symbol symbol = resourceSymbol.get();
                 Optional<Documentation> documentation = ((Documentable) symbol).documentation();
@@ -293,31 +265,5 @@ public class OpenAPIResourceMapper {
             }
         }
         return apiDocs;
-    }
-
-    /**
-     * Gets the http methods of a resource.
-     *
-     * @param resource    The ballerina resource.
-     * @return A list of http methods.
-     */
-    private List<String> getHttpMethods(FunctionDefinitionNode resource) {
-        Set<String> httpMethods = new LinkedHashSet<>();
-        ServiceDeclarationNode parentNode = (ServiceDeclarationNode) resource.parent();
-        NodeList<Node> siblings = parentNode.members();
-        httpMethods.add(resource.functionName().text());
-        String relativePath = MapperCommonUtils.generateRelativePath(resource);
-        for (Node function: siblings) {
-            SyntaxKind kind = function.kind();
-            if (kind.equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
-                FunctionDefinitionNode sibling = (FunctionDefinitionNode) function;
-                //need to build relative path
-                String siblingRelativePath = MapperCommonUtils.generateRelativePath(sibling);
-                if (relativePath.equals(siblingRelativePath)) {
-                    httpMethods.add(sibling.functionName().text());
-                }
-            }
-        }
-        return new ArrayList<>(httpMethods);
     }
 }

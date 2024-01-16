@@ -19,20 +19,24 @@
 
 package io.ballerina.openapi.service.mapper.model;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.Objects;
 
 /**
  * This class will hold operation details specific to HTTP operation.
  */
-public class OperationAdaptor {
+public class OperationDTO {
 
     private Operation operation;
     private String path;
     private String httpOperation;
+    private Components components;
 
-    public OperationAdaptor() {
+    public OperationDTO() {
         this.operation = new io.swagger.v3.oas.models.Operation();
     }
 
@@ -64,8 +68,29 @@ public class OperationAdaptor {
         this.httpOperation = httpOperation;
     }
 
+    public Components getComponents() {
+        return components;
+    }
+
+    public void setComponents(Components components) {
+        this.components = components;
+    }
+
     public boolean hasDataBinding() {
         return Objects.nonNull(this.operation.getRequestBody()) || Objects.nonNull(this.operation.getParameters());
     }
 
+    public void setParameter(Parameter parameter) {
+        operation.addParametersItem(parameter);
+    }
+
+    public void setRequestBody(RequestBody requestBody) {
+        if (Objects.isNull(operation.getRequestBody())) {
+            operation.setRequestBody(requestBody);
+        }
+    }
+
+    public void overrideRequestBody(RequestBody requestBody) {
+        operation.setRequestBody(requestBody);
+    }
 }

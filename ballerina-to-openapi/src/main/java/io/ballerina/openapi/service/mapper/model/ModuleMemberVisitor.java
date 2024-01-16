@@ -21,6 +21,7 @@ package io.ballerina.openapi.service.mapper.model;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -45,17 +46,13 @@ public class ModuleMemberVisitor extends NodeVisitor {
         listenerDeclarationNodes.add(listenerDeclarationNode);
     }
 
-    public Set<TypeDefinitionNode> getTypeDefinitionNodes() {
-        return typeDefinitionNodes;
-    }
-
     public Set<ListenerDeclarationNode> getListenerDeclarationNodes() {
         return listenerDeclarationNodes;
     }
 
     public TypeDefinitionNode getTypeDefinitionNode(String typeName) {
         for (TypeDefinitionNode typeDefinitionNode : typeDefinitionNodes) {
-            if (typeDefinitionNode.typeName().text().equals(typeName)) {
+            if (MapperCommonUtils.unescapeIdentifier(typeDefinitionNode.typeName().text()).equals(typeName)) {
                 return typeDefinitionNode;
             }
         }

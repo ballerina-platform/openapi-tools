@@ -16,5 +16,186 @@
 
 package io.ballerina.openapi.service.mapper.parameter;
 
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
+import io.ballerina.compiler.api.symbols.ParameterSymbol;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.openapi.service.mapper.model.AdditionalData;
+import io.ballerina.openapi.service.mapper.model.OperationDTO;
+import io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import static io.ballerina.openapi.service.mapper.Constants.HTTP_PAYLOAD;
+import static io.ballerina.openapi.service.mapper.Constants.MEDIA_TYPE;
+import static io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils.getMediaTypeFromType;
+import static io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils.isSameMediaType;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractAnnotationFieldDetails;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
+
 public class RequestBodyMapper {
+    private List<String> allowedMediaTypes = new ArrayList<>();
+    private final RequestBody requestBody = new RequestBody().required(true);
+    private final AdditionalData additionalData;
+    private final OperationDTO operationDTO;
+    private final String mediaTypeSubTypePrefix;
+    private final Components components;
+
+    public RequestBodyMapper(ParameterSymbol reqParameter, AnnotationNode annotation, OperationDTO operationDTO,
+                             FunctionDefinitionNode resourceNode, Components components,
+                             Map<String, String> apiDocs, AdditionalData additionalData) {
+        this.additionalData = additionalData;
+        this.operationDTO = operationDTO;
+        this.components = components;
+        this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
+        requestBody.description(apiDocs.get(removeStartingSingleQuote(reqParameter.getName().get())));
+        extractAnnotationDetails(annotation);
+        createReqBodyMapping(reqParameter.typeDescriptor());
+    }
+
+    public void setRequestBody() {
+        operationDTO.overrideRequestBody(requestBody);
+    }
+
+    private void extractAnnotationDetails(AnnotationNode annotation) {
+        if (annotation.annotReference().toString().trim().equals(HTTP_PAYLOAD)) {
+            allowedMediaTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, MEDIA_TYPE,
+                    annotation, additionalData.semanticModel());
+        }
+    }
+
+    private void createReqBodyMapping(TypeSymbol reqBodyType) {
+        UnionTypeSymbol unionType = getUnionType(reqBodyType, additionalData.semanticModel());
+        if (Objects.nonNull(unionType)) {
+            addReqBodyMappingForUnion(unionType);
+        } else {
+            addReqBodyMappingForSimpleType(reqBodyType);
+        }
+    }
+
+    private static UnionTypeSymbol getUnionType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
+        if (Objects.isNull(typeSymbol)) {
+            return null;
+        }
+        return switch (typeSymbol.typeKind()) {
+            case UNION -> (UnionTypeSymbol) typeSymbol;
+            case TYPE_REFERENCE -> isSameMediaType(typeSymbol, semanticModel) ? null :
+                    getUnionType(((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor(), semanticModel);
+            case INTERSECTION ->
+                    getUnionType(((IntersectionTypeSymbol) typeSymbol).effectiveTypeDescriptor(), semanticModel);
+            default -> null;
+        };
+    }
+
+    private void addReqBodyMappingForUnion(UnionTypeSymbol unionType) {
+        Map<String, TypeSymbol> reqContentMap = getReqContentMap(unionType);
+        for (Map.Entry<String, TypeSymbol> entry : reqContentMap.entrySet()) {
+            TypeSymbol typeSymbol = entry.getValue();
+            String mediaType = entry.getKey();
+            addRequestContent(typeSymbol, mediaType);
+        }
+    }
+
+    private void addRequestContent(TypeSymbol reqBodyType, String mediaType) {
+        MediaType mediaTypeObj = new MediaType();
+        mediaTypeObj.setSchema(TypeMapper.getTypeSchema(reqBodyType, components, additionalData));
+        updateReqBodyContentWithMediaType(mediaType, mediaTypeObj);
+    }
+
+    private void updateReqBodyContentWithMediaType(String mediaType, MediaType mediaTypeObj) {
+        Content content = requestBody.getContent();
+        if (Objects.isNull(content)) {
+            content = new Content();
+        }
+        content.addMediaType(mediaType, mediaTypeObj);
+        requestBody.setContent(content);
+    }
+
+    private void addReqBodyMappingForSimpleType(TypeSymbol returnType) {
+        String mediaType = getMediaTypeFromType(returnType, mediaTypeSubTypePrefix, allowedMediaTypes,
+                additionalData.semanticModel());
+        addRequestContent(returnType, mediaType);
+    }
+
+    public Map<String, TypeSymbol> getReqContentMap(UnionTypeSymbol typeSymbol) {
+        Map<String, List<TypeSymbol>> reqContentsList = new HashMap<>();
+        extractBasicMembers(typeSymbol, reqContentsList);
+        Map<String, TypeSymbol> reqContents = new HashMap<>();
+        for (Map.Entry<String, List<TypeSymbol>> entry : reqContentsList.entrySet()) {
+            List<TypeSymbol> typeSymbols = entry.getValue();
+            String mediaType = entry.getKey();
+            if (typeSymbols.size() == 1) {
+                if (isSubTypeOfNil(typeSymbols.get(0), additionalData.semanticModel())) {
+                    requestBody.required(null);
+                    continue;
+                }
+                reqContents.put(mediaType, typeSymbols.get(0));
+            } else {
+                SemanticModel semanticModel = additionalData.semanticModel();
+                if (typeSymbols.removeIf(typeSymbol1 -> isSubTypeOfNil(typeSymbol1, semanticModel))) {
+                    requestBody.required(null);
+                }
+                TypeSymbol[] typeSymbolArray = typeSymbols.toArray(TypeSymbol[]::new);
+                TypeSymbol unionTypeSymbol = semanticModel.types().builder().UNION_TYPE.withMemberTypes(
+                        typeSymbolArray).build();
+                reqContents.put(mediaType, unionTypeSymbol);
+            }
+        }
+        return reqContents;
+    }
+
+    private void updateReqContentMap(Map<String, List<TypeSymbol>> reqContents, TypeSymbol typesymbol,
+                                     String mediaType) {
+        if (reqContents.containsKey(mediaType)) {
+            reqContents.get(mediaType).add(typesymbol);
+        } else {
+            List<TypeSymbol> typeSymbols = new ArrayList<>();
+            typeSymbols.add(typesymbol);
+            reqContents.put(mediaType, typeSymbols);
+        }
+    }
+
+    private void extractBasicMembers(UnionTypeSymbol unionTypeSymbol, Map<String, List<TypeSymbol>> reqContents) {
+        SemanticModel semanticModel = additionalData.semanticModel();
+        if (isSameMediaType(unionTypeSymbol, semanticModel)) {
+            String mediaType = getMediaTypeFromType(unionTypeSymbol, mediaTypeSubTypePrefix,
+                    allowedMediaTypes, semanticModel);
+            updateReqContentMap(reqContents, unionTypeSymbol, mediaType);
+            return;
+        }
+        List<TypeSymbol> directMemberTypes = unionTypeSymbol.userSpecifiedMemberTypes();
+        for (TypeSymbol directMemberType : directMemberTypes) {
+            if (isSameMediaType(directMemberType, semanticModel)) {
+                String mediaType = getMediaTypeFromType(directMemberType, mediaTypeSubTypePrefix,
+                        allowedMediaTypes, semanticModel);
+                updateReqContentMap(reqContents, directMemberType, mediaType);
+            } else {
+                UnionTypeSymbol unionType = getUnionType(directMemberType, semanticModel);
+                if (Objects.isNull(unionType)) {
+                    String mediaType = getMediaTypeFromType(directMemberType, mediaTypeSubTypePrefix,
+                            allowedMediaTypes, semanticModel);
+                    updateReqContentMap(reqContents, directMemberType, mediaType);
+                    continue;
+                }
+                extractBasicMembers(unionType, reqContents);
+            }
+        }
+    }
+
+    private static boolean isSubTypeOfNil(TypeSymbol typeSymbol, SemanticModel semanticModel) {
+        return typeSymbol.subtypeOf(semanticModel.types().NIL);
+    }
 }

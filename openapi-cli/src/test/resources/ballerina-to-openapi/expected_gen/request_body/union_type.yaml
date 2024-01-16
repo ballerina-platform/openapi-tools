@@ -30,19 +30,36 @@ paths:
   /path1:
     post:
       operationId: postPath1
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              type: object
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ABC'
+        required: true
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /path2:
     post:
       operationId: postPath2
       requestBody:
         content:
+          application/xml:
+            schema:
+              type: object
           application/json:
             schema:
               $ref: '#/components/schemas/ABC'
-          application/xml:
-            schema: {}
+        required: true
       responses:
         "202":
           description: Accepted
@@ -57,13 +74,14 @@ paths:
       operationId: postPath3
       requestBody:
         content:
+          application/xml:
+            schema:
+              type: object
           application/json:
             schema:
               oneOf:
                 - $ref: '#/components/schemas/ABC'
                 - $ref: '#/components/schemas/Remote'
-          application/xml:
-            schema: {}
       responses:
         "202":
           description: Accepted
@@ -78,14 +96,16 @@ paths:
       operationId: postPath4
       requestBody:
         content:
+          application/xml:
+            schema:
+              type: object
           application/json:
             schema:
               $ref: '#/components/schemas/ABC'
           text/plain:
             schema:
               type: string
-          application/xml:
-            schema: {}
+        required: true
       responses:
         "202":
           description: Accepted
@@ -106,6 +126,7 @@ paths:
                 - $ref: '#/components/schemas/ABC'
                 - type: integer
                   format: int64
+        required: true
       responses:
         "202":
           description: Accepted
@@ -127,6 +148,7 @@ paths:
           text/plain:
             schema:
               type: string
+        required: true
       responses:
         "202":
           description: Accepted
@@ -145,11 +167,11 @@ paths:
             schema:
               oneOf:
                 - type: object
-                  additionalProperties: {}
                 - type: array
                   items:
                     type: integer
                     format: int64
+        required: true
       responses:
         "202":
           description: Accepted
@@ -173,6 +195,7 @@ paths:
           text/plain:
             schema:
               type: string
+        required: true
       responses:
         "202":
           description: Accepted
@@ -197,6 +220,7 @@ paths:
                 - type: object
                   additionalProperties:
                     type: string
+        required: true
       responses:
         "202":
           description: Accepted

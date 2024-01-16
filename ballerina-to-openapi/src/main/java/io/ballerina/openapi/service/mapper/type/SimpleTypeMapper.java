@@ -18,11 +18,11 @@ package io.ballerina.openapi.service.mapper.type;
 
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.mapper.AdditionalData;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.NumberSchema;
@@ -45,7 +45,7 @@ public class SimpleTypeMapper extends AbstractTypeMapper {
     }
 
     @Override
-    public Schema getReferenceSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(Components components) {
         TypeSymbol referredType = typeSymbol.typeDescriptor();
         Schema schema = getTypeSchema(referredType, additionalData);
         return Objects.nonNull(schema) ? schema.description(description) : null;

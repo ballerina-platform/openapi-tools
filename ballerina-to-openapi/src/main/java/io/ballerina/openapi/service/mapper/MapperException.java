@@ -21,19 +21,8 @@ package io.ballerina.openapi.service.mapper;
 /**
  * Exception definition for Ballerina to OpenApi mapper errors.
  */
-public class OpenApiMapperException extends Exception {
-    public OpenApiMapperException(String message, Throwable cause) {
-        super(message, cause);
-    }
+public class MapperException extends Exception {
 
-    public OpenApiMapperException(String message) {
-        super(message);
-    }
-
-    public OpenApiMapperException(Throwable cause) {
-        super(cause);
-    }
-
-    public OpenApiMapperException() {
+    public MapperException() {
     }
 }

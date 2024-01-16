@@ -33,7 +33,7 @@ import java.util.List;
 
 /**
  * This Test class for storing all the endpoint related tests
- * {@link io.ballerina.openapi.service.mapper.OpenAPIEndpointMapper}.
+ * {@link io.ballerina.openapi.service.mapper.ServersMapper}.
  */
 public class ListenerTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();

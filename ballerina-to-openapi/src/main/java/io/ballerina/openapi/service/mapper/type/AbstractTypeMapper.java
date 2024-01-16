@@ -18,9 +18,9 @@ package io.ballerina.openapi.service.mapper.type;
 
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.mapper.AdditionalData;
+import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Map;
@@ -41,26 +41,26 @@ public abstract class AbstractTypeMapper {
         this.additionalData = additionalData;
     }
 
-    abstract Schema getReferenceSchema(OpenAPI openAPI);
+    abstract Schema getReferenceSchema(Components components);
 
-    public void addToComponents(OpenAPI openAPI) {
-        Map<String, Schema> schemas = MapperCommonUtils.getComponentsSchema(openAPI);
+    public void addToComponents(Components components) {
+        Map<String, Schema> schemas = components.getSchemas();
         if (schemas.containsKey(name) && Objects.nonNull(schemas.get(name))) {
             return;
         }
-        Schema schema = getReferenceSchema(openAPI);
+        Schema schema = getReferenceSchema(components);
         if (Objects.nonNull(schema)) {
-            openAPI.schema(name, schema);
+            components.addSchemas(name, schema);
         }
     }
 
-    static boolean hasMapping(OpenAPI openAPI, TypeSymbol typeSymbol) {
-        Map<String, Schema> schemas = MapperCommonUtils.getComponentsSchema(openAPI);
+    static boolean hasMapping(Components components, TypeSymbol typeSymbol) {
+        Map<String, Schema> schemas = components.getSchemas();
         return schemas.containsKey(MapperCommonUtils.getTypeName(typeSymbol));
     }
 
-    static boolean hasFullMapping(OpenAPI openAPI, TypeSymbol typeSymbol) {
-        Map<String, Schema> schemas = MapperCommonUtils.getComponentsSchema(openAPI);
+    static boolean hasFullMapping(Components components, TypeSymbol typeSymbol) {
+        Map<String, Schema> schemas = components.getSchemas();
         return schemas.containsKey(MapperCommonUtils.getTypeName(typeSymbol)) && Objects.nonNull(
                 schemas.get(MapperCommonUtils.getTypeName(typeSymbol)));
     }

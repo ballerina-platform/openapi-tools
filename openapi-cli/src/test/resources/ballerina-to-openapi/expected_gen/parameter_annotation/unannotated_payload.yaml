@@ -18,6 +18,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Student'
+        required: true
       responses:
         "201":
           description: Created
@@ -45,6 +46,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Student'
+        required: true
       responses:
         "201":
           description: Created
@@ -68,6 +70,7 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/Student'
+        required: true
       responses:
         "201":
           description: Created

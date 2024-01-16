@@ -20,9 +20,9 @@ import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.mapper.AdditionalData;
+import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -37,29 +37,48 @@ public class ReferenceTypeMapper extends AbstractTypeMapper {
     }
 
     @Override
-    public Schema getReferenceSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(Components components) {
         TypeReferenceTypeSymbol referredType = (TypeReferenceTypeSymbol) typeSymbol.typeDescriptor();
-        Schema schema = getSchema(referredType, openAPI, additionalData);
+        Schema schema = getSchema(referredType, components, additionalData);
         if (Objects.nonNull(schema)) {
             schema.description(description);
         }
         return schema;
     }
 
-    public static Schema getSchema(TypeReferenceTypeSymbol typeSymbol, OpenAPI openAPI,
+    public static Schema getSchema(TypeReferenceTypeSymbol typeSymbol, Components components,
                                    AdditionalData additionalData) {
-        if (!AbstractTypeMapper.hasMapping(openAPI, typeSymbol)) {
-            createComponentMapping(typeSymbol, openAPI, additionalData);
-            if (!AbstractTypeMapper.hasFullMapping(openAPI, typeSymbol)) {
+        if (isBuiltInSubTypes(typeSymbol)) {
+            return SimpleTypeMapper.getTypeSchema(typeSymbol.typeDescriptor(), additionalData);
+        }
+        if (!AbstractTypeMapper.hasMapping(components, typeSymbol)) {
+            createComponentMapping(typeSymbol, components, additionalData);
+            if (!AbstractTypeMapper.hasFullMapping(components, typeSymbol)) {
                 return null;
             }
         }
         return new ObjectSchema().$ref(MapperCommonUtils.getTypeName(typeSymbol));
     }
 
+    public static boolean isBuiltInSubTypes(TypeReferenceTypeSymbol typeSymbol) {
+        TypeSymbol referredType = typeSymbol.typeDescriptor();
+        return switch (referredType.typeKind()) {
+            case INT_SIGNED8, INT_SIGNED16, INT_SIGNED32, INT_UNSIGNED8, INT_UNSIGNED16, INT_UNSIGNED32,
+                    XML_COMMENT, XML_ELEMENT, XML_PROCESSING_INSTRUCTION, XML_TEXT,
+                    STRING_CHAR->
+                    true;
+            default -> false;
+        };
+    }
+
     public static TypeSymbol getReferredType(TypeSymbol typeSymbol) {
         if (typeSymbol.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
-            return getReferredType(((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor());
+            TypeSymbol referencedType = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
+            if (referencedType.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
+                return getReferredType(referencedType);
+            } else {
+                return typeSymbol;
+            }
         }
         if (typeSymbol.typeKind().equals(TypeDescKind.INTERSECTION)) {
             TypeSymbol effectiveType = ReadOnlyTypeMapper.getEffectiveType((IntersectionTypeSymbol) typeSymbol);

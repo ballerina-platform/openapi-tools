@@ -1,0 +1,144 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /path1:
+    get:
+      operationId: getPath1
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalSubTypes'
+  /path2:
+    get:
+      operationId: getPath2
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/xml:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/XmlElement'
+                  - $ref: '#/components/schemas/XmlComment'
+                  - $ref: '#/components/schemas/XmlText'
+                  - $ref: '#/components/schemas/XmlProcessingInstruction'
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Unsigned8'
+                  - $ref: '#/components/schemas/Unsigned16'
+                  - $ref: '#/components/schemas/Unsigned32'
+                  - $ref: '#/components/schemas/Signed8'
+                  - $ref: '#/components/schemas/Signed16'
+                  - $ref: '#/components/schemas/Signed32'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Char'
+components:
+  schemas:
+    BalSubTypes:
+      required:
+        - char
+        - ints
+        - xmls
+      type: object
+      properties:
+        char:
+          type: string
+        ints:
+          $ref: '#/components/schemas/BalInts'
+        xmls:
+          $ref: '#/components/schemas/BalXmls'
+      additionalProperties: false
+    BalInts:
+      required:
+        - signed
+        - unsigned
+      type: object
+      properties:
+        signed:
+          $ref: '#/components/schemas/BalSignedInts'
+        unsigned:
+          $ref: '#/components/schemas/BalUnsignedInts'
+      additionalProperties: false
+    BalSignedInts:
+      required:
+        - signed16
+        - signed32
+        - signed8
+      type: object
+      properties:
+        signed32:
+          type: integer
+          format: int32
+        signed16:
+          type: integer
+        signed8:
+          type: integer
+      additionalProperties: false
+    BalUnsignedInts:
+      required:
+        - unsigned16
+        - unsigned32
+        - unsigned8
+      type: object
+      properties:
+        unsigned32:
+          type: integer
+        unsigned16:
+          type: integer
+        unsigned8:
+          type: integer
+      additionalProperties: false
+    BalXmls:
+      required:
+        - comment
+        - element
+        - processingInstruction
+        - text
+      type: object
+      properties:
+        comment:
+          type: object
+        element:
+          type: object
+        processingInstruction:
+          type: object
+        text:
+          type: object
+      additionalProperties: false
+    XmlElement:
+      type: object
+    XmlComment:
+      type: object
+    XmlText:
+      type: object
+    XmlProcessingInstruction:
+      type: object
+    Unsigned8:
+      type: integer
+    Unsigned16:
+      type: integer
+    Unsigned32:
+      type: integer
+    Signed8:
+      type: integer
+    Signed16:
+      type: integer
+    Signed32:
+      type: integer
+      format: int32
+    Char:
+      type: string

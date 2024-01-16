@@ -145,18 +145,28 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Location:
+    ErrorPayload:
       required:
-        - address
-        - id
-        - name
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        name:
+        timestamp:
           type: string
-        id:
+        status:
+          type: integer
+          format: int64
+        reason:
           type: string
-        address:
+        message:
+          type: string
+        path:
+          type: string
+        method:
           type: string
     Room:
       required:
@@ -185,26 +195,15 @@ components:
         count:
           type: integer
           format: int64
-    ErrorPayload:
+    Location:
       required:
-        - message
-        - method
-        - path
-        - reason
-        - status
-        - timestamp
+        - address
+        - id
+        - name
       type: object
       properties:
-        timestamp:
+        name:
           type: string
-        status:
-          type: integer
-          format: int64
-        reason:
+        id:
           type: string
-        message:
-          type: string
-        path:
-          type: string
-        method:
-          type: string
+        address:

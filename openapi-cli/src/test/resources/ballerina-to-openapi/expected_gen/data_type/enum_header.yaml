@@ -27,7 +27,9 @@ paths:
         - name: x-date-optional
           in: header
           schema:
-            $ref: '#/components/schemas/DateFormat'
+            nullable: true
+            allOf:
+              - $ref: '#/components/schemas/DateFormat'
         - name: x-required-arr
           in: header
           required: true
@@ -39,6 +41,7 @@ paths:
           in: header
           schema:
             type: array
+            nullable: true
             items:
               $ref: '#/components/schemas/TimeZone'
         - name: x-def-arr
