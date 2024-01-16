@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import static io.ballerina.openapi.service.mapper.Constants.DEFAULT;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOperationId;
@@ -81,7 +82,7 @@ public class ResourceMapper implements ResourceMapperInterface {
             openAPI.setComponents(components);
         }
         if (components.getSchemas() == null) {
-            components.setSchemas(new HashMap<>());
+            components.setSchemas(new TreeMap<>());
         }
         for (FunctionDefinitionNode resource : resources) {
             generateResourceMapping(resource, components);
