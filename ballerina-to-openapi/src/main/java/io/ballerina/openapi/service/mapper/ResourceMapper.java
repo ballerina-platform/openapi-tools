@@ -97,8 +97,8 @@ public class ResourceMapper {
         openAPI.setPaths(pathObject);
     }
 
-    private void generateResourceMapping(SemanticModel semanticModel, FunctionDefinitionNode resource, Components components,
-                                         ServiceDeclarationNode service) {
+    private void generateResourceMapping(SemanticModel semanticModel, FunctionDefinitionNode resource,
+                                         Components components, ServiceDeclarationNode service) {
         String relativePath = MapperCommonUtils.generateRelativePath(resource);
         String cleanResourcePath = MapperCommonUtils.unescapeIdentifier(relativePath);
         String httpMethod = resource.functionName().toString().trim();
@@ -108,8 +108,8 @@ public class ResourceMapper {
                     resource.location());
             additionalData.diagnostics().add(error);
         } else {
-            Optional<OperationDTO> operationDTO = convertResourceToOperation(semanticModel, resource, httpMethod, components,
-                    cleanResourcePath, service);
+            Optional<OperationDTO> operationDTO = convertResourceToOperation(semanticModel, resource, httpMethod,
+                    components, cleanResourcePath, service);
             if (operationDTO.isPresent()) {
                 Operation operation = operationDTO.get().getOperation();
                 generatePathItem(httpMethod, pathObject, operation, cleanResourcePath);
@@ -185,7 +185,8 @@ public class ResourceMapper {
      *
      * @return Operation Adaptor object of given resource
      */
-    private Optional<OperationDTO> convertResourceToOperation(SemanticModel semanticModel, FunctionDefinitionNode resource, String httpMethod,
+    private Optional<OperationDTO> convertResourceToOperation(SemanticModel semanticModel,
+                                                              FunctionDefinitionNode resource, String httpMethod,
                                                               Components components, String generateRelativePath,
                                                               ServiceDeclarationNode service) {
         OperationDTO op = new OperationDTO();
