@@ -19,17 +19,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Pet:
-      required:
-        - id
-        - name
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
     ErrorPayload:
       required:
         - message
@@ -52,4 +41,15 @@ components:
         path:
           type: string
         method:
+          type: string
+    Pet:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
           type: string

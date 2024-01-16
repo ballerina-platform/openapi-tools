@@ -32,25 +32,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Link:
-      required:
-        - href
-        - rel
-      type: object
-      properties:
-        rel:
-          type: string
-        href:
-          type: string
-        mediaTypes:
-          type: array
-          items:
-            type: string
-        actions:
-          type: array
-          items:
-            $ref: '#/components/schemas/Action'
-      additionalProperties: false
     Action:
       type: string
       enum:
@@ -82,3 +63,22 @@ components:
           type: string
         method:
           type: string
+    Link:
+      required:
+        - href
+        - rel
+      type: object
+      properties:
+        rel:
+          type: string
+        href:
+          type: string
+        mediaTypes:
+          type: array
+          items:
+            type: string
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+      additionalProperties: false

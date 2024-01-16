@@ -1,19 +1,20 @@
-// Copyright (c) 2023 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
-//
-// WSO2 LLC. licenses this file to you under the Apache License,
-// Version 2.0 (the "License"); you may not use this file except
-// in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing,
-// software distributed under the License is distributed on an
-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
-// specific language governing permissions and limitations
-// under the License.
-
+/*
+ *  Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 LLC. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 package io.ballerina.openapi.service.mapper.type;
 
 import io.ballerina.compiler.api.symbols.ConstantSymbol;
@@ -30,7 +31,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -49,18 +50,18 @@ public class UnionTypeMapper extends AbstractTypeMapper {
     }
 
     @Override
-    public Schema getReferenceSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(Components components) {
         Schema schema;
         if (isEnumType) {
             schema = getEnumTypeSchema((EnumSymbol) typeSymbol.definition());
         } else {
             UnionTypeSymbol unionTypeSymbol = (UnionTypeSymbol) typeSymbol.typeDescriptor();
-            schema = getSchema(unionTypeSymbol, openAPI, additionalData, false);
+            schema = getSchema(unionTypeSymbol, components, additionalData, false);
         }
         return Objects.nonNull(schema) ? schema.description(description) : null;
     }
 
-    public static Schema getSchema(UnionTypeSymbol typeSymbol, OpenAPI openAPI, AdditionalData additionalData,
+    public static Schema getSchema(UnionTypeSymbol typeSymbol, Components components, AdditionalData additionalData,
                                    boolean skipNilType) {
         if (isUnionOfSingletons(typeSymbol)) {
             return getSingletonUnionTypeSchema(typeSymbol, additionalData.diagnostics());
@@ -72,7 +73,7 @@ public class UnionTypeMapper extends AbstractTypeMapper {
             if (memberTypeSymbol.typeKind().equals(TypeDescKind.NIL)) {
                 continue;
             }
-            Schema schema = TypeMapper.getTypeSchema(memberTypeSymbol, openAPI, additionalData, nullable);
+            Schema schema = TypeMapper.getTypeSchema(memberTypeSymbol, components, additionalData, nullable);
             if (Objects.nonNull(schema)) {
                 memberSchemas.add(schema);
             }

@@ -49,13 +49,7 @@ components:
           $ref: '#/components/schemas/EmpID'
         name:
           $ref: '#/components/schemas/Name'
-    PosID:
-      maxLength: 21
-      minLength: 21
-      type: string
     EmpID:
-      type: string
-    Name:
       type: string
     ErrorPayload:
       required:
@@ -80,3 +74,9 @@ components:
           type: string
         method:
           type: string
+    Name:
+      type: string
+    PosID:
+      maxLength: 21
+      minLength: 21
+      type: string

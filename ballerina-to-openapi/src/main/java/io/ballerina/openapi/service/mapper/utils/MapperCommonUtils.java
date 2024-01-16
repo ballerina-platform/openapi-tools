@@ -15,7 +15,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package io.ballerina.openapi.service.mapper.utils;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -59,9 +58,7 @@ import io.ballerina.tools.diagnostics.Location;
 import io.ballerina.tools.text.LinePosition;
 import io.ballerina.tools.text.LineRange;
 import io.ballerina.tools.text.TextRange;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
@@ -73,11 +70,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -428,17 +422,5 @@ public class MapperCommonUtils {
     public static boolean isNotSimpleValueLiteralKind(SyntaxKind valueExpressionKind) {
         return Arrays.stream(validExpressionKind).noneMatch(syntaxKind -> syntaxKind ==
                 valueExpressionKind);
-    }
-
-    public static Map<String, Schema> getComponentsSchema(OpenAPI openAPI) {
-        Components components = openAPI.getComponents();
-        if (Objects.isNull(components)) {
-            return new HashMap<>();
-        }
-        Map<String, Schema> schemas = components.getSchemas();
-        if (Objects.isNull(schemas)) {
-            return new HashMap<>();
-        }
-        return schemas;
     }
 }

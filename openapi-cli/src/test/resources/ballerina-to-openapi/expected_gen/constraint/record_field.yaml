@@ -36,6 +36,32 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    Address:
+      minLength: 5
+      type: string
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Person:
       required:
         - id
@@ -70,29 +96,3 @@ components:
           exclusiveMinimum: true
           type: number
           format: double
-    Address:
-      minLength: 5
-      type: string
-    ErrorPayload:
-      required:
-        - message
-        - method
-        - path
-        - reason
-        - status
-        - timestamp
-      type: object
-      properties:
-        timestamp:
-          type: string
-        status:
-          type: integer
-          format: int64
-        reason:
-          type: string
-        message:
-          type: string
-        path:
-          type: string
-        method:
-          type: string

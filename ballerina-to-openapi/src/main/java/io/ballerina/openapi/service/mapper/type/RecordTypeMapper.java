@@ -1,19 +1,20 @@
-// Copyright (c) 2023 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
-//
-// WSO2 LLC. licenses this file to you under the Apache License,
-// Version 2.0 (the "License"); you may not use this file except
-// in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing,
-// software distributed under the License is distributed on an
-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
-// specific language governing permissions and limitations
-// under the License.
-
+/*
+ *  Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 LLC. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 package io.ballerina.openapi.service.mapper.type;
 
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
@@ -34,7 +35,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagno
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -57,26 +58,26 @@ public class RecordTypeMapper extends AbstractTypeMapper {
     }
 
     @Override
-    public Schema getReferenceSchema(OpenAPI openAPI) {
+    public Schema getReferenceSchema(Components components) {
         RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeSymbol.typeDescriptor();
-        return getSchema(recordTypeSymbol, openAPI, name, additionalData).description(description);
+        return getSchema(recordTypeSymbol, components, name, additionalData).description(description);
     }
 
-    public static Schema getSchema(RecordTypeSymbol typeSymbol, OpenAPI openAPI,
-                                   String recordName, AdditionalData additionalData) {
+    public static Schema getSchema(RecordTypeSymbol typeSymbol, Components components, String recordName,
+                                   AdditionalData additionalData) {
         ObjectSchema schema = new ObjectSchema();
         Set<String> requiredFields = new HashSet<>();
 
         Map<String, RecordFieldSymbol> recordFieldMap = new LinkedHashMap<>(typeSymbol.fieldDescriptors());
-        List<Schema> allOfSchemaList = mapIncludedRecords(typeSymbol, openAPI, recordFieldMap, additionalData);
+        List<Schema> allOfSchemaList = mapIncludedRecords(typeSymbol, components, recordFieldMap, additionalData);
 
-        Map<String, Schema> properties = mapRecordFields(recordFieldMap, openAPI, requiredFields,
+        Map<String, Schema> properties = mapRecordFields(recordFieldMap, components, requiredFields,
                 recordName, false, additionalData);
 
         Optional<TypeSymbol> restFieldType = typeSymbol.restTypeDescriptor();
         if (restFieldType.isPresent()) {
             if (!additionalData.semanticModel().types().JSON.subtypeOf(restFieldType.get())) {
-                Schema restFieldSchema = TypeMapper.getTypeSchema(restFieldType.get(), openAPI, additionalData);
+                Schema restFieldSchema = TypeMapper.getTypeSchema(restFieldType.get(), components, additionalData);
                 schema.additionalProperties(restFieldSchema);
             }
         } else {
@@ -94,7 +95,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         return schema;
     }
 
-    static List<Schema> mapIncludedRecords(RecordTypeSymbol typeSymbol, OpenAPI openAPI,
+    static List<Schema> mapIncludedRecords(RecordTypeSymbol typeSymbol, Components components,
                                            Map<String, RecordFieldSymbol> recordFieldMap,
                                            AdditionalData additionalData) {
         List<Schema> allOfSchemaList = new ArrayList<>();
@@ -106,8 +107,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                 Schema includedRecordSchema = new Schema();
                 includedRecordSchema.set$ref(getTypeName(typeInclusion));
                 allOfSchemaList.add(includedRecordSchema);
-                TypeMapper.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion, openAPI,
-                        additionalData);
+                TypeMapper.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion, components, additionalData);
 
                 RecordTypeSymbol includedRecordTypeSymbol = (RecordTypeSymbol) ((TypeReferenceTypeSymbol) typeInclusion)
                         .typeDescriptor();
@@ -120,9 +120,10 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         return allOfSchemaList;
     }
 
-    public static Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap, OpenAPI openAPI,
-                                                      Set<String> requiredFields, String recordName,
-                                                      boolean treatNilableAsOptional, AdditionalData additionalData) {
+    public static Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
+                                                      Components components, Set<String> requiredFields,
+                                                      String recordName, boolean treatNilableAsOptional,
+                                                      AdditionalData additionalData) {
         Map<String, Schema> properties = new LinkedHashMap<>();
         for (Map.Entry<String, RecordFieldSymbol> recordField : recordFieldMap.entrySet()) {
             RecordFieldSymbol recordFieldSymbol = recordField.getValue();
@@ -133,7 +134,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             }
             String recordFieldDescription = getRecordFieldTypeDescription(recordFieldSymbol);
             Schema recordFieldSchema = TypeMapper.getTypeSchema(recordFieldSymbol.typeDescriptor(),
-                    openAPI, additionalData);
+                    components, additionalData);
             if (Objects.nonNull(recordFieldDescription) && Objects.nonNull(recordFieldSchema)) {
                 recordFieldSchema = recordFieldSchema.description(recordFieldDescription);
             }
@@ -141,7 +142,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                 Object recordFieldDefaultValue = getRecordFieldDefaultValue(recordName, recordFieldName,
                         additionalData.moduleMemberVisitor());
                 if (Objects.nonNull(recordFieldDefaultValue)) {
-                    TypeMapper.setDefaultValue(recordFieldSchema, recordFieldDefaultValue);
+                    TypeMapperInterface.setDefaultValue(recordFieldSchema, recordFieldDefaultValue);
                 } else {
                     DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_124;
                     IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(message,

@@ -1,21 +1,23 @@
-// Copyright (c) 2023 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
-//
-// WSO2 LLC. licenses this file to you under the Apache License,
-// Version 2.0 (the "License"); you may not use this file except
-// in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing,
-// software distributed under the License is distributed on an
-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
-// specific language governing permissions and limitations
-// under the License.
-
+/*
+ *  Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 LLC. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 package io.ballerina.openapi.service.mapper.parameter;
 
+import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ParameterKind;
 import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -23,10 +25,11 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationAdaptor;
+import io.ballerina.openapi.service.mapper.model.OperationBuilder;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapperInterface;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -45,14 +48,14 @@ public class QueryParameterMapper extends AbstractParameterMapper {
     private boolean isRequired = false;
     private String description = null;
     private boolean treatNilableAsOptional = false;
-    private AdditionalData additionalData;
     private Object defaultValue = null;
-    private OpenAPI openAPI;
+    private TypeMapperInterface typeMapper = null;
+    private SemanticModel semanticModel;
 
     public QueryParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs,
-                                OperationAdaptor operationAdaptor, OpenAPI openAPI, boolean treatNilableAsOptional,
-                                AdditionalData additionalData) {
-        super(operationAdaptor);
+                                OperationBuilder operationBuilder, Components components,
+                                boolean treatNilableAsOptional, AdditionalData additionalData) {
+        super(operationBuilder);
         Symbol parameterSymbol = additionalData.semanticModel().symbol(parameterNode).orElse(null);
         if (Objects.nonNull(parameterSymbol) && (parameterSymbol instanceof ParameterSymbol queryParameter)) {
             this.type = queryParameter.typeDescriptor();
@@ -60,8 +63,8 @@ public class QueryParameterMapper extends AbstractParameterMapper {
             this.isRequired = queryParameter.paramKind().equals(ParameterKind.REQUIRED);
             this.description = apiDocs.get(removeStartingSingleQuote(queryParameter.getName().get()));
             this.treatNilableAsOptional = treatNilableAsOptional;
-            this.openAPI = openAPI;
-            this.additionalData = additionalData;
+            this.semanticModel = additionalData.semanticModel();
+            this.typeMapper = new TypeMapper(components, additionalData);
             if (parameterNode instanceof DefaultableParameterNode defaultableQueryParam) {
                 this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableQueryParam);
             }
@@ -78,11 +81,11 @@ public class QueryParameterMapper extends AbstractParameterMapper {
         if (isRequired && (!treatNilableAsOptional || !UnionTypeMapper.hasNilableType(type))) {
             queryParameter.setRequired(true);
         }
-        Schema typeSchema = TypeMapper.getTypeSchema(type, openAPI, additionalData);
+        Schema typeSchema = typeMapper.getTypeSchema(type);
         if (Objects.nonNull(defaultValue)) {
-            TypeMapper.setDefaultValue(typeSchema, defaultValue);
+            TypeMapperInterface.setDefaultValue(typeSchema, defaultValue);
         }
-        if (AbstractParameterMapper.hasObjectType(additionalData.semanticModel(), type)) {
+        if (AbstractParameterMapper.hasObjectType(semanticModel, type)) {
             Content content = new Content();
             content.put("application/json", new MediaType().schema(typeSchema));
             queryParameter.setContent(content);

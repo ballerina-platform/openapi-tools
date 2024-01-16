@@ -48,20 +48,6 @@ paths:
                 $ref: '#/components/schemas/Char'
 components:
   schemas:
-    BalSubTypes:
-      required:
-        - char
-        - ints
-        - xmls
-      type: object
-      properties:
-        char:
-          type: string
-        ints:
-          $ref: '#/components/schemas/BalInts'
-        xmls:
-          $ref: '#/components/schemas/BalXmls'
-      additionalProperties: false
     BalInts:
       required:
         - signed
@@ -87,6 +73,20 @@ components:
           type: integer
         signed8:
           type: integer
+      additionalProperties: false
+    BalSubTypes:
+      required:
+        - char
+        - ints
+        - xmls
+      type: object
+      properties:
+        char:
+          type: string
+        ints:
+          $ref: '#/components/schemas/BalInts'
+        xmls:
+          $ref: '#/components/schemas/BalXmls'
       additionalProperties: false
     BalUnsignedInts:
       required:
@@ -119,26 +119,26 @@ components:
         text:
           type: object
       additionalProperties: false
-    XmlElement:
-      type: object
-    XmlComment:
-      type: object
-    XmlText:
-      type: object
-    XmlProcessingInstruction:
-      type: object
-    Unsigned8:
-      type: integer
-    Unsigned16:
-      type: integer
-    Unsigned32:
-      type: integer
-    Signed8:
-      type: integer
+    Char:
+      type: string
     Signed16:
       type: integer
     Signed32:
       type: integer
       format: int32
-    Char:
-      type: string
+    Signed8:
+      type: integer
+    Unsigned16:
+      type: integer
+    Unsigned32:
+      type: integer
+    Unsigned8:
+      type: integer
+    XmlComment:
+      type: object
+    XmlElement:
+      type: object
+    XmlProcessingInstruction:
+      type: object
+    XmlText:
+      type: object

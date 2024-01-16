@@ -43,12 +43,6 @@ components:
       properties:
         position:
           $ref: '#/components/schemas/Position'
-    Position:
-      maximum: 100
-      exclusiveMaximum: true
-      minimum: 10
-      type: integer
-      format: int64
     ErrorPayload:
       required:
         - message
@@ -72,3 +66,9 @@ components:
           type: string
         method:
           type: string
+    Position:
+      maximum: 100
+      exclusiveMaximum: true
+      minimum: 10
+      type: integer
+      format: int64

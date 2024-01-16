@@ -61,22 +61,6 @@
           }
         }
       },
-      "Pet" : {
-        "required" : [ "id", "name" ],
-        "type" : "object",
-        "properties" : {
-          "id" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "name" : {
-            "type" : "string"
-          },
-          "tag" : {
-            "type" : "string"
-          }
-        }
-      },
       "ErrorPayload" : {
         "required" : [ "message", "method", "path", "reason", "status", "timestamp" ],
         "type" : "object",
@@ -98,6 +82,22 @@
             "type" : "string"
           },
           "method" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Pet" : {
+        "required" : [ "id", "name" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "tag" : {
             "type" : "string"
           }
         }

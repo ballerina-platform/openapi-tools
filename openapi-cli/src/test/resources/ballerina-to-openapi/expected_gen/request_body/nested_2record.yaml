@@ -40,6 +40,29 @@ components:
           $ref: '#/components/schemas/Pet'
         bark:
           type: boolean
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Pet:
       required:
         - id
@@ -63,27 +86,4 @@ components:
           type: integer
           format: int64
         name:
-          type: string
-    ErrorPayload:
-      required:
-        - message
-        - method
-        - path
-        - reason
-        - status
-        - timestamp
-      type: object
-      properties:
-        timestamp:
-          type: string
-        status:
-          type: integer
-          format: int64
-        reason:
-          type: string
-        message:
-          type: string
-        path:
-          type: string
-        method:
           type: string

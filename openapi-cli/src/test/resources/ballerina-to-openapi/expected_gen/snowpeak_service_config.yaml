@@ -32,29 +32,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Payment:
-      required:
-        - cardNumber
-        - cardholderName
-        - expiryMonth
-        - expiryYear
-      type: object
-      properties:
-        cardholderName:
-          type: string
-          description: Name of the card holder
-        cardNumber:
-          type: integer
-          description: Card number
-          format: int64
-        expiryMonth:
-          type: string
-          description: Expiration month of the card in mm
-        expiryYear:
-          type: string
-          description: Expiaration year of the card in yyyy
-      additionalProperties: false
-      description: Reperesents payement for rooms
     ErrorPayload:
       required:
         - message
@@ -78,3 +55,26 @@ components:
           type: string
         method:
           type: string
+    Payment:
+      required:
+        - cardNumber
+        - cardholderName
+        - expiryMonth
+        - expiryYear
+      type: object
+      properties:
+        cardholderName:
+          type: string
+          description: Name of the card holder
+        cardNumber:
+          type: integer
+          description: Card number
+          format: int64
+        expiryMonth:
+          type: string
+          description: Expiration month of the card in mm
+        expiryYear:
+          type: string
+          description: Expiaration year of the card in yyyy
+      additionalProperties: false
+      description: Reperesents payement for rooms

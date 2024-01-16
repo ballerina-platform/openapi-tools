@@ -32,6 +32,41 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    Action:
+      type: string
+      nullable: true
+    Books:
+      type: object
+      additionalProperties:
+        type: string
+      nullable: true
+    Count:
+      type: number
+      format: double
+      nullable: true
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Link:
       required:
         - actions
@@ -56,18 +91,6 @@ components:
       nullable: true
       items:
         type: string
-    Action:
-      type: string
-      nullable: true
-    Count:
-      type: number
-      format: double
-      nullable: true
-    Books:
-      type: object
-      additionalProperties:
-        type: string
-      nullable: true
     Salary:
       nullable: true
       oneOf:
@@ -77,26 +100,3 @@ components:
           format: float
         - type: number
           format: double
-    ErrorPayload:
-      required:
-        - message
-        - method
-        - path
-        - reason
-        - status
-        - timestamp
-      type: object
-      properties:
-        timestamp:
-          type: string
-        status:
-          type: integer
-          format: int64
-        reason:
-          type: string
-        message:
-          type: string
-        path:
-          type: string
-        method:
-          type: string

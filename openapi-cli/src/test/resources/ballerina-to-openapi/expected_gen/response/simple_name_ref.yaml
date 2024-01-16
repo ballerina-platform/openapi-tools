@@ -369,8 +369,21 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    ReturnValueStr:
-      type: string
+    ByteArr:
+      type: array
+      items:
+        type: string
+        format: byte
+    Dog:
+      required:
+        - breed
+        - isBark
+      type: object
+      properties:
+        breed:
+          type: string
+        isBark:
+          type: boolean
     ErrorPayload:
       required:
         - message
@@ -394,19 +407,6 @@ components:
           type: string
         method:
           type: string
-    ReturnValueIntArray:
-      type: array
-      items:
-        type: integer
-        format: int64
-    ReturnValueMapJson:
-      type: object
-    ReturnValueJson:
-      type: object
-    ReturnValueMapRec:
-      type: object
-      additionalProperties:
-        $ref: '#/components/schemas/Pet'
     Pet:
       required:
         - name
@@ -414,36 +414,36 @@ components:
       properties:
         name:
           type: string
+    ReturnValueError:
+      $ref: '#/components/schemas/ErrorPayload'
+    ReturnValueIntArray:
+      type: array
+      items:
+        type: integer
+        format: int64
+    ReturnValueJson:
+      type: object
+    ReturnValueMapJson:
+      type: object
+    ReturnValueMapRec:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/Pet'
     ReturnValueMapString:
       type: object
       additionalProperties:
         type: string
-    ReturnValueXML:
-      type: object
-    ReturnValueError:
-      $ref: '#/components/schemas/ErrorPayload'
     ReturnValuePrimitiveUnion:
       oneOf:
         - type: number
           format: float
         - type: integer
           format: int64
-    Dog:
-      required:
-        - breed
-        - isBark
+    ReturnValueStr:
+      type: string
+    ReturnValueXML:
       type: object
-      properties:
-        breed:
-          type: string
-        isBark:
-          type: boolean
     StrArray:
       type: array
       items:
         type: string
-    ByteArr:
-      type: array
-      items:
-        type: string
-        format: byte

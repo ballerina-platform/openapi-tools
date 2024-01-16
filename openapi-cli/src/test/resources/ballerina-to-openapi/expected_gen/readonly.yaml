@@ -62,6 +62,29 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     LiftRecord:
       required:
         - capacity
@@ -93,26 +116,3 @@ components:
         - HOLD
         - CLOSED
         - OPEN
-    ErrorPayload:
-      required:
-        - message
-        - method
-        - path
-        - reason
-        - status
-        - timestamp
-      type: object
-      properties:
-        timestamp:
-          type: string
-        status:
-          type: integer
-          format: int64
-        reason:
-          type: string
-        message:
-          type: string
-        path:
-          type: string
-        method:
-          type: string

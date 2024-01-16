@@ -36,19 +36,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    School:
-      required:
-        - marks
-      type: object
-      properties:
-        marks:
-          $ref: '#/components/schemas/Marks'
-    Marks:
-      maximum: 5.55
-      minimum: 2.55
-      exclusiveMinimum: true
-      type: number
-      format: double
     ErrorPayload:
       required:
         - message
@@ -72,3 +59,16 @@ components:
           type: string
         method:
           type: string
+    Marks:
+      maximum: 5.55
+      minimum: 2.55
+      exclusiveMinimum: true
+      type: number
+      format: double
+    School:
+      required:
+        - marks
+      type: object
+      properties:
+        marks:
+          $ref: '#/components/schemas/Marks'

@@ -69,31 +69,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Pet-Task:
-      required:
-        - pet-id
-      type: object
-      properties:
-        pet-id:
-          type: integer
-          description: Field id Description
-          format: int64
-        pet-types:
-          type: array
-          description: Field type Description
-          items:
-            type: string
-        store:
-          $ref: '#/components/schemas/Pet-Store'
-      description: Description
-    Pet-Store:
-      required:
-        - id
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
     ErrorPayload:
       required:
         - message
@@ -117,3 +92,28 @@ components:
           type: string
         method:
           type: string
+    Pet-Store:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+    Pet-Task:
+      required:
+        - pet-id
+      type: object
+      properties:
+        pet-id:
+          type: integer
+          description: Field id Description
+          format: int64
+        pet-types:
+          type: array
+          description: Field type Description
+          items:
+            type: string
+        store:
+          $ref: '#/components/schemas/Pet-Store'
+      description: Description

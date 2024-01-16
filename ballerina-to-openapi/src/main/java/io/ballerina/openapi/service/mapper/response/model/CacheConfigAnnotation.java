@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.ballerina.openapi.service.mapper.parameter.model;
+package io.ballerina.openapi.service.mapper.response.model;
 
 import java.util.ArrayList;
 import java.util.List;

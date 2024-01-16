@@ -76,45 +76,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    MeetingGroup:
-      type: string
-      enum:
-        - ENGINEERING
-        - HR
-        - ADMIN
-    RoomNo:
-      type: string
-      enum:
-        - R6
-        - R5
-        - R3
-    Status:
-      type: string
-      enum:
-        - PENDING
-        - AVAILABLE
-    Format:
-      type: string
-      enum:
-        - MSGPACK
-        - JSONP
-        - JSON
-    MeetingList:
-      required:
-        - meetings
-      type: object
-      properties:
-        meetings:
-          type: array
-          items:
-            $ref: '#/components/schemas/Meeting'
-    Meeting:
-      required:
-        - topic
-      type: object
-      properties:
-        topic:
-          type: string
     ErrorPayload:
       required:
         - message
@@ -138,3 +99,42 @@ components:
           type: string
         method:
           type: string
+    Format:
+      type: string
+      enum:
+        - MSGPACK
+        - JSONP
+        - JSON
+    Meeting:
+      required:
+        - topic
+      type: object
+      properties:
+        topic:
+          type: string
+    MeetingGroup:
+      type: string
+      enum:
+        - ENGINEERING
+        - HR
+        - ADMIN
+    MeetingList:
+      required:
+        - meetings
+      type: object
+      properties:
+        meetings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Meeting'
+    RoomNo:
+      type: string
+      enum:
+        - R6
+        - R5
+        - R3
+    Status:
+      type: string
+      enum:
+        - PENDING
+        - AVAILABLE

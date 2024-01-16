@@ -36,19 +36,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Hotel:
-      required:
-        - rate
-      type: object
-      properties:
-        rate:
-          $ref: '#/components/schemas/Rating'
-    Rating:
-      maximum: 10.5
-      minimum: 2.5
-      exclusiveMinimum: true
-      type: number
-      format: float
     ErrorPayload:
       required:
         - message
@@ -72,3 +59,16 @@ components:
           type: string
         method:
           type: string
+    Hotel:
+      required:
+        - rate
+      type: object
+      properties:
+        rate:
+          $ref: '#/components/schemas/Rating'
+    Rating:
+      maximum: 10.5
+      minimum: 2.5
+      exclusiveMinimum: true
+      type: number
+      format: float

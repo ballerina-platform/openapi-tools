@@ -1,4 +1,21 @@
-package io.ballerina.openapi.service.mapper.parameter.utils;
+/*
+ *  Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 LLC. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
+package io.ballerina.openapi.service.mapper.response.utils;
 
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
@@ -7,7 +24,7 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.openapi.service.mapper.parameter.model.CacheConfigAnnotation;
+import io.ballerina.openapi.service.mapper.response.model.CacheConfigAnnotation;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.StringSchema;
 
@@ -33,6 +50,10 @@ import static io.ballerina.openapi.service.mapper.Constants.S_MAX_AGE;
 import static io.ballerina.openapi.service.mapper.Constants.TRUE;
 
 public final class CacheHeaderUtils {
+
+    private CacheHeaderUtils() {
+
+    }
 
     public static CacheConfigAnnotation setCacheConfigValues(SeparatedNodeList<MappingFieldNode> fields) {
         CacheConfigAnnotation cacheConfig = new CacheConfigAnnotation();
@@ -168,7 +189,12 @@ public final class CacheHeaderUtils {
             directives.add(NO_TRANSFORM);
         }
         if (cacheConfig.isPrivate()) {
-            directives.add(PRIVATE + appendFields(cacheConfig.getPrivateFields()));
+            List<String> privateCacheFields = cacheConfig.getPrivateFields();
+            if (privateCacheFields.isEmpty()) {
+                directives.add(PRIVATE);
+            } else {
+                directives.add(PRIVATE + appendFields(privateCacheFields));
+            }
         } else {
             directives.add(PUBLIC);
         }
@@ -186,6 +212,7 @@ public final class CacheHeaderUtils {
     }
 
     private static String appendFields(List<String> fields) {
+
         return ("=\"" + buildCommaSeparatedString(fields) + "\"");
     }
 

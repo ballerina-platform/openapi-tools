@@ -30,18 +30,16 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Link:
+    Cat:
       required:
-        - pet
-        - rel
+        - id
       type: object
       properties:
-        rel:
+        id:
+          type: integer
+          format: int64
+        eat:
           type: string
-        pet:
-          oneOf:
-            - $ref: '#/components/schemas/Dog'
-            - $ref: '#/components/schemas/Cat'
       additionalProperties: false
     Dog:
       required:
@@ -53,17 +51,6 @@ components:
           format: int64
           nullable: true
         name:
-          type: string
-      additionalProperties: false
-    Cat:
-      required:
-        - id
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        eat:
           type: string
       additionalProperties: false
     ErrorPayload:
@@ -89,3 +76,16 @@ components:
           type: string
         method:
           type: string
+    Link:
+      required:
+        - pet
+        - rel
+      type: object
+      properties:
+        rel:
+          type: string
+        pet:
+          oneOf:
+            - $ref: '#/components/schemas/Dog'
+            - $ref: '#/components/schemas/Cat'
+      additionalProperties: false

@@ -86,13 +86,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Student:
-      required:
-        - Name
-      type: object
-      properties:
-        Name:
-          type: string
     ErrorPayload:
       required:
         - message
@@ -115,4 +108,11 @@ components:
         path:
           type: string
         method:
+          type: string
+    Student:
+      required:
+        - Name
+      type: object
+      properties:
+        Name:
           type: string
