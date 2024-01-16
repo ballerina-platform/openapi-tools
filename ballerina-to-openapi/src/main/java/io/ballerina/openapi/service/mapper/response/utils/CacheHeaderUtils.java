@@ -34,6 +34,10 @@ import static io.ballerina.openapi.service.mapper.Constants.TRUE;
 
 public final class CacheHeaderUtils {
 
+    private CacheHeaderUtils() {
+
+    }
+
     public static CacheConfigAnnotation setCacheConfigValues(SeparatedNodeList<MappingFieldNode> fields) {
         CacheConfigAnnotation cacheConfig = new CacheConfigAnnotation();
         // when field values has -- create a function for have the default values.

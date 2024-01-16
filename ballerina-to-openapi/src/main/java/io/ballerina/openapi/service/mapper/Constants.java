@@ -60,6 +60,10 @@ public final class Constants {
     public static final String REGEX_INTERPOLATION_PATTERN = "^(?!.*\\$\\{).+$";
     public static final String DATE_CONSTRAINT_ANNOTATION = "constraint:Date";
 
+    private Constants() {
+
+    }
+
     /**
      * Enum to select the Ballerina Type.
      * Ballerina mapper, mock and client generation is available

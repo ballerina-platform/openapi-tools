@@ -25,6 +25,10 @@ public final class MediaTypeUtils {
     private static final String TEXT_PATTERN = "^(text)\\/(.*[.+-]|)plain$";
     private static final String OCTET_STREAM_PATTERN = "^(application)\\/(.*[.+-]|)octet-stream$";
 
+    private MediaTypeUtils() {
+
+    }
+
     public static String getMediaTypeFromType(TypeSymbol typeSymbol, String prefix, List<String> allowedMediaTypes,
                                               SemanticModel semanticModel) {
         String mediaType;
