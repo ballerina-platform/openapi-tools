@@ -23,20 +23,21 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.Objects;
 
 /**
  * This class will hold operation details specific to HTTP operation.
  */
-public class OperationDTO {
+public class OperationBuilder {
 
     private Operation operation;
     private String path;
     private String httpOperation;
     private Components components;
 
-    public OperationDTO() {
+    public OperationBuilder() {
         this.operation = new io.swagger.v3.oas.models.Operation();
     }
 
@@ -92,5 +93,17 @@ public class OperationDTO {
 
     public void overrideRequestBody(RequestBody requestBody) {
         operation.setRequestBody(requestBody);
+    }
+
+    public void setApiResponses(ApiResponses apiResponses) {
+        operation.setResponses(apiResponses);
+    }
+
+    public void setOperationId(String operationId) {
+        operation.setOperationId(operationId);
+    }
+
+    public void setSummary(String summary) {
+        operation.setSummary(summary);
     }
 }

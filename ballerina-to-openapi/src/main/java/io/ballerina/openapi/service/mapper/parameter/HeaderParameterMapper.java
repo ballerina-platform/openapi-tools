@@ -16,9 +16,10 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationDTO;
+import io.ballerina.openapi.service.mapper.model.OperationBuilder;
 import io.ballerina.openapi.service.mapper.type.RecordTypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapperInterface;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
@@ -45,14 +46,13 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
     private boolean isRequired = false;
     private String description = null;
     private  boolean treatNilableAsOptional = false;
-    private AdditionalData additionalData;
     private Object defaultValue = null;
-    private Components components = null;
+    private TypeMapperInterface typeMapper = null;
 
-    public HeaderParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs, OperationDTO operationDTO,
-                                 Components components, boolean treatNilableAsOptional,
-                                 AdditionalData additionalData) {
-        super(operationDTO);
+    public HeaderParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs,
+                                 OperationBuilder operationBuilder, Components components,
+                                 boolean treatNilableAsOptional, AdditionalData additionalData) {
+        super(operationBuilder);
         Symbol parameterSymbol = additionalData.semanticModel().symbol(parameterNode).orElse(null);
         if (Objects.nonNull(parameterSymbol) && (parameterSymbol instanceof ParameterSymbol headerParameter)) {
             this.type = headerParameter.typeDescriptor();
@@ -61,11 +61,10 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
             this.isRequired = headerParameter.paramKind().equals(ParameterKind.REQUIRED);
             this.description = apiDocs.get(removeStartingSingleQuote(headerParameter.getName().get()));
             this.treatNilableAsOptional = treatNilableAsOptional;
-            this.additionalData = additionalData;
-            this.components = components;
             if (parameterNode instanceof DefaultableParameterNode defaultableHeaderParam) {
                 this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableHeaderParam);
             }
+            this.typeMapper = new TypeMapper(components, additionalData);
         }
     }
 
@@ -130,9 +129,9 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
         if (isRequired && (!treatNilableAsOptional || !UnionTypeMapper.hasNilableType(type))) {
             headerParameter.setRequired(true);
         }
-        Schema typeSchema = TypeMapper.getTypeSchema(type, components, additionalData);
+        Schema typeSchema = typeMapper.getTypeSchema(type);
         if (Objects.nonNull(defaultValue)) {
-            TypeMapper.setDefaultValue(typeSchema, defaultValue);
+            TypeMapperInterface.setDefaultValue(typeSchema, defaultValue);
         }
         headerParameter.setSchema(typeSchema);
         headerParameter.setDescription(description);
@@ -147,8 +146,8 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
 
         Set<String> requiredHeaders = new HashSet<>();
         HashMap<String, RecordFieldSymbol> headerMap = new HashMap<>(recordTypeInfo.typeSymbol().fieldDescriptors());
-        Map<String, Schema> headerSchemaMap = RecordTypeMapper.mapRecordFields(headerMap, components, requiredHeaders,
-                recordTypeInfo.name(), treatNilableAsOptional, additionalData);
+        Map<String, Schema> headerSchemaMap = typeMapper.mapRecordFields(headerMap, requiredHeaders,
+                recordTypeInfo.name(), treatNilableAsOptional);
 
         List<Parameter> headerParameters = new ArrayList<>();
         for (Map.Entry<String, Schema> entry : headerSchemaMap.entrySet()) {
@@ -174,7 +173,7 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
             headerParameter.setRequired(true);
         }
         if (Objects.nonNull(defaultValue)) {
-            TypeMapper.setDefaultValue(schema, defaultValue);
+            TypeMapperInterface.setDefaultValue(schema, defaultValue);
         }
         headerParameter.setSchema(schema);
         return headerParameter;

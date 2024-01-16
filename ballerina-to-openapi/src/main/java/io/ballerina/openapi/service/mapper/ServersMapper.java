@@ -54,25 +54,28 @@ import static io.ballerina.openapi.service.mapper.Constants.SERVER;
 /**
  * Extract OpenApi server information from and Ballerina endpoint.
  */
-public final class ServersMapper {
+public class ServersMapper implements ServersMapperInterface {
 
-    /**
-     * Convert endpoints bound to {@code mapper} openapi server information.
-     *
-     * @param openAPI   openapi definition to attach extracted information
-     * @param endpoints all endpoints defined in ballerina source
-     * @param service   mapper node with bound endpoints
-     */
-    public static void setServers(OpenAPI openAPI, Set<ListenerDeclarationNode> endpoints,
-                                  ServiceDeclarationNode service) {
-        extractServerForExpressionNode(openAPI, service.expressions(), service);
+    final OpenAPI openAPI;
+    final Set<ListenerDeclarationNode> endpoints;
+    final ServiceDeclarationNode service;
+
+    public ServersMapper(OpenAPI openAPI, Set<ListenerDeclarationNode> endpoints,
+                         ServiceDeclarationNode service) {
+        this.openAPI = openAPI;
+        this.endpoints = endpoints;
+        this.service = service;
+    }
+
+    public void setServers() {
+        extractServerForExpressionNode();
         List<Server> servers = openAPI.getServers();
         //Handle ImplicitNewExpressionNode in listener
         if (!endpoints.isEmpty()) {
             for (ListenerDeclarationNode ep : endpoints) {
                 SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
                 for (ExpressionNode node : exprNodes) {
-                    updateServerDetails(service, servers, ep, node);
+                    updateServerDetails(servers, ep, node);
                 }
             }
         }
@@ -82,11 +85,8 @@ public final class ServersMapper {
         }
     }
 
-    /**
-     * This util is for extracting the server details from endpoints and update server list.
-     */
-    private static void updateServerDetails(ServiceDeclarationNode service, List<Server> servers,
-                                     ListenerDeclarationNode endPoint, ExpressionNode expNode) {
+
+    private void updateServerDetails(List<Server> servers, ListenerDeclarationNode endPoint, ExpressionNode expNode) {
 
         if (expNode instanceof QualifiedNameReferenceNode refNode) {
             //Handle QualifiedNameReferenceNode in listener
@@ -151,8 +151,8 @@ public final class ServersMapper {
     }
 
     // Function to handle ExplicitNewExpressionNode in listener.
-    private static void extractServerForExpressionNode(OpenAPI openAPI, SeparatedNodeList<ExpressionNode> bTypeExplicit,
-                                                                    ServiceDeclarationNode service) {
+    private void extractServerForExpressionNode() {
+        SeparatedNodeList<ExpressionNode> bTypeExplicit = service.expressions();
         String serviceBasePath = getServiceBasePath(service);
         Optional<ParenthesizedArgList> list;
         List<Server> servers = new ArrayList<>();
@@ -194,7 +194,7 @@ public final class ServersMapper {
      * Set server variables port and server.
      */
     private static void setServerVariableValues(String serviceBasePath, String port, String host,
-                                         ServerVariables serverVariables, Server server) {
+                                                ServerVariables serverVariables, Server server) {
 
         String serverUrl;
         if (host != null && port != null) {

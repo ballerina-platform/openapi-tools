@@ -1,4 +1,4 @@
-package io.ballerina.openapi.service.mapper.parameter.utils;
+package io.ballerina.openapi.service.mapper.utils;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
@@ -7,8 +7,7 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
-import io.ballerina.openapi.service.mapper.parameter.ResponseMapper;
-import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
+import io.ballerina.openapi.service.mapper.response.ResponseMapper;
 
 import java.util.List;
 import java.util.Objects;

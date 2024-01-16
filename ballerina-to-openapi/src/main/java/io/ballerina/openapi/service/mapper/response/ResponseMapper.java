@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package io.ballerina.openapi.service.mapper.parameter;
+package io.ballerina.openapi.service.mapper.response;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ClassSymbol;
@@ -34,14 +34,13 @@ import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationDTO;
-import io.ballerina.openapi.service.mapper.parameter.model.CacheConfigAnnotation;
-import io.ballerina.openapi.service.mapper.parameter.utils.CacheHeaderUtils;
-import io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils;
-import io.ballerina.openapi.service.mapper.type.RecordTypeMapper;
-import io.ballerina.openapi.service.mapper.type.ReferenceTypeMapper;
+import io.ballerina.openapi.service.mapper.model.OperationBuilder;
+import io.ballerina.openapi.service.mapper.response.model.CacheConfigAnnotation;
+import io.ballerina.openapi.service.mapper.response.utils.CacheHeaderUtils;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapperInterface;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
+import io.ballerina.openapi.service.mapper.utils.MediaTypeUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -71,42 +70,42 @@ import static io.ballerina.openapi.service.mapper.Constants.HTTP_CODE_DESCRIPTIO
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_PAYLOAD;
 import static io.ballerina.openapi.service.mapper.Constants.MEDIA_TYPE;
 import static io.ballerina.openapi.service.mapper.Constants.POST;
-import static io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils.getMediaTypeFromType;
-import static io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils.isSameMediaType;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractAnnotationFieldDetails;
+import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.getMediaTypeFromType;
+import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.isSameMediaType;
 
-public class ResponseMapper {
-    private final Components components;
+public class ResponseMapper implements ResponseMapperInterface {
+    private final TypeMapperInterface typeMapper;
+    private final SemanticModel semanticModel;
     private List<String> allowedMediaTypes = new ArrayList<>();
     private final Map<String, Header> cacheHeaders = new HashMap<>();
     private final Map<String, Map<String, Header>> headersMap = new HashMap<>();
     private final String mediaTypeSubTypePrefix;
     private final ApiResponses apiResponses = new ApiResponses();
-    private final AdditionalData additionalData;
-    private final OperationDTO operationDTO;
+    private final OperationBuilder operationBuilder;
 
-    public ResponseMapper(FunctionDefinitionNode resourceNode, OperationDTO operationDTO, Components components,
+    public ResponseMapper(FunctionDefinitionNode resourceNode, OperationBuilder operationBuilder, Components components,
                           AdditionalData additionalData) {
-        this.additionalData = additionalData;
+        this.typeMapper = new TypeMapper(components, additionalData);
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
-        this.components = components;
-        this.operationDTO = operationDTO;
+        this.semanticModel = additionalData.semanticModel();
+        this.operationBuilder = operationBuilder;
         extractAnnotationDetails(resourceNode);
 
-        String defaultStatusCode = operationDTO.getHttpOperation().equalsIgnoreCase(POST) ? HTTP_201 : HTTP_200;
+        String defaultStatusCode = operationBuilder.getHttpOperation().equalsIgnoreCase(POST) ? HTTP_201 : HTTP_200;
         TypeSymbol returnTypeSymbol = getReturnTypeSymbol(resourceNode);
         createResponseMapping(returnTypeSymbol, defaultStatusCode);
-        if (operationDTO.hasDataBinding()) {
+        if (operationBuilder.hasDataBinding()) {
             addResponseMappingForDataBindingFailures();
         }
     }
 
     public void setApiResponses() {
-        operationDTO.getOperation().setResponses(apiResponses);
+        operationBuilder.setApiResponses(apiResponses);
     }
 
     private TypeSymbol getReturnTypeSymbol(FunctionDefinitionNode resourceNode) {
-        Optional<Symbol> symbol = additionalData.semanticModel().symbol(resourceNode);
+        Optional<Symbol> symbol = semanticModel.symbol(resourceNode);
         if (symbol.isEmpty() || !(symbol.get() instanceof ResourceMethodSymbol resourceMethodSymbol)) {
             return null;
         }
@@ -131,7 +130,7 @@ public class ResponseMapper {
                                         cacheConfigAnn));
                     } else if (annotation.annotReference().toString().trim().equals(HTTP_PAYLOAD)) {
                         allowedMediaTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, MEDIA_TYPE,
-                                annotation, additionalData.semanticModel());
+                                annotation, semanticModel);
                     }
                 }
             }
@@ -139,7 +138,7 @@ public class ResponseMapper {
     }
 
     private void createResponseMapping(TypeSymbol returnType, String defaultStatusCode) {
-        UnionTypeSymbol unionType = getUnionType(returnType, additionalData.semanticModel());
+        UnionTypeSymbol unionType = getUnionType(returnType, semanticModel);
         if (Objects.nonNull(unionType)) {
             addResponseMappingForUnion(defaultStatusCode, unionType);
         } else {
@@ -168,9 +167,9 @@ public class ResponseMapper {
             String responseCode = mediaTypeEntry.getKey();
             for (Map.Entry<String, TypeSymbol> entry : mediaTypes.entrySet()) {
                 TypeSymbol typeSymbol = entry.getValue();
-                if (isSubTypeOfNil(typeSymbol, additionalData.semanticModel())) {
+                if (isSubTypeOfNil(typeSymbol, semanticModel)) {
                     addResponseMappingForNil();
-                } else if (isSubTypeOfHttpResponse(typeSymbol, additionalData.semanticModel())) {
+                } else if (isSubTypeOfHttpResponse(typeSymbol, semanticModel)) {
                     addResponseMappingForHttpResponse();
                 } else {
                     String mediaType = entry.getKey();
@@ -198,7 +197,7 @@ public class ResponseMapper {
     private void addResponseContent(TypeSymbol returnType, ApiResponse apiResponse, String mediaType) {
         if (!isPlainAnyDataType(returnType)) {
             MediaType mediaTypeObj = new MediaType();
-            mediaTypeObj.setSchema(TypeMapper.getTypeSchema(returnType, components, additionalData));
+            mediaTypeObj.setSchema(typeMapper.getTypeSchema(returnType));
             updateApiResponseContentWithMediaType(apiResponse, mediaType, mediaTypeObj);
         }
     }
@@ -269,7 +268,7 @@ public class ResponseMapper {
     private void addResponseMappingForDataBindingFailures() {
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.description(BAD_REQUEST);
-        TypeSymbol errorType = additionalData.semanticModel().types().ERROR;
+        TypeSymbol errorType = semanticModel.types().ERROR;
         addResponseContent(errorType, apiResponse, "application/json");
         addApiResponse(apiResponse, HTTP_400);
     }
@@ -284,7 +283,6 @@ public class ResponseMapper {
     }
 
     private void addResponseMappingForSimpleType(TypeSymbol returnType, String defaultStatusCode) {
-        SemanticModel semanticModel = additionalData.semanticModel();
         if (isSubTypeOfNil(returnType, semanticModel)) {
             addResponseMappingForNil();
         } else if (isSubTypeOfHttpResponse(returnType, semanticModel)) {
@@ -320,7 +318,6 @@ public class ResponseMapper {
                     updateResponseCodeMap(responseCodeMap, code, mediaType, typeSymbols.get(0));
                 } else {
                     TypeSymbol[] typeSymbolArray = typeSymbols.toArray(TypeSymbol[]::new);
-                    SemanticModel semanticModel = additionalData.semanticModel();
                     TypeSymbol unionTypeSymbol = semanticModel.types().builder().UNION_TYPE.withMemberTypes(
                             typeSymbolArray).build();
                     updateResponseCodeMap(responseCodeMap, code, mediaType, unionTypeSymbol);
@@ -360,7 +357,6 @@ public class ResponseMapper {
 
     private void extractBasicMembers(UnionTypeSymbol unionTypeSymbol, String defaultCode,
                                      Map<String, Map<String, List<TypeSymbol>>> responses) {
-        SemanticModel semanticModel = additionalData.semanticModel();
         if (isSameMediaType(unionTypeSymbol, semanticModel)) {
             String mediaType = getMediaTypeFromType(unionTypeSymbol, mediaTypeSubTypePrefix, allowedMediaTypes,
                     semanticModel);
@@ -405,7 +401,7 @@ public class ResponseMapper {
         return false;
     }
 
-    public static TypeSymbol getBodyTypeFromStatusCodeResponse(TypeSymbol typeSymbol, SemanticModel semanticModel) {
+    public TypeSymbol getBodyTypeFromStatusCodeResponse(TypeSymbol typeSymbol, SemanticModel semanticModel) {
         RecordTypeSymbol statusCodeRecordType = getStatusCodeRecordTypeSymbol(typeSymbol);
         if (Objects.nonNull(statusCodeRecordType) && statusCodeRecordType.fieldDescriptors().containsKey("body")) {
             return statusCodeRecordType.fieldDescriptors().get("body").typeDescriptor();
@@ -426,14 +422,14 @@ public class ResponseMapper {
 
         Map<String, RecordFieldSymbol> recordFieldMap = new HashMap<>(headersInfo.headerRecordType().
                 fieldDescriptors());
-        Map<String, Schema> recordFieldsMapping = RecordTypeMapper.mapRecordFields(recordFieldMap, components,
-                new HashSet<>(), headersInfo.recordName(), false, additionalData);
+        Map<String, Schema> recordFieldsMapping = typeMapper.mapRecordFields(recordFieldMap, new HashSet<>(),
+                headersInfo.recordName(), false);
         return mapRecordFieldToHeaders(recordFieldsMapping);
     }
 
-    private static HeadersInfo getHeadersInfo(RecordTypeSymbol statusCodeRecordType) {
+    private HeadersInfo getHeadersInfo(RecordTypeSymbol statusCodeRecordType) {
         if (statusCodeRecordType.fieldDescriptors().containsKey("headers")) {
-            TypeSymbol headersType = ReferenceTypeMapper.getReferredType(
+            TypeSymbol headersType = typeMapper.getReferredType(
                     statusCodeRecordType.fieldDescriptors().get("headers").typeDescriptor());
             if (Objects.nonNull(headersType) && headersType instanceof TypeReferenceTypeSymbol headersRefType &&
                     headersRefType.typeDescriptor() instanceof RecordTypeSymbol recordType) {
@@ -448,8 +444,8 @@ public class ResponseMapper {
     private record HeadersInfo(RecordTypeSymbol headerRecordType, String recordName) {
     }
 
-    private static RecordTypeSymbol getStatusCodeRecordTypeSymbol(TypeSymbol typeSymbol) {
-        TypeSymbol statusCodeResType = ReferenceTypeMapper.getReferredType(typeSymbol);
+    private RecordTypeSymbol getStatusCodeRecordTypeSymbol(TypeSymbol typeSymbol) {
+        TypeSymbol statusCodeResType = typeMapper.getReferredType(typeSymbol);
         RecordTypeSymbol statusCodeRecordType = null;
         if (statusCodeResType instanceof TypeReferenceTypeSymbol statusCodeResRefType &&
                 statusCodeResRefType.typeDescriptor() instanceof RecordTypeSymbol recordTypeSymbol) {

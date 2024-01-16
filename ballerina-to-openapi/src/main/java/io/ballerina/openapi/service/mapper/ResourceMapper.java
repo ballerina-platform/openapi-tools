@@ -29,9 +29,11 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationDTO;
+import io.ballerina.openapi.service.mapper.model.OperationBuilder;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
-import io.ballerina.openapi.service.mapper.parameter.ResponseMapper;
+import io.ballerina.openapi.service.mapper.parameter.ParameterMapperInterface;
+import io.ballerina.openapi.service.mapper.response.ResponseMapper;
+import io.ballerina.openapi.service.mapper.response.ResponseMapperInterface;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.Components;
@@ -54,7 +56,7 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpe
  *
  * @since 2.0.0
  */
-public class ResourceMapper {
+public class ResourceMapper implements ResourceMapperInterface {
     private final Paths pathObject = new Paths();
     private final AdditionalData additionalData;
     private final OpenAPI openAPI;
@@ -99,9 +101,10 @@ public class ResourceMapper {
                     resource.location());
             additionalData.diagnostics().add(error);
         } else {
-            Optional<OperationDTO> operationDTO = convertResourceToOperation(resource, httpMethod, path, components);
-            if (operationDTO.isPresent()) {
-                Operation operation = operationDTO.get().getOperation();
+            Optional<OperationBuilder> operationBuilder = convertResourceToOperation(resource, httpMethod, path,
+                    components);
+            if (operationBuilder.isPresent()) {
+                Operation operation = operationBuilder.get().getOperation();
                 generatePathItem(httpMethod, pathObject, operation, path);
             }
         }
@@ -175,11 +178,11 @@ public class ResourceMapper {
      *
      * @return Operation Adaptor object of given resource
      */
-    private Optional<OperationDTO> convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
-                                                              String generateRelativePath, Components components) {
-        OperationDTO op = new OperationDTO();
-        op.setHttpOperation(httpMethod);
-        op.setPath(generateRelativePath);
+    private Optional<OperationBuilder> convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
+                                                                  String generateRelativePath, Components components) {
+        OperationBuilder operationBuilder = new OperationBuilder();
+        operationBuilder.setHttpOperation(httpMethod);
+        operationBuilder.setPath(generateRelativePath);
         /* Set operation id */
         String resName = (resource.functionName().text() + "_" +
                 generateRelativePath).replaceAll("\\{///}", "_");
@@ -187,14 +190,13 @@ public class ResourceMapper {
         if (generateRelativePath.equals("/")) {
             resName = resource.functionName().text();
         }
-        op.getOperation().setOperationId(getOperationId(resName));
-        op.getOperation().setParameters(null);
+        operationBuilder.setOperationId(getOperationId(resName));
         // Set operation summary
         // Map API documentation
-        Map<String, String> apiDocs = listAPIDocumentations(resource, op);
+        Map<String, String> apiDocs = listAPIDocumentations(resource, operationBuilder);
         //Add path parameters if in path and query parameters
-        ParameterMapper parameterMapper = new ParameterMapper(resource, op, components, apiDocs, additionalData,
-                treatNilableAsOptional);
+        ParameterMapperInterface parameterMapper = new ParameterMapper(resource, operationBuilder, components, apiDocs,
+                additionalData, treatNilableAsOptional);
         parameterMapper.setParameters();
         List<OpenAPIMapperDiagnostic> diagnostics = additionalData.diagnostics();
         if (diagnostics.size() > 1 || (diagnostics.size() == 1 && !diagnostics.get(0).getCode().equals(
@@ -208,15 +210,17 @@ public class ResourceMapper {
             }
         }
 
-        ResponseMapper responseMapper = new ResponseMapper(resource, op, components, additionalData);
+        ResponseMapperInterface responseMapper = new ResponseMapper(resource, operationBuilder, components,
+                additionalData);
         responseMapper.setApiResponses();
-        return Optional.of(op);
+        return Optional.of(operationBuilder);
     }
 
     /**
      * Filter the API documentations from resource function node.
      */
-    private Map<String, String> listAPIDocumentations(FunctionDefinitionNode resource, OperationDTO op) {
+    private Map<String, String> listAPIDocumentations(FunctionDefinitionNode resource,
+                                                      OperationBuilder operationBuilder) {
 
         Map<String, String> apiDocs = new HashMap<>();
         if (resource.metadata().isPresent()) {
@@ -230,7 +234,7 @@ public class ResourceMapper {
                     if (description.isPresent()) {
                         String resourceFunctionAPI = description.get().trim();
                         apiDocs = documentation1.parameterMap();
-                        op.getOperation().setSummary(resourceFunctionAPI);
+                        operationBuilder.setSummary(resourceFunctionAPI);
                     }
                 }
             }

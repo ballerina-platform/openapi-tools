@@ -1,4 +1,4 @@
-package io.ballerina.openapi.service.mapper.parameter.utils;
+package io.ballerina.openapi.service.mapper.response.utils;
 
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
@@ -7,7 +7,7 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.openapi.service.mapper.parameter.model.CacheConfigAnnotation;
+import io.ballerina.openapi.service.mapper.response.model.CacheConfigAnnotation;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.StringSchema;
 

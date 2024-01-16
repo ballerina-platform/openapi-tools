@@ -22,6 +22,7 @@ import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.ErrorTypeSymbol;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.MapTypeSymbol;
+import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.TableTypeSymbol;
 import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
@@ -33,7 +34,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Map;
-import java.util.Objects;
+import java.util.Set;
 
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
@@ -42,7 +43,19 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTyp
  *
  * @since 1.9.0
  */
-public abstract class TypeMapper {
+public class TypeMapper implements TypeMapperInterface {
+
+    private final Components components;
+    private final AdditionalData componentMapperData;
+
+    public TypeMapper(Components components, AdditionalData componentMapperData) {
+        this.components = components;
+        this.componentMapperData = componentMapperData;
+    }
+
+    public Schema getTypeSchema(TypeSymbol typeSymbol) {
+        return getTypeSchema(typeSymbol, components, componentMapperData, false);
+    }
 
     public static Schema getTypeSchema(TypeSymbol typeSymbol, Components components,
                                        AdditionalData componentMapperData) {
@@ -97,17 +110,14 @@ public abstract class TypeMapper {
         mapper.addToComponents(components);
     }
 
-    public static void setDefaultValue(Schema schema, Object defaultValue) {
-        if (Objects.isNull(defaultValue)) {
-            return;
-        }
-        if (Objects.nonNull(schema.get$ref())) {
-            Schema refSchema = new Schema<>();
-            refSchema.set$ref(schema.get$ref());
-            schema.set$ref(null);
-            schema.addAllOfItem(refSchema);
-            schema.setType(null);
-        }
-        schema.setDefault(defaultValue);
+    public Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
+                                               Set<String> requiredFields, String recordName,
+                                               boolean treatNilableAsOptional) {
+        return RecordTypeMapper.mapRecordFields(recordFieldMap, components, requiredFields, recordName,
+                treatNilableAsOptional, componentMapperData);
+    }
+
+    public TypeSymbol getReferredType(TypeSymbol typeSymbol) {
+        return ReferenceTypeMapper.getReferredType(typeSymbol);
     }
 }

@@ -25,9 +25,10 @@ import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationDTO;
-import io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils;
+import io.ballerina.openapi.service.mapper.model.OperationBuilder;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapperInterface;
+import io.ballerina.openapi.service.mapper.utils.MediaTypeUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -41,25 +42,25 @@ import java.util.Objects;
 
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_PAYLOAD;
 import static io.ballerina.openapi.service.mapper.Constants.MEDIA_TYPE;
-import static io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils.getMediaTypeFromType;
-import static io.ballerina.openapi.service.mapper.parameter.utils.MediaTypeUtils.isSameMediaType;
+import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.getMediaTypeFromType;
+import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.isSameMediaType;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractAnnotationFieldDetails;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
 
 public class RequestBodyMapper {
     private List<String> allowedMediaTypes = new ArrayList<>();
     private final RequestBody requestBody = new RequestBody().required(true);
-    private final AdditionalData additionalData;
-    private final OperationDTO operationDTO;
+    private final TypeMapperInterface typeMapper;
+    private final SemanticModel semanticModel;
+    private final OperationBuilder operationBuilder;
     private final String mediaTypeSubTypePrefix;
-    private final Components components;
 
-    public RequestBodyMapper(ParameterSymbol reqParameter, AnnotationNode annotation, OperationDTO operationDTO,
+    public RequestBodyMapper(ParameterSymbol reqParameter, AnnotationNode annotation, OperationBuilder operationBuilder,
                              FunctionDefinitionNode resourceNode, Components components,
                              Map<String, String> apiDocs, AdditionalData additionalData) {
-        this.additionalData = additionalData;
-        this.operationDTO = operationDTO;
-        this.components = components;
+        this.typeMapper = new TypeMapper(components, additionalData);
+        this.semanticModel = additionalData.semanticModel();
+        this.operationBuilder = operationBuilder;
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
         requestBody.description(apiDocs.get(removeStartingSingleQuote(reqParameter.getName().get())));
         extractAnnotationDetails(annotation);
@@ -67,18 +68,17 @@ public class RequestBodyMapper {
     }
 
     public void setRequestBody() {
-        operationDTO.overrideRequestBody(requestBody);
+        operationBuilder.overrideRequestBody(requestBody);
     }
 
     private void extractAnnotationDetails(AnnotationNode annotation) {
         if (annotation.annotReference().toString().trim().equals(HTTP_PAYLOAD)) {
-            allowedMediaTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, MEDIA_TYPE,
-                    annotation, additionalData.semanticModel());
+            allowedMediaTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, MEDIA_TYPE, annotation, semanticModel);
         }
     }
 
     private void createReqBodyMapping(TypeSymbol reqBodyType) {
-        UnionTypeSymbol unionType = getUnionType(reqBodyType, additionalData.semanticModel());
+        UnionTypeSymbol unionType = getUnionType(reqBodyType, semanticModel);
         if (Objects.nonNull(unionType)) {
             addReqBodyMappingForUnion(unionType);
         } else {
@@ -111,7 +111,7 @@ public class RequestBodyMapper {
 
     private void addRequestContent(TypeSymbol reqBodyType, String mediaType) {
         MediaType mediaTypeObj = new MediaType();
-        mediaTypeObj.setSchema(TypeMapper.getTypeSchema(reqBodyType, components, additionalData));
+        mediaTypeObj.setSchema(typeMapper.getTypeSchema(reqBodyType));
         updateReqBodyContentWithMediaType(mediaType, mediaTypeObj);
     }
 
@@ -125,8 +125,7 @@ public class RequestBodyMapper {
     }
 
     private void addReqBodyMappingForSimpleType(TypeSymbol returnType) {
-        String mediaType = getMediaTypeFromType(returnType, mediaTypeSubTypePrefix, allowedMediaTypes,
-                additionalData.semanticModel());
+        String mediaType = getMediaTypeFromType(returnType, mediaTypeSubTypePrefix, allowedMediaTypes, semanticModel);
         addRequestContent(returnType, mediaType);
     }
 
@@ -138,13 +137,12 @@ public class RequestBodyMapper {
             List<TypeSymbol> typeSymbols = entry.getValue();
             String mediaType = entry.getKey();
             if (typeSymbols.size() == 1) {
-                if (isSubTypeOfNil(typeSymbols.get(0), additionalData.semanticModel())) {
+                if (isSubTypeOfNil(typeSymbols.get(0), semanticModel)) {
                     requestBody.required(null);
                     continue;
                 }
                 reqContents.put(mediaType, typeSymbols.get(0));
             } else {
-                SemanticModel semanticModel = additionalData.semanticModel();
                 if (typeSymbols.removeIf(typeSymbol1 -> isSubTypeOfNil(typeSymbol1, semanticModel))) {
                     requestBody.required(null);
                 }
@@ -169,7 +167,6 @@ public class RequestBodyMapper {
     }
 
     private void extractBasicMembers(UnionTypeSymbol unionTypeSymbol, Map<String, List<TypeSymbol>> reqContents) {
-        SemanticModel semanticModel = additionalData.semanticModel();
         if (isSameMediaType(unionTypeSymbol, semanticModel)) {
             String mediaType = getMediaTypeFromType(unionTypeSymbol, mediaTypeSubTypePrefix,
                     allowedMediaTypes, semanticModel);

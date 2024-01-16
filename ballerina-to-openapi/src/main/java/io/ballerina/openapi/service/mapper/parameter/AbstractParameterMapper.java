@@ -20,7 +20,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.openapi.service.mapper.model.OperationDTO;
+import io.ballerina.openapi.service.mapper.model.OperationBuilder;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
@@ -29,12 +29,12 @@ import java.util.List;
 import java.util.Objects;
 
 public abstract class AbstractParameterMapper {
-    final OperationDTO operationDTO;
+    final OperationBuilder operationBuilder;
 
     abstract Parameter getParameterSchema();
 
-    protected AbstractParameterMapper(OperationDTO operationDTO) {
-        this.operationDTO = operationDTO;
+    protected AbstractParameterMapper(OperationBuilder operationBuilder) {
+        this.operationBuilder = operationBuilder;
     }
 
     public List<Parameter> getParameterSchemaList() {
@@ -47,7 +47,7 @@ public abstract class AbstractParameterMapper {
 
     public void setParameter() {
         List<Parameter> parameterList = getParameterSchemaList();
-        parameterList.forEach(operationDTO::setParameter);
+        parameterList.forEach(operationBuilder::setParameter);
     }
 
     static Object getDefaultValue(DefaultableParameterNode parameterNode) {

@@ -40,7 +40,7 @@ import java.util.Optional;
 import static io.ballerina.openapi.service.mapper.Constants.DATE_CONSTRAINT_ANNOTATION;
 import static io.ballerina.openapi.service.mapper.Constants.REGEX_INTERPOLATION_PATTERN;
 
-public class ConstraintMapper {
+public class ConstraintMapper implements ConstraintMapperInterface {
 
     private final OpenAPI openAPI;
     private final ModuleMemberVisitor moduleMemberVisitor;

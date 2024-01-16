@@ -141,7 +141,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                 Object recordFieldDefaultValue = getRecordFieldDefaultValue(recordName, recordFieldName,
                         additionalData.moduleMemberVisitor());
                 if (Objects.nonNull(recordFieldDefaultValue)) {
-                    TypeMapper.setDefaultValue(recordFieldSchema, recordFieldDefaultValue);
+                    TypeMapperInterface.setDefaultValue(recordFieldSchema, recordFieldDefaultValue);
                 } else {
                     DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_124;
                     IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(message,
