@@ -189,7 +189,12 @@ public final class CacheHeaderUtils {
             directives.add(NO_TRANSFORM);
         }
         if (cacheConfig.isPrivate()) {
-            directives.add(PRIVATE + appendFields(cacheConfig.getPrivateFields()));
+            List<String> privateCacheFields = cacheConfig.getPrivateFields();
+            if (privateCacheFields.isEmpty()) {
+                directives.add(PRIVATE);
+            } else {
+                directives.add(PRIVATE + appendFields(privateCacheFields));
+            }
         } else {
             directives.add(PUBLIC);
         }
@@ -207,6 +212,7 @@ public final class CacheHeaderUtils {
     }
 
     private static String appendFields(List<String> fields) {
+
         return ("=\"" + buildCommaSeparatedString(fields) + "\"");
     }
 
