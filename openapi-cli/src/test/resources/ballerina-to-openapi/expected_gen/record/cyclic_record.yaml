@@ -108,6 +108,28 @@ paths:
                   $ref: '#/components/schemas/AidPackage'
 components:
   schemas:
+    AidPackage:
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          type: string
+        aidPackageItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/AidPackageItem'
+      additionalProperties: false
+    AidPackageItem:
+      type: object
+      properties:
+        totalAmount:
+          type: number
+          format: double
+          default: 0
+        aidPackage:
+          $ref: '#/components/schemas/AidPackage'
+      additionalProperties: false
     ResponseError:
       required:
         - id
@@ -208,26 +230,4 @@ components:
           nullable: true
           items:
             $ref: '#/components/schemas/ResponseError07'
-      additionalProperties: false
-    AidPackage:
-      required:
-        - status
-      type: object
-      properties:
-        status:
-          type: string
-        aidPackageItems:
-          type: array
-          items:
-            $ref: '#/components/schemas/AidPackageItem'
-      additionalProperties: false
-    AidPackageItem:
-      type: object
-      properties:
-        totalAmount:
-          type: number
-          format: double
-          default: 0
-        aidPackage:
-          $ref: '#/components/schemas/AidPackage'
       additionalProperties: false

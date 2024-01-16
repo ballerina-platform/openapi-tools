@@ -50,16 +50,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Link:
-      required:
-        - rel
-      type: object
-      properties:
-        rel:
-          type: string
-        actions:
-          $ref: '#/components/schemas/Action'
-      additionalProperties: false
     Action:
       type: string
       enum:
@@ -91,6 +81,16 @@ components:
           type: string
         method:
           type: string
+    Link:
+      required:
+        - rel
+      type: object
+      properties:
+        rel:
+          type: string
+        actions:
+          $ref: '#/components/schemas/Action'
+      additionalProperties: false
     Order:
       required:
         - rel

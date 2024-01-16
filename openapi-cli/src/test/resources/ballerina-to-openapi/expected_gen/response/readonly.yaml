@@ -264,15 +264,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    ReadOnlyPet:
-      $ref: '#/components/schemas/Pet'
-    Pet:
-      required:
-        - name
-      type: object
-      properties:
-        name:
-          type: string
     ErrorPayload:
       required:
         - message
@@ -296,20 +287,21 @@ components:
           type: string
         method:
           type: string
-    ReadOnlyStr:
-      type: string
-    ReadOnlyStrArray:
-      type: array
-      items:
-        type: string
-    ReadOnlyMapJson:
+    Pet:
+      required:
+        - name
       type: object
-    ReadOnlyJson:
-      type: object
-    ReadOnlyXML:
-      type: object
+      properties:
+        name:
+          type: string
     ReadOnlyError:
       $ref: '#/components/schemas/ErrorPayload'
+    ReadOnlyJson:
+      type: object
+    ReadOnlyMapJson:
+      type: object
+    ReadOnlyPet:
+      $ref: '#/components/schemas/Pet'
     ReadOnlyRec:
       required:
         - id
@@ -321,3 +313,11 @@ components:
         name:
           type: string
       additionalProperties: false
+    ReadOnlyStr:
+      type: string
+    ReadOnlyStrArray:
+      type: array
+      items:
+        type: string
+    ReadOnlyXML:
+      type: object

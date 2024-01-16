@@ -36,19 +36,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    StudentRecord:
-      required:
-        - id
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/St_ID'
-        num:
-          type: number
-          format: float
-    St_ID:
-      type: integer
-      format: int64
     ErrorPayload:
       required:
         - message
@@ -72,3 +59,16 @@ components:
           type: string
         method:
           type: string
+    St_ID:
+      type: integer
+      format: int64
+    StudentRecord:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/St_ID'
+        num:
+          type: number
+          format: float

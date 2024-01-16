@@ -36,6 +36,38 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Hobby:
+      maxItems: 5
+      minItems: 2
+      type: array
+      items:
+        $ref: '#/components/schemas/HobbyItemsString'
+    HobbyItemsString:
+      maxLength: 23
+      type: string
     Person:
       required:
         - id
@@ -61,15 +93,6 @@ components:
             query or by default).
           items:
             $ref: '#/components/schemas/PersonLimitItemsInteger'
-    Hobby:
-      maxItems: 5
-      minItems: 2
-      type: array
-      items:
-        $ref: '#/components/schemas/HobbyItemsString'
-    HobbyItemsString:
-      maxLength: 23
-      type: string
     PersonDetailsItemsString:
       minLength: 7
       type: string
@@ -81,26 +104,3 @@ components:
       maximum: 67
       type: integer
       format: int64
-    ErrorPayload:
-      required:
-        - message
-        - method
-        - path
-        - reason
-        - status
-        - timestamp
-      type: object
-      properties:
-        timestamp:
-          type: string
-        status:
-          type: integer
-          format: int64
-        reason:
-          type: string
-        message:
-          type: string
-        path:
-          type: string
-        method:
-          type: string

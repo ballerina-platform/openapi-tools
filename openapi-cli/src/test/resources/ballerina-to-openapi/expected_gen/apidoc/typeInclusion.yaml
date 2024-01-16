@@ -30,55 +30,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    ReservationReceipt:
-      type: object
-      description: ReservationReceipt details
-      allOf:
-        - $ref: '#/components/schemas/Links'
-        - required:
-            - id
-          type: object
-          properties:
-            id:
-              type: string
-              description: Reservation receipt id
-          additionalProperties: false
-    Links:
-      required:
-        - linkid
-        - links
-      type: object
-      properties:
-        links:
-          type: array
-          description: Array links
-          items:
-            $ref: '#/components/schemas/Link'
-        linkid:
-          type: integer
-          description: link id
-          format: int64
-      additionalProperties: false
-      description: Links array
-    Link:
-      required:
-        - href
-        - rel
-      type: object
-      properties:
-        rel:
-          type: string
-          description: link rel
-        href:
-          type: string
-          description: link href
-        mediaTypes:
-          type: array
-          description: link mediatype
-          items:
-            type: string
-      additionalProperties: false
-      description: Link record
     ErrorPayload:
       required:
         - message
@@ -102,3 +53,52 @@ components:
           type: string
         method:
           type: string
+    Link:
+      required:
+        - href
+        - rel
+      type: object
+      properties:
+        rel:
+          type: string
+          description: link rel
+        href:
+          type: string
+          description: link href
+        mediaTypes:
+          type: array
+          description: link mediatype
+          items:
+            type: string
+      additionalProperties: false
+      description: Link record
+    Links:
+      required:
+        - linkid
+        - links
+      type: object
+      properties:
+        links:
+          type: array
+          description: Array links
+          items:
+            $ref: '#/components/schemas/Link'
+        linkid:
+          type: integer
+          description: link id
+          format: int64
+      additionalProperties: false
+      description: Links array
+    ReservationReceipt:
+      type: object
+      description: ReservationReceipt details
+      allOf:
+        - $ref: '#/components/schemas/Links'
+        - required:
+            - id
+          type: object
+          properties:
+            id:
+              type: string
+              description: Reservation receipt id
+          additionalProperties: false

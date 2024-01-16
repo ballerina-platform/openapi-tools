@@ -40,51 +40,6 @@ paths:
                 type: string
 components:
   schemas:
-    Locations:
-      required:
-        - locations
-      type: object
-      properties:
-        locations:
-          type: array
-          description: collection of locations
-          items:
-            $ref: '#/components/schemas/Location'
-      additionalProperties: false
-      description: Represents a collection of locations
-    Location:
-      type: object
-      description: Represents location
-      allOf:
-        - $ref: '#/components/schemas/Links'
-        - required:
-            - address
-            - id
-            - name
-          type: object
-          properties:
-            name:
-              type: string
-              description: Name of the location
-            id:
-              type: string
-              description: Unique identification
-            address:
-              type: string
-              description: Address of the location
-          additionalProperties: false
-    Links:
-      required:
-        - _links
-      type: object
-      properties:
-        _links:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/Link'
-          description: Map of available links
-      additionalProperties: false
-      description: Represents available server-provided links
     Link:
       required:
         - href
@@ -108,6 +63,51 @@ components:
           items:
             $ref: '#/components/schemas/Method'
       description: Represents a server-provided hyperlink
+    Links:
+      required:
+        - _links
+      type: object
+      properties:
+        _links:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          description: Map of available links
+      additionalProperties: false
+      description: Represents available server-provided links
+    Location:
+      type: object
+      description: Represents location
+      allOf:
+        - $ref: '#/components/schemas/Links'
+        - required:
+            - address
+            - id
+            - name
+          type: object
+          properties:
+            name:
+              type: string
+              description: Name of the location
+            id:
+              type: string
+              description: Unique identification
+            address:
+              type: string
+              description: Address of the location
+          additionalProperties: false
+    Locations:
+      required:
+        - locations
+      type: object
+      properties:
+        locations:
+          type: array
+          description: collection of locations
+          items:
+            $ref: '#/components/schemas/Location'
+      additionalProperties: false
+      description: Represents a collection of locations
     Method:
       type: string
       description: Represents HTTP methods.

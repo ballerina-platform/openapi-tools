@@ -36,21 +36,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    StudentRecord:
-      required:
-        - id
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/St_ID'
-        name:
-          pattern: "^[a-zA-Z]+$"
-          type: string
-    St_ID:
-      maxLength: 10
-      minLength: 10
-      pattern: "^[a-zA-Z0-9_]+$"
-      type: string
     ErrorPayload:
       required:
         - message
@@ -73,4 +58,19 @@ components:
         path:
           type: string
         method:
+          type: string
+    St_ID:
+      maxLength: 10
+      minLength: 10
+      pattern: "^[a-zA-Z0-9_]+$"
+      type: string
+    StudentRecord:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/St_ID'
+        name:
+          pattern: "^[a-zA-Z]+$"
           type: string

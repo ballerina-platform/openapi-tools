@@ -177,151 +177,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Locations:
-      required:
-        - locations
-      type: object
-      properties:
-        locations:
-          type: array
-          description: collection of locations
-          items:
-            $ref: '#/components/schemas/Location'
-      additionalProperties: false
-      description: Represents a collection of locations
-    Location:
-      type: object
-      description: Represents location
-      allOf:
-        - $ref: '#/components/schemas/Links'
-        - required:
-            - address
-            - id
-            - name
-          type: object
-          properties:
-            name:
-              type: string
-              description: Name of the location
-            id:
-              type: string
-              description: Unique identification
-            address:
-              type: string
-              description: Address of the location
-          additionalProperties: false
-    Links:
-      required:
-        - _links
-      type: object
-      properties:
-        _links:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/Link'
-          description: Map of available links
-      additionalProperties: false
-      description: Represents available server-provided links
-    Link:
-      required:
-        - href
-      type: object
-      properties:
-        rel:
-          type: string
-          description: Names the relationship of the linked target to the current
-            representation
-        href:
-          type: string
-          description: Target URL
-        types:
-          type: array
-          description: Expected resource representation media types
-          items:
-            type: string
-        methods:
-          type: array
-          description: Allowed resource methods
-          items:
-            $ref: '#/components/schemas/Method'
-      description: Represents a server-provided hyperlink
-    Method:
-      type: string
-      description: Represents HTTP methods.
-      enum:
-        - OPTIONS
-        - HEAD
-        - PATCH
-        - DELETE
-        - PUT
-        - POST
-        - GET
-    Rooms:
-      type: object
-      description: Represents a collection of resort rooms
-      allOf:
-        - $ref: '#/components/schemas/Links'
-        - required:
-            - rooms
-          type: object
-          properties:
-            rooms:
-              type: array
-              description: Array of rooms
-              items:
-                $ref: '#/components/schemas/Room'
-          additionalProperties: false
-    Room:
-      required:
-        - capacity
-        - category
-        - count
-        - currency
-        - id
-        - price
-        - status
-        - wifi
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique identification
-        category:
-          $ref: '#/components/schemas/RoomCategory'
-        capacity:
-          type: integer
-          description: Number of people that can be accommodate
-          format: int64
-        wifi:
-          type: boolean
-          description: Availability of wifi
-        status:
-          $ref: '#/components/schemas/RoomStatus'
-        currency:
-          type: string
-          description: Currency used in price
-        price:
-          type: number
-          description: Cost for the room
-          format: double
-        count:
-          type: integer
-          description: Number of rooms as per the status
-          format: int64
-      additionalProperties: false
-      description: Represents resort room
-    RoomCategory:
-      type: string
-      enum:
-        - FAMILY
-        - KING
-        - DELUXE
-    RoomStatus:
-      type: string
-      enum:
-        - BOOKED
-        - RESERVED
-        - AVAILABLE
     ErrorPayload:
       required:
         - message
@@ -345,74 +200,85 @@ components:
           type: string
         method:
           type: string
-    Reservation:
+    Link:
       required:
-        - endDate
-        - reserveRooms
-        - startDate
+        - href
       type: object
       properties:
-        reserveRooms:
+        rel:
+          type: string
+          description: Names the relationship of the linked target to the current
+            representation
+        href:
+          type: string
+          description: Target URL
+        types:
           type: array
-          description: Rooms to be reserved
+          description: Expected resource representation media types
           items:
-            $ref: '#/components/schemas/ReserveRoom'
-        startDate:
-          type: string
-          description: Start date in yyyy-mm-dd
-        endDate:
-          type: string
-          description: End date in yyyy-mm-dd
-      additionalProperties: false
-      description: Represents a reservation of rooms
-    ReserveRoom:
+            type: string
+        methods:
+          type: array
+          description: Allowed resource methods
+          items:
+            $ref: '#/components/schemas/Method'
+      description: Represents a server-provided hyperlink
+    Links:
       required:
-        - count
-        - id
+        - _links
       type: object
       properties:
-        id:
-          type: string
-          description: Unique identification of the room
-        count:
-          type: integer
-          description: Number of rooms
-          format: int64
+        _links:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          description: Map of available links
       additionalProperties: false
-      description: Represents rooms be reserved
-    ReservationReceipt:
+      description: Represents available server-provided links
+    Location:
       type: object
-      description: Represents a receipt for the reservation
+      description: Represents location
       allOf:
         - $ref: '#/components/schemas/Links'
         - required:
-            - currency
-            - expiryDate
+            - address
             - id
-            - lastUpdated
-            - reservation
-            - total
+            - name
           type: object
           properties:
+            name:
+              type: string
+              description: Name of the location
             id:
               type: string
               description: Unique identification
-            expiryDate:
+            address:
               type: string
-              description: Expiry date in yyyy-mm-dd
-            lastUpdated:
-              type: string
-              description: Last updated time stamp
-            currency:
-              type: string
-              description: Currency used in price
-            total:
-              type: number
-              description: Total payable
-              format: double
-            reservation:
-              $ref: '#/components/schemas/Reservation'
+              description: Address of the location
           additionalProperties: false
+    Locations:
+      required:
+        - locations
+      type: object
+      properties:
+        locations:
+          type: array
+          description: collection of locations
+          items:
+            $ref: '#/components/schemas/Location'
+      additionalProperties: false
+      description: Represents a collection of locations
+    Method:
+      type: string
+      description: Represents HTTP methods.
+      enum:
+        - OPTIONS
+        - HEAD
+        - PATCH
+        - DELETE
+        - PUT
+        - POST
+        - GET
     Payment:
       required:
         - cardNumber
@@ -465,3 +331,137 @@ components:
             $ref: '#/components/schemas/Room'
       additionalProperties: false
       description: Reperesents receipt for the payment
+    Reservation:
+      required:
+        - endDate
+        - reserveRooms
+        - startDate
+      type: object
+      properties:
+        reserveRooms:
+          type: array
+          description: Rooms to be reserved
+          items:
+            $ref: '#/components/schemas/ReserveRoom'
+        startDate:
+          type: string
+          description: Start date in yyyy-mm-dd
+        endDate:
+          type: string
+          description: End date in yyyy-mm-dd
+      additionalProperties: false
+      description: Represents a reservation of rooms
+    ReservationReceipt:
+      type: object
+      description: Represents a receipt for the reservation
+      allOf:
+        - $ref: '#/components/schemas/Links'
+        - required:
+            - currency
+            - expiryDate
+            - id
+            - lastUpdated
+            - reservation
+            - total
+          type: object
+          properties:
+            id:
+              type: string
+              description: Unique identification
+            expiryDate:
+              type: string
+              description: Expiry date in yyyy-mm-dd
+            lastUpdated:
+              type: string
+              description: Last updated time stamp
+            currency:
+              type: string
+              description: Currency used in price
+            total:
+              type: number
+              description: Total payable
+              format: double
+            reservation:
+              $ref: '#/components/schemas/Reservation'
+          additionalProperties: false
+    ReserveRoom:
+      required:
+        - count
+        - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identification of the room
+        count:
+          type: integer
+          description: Number of rooms
+          format: int64
+      additionalProperties: false
+      description: Represents rooms be reserved
+    Room:
+      required:
+        - capacity
+        - category
+        - count
+        - currency
+        - id
+        - price
+        - status
+        - wifi
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identification
+        category:
+          $ref: '#/components/schemas/RoomCategory'
+        capacity:
+          type: integer
+          description: Number of people that can be accommodate
+          format: int64
+        wifi:
+          type: boolean
+          description: Availability of wifi
+        status:
+          $ref: '#/components/schemas/RoomStatus'
+        currency:
+          type: string
+          description: Currency used in price
+        price:
+          type: number
+          description: Cost for the room
+          format: double
+        count:
+          type: integer
+          description: Number of rooms as per the status
+          format: int64
+      additionalProperties: false
+      description: Represents resort room
+    RoomCategory:
+      type: string
+      enum:
+        - FAMILY
+        - KING
+        - DELUXE
+    RoomStatus:
+      type: string
+      enum:
+        - BOOKED
+        - RESERVED
+        - AVAILABLE
+    Rooms:
+      type: object
+      description: Represents a collection of resort rooms
+      allOf:
+        - $ref: '#/components/schemas/Links'
+        - required:
+            - rooms
+          type: object
+          properties:
+            rooms:
+              type: array
+              description: Array of rooms
+              items:
+                $ref: '#/components/schemas/Room'
+          additionalProperties: false
