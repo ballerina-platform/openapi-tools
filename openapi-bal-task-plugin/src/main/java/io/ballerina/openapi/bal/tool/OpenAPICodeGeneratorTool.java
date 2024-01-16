@@ -17,7 +17,7 @@
  */
 package io.ballerina.openapi.bal.tool;
 
-import io.ballerina.cli.tool.BuildToolRunner;
+import io.ballerina.cli.tool.CodeGeneratorTool;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.GeneratorUtils;
@@ -53,7 +53,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT;
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT_METHODS;
@@ -77,42 +83,35 @@ import static io.ballerina.openapi.core.GeneratorUtils.normalizeOpenAPI;
  *
  * @since 1.9.0
  */
-public class OpenAPIBuildToolRunner implements BuildToolRunner {
-    static List<Diagnostic> diagnostics = new ArrayList<>();
+public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     static String md5HexOpenAPI;
 
     @Override
-    public String getToolName() {
+    public String toolName() {
         return "openapi";
     }
 
     @Override
-    public List<Diagnostic> diagnostics() {
-        return diagnostics;
-    }
-
-    @Override
-    public void executeTool(ToolContext toolContext) {
-
+    public void execute(ToolContext toolContext) {
         ImmutablePair<OASClientConfig, OASServiceMetadata> codeGeneratorConfig;
-        TomlNodeLocation location = toolContext.packageInstance().ballerinaToml().get().tomlAstNode().location();
-        Path cachePath = toolContext.cachePath();
-
+        TomlNodeLocation location = toolContext.currentPackage().ballerinaToml().get().tomlAstNode().location();
         try {
             // Validate the OAS file whether we can handle within OpenAPI tool
             if (!canHandle(toolContext)) {
                 Constants.DiagnosticMessages error = Constants.DiagnosticMessages.WARNING_FOR_UNSUPPORTED_CONTRACT;
-                reportDiagnostics(error, error.getDescription(), location);
+                toolContext.reportDiagnostic(createDiagnostics(error, error.getDescription(), location));
                 return;
             }
+            // Handle the code generation
             String oasFilePath = toolContext.filePath();
-            Path packagePath = toolContext.packageInstance().project().sourceRoot();
-            OpenAPI openAPI = getOpenAPIContract(packagePath, Path.of(oasFilePath), location);
+            Path packagePath = toolContext.currentPackage().project().sourceRoot();
+            OpenAPI openAPI = getOpenAPIContract(packagePath, Path.of(oasFilePath), location, toolContext);
             if (openAPI == null) {
                 return;
             }
+            // Handle the details with Ballerina.toml option table, if option table is null then by default
+            // client will generate
             TomlTableNode tomlTableNode = toolContext.optionsTable();
-
             if (tomlTableNode == null) {
                 // Default generate client
                 Filter filter = new Filter();
@@ -121,14 +120,14 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
                 OASServiceMetadata serviceMetaData = new OASServiceMetadata.Builder()
                         .withFilters(filter).withOpenAPI(openAPI).build();
                 codeGeneratorConfig =  new ImmutablePair<>(clientConfig, serviceMetaData);
-                if (validateCache(toolContext, cachePath, clientConfig)) {
+                if (validateCache(toolContext, clientConfig)) {
                     return;
                 }
                 generateClient(toolContext, codeGeneratorConfig);
             } else {
                 codeGeneratorConfig = extractOptionDetails(toolContext, openAPI);
                 Map<String, TopLevelNode> options = tomlTableNode.entries();
-                if (validateCache(toolContext, cachePath, codeGeneratorConfig.getLeft())) {
+                if (validateCache(toolContext, codeGeneratorConfig.getLeft())) {
                     return;
                 }
                 if (options.containsKey(MODE)) {
@@ -142,27 +141,25 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
             }
         } catch (BallerinaOpenApiException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.PARSER_ERROR;
-            reportDiagnostics(error, e.getMessage(), location);
+            toolContext.reportDiagnostic(createDiagnostics(error, e.getMessage(), location));
         } catch (IOException | FormatterException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_GENERATING_CLIENT;
-            reportDiagnostics(error, e.getMessage(), location);
+            toolContext.reportDiagnostic(createDiagnostics(error, e.getMessage(), location));
         }
     }
 
-    private static boolean validateCache(ToolContext toolContext, Path cachePath, OASClientConfig clientConfig) throws IOException {
-        String cacheDir = toolContext.toolId();
-        Path toolCachePath = cachePath.getParent();
-        File directoryPath = new File(toolCachePath.toString());
-        String[] cacheDirs = directoryPath.list();
+    /**
+     * This method uses to validate the cache.
+     */
+    private static boolean validateCache(ToolContext toolContext, OASClientConfig clientConfig) throws IOException {
+        Path cachePath = toolContext.cachePath();
         md5HexOpenAPI = getHashValue(clientConfig, toolContext.targetModule());
-        for (String path : cacheDirs) {
-            if (path.equals(cacheDir)) {
-                // read the cache file
-                Path cacheFilePath = Paths.get(cachePath.toString(), "openapi-cache.txt");
-                String cacheContent = Files.readString(Paths.get(cacheFilePath.toString()));
-                if (cacheContent.equals(md5HexOpenAPI)) {
-                    return true;
-                }
+        if (Files.isDirectory(cachePath)) {
+            // read the cache file
+            Path cacheFilePath = Paths.get(cachePath.toString(), "openapi-cache.txt");
+            String cacheContent = Files.readString(Paths.get(cacheFilePath.toString()));
+            if (cacheContent.equals(md5HexOpenAPI)) {
+                return true;
             }
         }
         return false;
@@ -180,8 +177,8 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
             generateClient(toolContext, codeGeneratorConfig);
         } else {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.WARNING_FOR_OTHER_GENERATION;
-            reportDiagnostics(error, String.format(error.getDescription(), mode),
-                    location);
+            toolContext.reportDiagnostic(createDiagnostics(error, String.format(error.getDescription(), mode),
+                    location));
         }
     }
 
@@ -192,9 +189,9 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
     private static boolean canHandle(ToolContext toolContext) {
         String oasPath = toolContext.filePath();
         if (oasPath.isBlank()) {
-            TomlNodeLocation location = toolContext.packageInstance().ballerinaToml().get().tomlAstNode().location();
+            TomlNodeLocation location = toolContext.currentPackage().ballerinaToml().get().tomlAstNode().location();
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.EMPTY_CONTRACT_PATH;
-            reportDiagnostics(error, error.getDescription(), location);
+            toolContext.reportDiagnostic(createDiagnostics(error, error.getDescription(), location));
             return false;
         }
         return (oasPath.endsWith(YAML_EXTENSION) || oasPath.endsWith(JSON_EXTENSION) ||
@@ -204,7 +201,8 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
     /**
      * This method uses to read the openapi contract and return the {@code OpenAPI} object.
      */
-    private OpenAPI getOpenAPIContract(Path ballerinaFilePath, Path openAPIPath, Location location) {
+    private OpenAPI getOpenAPIContract(Path ballerinaFilePath, Path openAPIPath, Location location,
+                                       ToolContext toolContext) {
         Path relativePath;
         try {
             Path inputPath = Paths.get(openAPIPath.toString());
@@ -215,10 +213,16 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
                 File openapiContract = new File(file, openAPIPath.toString());
                 relativePath = Paths.get(openapiContract.getCanonicalPath());
             }
-            return normalizeOpenAPI(Path.of(relativePath.toString()), true);
+            if (Files.exists(relativePath)) {
+                return normalizeOpenAPI(Path.of(relativePath.toString()), true);
+            } else {
+                Constants.DiagnosticMessages error = Constants.DiagnosticMessages.INVALID_CONTRACT_PATH;
+                toolContext.reportDiagnostic(createDiagnostics(error, error.getDescription(), location));
+            }
+
         } catch (IOException | BallerinaOpenApiException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.UNEXPECTED_EXCEPTIONS;
-            reportDiagnostics(error, error.getDescription(), location);
+            toolContext.reportDiagnostic(createDiagnostics(error, error.getDescription(), location));
         }
         return null;
     }
@@ -255,8 +259,15 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
                     clientMetaDataBuilder.withResourceMode(value.contains("resource"));
                     break;
                 case LICENSE:
-                    String licenseContent = Objects.equals(value, "") ? null :
-                            getLicenseContent(toolContext, Paths.get(value));
+                    String licenseContent;
+                    if (Objects.equals(value, "")) {
+                        Constants.DiagnosticMessages error = Constants.DiagnosticMessages.LICENSE_PATH_BLANK;
+                        toolContext.reportDiagnostic(createDiagnostics(error, error.getDescription(),
+                                toolContext.optionsTable().location()));
+                        licenseContent = DO_NOT_MODIFY_FILE_HEADER;
+                    } else {
+                        licenseContent = getLicenseContent(toolContext, Paths.get(value));
+                    }
                     clientMetaDataBuilder.withLicense(licenseContent != null ? licenseContent :
                             DO_NOT_MODIFY_FILE_HEADER);
                     break;
@@ -297,6 +308,10 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         writeGeneratedSources(sourcesForCache, cachePath);
     }
 
+    /**
+     * This method uses to generate hash value for the given code generation details.
+     * //TODO: This will be extended to support service generation.
+     */
     private static String getHashValue(OASClientConfig clientConfig, String targetPath) {
         String openAPIDefinitions = clientConfig.getOpenAPI().toString().trim().replaceAll("\\s+", "");
         StringBuilder summaryOfCodegen = new StringBuilder();
@@ -315,9 +330,7 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         for (String str : operations) {
             summaryOfCodegen.append(str);
         }
-
-        String md5HexOpenAPI = DigestUtils.md5Hex(summaryOfCodegen.toString()).toUpperCase(Locale.ENGLISH);
-        return md5HexOpenAPI;
+        return DigestUtils.md5Hex(summaryOfCodegen.toString()).toUpperCase(Locale.ENGLISH);
     }
 
     /**
@@ -373,15 +386,15 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
      * Util to read license content.
      */
     private static String getLicenseContent(ToolContext context, Path licensePath) {
-        Package packageInstance = context.packageInstance();
+        Package packageInstance = context.currentPackage();
         Location location = context.optionsTable().entries().get("license").location();
         Path ballerinaFilePath = Optional.ofNullable(packageInstance.project().sourceRoot()).orElse(null);
         try {
-            Path relativePath = getLicensePath(licensePath, location, ballerinaFilePath);
-            return (relativePath != null) ? createLicenseContent(relativePath, location) : null;
+            Path relativePath = getLicensePath(licensePath, ballerinaFilePath);
+            return (relativePath != null) ? createLicenseContent(relativePath, location, context) : null;
         } catch (IOException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_READING_LICENSE_FILE;
-            reportDiagnostics(error, error.getDescription(), location);
+            context.reportDiagnostic(createDiagnostics(error, error.getDescription(), location));
             return null;
         }
     }
@@ -389,13 +402,9 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
     /**
      * Util to get license path.
      */
-    private static Path getLicensePath(Path licensePath, Location location, Path ballerinaFilePath)
-            throws IOException {
+    private static Path getLicensePath(Path licensePath, Path ballerinaFilePath) throws IOException {
         Path relativePath = null;
-        if (licensePath.toString().isBlank()) {
-            Constants.DiagnosticMessages error = Constants.DiagnosticMessages.LICENSE_PATH_BLANK;
-            reportDiagnostics(error, error.getDescription(), location);
-        } else {
+        if (!licensePath.toString().isBlank()) {
             Path finalLicensePath = Paths.get(licensePath.toString());
             if (finalLicensePath.isAbsolute()) {
                 relativePath = finalLicensePath;
@@ -410,7 +419,7 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
     /**
      * Util to create license content.
      */
-    private static String createLicenseContent(Path relativePath, Location location) {
+    private static String createLicenseContent(Path relativePath, Location location, ToolContext toolContext) {
         String licenseHeader;
         try {
             String newLine = System.lineSeparator();
@@ -424,7 +433,7 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
         } catch (IOException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages
                     .ERROR_WHILE_READING_LICENSE_FILE;
-            reportDiagnostics(error, error.getDescription(), location);
+            toolContext.reportDiagnostic(createDiagnostics(error, error.getDescription(), location));
             return null;
         }
         return licenseHeader;
@@ -433,12 +442,10 @@ public class OpenAPIBuildToolRunner implements BuildToolRunner {
     /**
      * This method uses to report the diagnostics.
      */
-    private static void reportDiagnostics(Constants.DiagnosticMessages error, String error1, Location location) {
+    private static Diagnostic createDiagnostics(Constants.DiagnosticMessages error, String error1, Location location) {
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), error1,
                 error.getSeverity());
-        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
-                location);
-        diagnostics.add(diagnostic);
+        return DiagnosticFactory.createDiagnostic(diagnosticInfo, location);
     }
 
     /**
