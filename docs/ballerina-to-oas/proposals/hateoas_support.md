@@ -1,7 +1,7 @@
 # Proposal: Map Ballerina HATEOAS Links to OpenAPI Specification
 
-_Owners_: [@SachinAkash01](https://github.com/SachinAkash01)  
-_Reviewers_: [@lnash94](https://github.com/lnash94) [@TharmiganK](https://github.com/TharmiganK)    
+_Owners_: @SachinAkash01 
+_Reviewers_: @lnash94 @TharmiganK   
 _Created_: 2023/10/25  
 _Updated_: 2023/10/31  
 _Issue_: [#4788](https://github.com/ballerina-platform/ballerina-library/issues/4788)
