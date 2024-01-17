@@ -140,7 +140,7 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
                     "Expected content and actual generated content is mismatched for: " + yamlPath);
             deleteGeneratedFiles("without-data-binding-service.bal");
         } else {
-            Assert.fail("Service generation for All Of Schema type failed.");
+            Assert.fail("Service generation for low level service is failed.");
         }
     }
 }

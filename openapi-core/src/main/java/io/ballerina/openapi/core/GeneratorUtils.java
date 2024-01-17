@@ -1131,7 +1131,7 @@ public class GeneratorUtils {
         String type;
         if (!(isStringSchema(typeSchema) || isNumberSchema(typeSchema) || isBooleanSchema(typeSchema)
                 || isIntegerSchema(typeSchema))) {
-            type = "string";
+            type = STRING;
             LOGGER.warn("unsupported path parameter type found in the parameter `" + pathParam + "`. hence the " +
                     "parameter type is set to string.");
         } else {
