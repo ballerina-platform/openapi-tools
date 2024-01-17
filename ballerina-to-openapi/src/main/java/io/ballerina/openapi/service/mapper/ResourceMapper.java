@@ -64,7 +64,6 @@ public class ResourceMapper implements ResourceMapperInterface {
     private final Paths pathObject = new Paths();
     private final AdditionalData additionalData;
     private final OpenAPI openAPI;
-    private final String packageId;
     private final List<FunctionDefinitionNode> resources;
     private final boolean treatNilableAsOptional;
     private final HateoasMapper hateoasMapper;
@@ -72,10 +71,9 @@ public class ResourceMapper implements ResourceMapperInterface {
     /**
      * Initializes a resource parser for openApi.
      */
-    ResourceMapper(OpenAPI openAPI, List<FunctionDefinitionNode> resources, String packageId,
-                   AdditionalData additionalData, boolean treatNilableAsOptional) {
+    ResourceMapper(OpenAPI openAPI, List<FunctionDefinitionNode> resources, AdditionalData additionalData,
+                   boolean treatNilableAsOptional) {
         this.openAPI = openAPI;
-        this.packageId = packageId;
         this.resources = resources;
         this.additionalData = additionalData;
         this.treatNilableAsOptional = treatNilableAsOptional;
