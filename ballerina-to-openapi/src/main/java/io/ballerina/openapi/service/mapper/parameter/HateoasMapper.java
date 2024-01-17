@@ -82,11 +82,7 @@ public class HateoasMapper {
             }
         }
         hateoasLink.setResourceName(keyValueMap.get("name"));
-        if (keyValueMap.get("relation") == null) {
-            hateoasLink.setRel(OPENAPI_LINK_DEFAULT_REL);
-        } else {
-            hateoasLink.setRel(keyValueMap.get("relation"));
-        }
+        hateoasLink.setRel(keyValueMap.getOrDefault("relation", OPENAPI_LINK_DEFAULT_REL));
         hateoasLink.setResourceMethod(keyValueMap.get("method"));
         return hateoasLink;
     }
