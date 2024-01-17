@@ -40,9 +40,8 @@ import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
-import io.ballerina.projects.*;
 import io.ballerina.projects.Module;
-import io.ballerina.projects.Package;
+import io.ballerina.projects.Project;
 import io.swagger.v3.oas.models.OpenAPI;
 
 import java.nio.file.Path;
