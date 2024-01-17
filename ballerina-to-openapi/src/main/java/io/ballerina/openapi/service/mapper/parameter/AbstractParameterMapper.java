@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -21,7 +21,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.openapi.service.mapper.model.OperationBuilder;
+import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
@@ -30,12 +30,12 @@ import java.util.List;
 import java.util.Objects;
 
 public abstract class AbstractParameterMapper {
-    final OperationBuilder operationBuilder;
+    final OperationInventory operationInventory;
 
     abstract Parameter getParameterSchema();
 
-    protected AbstractParameterMapper(OperationBuilder operationBuilder) {
-        this.operationBuilder = operationBuilder;
+    protected AbstractParameterMapper(OperationInventory operationInventory) {
+        this.operationInventory = operationInventory;
     }
 
     public List<Parameter> getParameterSchemaList() {
@@ -48,7 +48,7 @@ public abstract class AbstractParameterMapper {
 
     public void setParameter() {
         List<Parameter> parameterList = getParameterSchemaList();
-        parameterList.forEach(operationBuilder::setParameter);
+        parameterList.forEach(operationInventory::setParameter);
     }
 
     static Object getDefaultValue(DefaultableParameterNode parameterNode) {

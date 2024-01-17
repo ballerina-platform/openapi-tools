@@ -15,7 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.mapper.constraint.model;
+package io.ballerina.openapi.service.mapper.constraint;
 
 import java.util.Optional;
 

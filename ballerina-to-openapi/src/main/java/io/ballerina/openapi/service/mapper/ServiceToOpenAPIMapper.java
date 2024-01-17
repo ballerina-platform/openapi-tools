@@ -31,7 +31,7 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.service.mapper.constraint.ConstraintMapper;
-import io.ballerina.openapi.service.mapper.constraint.ConstraintMapperInterface;
+import io.ballerina.openapi.service.mapper.constraint.ConstraintMapperImpl;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
@@ -198,14 +198,14 @@ public class ServiceToOpenAPIMapper {
             if (openapi.getPaths() == null) {
                 // Take base path of service
                 // 02. Filter and set the ServerURLs according to endpoints. Complete the server section in OAS
-                ServersMapper serversMapper = new ServersMapper(openapi, listeners, serviceDefinition);
-                serversMapper.setServers();
+                ServersMapper serversMapperImpl = new ServersMapperImpl(openapi, listeners, serviceDefinition);
+                serversMapperImpl.setServers();
                 // 03. Filter path and component sections in OAS.
                 // Generate openApi string for the mentioned service name.
                 convertServiceToOpenAPI(serviceDefinition, openapi, semanticModel, moduleMemberVisitor, diagnostics);
-                ConstraintMapperInterface constraintMapper = new ConstraintMapper(openapi, moduleMemberVisitor,
+                ConstraintMapper constraintMapper = new ConstraintMapperImpl(openapi, moduleMemberVisitor,
                         diagnostics);
-                constraintMapper.addMapping();
+                constraintMapper.setConstraints();
                 return new OASResult(openapi, diagnostics);
             } else {
                 return new OASResult(openapi, oasResult.getDiagnostics());
@@ -244,9 +244,9 @@ public class ServiceToOpenAPIMapper {
             }
         }
         AdditionalData additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
-        ResourceMapperInterface resourceMapper = new ResourceMapper(openAPI, resources, additionalData,
+        ResourceMapper resourceMapper = new ResourceMapperImpl(openAPI, resources, additionalData,
                 isTreatNilableAsOptionalParameter(serviceNode));
-        resourceMapper.addMapping();
+        resourceMapper.setOperation();
     }
 
     private static boolean isTreatNilableAsOptionalParameter(ServiceDeclarationNode serviceNode) {
