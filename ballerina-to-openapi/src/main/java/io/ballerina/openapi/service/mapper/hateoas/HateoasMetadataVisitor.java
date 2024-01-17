@@ -35,9 +35,11 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getRes
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getValueForAnnotationFields;
 
 public class HateoasMetadataVisitor extends NodeVisitor {
+    private final String packageId;
     private final SemanticModel semanticModel;
 
-    public HateoasMetadataVisitor(SemanticModel semanticModel) {
+    public HateoasMetadataVisitor(String packageId, SemanticModel semanticModel) {
+        this.packageId = packageId;
         this.semanticModel = semanticModel;
     }
 
@@ -65,7 +67,8 @@ public class HateoasMetadataVisitor extends NodeVisitor {
                 }
                 String cleanedResourceName = resourceName.get().replaceAll("\"", "");
                 Resource hateoasResource = new Resource(resourceMethod, operationId);
-                getHateoasContextHolder().updateHateoasResource(serviceId, cleanedResourceName, hateoasResource);
+                getHateoasContextHolder().updateHateoasResource(
+                        packageId, serviceId, cleanedResourceName, hateoasResource);
             }
         }
     }

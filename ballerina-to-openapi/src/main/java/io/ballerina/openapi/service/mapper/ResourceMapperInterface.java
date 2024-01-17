@@ -22,5 +22,5 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 
 public interface ResourceMapperInterface {
 
-    void addMapping(SemanticModel semanticModel, ServiceDeclarationNode serviceNode);
+    void addMapping(String packageId, SemanticModel semanticModel, ServiceDeclarationNode serviceNode);
 }

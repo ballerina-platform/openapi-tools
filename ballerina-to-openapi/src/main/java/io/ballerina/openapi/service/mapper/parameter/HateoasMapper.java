@@ -37,7 +37,7 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getVal
 
 public class HateoasMapper {
 
-    public Map<String, Link> mapHateoasLinksToSwaggerLinks(int serviceId,
+    public Map<String, Link> mapHateoasLinksToSwaggerLinks(String packageId, int serviceId,
                                                            FunctionDefinitionNode resourceFunction) {
         Optional<String> linkedTo = getResourceConfigAnnotation(resourceFunction)
                 .flatMap(resourceConfig -> getValueForAnnotationFields(resourceConfig, "linkedTo"));
@@ -48,7 +48,7 @@ public class HateoasMapper {
         Map<String, Link> hateoasLinks = new HashMap<>();
         for (HateoasLink link : links) {
             Optional<Resource> resource = getHateoasContextHolder()
-                    .getHateoasResource(serviceId, link.getResourceName(), link.getResourceMethod());
+                    .getHateoasResource(packageId, serviceId, link.getResourceName(), link.getResourceMethod());
             if (resource.isPresent()) {
                 Link swaggerLink = new Link();
                 String operationId = resource.get().operationId();

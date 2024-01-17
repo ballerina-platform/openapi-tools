@@ -24,10 +24,12 @@ import java.util.List;
 import java.util.Map;
 
 public class Service {
+    private final String packageId;
     private final int serviceId;
     private final Map<String, List<Resource>> hateoasResourceMapping = new HashMap<>();
 
-    public Service(int serviceId) {
+    public Service(String packageId, int serviceId) {
+        this.packageId = packageId;
         this.serviceId = serviceId;
     }
 
@@ -37,6 +39,10 @@ public class Service {
             return;
         }
         hateoasResourceMapping.put(resourceName, Arrays.asList(resource));
+    }
+
+    public String getPackageId() {
+        return packageId;
     }
 
     public int getServiceId() {

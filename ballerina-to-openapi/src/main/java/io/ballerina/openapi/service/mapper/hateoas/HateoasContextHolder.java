@@ -41,12 +41,12 @@ public final class HateoasContextHolder {
         return instance;
     }
 
-    public void updateHateoasResource(int serviceId, String resourceName, Resource resource) {
+    public void updateHateoasResource(String packageId, int serviceId, String resourceName, Resource resource) {
         Optional<Service> hateoasService = this.hateoasServices.stream()
-                .filter(svc -> svc.getServiceId() == serviceId)
+                .filter(svc -> packageId.equals(svc.getPackageId()) && svc.getServiceId() == serviceId)
                 .findFirst();
         if (hateoasService.isEmpty()) {
-            Service service = new Service(serviceId);
+            Service service = new Service(packageId, serviceId);
             service.addResource(resourceName, resource);
             this.hateoasServices.add(service);
             return;
@@ -55,9 +55,10 @@ public final class HateoasContextHolder {
         service.addResource(resourceName, resource);
     }
 
-    public Optional<Resource> getHateoasResource(int serviceId, String resourceName, String resourceMethod) {
+    public Optional<Resource> getHateoasResource(String packageId, int serviceId, String resourceName,
+                                                 String resourceMethod) {
         return this.hateoasServices.stream()
-                .filter(svc -> svc.getServiceId() == serviceId)
+                .filter(svc -> svc.getPackageId().equals(packageId) && svc.getServiceId() == serviceId)
                 .findFirst()
                 .flatMap(svc -> svc.getHateoasResourceMapping().entrySet().stream()
                         .filter(resources -> resourceName.equals(resources.getKey()))
