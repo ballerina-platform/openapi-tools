@@ -205,7 +205,8 @@ public class ServiceToOpenAPIMapper {
                 // 03. Filter path and component sections in OAS.
                 // Generate openApi string for the mentioned service name.
                 String packageId = oasGenerationMetaInfo.getProject().currentPackage().packageId().id().toString();
-                convertServiceToOpenAPI(packageId, serviceDefinition, openapi, semanticModel, moduleMemberVisitor, diagnostics);
+                convertServiceToOpenAPI(
+                        packageId, serviceDefinition, openapi, semanticModel, moduleMemberVisitor, diagnostics);
                 ConstraintMapperInterface constraintMapper = new ConstraintMapper(openapi, moduleMemberVisitor,
                         diagnostics);
                 constraintMapper.addMapping();
@@ -247,7 +248,7 @@ public class ServiceToOpenAPIMapper {
             }
         }
         AdditionalData additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
-        ResourceMapperInterface resourceMapper = new ResourceMapper(openAPI, resources, packageId, additionalData,
+        ResourceMapperInterface resourceMapper = new ResourceMapper(openAPI, resources, additionalData,
                 isTreatNilableAsOptionalParameter(serviceNode));
         resourceMapper.addMapping(packageId, semanticModel, serviceNode);
     }
