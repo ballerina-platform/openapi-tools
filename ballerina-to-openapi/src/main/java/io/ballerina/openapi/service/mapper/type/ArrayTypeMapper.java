@@ -39,6 +39,6 @@ public class ArrayTypeMapper extends AbstractTypeMapper {
 
     public static Schema getSchema(ArrayTypeSymbol typeSymbol, Components components, AdditionalData additionalData) {
         TypeSymbol elementType = typeSymbol.memberTypeDescriptor();
-        return new ArraySchema().items(TypeMapper.getTypeSchema(elementType, components, additionalData));
+        return new ArraySchema().items(TypeMapperImpl.getTypeSchema(elementType, components, additionalData));
     }
 }

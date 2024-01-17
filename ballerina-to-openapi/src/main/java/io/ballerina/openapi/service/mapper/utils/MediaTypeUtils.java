@@ -24,7 +24,7 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
-import io.ballerina.openapi.service.mapper.response.ResponseMapper;
+import io.ballerina.openapi.service.mapper.response.ResponseMapperImpl;
 
 import java.util.List;
 import java.util.Objects;
@@ -56,7 +56,7 @@ public final class MediaTypeUtils {
         } else if (typeSymbol.subtypeOf(
                 semanticModel.types().builder().ARRAY_TYPE.withType(semanticModel.types().BYTE).build())) {
             mediaType = getCompatibleMediaType(allowedMediaTypes, OCTET_STREAM_PATTERN, APPLICATION_OCTET_STREAM);
-        } else if (ResponseMapper.isSubTypeOfHttpResponse(typeSymbol, semanticModel)) {
+        } else if (ResponseMapperImpl.isSubTypeOfHttpResponse(typeSymbol, semanticModel)) {
             return "*/*";
         } else {
             mediaType = getCompatibleMediaType(allowedMediaTypes, JSON_PATTERN, APPLICATION_JSON);

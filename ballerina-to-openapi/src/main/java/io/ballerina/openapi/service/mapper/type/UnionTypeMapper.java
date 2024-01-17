@@ -73,7 +73,7 @@ public class UnionTypeMapper extends AbstractTypeMapper {
             if (memberTypeSymbol.typeKind().equals(TypeDescKind.NIL)) {
                 continue;
             }
-            Schema schema = TypeMapper.getTypeSchema(memberTypeSymbol, components, additionalData, nullable);
+            Schema schema = TypeMapperImpl.getTypeSchema(memberTypeSymbol, components, additionalData, nullable);
             if (Objects.nonNull(schema)) {
                 memberSchemas.add(schema);
             }

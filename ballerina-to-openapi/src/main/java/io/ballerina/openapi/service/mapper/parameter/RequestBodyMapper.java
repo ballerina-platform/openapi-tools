@@ -28,7 +28,7 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationBuilder;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
-import io.ballerina.openapi.service.mapper.type.TypeMapperInterface;
+import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.openapi.service.mapper.utils.MediaTypeUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
@@ -51,7 +51,7 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.remove
 public class RequestBodyMapper {
     private List<String> allowedMediaTypes = new ArrayList<>();
     private final RequestBody requestBody = new RequestBody().required(true);
-    private final TypeMapperInterface typeMapper;
+    private final TypeMapper typeMapper;
     private final SemanticModel semanticModel;
     private final OperationBuilder operationBuilder;
     private final String mediaTypeSubTypePrefix;
@@ -59,7 +59,7 @@ public class RequestBodyMapper {
     public RequestBodyMapper(ParameterSymbol reqParameter, AnnotationNode annotation, OperationBuilder operationBuilder,
                              FunctionDefinitionNode resourceNode, Components components,
                              Map<String, String> apiDocs, AdditionalData additionalData) {
-        this.typeMapper = new TypeMapper(components, additionalData);
+        this.typeMapper = new TypeMapperImpl(components, additionalData);
         this.semanticModel = additionalData.semanticModel();
         this.operationBuilder = operationBuilder;
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");

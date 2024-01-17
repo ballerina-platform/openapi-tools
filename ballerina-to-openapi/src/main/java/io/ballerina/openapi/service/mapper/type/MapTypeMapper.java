@@ -42,7 +42,7 @@ public class MapTypeMapper extends AbstractTypeMapper {
         if (additionalData.semanticModel().types().JSON.subtypeOf(memberType)) {
             return new ObjectSchema();
         }
-        return new ObjectSchema().additionalProperties(TypeMapper.getTypeSchema(memberType, components,
+        return new ObjectSchema().additionalProperties(TypeMapperImpl.getTypeSchema(memberType, components,
                 additionalData));
     }
 }

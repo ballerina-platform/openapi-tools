@@ -27,7 +27,7 @@ import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationBuilder;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
-import io.ballerina.openapi.service.mapper.type.TypeMapperInterface;
+import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
@@ -49,7 +49,7 @@ public class QueryParameterMapper extends AbstractParameterMapper {
     private String description = null;
     private boolean treatNilableAsOptional = false;
     private Object defaultValue = null;
-    private TypeMapperInterface typeMapper = null;
+    private TypeMapper typeMapper = null;
     private SemanticModel semanticModel;
 
     public QueryParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs,
@@ -64,7 +64,7 @@ public class QueryParameterMapper extends AbstractParameterMapper {
             this.description = apiDocs.get(removeStartingSingleQuote(queryParameter.getName().get()));
             this.treatNilableAsOptional = treatNilableAsOptional;
             this.semanticModel = additionalData.semanticModel();
-            this.typeMapper = new TypeMapper(components, additionalData);
+            this.typeMapper = new TypeMapperImpl(components, additionalData);
             if (parameterNode instanceof DefaultableParameterNode defaultableQueryParam) {
                 this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableQueryParam);
             }
@@ -83,7 +83,7 @@ public class QueryParameterMapper extends AbstractParameterMapper {
         }
         Schema typeSchema = typeMapper.getTypeSchema(type);
         if (Objects.nonNull(defaultValue)) {
-            TypeMapperInterface.setDefaultValue(typeSchema, defaultValue);
+            TypeMapper.setDefaultValue(typeSchema, defaultValue);
         }
         if (AbstractParameterMapper.hasObjectType(semanticModel, type)) {
             Content content = new Content();

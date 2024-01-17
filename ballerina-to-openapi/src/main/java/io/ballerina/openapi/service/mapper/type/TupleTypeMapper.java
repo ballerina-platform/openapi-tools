@@ -54,7 +54,7 @@ public class TupleTypeMapper extends AbstractTypeMapper {
         }
         List<TypeSymbol> memberTypeSymbols = typeSymbol.memberTypeDescriptors();
         Schema memberSchema = new ComposedSchema().oneOf(memberTypeSymbols.stream().map(
-                type -> TypeMapper.getTypeSchema(type, components, additionalData)).toList());
+                type -> TypeMapperImpl.getTypeSchema(type, components, additionalData)).toList());
         return new ArraySchema().items(memberSchema);
     }
 }

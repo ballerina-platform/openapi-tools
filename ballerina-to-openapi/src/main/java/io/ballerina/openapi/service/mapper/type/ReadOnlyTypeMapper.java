@@ -47,7 +47,7 @@ public class ReadOnlyTypeMapper extends AbstractTypeMapper {
         if (Objects.isNull(effectiveType)) {
             return null;
         }
-        return TypeMapper.getTypeSchema(effectiveType, components, additionalData);
+        return TypeMapperImpl.getTypeSchema(effectiveType, components, additionalData);
     }
 
     public static TypeSymbol getEffectiveType(IntersectionTypeSymbol typeSymbol) {
