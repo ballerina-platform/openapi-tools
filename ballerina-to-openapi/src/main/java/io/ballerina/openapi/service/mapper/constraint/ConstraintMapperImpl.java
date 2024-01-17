@@ -55,6 +55,20 @@ import java.util.Optional;
 
 import static io.ballerina.openapi.service.mapper.Constants.DATE_CONSTRAINT_ANNOTATION;
 import static io.ballerina.openapi.service.mapper.Constants.REGEX_INTERPOLATION_PATTERN;
+import static io.ballerina.openapi.service.mapper.constraint.Constants.ARRAY;
+import static io.ballerina.openapi.service.mapper.constraint.Constants.INTEGER;
+import static io.ballerina.openapi.service.mapper.constraint.Constants.LENGTH;
+import static io.ballerina.openapi.service.mapper.constraint.Constants.MAX_LENGTH;
+import static io.ballerina.openapi.service.mapper.constraint.Constants.MAX_VALUE;
+import static io.ballerina.openapi.service.mapper.constraint.Constants.MAX_VALUE_EXCLUSIVE;
+import static io.ballerina.openapi.service.mapper.constraint.Constants.MIN_LENGTH;
+import static io.ballerina.openapi.service.mapper.constraint.Constants.MIN_VALUE;
+import static io.ballerina.openapi.service.mapper.constraint.Constants.MIN_VALUE_EXCLUSIVE;
+import static io.ballerina.openapi.service.mapper.constraint.Constants.NUMBER;
+import static io.ballerina.openapi.service.mapper.constraint.Constants.OBJECT;
+import static io.ballerina.openapi.service.mapper.constraint.Constants.PATTERN;
+import static io.ballerina.openapi.service.mapper.constraint.Constants.STRING;
+import static io.ballerina.openapi.service.mapper.constraint.Constants.VALUE;
 
 public class ConstraintMapperImpl implements ConstraintMapper {
 
@@ -103,10 +117,10 @@ public class ConstraintMapperImpl implements ConstraintMapper {
             //with plans to extend constraint support in the future.
             String schemaType = getEffectiveSchemaType(properties);
             switch (schemaType) {
-                case "array" -> setArrayConstraintValuesToSchema(constraintAnnot, properties);
-                case "string" -> setStringConstraintValuesToSchema(constraintAnnot, properties);
-                case "integer" -> setIntegerConstraintValuesToSchema(constraintAnnot, properties);
-                case "number" -> setNumberConstraintValuesToSchema(constraintAnnot, properties);
+                case ARRAY -> setArrayConstraintValuesToSchema(constraintAnnot, properties);
+                case STRING -> setStringConstraintValuesToSchema(constraintAnnot, properties);
+                case INTEGER -> setIntegerConstraintValuesToSchema(constraintAnnot, properties);
+                case NUMBER -> setNumberConstraintValuesToSchema(constraintAnnot, properties);
                 default -> { }
             }
         } catch (ParseException parseException) {
@@ -119,13 +133,13 @@ public class ConstraintMapperImpl implements ConstraintMapper {
 
     private String getEffectiveSchemaType(Schema schema) {
         if (schema instanceof ArraySchema) {
-            return "array";
+            return ARRAY;
         } else if (schema instanceof IntegerSchema) {
-            return "integer";
+            return INTEGER;
         } else if (schema instanceof NumberSchema) {
-            return "number";
+            return NUMBER;
         } else if (schema instanceof StringSchema) {
-            return "string";
+            return STRING;
         } else if (schema instanceof ObjectSchema) {
             String ref = schema.get$ref();
             if (Objects.nonNull(ref)) {
@@ -141,7 +155,7 @@ public class ConstraintMapperImpl implements ConstraintMapper {
                 }
             }
         }
-        return "object";
+        return OBJECT;
     }
 
     /**
@@ -379,7 +393,7 @@ public class ConstraintMapperImpl implements ConstraintMapper {
             case MAPPING_CONSTRUCTOR:
                 return ((MappingConstructorExpressionNode) exprNode).fields().stream()
                         .filter(fieldNode -> ((SpecificFieldNode) fieldNode).fieldName().toString().
-                                trim().equals("value"))
+                                trim().equals(VALUE))
                         .findFirst()
                         .flatMap(node -> ((SpecificFieldNode) node).valueExpr()
                                 .flatMap(this::extractFieldValue));
@@ -398,14 +412,14 @@ public class ConstraintMapperImpl implements ConstraintMapper {
     private void fillConstraintValue(ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder,
                                      String name, String constraintValue) {
         switch (name) {
-            case "minValue" -> constraintBuilder.withMinValue(constraintValue);
-            case "maxValue" -> constraintBuilder.withMaxValue(constraintValue);
-            case "minValueExclusive" -> constraintBuilder.withMinValueExclusive(constraintValue);
-            case "maxValueExclusive" -> constraintBuilder.withMaxValueExclusive(constraintValue);
-            case "length" -> constraintBuilder.withLength(constraintValue);
-            case "maxLength" -> constraintBuilder.withMaxLength(constraintValue);
-            case "minLength" -> constraintBuilder.withMinLength(constraintValue);
-            case "pattern" -> constraintBuilder.withPattern(constraintValue);
+            case MIN_VALUE -> constraintBuilder.withMinValue(constraintValue);
+            case MAX_VALUE -> constraintBuilder.withMaxValue(constraintValue);
+            case MIN_VALUE_EXCLUSIVE -> constraintBuilder.withMinValueExclusive(constraintValue);
+            case MAX_VALUE_EXCLUSIVE -> constraintBuilder.withMaxValueExclusive(constraintValue);
+            case LENGTH -> constraintBuilder.withLength(constraintValue);
+            case MAX_LENGTH -> constraintBuilder.withMaxLength(constraintValue);
+            case MIN_LENGTH -> constraintBuilder.withMinLength(constraintValue);
+            case PATTERN -> constraintBuilder.withPattern(constraintValue);
             default -> { }
         }
     }
