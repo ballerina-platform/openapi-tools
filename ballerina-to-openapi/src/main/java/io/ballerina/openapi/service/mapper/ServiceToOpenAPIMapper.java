@@ -204,7 +204,8 @@ public class ServiceToOpenAPIMapper {
                 serversMapper.setServers();
                 // 03. Filter path and component sections in OAS.
                 // Generate openApi string for the mentioned service name.
-                convertServiceToOpenAPI(serviceDefinition, openapi, semanticModel, moduleMemberVisitor, diagnostics);
+                String packageId = oasGenerationMetaInfo.getProject().currentPackage().packageId().id().toString();
+                convertServiceToOpenAPI(packageId, serviceDefinition, openapi, semanticModel, moduleMemberVisitor, diagnostics);
                 ConstraintMapperInterface constraintMapper = new ConstraintMapper(openapi, moduleMemberVisitor,
                         diagnostics);
                 constraintMapper.addMapping();
@@ -234,7 +235,7 @@ public class ServiceToOpenAPIMapper {
         return balNodeVisitor;
     }
 
-    private static void convertServiceToOpenAPI(ServiceDeclarationNode serviceNode, OpenAPI openAPI,
+    private static void convertServiceToOpenAPI(String packageId, ServiceDeclarationNode serviceNode, OpenAPI openAPI,
                                                 SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
                                                 List<OpenAPIMapperDiagnostic> diagnostics) {
         NodeList<Node> functions = serviceNode.members();
@@ -246,9 +247,9 @@ public class ServiceToOpenAPIMapper {
             }
         }
         AdditionalData additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
-        ResourceMapperInterface resourceMapper = new ResourceMapper(openAPI, resources, semanticModel, additionalData,
+        ResourceMapperInterface resourceMapper = new ResourceMapper(openAPI, resources, packageId, additionalData,
                 isTreatNilableAsOptionalParameter(serviceNode));
-        resourceMapper.addMapping(semanticModel, serviceNode);
+        resourceMapper.addMapping(packageId, semanticModel, serviceNode);
     }
 
     private static boolean isTreatNilableAsOptionalParameter(ServiceDeclarationNode serviceNode) {
@@ -270,10 +271,11 @@ public class ServiceToOpenAPIMapper {
     }
 
     public static void extractHateoasLinkMetadata(Project project) {
+        String packageId = project.currentPackage().packageId().id().toString();
         project.currentPackage().moduleIds().forEach(moduleId -> {
             Module module = project.currentPackage().module(moduleId);
             SemanticModel semanticModel = project.currentPackage().getCompilation().getSemanticModel(moduleId);
-            HateoasMetadataVisitor hateoasMetadataVisitor = new HateoasMetadataVisitor(semanticModel);
+            HateoasMetadataVisitor hateoasMetadataVisitor = new HateoasMetadataVisitor(packageId, semanticModel);
             module.documentIds().forEach(documentId -> {
                 SyntaxTree syntaxTreeDoc = module.document(documentId).syntaxTree();
                 syntaxTreeDoc.rootNode().accept(hateoasMetadataVisitor);
