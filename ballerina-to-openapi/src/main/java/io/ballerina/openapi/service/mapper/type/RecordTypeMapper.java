@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -77,7 +77,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         Optional<TypeSymbol> restFieldType = typeSymbol.restTypeDescriptor();
         if (restFieldType.isPresent()) {
             if (!additionalData.semanticModel().types().JSON.subtypeOf(restFieldType.get())) {
-                Schema restFieldSchema = TypeMapper.getTypeSchema(restFieldType.get(), components, additionalData);
+                Schema restFieldSchema = TypeMapperImpl.getTypeSchema(restFieldType.get(), components, additionalData);
                 schema.additionalProperties(restFieldSchema);
             }
         } else {
@@ -107,7 +107,8 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                 Schema includedRecordSchema = new Schema();
                 includedRecordSchema.set$ref(getTypeName(typeInclusion));
                 allOfSchemaList.add(includedRecordSchema);
-                TypeMapper.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion, components, additionalData);
+                TypeMapperImpl.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion,
+                        components, additionalData);
 
                 RecordTypeSymbol includedRecordTypeSymbol = (RecordTypeSymbol) ((TypeReferenceTypeSymbol) typeInclusion)
                         .typeDescriptor();
@@ -133,7 +134,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                 requiredFields.add(recordFieldName);
             }
             String recordFieldDescription = getRecordFieldTypeDescription(recordFieldSymbol);
-            Schema recordFieldSchema = TypeMapper.getTypeSchema(recordFieldSymbol.typeDescriptor(),
+            Schema recordFieldSchema = TypeMapperImpl.getTypeSchema(recordFieldSymbol.typeDescriptor(),
                     components, additionalData);
             if (Objects.nonNull(recordFieldDescription) && Objects.nonNull(recordFieldSchema)) {
                 recordFieldSchema = recordFieldSchema.description(recordFieldDescription);
@@ -142,7 +143,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                 Object recordFieldDefaultValue = getRecordFieldDefaultValue(recordName, recordFieldName,
                         additionalData.moduleMemberVisitor());
                 if (Objects.nonNull(recordFieldDefaultValue)) {
-                    TypeMapperInterface.setDefaultValue(recordFieldSchema, recordFieldDefaultValue);
+                    TypeMapper.setDefaultValue(recordFieldSchema, recordFieldDefaultValue);
                 } else {
                     DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_124;
                     IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(message,

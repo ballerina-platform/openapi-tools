@@ -38,8 +38,6 @@ module io.ballerina.openapi.service {
     exports io.ballerina.openapi.service.mapper.type;
     exports io.ballerina.openapi.service.mapper.model;
     exports io.ballerina.openapi.service.mapper.utils;
-    exports io.ballerina.openapi.service.mapper.response.model;
-    exports io.ballerina.openapi.service.mapper.constraint.model;
     exports io.ballerina.openapi.service.mapper.parameter;
     exports io.ballerina.openapi.service.mapper.response;
 }

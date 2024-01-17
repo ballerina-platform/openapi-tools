@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -24,9 +24,9 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationBuilder;
+import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
-import io.ballerina.openapi.service.mapper.type.TypeMapperInterface;
+import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.parameters.PathParameter;
@@ -42,19 +42,19 @@ public class PathParameterMapper extends AbstractParameterMapper {
     private final TypeSymbol type;
     private final String name;
     private final String description;
-    private final TypeMapperInterface typeMapper;
+    private final TypeMapper typeMapper;
     private final Location location;
     private final PathSegment.Kind pathSegmentKind;
     private final List<OpenAPIMapperDiagnostic> diagnostics;
 
     public PathParameterMapper(PathParameterSymbol pathParameterSymbol, Components components,
-                               Map<String, String> apiDocs, OperationBuilder operationBuilder,
+                               Map<String, String> apiDocs, OperationInventory operationInventory,
                                AdditionalData additionalData) {
-        super(operationBuilder);
+        super(operationInventory);
         this.location = pathParameterSymbol.getLocation().orElse(null);
         this.pathSegmentKind = pathParameterSymbol.pathSegmentKind();
         this.type = pathParameterSymbol.typeDescriptor();
-        this.typeMapper = new TypeMapper(components, additionalData);
+        this.typeMapper = new TypeMapperImpl(components, additionalData);
         this.name = unescapeIdentifier(pathParameterSymbol.getName().get());
         this.description = apiDocs.get(removeStartingSingleQuote(pathParameterSymbol.getName().get()));
         this.diagnostics = additionalData.diagnostics();

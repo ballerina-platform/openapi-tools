@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -29,7 +29,7 @@ import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Objects;
 
-import static io.ballerina.openapi.service.mapper.type.TypeMapper.createComponentMapping;
+import static io.ballerina.openapi.service.mapper.type.TypeMapperImpl.createComponentMapping;
 
 public class ReferenceTypeMapper extends AbstractTypeMapper {
 

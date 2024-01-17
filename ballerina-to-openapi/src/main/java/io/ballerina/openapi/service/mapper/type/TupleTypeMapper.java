@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -54,7 +54,7 @@ public class TupleTypeMapper extends AbstractTypeMapper {
         }
         List<TypeSymbol> memberTypeSymbols = typeSymbol.memberTypeDescriptors();
         Schema memberSchema = new ComposedSchema().oneOf(memberTypeSymbols.stream().map(
-                type -> TypeMapper.getTypeSchema(type, components, additionalData)).toList());
+                type -> TypeMapperImpl.getTypeSchema(type, components, additionalData)).toList());
         return new ArraySchema().items(memberSchema);
     }
 }

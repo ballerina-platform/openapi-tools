@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -73,7 +73,7 @@ public class UnionTypeMapper extends AbstractTypeMapper {
             if (memberTypeSymbol.typeKind().equals(TypeDescKind.NIL)) {
                 continue;
             }
-            Schema schema = TypeMapper.getTypeSchema(memberTypeSymbol, components, additionalData, nullable);
+            Schema schema = TypeMapperImpl.getTypeSchema(memberTypeSymbol, components, additionalData, nullable);
             if (Objects.nonNull(schema)) {
                 memberSchemas.add(schema);
             }

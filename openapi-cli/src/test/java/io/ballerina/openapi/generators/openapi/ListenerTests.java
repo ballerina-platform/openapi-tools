@@ -18,6 +18,7 @@
 package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.openapi.cmd.OASContractGenerator;
+import io.ballerina.openapi.service.mapper.ServersMapperImpl;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -33,7 +34,7 @@ import java.util.List;
 
 /**
  * This Test class for storing all the endpoint related tests
- * {@link io.ballerina.openapi.service.mapper.ServersMapper}.
+ * {@link ServersMapperImpl}.
  */
 public class ListenerTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();

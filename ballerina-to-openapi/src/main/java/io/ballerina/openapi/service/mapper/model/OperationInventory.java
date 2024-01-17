@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -17,7 +17,6 @@
  */
 package io.ballerina.openapi.service.mapper.model;
 
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -25,17 +24,18 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.Objects;
 
+import static io.ballerina.openapi.service.mapper.Constants.SLASH;
+
 /**
  * This class will hold operation details specific to HTTP operation.
  */
-public class OperationBuilder {
+public class OperationInventory {
 
     private Operation operation;
     private String path;
     private String httpOperation;
-    private Components components;
 
-    public OperationBuilder() {
+    public OperationInventory() {
         this.operation = new io.swagger.v3.oas.models.Operation();
     }
 
@@ -52,8 +52,8 @@ public class OperationBuilder {
     }
 
     public void setPath(String path) {
-        if (!path.startsWith("/")) {
-            this.path = "/" + path;
+        if (!path.startsWith(SLASH)) {
+            this.path = SLASH + path;
         } else {
             this.path = path;
         }
@@ -65,14 +65,6 @@ public class OperationBuilder {
 
     public void setHttpOperation(String httpOperation) {
         this.httpOperation = httpOperation;
-    }
-
-    public Components getComponents() {
-        return components;
-    }
-
-    public void setComponents(Components components) {
-        this.components = components;
     }
 
     public boolean hasDataBinding() {
