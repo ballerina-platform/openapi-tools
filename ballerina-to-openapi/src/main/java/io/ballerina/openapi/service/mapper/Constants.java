@@ -249,6 +249,10 @@ public final class Constants {
     }
     public static final String HTTP_200 = "200";
     public static final String HTTP_201 = "201";
+    public static final String HTTP_202 = "202";
+    public static final String ACCEPTED = "Accepted";
+    public static final String HTTP_400 = "400";
+    public static final String BAD_REQUEST = "BadRequest";
     public static final String HTTP_500 = "500";
     public static final String SPECIAL_CHAR_REGEX = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
 
@@ -280,8 +284,4 @@ public final class Constants {
     public static final String JSON_EXTENSION = ".json";
     public static final String YML_EXTENSION = ".yml";
     public static final String UNDERSCORE = "_";
-    public static final String HTTP_202 = "202";
-    public static final String HTTP_400 = "400";
-    public static final String ACCEPTED = "Accepted";
-    public static final String BAD_REQUEST = "BadRequest";
 }

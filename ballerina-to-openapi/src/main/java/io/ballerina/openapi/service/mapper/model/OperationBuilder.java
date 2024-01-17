@@ -25,6 +25,8 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.Objects;
 
+import static io.ballerina.openapi.service.mapper.Constants.SLASH;
+
 /**
  * This class will hold operation details specific to HTTP operation.
  */
@@ -52,8 +54,8 @@ public class OperationBuilder {
     }
 
     public void setPath(String path) {
-        if (!path.startsWith("/")) {
-            this.path = "/" + path;
+        if (!path.startsWith(SLASH)) {
+            this.path = SLASH + path;
         } else {
             this.path = path;
         }

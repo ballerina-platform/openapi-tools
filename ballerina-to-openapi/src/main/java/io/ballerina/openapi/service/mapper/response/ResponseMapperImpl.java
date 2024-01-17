@@ -469,7 +469,7 @@ public class ResponseMapperImpl implements ResponseMapper {
 
     private static String getResponseCode(TypeSymbol typeSymbol, String defaultCode, SemanticModel semanticModel) {
         if (isSubTypeOfNil(typeSymbol, semanticModel)) {
-            return "202";
+            return HTTP_202;
         } else if (isSubTypeOfError(typeSymbol, semanticModel)) {
             return HTTP_500;
         }
