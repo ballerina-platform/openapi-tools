@@ -36,8 +36,6 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationBuilder;
-import io.ballerina.openapi.service.mapper.response.model.CacheConfigAnnotation;
-import io.ballerina.openapi.service.mapper.response.utils.CacheHeaderUtils;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;

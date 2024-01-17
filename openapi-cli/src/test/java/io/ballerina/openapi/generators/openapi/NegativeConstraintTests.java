@@ -18,7 +18,7 @@
 package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.openapi.cmd.OASContractGenerator;
-import io.ballerina.openapi.service.mapper.constraint.model.ConstraintAnnotation;
+import io.ballerina.openapi.service.mapper.constraint.ConstraintAnnotation;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Project;
