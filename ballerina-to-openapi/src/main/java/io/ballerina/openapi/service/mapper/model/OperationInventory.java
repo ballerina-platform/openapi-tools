@@ -17,7 +17,6 @@
  */
 package io.ballerina.openapi.service.mapper.model;
 
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -30,14 +29,13 @@ import static io.ballerina.openapi.service.mapper.Constants.SLASH;
 /**
  * This class will hold operation details specific to HTTP operation.
  */
-public class OperationBuilder {
+public class OperationInventory {
 
     private Operation operation;
     private String path;
     private String httpOperation;
-    private Components components;
 
-    public OperationBuilder() {
+    public OperationInventory() {
         this.operation = new io.swagger.v3.oas.models.Operation();
     }
 
@@ -67,14 +65,6 @@ public class OperationBuilder {
 
     public void setHttpOperation(String httpOperation) {
         this.httpOperation = httpOperation;
-    }
-
-    public Components getComponents() {
-        return components;
-    }
-
-    public void setComponents(Components components) {
-        this.components = components;
     }
 
     public boolean hasDataBinding() {

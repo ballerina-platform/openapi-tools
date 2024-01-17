@@ -109,9 +109,9 @@ public class TypeMapperImpl implements TypeMapper {
         mapper.addToComponents(components);
     }
 
-    public Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
-                                               Set<String> requiredFields, String recordName,
-                                               boolean treatNilableAsOptional) {
+    public Map<String, Schema> getSchemaForRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
+                                                        Set<String> requiredFields, String recordName,
+                                                        boolean treatNilableAsOptional) {
         return RecordTypeMapper.mapRecordFields(recordFieldMap, components, requiredFields, recordName,
                 treatNilableAsOptional, componentMapperData);
     }

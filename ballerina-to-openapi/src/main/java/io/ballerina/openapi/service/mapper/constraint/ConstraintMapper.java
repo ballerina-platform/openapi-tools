@@ -19,5 +19,5 @@ package io.ballerina.openapi.service.mapper.constraint;
 
 public interface ConstraintMapper {
 
-    void addMapping();
+    void setConstraints();
 }

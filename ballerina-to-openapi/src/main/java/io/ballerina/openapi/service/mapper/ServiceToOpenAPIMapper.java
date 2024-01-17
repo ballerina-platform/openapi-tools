@@ -198,14 +198,14 @@ public class ServiceToOpenAPIMapper {
             if (openapi.getPaths() == null) {
                 // Take base path of service
                 // 02. Filter and set the ServerURLs according to endpoints. Complete the server section in OAS
-                ServersMapperImpl serversMapperImpl = new ServersMapperImpl(openapi, listeners, serviceDefinition);
+                ServersMapper serversMapperImpl = new ServersMapperImpl(openapi, listeners, serviceDefinition);
                 serversMapperImpl.setServers();
                 // 03. Filter path and component sections in OAS.
                 // Generate openApi string for the mentioned service name.
                 convertServiceToOpenAPI(serviceDefinition, openapi, semanticModel, moduleMemberVisitor, diagnostics);
                 ConstraintMapper constraintMapper = new ConstraintMapperImpl(openapi, moduleMemberVisitor,
                         diagnostics);
-                constraintMapper.addMapping();
+                constraintMapper.setConstraints();
                 return new OASResult(openapi, diagnostics);
             } else {
                 return new OASResult(openapi, oasResult.getDiagnostics());
@@ -246,7 +246,7 @@ public class ServiceToOpenAPIMapper {
         AdditionalData additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
         ResourceMapper resourceMapper = new ResourceMapperImpl(openAPI, resources, additionalData,
                 isTreatNilableAsOptionalParameter(serviceNode));
-        resourceMapper.addMapping();
+        resourceMapper.setOperation();
     }
 
     private static boolean isTreatNilableAsOptionalParameter(ServiceDeclarationNode serviceNode) {

@@ -36,7 +36,7 @@ import io.ballerina.openapi.service.mapper.Constants;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationBuilder;
+import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -56,17 +56,17 @@ import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_SUMMARY;
  */
 public class ParameterMapperImpl implements ParameterMapper {
     private final FunctionDefinitionNode functionDefinitionNode;
-    private final OperationBuilder operationBuilder;
+    private final OperationInventory operationInventory;
     private final Map<String, String> apidocs;
     private final AdditionalData additionalData;
     private final Components components;
     private final boolean treatNilableAsOptional;
 
-    public ParameterMapperImpl(FunctionDefinitionNode functionDefinitionNode, OperationBuilder operationBuilder,
+    public ParameterMapperImpl(FunctionDefinitionNode functionDefinitionNode, OperationInventory operationInventory,
                                Components components, Map<String, String> apiDocs, AdditionalData additionalData,
                                Boolean treatNilableAsOptional) {
         this.functionDefinitionNode = functionDefinitionNode;
-        this.operationBuilder = operationBuilder;
+        this.operationInventory = operationInventory;
         this.apidocs = apiDocs;
         this.additionalData = additionalData;
         this.components = components;
@@ -87,7 +87,7 @@ public class ParameterMapperImpl implements ParameterMapper {
                 continue;
             }
             if ((parameterType.equals("REQUEST") || parameterType.equals("PAYLOAD")) &&
-                    (Constants.GET.equalsIgnoreCase(operationBuilder.getHttpOperation()))) {
+                    (Constants.GET.equalsIgnoreCase(operationInventory.getHttpOperation()))) {
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
                 IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
                         parameterNode.location());
@@ -102,12 +102,12 @@ public class ParameterMapperImpl implements ParameterMapper {
         switch (parameterType) {
             case "QUERY" -> {
                 QueryParameterMapper queryParameterMapper = new QueryParameterMapper(parameterNode, apidocs,
-                        operationBuilder, components, treatNilableAsOptional, additionalData);
+                        operationInventory, components, treatNilableAsOptional, additionalData);
                 queryParameterMapper.setParameter();
             }
             case "HEADER" -> {
                 HeaderParameterMapper headerParameterMapper = new HeaderParameterMapper(parameterNode, apidocs,
-                        operationBuilder, components, treatNilableAsOptional, additionalData);
+                        operationInventory, components, treatNilableAsOptional, additionalData);
                 headerParameterMapper.setParameter();
             }
             case "PAYLOAD" -> {
@@ -117,7 +117,7 @@ public class ParameterMapperImpl implements ParameterMapper {
                 }
                 AnnotationNode annotation = getPayloadAnnotation(parameterNode);
                 RequestBodyMapper requestBodyMapper = new RequestBodyMapper((ParameterSymbol) symbol.get(), annotation,
-                        operationBuilder, functionDefinitionNode, components, apidocs, additionalData);
+                        operationInventory, functionDefinitionNode, components, apidocs, additionalData);
                 requestBodyMapper.setRequestBody();
             }
             case "REQUEST" -> {
@@ -126,7 +126,7 @@ public class ParameterMapperImpl implements ParameterMapper {
                 mediaType.setSchema(new Schema<>().description(WILD_CARD_SUMMARY));
                 requestBody.setContent(new Content().addMediaType(WILD_CARD_CONTENT_KEY, mediaType));
                 // The following method will only add the request body if it is not already set.
-                operationBuilder.setRequestBody(requestBody);
+                operationInventory.setRequestBody(requestBody);
             }
             default -> {
 
@@ -155,7 +155,7 @@ public class ParameterMapperImpl implements ParameterMapper {
                 SemanticModel semanticModel = additionalData.semanticModel();
                 PathParameterSymbol pathParameterSymbol = (PathParameterSymbol) semanticModel.symbol(pathParam).get();
                 PathParameterMapper pathParameterMapper = new PathParameterMapper(pathParameterSymbol, components,
-                        apidocs, operationBuilder, additionalData);
+                        apidocs, operationInventory, additionalData);
                 pathParameterMapper.setParameter();
             }
         }

@@ -26,7 +26,7 @@ import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationBuilder;
+import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.openapi.service.mapper.utils.MediaTypeUtils;
@@ -53,15 +53,15 @@ public class RequestBodyMapper {
     private final RequestBody requestBody = new RequestBody().required(true);
     private final TypeMapper typeMapper;
     private final SemanticModel semanticModel;
-    private final OperationBuilder operationBuilder;
+    private final OperationInventory operationInventory;
     private final String mediaTypeSubTypePrefix;
 
-    public RequestBodyMapper(ParameterSymbol reqParameter, AnnotationNode annotation, OperationBuilder operationBuilder,
-                             FunctionDefinitionNode resourceNode, Components components,
-                             Map<String, String> apiDocs, AdditionalData additionalData) {
+    public RequestBodyMapper(ParameterSymbol reqParameter, AnnotationNode annotation,
+                             OperationInventory operationInventory, FunctionDefinitionNode resourceNode,
+                             Components components, Map<String, String> apiDocs, AdditionalData additionalData) {
         this.typeMapper = new TypeMapperImpl(components, additionalData);
         this.semanticModel = additionalData.semanticModel();
-        this.operationBuilder = operationBuilder;
+        this.operationInventory = operationInventory;
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
         requestBody.description(apiDocs.get(removeStartingSingleQuote(reqParameter.getName().get())));
         extractAnnotationDetails(annotation);
@@ -69,7 +69,7 @@ public class RequestBodyMapper {
     }
 
     public void setRequestBody() {
-        operationBuilder.overrideRequestBody(requestBody);
+        operationInventory.overrideRequestBody(requestBody);
     }
 
     private void extractAnnotationDetails(AnnotationNode annotation) {

@@ -33,7 +33,7 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationBuilder;
+import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.type.RecordTypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
@@ -67,9 +67,9 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
     private TypeMapper typeMapper = null;
 
     public HeaderParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs,
-                                 OperationBuilder operationBuilder, Components components,
+                                 OperationInventory operationInventory, Components components,
                                  boolean treatNilableAsOptional, AdditionalData additionalData) {
-        super(operationBuilder);
+        super(operationInventory);
         Symbol parameterSymbol = additionalData.semanticModel().symbol(parameterNode).orElse(null);
         if (Objects.nonNull(parameterSymbol) && (parameterSymbol instanceof ParameterSymbol headerParameter)) {
             this.type = headerParameter.typeDescriptor();
@@ -163,7 +163,7 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
 
         Set<String> requiredHeaders = new HashSet<>();
         HashMap<String, RecordFieldSymbol> headerMap = new HashMap<>(recordTypeInfo.typeSymbol().fieldDescriptors());
-        Map<String, Schema> headerSchemaMap = typeMapper.mapRecordFields(headerMap, requiredHeaders,
+        Map<String, Schema> headerSchemaMap = typeMapper.getSchemaForRecordFields(headerMap, requiredHeaders,
                 recordTypeInfo.name(), treatNilableAsOptional);
 
         List<Parameter> headerParameters = new ArrayList<>();

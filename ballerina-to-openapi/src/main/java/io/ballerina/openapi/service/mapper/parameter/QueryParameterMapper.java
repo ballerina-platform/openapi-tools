@@ -25,7 +25,7 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationBuilder;
+import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
@@ -53,9 +53,9 @@ public class QueryParameterMapper extends AbstractParameterMapper {
     private SemanticModel semanticModel;
 
     public QueryParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs,
-                                OperationBuilder operationBuilder, Components components,
+                                OperationInventory operationInventory, Components components,
                                 boolean treatNilableAsOptional, AdditionalData additionalData) {
-        super(operationBuilder);
+        super(operationInventory);
         Symbol parameterSymbol = additionalData.semanticModel().symbol(parameterNode).orElse(null);
         if (Objects.nonNull(parameterSymbol) && (parameterSymbol instanceof ParameterSymbol queryParameter)) {
             this.type = queryParameter.typeDescriptor();

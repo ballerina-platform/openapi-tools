@@ -83,7 +83,7 @@ public class ConstraintMapperImpl implements ConstraintMapper {
         this.diagnostics = diagnostics;
     }
 
-    public void addMapping() {
+    public void setConstraints() {
         Components components = openAPI.getComponents();
         if (Objects.isNull(components)) {
             return;

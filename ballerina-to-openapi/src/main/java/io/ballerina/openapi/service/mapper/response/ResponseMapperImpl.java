@@ -35,7 +35,7 @@ import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationBuilder;
+import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
@@ -81,26 +81,26 @@ public class ResponseMapperImpl implements ResponseMapper {
     private final Map<String, Map<String, Header>> headersMap = new HashMap<>();
     private final String mediaTypeSubTypePrefix;
     private final ApiResponses apiResponses = new ApiResponses();
-    private final OperationBuilder operationBuilder;
+    private final OperationInventory operationInventory;
 
-    public ResponseMapperImpl(FunctionDefinitionNode resourceNode, OperationBuilder operationBuilder,
+    public ResponseMapperImpl(FunctionDefinitionNode resourceNode, OperationInventory operationInventory,
                               Components components, AdditionalData additionalData) {
         this.typeMapper = new TypeMapperImpl(components, additionalData);
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
         this.semanticModel = additionalData.semanticModel();
-        this.operationBuilder = operationBuilder;
+        this.operationInventory = operationInventory;
         extractAnnotationDetails(resourceNode);
 
-        String defaultStatusCode = operationBuilder.getHttpOperation().equalsIgnoreCase(POST) ? HTTP_201 : HTTP_200;
+        String defaultStatusCode = operationInventory.getHttpOperation().equalsIgnoreCase(POST) ? HTTP_201 : HTTP_200;
         TypeSymbol returnTypeSymbol = getReturnTypeSymbol(resourceNode);
         createResponseMapping(returnTypeSymbol, defaultStatusCode);
-        if (operationBuilder.hasDataBinding()) {
+        if (operationInventory.hasDataBinding()) {
             addResponseMappingForDataBindingFailures();
         }
     }
 
     public void setApiResponses() {
-        operationBuilder.setApiResponses(apiResponses);
+        operationInventory.setApiResponses(apiResponses);
     }
 
     private TypeSymbol getReturnTypeSymbol(FunctionDefinitionNode resourceNode) {
@@ -421,7 +421,7 @@ public class ResponseMapperImpl implements ResponseMapper {
 
         Map<String, RecordFieldSymbol> recordFieldMap = new HashMap<>(headersInfo.headerRecordType().
                 fieldDescriptors());
-        Map<String, Schema> recordFieldsMapping = typeMapper.mapRecordFields(recordFieldMap, new HashSet<>(),
+        Map<String, Schema> recordFieldsMapping = typeMapper.getSchemaForRecordFields(recordFieldMap, new HashSet<>(),
                 headersInfo.recordName(), false);
         return mapRecordFieldToHeaders(recordFieldsMapping);
     }

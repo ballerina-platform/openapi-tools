@@ -24,7 +24,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationBuilder;
+import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.tools.diagnostics.Location;
@@ -48,9 +48,9 @@ public class PathParameterMapper extends AbstractParameterMapper {
     private final List<OpenAPIMapperDiagnostic> diagnostics;
 
     public PathParameterMapper(PathParameterSymbol pathParameterSymbol, Components components,
-                               Map<String, String> apiDocs, OperationBuilder operationBuilder,
+                               Map<String, String> apiDocs, OperationInventory operationInventory,
                                AdditionalData additionalData) {
-        super(operationBuilder);
+        super(operationInventory);
         this.location = pathParameterSymbol.getLocation().orElse(null);
         this.pathSegmentKind = pathParameterSymbol.pathSegmentKind();
         this.type = pathParameterSymbol.typeDescriptor();

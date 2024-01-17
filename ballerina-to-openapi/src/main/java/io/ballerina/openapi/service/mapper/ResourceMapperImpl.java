@@ -27,7 +27,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.OperationBuilder;
+import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapperImpl;
 import io.ballerina.openapi.service.mapper.response.ResponseMapper;
@@ -73,7 +73,7 @@ public class ResourceMapperImpl implements ResourceMapper {
         this.treatNilableAsOptional = treatNilableAsOptional;
     }
 
-    public void addMapping() {
+    public void setOperation() {
         Components components = openAPI.getComponents();
         if (components == null) {
             components = new Components();
@@ -83,7 +83,7 @@ public class ResourceMapperImpl implements ResourceMapper {
             components.setSchemas(new TreeMap<>());
         }
         for (FunctionDefinitionNode resource : resources) {
-            generateResourceMapping(resource, components);
+            addResourceMapping(resource, components);
         }
         if (components.getSchemas().isEmpty()) {
             openAPI.setComponents(null);
@@ -91,7 +91,7 @@ public class ResourceMapperImpl implements ResourceMapper {
         openAPI.setPaths(pathObject);
     }
 
-    private void generateResourceMapping(FunctionDefinitionNode resource, Components components) {
+    private void addResourceMapping(FunctionDefinitionNode resource, Components components) {
         String path = MapperCommonUtils.unescapeIdentifier(generateRelativePath(resource));
         String httpMethod = resource.functionName().toString().trim();
         if (httpMethod.equals(String.format("'%s", DEFAULT)) || httpMethod.equals(DEFAULT)) {
@@ -101,11 +101,11 @@ public class ResourceMapperImpl implements ResourceMapper {
             additionalData.diagnostics().add(error);
         } else {
             convertResourceToOperation(resource, httpMethod, path, components).ifPresent(
-                    operation -> generatePathItem(httpMethod, pathObject, operation.getOperation(), path));
+                    operation -> addPathItem(httpMethod, pathObject, operation.getOperation(), path));
         }
     }
 
-    private void generatePathItem(String httpMethod, Paths path, Operation operation, String pathName) {
+    private void addPathItem(String httpMethod, Paths path, Operation operation, String pathName) {
         PathItem pathItem = new PathItem();
         switch (httpMethod.trim().toUpperCase(Locale.ENGLISH)) {
             case Constants.GET -> {
@@ -173,11 +173,12 @@ public class ResourceMapperImpl implements ResourceMapper {
      *
      * @return Operation Adaptor object of given resource
      */
-    private Optional<OperationBuilder> convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
-                                                                  String generateRelativePath, Components components) {
-        OperationBuilder operationBuilder = new OperationBuilder();
-        operationBuilder.setHttpOperation(httpMethod);
-        operationBuilder.setPath(generateRelativePath);
+    private Optional<OperationInventory> convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
+                                                                    String generateRelativePath,
+                                                                    Components components) {
+        OperationInventory operationInventory = new OperationInventory();
+        operationInventory.setHttpOperation(httpMethod);
+        operationInventory.setPath(generateRelativePath);
         /* Set operation id */
         String resName = (resource.functionName().text() + "_" +
                 generateRelativePath).replaceAll("\\{///}", "_");
@@ -185,12 +186,12 @@ public class ResourceMapperImpl implements ResourceMapper {
         if (generateRelativePath.equals("/")) {
             resName = resource.functionName().text();
         }
-        operationBuilder.setOperationId(getOperationId(resName));
+        operationInventory.setOperationId(getOperationId(resName));
         // Set operation summary
         // Map API documentation
-        Map<String, String> apiDocs = listAPIDocumentations(resource, operationBuilder);
+        Map<String, String> apiDocs = listAPIDocumentations(resource, operationInventory);
         //Add path parameters if in path and query parameters
-        ParameterMapper parameterMapper = new ParameterMapperImpl(resource, operationBuilder, components, apiDocs,
+        ParameterMapper parameterMapper = new ParameterMapperImpl(resource, operationInventory, components, apiDocs,
                 additionalData, treatNilableAsOptional);
         parameterMapper.setParameters();
         List<OpenAPIMapperDiagnostic> diagnostics = additionalData.diagnostics();
@@ -205,17 +206,17 @@ public class ResourceMapperImpl implements ResourceMapper {
             }
         }
 
-        ResponseMapper responseMapper = new ResponseMapperImpl(resource, operationBuilder, components,
+        ResponseMapper responseMapper = new ResponseMapperImpl(resource, operationInventory, components,
                 additionalData);
         responseMapper.setApiResponses();
-        return Optional.of(operationBuilder);
+        return Optional.of(operationInventory);
     }
 
     /**
      * Filter the API documentations from resource function node.
      */
     private Map<String, String> listAPIDocumentations(FunctionDefinitionNode resource,
-                                                      OperationBuilder operationBuilder) {
+                                                      OperationInventory operationInventory) {
 
         Map<String, String> apiDocs = new HashMap<>();
         if (resource.metadata().isPresent()) {
@@ -229,7 +230,7 @@ public class ResourceMapperImpl implements ResourceMapper {
                     if (description.isPresent()) {
                         String resourceFunctionAPI = description.get().trim();
                         apiDocs = documentation1.parameterMap();
-                        operationBuilder.setSummary(resourceFunctionAPI);
+                        operationInventory.setSummary(resourceFunctionAPI);
                     }
                 }
             }

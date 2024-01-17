@@ -19,5 +19,5 @@ package io.ballerina.openapi.service.mapper;
 
 public interface ResourceMapper {
 
-    void addMapping();
+    void setOperation();
 }
