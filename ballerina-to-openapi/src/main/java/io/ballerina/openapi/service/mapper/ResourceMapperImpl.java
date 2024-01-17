@@ -94,7 +94,7 @@ public class ResourceMapperImpl implements ResourceMapper {
     private void generateResourceMapping(FunctionDefinitionNode resource, Components components) {
         String path = MapperCommonUtils.unescapeIdentifier(generateRelativePath(resource));
         String httpMethod = resource.functionName().toString().trim();
-        if (httpMethod.equals("'" + DEFAULT) || httpMethod.equals(DEFAULT)) {
+        if (httpMethod.equals(String.format("'%s", DEFAULT)) || httpMethod.equals(DEFAULT)) {
             DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_100;
             IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
                     resource.location());
