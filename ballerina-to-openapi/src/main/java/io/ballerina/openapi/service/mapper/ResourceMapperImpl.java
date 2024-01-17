@@ -17,17 +17,21 @@
  */
 package io.ballerina.openapi.service.mapper;
 
+import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Documentable;
 import io.ballerina.compiler.api.symbols.Documentation;
+import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
+import io.ballerina.openapi.service.mapper.parameter.HateoasMapper;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapperImpl;
 import io.ballerina.openapi.service.mapper.response.ResponseMapper;
@@ -39,6 +43,9 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.links.Link;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.HashMap;
 import java.util.List;
@@ -61,6 +68,7 @@ public class ResourceMapperImpl implements ResourceMapper {
     private final OpenAPI openAPI;
     private final List<FunctionDefinitionNode> resources;
     private final boolean treatNilableAsOptional;
+    private final HateoasMapper hateoasMapper;
 
     /**
      * Initializes a resource parser for openApi.
@@ -71,9 +79,10 @@ public class ResourceMapperImpl implements ResourceMapper {
         this.resources = resources;
         this.additionalData = additionalData;
         this.treatNilableAsOptional = treatNilableAsOptional;
+        this.hateoasMapper = new HateoasMapper();
     }
 
-    public void setOperation() {
+    public void setOperation(String packageId, SemanticModel semanticModel, ServiceDeclarationNode service) {
         Components components = openAPI.getComponents();
         if (components == null) {
             components = new Components();
@@ -83,7 +92,7 @@ public class ResourceMapperImpl implements ResourceMapper {
             components.setSchemas(new TreeMap<>());
         }
         for (FunctionDefinitionNode resource : resources) {
-            addResourceMapping(resource, components);
+            addResourceMapping(packageId, semanticModel, resource, components, service);
         }
         if (components.getSchemas().isEmpty()) {
             openAPI.setComponents(null);
@@ -91,7 +100,8 @@ public class ResourceMapperImpl implements ResourceMapper {
         openAPI.setPaths(pathObject);
     }
 
-    private void addResourceMapping(FunctionDefinitionNode resource, Components components) {
+    private void addResourceMapping(String packageId, SemanticModel semanticModel, FunctionDefinitionNode resource,
+                                    Components components, ServiceDeclarationNode service) {
         String path = MapperCommonUtils.unescapeIdentifier(generateRelativePath(resource));
         String httpMethod = resource.functionName().toString().trim();
         if (httpMethod.equals(String.format("'%s", DEFAULT)) || httpMethod.equals(DEFAULT)) {
@@ -100,8 +110,8 @@ public class ResourceMapperImpl implements ResourceMapper {
                     resource.location());
             additionalData.diagnostics().add(error);
         } else {
-            convertResourceToOperation(resource, httpMethod, path, components).ifPresent(
-                    operation -> addPathItem(httpMethod, pathObject, operation.getOperation(), path));
+            convertResourceToOperation(packageId, semanticModel, resource, httpMethod, path, components, service)
+                    .ifPresent(operation -> addPathItem(httpMethod, pathObject, operation.getOperation(), path));
         }
     }
 
@@ -173,9 +183,10 @@ public class ResourceMapperImpl implements ResourceMapper {
      *
      * @return Operation Adaptor object of given resource
      */
-    private Optional<OperationInventory> convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
-                                                                    String generateRelativePath,
-                                                                    Components components) {
+    private Optional<OperationInventory> convertResourceToOperation(String packageId, SemanticModel semanticModel,
+                                                                    FunctionDefinitionNode resource, String httpMethod,
+                                                                    String generateRelativePath, Components components,
+                                                                    ServiceDeclarationNode service) {
         OperationInventory operationInventory = new OperationInventory();
         operationInventory.setHttpOperation(httpMethod);
         operationInventory.setPath(generateRelativePath);
@@ -208,8 +219,27 @@ public class ResourceMapperImpl implements ResourceMapper {
 
         ResponseMapper responseMapper = new ResponseMapperImpl(resource, operationInventory, components,
                 additionalData);
+        setSwaggerLinksInApiResponse(packageId, semanticModel, service, responseMapper.getApiResponses(), resource);
         responseMapper.setApiResponses();
         return Optional.of(operationInventory);
+    }
+
+    private void setSwaggerLinksInApiResponse(String packageId, SemanticModel semanticModel,
+                                              ServiceDeclarationNode service, ApiResponses apiResponses,
+                                              FunctionDefinitionNode resource) {
+        Optional<Symbol> serviceDeclarationOpt = semanticModel.symbol(service);
+        ServiceDeclarationSymbol serviceSymbol = (ServiceDeclarationSymbol) serviceDeclarationOpt.get();
+        int serviceId = serviceSymbol.hashCode();
+        Map<String, Link> swaggerLinks = this.hateoasMapper.mapHateoasLinksToSwaggerLinks(packageId, serviceId,
+                resource);
+        if (!swaggerLinks.isEmpty()) {
+            for (Map.Entry<String, ApiResponse> entry : apiResponses.entrySet()) {
+                int statusCode = Integer.parseInt(entry.getKey());
+                if (statusCode >= 200 && statusCode < 300) {
+                    entry.getValue().setLinks(swaggerLinks);
+                }
+            }
+        }
     }
 
     /**

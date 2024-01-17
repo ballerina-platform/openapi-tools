@@ -103,6 +103,10 @@ public class ResponseMapperImpl implements ResponseMapper {
         operationInventory.setApiResponses(apiResponses);
     }
 
+    public ApiResponses getApiResponses() {
+        return apiResponses;
+    }
+
     private TypeSymbol getReturnTypeSymbol(FunctionDefinitionNode resourceNode) {
         Optional<Symbol> symbol = semanticModel.symbol(resourceNode);
         if (symbol.isEmpty() || !(symbol.get() instanceof ResourceMethodSymbol resourceMethodSymbol)) {

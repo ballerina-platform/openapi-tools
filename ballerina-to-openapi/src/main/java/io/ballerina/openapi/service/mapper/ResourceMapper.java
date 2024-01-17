@@ -17,7 +17,10 @@
  */
 package io.ballerina.openapi.service.mapper;
 
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+
 public interface ResourceMapper {
 
-    void setOperation();
+    void setOperation(String packageId, SemanticModel semanticModel, ServiceDeclarationNode service);
 }
