@@ -33,6 +33,7 @@ public class Constants {
     public static final String TRUE = "true";
     public static final String MODE = "mode";
     public static final String CLIENT = "client";
+    public static final String CACHE_FILE = "openapi-cache.txt";
 
     /**
      * Enum class for containing diagnostic messages.
