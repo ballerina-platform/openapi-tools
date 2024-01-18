@@ -25,7 +25,6 @@ import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,7 +42,7 @@ public abstract class AbstractParameterMapper {
         if (Objects.nonNull(parameter)) {
             return List.of(parameter);
         }
-        return new ArrayList<>();
+        return List.of();
     }
 
     public void setParameter() {
