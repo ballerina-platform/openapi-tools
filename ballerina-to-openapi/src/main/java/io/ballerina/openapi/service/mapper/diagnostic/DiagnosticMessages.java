@@ -20,9 +20,9 @@ package io.ballerina.openapi.service.mapper.diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 /**
- * This {@code DiagnosticMessages} enum class for containing the error message related to ballerina to openapi command.
+ * This {@link DiagnosticMessages} enum class for containing the error message related to ballerina to openapi command.
  *
- * @since 2.0.0
+ * @since 1.0.0
  */
 public enum DiagnosticMessages {
     OAS_CONVERTOR_100("OAS_CONVERTOR_100",

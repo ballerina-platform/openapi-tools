@@ -22,9 +22,9 @@ import io.ballerina.tools.diagnostics.Location;
 
 import java.util.Optional;
 /**
- * This {@code OpenAPIConverterDiagnostic} represents diagnostic type in the ballerina to openapi command.
+ * This {@link OpenAPIMapperDiagnostic} represents diagnostic type in the ballerina to openapi command.
  *
- * @since 2.0.0
+ * @since 1.0.0
  */
 public interface OpenAPIMapperDiagnostic {
 

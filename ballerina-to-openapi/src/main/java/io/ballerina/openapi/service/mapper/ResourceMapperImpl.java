@@ -51,9 +51,10 @@ import static io.ballerina.openapi.service.mapper.Constants.DEFAULT;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOperationId;
 
 /**
- * This class will do resource mapping from ballerina to openApi.
+ * This {@link ResourceMapperImpl} class is the implementation of the {@link ResourceMapper} interface.
+ * This class provides the functionality for mapping the Ballerina resources to OpenAPI operations.
  *
- * @since 2.0.0
+ * @since 1.0.0
  */
 public class ResourceMapperImpl implements ResourceMapper {
     private final Paths pathObject = new Paths();

@@ -37,6 +37,12 @@ import java.util.Map;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
+/**
+ * This {@link PathParameterMapper} class represents the path parameter mapper.
+ * This class provides functionality for mapping the Ballerina path parameter to OpenAPI path parameter.
+ *
+ * @since 1.9.0
+ */
 public class PathParameterMapper extends AbstractParameterMapper {
 
     private final TypeSymbol type;

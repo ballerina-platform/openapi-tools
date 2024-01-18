@@ -52,7 +52,10 @@ import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_CONTENT_KE
 import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_SUMMARY;
 
 /**
- * OpenAPIParameterMapper provides functionality for converting ballerina parameter to OAS parameter model.
+ * The {@link ParameterMapperImpl} class is the implementation class for the {@link ParameterMapper}.
+ * This class provides functionalities to map the Ballerina resource parameters to OpenAPI operation parameters.
+ *
+ * @since 1.9.0
  */
 public class ParameterMapperImpl implements ParameterMapper {
     private final FunctionDefinitionNode functionDefinitionNode;

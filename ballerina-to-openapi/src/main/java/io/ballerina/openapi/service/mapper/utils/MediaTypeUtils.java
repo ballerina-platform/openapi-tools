@@ -35,6 +35,11 @@ import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
+/**
+ * This {@link MediaTypeUtils} represents the util functions for populating media type.
+ *
+ * @since 1.9.0
+ */
 public final class MediaTypeUtils {
 
     private static final String JSON_PATTERN = "^(application|text)\\/(.*[.+-]|)json$";

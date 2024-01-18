@@ -51,6 +51,12 @@ import java.util.Set;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getRecordFieldTypeDescription;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
+/**
+ * This {@link RecordTypeMapper} class represents the record type mapper.
+ * This class provides functionalities for mapping the Ballerina record type to OpenAPI type schema.
+ *
+ * @since 1.9.0
+ */
 public class RecordTypeMapper extends AbstractTypeMapper {
 
     public RecordTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {

@@ -22,6 +22,9 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 
+/**
+ * The {@link ServersMapper} represents the interface for servers mapper.
+ */
 public interface ServersMapper {
 
     void setServers();

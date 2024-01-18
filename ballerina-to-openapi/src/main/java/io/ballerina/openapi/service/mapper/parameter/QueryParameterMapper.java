@@ -41,6 +41,12 @@ import java.util.Objects;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
+/**
+ * This {@link QueryParameterMapper} class represents the query parameter mapper.
+ * This class provides functionality for mapping the Ballerina query parameter to OpenAPI query parameter.
+ *
+ * @since 1.9.0
+ */
 public class QueryParameterMapper extends AbstractParameterMapper {
 
     private TypeSymbol type = null;

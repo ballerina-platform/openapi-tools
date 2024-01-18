@@ -25,6 +25,12 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
+/**
+ * This {@link MapTypeMapper} class represents the map type mapper.
+ * This class provides functionalities for mapping the Ballerina map type to OpenAPI type schema.
+ *
+ * @since 1.9.0
+ */
 public class MapTypeMapper extends AbstractTypeMapper {
 
     public MapTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {

@@ -30,6 +30,12 @@ import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * This {@link ErrorTypeMapper} class represents the error type mapper.
+ * This class provides functionalities for mapping the Ballerina error type to OpenAPI type schema.
+ *
+ * @since 1.9.0
+ */
 public class ErrorTypeMapper extends AbstractTypeMapper {
 
     public ErrorTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {

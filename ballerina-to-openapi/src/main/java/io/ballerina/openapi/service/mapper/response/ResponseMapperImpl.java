@@ -73,6 +73,13 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extrac
 import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.getMediaTypeFromType;
 import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.isSameMediaType;
 
+/**
+ * This {@link ResponseMapperImpl} class is the implementation of the {@link ResponseMapper} interface.
+ * This class provides functionalities for mapping the Ballerina return type to OpenAPI
+ * response.
+ *
+ * @since 1.9.0
+ */
 public class ResponseMapperImpl implements ResponseMapper {
     private final TypeMapper typeMapper;
     private final SemanticModel semanticModel;

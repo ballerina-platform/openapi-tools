@@ -25,6 +25,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * This {@link TypeMapper} represents the interface for type mapper.
+ *
+ * @since 1.9.0
+ */
 public interface TypeMapper {
 
     Schema getTypeSchema(TypeSymbol typeSymbol);
