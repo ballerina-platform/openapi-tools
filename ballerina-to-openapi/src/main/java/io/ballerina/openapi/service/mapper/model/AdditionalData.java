@@ -24,6 +24,9 @@ import java.util.List;
 
 /**
  * This {@link AdditionalData} record stores the additional data required for the openapi service mapper.
+ * @param semanticModel - The semantic model of the ballerina project.
+ * @param moduleMemberVisitor - The module member visitor.
+ * @param diagnostics - The list of diagnostics.
  *
  * @since 1.9.0
  */
