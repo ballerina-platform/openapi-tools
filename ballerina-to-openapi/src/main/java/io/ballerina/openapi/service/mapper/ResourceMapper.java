@@ -17,6 +17,9 @@
  */
 package io.ballerina.openapi.service.mapper;
 
+/**
+ * The {@link ResourceMapper} represents the interface for resource mapper.
+ */
 public interface ResourceMapper {
 
     void setOperation();

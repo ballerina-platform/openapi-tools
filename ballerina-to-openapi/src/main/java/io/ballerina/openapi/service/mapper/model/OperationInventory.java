@@ -27,7 +27,9 @@ import java.util.Objects;
 import static io.ballerina.openapi.service.mapper.Constants.SLASH;
 
 /**
- * This class will hold operation details specific to HTTP operation.
+ * This {@link OperationInventory} class represents the operation inventory.
+ *
+ * @since 1.9.0
  */
 public class OperationInventory {
 

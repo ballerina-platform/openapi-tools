@@ -28,6 +28,11 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * This {@link AbstractParameterMapper} class represents the abstract parameter mapper.
+ *
+ * @since 1.9.0
+ */
 public abstract class AbstractParameterMapper {
     final OperationInventory operationInventory;
 

@@ -58,6 +58,12 @@ import static io.ballerina.openapi.service.mapper.Constants.SPECIAL_CHAR_REGEX;
 import static io.ballerina.openapi.service.mapper.Constants.TITLE;
 import static io.ballerina.openapi.service.mapper.Constants.VERSION;
 
+/**
+ * This {@link InfoMapper} class represents the info mapper.
+ * This class provides functionalities for mapping the Ballerina service information to OpenAPI info section.
+ *
+ * @since 1.0.0
+ */
 public final class InfoMapper {
 
     /**

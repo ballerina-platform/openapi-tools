@@ -31,6 +31,12 @@ import java.util.Objects;
 
 import static io.ballerina.openapi.service.mapper.type.TypeMapperImpl.createComponentMapping;
 
+/**
+ * This {@link ReferenceTypeMapper} class represents the reference type mapper.
+ * This class provides functionalities for mapping the Ballerina type reference type to OpenAPI type schema.
+ *
+ * @since 1.9.0
+ */
 public class ReferenceTypeMapper extends AbstractTypeMapper {
 
     public ReferenceTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {

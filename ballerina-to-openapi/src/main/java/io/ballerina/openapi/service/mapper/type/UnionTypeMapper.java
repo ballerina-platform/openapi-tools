@@ -40,6 +40,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * This {@link UnionTypeMapper} class represents the union type mapper.
+ * This class provides functionalities for mapping the Ballerina union type to OpenAPI type schema.
+ *
+ * @since 1.9.0
+ */
 public class UnionTypeMapper extends AbstractTypeMapper {
 
     private final boolean isEnumType;

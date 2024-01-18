@@ -48,6 +48,12 @@ import static io.ballerina.openapi.service.mapper.Constants.PUBLIC;
 import static io.ballerina.openapi.service.mapper.Constants.S_MAX_AGE;
 import static io.ballerina.openapi.service.mapper.Constants.TRUE;
 
+/**
+ * This {@link CacheHeaderUtils} class provides functionalities for mapping the Ballerina cache header to OpenAPI
+ * cache header.
+ *
+ * @since 1.9.0
+ */
 public final class CacheHeaderUtils {
 
     private CacheHeaderUtils() {

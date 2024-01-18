@@ -23,9 +23,9 @@ import io.ballerina.tools.diagnostics.Location;
 import java.util.Optional;
 
 /**
- * This {@code ExceptionDiagnostic} represents all the errors that happens during the code generation process.
+ * This {@link ExceptionDiagnostic} represents all the errors that happens during the code generation process.
  *
- * @since 2.0.0
+ * @since 1.0.0
  */
 public class ExceptionDiagnostic implements OpenAPIMapperDiagnostic {
     private final String code;

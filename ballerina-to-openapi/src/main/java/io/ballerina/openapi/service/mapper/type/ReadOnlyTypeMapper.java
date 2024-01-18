@@ -28,6 +28,12 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * This {@link ReadOnlyTypeMapper} class represents the read only type mapper.
+ * This class provides functionalities for mapping the Ballerina read only type to OpenAPI type schema.
+ *
+ * @since 1.9.0
+ */
 public class ReadOnlyTypeMapper extends AbstractTypeMapper {
 
     public ReadOnlyTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {

@@ -48,6 +48,12 @@ import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.isSameMed
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractAnnotationFieldDetails;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
 
+/**
+ * This {@link RequestBodyMapper} class represents the request body mapper.
+ * This class provides functionality for mapping the Ballerina payload parameter to OpenAPI request body.
+ *
+ * @since 1.9.0
+ */
 public class RequestBodyMapper {
     private List<String> allowedMediaTypes = new ArrayList<>();
     private final RequestBody requestBody = new RequestBody().required(true);

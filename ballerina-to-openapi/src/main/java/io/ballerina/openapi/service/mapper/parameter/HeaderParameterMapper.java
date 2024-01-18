@@ -56,6 +56,12 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
+/**
+ * This {@link HeaderParameterMapper} class represents the header parameter mapper.
+ * This mapper provides functionalities to map the Ballerina header parameter to OpenAPI header parameter.
+ *
+ * @since 1.9.0
+ */
 public class HeaderParameterMapper extends AbstractParameterMapper {
 
     private TypeSymbol type = null;

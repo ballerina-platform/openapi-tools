@@ -22,9 +22,9 @@ import java.util.Optional;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.normalizeTitle;
 
 /**
- * This {@code OpenAPIInfo} contains details related to openAPI info section.
+ * This {@link OpenAPIInfo} contains details related to openAPI info section.
  *
- * @since 2.0.0
+ * @since 1.0.0
  */
 public class OpenAPIInfo {
     private final String title;

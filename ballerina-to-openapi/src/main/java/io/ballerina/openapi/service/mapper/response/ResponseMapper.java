@@ -17,6 +17,11 @@
  */
 package io.ballerina.openapi.service.mapper.response;
 
+/**
+ * This {@link ResponseMapper} represents the interface for response mapper.
+ *
+ * @since 1.9.0
+ */
 public interface ResponseMapper {
 
     void setApiResponses();

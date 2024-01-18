@@ -39,6 +39,12 @@ import static io.ballerina.openapi.service.mapper.Constants.FLOAT;
 import static io.ballerina.openapi.service.mapper.Constants.INT32;
 import static io.ballerina.openapi.service.mapper.Constants.INT64;
 
+/**
+ * This {@link SimpleTypeMapper} class represents the simple type mapper.
+ * This class provides functionalities for mapping Ballerina simple types to OpenAPI type schema.
+ *
+ * @since 1.9.0
+ */
 public class SimpleTypeMapper extends AbstractTypeMapper {
 
     public SimpleTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {

@@ -25,6 +25,12 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
+/**
+ * This {@link TableTypeMapper} class represents the table type mapper.
+ * This class provides functionalities for mapping the Ballerina table type to OpenAPI type schema.
+ *
+ * @since 1.9.0
+ */
 public class TableTypeMapper extends AbstractTypeMapper {
 
     public TableTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {

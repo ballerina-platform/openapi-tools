@@ -17,6 +17,11 @@
  */
 package io.ballerina.openapi.service.mapper.constraint;
 
+/**
+ * This {@link ConstraintMapper} class represents the interface for constraint mapper.
+ *
+ * @since 1.9.0
+ */
 public interface ConstraintMapper {
 
     void setConstraints();

@@ -70,6 +70,12 @@ import static io.ballerina.openapi.service.mapper.constraint.Constants.PATTERN;
 import static io.ballerina.openapi.service.mapper.constraint.Constants.STRING;
 import static io.ballerina.openapi.service.mapper.constraint.Constants.VALUE;
 
+/**
+ * This {@link ConstraintMapperImpl} class represents the implementation of the {@link ConstraintMapper}.
+ * This mapper provides functionalities to set the validations details from the constraint annotations.
+ *
+ * @since 1.9.0
+ */
 public class ConstraintMapperImpl implements ConstraintMapper {
 
     private final OpenAPI openAPI;

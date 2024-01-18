@@ -32,6 +32,12 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * This {@link TupleTypeMapper} class represents the tuple type mapper.
+ * This class provides functionalities for mapping the Ballerina tuple type to OpenAPI type schema.
+ *
+ * @since 1.9.0
+ */
 public class TupleTypeMapper extends AbstractTypeMapper {
 
     public TupleTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {
