@@ -48,7 +48,10 @@ import static io.ballerina.openapi.service.mapper.Constants.PORT;
 import static io.ballerina.openapi.service.mapper.Constants.SERVER;
 
 /**
- * Extract OpenApi server information from and Ballerina endpoint.
+ * This {@link ServersMapperImpl} class is the implementation of the {@link ServersMapper} interface.
+ * This class provides the functionality for mapping Ballerina listener information to OpenAPI servers section.
+ *
+ * @since 1.0.0
  */
 public class ServersMapperImpl implements ServersMapper {
 

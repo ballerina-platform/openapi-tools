@@ -27,6 +27,11 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * This {@link AbstractTypeMapper} class represents the abstract type mapper.
+ *
+ * @since 1.9.0
+ */
 public abstract class AbstractTypeMapper {
 
     final String name;

@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * This {@code OASResult} is used to contain OpenAPI definition in string format and error list.
+ * This {@link OASResult} is used to contain OpenAPI definition in string format and error list.
  *
- * @since 2.0.0
+ * @since 1.0.0
  */
 public class OASResult {
     private OpenAPI openAPI;

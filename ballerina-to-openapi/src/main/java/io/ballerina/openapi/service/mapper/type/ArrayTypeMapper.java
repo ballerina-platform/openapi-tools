@@ -25,6 +25,12 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
+/**
+ * This {@link ArrayTypeMapper} class represents the array type mapper.
+ * This class provides functionalities for mapping the Ballerina array type to OpenAPI type schema.
+ *
+ * @since 1.9.0
+ */
 public class ArrayTypeMapper extends AbstractTypeMapper {
 
     public ArrayTypeMapper(TypeReferenceTypeSymbol typeSymbol, AdditionalData additionalData) {

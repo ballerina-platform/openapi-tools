@@ -20,6 +20,9 @@ package io.ballerina.openapi.service.mapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 
+/**
+ * The {@link ResourceMapper} represents the interface for resource mapper.
+ */
 public interface ResourceMapper {
 
     void setOperation(String packageId, SemanticModel semanticModel, ServiceDeclarationNode service);

@@ -25,10 +25,14 @@ import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * This {@link AbstractParameterMapper} class represents the abstract parameter mapper.
+ *
+ * @since 1.9.0
+ */
 public abstract class AbstractParameterMapper {
     final OperationInventory operationInventory;
 
@@ -43,7 +47,7 @@ public abstract class AbstractParameterMapper {
         if (Objects.nonNull(parameter)) {
             return List.of(parameter);
         }
-        return new ArrayList<>();
+        return List.of();
     }
 
     public void setParameter() {

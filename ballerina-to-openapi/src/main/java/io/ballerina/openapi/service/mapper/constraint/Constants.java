@@ -1,5 +1,10 @@
 package io.ballerina.openapi.service.mapper.constraint;
 
+/**
+ * The {@link Constants} class contains the constants used in the constraint mapper.
+ *
+ * @since 1.9.0
+ */
 public final class Constants {
 
     private Constants() {

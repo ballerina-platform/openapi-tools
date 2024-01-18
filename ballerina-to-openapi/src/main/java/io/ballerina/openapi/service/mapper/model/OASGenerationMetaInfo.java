@@ -24,7 +24,7 @@ import io.ballerina.projects.Project;
 import java.nio.file.Path;
 
 /**
- * This {@code OASGenerationMetaInfo} contains details related to openAPI specification.
+ * This {@link OASGenerationMetaInfo} contains details related to openAPI specification.
  *
  * @since 1.6.0
  */

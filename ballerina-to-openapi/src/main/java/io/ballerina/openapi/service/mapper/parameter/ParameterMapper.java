@@ -17,6 +17,11 @@
  */
 package io.ballerina.openapi.service.mapper.parameter;
 
+/**
+ * This {@link ParameterMapper} represents the interface for parameter mapper.
+ *
+ * @since 1.9.0
+ */
 public interface ParameterMapper {
 
     void setParameters();

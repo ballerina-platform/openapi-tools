@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * This class uses to store all the cache configuration details.
  *
- * @since 2.0.0
+ * @since 1.0.0
  */
 public class CacheConfigAnnotation {
     private boolean mustRevalidate = true;

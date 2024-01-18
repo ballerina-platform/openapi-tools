@@ -23,10 +23,10 @@ import io.ballerina.tools.diagnostics.Location;
 import java.util.Optional;
 
 /**
- * This {@code IncompatibleResourceDiagnostic} represents the diagnostic that OAS not compatible with ballerina
+ * This {@link IncompatibleResourceDiagnostic} represents the diagnostic that OAS not compatible with ballerina
  * implementation.
  *
- * @since 2.0.0
+ * @since 1.0.0
  */
 public class IncompatibleResourceDiagnostic implements OpenAPIMapperDiagnostic {
     private final String code;

@@ -43,7 +43,6 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -51,11 +50,18 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
+/**
+ * This {@link HeaderParameterMapper} class represents the header parameter mapper.
+ * This mapper provides functionalities to map the Ballerina header parameter to OpenAPI header parameter.
+ *
+ * @since 1.9.0
+ */
 public class HeaderParameterMapper extends AbstractParameterMapper {
 
     private TypeSymbol type = null;
@@ -128,7 +134,7 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
 
     public List<Parameter> getParameterSchemaList() {
         if (Objects.isNull(type)) {
-            return new ArrayList<>();
+            return List.of();
         }
 
         List<Parameter> headerParameters = getRecordParameterSchema();
@@ -158,7 +164,7 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
     public List<Parameter> getRecordParameterSchema() {
         RecordTypeMapper.RecordTypeInfo recordTypeInfo = RecordTypeMapper.getDirectRecordType(type, null);
         if (Objects.isNull(recordTypeInfo)) {
-            return new ArrayList<>();
+            return List.of();
         }
 
         Set<String> requiredHeaders = new HashSet<>();
@@ -166,13 +172,10 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
         Map<String, Schema> headerSchemaMap = typeMapper.getSchemaForRecordFields(headerMap, requiredHeaders,
                 recordTypeInfo.name(), treatNilableAsOptional);
 
-        List<Parameter> headerParameters = new ArrayList<>();
-        for (Map.Entry<String, Schema> entry : headerSchemaMap.entrySet()) {
-            HeaderParameter headerParameter = createHeaderParameter(entry.getKey(), entry.getValue(),
-                    requiredHeaders.contains(entry.getKey()), getDefaultValueForHeaderField(entry.getKey()));
-            headerParameters.add(headerParameter);
-        }
-        return headerParameters;
+        return headerSchemaMap.entrySet().stream().map(
+                entry -> createHeaderParameter(entry.getKey(), entry.getValue(),
+                        requiredHeaders.contains(entry.getKey()), getDefaultValueForHeaderField(entry.getKey()))
+        ).collect(Collectors.toList());
     }
 
     private Object getDefaultValueForHeaderField(String name) {

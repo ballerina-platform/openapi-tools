@@ -38,7 +38,8 @@ import java.util.Set;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
 /**
- * The mapper class to map ballerina types to OAS components.
+ * This {@link TypeMapperImpl} class is the implementation of the {@link TypeMapper} interface.
+ * This class provides the functionality for mapping the Ballerina types to OpenAPI type schema.
  *
  * @since 1.9.0
  */
