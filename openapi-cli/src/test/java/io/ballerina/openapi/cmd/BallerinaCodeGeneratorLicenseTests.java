@@ -48,7 +48,7 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
     public void testClientGeneration() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--mode", "client"};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
 
@@ -72,7 +72,7 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
     public void testServiceTypeGeneration() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--with-service-type"};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
 
@@ -99,7 +99,7 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--with-service-type",
                 "--mode", "service"};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
 
@@ -123,7 +123,7 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
     public void testBothClientServiceGeneration() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
 
@@ -151,7 +151,7 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
         Path licenseHeader = resourceDir.resolve(Paths.get("expected_gen/licenses/license.txt"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
                 licenseHeader.toString(), "--with-service-type"};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         if (Files.exists(this.tmpDir.resolve("client.bal")) &&

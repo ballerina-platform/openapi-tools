@@ -49,7 +49,7 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
     public void testBallerinaToOpenAPIGeneration() {
         Path filePath = resourceDir.resolve(Paths.get("cmd/ballerina-to-openapi/ballerina-file.bal"));
         String[] args = {"--input", filePath.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
 
         String output = "";
@@ -65,7 +65,7 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
     public void testDefaultMethod() {
         Path filePath = resourceDir.resolve(Paths.get("cmd/ballerina-to-openapi/default_method.bal"));
         String[] args = {"--input", filePath.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
 
         String output = "";
@@ -85,7 +85,7 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
     public void testDefaultMethod02() {
         Path filePath = resourceDir.resolve(Paths.get("cmd/ballerina-to-openapi/default_method_02.bal"));
         String[] args = {"--input", filePath.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
 
         String output = "";
@@ -104,7 +104,7 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
     public void testHttpResponse() {
         Path filePath = resourceDir.resolve(Paths.get("cmd/ballerina-to-openapi/http_response.bal"));
         String[] args = {"--input", filePath.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
 
         String output = "";
@@ -128,7 +128,7 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
     public void testHttpRequest() {
         Path filePath = resourceDir.resolve(Paths.get("cmd/ballerina-to-openapi/http_request.bal"));
         String[] args = {"--input", filePath.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
 
         String output = "";
@@ -146,7 +146,7 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
     public void openapiAnnotationWithContract() {
         Path filePath = resourceDir.resolve(Paths.get("cmd/ballerina-to-openapi/project_1/service.bal"));
         String[] args = {"--input", filePath.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
 
         String output = "";
@@ -170,7 +170,7 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
     public void openapiAnnotationWithOutContract() {
         Path filePath = resourceDir.resolve(Paths.get("cmd/ballerina-to-openapi/project_2/service.bal"));
         String[] args = {"--input", filePath.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
 
         String output = "";
@@ -193,7 +193,7 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
     public void openapiAnnotationWithoutFields() {
         Path filePath = resourceDir.resolve(Paths.get("cmd/ballerina-to-openapi/project_3/service.bal"));
         String[] args = {"--input", filePath.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
 
         String output = "";

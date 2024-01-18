@@ -77,7 +77,7 @@ public abstract class OpenAPICommandTest {
         Path yamlPath = resourceDir.resolve(Paths.get(yamlFile));
         String[] args = {"--input", yamlPath.toString(), "--service-name", serviceName, "-o",
                          this.tmpDir.toString(), "--mode", "service"};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, this.tmpDir);
+        TestOpenApiCmd cmd = new TestOpenApiCmd(printStream, this.tmpDir);
         new CommandLine(cmd).parseArgs(args);
         String output = "";
         try {

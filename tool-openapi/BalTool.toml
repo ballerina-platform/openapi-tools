@@ -1,0 +1,8 @@
+[tool]
+id = "test_openapi"
+
+[[dependency]]
+path = "resources/openapi-cli-1.7.0-SNAPSHOT.jar"
+
+[[dependency]]
+path = "resources/libs/*"
