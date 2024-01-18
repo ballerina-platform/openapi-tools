@@ -221,8 +221,7 @@ public class GeneratorUtils {
      * @return - node lists
      * @throws BallerinaOpenApiException
      */
-    public static List<Node> getRelativeResourcePath(String path, Operation operation, List<Node> resourceFunctionDocs,
-                                                     Components components, boolean isWithoutDataBinding)
+    public static List<Node> getRelativeResourcePath(String path, Operation operation, List<Node> resourceFunctionDocs)
             throws BallerinaOpenApiException {
 
         List<Node> functionRelativeResourcePath = new ArrayList<>();
@@ -242,7 +241,7 @@ public class GeneratorUtils {
                      */
                     if (operation.getParameters() != null) {
                         extractPathParameterDetails(operation, functionRelativeResourcePath, pathNode,
-                                pathParam, resourceFunctionDocs, components, isWithoutDataBinding);
+                                pathParam, resourceFunctionDocs);
                     }
                 } else if (!pathNode.isBlank()) {
                     IdentifierToken idToken = createIdentifierToken(escapeIdentifier(pathNode.trim()));
@@ -262,9 +261,7 @@ public class GeneratorUtils {
     }
 
     private static void extractPathParameterDetails(Operation operation, List<Node> functionRelativeResourcePath,
-                                                    String pathNode, String pathParam,
-                                                    List<Node> resourceFunctionDocs,
-                                                    Components components, boolean isWithoutDataBinding)
+                                                    String pathNode, String pathParam, List<Node> resourceFunctionDocs)
             throws BallerinaOpenApiException {
         // check whether path parameter segment has special character
         String[] split = pathNode.split(CLOSE_CURLY_BRACE, 2);
@@ -284,10 +281,9 @@ public class GeneratorUtils {
                     && parameter.getIn().equals("path")) {
                 String paramType;
                 if (parameter.getSchema().get$ref() != null) {
-                    paramType = resolveReferenceType(parameter.getSchema(), components, isWithoutDataBinding,
-                            pathParam);
+                    paramType = getValidName(extractReferenceType(parameter.getSchema().get$ref()), true);
                 } else {
-                    paramType = getPathParameterType(parameter.getSchema(), pathParam);
+                    paramType = convertOpenAPITypeToBallerina(parameter.getSchema());
                     if (paramType.endsWith(NILLABLE)) {
                         throw new BallerinaOpenApiException("Path parameter value cannot be null.");
                     }
@@ -1105,38 +1101,5 @@ public class GeneratorUtils {
 
     public static boolean isNumberSchema(Schema<?> fieldSchema) {
         return Objects.equals(GeneratorUtils.getOpenAPIType(fieldSchema), NUMBER);
-    }
-
-    public static String resolveReferenceType(Schema<?> schema, Components components, boolean isWithoutDataBinding,
-                                              String pathParam) throws BallerinaOpenApiException {
-        String type = GeneratorUtils.extractReferenceType(schema.get$ref());
-
-        if (isWithoutDataBinding) {
-            Schema<?> referencedSchema = components.getSchemas().get(getValidName(type, true));
-            if (referencedSchema != null) {
-                if (referencedSchema.get$ref() != null) {
-                    type = resolveReferenceType(referencedSchema, components, isWithoutDataBinding, pathParam);
-                } else {
-                    type = getPathParameterType(referencedSchema, pathParam);
-                }
-            }
-        } else {
-            type = getValidName(type, true);
-        }
-        return type;
-    }
-
-    private static String getPathParameterType(Schema<?> typeSchema, String pathParam)
-            throws BallerinaOpenApiException {
-        String type;
-        if (!(isStringSchema(typeSchema) || isNumberSchema(typeSchema) || isBooleanSchema(typeSchema)
-                || isIntegerSchema(typeSchema))) {
-            type = STRING;
-            LOGGER.warn("unsupported path parameter type found in the parameter `" + pathParam + "`. hence the " +
-                    "parameter type is set to string.");
-        } else {
-            type = GeneratorUtils.convertOpenAPITypeToBallerina(typeSchema);
-        }
-        return type;
     }
 }

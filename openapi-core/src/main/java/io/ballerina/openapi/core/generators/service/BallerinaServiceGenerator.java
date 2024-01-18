@@ -247,8 +247,7 @@ public class BallerinaServiceGenerator {
                                     filterOperations.contains(operation.getValue().getOperationId().trim()))) {
                         // getRelative resource path
                         List<Node> functionRelativeResourcePath = GeneratorUtils.getRelativeResourcePath(path,
-                                operation.getValue(), resourceFunctionDocs, openAPI.getComponents(),
-                                generateWithoutDataBinding);
+                                operation.getValue(), resourceFunctionDocs);
                         // function call
 
                         FunctionDefinitionNode functionDefinitionNode = generateWithoutDataBinding ?
@@ -262,7 +261,7 @@ public class BallerinaServiceGenerator {
             } else {
                 // getRelative resource path
                 List<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
-                        resourceFunctionDocs, openAPI.getComponents(), generateWithoutDataBinding);
+                        resourceFunctionDocs);
                 // function call
                 FunctionDefinitionNode resourceFunction = generateWithoutDataBinding ?
                         generateGenericResourceFunctions(operation,
