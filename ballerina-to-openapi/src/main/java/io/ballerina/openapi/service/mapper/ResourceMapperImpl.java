@@ -83,7 +83,7 @@ public class ResourceMapperImpl implements ResourceMapper {
         this.hateoasMapper = new HateoasMapper();
     }
 
-    public void setOperation(String packageId, SemanticModel semanticModel, ServiceDeclarationNode service) {
+    public void setOperation(SemanticModel semanticModel, ServiceDeclarationNode service) {
         Components components = openAPI.getComponents();
         if (components == null) {
             components = new Components();
@@ -93,7 +93,7 @@ public class ResourceMapperImpl implements ResourceMapper {
             components.setSchemas(new TreeMap<>());
         }
         for (FunctionDefinitionNode resource : resources) {
-            addResourceMapping(packageId, semanticModel, resource, components, service);
+            addResourceMapping(semanticModel, resource, components, service);
         }
         if (components.getSchemas().isEmpty()) {
             openAPI.setComponents(null);
@@ -101,7 +101,7 @@ public class ResourceMapperImpl implements ResourceMapper {
         openAPI.setPaths(pathObject);
     }
 
-    private void addResourceMapping(String packageId, SemanticModel semanticModel, FunctionDefinitionNode resource,
+    private void addResourceMapping(SemanticModel semanticModel, FunctionDefinitionNode resource,
                                     Components components, ServiceDeclarationNode service) {
         String path = MapperCommonUtils.unescapeIdentifier(generateRelativePath(resource));
         String httpMethod = resource.functionName().toString().trim();
@@ -111,7 +111,7 @@ public class ResourceMapperImpl implements ResourceMapper {
                     resource.location());
             additionalData.diagnostics().add(error);
         } else {
-            convertResourceToOperation(packageId, semanticModel, resource, httpMethod, path, components, service)
+            convertResourceToOperation(semanticModel, resource, httpMethod, path, components, service)
                     .ifPresent(operation -> addPathItem(httpMethod, pathObject, operation.getOperation(), path));
         }
     }
@@ -184,7 +184,7 @@ public class ResourceMapperImpl implements ResourceMapper {
      *
      * @return Operation Adaptor object of given resource
      */
-    private Optional<OperationInventory> convertResourceToOperation(String packageId, SemanticModel semanticModel,
+    private Optional<OperationInventory> convertResourceToOperation(SemanticModel semanticModel,
                                                                     FunctionDefinitionNode resource, String httpMethod,
                                                                     String generateRelativePath, Components components,
                                                                     ServiceDeclarationNode service) {
@@ -220,27 +220,8 @@ public class ResourceMapperImpl implements ResourceMapper {
 
         ResponseMapper responseMapper = new ResponseMapperImpl(resource, operationInventory, components,
                 additionalData);
-        setSwaggerLinksInApiResponse(packageId, semanticModel, service, responseMapper.getApiResponses(), resource);
         responseMapper.setApiResponses();
         return Optional.of(operationInventory);
-    }
-
-    private void setSwaggerLinksInApiResponse(String packageId, SemanticModel semanticModel,
-                                              ServiceDeclarationNode service, ApiResponses apiResponses,
-                                              FunctionDefinitionNode resource) {
-        Optional<Symbol> serviceDeclarationOpt = semanticModel.symbol(service);
-        ServiceDeclarationSymbol serviceSymbol = (ServiceDeclarationSymbol) serviceDeclarationOpt.get();
-        int serviceId = serviceSymbol.hashCode();
-        Map<String, Link> swaggerLinks = this.hateoasMapper.mapHateoasLinksToSwaggerLinks(packageId, serviceId,
-                resource);
-        if (!swaggerLinks.isEmpty()) {
-            for (Map.Entry<String, ApiResponse> entry : apiResponses.entrySet()) {
-                int statusCode = Integer.parseInt(entry.getKey());
-                if (statusCode >= 200 && statusCode < 300) {
-                    entry.getValue().setLinks(swaggerLinks);
-                }
-            }
-        }
     }
 
     /**
