@@ -35,6 +35,8 @@ import io.ballerina.openapi.service.mapper.constraint.ConstraintMapperImpl;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.hateoas.HateoasMapper;
+import io.ballerina.openapi.service.mapper.hateoas.HateoasMapperImpl;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMetadataVisitor;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
@@ -205,11 +207,12 @@ public class ServiceToOpenAPIMapper {
                 // 03. Filter path and component sections in OAS.
                 // Generate openApi string for the mentioned service name.
                 String packageId = oasGenerationMetaInfo.getProject().currentPackage().packageId().id().toString();
-                convertServiceToOpenAPI(
-                        packageId, serviceDefinition, openapi, semanticModel, moduleMemberVisitor, diagnostics);
+                convertServiceToOpenAPI(serviceDefinition, openapi, semanticModel, moduleMemberVisitor, diagnostics);
                 ConstraintMapper constraintMapper = new ConstraintMapperImpl(openapi, moduleMemberVisitor,
                         diagnostics);
                 constraintMapper.setConstraints();
+                HateoasMapper hateoasMapper = new HateoasMapperImpl(packageId, semanticModel);
+                hateoasMapper.setSwaggerLinks(serviceDefinition, openapi);
                 return new OASResult(openapi, diagnostics);
             } else {
                 return new OASResult(openapi, oasResult.getDiagnostics());
@@ -236,7 +239,7 @@ public class ServiceToOpenAPIMapper {
         return balNodeVisitor;
     }
 
-    private static void convertServiceToOpenAPI(String packageId, ServiceDeclarationNode serviceNode, OpenAPI openAPI,
+    private static void convertServiceToOpenAPI(ServiceDeclarationNode serviceNode, OpenAPI openAPI,
                                                 SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
                                                 List<OpenAPIMapperDiagnostic> diagnostics) {
         NodeList<Node> functions = serviceNode.members();
@@ -250,7 +253,7 @@ public class ServiceToOpenAPIMapper {
         AdditionalData additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
         ResourceMapper resourceMapper = new ResourceMapperImpl(openAPI, resources, additionalData,
                 isTreatNilableAsOptionalParameter(serviceNode));
-        resourceMapper.setOperation(packageId, semanticModel, serviceNode);
+        resourceMapper.setOperation(semanticModel, serviceNode);
     }
 
     private static boolean isTreatNilableAsOptionalParameter(ServiceDeclarationNode serviceNode) {
