@@ -20,7 +20,6 @@ package io.ballerina.openapi.service.mapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Documentable;
 import io.ballerina.compiler.api.symbols.Documentation;
-import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -31,7 +30,6 @@ import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagno
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
-import io.ballerina.openapi.service.mapper.parameter.HateoasMapper;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapperImpl;
 import io.ballerina.openapi.service.mapper.response.ResponseMapper;
@@ -43,9 +41,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
-import io.swagger.v3.oas.models.links.Link;
-import io.swagger.v3.oas.models.responses.ApiResponse;
-import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.HashMap;
 import java.util.List;
@@ -69,7 +64,6 @@ public class ResourceMapperImpl implements ResourceMapper {
     private final OpenAPI openAPI;
     private final List<FunctionDefinitionNode> resources;
     private final boolean treatNilableAsOptional;
-    private final HateoasMapper hateoasMapper;
 
     /**
      * Initializes a resource parser for openApi.
@@ -80,7 +74,6 @@ public class ResourceMapperImpl implements ResourceMapper {
         this.resources = resources;
         this.additionalData = additionalData;
         this.treatNilableAsOptional = treatNilableAsOptional;
-        this.hateoasMapper = new HateoasMapper();
     }
 
     public void setOperation(SemanticModel semanticModel, ServiceDeclarationNode service) {
