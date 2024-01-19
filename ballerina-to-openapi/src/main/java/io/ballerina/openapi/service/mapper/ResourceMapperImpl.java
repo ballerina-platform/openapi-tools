@@ -86,7 +86,7 @@ public class ResourceMapperImpl implements ResourceMapper {
             components.setSchemas(new TreeMap<>());
         }
         for (FunctionDefinitionNode resource : resources) {
-            addResourceMapping(semanticModel, resource, components, service);
+            addResourceMapping(resource, components);
         }
         if (components.getSchemas().isEmpty()) {
             openAPI.setComponents(null);
@@ -94,8 +94,7 @@ public class ResourceMapperImpl implements ResourceMapper {
         openAPI.setPaths(pathObject);
     }
 
-    private void addResourceMapping(SemanticModel semanticModel, FunctionDefinitionNode resource,
-                                    Components components, ServiceDeclarationNode service) {
+    private void addResourceMapping(FunctionDefinitionNode resource, Components components) {
         String path = MapperCommonUtils.unescapeIdentifier(generateRelativePath(resource));
         String httpMethod = resource.functionName().toString().trim();
         if (httpMethod.equals(String.format("'%s", DEFAULT)) || httpMethod.equals(DEFAULT)) {
@@ -104,7 +103,7 @@ public class ResourceMapperImpl implements ResourceMapper {
                     resource.location());
             additionalData.diagnostics().add(error);
         } else {
-            convertResourceToOperation(semanticModel, resource, httpMethod, path, components, service)
+            convertResourceToOperation(resource, httpMethod, path, components)
                     .ifPresent(operation -> addPathItem(httpMethod, pathObject, operation.getOperation(), path));
         }
     }
@@ -177,10 +176,9 @@ public class ResourceMapperImpl implements ResourceMapper {
      *
      * @return Operation Adaptor object of given resource
      */
-    private Optional<OperationInventory> convertResourceToOperation(SemanticModel semanticModel,
-                                                                    FunctionDefinitionNode resource, String httpMethod,
-                                                                    String generateRelativePath, Components components,
-                                                                    ServiceDeclarationNode service) {
+    private Optional<OperationInventory> convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
+                                                                    String generateRelativePath,
+                                                                    Components components) {
         OperationInventory operationInventory = new OperationInventory();
         operationInventory.setHttpOperation(httpMethod);
         operationInventory.setPath(generateRelativePath);
