@@ -16,4 +16,10 @@ service /payloadV on helloEp {
         };
         return user;
     }
+
+    resource function get expense(@http:Query ty:Currency currency) returns int? {
+    }
+
+    resource function get bill(ty:Product p) {
+    }
 }

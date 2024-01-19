@@ -119,6 +119,12 @@ public class RecordTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/union_records_with_interdependency.yaml");
     }
 
+    @Test(description = "Test for rest field in the record")
+    public void testRestFieldInRecord() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/record_rest_param.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/record_rest_param.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

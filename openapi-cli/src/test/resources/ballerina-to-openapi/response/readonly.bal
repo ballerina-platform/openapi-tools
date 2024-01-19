@@ -86,4 +86,22 @@ service /payloadV on new http:Listener(9090) {
             name: "Kitty"
         };
     }
+
+    resource function get res12()
+            returns http:InternalServerError & readonly|http:Created & readonly|http:Conflict & readonly {
+        return http:CREATED;
+    }
+
+    resource function get res13() returns
+            readonly & (string|int) |
+            readonly & string|int |
+            readonly & map<json> |
+            string |
+            readonly & Pet |
+            readonly & record {|
+                readonly string id;
+                string name;
+            |} {
+        return "Hello World";
+    }
 }

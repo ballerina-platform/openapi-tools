@@ -15,5 +15,8 @@ service /payloadV on helloEp {
     resource function get cachingBackEnd03() returns @http:Cache{setETag : false,
     mustRevalidate:false} string {
                return "Hello, World!!";}
+    //With private and without private fields
+    resource function get cachingBackEnd04() returns @http:Cache{isPrivate: true} string {
+               return "Hello, World!!";}
 
 }

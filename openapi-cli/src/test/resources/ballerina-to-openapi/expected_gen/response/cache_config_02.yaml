@@ -50,3 +50,24 @@ paths:
             text/plain:
               schema:
                 type: string
+  /cachingBackEnd04:
+    get:
+      operationId: getCachingbackend04
+      responses:
+        "200":
+          description: Ok
+          headers:
+            Last-Modified:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+                default: "must-revalidate,private,max-age=3600"
+            ETag:
+              schema:
+                type: string
+          content:
+            text/plain:
+              schema:
+                type: string
