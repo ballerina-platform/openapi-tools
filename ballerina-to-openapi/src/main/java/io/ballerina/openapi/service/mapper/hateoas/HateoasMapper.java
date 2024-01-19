@@ -21,6 +21,12 @@ package io.ballerina.openapi.service.mapper.hateoas;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.swagger.v3.oas.models.OpenAPI;
 
+/**
+ * This {@link HateoasMapper} uses to set HATEOAS links into the OpenAPI context.
+ *
+ * @since 1.9.0
+ */
 public interface HateoasMapper {
+    
     void setSwaggerLinks(ServiceDeclarationNode serviceNode, OpenAPI openAPI);
 }
