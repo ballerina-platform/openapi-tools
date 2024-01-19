@@ -1,0 +1,271 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /path1:
+    get:
+      operationId: getPath1
+      parameters:
+        - name: user
+          in: query
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /path2:
+    get:
+      operationId: getPath2
+      parameters:
+        - name: name
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: header
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /path3:
+    post:
+      operationId: postPath3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRestString'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /path4:
+    post:
+      operationId: postPath4
+      parameters:
+        - name: user1
+          in: query
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRestMap'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserClosed'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /path5:
+    post:
+      operationId: postPath5
+      parameters:
+        - name: name
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: header
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRestProperty'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /path6:
+    post:
+      operationId: postPath6
+      parameters:
+        - name: user2
+          in: query
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserClosed'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRestMapProperty'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Property:
+      required:
+        - name
+        - value
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+      additionalProperties: false
+    User:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+    UserClosed:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+      additionalProperties: false
+    UserRestMap:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+      additionalProperties:
+        type: object
+        additionalProperties:
+          type: string
+    UserRestMapProperty:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+      additionalProperties:
+        type: object
+        additionalProperties:
+          $ref: '#/components/schemas/Property'
+    UserRestProperty:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+      additionalProperties:
+        $ref: '#/components/schemas/Property'
+    UserRestString:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+      additionalProperties:
+        type: string
