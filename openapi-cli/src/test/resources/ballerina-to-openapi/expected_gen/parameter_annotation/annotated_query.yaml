@@ -52,6 +52,51 @@ paths:
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/Student'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /student10:
+    post:
+      operationId: postStudent10
+      parameters:
+        - name: status
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Status'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /student11:
+    post:
+      operationId: postStudent11
+      parameters:
+        - name: status
+          in: query
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Status'
+            default: ACTIVE
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
                 type: object
         "400":
           description: BadRequest
@@ -83,4 +128,16 @@ components:
         path:
           type: string
         method:
+          type: string
+    Status:
+      type: string
+      enum:
+        - INACTIVE
+        - ACTIVE
+    Student:
+      required:
+        - Name
+      type: object
+      properties:
+        Name:
           type: string

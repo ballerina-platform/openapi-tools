@@ -262,6 +262,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorPayload'
+  /res12:
+    get:
+      operationId: getRes12
+      responses:
+        "201":
+          description: Created
+        "500":
+          description: InternalServerError
+        "409":
+          description: Conflict
+  /res13:
+    get:
+      operationId: getRes13
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: integer
+                    format: int64
+                  - type: object
+                  - $ref: '#/components/schemas/Pet'
+                  - required:
+                      - id
+                      - name
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                    additionalProperties: false
+            text/plain:
+              schema:
+                oneOf:
+                  - type: string
+                  - type: string
 components:
   schemas:
     ErrorPayload:
