@@ -7,38 +7,41 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Pet'
+        required: true
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    TagType:
+    ErrorPayload:
       required:
-        - category
-        - id
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
-        category:
-          type: array
-          items:
-            type: string
-    Tag:
-      required:
-        - id
-        - name
-        - tagType
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
+        timestamp:
           type: string
-        tagType:
-          $ref: '#/components/schemas/TagType'
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Pet:
       required:
         - id
@@ -53,3 +56,30 @@ components:
           type: string
         tag:
           $ref: '#/components/schemas/Tag'
+    Tag:
+      required:
+        - id
+        - name
+        - tagType
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tagType:
+          $ref: '#/components/schemas/TagType'
+    TagType:
+      required:
+        - category
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        category:
+          type: array
+          items:
+            type: string

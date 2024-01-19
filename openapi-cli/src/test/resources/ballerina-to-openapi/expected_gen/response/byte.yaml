@@ -25,10 +25,18 @@ paths:
           content:
             application/octet-stream:
               schema:
-                type: string
-                format: byte
+                type: array
+                items:
+                  type: string
+                  format: byte
         "500":
-          description: Internal server error
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
           content:
             application/json:
               schema:
@@ -36,24 +44,25 @@ paths:
 components:
   schemas:
     ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        reason:
-          type: string
-          description: Reason phrase
-        path:
-          type: string
-          description: Request path
-        method:
-          type: string
-          description: Method type of the request
-        message:
-          type: string
-          description: Error message
         timestamp:
           type: string
-          description: Timestamp of the error
         status:
           type: integer
-          description: Relevant HTTP status code
-          format: int32
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.openapi.cmd.OASContractGenerator;
-import io.ballerina.openapi.converter.OpenApiConverterException;
+import io.ballerina.openapi.service.mapper.MapperException;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
@@ -49,7 +49,7 @@ public class RequestBodyTest {
     }
 
     @Test(description = "Generate OpenAPI spec with json payload")
-    public void testJsonPayLoad() throws OpenApiConverterException {
+    public void testJsonPayLoad() throws MapperException {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/json_payload_service.bal");
         //Compare generated yaml file with expected yaml content
         compareWithGeneratedFile(ballerinaFilePath, "json_payload.yaml");
@@ -65,7 +65,7 @@ public class RequestBodyTest {
     }
 
     @Test(description = "Generate OpenAPI spec with mulitple payload")
-    public void testMultiplePayLoad() throws IOException, OpenApiConverterException {
+    public void testMultiplePayLoad() throws IOException, MapperException {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/multiple_payload_service.bal");
         compareWithGeneratedFile(ballerinaFilePath, "multiple_payload.yaml");
     }
@@ -187,7 +187,7 @@ public class RequestBodyTest {
     }
 
     @Test(description = "Generate OpenAPI spec for multiple records")
-    public void testMultipleRecords() throws OpenApiConverterException {
+    public void testMultipleRecords() throws MapperException {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/rb_scenario11.bal");
         compareWithGeneratedFile(ballerinaFilePath, "rb_scenario11.yaml");
     }

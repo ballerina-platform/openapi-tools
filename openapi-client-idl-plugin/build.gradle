@@ -32,7 +32,7 @@ configurations {
 }
 
 dependencies {
-    implementation project(':openapi-bal-service')
+    implementation project(':ballerina-to-openapi')
     implementation project(':openapi-core')
     implementation ("io.swagger.parser.v3:swagger-parser:${swaggerParserVersion}") {
         exclude group: "io.swagger", module: "swagger-compat-spec-parser"

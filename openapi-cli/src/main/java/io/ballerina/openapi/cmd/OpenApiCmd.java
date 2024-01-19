@@ -18,12 +18,12 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
-import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
-import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
-import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;
 
@@ -228,7 +228,7 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param fileName  input resource file
      */
     private void ballerinaToOpenApi(String fileName) {
-        List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
+        List<OpenAPIMapperDiagnostic> errors = new ArrayList<>();
         final File balFile = new File(fileName);
         Path balFilePath = null;
         try {
@@ -245,24 +245,26 @@ public class OpenApiCmd implements BLauncherCmd {
         openApiConverter.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, service,
                 generatedFileType);
         errors.addAll(openApiConverter.getErrors());
+        boolean exitWithError = false;
         if (!errors.isEmpty()) {
-            for (OpenAPIConverterDiagnostic error: errors) {
-                if (error instanceof ExceptionDiagnostic) {
+            for (OpenAPIMapperDiagnostic error: errors) {
+                if (error instanceof ExceptionDiagnostic exceptionDiagnostic) {
                     this.outStream = System.err;
-                    ExceptionDiagnostic exceptionDiagnostic = (ExceptionDiagnostic) error;
                     OpenAPIDiagnostic diagnostic = CmdUtils.constructOpenAPIDiagnostic(exceptionDiagnostic.getCode(),
                             exceptionDiagnostic.getMessage(), exceptionDiagnostic.getDiagnosticSeverity(),
                             exceptionDiagnostic.getLocation().orElse(null));
-                    outStream.println(diagnostic.toString());
-                    exitError(this.exitWhenFinish);
-                } else if (error instanceof IncompatibleResourceDiagnostic) {
-                    IncompatibleResourceDiagnostic incompatibleError = (IncompatibleResourceDiagnostic) error;
+                    outStream.println(diagnostic);
+                    exitWithError = true;
+                } else if (error instanceof IncompatibleResourceDiagnostic incompatibleError) {
                     OpenAPIDiagnostic diagnostic = CmdUtils.constructOpenAPIDiagnostic(incompatibleError.getCode(),
                             incompatibleError.getMessage(), incompatibleError.getDiagnosticSeverity(),
-                            incompatibleError.getLocation().get());
-                    outStream.println(diagnostic.toString());
+                            incompatibleError.getLocation().orElse(null));
+                    outStream.println(diagnostic);
                 }
             }
+        }
+        if (exitWithError) {
+            exitError(this.exitWhenFinish);
         }
     }
 

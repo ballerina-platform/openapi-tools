@@ -16,11 +16,11 @@ paths:
       parameters:
         - name: student
           in: query
+          required: true
           content:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
       responses:
         "201":
           description: Created
@@ -28,6 +28,12 @@ paths:
             application/json:
               schema:
                 type: object
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /student9:
     post:
       operationId: postStudent9
@@ -38,7 +44,6 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
                 default:
                   Name: John
       responses:
@@ -47,5 +52,92 @@ paths:
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/Student'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /student10:
+    post:
+      operationId: postStudent10
+      parameters:
+        - name: status
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Status'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /student11:
+    post:
+      operationId: postStudent11
+      parameters:
+        - name: status
+          in: query
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Status'
+            default: ACTIVE
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
                 type: object
-components: {}
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Status:
+      type: string
+      enum:
+        - INACTIVE
+        - ACTIVE
+    Student:
+      required:
+        - Name
+      type: object
+      properties:
+        Name:
+          type: string

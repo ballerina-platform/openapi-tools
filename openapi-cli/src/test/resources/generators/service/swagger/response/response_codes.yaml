@@ -130,4 +130,3 @@ paths:
           description: NotExtended
         "511":
           description: NetworkAuthorizationRequired
-components: {}

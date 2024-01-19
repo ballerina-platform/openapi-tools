@@ -29,6 +29,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/LiftRecord'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /lift:
     get:
       summary: "Returns a `Lift` by `id` (id: \"panorama\")"
@@ -40,18 +46,45 @@ paths:
           schema:
             type: string
       responses:
-        "202":
-          description: Accepted
-        "400":
-          description: BadRequest
         "200":
           description: Ok
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LiftRecord'
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     LiftRecord:
       required:
         - capacity
@@ -67,11 +100,7 @@ components:
         name:
           type: string
         status:
-          type: string
-          enum:
-            - HOLD
-            - CLOSED
-            - OPEN
+          $ref: '#/components/schemas/Status'
         capacity:
           type: integer
           format: int64
@@ -80,3 +109,10 @@ components:
         elevationgain:
           type: integer
           format: int64
+      additionalProperties: false
+    Status:
+      type: string
+      enum:
+        - HOLD
+        - CLOSED
+        - OPEN

@@ -29,7 +29,13 @@ paths:
               schema:
                 type: string
         "500":
-          description: Internal server error
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
           content:
             application/json:
               schema:
@@ -59,7 +65,13 @@ paths:
               schema:
                 type: string
         "500":
-          description: Internal server error
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
           content:
             application/json:
               schema:
@@ -72,6 +84,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Offset'
+        required: true
       responses:
         "201":
           description: Created
@@ -80,7 +93,13 @@ paths:
               schema:
                 type: string
         "500":
-          description: Internal server error
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
           content:
             application/json:
               schema:
@@ -99,6 +118,10 @@ paths:
           description: Accepted
         "400":
           description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
     put:
       operationId: putพิมพ์ชื่อ
       parameters:
@@ -112,41 +135,35 @@ paths:
           description: Accepted
         "400":
           description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        reason:
-          type: string
-          description: Reason phrase
-        path:
-          type: string
-          description: Request path
-        method:
-          type: string
-          description: Method type of the request
-        message:
-          type: string
-          description: Error message
         timestamp:
           type: string
-          description: Timestamp of the error
         status:
           type: integer
-          description: Relevant HTTP status code
-          format: int32
-    Pet:
-      required:
-        - id
-        - type
-      type: object
-      properties:
-        type:
-          type: string
-        id:
-          type: integer
           format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Offset:
       required:
         - id
@@ -162,3 +179,14 @@ components:
           format: int64
         join:
           $ref: '#/components/schemas/Pet'
+    Pet:
+      required:
+        - id
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+        id:
+          type: integer
+          format: int64

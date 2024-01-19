@@ -98,4 +98,3 @@ paths:
           description: GatewayTimeout
         "505":
           description: HttpVersionNotSupported
-components: {}

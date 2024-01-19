@@ -18,5 +18,5 @@ paths:
           description: Ok
           content:
             text/plain:
-              schema: {}
-components: {}
+              schema:
+                type: string

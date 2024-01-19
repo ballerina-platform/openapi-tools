@@ -29,7 +29,7 @@ paths:
         "201":
           description: Created
           content:
-            text/plain:
+            application/json:
               schema:
                 type: array
                 items:

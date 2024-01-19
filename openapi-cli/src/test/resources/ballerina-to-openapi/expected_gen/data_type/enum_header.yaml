@@ -27,7 +27,9 @@ paths:
         - name: x-date-optional
           in: header
           schema:
-            $ref: '#/components/schemas/DateFormat'
+            nullable: true
+            allOf:
+              - $ref: '#/components/schemas/DateFormat'
         - name: x-required-arr
           in: header
           required: true
@@ -39,6 +41,7 @@ paths:
           in: header
           schema:
             type: array
+            nullable: true
             items:
               $ref: '#/components/schemas/TimeZone'
         - name: x-def-arr
@@ -64,21 +67,14 @@ paths:
                 $ref: '#/components/schemas/MeetingList'
         "404":
           description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    TimeZone:
-      type: string
-      enum:
-        - UTC
-        - GMT
-        - IST
-    Meeting:
-      required:
-        - topic
-      type: object
-      properties:
-        topic:
-          type: string
     DateFormat:
       type: string
       enum:
@@ -86,6 +82,42 @@ components:
         - OFFSET
         - LOCAL
         - UTC
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Meeting:
+      required:
+        - topic
+      type: object
+      properties:
+        topic:
+          type: string
+    MeetingGroup:
+      type: string
+      enum:
+        - ENGINEERING
+        - HR
+        - ADMIN
     MeetingList:
       required:
         - meetings
@@ -95,9 +127,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Meeting'
-    MeetingGroup:
+    TimeZone:
       type: string
       enum:
-        - ENGINEERING
-        - HR
-        - ADMIN
+        - UTC
+        - GMT
+        - IST

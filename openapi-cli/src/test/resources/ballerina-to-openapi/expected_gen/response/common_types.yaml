@@ -1,0 +1,140 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /pet01:
+    get:
+      operationId: getPet01
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/html:
+              schema:
+                $ref: '#/components/schemas/User'
+  /expense:
+    get:
+      operationId: getExpense
+      parameters:
+        - name: currency
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Currency'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /bill:
+    get:
+      operationId: getBill
+      parameters:
+        - name: p
+          in: query
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    Currency:
+      type: string
+      enum:
+        - GBP
+        - SGD
+        - LKR
+        - USD
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Price:
+      required:
+        - amount
+        - currency
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/Currency'
+        amount:
+          type: number
+          format: float
+      additionalProperties: false
+    Product:
+      required:
+        - description
+        - name
+        - price
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          maxLength: 14
+          type: string
+        description:
+          type: string
+        price:
+          $ref: '#/components/schemas/Price'
+      additionalProperties: false
+      description: Represents a product
+    User:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
