@@ -27,6 +27,12 @@ import io.swagger.v3.oas.models.OpenAPI;
  * @since 1.9.0
  */
 public interface HateoasMapper {
-    
+
+    /**
+     * Sets HATEOAS links into the OpenAPI context.
+     *
+     * @param serviceNode Specific service declaration node
+     * @param openAPI Current OpenAPI context
+     */
     void setSwaggerLinks(ServiceDeclarationNode serviceNode, OpenAPI openAPI);
 }
