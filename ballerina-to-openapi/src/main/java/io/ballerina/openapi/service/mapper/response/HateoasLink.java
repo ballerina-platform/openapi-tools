@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.service.mapper.response.model;
+package io.ballerina.openapi.service.mapper.response;
 
 public class HateoasLink {
     private String resourceName;

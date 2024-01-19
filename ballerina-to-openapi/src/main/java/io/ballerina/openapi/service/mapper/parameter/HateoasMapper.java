@@ -20,7 +20,7 @@ package io.ballerina.openapi.service.mapper.parameter;
 
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.openapi.service.mapper.hateoas.Resource;
-import io.ballerina.openapi.service.mapper.response.model.HateoasLink;
+import io.ballerina.openapi.service.mapper.response.HateoasLink;
 import io.swagger.v3.oas.models.links.Link;
 
 import java.util.ArrayList;
