@@ -33,6 +33,9 @@ public class ErrorMessages {
             "cannot find 'Ballerina.toml' file.%n%n";
     public static final String INVALID_INPUT_PATH = "ERROR: provide input oas contract path.%n%n";
 
+    public static final String TOML_UPDATED_MSG = "Ballerina.toml updated successfully with openapi tool " +
+            "configuration.";
+
     private ErrorMessages() {
         throw new AssertionError();
     }
