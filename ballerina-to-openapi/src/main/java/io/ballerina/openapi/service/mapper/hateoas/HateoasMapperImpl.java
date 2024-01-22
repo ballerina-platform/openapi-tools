@@ -43,8 +43,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.openapi.service.mapper.hateoas.HateoasConstants.BALLERINA_LINKEDTO_KEYWORD;
-import static io.ballerina.openapi.service.mapper.hateoas.HateoasConstants.OPENAPI_LINK_DEFAULT_REL;
+import static io.ballerina.openapi.service.mapper.hateoas.Constants.BALLERINA_LINKEDTO_KEYWORD;
+import static io.ballerina.openapi.service.mapper.hateoas.Constants.OPENAPI_LINK_DEFAULT_REL;
 import static io.ballerina.openapi.service.mapper.hateoas.HateoasContextHolder.getHateoasContextHolder;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.generateRelativePath;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getResourceConfigAnnotation;

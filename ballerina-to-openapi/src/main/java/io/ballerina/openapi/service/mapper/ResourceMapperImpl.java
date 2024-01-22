@@ -101,8 +101,8 @@ public class ResourceMapperImpl implements ResourceMapper {
                     resource.location());
             additionalData.diagnostics().add(error);
         } else {
-            convertResourceToOperation(resource, httpMethod, path, components)
-                    .ifPresent(operation -> addPathItem(httpMethod, pathObject, operation.getOperation(), path));
+            convertResourceToOperation(resource, httpMethod, path, components).ifPresent(
+                    operation -> addPathItem(httpMethod, pathObject, operation.getOperation(), path));
         }
     }
 
