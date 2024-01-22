@@ -26,7 +26,7 @@ import java.util.Optional;
 /**
  * A context-holder to share HATEOAS meta-data information.
  *
- * @since 1.6.0
+ * @since 1.9.0
  */
 public final class HateoasContextHolder {
     private static HateoasContextHolder instance;
