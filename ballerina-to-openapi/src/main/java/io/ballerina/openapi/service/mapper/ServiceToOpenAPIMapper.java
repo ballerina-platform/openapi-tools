@@ -274,7 +274,7 @@ public class ServiceToOpenAPIMapper {
         return true;
     }
 
-    public static void extractHateoasLinkMetadata(Project project) {
+    private static void extractHateoasLinkMetadata(Project project) {
         String packageId = project.currentPackage().packageId().id().toString();
         project.currentPackage().moduleIds().forEach(moduleId -> {
             Module module = project.currentPackage().module(moduleId);
