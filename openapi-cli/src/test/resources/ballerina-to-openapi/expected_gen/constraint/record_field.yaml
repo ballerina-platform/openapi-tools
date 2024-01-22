@@ -1,0 +1,98 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /pet:
+    post:
+      operationId: postPet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Person'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    Address:
+      minLength: 5
+      type: string
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Person:
+      required:
+        - id
+      type: object
+      properties:
+        name:
+          maxLength: 14
+          type: string
+        hobby:
+          maxItems: 5
+          minItems: 2
+          type: array
+          items:
+            type: string
+        id:
+          maximum: 5
+          exclusiveMaximum: true
+          minimum: 0
+          type: integer
+          format: int64
+        address:
+          $ref: '#/components/schemas/Address'
+        salary:
+          maximum: 100000.0
+          exclusiveMaximum: true
+          minimum: 1000.0
+          type: number
+          format: float
+        net:
+          maximum: 1000000.0
+          minimum: 500000.0
+          exclusiveMinimum: true
+          type: number
+          format: double

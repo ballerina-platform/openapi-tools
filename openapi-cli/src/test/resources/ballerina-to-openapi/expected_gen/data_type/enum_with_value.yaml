@@ -20,11 +20,49 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Link'
+        required: true
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    Action:
+      type: string
+      enum:
+        - patch
+        - delete
+        - put
+        - post
+        - get
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Link:
       required:
         - rel
@@ -33,10 +71,5 @@ components:
         rel:
           type: string
         actions:
-          type: string
-          enum:
-            - patch
-            - delete
-            - put
-            - post
-            - get
+          $ref: '#/components/schemas/Action'
+      additionalProperties: false

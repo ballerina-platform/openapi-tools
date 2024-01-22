@@ -22,6 +22,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.cmd.CmdUtils;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
@@ -34,7 +35,10 @@ import io.ballerina.projects.ProjectException;
 import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.SpecVersion;
+import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
@@ -47,12 +51,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIFromOpenAPIV3Parser;
 
 /**
  * This util class for keeping all the common functions that use to tests.
@@ -88,13 +96,6 @@ public class TestUtils {
     public static List<Diagnostic> getDiagnostics(SyntaxTree syntaxTree) throws FormatterException, IOException {
         writeFile(schemaPath, Formatter.format(syntaxTree).toSourceCode());
         SemanticModel semanticModel = getSemanticModel(schemaPath);
-        return semanticModel.diagnostics();
-    }
-
-    public static List<Diagnostic> getDiagnosticsForGenericService(SyntaxTree serviceSyntaxTree)
-            throws FormatterException, IOException {
-        writeFile(servicePath, Formatter.format(serviceSyntaxTree).toSourceCode());
-        SemanticModel semanticModel = getSemanticModel(servicePath);
         return semanticModel.diagnostics();
     }
 
@@ -201,5 +202,43 @@ public class TestUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Normalized OpenAPI specification with adding proper naming to schema.
+     *
+     * @param openAPIPath - openAPI file path
+     * @return - openAPI specification
+     * @throws IOException
+     * @throws BallerinaOpenApiException
+     */
+    public static OpenAPI normalizeOpenAPI(Path openAPIPath, boolean isClient, SpecVersion openAPIVersion)
+            throws IOException,
+            BallerinaOpenApiException {
+        OpenAPI openAPI = getOpenAPIFromOpenAPIV3Parser(openAPIPath);
+        if (openAPIVersion.equals(SpecVersion.V31) && !openAPI.getSpecVersion().equals(SpecVersion.V31)) {
+            openAPI.setSpecVersion(SpecVersion.V31);
+            openAPI.setOpenapi("3.1.0");
+        }
+        io.swagger.v3.oas.models.Paths openAPIPaths = openAPI.getPaths();
+        if (isClient) {
+            GeneratorUtils.validateOperationIds(openAPIPaths.entrySet());
+        }
+        GeneratorUtils.validateRequestBody(openAPIPaths.entrySet());
+
+        if (openAPI.getComponents() != null) {
+            // Refactor schema name with valid name
+            Components components = openAPI.getComponents();
+            Map<String, Schema> componentsSchemas = components.getSchemas();
+            if (componentsSchemas != null) {
+                Map<String, Schema> refacSchema = new HashMap<>();
+                for (Map.Entry<String, Schema> schemaEntry : componentsSchemas.entrySet()) {
+                    String name = GeneratorUtils.getValidName(schemaEntry.getKey(), true);
+                    refacSchema.put(name, schemaEntry.getValue());
+                }
+                openAPI.getComponents().setSchemas(refacSchema);
+            }
+        }
+        return openAPI;
     }
 }

@@ -34,7 +34,6 @@ import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
-import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
@@ -46,6 +45,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createParenthesisedT
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
+import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.GeneratorUtils.hasConstraints;
 import static io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils.getNullableType;
 
@@ -82,9 +82,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
 
-        assert schema instanceof ArraySchema;
-        ArraySchema arraySchema = (ArraySchema) schema;
-        Schema<?> items = arraySchema.getItems();
+        Schema<?> items = schema.getItems();
         boolean isConstraintsAvailable =
                 !GeneratorMetaData.getInstance().isNullable() && hasConstraints(items) && typeName != null;
         TypeGenerator typeGenerator;
@@ -97,8 +95,8 @@ public class ArrayTypeGenerator extends TypeGenerator {
             }
             typeName = GeneratorUtils.getValidName(
                     parentType != null ?
-                            parentType + "-" + normalizedTypeName + "-Items-" + items.getType() :
-                            normalizedTypeName + "-Items-" + items.getType(),
+                            parentType + "-" + normalizedTypeName + "-Items-" + getOpenAPIType(items) :
+                            normalizedTypeName + "-Items-" + getOpenAPIType(items),
                     true);
             typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
             TypeDefinitionNode arrayItemWithConstraint = typeGenerator.generateTypeDefinitionNode(
@@ -129,8 +127,8 @@ public class ArrayTypeGenerator extends TypeGenerator {
             typeDescriptorNode = (TypeDescriptorNode) node;
         }
 
-        if (arraySchema.getMaxItems() != null) {
-            if (arraySchema.getMaxItems() > GeneratorConstants.MAX_ARRAY_LENGTH) {
+        if (schema.getMaxItems() != null) {
+            if (schema.getMaxItems() > GeneratorConstants.MAX_ARRAY_LENGTH) {
                 throw new BallerinaOpenApiException("Maximum item count defined in the definition exceeds the " +
                         "maximum ballerina array length.");
             }
@@ -149,6 +147,6 @@ public class ArrayTypeGenerator extends TypeGenerator {
         ArrayTypeDescriptorNode arrayTypeDescriptorNode = createArrayTypeDescriptorNode(typeDescriptorNode
                 , arrayDimensions);
         imports.addAll(typeGenerator.getImports());
-        return getNullableType(arraySchema, arrayTypeDescriptorNode);
+        return getNullableType(schema, arrayTypeDescriptorNode);
     }
 }

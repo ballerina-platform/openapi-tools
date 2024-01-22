@@ -256,6 +256,16 @@ public class ResponseTests {
         compareWithGeneratedFile(ballerinaFilePath, "response/decimal.yaml");
     }
 
+    @Test(description = "When the response has byte[] return type")
+    public void testResponseWithByteArray() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/byte.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "response/byte.yaml");
+    }
+
     @Test
     public void testWithMultipleReturnPayloadSameStatusCode() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/same_status_code.bal");
@@ -307,6 +317,26 @@ public class ResponseTests {
         compareWithGeneratedFile(ballerinaFilePath, "response/service_config_with_cors.yaml");
     }
 
+    @Test(description = "When the service has `error` and `InternalServerError`")
+    public void testForResponseHasSameErrorStatusCode() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/service_with_error_and_internal_server_error.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "response/service_with_error_and_internal_server_error.yaml");
+    }
+
+    @Test(description = "When the service has same error response code")
+    public void testForResponseHasSameStatusCode() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/service_with_same_status_codes.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "response/service_with_same_status_code.yaml");
+    }
+
     @Test(description = "When the service has config without mediaType attribute, and with slash path")
     public void testResponseHasServiceConfigWithCorsWithSlash() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/service_config_with_cors_with_slash.bal");
@@ -341,6 +371,26 @@ public class ResponseTests {
         generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
         expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
+    }
+
+    @Test(description = "When the resource has nil type return")
+    public void testNilReturnType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/nil_return_type.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "response/nil_return_type.yaml");
+    }
+
+    @Test(description = "When the resource has nil union type return")
+    public void testNilUnionReturnType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/nil_union_return_type.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "response/nil_union_return_type.yaml");
     }
 
     @AfterMethod

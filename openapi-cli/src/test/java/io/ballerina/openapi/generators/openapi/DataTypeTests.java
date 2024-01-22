@@ -50,15 +50,19 @@ public class DataTypeTests {
     @Test(description = "When the record field has type definitions with nullable")
     public void testForAllTypeDefinitionWithNullableValue() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("data_type/nullable_type_def.bal");
-        //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/nullable_type_def.yaml");
     }
 
     @Test(description = "test for tuple type scenarios")
     public void testForTupleType() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("data_type/tuple_types.bal");
-        //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/tuple_type.yaml");
+    }
+
+    @Test(description = "test for Ballerina built-in subtypes as record fields")
+    public void testForBuiltInSubTypes() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("data_type/built_in_sub_types_in_record.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/built_in_sub_types_in_record.yaml");
     }
 
     @AfterMethod

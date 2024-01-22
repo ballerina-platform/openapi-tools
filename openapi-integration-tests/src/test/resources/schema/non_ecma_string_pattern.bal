@@ -1,5 +1,5 @@
-import ballerina/http;
 import ballerina/constraint;
+import ballerina/http;
 
 # Provides a set of configurations for controlling the behaviours when communicating with a remote HTTP endpoint.
 @display {label: "Connection Config"}

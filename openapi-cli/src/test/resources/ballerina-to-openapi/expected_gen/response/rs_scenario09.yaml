@@ -28,6 +28,12 @@ paths:
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
     put:
       operationId: putHi
       responses:
@@ -59,12 +65,20 @@ paths:
             type: integer
             format: int64
       responses:
+        "202":
+          description: Accepted
         "500":
-          description: Internal server error
+          description: InternalServerError
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /v1:
     post:
       operationId: postV1
@@ -73,11 +87,41 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Pet'
+        required: true
       responses:
         "404":
           description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Pet:
       required:
         - id

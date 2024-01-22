@@ -32,8 +32,8 @@ import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
 import io.ballerina.openapi.core.generators.schema.model.RecordMetadata;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -92,9 +92,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
         // This assertion is always `true` because this type generator receive ComposedSchema during the upper level
         // filtering as input. Has to use this assertion statement instead of `if` condition, because to avoid
         // unreachable else statement.
-        assert schema instanceof ComposedSchema;
-        ComposedSchema composedSchema = (ComposedSchema) schema;
-        List<Schema> allOfSchemas = composedSchema.getAllOf();
+        List<Schema<?>> allOfSchemas = schema.getAllOf();
 
         RecordMetadata recordMetadata = getRecordMetadata();
         RecordRestDescriptorNode restDescriptorNode = recordMetadata.getRestDescriptorNode();
@@ -103,23 +101,37 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                     typeName);
             return referencedTypeGenerator.generateTypeDescriptorNode();
         } else {
-            List<Node> recordFieldList = generateAllOfRecordFields(allOfSchemas);
-            addAdditionalSchemas(schema);
-            restDescriptorNode =
-                    restSchemas.size() > 1 ? getRestDescriptorNodeForAllOf(restSchemas) : restDescriptorNode;
+            ImmutablePair<List<Node>, List<Schema<?>>> recordFlist = generateAllOfRecordFields(allOfSchemas);
+            List<Node> recordFieldList = recordFlist.getLeft();
+            List<Schema<?>> validSchemas = recordFlist.getRight();
+            if (validSchemas.isEmpty()) {
+                AnyDataTypeGenerator anyDataTypeGenerator = new AnyDataTypeGenerator(schema, typeName);
+                return anyDataTypeGenerator.generateTypeDescriptorNode();
+            } else if (validSchemas.size() == 1) {
+                TypeGenerator typeGenerator = getTypeGenerator(validSchemas.get(0), typeName, null);
+                return typeGenerator.generateTypeDescriptorNode();
+            } else {
+                addAdditionalSchemas(schema);
+                restDescriptorNode =
+                        restSchemas.size() > 1 ? getRestDescriptorNodeForAllOf(restSchemas) : restDescriptorNode;
 
-            NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
-            return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
-                    recordMetadata.isOpenRecord() ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
-                    fieldNodes, restDescriptorNode,
-                    recordMetadata.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) :
-                            createToken(CLOSE_BRACE_PIPE_TOKEN));
+                NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
+                return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
+                        recordMetadata.isOpenRecord() ?
+                                createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
+                        fieldNodes, restDescriptorNode,
+                        recordMetadata.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) :
+                                createToken(CLOSE_BRACE_PIPE_TOKEN));
+            }
         }
     }
 
-    private List<Node> generateAllOfRecordFields(List<Schema> allOfSchemas) throws BallerinaOpenApiException {
+    private ImmutablePair<List<Node>, List<Schema<?>>> generateAllOfRecordFields(List<Schema<?>> allOfSchemas)
+            throws BallerinaOpenApiException {
 
         List<Node> recordFieldList = new ArrayList<>();
+        List<Schema<?>> validSchemas = new ArrayList<>();
+
         for (Schema allOfSchema : allOfSchemas) {
             if (allOfSchema.get$ref() != null) {
                 String extractedSchemaName = GeneratorUtils.extractReferenceType(allOfSchema.get$ref());
@@ -138,18 +150,24 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                 List<String> required = allOfSchema.getRequired();
                 recordFieldList.addAll(addRecordFields(required, properties.entrySet(), typeName));
                 addAdditionalSchemas(allOfSchema);
-            } else if (allOfSchema instanceof ComposedSchema) {
-                ComposedSchema nestedComposedSchema = (ComposedSchema) allOfSchema;
-                if (nestedComposedSchema.getAllOf() != null) {
-                    recordFieldList.addAll(generateAllOfRecordFields(nestedComposedSchema.getAllOf()));
+            } else if (GeneratorUtils.isComposedSchema(allOfSchema)) {
+                if (allOfSchema.getAllOf() != null) {
+                    ImmutablePair<List<Node>, List<Schema<?>>> immutablePair =
+                            generateAllOfRecordFields(allOfSchema.getAllOf());
+                    List<Node> recordAllFields = (List<Node>) immutablePair.getLeft();
+                    recordFieldList.addAll(recordAllFields);
                 } else {
                     // TODO: Needs to improve the error message. Could not access the schema name at this level.
                     throw new BallerinaOpenApiException(
                             "Unsupported nested OneOf or AnyOf schema is found inside a AllOf schema.");
                 }
             }
+            if (allOfSchema.getType() != null || allOfSchema.getProperties() != null || allOfSchema.get$ref() != null
+                    || allOfSchema.getAllOf() != null) {
+                validSchemas.add(allOfSchema);
+            }
         }
-        return recordFieldList;
+        return ImmutablePair.of(recordFieldList, validSchemas);
     }
 
     /**

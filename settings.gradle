@@ -15,12 +15,12 @@
  *
  */
 plugins {
-    id "com.gradle.enterprise" version "3.5"
+    id "com.gradle.enterprise" version "3.13.2"
 }
 rootProject.name = 'openapi-tools'
-include(':config:checkstyle')
+include(':checkstyle')
 include(':module-ballerina-openapi')
-include(':openapi-bal-service')
+include(':ballerina-to-openapi')
 include(':openapi-build-extension')
 include(':openapi-cli')
 include(':openapi-ls-extension')
@@ -29,6 +29,7 @@ include(':openapi-extension')
 include(':openapi-extension-tests')
 include(':openapi-integration-tests')
 //include(':openapi-tests')
+project(':checkstyle').projectDir = file("config${File.separator}checkstyle")
 
 gradleEnterprise {
     buildScan {

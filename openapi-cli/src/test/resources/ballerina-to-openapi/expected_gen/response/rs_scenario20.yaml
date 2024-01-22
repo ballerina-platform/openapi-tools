@@ -1,3 +1,14 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /pet:
     get:
@@ -9,12 +20,14 @@ paths:
             '*/*':
               schema:
                 description: Any type of entity body
+        "202":
+          description: Accepted
         "500":
-          description: Internal server error
+          description: InternalServerError
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/ErrorPayload'
   /pets:
     get:
       operationId: getPets
@@ -25,4 +38,28 @@ paths:
             application/json:
               schema:
                 type: object
-components: {}
+components:
+  schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

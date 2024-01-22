@@ -7,9 +7,16 @@ paths:
           application/vnd.snowpeak.reservation+json:
             schema:
               $ref: '#/components/schemas/Tag'
+        required: true
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
     post:
       operationId: postPets
       requestBody:
@@ -17,24 +24,52 @@ paths:
           application/vnd.snowpeak.reservation+json:
             schema:
               $ref: '#/components/schemas/Pet'
+        required: true
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    TagType:
+    ErrorPayload:
       required:
-        - category
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Pet:
+      required:
         - id
+        - name
       type: object
       properties:
         id:
           type: integer
           format: int64
-        category:
-          type: array
-          items:
-            type: string
+        name:
+          type: string
     Tag:
       required:
         - id
@@ -51,14 +86,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TagType'
-    Pet:
+    TagType:
       required:
+        - category
         - id
-        - name
       type: object
       properties:
         id:
           type: integer
           format: int64
-        name:
-          type: string
+        category:
+          type: array
+          items:
+            type: string

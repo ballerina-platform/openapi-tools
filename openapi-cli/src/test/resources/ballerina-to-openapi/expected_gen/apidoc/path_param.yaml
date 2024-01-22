@@ -24,4 +24,5 @@ paths:
       responses:
         "202":
           description: Accepted
-components: {}
+        "400":
+          description: BadRequest

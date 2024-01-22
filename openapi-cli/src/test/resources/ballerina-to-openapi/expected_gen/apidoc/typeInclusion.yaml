@@ -18,11 +18,41 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ReservationReceipt'
+        required: true
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Link:
       required:
         - href
@@ -40,6 +70,7 @@ components:
           description: link mediatype
           items:
             type: string
+      additionalProperties: false
       description: Link record
     Links:
       required:
@@ -49,12 +80,18 @@ components:
       properties:
         links:
           type: array
+          description: Array links
           items:
             $ref: '#/components/schemas/Link'
         linkid:
           type: integer
+          description: link id
           format: int64
+      additionalProperties: false
+      description: Links array
     ReservationReceipt:
+      type: object
+      description: ReservationReceipt details
       allOf:
         - $ref: '#/components/schemas/Links'
         - required:
@@ -64,3 +101,4 @@ components:
             id:
               type: string
               description: Reservation receipt id
+          additionalProperties: false

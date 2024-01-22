@@ -27,9 +27,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
-import io.ballerina.openapi.converter.model.OASResult;
-import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
+import io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.OASResult;
 import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
@@ -102,7 +102,7 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 response.setError(errorString.toString());
             } else {
                 response.setError(null);
-                List<OASResult> yamlContent = ServiceToOpenAPIConverterUtils.generateOAS3Definition(
+                List<OASResult> yamlContent = ServiceToOpenAPIMapper.generateOAS3Definition(
                         ballerinaPackage.get(), syntaxTree.get(), semanticModel.get(), null, false,
                         Path.of(request.getDocumentFilePath()));
                 //Response should handle
@@ -127,21 +127,22 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
             OpenAPIConverterResponse response = new OpenAPIConverterResponse();
             Path filePath = Path.of(request.getDocumentFilePath());
             Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(filePath);
-            Optional<Project> module = workspaceManager.project(filePath);
+            Optional<Project> project = workspaceManager.project(filePath);
             if (semanticModel.isEmpty()) {
                 response.setError("Error while generating semantic model.");
                 return response;
             }
-            if (module.isEmpty()) {
+            if (project.isEmpty()) {
                 response.setError("Error while getting the project.");
                 return response;
             }
-            DiagnosticResult diagnosticsFromCodeGenAndModify = module.get()
+            project = Optional.of(project.get().duplicate());
+            DiagnosticResult diagnosticsFromCodeGenAndModify = project.get()
                     .currentPackage()
                     .runCodeGenAndModifyPlugins();
             boolean hasErrorsFromCodeGenAndModify = diagnosticsFromCodeGenAndModify.diagnostics().stream()
                     .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
-            Collection<Diagnostic> compilationDiagnostics = module.get().currentPackage()
+            Collection<Diagnostic> compilationDiagnostics = project.get().currentPackage()
                     .getCompilation().diagnosticResult().diagnostics();
             boolean hasCompilationErrors = compilationDiagnostics.stream()
                     .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
@@ -150,17 +151,17 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 response.setError("Given Ballerina file contains compilation error(s).");
                 return response;
             }
-            Module defaultModule = module.get().currentPackage().getDefaultModule();
-
+            Module defaultModule = project.get().currentPackage().getDefaultModule();
+            SemanticModel updatedSemanticModel =
+                    project.get().currentPackage().getCompilation().getSemanticModel(defaultModule.moduleId());
             JsonArray specs = new JsonArray();
             for (DocumentId currentDocumentID : defaultModule.documentIds()) {
                 Document document = defaultModule.document(currentDocumentID);
                 Optional<Path> path = defaultModule.project().documentPath(currentDocumentID);
                 Path inputPath = path.orElse(null);
                 SyntaxTree syntaxTree = document.syntaxTree();
-                List<OASResult> oasResults = ServiceToOpenAPIConverterUtils.generateOAS3Definition(module.get(),
-                        syntaxTree, semanticModel.get(), null, false, inputPath);
-
+                List<OASResult> oasResults = ServiceToOpenAPIMapper.generateOAS3Definition(project.get(),
+                        syntaxTree, updatedSemanticModel, null, false, inputPath);
                 generateServiceJson(response, document.syntaxTree().filePath(), oasResults, specs);
             }
             response.setContent(specs);
@@ -205,9 +206,9 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
      * @return Json Array of diagnostics
      */
     private JsonArray getDiagnosticsJson(OASResult oasResult) {
-        List<OpenAPIConverterDiagnostic> diagnostics = oasResult.getDiagnostics();
+        List<OpenAPIMapperDiagnostic> diagnostics = oasResult.getDiagnostics();
         JsonArray diagnosticsJson = new JsonArray();
-        for (OpenAPIConverterDiagnostic diagnostic : diagnostics) {
+        for (OpenAPIMapperDiagnostic diagnostic : diagnostics) {
             JsonObject diagnosticJson = new JsonObject();
             diagnosticJson.addProperty(MESSAGE, diagnostic.getMessage());
             diagnosticJson.addProperty(SEVERITY, diagnostic.getDiagnosticSeverity().name());

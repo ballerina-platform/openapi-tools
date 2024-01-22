@@ -15,14 +15,12 @@
  */
 
 module io.ballerina.openapi.extension.openAPILSExtension {
-    requires com.fasterxml.jackson.core;
-    requires com.fasterxml.jackson.databind;
     requires handlebars;
     requires info.picocli;
     requires io.ballerina.lang;
     requires io.ballerina.parser;
     requires io.ballerina.tools.api;
-    requires io.ballerina.openapi.converter;
+    requires io.ballerina.openapi.service;
     requires io.ballerina.language.server.commons;
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;

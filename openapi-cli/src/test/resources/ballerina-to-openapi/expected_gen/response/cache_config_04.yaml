@@ -6,6 +6,9 @@ paths:
         "200":
           description: Ok
           headers:
+            Last-Modified:
+              schema:
+                type: string
             Cache-Control:
               schema:
                 type: string
@@ -13,11 +16,7 @@ paths:
             ETag:
               schema:
                 type: string
-            Last-Modified:
-              schema:
-                type: string
           content:
             text/plain:
               schema:
                 type: string
-components: {}

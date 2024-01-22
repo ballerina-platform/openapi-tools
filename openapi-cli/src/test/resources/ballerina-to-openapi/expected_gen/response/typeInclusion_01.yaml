@@ -20,6 +20,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Reservation'
+        required: true
       responses:
         "201":
           description: Created
@@ -33,22 +34,74 @@ paths:
             text/plain:
               schema:
                 type: string
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    ReserveRoom:
+    Action:
+      type: string
+      enum:
+        - PATCH
+        - DELETE
+        - PUT
+        - POST
+        - GET
+    ErrorPayload:
       required:
-        - count
-        - id
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        id:
+        timestamp:
           type: string
-          description: Unique identification of the room
-        count:
+        status:
           type: integer
-          description: Number of rooms
           format: int64
-      description: Represents rooms be reserved
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Link:
+      required:
+        - href
+        - rel
+      type: object
+      properties:
+        rel:
+          type: string
+        href:
+          type: string
+        mediaTypes:
+          type: array
+          items:
+            type: string
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+      additionalProperties: false
+    Links:
+      required:
+        - links
+      type: object
+      properties:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+      additionalProperties: false
     Reservation:
       required:
         - endDate
@@ -67,17 +120,11 @@ components:
         endDate:
           type: string
           description: End date in yyyy-mm-dd
+      additionalProperties: false
       description: Represents a reservation of rooms
-    Links:
-      required:
-        - links
-      type: object
-      properties:
-        links:
-          type: array
-          items:
-            $ref: '#/components/schemas/Link'
     ReservationReceipt:
+      type: object
+      description: Represents a receipt for the reservation
       allOf:
         - $ref: '#/components/schemas/Links'
         - required:
@@ -98,27 +145,19 @@ components:
               description: Last updated time stamp
             reservation:
               $ref: '#/components/schemas/Reservation'
-    Link:
+          additionalProperties: false
+    ReserveRoom:
       required:
-        - href
-        - rel
+        - count
+        - id
       type: object
       properties:
-        rel:
+        id:
           type: string
-        href:
-          type: string
-        mediaTypes:
-          type: array
-          items:
-            type: string
-        actions:
-          type: array
-          items:
-            type: string
-            enum:
-              - PATCH
-              - DELETE
-              - PUT
-              - POST
-              - GET
+          description: Unique identification of the room
+        count:
+          type: integer
+          description: Number of rooms
+          format: int64
+      additionalProperties: false
+      description: Represents rooms be reserved

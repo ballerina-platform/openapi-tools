@@ -15,8 +15,6 @@
  */
 
 module io.ballerina.openapi {
-    requires com.fasterxml.jackson.core;
-    requires com.fasterxml.jackson.databind;
     requires handlebars;
     requires info.picocli;
     requires io.ballerina.lang;
@@ -25,7 +23,7 @@ module io.ballerina.openapi {
     requires io.ballerina.cli;
     requires io.ballerina.tools.api;
     requires io.ballerina.formatter.core;
-    requires io.ballerina.openapi.converter;
+    requires io.ballerina.openapi.service;
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
     requires java.ws.rs;

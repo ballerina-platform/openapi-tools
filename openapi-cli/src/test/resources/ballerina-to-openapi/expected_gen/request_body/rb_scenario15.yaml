@@ -20,9 +20,16 @@ paths:
               type: object
               additionalProperties:
                 type: string
+        required: true
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /pets02:
     post:
       operationId: postPets02
@@ -33,9 +40,16 @@ paths:
               type: object
               additionalProperties:
                 type: string
+        required: true
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /pets03:
     post:
       operationId: postPets03
@@ -46,9 +60,16 @@ paths:
               type: object
               additionalProperties:
                 type: string
+        required: true
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /pets04:
     post:
       operationId: postPets04
@@ -59,7 +80,38 @@ paths:
               type: object
               additionalProperties:
                 type: string
+        required: true
       responses:
         "200":
           description: Ok
-components: {}
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

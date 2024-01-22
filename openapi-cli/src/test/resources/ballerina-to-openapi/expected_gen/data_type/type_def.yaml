@@ -20,9 +20,16 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Link'
+        required: true
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /reservation/{id}:
     get:
       operationId: getReservationId
@@ -35,50 +42,47 @@ paths:
       responses:
         "202":
           description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    PriceMap:
-      required:
-        - price
-        - salary
-      type: object
-      properties:
-        price:
-          type: integer
-          format: int64
-        salary:
-          type: number
-          format: double
-    Salary:
-      oneOf:
-        - type: integer
-          format: int64
-        - type: number
-          format: float
-        - type: number
-          format: double
     Action:
       type: string
       description: Adding doc
-    Price:
-      oneOf:
-        - type: number
-          format: float
-        - $ref: '#/components/schemas/PriceMap'
-    Count:
-      type: integer
-      format: int32
-    Rels:
-      type: array
-      items:
-        type: string
     Books:
       type: object
       additionalProperties:
         type: string
-    PetId:
+    Count:
       type: integer
-      format: int32
+      format: int64
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Link:
       required:
         - count
@@ -93,7 +97,7 @@ components:
           $ref: '#/components/schemas/Action'
         count:
           nullable: true
-          oneOf:
+          allOf:
             - $ref: '#/components/schemas/Count'
         books:
           $ref: '#/components/schemas/Books'
@@ -101,3 +105,37 @@ components:
           $ref: '#/components/schemas/Price'
         salary:
           $ref: '#/components/schemas/Salary'
+      additionalProperties: false
+    PetId:
+      type: integer
+      format: int64
+    Price:
+      oneOf:
+        - type: number
+          format: float
+        - $ref: '#/components/schemas/PriceMap'
+    PriceMap:
+      required:
+        - price
+        - salary
+      type: object
+      properties:
+        price:
+          type: integer
+          format: int64
+        salary:
+          type: number
+          format: double
+      additionalProperties: false
+    Rels:
+      type: array
+      items:
+        type: string
+    Salary:
+      oneOf:
+        - type: integer
+          format: int64
+        - type: number
+          format: float
+        - type: number
+          format: double

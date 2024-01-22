@@ -31,15 +31,7 @@ import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.schema.model.RecordMetadata;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.BooleanSchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.IntegerSchema;
-import io.swagger.v3.oas.models.media.MapSchema;
-import io.swagger.v3.oas.models.media.NumberSchema;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.media.StringSchema;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.io.PrintStream;
@@ -156,10 +148,10 @@ public class RecordTypeGenerator extends TypeGenerator {
                 if (additionalPropSchema.get$ref() != null) {
                     isOpenRecord = false;
                     recordRestDescNode = getRestDescriptorNodeForReference(additionalPropSchema);
-                } else if (additionalPropSchema.getType() != null) {
+                } else if (GeneratorUtils.getOpenAPIType(additionalPropSchema) != null) {
                     isOpenRecord = false;
                     recordRestDescNode = getRecordRestDescriptorNode(additionalPropSchema);
-                } else if (additionalPropSchema instanceof ComposedSchema) {
+                } else if (GeneratorUtils.isComposedSchema(additionalPropSchema)) {
                     OUT_STREAM.println("WARNING: generating Ballerina rest record field will be ignored for the " +
                             "OpenAPI contract additionalProperties type `ComposedSchema`, as it is not supported on " +
                             "Ballerina rest record field.");
@@ -197,35 +189,36 @@ public class RecordTypeGenerator extends TypeGenerator {
             throws BallerinaOpenApiException {
 
         RecordRestDescriptorNode recordRestDescNode = null;
-        if (additionalPropSchema instanceof NumberSchema && additionalPropSchema.getFormat() != null) {
+        if (GeneratorUtils.isNumberSchema(additionalPropSchema) && additionalPropSchema.getFormat() != null) {
             // this is special for `NumberSchema` because it has format with its expected type.
-            String type = additionalPropSchema.getFormat();
             SimpleNameReferenceNode numberNode = NodeFactory.createSimpleNameReferenceNode(
-                    createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(type)));
+                    createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(additionalPropSchema)));
             recordRestDescNode = NodeFactory.createRecordRestDescriptorNode(
                     TypeGeneratorUtils.getNullableType(additionalPropSchema, numberNode),
                     createToken(ELLIPSIS_TOKEN),
                     createToken(SEMICOLON_TOKEN));
-        } else if (additionalPropSchema instanceof ObjectSchema || additionalPropSchema instanceof MapSchema) {
+        } else if (GeneratorUtils.isObjectSchema(additionalPropSchema) ||
+                GeneratorUtils.isMapSchema(additionalPropSchema)) {
             RecordTypeGenerator record = new RecordTypeGenerator(additionalPropSchema, null);
             TypeDescriptorNode recordNode = TypeGeneratorUtils.getNullableType(additionalPropSchema,
                     record.generateTypeDescriptorNode());
             recordRestDescNode = NodeFactory.createRecordRestDescriptorNode(recordNode, createToken(ELLIPSIS_TOKEN),
                     createToken(SEMICOLON_TOKEN));
-        } else if (additionalPropSchema instanceof ArraySchema) {
+        } else if (GeneratorUtils.isArraySchema(additionalPropSchema)) {
             ArrayTypeGenerator arrayTypeGenerator = new ArrayTypeGenerator(additionalPropSchema, null, null);
             TypeDescriptorNode arrayNode = arrayTypeGenerator.generateTypeDescriptorNode();
             recordRestDescNode = NodeFactory.createRecordRestDescriptorNode(arrayNode, createToken(ELLIPSIS_TOKEN),
                     createToken(SEMICOLON_TOKEN));
-        } else if (additionalPropSchema instanceof IntegerSchema || additionalPropSchema instanceof StringSchema ||
-                additionalPropSchema instanceof BooleanSchema) {
+        } else if (GeneratorUtils.isIntegerSchema(additionalPropSchema) ||
+                GeneratorUtils.isStringSchema(additionalPropSchema) ||
+                GeneratorUtils.isBooleanSchema(additionalPropSchema)) {
             PrimitiveTypeGenerator primitiveTypeGenerator = new PrimitiveTypeGenerator(additionalPropSchema, null);
             TypeDescriptorNode primitiveNode = primitiveTypeGenerator.generateTypeDescriptorNode();
             recordRestDescNode = NodeFactory.createRecordRestDescriptorNode(primitiveNode, createToken(ELLIPSIS_TOKEN),
                     createToken(SEMICOLON_TOKEN));
         } else {
             OUT_STREAM.printf("WARNING: the Ballerina rest record field does not support with the data type `%s`",
-                    additionalPropSchema.getType());
+                    GeneratorUtils.getOpenAPIType(additionalPropSchema));
         }
         return recordRestDescNode;
     }

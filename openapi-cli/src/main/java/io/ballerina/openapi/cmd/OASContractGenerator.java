@@ -20,12 +20,12 @@ package io.ballerina.openapi.cmd;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
-import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
-import io.ballerina.openapi.converter.model.OASResult;
-import io.ballerina.openapi.converter.utils.CodegenUtils;
-import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
+import io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.OASResult;
+import io.ballerina.openapi.service.mapper.utils.CodegenUtils;
 import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
@@ -45,7 +45,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import static io.ballerina.openapi.converter.utils.CodegenUtils.resolveContractFileName;
+import static io.ballerina.openapi.service.mapper.utils.CodegenUtils.resolveContractFileName;
 
 /**
  * OpenApi related utility classes.
@@ -54,8 +54,11 @@ import static io.ballerina.openapi.converter.utils.CodegenUtils.resolveContractF
  */
 
 public class OASContractGenerator {
-    private final List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
-    private final PrintStream outStream = System.out;
+    private SyntaxTree syntaxTree;
+    private SemanticModel semanticModel;
+    private Project project;
+    private List<OpenAPIMapperDiagnostic> errors = new ArrayList<>();
+    private PrintStream outStream = System.out;
 
     /**
      * Initialize constructor.
@@ -64,7 +67,7 @@ public class OASContractGenerator {
 
     }
 
-    public List<OpenAPIConverterDiagnostic> getErrors() {
+    public List<OpenAPIMapperDiagnostic> getErrors() {
         return errors;
     }
 
@@ -78,7 +81,7 @@ public class OASContractGenerator {
     public void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, String serviceName,
                                                   Boolean needJson) {
         // Load project instance for single ballerina file
-        Project project = ProjectLoader.loadProject(servicePath);
+        project = ProjectLoader.loadProject(servicePath);
         DiagnosticResult diagnosticsFromCodeGenAndModify = project.currentPackage().runCodeGenAndModifyPlugins();
         boolean hasErrorsFromCodeGenAndModify = diagnosticsFromCodeGenAndModify.diagnostics().stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
@@ -99,7 +102,7 @@ public class OASContractGenerator {
         Optional<Path> path = project.documentPath(docId);
         Path inputPath = path.orElse(null);
 
-        SyntaxTree syntaxTree = doc.syntaxTree();
+        syntaxTree = doc.syntaxTree();
         PackageCompilation compilation = project.currentPackage().getCompilation();
         boolean hasCompilationErrors = compilation.diagnosticResult()
                 .diagnostics().stream()
@@ -112,8 +115,8 @@ public class OASContractGenerator {
             });
             return;
         }
-        SemanticModel semanticModel = compilation.getSemanticModel(docId.moduleId());
-        List<OASResult> openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(project, syntaxTree,
+        semanticModel = compilation.getSemanticModel(docId.moduleId());
+        List<OASResult> openAPIDefinitions = ServiceToOpenAPIMapper.generateOAS3Definition(project, syntaxTree,
                 semanticModel, serviceName, needJson, inputPath);
 
         if (!openAPIDefinitions.isEmpty()) {

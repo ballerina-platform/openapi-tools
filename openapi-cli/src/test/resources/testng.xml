@@ -42,6 +42,9 @@ under the License.
             <class name="io.ballerina.openapi.generators.openapi.ServiceDeclarationNodesTests"/>
             <class name="io.ballerina.openapi.generators.openapi.ResponseHeaderTests"/>
             <class name="io.ballerina.openapi.generators.openapi.MapTypeTests"/>
+            <class name="io.ballerina.openapi.generators.openapi.ConstraintTests"/>
+            <class name="io.ballerina.openapi.generators.openapi.NegativeConstraintTests"/>
+            <class name="io.ballerina.openapi.generators.openapi.NegativePathParameterTests"/>
             <class name="io.ballerina.openapi.generators.openapi.ParameterAnnotationTests"/>
             <class name="io.ballerina.openapi.generators.openapi.UnSupportedBallerinaFileTests"/>
             <class name="io.ballerina.openapi.cmd.OpenApiGenServiceCmdTest"/>
@@ -101,9 +104,11 @@ under the License.
             <class name="io.ballerina.openapi.generators.schema.IntegerDataTypeTests"/>
             <class name="io.ballerina.openapi.generators.schema.EnumGenerationTests"/>
             <class name="io.ballerina.openapi.generators.schema.NegativeConstraintTests"/>
+            <class name="io.ballerina.openapi.generators.schema.TypeFormatTests"/>
             <class name="io.ballerina.openapi.generators.testcases.BallerinaTestGeneratorTests"/>
             <class name="io.ballerina.openapi.generators.client.OneOfResponsesTests"/>
             <class name="io.ballerina.openapi.generators.openapi.DataTypeTests"/>
+            <class name="io.ballerina.openapi.generators.openapi.NegativeResponseTests"/>
             <!--            <class name="io.ballerina.openapi.generators.schema.SwaggerParserTests"/>-->
         </classes>
     </test>

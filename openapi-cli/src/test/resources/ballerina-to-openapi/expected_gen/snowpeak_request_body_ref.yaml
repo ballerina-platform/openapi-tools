@@ -20,18 +20,19 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Reservation'
+        required: true
       responses:
         "201":
           description: Created
           headers:
+            Last-Modified:
+              schema:
+                type: string
             Cache-Control:
               schema:
                 type: string
                 default: "must-revalidate,public,max-age=3600"
             ETag:
-              schema:
-                type: string
-            Last-Modified:
               schema:
                 type: string
           content:
@@ -44,6 +45,51 @@ paths:
             text/plain:
               schema:
                 type: string
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /reservations:
+    post:
+      summary: Represents Snowpeak reservations resource
+      operationId: postReservations
+      requestBody:
+        description: Array representation of Reservations
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Reservation'
+        required: true
+      responses:
+        "201":
+          description: Created
+          headers:
+            Last-Modified:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+                default: "must-revalidate,public,max-age=3600"
+            ETag:
+              schema:
+                type: string
+        "409":
+          description: Conflict
+          content:
+            text/plain:
+              schema:
+                type: string
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /payment/{id}:
     post:
       summary: Represents Snowpeak payment resource
@@ -61,6 +107,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Payment'
+        required: true
       responses:
         "201":
           description: Created
@@ -74,41 +121,83 @@ paths:
             text/plain:
               schema:
                 type: string
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    ReserveRoom:
+    ErrorPayload:
       required:
-        - count
-        - id
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        id:
+        timestamp:
           type: string
-          description: Unique identification of the room
-        count:
+        status:
           type: integer
-          description: Number of rooms
           format: int64
-      description: Represents rooms be reserved
-    Reservation:
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Link:
       required:
-        - endDate
-        - reserveRooms
-        - startDate
+        - href
       type: object
       properties:
-        reserveRooms:
+        rel:
+          type: string
+          description: Names the relationship of the linked target to the current
+            representation
+        href:
+          type: string
+          description: Target URL
+        types:
           type: array
-          description: Rooms to be reserved
+          description: Expected resource representation media types
           items:
-            $ref: '#/components/schemas/ReserveRoom'
-        startDate:
-          type: string
-          description: Start date in yyyy-mm-dd
-        endDate:
-          type: string
-          description: End date in yyyy-mm-dd
-      description: Represents a reservation of rooms
+            type: string
+        methods:
+          type: array
+          description: Allowed resource methods
+          items:
+            $ref: '#/components/schemas/Method'
+      description: Represents a server-provided hyperlink
+    Links:
+      required:
+        - _links
+      type: object
+      properties:
+        _links:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+          description: Map of available links
+      additionalProperties: false
+      description: Represents available server-provided links
+    Method:
+      type: string
+      description: Represents HTTP methods.
+      enum:
+        - OPTIONS
+        - HEAD
+        - PATCH
+        - DELETE
+        - PUT
+        - POST
+        - GET
     Payment:
       required:
         - cardNumber
@@ -130,6 +219,7 @@ components:
         expiryYear:
           type: string
           description: Expiaration year of the card in yyyy
+      additionalProperties: false
       description: Reperesents payement for rooms
     PaymentReceipt:
       required:
@@ -158,17 +248,31 @@ components:
           description: Booked rooms
           items:
             $ref: '#/components/schemas/Room'
+      additionalProperties: false
       description: Reperesents receipt for the payment
-    Links:
+    Reservation:
       required:
-        - _links
+        - endDate
+        - reserveRooms
+        - startDate
       type: object
       properties:
-        _links:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/Link'
+        reserveRooms:
+          type: array
+          description: Rooms to be reserved
+          items:
+            $ref: '#/components/schemas/ReserveRoom'
+        startDate:
+          type: string
+          description: Start date in yyyy-mm-dd
+        endDate:
+          type: string
+          description: End date in yyyy-mm-dd
+      additionalProperties: false
+      description: Represents a reservation of rooms
     ReservationReceipt:
+      type: object
+      description: Represents a receipt for the reservation
       allOf:
         - $ref: '#/components/schemas/Links'
         - required:
@@ -198,6 +302,22 @@ components:
               format: double
             reservation:
               $ref: '#/components/schemas/Reservation'
+          additionalProperties: false
+    ReserveRoom:
+      required:
+        - count
+        - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identification of the room
+        count:
+          type: integer
+          description: Number of rooms
+          format: int64
+      additionalProperties: false
+      description: Represents rooms be reserved
     Room:
       required:
         - capacity
@@ -214,12 +334,7 @@ components:
           type: string
           description: Unique identification
         category:
-          type: string
-          description: Types of rooms available
-          enum:
-            - FAMILY
-            - KING
-            - DELUXE
+          $ref: '#/components/schemas/RoomCategory'
         capacity:
           type: integer
           description: Number of people that can be accommodate
@@ -228,12 +343,7 @@ components:
           type: boolean
           description: Availability of wifi
         status:
-          type: string
-          description: Availability of room
-          enum:
-            - BOOKED
-            - RESERVED
-            - AVAILABLE
+          $ref: '#/components/schemas/RoomStatus'
         currency:
           type: string
           description: Currency used in price
@@ -245,35 +355,17 @@ components:
           type: integer
           description: Number of rooms as per the status
           format: int64
+      additionalProperties: false
       description: Represents resort room
-    Link:
-      required:
-        - href
-      type: object
-      properties:
-        rel:
-          type: string
-          description: Names the relationship of the linked target to the current
-            representation
-        href:
-          type: string
-          description: Target URL
-        types:
-          type: array
-          description: Expected resource representation media types
-          items:
-            type: string
-        methods:
-          type: array
-          description: Allowed resource methods
-          items:
-            type: string
-            enum:
-              - OPTIONS
-              - HEAD
-              - PATCH
-              - DELETE
-              - PUT
-              - POST
-              - GET
-      description: Represents a server-provided hyperlink
+    RoomCategory:
+      type: string
+      enum:
+        - FAMILY
+        - KING
+        - DELUXE
+    RoomStatus:
+      type: string
+      enum:
+        - BOOKED
+        - RESERVED
+        - AVAILABLE

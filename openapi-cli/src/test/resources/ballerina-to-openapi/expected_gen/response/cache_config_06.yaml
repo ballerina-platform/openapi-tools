@@ -1,3 +1,14 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /cachingBackEnd01:
     get:
@@ -6,6 +17,9 @@ paths:
         "200":
           description: Ok
           headers:
+            Last-Modified:
+              schema:
+                type: string
             Cache-Control:
               schema:
                 type: string
@@ -13,19 +27,16 @@ paths:
             ETag:
               schema:
                 type: string
-            Last-Modified:
-              schema:
-                type: string
           content:
             text/plain:
               schema:
                 type: string
         "500":
-          description: Internal server error
+          description: InternalServerError
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/ErrorPayload'
   /cachingBackEnd02:
     get:
       operationId: getCachingbackend02
@@ -33,6 +44,9 @@ paths:
         "200":
           description: Ok
           headers:
+            Last-Modified:
+              schema:
+                type: string
             Cache-Control:
               schema:
                 type: string
@@ -40,17 +54,51 @@ paths:
             ETag:
               schema:
                 type: string
+          content:
+            text/plain:
+              schema:
+                type: string
+        "202":
+          description: Accepted
+          headers:
             Last-Modified:
               schema:
                 type: string
-          content:
-            text/plain:
+            Cache-Control:
+              schema:
+                type: string
+                default: "must-revalidate,no-store,no-transform,public,proxy-revalidate,max-age=3600,s-maxage=5"
+            ETag:
               schema:
                 type: string
         "500":
-          description: Internal server error
+          description: InternalServerError
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-components: {}
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

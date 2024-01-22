@@ -38,12 +38,11 @@ public isolated client class Client {
     # 02 Example for rb has inline requestbody.
     #
     # + return - OK
-    remote isolated function updateUser(json[] payload) returns http:Response|error {
+    remote isolated function updateUser(json[] payload) returns error? {
         string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        http:Response response = check self.clientEp->put(resourcePath, request);
-        return response;
+        return self.clientEp->put(resourcePath, request);
     }
 }

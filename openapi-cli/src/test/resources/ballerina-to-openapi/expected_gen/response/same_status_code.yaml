@@ -29,11 +29,11 @@ paths:
               schema:
                 type: string
         "500":
-          description: Internal server error
+          description: InternalServerError
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     Cat:
@@ -46,6 +46,29 @@ components:
           type: integer
           format: int64
         name:
+          type: string
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
           type: string
     Pet:
       required:

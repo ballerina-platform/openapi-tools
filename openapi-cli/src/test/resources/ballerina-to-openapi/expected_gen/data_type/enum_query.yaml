@@ -1,0 +1,140 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /users/meetings/{group}:
+    get:
+      operationId: getUsersMeetingsGroup
+      parameters:
+        - name: group
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/MeetingGroup'
+        - name: required-q-ref
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/RoomNo'
+        - name: required-q-arr
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Status'
+        - name: optional-q-arr
+          in: query
+          schema:
+            type: array
+            nullable: true
+            items:
+              $ref: '#/components/schemas/Status'
+        - name: format
+          in: query
+          schema:
+            nullable: true
+            allOf:
+              - $ref: '#/components/schemas/Format'
+        - name: type
+          in: query
+          schema:
+            type: string
+            default: live
+            enum:
+              - scheduled
+              - live
+              - upcoming
+        - name: q-default-ref
+          in: query
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/RoomNo'
+            default: R5
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingList'
+        "404":
+          description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Format:
+      type: string
+      enum:
+        - MSGPACK
+        - JSONP
+        - JSON
+    Meeting:
+      required:
+        - topic
+      type: object
+      properties:
+        topic:
+          type: string
+    MeetingGroup:
+      type: string
+      enum:
+        - ENGINEERING
+        - HR
+        - ADMIN
+    MeetingList:
+      required:
+        - meetings
+      type: object
+      properties:
+        meetings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Meeting'
+    RoomNo:
+      type: string
+      enum:
+        - R6
+        - R5
+        - R3
+    Status:
+      type: string
+      enum:
+        - PENDING
+        - AVAILABLE

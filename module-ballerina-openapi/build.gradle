@@ -25,7 +25,7 @@ dependencies {
     jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
     }
-    implementation project(':openapi-bal-service')
+    implementation project(':ballerina-to-openapi')
     implementation project(':openapi-validator')
     implementation project(':openapi-core')
     implementation project(':openapi-cli')
@@ -48,15 +48,17 @@ jar {
 
 def packageName = "openapi"
 def packageOrg = "ballerina"
-def platform = "java11"
+def platform = "java17"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
+def ballerinaConfigFilePlaceHolder = new File("${project.rootDir}/config/resources/Ballerina.toml")
+def ballerinaCompileConfigFilePlaceHolder = new File("${project.rootDir}/config/resources/CompilerPlugin.toml")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def ballerinaCompileConfigFile = new File("$project.projectDir/CompilerPlugin.toml")
 def artifactBallerinaDocs = file("$project.projectDir/build/docs_parent/")
 def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
 def artifactLibParent = file("$project.projectDir/build/lib_parent/")
 def targetNativeJar = file("""$project.rootDir/${packageName}-validator/build/libs/${packageName}-validator-${project.version}.jar""")
-def targetOpenApiCommonJar = file("$project.rootDir/openapi-bal-service/build/libs/openapi-bal-service-${project.version}.jar")
+def targetOpenApiCommonJar = file("$project.rootDir/ballerina-to-openapi/build/libs/ballerina-to-openapi-${project.version}.jar")
 def targetOpenApiCoreJar = file("$project.rootDir/openapi-core/build/libs/openapi-core-${project.version}.jar")
 def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-cli-${project.version}.jar")
 //def targetOpenApiClientIDLJar = file("$project.rootDir/openapi-client-idl-plugin" +
@@ -106,6 +108,7 @@ task unpackStdLibs() {
 task copyStdlibs(type: Copy) {
     def ballerinaDist = "build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
     into ballerinaDist
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     /* Standard Libraries */
     configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
@@ -124,7 +127,7 @@ task updateTomlFile {
         def stdlibDependentIoVersion = stripBallerinaExtensionVersion(project.stdlibIoVersion)
         def stdlibDependentLogVersion = stripBallerinaExtensionVersion(project.stdlibLogVersion)
 
-        def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
+        def newConfig = ballerinaConfigFilePlaceHolder.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
         newConfig = newConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)
@@ -137,7 +140,7 @@ task updateCompilerTomlFile {
         def stdlibDependentIoVersion = stripBallerinaExtensionVersion(project.stdlibIoVersion)
         def stdlibDependentLogVersion = stripBallerinaExtensionVersion(project.stdlibLogVersion)
 
-        def newConfig = ballerinaCompileConfigFile.text.replace("@project.version@", project.version)
+        def newConfig = ballerinaCompileConfigFilePlaceHolder.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
         newConfig = newConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)
@@ -177,6 +180,7 @@ task initializeVariables {
 
 task ballerinaBuild {
     inputs.dir file(project.projectDir)
+    doNotTrackState("build needs to run every time")
     doLast {
         // Build and populate caches
         exec {
@@ -329,7 +333,7 @@ copyStdlibs.dependsOn unpackStdLibs
 updateTomlFile.dependsOn copyStdlibs
 updateCompilerTomlFile.dependsOn updateTomlFile
 
-ballerinaBuild.dependsOn ":${packageName}-bal-service:build"
+ballerinaBuild.dependsOn ":ballerina-to-${packageName}:build"
 ballerinaBuild.dependsOn ":${packageName}-cli:build"
 ballerinaBuild.dependsOn ":${packageName}-ls-extension:build"
 ballerinaBuild.dependsOn ":${packageName}-validator:build"
@@ -337,6 +341,12 @@ ballerinaBuild.dependsOn ":${packageName}-extension:build"
 ballerinaBuild.dependsOn ":${packageName}-build-extension:build"
 ballerinaBuild.dependsOn updateCompilerTomlFile
 ballerinaBuild.dependsOn initializeVariables
+ballerinaBuild.dependsOn generatePomFileForMavenJavaPublication
+ballerinaBuild.dependsOn compileJava
+ballerinaBuild.dependsOn compileTestJava
+ballerinaBuild.dependsOn checkstyleMain
+ballerinaBuild.dependsOn checkstyleTest
+ballerinaBuild.dependsOn jar
 ballerinaBuild.finalizedBy revertTomlFile
 build.dependsOn ballerinaBuild
 

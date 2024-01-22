@@ -16,16 +16,17 @@ paths:
       parameters:
         - name: q
           in: query
+          required: true
           content:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Student'
+        required: true
       responses:
         "201":
           description: Created
@@ -33,6 +34,12 @@ paths:
             application/json:
               schema:
                 type: object
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /student2:
     post:
       operationId: postStudent2
@@ -47,6 +54,7 @@ paths:
           text/plain:
             schema:
               type: string
+        required: true
       responses:
         "201":
           description: Created
@@ -54,8 +62,37 @@ paths:
             application/json:
               schema:
                 type: object
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Student:
       required:
         - Name

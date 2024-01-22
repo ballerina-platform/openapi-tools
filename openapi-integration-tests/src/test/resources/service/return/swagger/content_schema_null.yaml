@@ -40,4 +40,3 @@ paths:
           content:
             "application/json":
               schema: {}
-components: {}

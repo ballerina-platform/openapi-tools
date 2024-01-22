@@ -1,9 +1,8 @@
- import ballerina/http;
+import ballerina/http;
 
- listener http:Listener helloEp = new (9090);
+listener http:Listener helloEp = new (9090);
 
- service /payloadV on helloEp {
-     resource function post hi(@http:Payload { mediaType:["application/json", "application/xml"] } json payload) {
-     }
- }
-
+service /payloadV on helloEp {
+    resource function post hi(@http:Payload {mediaType: ["application/vnd+json", "application/vnd+xml"]} json|xml payload) {
+    }
+}

@@ -37,9 +37,6 @@ paths:
         "200":
           description: Ok
           content:
-            application/snowflake+json:
-              schema:
-                type: string
             text/snowflake+plain:
               schema:
                 type: string

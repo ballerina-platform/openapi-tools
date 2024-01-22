@@ -17,10 +17,10 @@
  */
 package io.ballerina.openapi.cmd;
 
-import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.ballerina.openapi.core.ErrorMessages;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.model.GenSrcFile;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
@@ -53,7 +53,7 @@ public class CmdUtils {
 
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(code, message, severity);
         if (location == null) {
-            location = new ConverterCommonUtils.NullLocation();
+            location = new MapperCommonUtils.NullLocation();
         }
         return new OpenAPIDiagnostic(diagnosticInfo, location, Collections.emptyList(), args);
     }

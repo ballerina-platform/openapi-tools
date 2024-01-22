@@ -100,6 +100,16 @@ public class PrimitiveDataTypeTests {
                 syntaxTree);
     }
 
+    @Test(description = "Test for primitive types with formats")
+    public void generateSchemaForPrimitiveTypesWithUnsupportedFormats() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/invalid_formats.yaml");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/invalid_formats.bal", syntaxTree);
+    }
+
     @AfterTest
     public void clean() {
         System.setErr(null);

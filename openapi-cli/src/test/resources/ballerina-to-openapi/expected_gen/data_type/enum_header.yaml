@@ -1,0 +1,135 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /users/meetings/{group}:
+    get:
+      operationId: getUsersMeetingsGroup
+      parameters:
+        - name: group
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/MeetingGroup'
+        - name: x-date-required
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/DateFormat'
+        - name: x-date-optional
+          in: header
+          schema:
+            nullable: true
+            allOf:
+              - $ref: '#/components/schemas/DateFormat'
+        - name: x-required-arr
+          in: header
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/TimeZone'
+        - name: x-optional-arr
+          in: header
+          schema:
+            type: array
+            nullable: true
+            items:
+              $ref: '#/components/schemas/TimeZone'
+        - name: x-def-arr
+          in: header
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/DateFormat'
+            default:
+              - UTC
+        - name: x-def-header
+          in: header
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/DateFormat'
+            default: UTC
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingList'
+        "404":
+          description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    DateFormat:
+      type: string
+      enum:
+        - EPOCH
+        - OFFSET
+        - LOCAL
+        - UTC
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Meeting:
+      required:
+        - topic
+      type: object
+      properties:
+        topic:
+          type: string
+    MeetingGroup:
+      type: string
+      enum:
+        - ENGINEERING
+        - HR
+        - ADMIN
+    MeetingList:
+      required:
+        - meetings
+      type: object
+      properties:
+        meetings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Meeting'
+    TimeZone:
+      type: string
+      enum:
+        - UTC
+        - GMT
+        - IST

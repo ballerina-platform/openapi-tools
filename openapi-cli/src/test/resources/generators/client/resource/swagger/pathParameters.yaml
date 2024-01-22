@@ -129,4 +129,3 @@ paths:
         200:
           description: "Requested customer"
       operationId: "get_customer"
-components: {}

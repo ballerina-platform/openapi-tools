@@ -30,7 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.unescapeIdentifier;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 import static io.ballerina.openapi.generators.common.TestUtils.getStringFromGivenBalFile;
 import static io.ballerina.openapi.generators.openapi.TestUtils.compareWithGeneratedFile;
 import static io.ballerina.openapi.generators.openapi.TestUtils.deleteDirectory;

@@ -26,12 +26,8 @@ import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -52,11 +48,17 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_RETURN;
 import static io.ballerina.openapi.core.GeneratorConstants.ERROR;
+import static io.ballerina.openapi.core.GeneratorConstants.OPTIONAL_ERROR;
 import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
+import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.GeneratorUtils.isValidSchemaName;
+import static io.ballerina.openapi.core.GeneratorUtils.isArraySchema;
+import static io.ballerina.openapi.core.GeneratorUtils.isComposedSchema;
+import static io.ballerina.openapi.core.GeneratorUtils.isMapSchema;
+import static io.ballerina.openapi.core.GeneratorUtils.isObjectSchema;
 
 /**
  * This util class for maintain the operation response with ballerina return type.
@@ -94,6 +96,7 @@ public class FunctionReturnTypeGenerator {
         if (operation.getResponses() != null) {
             ApiResponses responses = operation.getResponses();
             for (Map.Entry<String, ApiResponse> entry : responses.entrySet()) {
+                noContentResponseFound = false;
                 String statusCode = entry.getKey();
                 ApiResponse response = entry.getValue();
                 if (statusCode.startsWith("2")) {
@@ -116,6 +119,10 @@ public class FunctionReturnTypeGenerator {
                         noContentResponseFound = true;
                     }
                 }
+                if ((statusCode.startsWith("1") || statusCode.startsWith("2") || statusCode.startsWith("3")) &&
+                        response.getContent() == null) {
+                    noContentResponseFound = true;
+                }
             }
         }
         if (returnTypes.size() > 0) {
@@ -127,6 +134,8 @@ public class FunctionReturnTypeGenerator {
                 finalReturnType.append(NILLABLE);
             }
             return finalReturnType.toString();
+        } else if (noContentResponseFound) {
+            return OPTIONAL_ERROR;
         } else {
             return DEFAULT_RETURN;
         }
@@ -139,15 +148,12 @@ public class FunctionReturnTypeGenerator {
                                Map.Entry<String, MediaType> media, String type, Schema schema)
             throws BallerinaOpenApiException {
 
-        if (schema instanceof ComposedSchema) {
-            ComposedSchema composedSchema = (ComposedSchema) schema;
-            type = generateReturnDataTypeForComposedSchema(operation, type, composedSchema, isSignature);
-        } else if (schema instanceof ObjectSchema) {
-            ObjectSchema objectSchema = (ObjectSchema) schema;
-            type = handleInLineRecordInResponse(operation, media, objectSchema);
-        } else if (schema instanceof MapSchema) {
-            MapSchema mapSchema = (MapSchema) schema;
-            type = handleResponseWithMapSchema(operation, media, mapSchema);
+        if (isComposedSchema(schema)) {
+            type = generateReturnDataTypeForComposedSchema(operation, type, schema, isSignature);
+        } else if (isObjectSchema(schema)) {
+            type = handleInLineRecordInResponse(operation, media, schema);
+        } else if (isMapSchema(schema)) {
+            type = handleResponseWithMapSchema(operation, media, schema);
         } else if (schema.get$ref() != null) {
             type = getValidName(extractReferenceType(schema.get$ref()), true);
             Schema componentSchema = openAPI.getComponents().getSchemas().get(type);
@@ -164,11 +170,10 @@ public class FunctionReturnTypeGenerator {
                         (componentSchema, type, responseDocs);
                 GeneratorUtils.updateTypeDefNodeList(type, typeDefinitionNode, typeDefinitionNodeList);
             }
-        } else if (schema instanceof ArraySchema) {
-            ArraySchema arraySchema = (ArraySchema) schema;
+        } else if (isArraySchema(schema)) {
             // TODO: Nested array when response has
-            type = generateReturnTypeForArraySchema(media, arraySchema, isSignature);
-        } else if (schema.getType() != null) {
+            type = generateReturnTypeForArraySchema(media, schema, isSignature);
+        } else if (getOpenAPIType(schema) != null) {
             type = convertOpenAPITypeToBallerina(schema);
         } else if (media.getKey().trim().equals("application/xml")) {
             type = generateCustomTypeDefine("xml", "XML", isSignature);
@@ -181,7 +186,7 @@ public class FunctionReturnTypeGenerator {
     /**
      * Get the return data type according to the OAS ArraySchema.
      */
-    private String generateReturnTypeForArraySchema(Map.Entry<String, MediaType> media, ArraySchema arraySchema,
+    private String generateReturnTypeForArraySchema(Map.Entry<String, MediaType> media, Schema arraySchema,
                                                     boolean isSignature) throws BallerinaOpenApiException {
 
         String type;
@@ -199,7 +204,7 @@ public class FunctionReturnTypeGenerator {
             if (!isSignature) {
                 type = typeName;
             }
-        } else if (arraySchema.getItems().getType() == null) {
+        } else if (getOpenAPIType(arraySchema.getItems()) == null) {
             if (media.getKey().trim().equals("application/xml")) {
                 type = generateCustomTypeDefine("xml[]", "XMLArr", isSignature);
             } else if (media.getKey().trim().equals("application/pdf") ||
@@ -215,16 +220,15 @@ public class FunctionReturnTypeGenerator {
             }
         } else {
             String typeName;
-            if (arraySchema.getItems() instanceof ArraySchema) {
+            if (isArraySchema(arraySchema.getItems())) {
                 Schema nestedSchema = arraySchema.getItems();
-                ArraySchema nestedArraySchema = (ArraySchema) nestedSchema;
-                String inlineArrayType = convertOpenAPITypeToBallerina(nestedArraySchema.getItems().getType());
+                String inlineArrayType = convertOpenAPITypeToBallerina(nestedSchema.getItems());
                 typeName = inlineArrayType + "NestedArr";
                 type = inlineArrayType + "[][]";
             } else {
-                typeName = convertOpenAPITypeToBallerina(Objects.requireNonNull(arraySchema.getItems()).getType()) +
+                typeName = convertOpenAPITypeToBallerina(Objects.requireNonNull(arraySchema.getItems())) +
                         "Arr";
-                type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType()) + "[]";
+                type = convertOpenAPITypeToBallerina(arraySchema.getItems()) + "[]";
             }
             type = generateCustomTypeDefine(type, getValidName(typeName, true), isSignature);
         }
@@ -235,7 +239,7 @@ public class FunctionReturnTypeGenerator {
      * Get the return data type according to the OAS ComposedSchemas ex: AllOf, OneOf, AnyOf.
      */
     private String generateReturnDataTypeForComposedSchema(Operation operation, String type,
-                                                           ComposedSchema composedSchema, boolean isSignature)
+                                                           Schema composedSchema, boolean isSignature)
             throws BallerinaOpenApiException {
 
         if (composedSchema.getOneOf() != null) {
@@ -263,7 +267,7 @@ public class FunctionReturnTypeGenerator {
      * Handle inline record by generating record with name for response in OAS type ObjectSchema.
      */
     private String handleInLineRecordInResponse(Operation operation, Map.Entry<String, MediaType> media,
-                                                ObjectSchema objectSchema)
+                                                Schema objectSchema)
             throws BallerinaOpenApiException {
 
         Map<String, Schema> properties = objectSchema.getProperties();
@@ -296,7 +300,7 @@ public class FunctionReturnTypeGenerator {
      * Get the return data type according to the OAS MapSchema type.
      */
     private String handleResponseWithMapSchema(Operation operation, Map.Entry<String, MediaType> media,
-                                               MapSchema mapSchema) throws BallerinaOpenApiException {
+                                               Schema mapSchema) throws BallerinaOpenApiException {
 
         Map<String, Schema> properties = mapSchema.getProperties();
         String ref = mapSchema.get$ref();
