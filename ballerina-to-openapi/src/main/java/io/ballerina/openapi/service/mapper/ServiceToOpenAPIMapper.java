@@ -212,7 +212,7 @@ public class ServiceToOpenAPIMapper {
                         diagnostics);
                 constraintMapper.setConstraints();
                 HateoasMapper hateoasMapper = new HateoasMapperImpl(packageId, semanticModel);
-                hateoasMapper.setLinks(serviceDefinition, openapi);
+                hateoasMapper.setOpenApiLinks(serviceDefinition, openapi);
                 return new OASResult(openapi, diagnostics);
             } else {
                 return new OASResult(openapi, oasResult.getDiagnostics());
@@ -253,7 +253,7 @@ public class ServiceToOpenAPIMapper {
         AdditionalData additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
         ResourceMapper resourceMapper = new ResourceMapperImpl(openAPI, resources, additionalData,
                 isTreatNilableAsOptionalParameter(serviceNode));
-        resourceMapper.setOperation(semanticModel, serviceNode);
+        resourceMapper.setOperation();
     }
 
     private static boolean isTreatNilableAsOptionalParameter(ServiceDeclarationNode serviceNode) {

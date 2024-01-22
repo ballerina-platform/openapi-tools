@@ -43,7 +43,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.openapi.service.mapper.Constants.OPENAPI_LINK_DEFAULT_REL;
+import static io.ballerina.openapi.service.mapper.hateoas.HateoasConstants.BALLERINA_LINKEDTO_KEYWORD;
+import static io.ballerina.openapi.service.mapper.hateoas.HateoasConstants.OPENAPI_LINK_DEFAULT_REL;
 import static io.ballerina.openapi.service.mapper.hateoas.HateoasContextHolder.getHateoasContextHolder;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.generateRelativePath;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getResourceConfigAnnotation;
@@ -64,7 +65,7 @@ public class HateoasMapperImpl implements HateoasMapper {
     }
 
     @Override
-    public void setSwaggerLinks(ServiceDeclarationNode serviceNode, OpenAPI openAPI) {
+    public void setOpenApiLinks(ServiceDeclarationNode serviceNode, OpenAPI openAPI) {
         Optional<Symbol> serviceSymbolOpt = semanticModel.symbol(serviceNode);
         if (serviceSymbolOpt.isEmpty()) {
             return;
@@ -81,7 +82,7 @@ public class HateoasMapperImpl implements HateoasMapper {
             if (responses.isEmpty()) {
                 continue;
             }
-            setSwaggerLinksInApiResponse(serviceId, resource, responses.get());
+            setOpenApiLinksInApiResponse(serviceId, resource, responses.get());
         }
     }
 
@@ -120,9 +121,9 @@ public class HateoasMapperImpl implements HateoasMapper {
         return Optional.ofNullable(responses);
     }
 
-    private void setSwaggerLinksInApiResponse(int serviceId, FunctionDefinitionNode resource,
+    private void setOpenApiLinksInApiResponse(int serviceId, FunctionDefinitionNode resource,
                                               ApiResponses apiResponses) {
-        Map<String, Link> swaggerLinks = mapHateoasLinksToSwaggerLinks(packageId, serviceId, resource);
+        Map<String, Link> swaggerLinks = mapHateoasLinksToOpenApiLinks(packageId, serviceId, resource);
         if (swaggerLinks.isEmpty()) {
             return;
         }
@@ -134,10 +135,10 @@ public class HateoasMapperImpl implements HateoasMapper {
         }
     }
 
-    private Map<String, Link> mapHateoasLinksToSwaggerLinks(String packageId, int serviceId,
+    private Map<String, Link> mapHateoasLinksToOpenApiLinks(String packageId, int serviceId,
                                                             FunctionDefinitionNode resourceFunction) {
         Optional<String> linkedTo = getResourceConfigAnnotation(resourceFunction)
-                .flatMap(resourceConfig -> getValueForAnnotationFields(resourceConfig, "linkedTo"));
+                .flatMap(resourceConfig -> getValueForAnnotationFields(resourceConfig, BALLERINA_LINKEDTO_KEYWORD));
         if (linkedTo.isEmpty()) {
             return Collections.emptyMap();
         }

@@ -17,14 +17,12 @@
  */
 package io.ballerina.openapi.service.mapper;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Documentable;
 import io.ballerina.compiler.api.symbols.Documentation;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
@@ -76,7 +74,7 @@ public class ResourceMapperImpl implements ResourceMapper {
         this.treatNilableAsOptional = treatNilableAsOptional;
     }
 
-    public void setOperation(SemanticModel semanticModel, ServiceDeclarationNode service) {
+    public void setOperation() {
         Components components = openAPI.getComponents();
         if (components == null) {
             components = new Components();

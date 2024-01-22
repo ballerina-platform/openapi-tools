@@ -34,5 +34,5 @@ public interface HateoasMapper {
      * @param serviceNode Specific service declaration node
      * @param openAPI Current OpenAPI context
      */
-    void setSwaggerLinks(ServiceDeclarationNode serviceNode, OpenAPI openAPI);
+    void setOpenApiLinks(ServiceDeclarationNode serviceNode, OpenAPI openAPI);
 }

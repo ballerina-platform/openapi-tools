@@ -25,5 +25,5 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
  */
 public interface ResourceMapper {
 
-    void setOperation(SemanticModel semanticModel, ServiceDeclarationNode service);
+    void setOperation();
 }
