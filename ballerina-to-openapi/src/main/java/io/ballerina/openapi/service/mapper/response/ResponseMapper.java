@@ -17,8 +17,6 @@
  */
 package io.ballerina.openapi.service.mapper.response;
 
-import io.swagger.v3.oas.models.responses.ApiResponses;
-
 /**
  * This {@link ResponseMapper} represents the interface for response mapper.
  *
@@ -27,5 +25,4 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 public interface ResponseMapper {
 
     void setApiResponses();
-    ApiResponses getApiResponses();
 }
