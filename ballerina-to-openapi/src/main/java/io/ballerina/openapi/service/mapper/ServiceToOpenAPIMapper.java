@@ -212,7 +212,7 @@ public class ServiceToOpenAPIMapper {
                         diagnostics);
                 constraintMapper.setConstraints();
                 HateoasMapper hateoasMapper = new HateoasMapperImpl(packageId, semanticModel);
-                hateoasMapper.setSwaggerLinks(serviceDefinition, openapi);
+                hateoasMapper.setLinks(serviceDefinition, openapi);
                 return new OASResult(openapi, diagnostics);
             } else {
                 return new OASResult(openapi, oasResult.getDiagnostics());
