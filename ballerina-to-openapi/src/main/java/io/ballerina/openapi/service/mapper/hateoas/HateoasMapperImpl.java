@@ -49,6 +49,11 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.genera
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getResourceConfigAnnotation;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getValueForAnnotationFields;
 
+/**
+ * This {@link HateoasMapperImpl} class represents the implementation of the {@link HateoasMapper}.
+ *
+ * @since 1.9.0
+ */
 public class HateoasMapperImpl implements HateoasMapper {
     private final String packageId;
     private final SemanticModel semanticModel;
@@ -118,12 +123,13 @@ public class HateoasMapperImpl implements HateoasMapper {
     private void setSwaggerLinksInApiResponse(int serviceId, FunctionDefinitionNode resource,
                                               ApiResponses apiResponses) {
         Map<String, Link> swaggerLinks = mapHateoasLinksToSwaggerLinks(packageId, serviceId, resource);
-        if (!swaggerLinks.isEmpty()) {
-            for (Map.Entry<String, ApiResponse> entry : apiResponses.entrySet()) {
-                int statusCode = Integer.parseInt(entry.getKey());
-                if (statusCode >= 200 && statusCode < 300) {
-                    entry.getValue().setLinks(swaggerLinks);
-                }
+        if (swaggerLinks.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<String, ApiResponse> entry : apiResponses.entrySet()) {
+            int statusCode = Integer.parseInt(entry.getKey());
+            if (statusCode >= 200 && statusCode < 300) {
+                entry.getValue().setLinks(swaggerLinks);
             }
         }
     }
@@ -140,12 +146,13 @@ public class HateoasMapperImpl implements HateoasMapper {
         for (HateoasLink link : links) {
             Optional<Resource> resource = getHateoasContextHolder()
                     .getHateoasResource(packageId, serviceId, link.getResourceName(), link.getResourceMethod());
-            if (resource.isPresent()) {
-                Link swaggerLink = new Link();
-                String operationId = resource.get().operationId();
-                swaggerLink.setOperationId(operationId);
-                hateoasLinks.put(link.getRel(), swaggerLink);
+            if (resource.isEmpty()) {
+                continue;
             }
+            Link swaggerLink = new Link();
+            String operationId = resource.get().operationId();
+            swaggerLink.setOperationId(operationId);
+            hateoasLinks.put(link.getRel(), swaggerLink);
         }
         return hateoasLinks;
     }
@@ -166,11 +173,12 @@ public class HateoasMapperImpl implements HateoasMapper {
         String[] keyValuePairs = input.replaceAll("[{}]", "").split(",\\s*");
         for (String pair : keyValuePairs) {
             String[] parts = pair.split(":\\s*");
-            if (parts.length == 2) {
-                String key = parts[0].trim();
-                String value = parts[1].replaceAll("\"", "").trim();
-                keyValueMap.put(key, value);
+            if (parts.length != 2) {
+                continue;
             }
+            String key = parts[0].trim();
+            String value = parts[1].replaceAll("\"", "").trim();
+            keyValueMap.put(key, value);
         }
         hateoasLink.setResourceName(keyValueMap.get("name"));
         hateoasLink.setRel(keyValueMap.getOrDefault("relation", OPENAPI_LINK_DEFAULT_REL));
