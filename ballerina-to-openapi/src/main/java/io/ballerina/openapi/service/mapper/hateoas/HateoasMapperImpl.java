@@ -150,7 +150,7 @@ public class HateoasMapperImpl implements HateoasMapper {
             if (resource.isEmpty()) {
                 continue;
             }
-            Link swaggerLink = new Link();
+            Link openapiLink = new Link();
             String operationId = resource.get().operationId();
             swaggerLink.setOperationId(operationId);
             hateoasLinks.put(link.getRel(), swaggerLink);
