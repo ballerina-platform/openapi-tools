@@ -174,8 +174,8 @@ public class ResourceMapperImpl implements ResourceMapper {
      *
      * @return Operation Adaptor object of given resource
      */
-    private Optional<OperationInventory> convertResourceToOperation(FunctionDefinitionNode resourceFunction, String httpMethod,
-                                                                    String generateRelativePath,
+    private Optional<OperationInventory> convertResourceToOperation(FunctionDefinitionNode resourceFunction,
+                                                                    String httpMethod, String generateRelativePath,
                                                                     Components components) {
         OperationInventory operationInventory = new OperationInventory();
         operationInventory.setHttpOperation(httpMethod);
@@ -185,8 +185,8 @@ public class ResourceMapperImpl implements ResourceMapper {
         // Map API documentation
         Map<String, String> apiDocs = listAPIDocumentations(resourceFunction, operationInventory);
         //Add path parameters if in path and query parameters
-        ParameterMapper parameterMapper = new ParameterMapperImpl(resourceFunction, operationInventory, components, apiDocs,
-                additionalData, treatNilableAsOptional);
+        ParameterMapper parameterMapper = new ParameterMapperImpl(resourceFunction, operationInventory, components,
+                apiDocs, additionalData, treatNilableAsOptional);
         parameterMapper.setParameters();
         List<OpenAPIMapperDiagnostic> diagnostics = additionalData.diagnostics();
         if (diagnostics.size() > 1 || (diagnostics.size() == 1 && !diagnostics.get(0).getCode().equals(
