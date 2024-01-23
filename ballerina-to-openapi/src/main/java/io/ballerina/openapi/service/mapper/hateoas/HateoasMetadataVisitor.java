@@ -64,7 +64,7 @@ public class HateoasMetadataVisitor extends NodeVisitor {
             if (SyntaxKind.RESOURCE_ACCESSOR_DEFINITION.equals(child.kind())) {
                 FunctionDefinitionNode resourceFunction = (FunctionDefinitionNode) child;
                 String resourceMethod = resourceFunction.functionName().text();
-                String operationId = generateOperationId(resourceFunction);
+                String operationId = MapperCommonUtils.getOperationId(resourceFunction);
                 Optional<String> resourceName = getResourceConfigAnnotation(resourceFunction)
                         .flatMap(resourceConfig -> getValueForAnnotationFields(resourceConfig, "name"));
                 if (resourceName.isEmpty()) {
@@ -76,16 +76,5 @@ public class HateoasMetadataVisitor extends NodeVisitor {
                         packageId, serviceId, cleanedResourceName, hateoasResource);
             }
         }
-    }
-
-    private String generateOperationId(FunctionDefinitionNode resourceFunction) {
-        String relativePath = MapperCommonUtils.generateRelativePath(resourceFunction);
-        String cleanResourcePath = MapperCommonUtils.unescapeIdentifier(relativePath);
-        String resName = (resourceFunction.functionName().text() + "_" +
-                cleanResourcePath).replaceAll("\\{///\\}", "_");
-        if (cleanResourcePath.equals("/")) {
-            resName = resourceFunction.functionName().text();
-        }
-        return MapperCommonUtils.getOperationId(resName);
     }
 }

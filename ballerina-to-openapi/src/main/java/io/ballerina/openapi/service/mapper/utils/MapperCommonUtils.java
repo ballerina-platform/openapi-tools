@@ -123,16 +123,23 @@ public class MapperCommonUtils {
     /**
      * Generate operationId by removing special characters.
      *
-     * @param operationID input function name, record name or operation Id
-     * @return string with new generated name
+     * @param resourceFunction resource function definition
+     * @return string with a unique operationId
      */
-    public static String getOperationId(String operationID) {
+    public static String getOperationId(FunctionDefinitionNode resourceFunction) {
         //For the flatten enable we need to remove first Part of valid name check
         // this - > !operationID.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
-        if (operationID.matches("\\b[0-9]*\\b")) {
-            return operationID;
+        String relativePath = MapperCommonUtils.generateRelativePath(resourceFunction);
+        String cleanResourcePath = MapperCommonUtils.unescapeIdentifier(relativePath);
+        String resName = (resourceFunction.functionName().text() + "_" +
+                cleanResourcePath).replaceAll("\\{///\\}", "_");
+        if (cleanResourcePath.equals("/")) {
+            resName = resourceFunction.functionName().text();
         }
-        String[] split = operationID.split(Constants.SPECIAL_CHAR_REGEX);
+        if (resName.matches("\\b[0-9]*\\b")) {
+            return resName;
+        }
+        String[] split = resName.split(Constants.SPECIAL_CHAR_REGEX);
         StringBuilder validName = new StringBuilder();
         for (String part : split) {
             if (!part.isBlank()) {
@@ -143,8 +150,8 @@ public class MapperCommonUtils {
                 validName.append(part);
             }
         }
-        operationID = validName.toString();
-        return operationID.substring(0, 1).toLowerCase(Locale.ENGLISH) + operationID.substring(1);
+        resName = validName.toString();
+        return resName.substring(0, 1).toLowerCase(Locale.ENGLISH) + resName.substring(1);
     }
 
     /**
