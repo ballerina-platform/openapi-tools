@@ -26,7 +26,6 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.Constants;
-import io.ballerina.openapi.service.mapper.response.HateoasLink;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
@@ -152,8 +151,8 @@ public class HateoasMapperImpl implements HateoasMapper {
             }
             Link openapiLink = new Link();
             String operationId = resource.get().operationId();
-            swaggerLink.setOperationId(operationId);
-            hateoasLinks.put(link.getRel(), swaggerLink);
+            openapiLink.setOperationId(operationId);
+            hateoasLinks.put(link.getRel(), openapiLink);
         }
         return hateoasLinks;
     }
