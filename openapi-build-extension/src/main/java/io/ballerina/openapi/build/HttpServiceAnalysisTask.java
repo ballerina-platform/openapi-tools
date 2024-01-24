@@ -75,10 +75,6 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         HttpServiceAnalysisTask.isWarningPrinted = isWarningPrinted;
     }
 
-//    public void setWarning(boolean isPrinted) {
-//        setIsWarningPrinted(isPrinted);
-//    }
-
     @Override
     public void perform(SyntaxNodeAnalysisContext context) {
         SemanticModel semanticModel = context.semanticModel();

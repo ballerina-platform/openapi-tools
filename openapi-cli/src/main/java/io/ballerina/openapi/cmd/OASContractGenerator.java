@@ -54,11 +54,8 @@ import static io.ballerina.openapi.service.mapper.utils.CodegenUtils.resolveCont
  */
 
 public class OASContractGenerator {
-    private SyntaxTree syntaxTree;
-    private SemanticModel semanticModel;
-    private Project project;
-    private List<OpenAPIMapperDiagnostic> errors = new ArrayList<>();
-    private PrintStream outStream = System.out;
+    private final List<OpenAPIMapperDiagnostic> errors = new ArrayList<>();
+    private final PrintStream outStream = System.out;
 
     /**
      * Initialize constructor.
@@ -81,7 +78,7 @@ public class OASContractGenerator {
     public void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, String serviceName,
                                                   Boolean needJson) {
         // Load project instance for single ballerina file
-        project = ProjectLoader.loadProject(servicePath);
+        Project project = ProjectLoader.loadProject(servicePath);
         DiagnosticResult diagnosticsFromCodeGenAndModify = project.currentPackage().runCodeGenAndModifyPlugins();
         boolean hasErrorsFromCodeGenAndModify = diagnosticsFromCodeGenAndModify.diagnostics().stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
@@ -102,7 +99,7 @@ public class OASContractGenerator {
         Optional<Path> path = project.documentPath(docId);
         Path inputPath = path.orElse(null);
 
-        syntaxTree = doc.syntaxTree();
+        SyntaxTree syntaxTree = doc.syntaxTree();
         PackageCompilation compilation = project.currentPackage().getCompilation();
         boolean hasCompilationErrors = compilation.diagnosticResult()
                 .diagnostics().stream()
@@ -111,11 +108,13 @@ public class OASContractGenerator {
             // if there are any compilation errors, do not proceed and those diagnostic will display to user
             outStream.println("OpenAPI contract generation failed due to Ballerina code has compilation errors. :");
             compilation.diagnosticResult().diagnostics().forEach(diagnostic -> {
-                outStream.println(diagnostic.toString());
+                if (diagnostic.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR)) {
+                    outStream.println(diagnostic);
+                }
             });
             return;
         }
-        semanticModel = compilation.getSemanticModel(docId.moduleId());
+        SemanticModel semanticModel = compilation.getSemanticModel(docId.moduleId());
         List<OASResult> openAPIDefinitions = ServiceToOpenAPIMapper.generateOAS3Definition(project, syntaxTree,
                 semanticModel, serviceName, needJson, inputPath);
 
@@ -123,7 +122,11 @@ public class OASContractGenerator {
             List<String> fileNames = new ArrayList<>();
             for (OASResult definition : openAPIDefinitions) {
                 try {
-                    this.errors.addAll(definition.getDiagnostics());
+                    //Handle all the errors and print to the console
+                    List<OpenAPIMapperDiagnostic> diagnostics = definition.getDiagnostics();
+                    diagnostics.forEach(d -> outStream.println(
+                            CmdUtils.constructOpenAPIDiagnostic(d.getCode(), d.getMessage(),
+                            d.getDiagnosticSeverity(), d.getLocation().orElse(null))));
                     if (definition.getOpenAPI().isPresent()) {
                         Optional<String> content;
                         if (needJson) {
@@ -147,9 +150,8 @@ public class OASContractGenerator {
                 return;
             }
             outStream.println("OpenAPI definition(s) generated successfully and copied to :");
-            Iterator<String> iterator = fileNames.iterator();
-            while (iterator.hasNext()) {
-                outStream.println("-- " + iterator.next());
+            for (String fileName : fileNames) {
+                outStream.println("-- " + fileName);
             }
         } else {
             DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_115;
