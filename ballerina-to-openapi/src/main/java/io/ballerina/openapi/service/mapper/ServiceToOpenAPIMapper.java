@@ -100,6 +100,8 @@ public class ServiceToOpenAPIMapper {
                         null, serviceName, availableService.toString());
                 diagnostics.add(error);
             }
+            // Extract HATEOAS meta-data for the all the service-declarations in the current project
+            extractHateoasLinkMetadata(project);
             // Generating openapi specification for selected services
             for (Map.Entry<String, ServiceDeclarationNode> serviceNode : servicesToGenerate.entrySet()) {
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNode.getKey(), needJson);
@@ -110,7 +112,6 @@ public class ServiceToOpenAPIMapper {
                         .setOpenApiFileName(openApiName)
                         .setBallerinaFilePath(inputPath)
                         .setProject(project);
-                extractHateoasLinkMetadata(project);
                 OASGenerationMetaInfo oasGenerationMetaInfo = builder.build();
                 OASResult oasDefinition = generateOAS(oasGenerationMetaInfo);
                 oasDefinition.setServiceName(openApiName);
@@ -189,7 +190,6 @@ public class ServiceToOpenAPIMapper {
     public static OASResult generateOAS(OASGenerationMetaInfo oasGenerationMetaInfo) {
         ServiceDeclarationNode serviceDefinition = oasGenerationMetaInfo.getServiceDeclarationNode();
         ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(oasGenerationMetaInfo.getProject());
-//        extractHateoasLinkMetadata(oasGenerationMetaInfo.getProject());
         Set<ListenerDeclarationNode> listeners = moduleMemberVisitor.getListenerDeclarationNodes();
         SemanticModel semanticModel = oasGenerationMetaInfo.getSemanticModel();
         String openApiFileName = oasGenerationMetaInfo.getOpenApiFileName();
