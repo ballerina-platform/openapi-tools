@@ -33,6 +33,7 @@ public class Constants {
     public static final String TRUE = "true";
     public static final String MODE = "mode";
     public static final String CLIENT = "client";
+    public static final String CACHE_FILE = "openapi-cache.txt";
 
     /**
      * Enum class for containing diagnostic messages.
@@ -47,13 +48,15 @@ public class Constants {
         PARSER_ERROR("OAS_CLIENT_04", "", DiagnosticSeverity.ERROR),
         UNEXPECTED_EXCEPTIONS("OAS_CLIENT_05", "unexpected error occurred while reading the contract",
                 DiagnosticSeverity.ERROR),
-        EMPTY_CONTRACT_PATH("OAS_CLIENT_06", "given OpenAPI contract file path is an empty string.",
-                DiagnosticSeverity.WARNING),
+        EMPTY_CONTRACT_PATH("OAS_CLIENT_06", "given openapi contract file path is an empty string.",
+                DiagnosticSeverity.ERROR),
         WARNING_FOR_OTHER_GENERATION("OAS_CLIENT_07", "`%s` mode does not support for bal build code generation.",
-                DiagnosticSeverity.WARNING),
+                DiagnosticSeverity.ERROR),
         WARNING_FOR_UNSUPPORTED_CONTRACT("OAS_CLIENT_08", "unsupported contract type. please use .yml, " +
                 ".yaml, or .json files for code generation.",
-                DiagnosticSeverity.WARNING);
+                DiagnosticSeverity.ERROR),
+        INVALID_CONTRACT_PATH("OAS_CLIENT_09", "invalid openapi contract file path.",
+                DiagnosticSeverity.ERROR);
 
         private final String code;
         private final String description;
