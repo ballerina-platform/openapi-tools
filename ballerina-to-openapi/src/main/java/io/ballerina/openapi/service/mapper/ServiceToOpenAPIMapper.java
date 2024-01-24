@@ -62,7 +62,10 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.isHttp
  *
  * @since 2.0.0
  */
-public class ServiceToOpenAPIMapper {
+public final class ServiceToOpenAPIMapper {
+
+    private ServiceToOpenAPIMapper() {
+    }
 
     /**
      * This method will generate  openapi definition Map lists with ballerina code.
