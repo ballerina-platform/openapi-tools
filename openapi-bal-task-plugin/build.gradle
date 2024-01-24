@@ -66,7 +66,6 @@ compileJava {
         classpath = files()
     }
 }
-// Add this line to make 'build' depend on 'shadowJar'
 build.dependsOn shadowJar
 
 // Disable the default 'jar' task
