@@ -75,6 +75,7 @@ import static io.ballerina.toml.syntax.tree.AbstractNodeFactory.createToken;
         description = "Update Ballerina.toml with the OpenAPI CLI code generation implementation"
 )
 public class Add implements BLauncherCmd {
+    private static final String COMMAND_IDENTIFIER = "openapi-add";
     private final PrintStream outStream;
     private final boolean exitWhenFinish;
 
@@ -108,6 +109,11 @@ public class Add implements BLauncherCmd {
                 Paths.get(System.getProperty("user.dir")).toAbsolutePath();
 
         try {
+            if (baseCmd.helpFlag) {
+                String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(COMMAND_IDENTIFIER);
+                outStream.println(commandUsageInfo);
+                return;
+            }
             //check the given path is the Ballerina package
             Optional<Path> ballerinaTomlPath = validateBallerinaProject(projectPath);
             if (ballerinaTomlPath.isEmpty()) {

@@ -71,8 +71,6 @@ public class OpenApiCmd implements BLauncherCmd {
 
     @CommandLine.Mixin
     private BaseCmd baseCmd = new BaseCmd();
-    @CommandLine.Option(names = {"-h", "--help"}, hidden = true)
-    private boolean helpFlag;
 
     @CommandLine.Option(names = {"-o", "--output"}, description = "Location of the generated Ballerina service, " +
             "client and model files.")
@@ -197,7 +195,7 @@ public class OpenApiCmd implements BLauncherCmd {
     }
 
     private boolean isHelp() {
-        return helpFlag || (argList != null && argList.get(0).equals("help"))
+        return baseCmd.helpFlag || (argList != null && argList.get(0).equals("help"))
                 || (argList == null && baseCmd.inputPath == null);
     }
 

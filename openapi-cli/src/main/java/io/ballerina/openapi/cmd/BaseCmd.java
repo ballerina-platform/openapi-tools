@@ -26,6 +26,8 @@ import picocli.CommandLine;
  * @since 1.9.0
  */
 public class BaseCmd {
+    @CommandLine.Option(names = {"-h", "--help"}, hidden = true)
+    public boolean helpFlag;
     @CommandLine.Option(names = {"-i", "--input"}, description = "Generating the client and service both files")
     public String inputPath;
 
