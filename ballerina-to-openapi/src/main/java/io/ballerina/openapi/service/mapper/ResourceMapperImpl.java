@@ -216,8 +216,8 @@ public class ResourceMapperImpl implements ResourceMapper {
             }
         }
 
-        ResponseMapper responseMapper = new InterceptableResponseMapperImpl(serviceNode, resource, operationInventory, components,
-                additionalData);
+        ResponseMapper responseMapper = new InterceptableResponseMapperImpl(serviceNode, resource, operationInventory,
+                components, additionalData);
         responseMapper.setApiResponses();
         return Optional.of(operationInventory);
     }
