@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.response.ResponseMapper;
@@ -44,7 +45,9 @@ public class InterceptableResponseMapperImpl implements ResponseMapper {
 
 
         if (isInterceptable(serviceNode)) {
-            getInterceptorReturnTypes(semanticModel);
+            if (supportsTupleType(resource)) {
+
+            }
         } else {
             ResponseMapper responseMapperImpl = new ResponseMapperImpl(resource, operationInventory, components,
                     additionalData);
@@ -58,7 +61,9 @@ public class InterceptableResponseMapperImpl implements ResponseMapper {
     }
 
     @Override
-    public void initializeResponseMapper(FunctionDefinitionNode resourceNode) {}
+    public void initializeResponseMapper(FunctionDefinitionNode resourceNode) {
+
+    }
 
     private boolean isInterceptable(ServiceDeclarationNode serviceNode) {
         if (isInterceptableServiceType(serviceNode)) {
@@ -79,7 +84,7 @@ public class InterceptableResponseMapperImpl implements ResponseMapper {
                                 false).anyMatch(child -> child.toString().equals("createInterceptors")));
     }
 
-    private void getInterceptorReturnTypes(SemanticModel semanticModel) {
-
+    private boolean supportsTupleType(FunctionDefinitionNode resource) {
+        return resource.functionSignature().returnTypeDesc().get().type().kind().equals(SyntaxKind.TUPLE_TYPE_DESC);
     }
 }

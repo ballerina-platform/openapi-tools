@@ -40,7 +40,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
-import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.HashMap;
 import java.util.List;
@@ -108,11 +107,6 @@ public class ResourceMapperImpl implements ResourceMapper {
             convertResourceToOperation(resource, httpMethod, path, components).ifPresent(
                     operation -> addPathItem(httpMethod, pathObject, operation.getOperation(), path));
         }
-    }
-
-    // todo: implement this properly
-    ApiResponses getApiResponses(FunctionDefinitionNode resource, List<String> interceptorResponse) {
-        return new ApiResponses();
     }
 
     private void addPathItem(String httpMethod, Paths path, Operation operation, String pathName) {
