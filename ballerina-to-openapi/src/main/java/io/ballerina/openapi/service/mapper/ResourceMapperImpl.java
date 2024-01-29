@@ -27,7 +27,7 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.interceptor.InterceptableResponseMapperImpl;
+import io.ballerina.openapi.service.mapper.response.InterceptableResponseMapperImpl;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
@@ -210,8 +210,9 @@ public class ResourceMapperImpl implements ResourceMapper {
             }
         }
 
-        ResponseMapper responseMapper = new InterceptableResponseMapperImpl(serviceNode, resource, operationInventory,
-                components, additionalData);
+        ResponseMapper responseMapper = new InterceptableResponseMapperImpl(serviceNode, operationInventory, components,
+                additionalData.semanticModel());
+        responseMapper.initializeResponseMapper(resource);
         responseMapper.setApiResponses();
         return Optional.of(operationInventory);
     }
