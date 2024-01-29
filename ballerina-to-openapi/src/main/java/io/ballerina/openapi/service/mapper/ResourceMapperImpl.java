@@ -23,15 +23,16 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.interceptor.InterceptableResponseMapperImpl;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapperImpl;
 import io.ballerina.openapi.service.mapper.response.ResponseMapper;
-import io.ballerina.openapi.service.mapper.response.ResponseMapperImpl;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.Components;
@@ -39,6 +40,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.HashMap;
 import java.util.List;
@@ -62,16 +64,18 @@ public class ResourceMapperImpl implements ResourceMapper {
     private final OpenAPI openAPI;
     private final List<FunctionDefinitionNode> resources;
     private final boolean treatNilableAsOptional;
+    private final ServiceDeclarationNode serviceNode;
 
     /**
      * Initializes a resource parser for openApi.
      */
     ResourceMapperImpl(OpenAPI openAPI, List<FunctionDefinitionNode> resources, AdditionalData additionalData,
-                       boolean treatNilableAsOptional) {
+                       boolean treatNilableAsOptional, ServiceDeclarationNode serviceNode) {
         this.openAPI = openAPI;
         this.resources = resources;
         this.additionalData = additionalData;
         this.treatNilableAsOptional = treatNilableAsOptional;
+        this.serviceNode = serviceNode;
     }
 
     public void setOperation() {
@@ -104,6 +108,11 @@ public class ResourceMapperImpl implements ResourceMapper {
             convertResourceToOperation(resource, httpMethod, path, components).ifPresent(
                     operation -> addPathItem(httpMethod, pathObject, operation.getOperation(), path));
         }
+    }
+
+    // todo: implement this properly
+    ApiResponses getApiResponses(FunctionDefinitionNode resource, List<String> interceptorResponse) {
+        return new ApiResponses();
     }
 
     private void addPathItem(String httpMethod, Paths path, Operation operation, String pathName) {
@@ -207,7 +216,7 @@ public class ResourceMapperImpl implements ResourceMapper {
             }
         }
 
-        ResponseMapper responseMapper = new ResponseMapperImpl(resource, operationInventory, components,
+        ResponseMapper responseMapper = new InterceptableResponseMapperImpl(serviceNode, resources, operationInventory, components,
                 additionalData);
         responseMapper.setApiResponses();
         return Optional.of(operationInventory);

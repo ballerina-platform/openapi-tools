@@ -245,7 +245,7 @@ public class ServiceToOpenAPIMapper {
         }
         AdditionalData additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
         ResourceMapper resourceMapper = new ResourceMapperImpl(openAPI, resources, additionalData,
-                isTreatNilableAsOptionalParameter(serviceNode));
+                isTreatNilableAsOptionalParameter(serviceNode), serviceNode);
         resourceMapper.setOperation();
     }
 
