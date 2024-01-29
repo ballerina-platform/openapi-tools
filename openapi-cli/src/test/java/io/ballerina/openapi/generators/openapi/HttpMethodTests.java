@@ -19,7 +19,6 @@
 package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.openapi.cmd.OASContractGenerator;
-import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
@@ -32,7 +31,6 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 /**
  * This test class is for capturing special tests regarding resource methods.
@@ -40,12 +38,14 @@ import java.util.List;
 public class HttpMethodTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();
     private Path tempDir;
-    private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+    private final PrintStream standardOut = System.out;
+
+    private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
     @BeforeMethod
     public void setup() throws IOException {
         this.tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
-        System.setOut(new PrintStream(outputStreamCaptor));
+        System.setOut(new PrintStream(outputStream));
     }
 
     @Test(description = "Compiler warning for 'default' resource methods.")
@@ -54,10 +54,9 @@ public class HttpMethodTests {
         OASContractGenerator openApiConverter = new OASContractGenerator();
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                 , false);
-        List<OpenAPIMapperDiagnostic> errors = openApiConverter.getErrors();
-        Assert.assertFalse(errors.isEmpty());
-        Assert.assertEquals(errors.get(0).getMessage(), "Generated OpenAPI definition does not " +
-                "contain details for the `default` resource method in the Ballerina service.");
+        Assert.assertTrue(outputStream.toString().contains("WARNING [default_bal.bal:(4:5,6:6)] " +
+                "Generated OpenAPI definition does not contain details for the `default` resource method " +
+                "in the Ballerina service."));
     }
 
     @Test
@@ -80,6 +79,6 @@ public class HttpMethodTests {
     @AfterTest
     public void clean() {
         System.setErr(null);
-        System.setOut(null);
+        System.setOut(standardOut);
     }
 }

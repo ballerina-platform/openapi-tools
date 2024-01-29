@@ -26,9 +26,13 @@ import io.ballerina.projects.ProjectException;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -43,7 +47,13 @@ import static io.ballerina.openapi.generators.openapi.TestUtils.getCompilation;
  */
 public class NegativeConstraintTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi").toAbsolutePath();
+    private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    private final PrintStream standardOut = System.out;
 
+    @BeforeMethod
+    public void setup() throws IOException {
+        System.setOut(new PrintStream(outputStream));
+    }
     @Test(description = "When the string constraint has incompatible REGEX patterns with OAS")
     public void testInterpolationInRegexPatterns() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("constraint-negative/negative_patternInterpolation.bal");
@@ -81,13 +91,12 @@ public class NegativeConstraintTests {
         Path ballerinaFilePath = RES_DIR.resolve("constraint-negative/negative_date.bal");
         List<OpenAPIMapperDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
                 ballerinaFilePath, "constraint-negative/negative_date.yaml");
-        Assert.assertEquals(errors.size(), 3);
-        Assert.assertEquals(errors.get(0).getMessage(), "Generated OpenAPI definition does not contain the default " +
-                "value for the record field: minutes");
-        Assert.assertEquals(errors.get(1).getMessage(), "Ballerina Date constraints might not be reflected in the " +
-                "OpenAPI definition");
-        Assert.assertEquals(errors.get(2).getMessage(), "Ballerina Date constraints might not be reflected in the " +
-                "OpenAPI definition");
+        Assert.assertTrue(outputStream.toString().contains("WARNING [:(1:1,1:1)] Generated OpenAPI definition " +
+                "does not contain the default value for the record field: minutes\n" +
+                "WARNING [negative_date.bal:(21:1,24:2)] Ballerina Date constraints might not be " +
+                "reflected in the OpenAPI definition\n" +
+                "WARNING [negative_date.bal:(29:5,35:6)] Ballerina Date constraints might not be reflected" +
+                " in the OpenAPI definition"));
     }
 
     /*
@@ -121,5 +130,11 @@ public class NegativeConstraintTests {
         Assert.assertEquals(errors.length, 1);
         Assert.assertTrue(errors[0].toString().contains("incompatible types: expected '(int|record {| int value; " +
                 "string message; |})?', found 'float'"));
+    }
+
+    @AfterTest
+    public void clean() {
+        System.setErr(null);
+        System.setOut(standardOut);
     }
 }

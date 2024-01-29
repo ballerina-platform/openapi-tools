@@ -25,7 +25,9 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,9 +45,13 @@ public class OpenApiConverterUtilsTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();
     private Path tempDir;
 
+    private final PrintStream standardOut = System.out;
+    private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+
     @BeforeMethod
     public void setup() throws IOException {
         this.tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
+        System.setOut(new PrintStream(outputStreamCaptor));
     }
 
     @Test(description = "Generate OpenAPI spec")
@@ -65,10 +71,10 @@ public class OpenApiConverterUtilsTest {
         OASContractGenerator openApiConverter = new OASContractGenerator();
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, "/abc",
                 false);
-        Assert.assertFalse(openApiConverter.getErrors().isEmpty());
-        Assert.assertEquals(openApiConverter.getErrors().get(0).getMessage(),
-                "No Ballerina HTTP services found with name '/abc' to generate an OpenAPI specification. " +
-                        "These services are available in ballerina file. [/hello, /hello02]");
+        Assert.assertTrue(outputStreamCaptor.toString().contains(
+                "ERROR [:(1:1,1:1)] No Ballerina HTTP services found with name /abc to generate" +
+                        " an OpenAPI specification. These services are available in ballerina file." +
+                        " [/hello, /hello02]"));
     }
 
     @Test(description = "Test if invalid 'exampleSetFlag' attribute is coming it the generated spec")
@@ -241,6 +247,6 @@ public class OpenApiConverterUtilsTest {
     public void clean() {
 
         System.setErr(null);
-        System.setOut(null);
+        System.setOut(standardOut);
     }
 }

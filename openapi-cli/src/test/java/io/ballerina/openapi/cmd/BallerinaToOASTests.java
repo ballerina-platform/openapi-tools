@@ -24,7 +24,9 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import picocli.CommandLine;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,11 +40,13 @@ import java.util.stream.Stream;
  * @since 2.0.0
  */
 public class BallerinaToOASTests extends OpenAPICommandTest {
-    private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
+    private final PrintStream standardOut = System.out;
+    private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
     @BeforeTest(description = "This will create a new ballerina project for testing below scenarios.")
     public void setupBallerinaProject() throws IOException {
         super.setup();
+        System.setOut(new PrintStream(outputStream));
     }
 
     @Test(description = "Test ballerina to openapi")
@@ -72,9 +76,9 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
         try {
             cmd.execute();
             output = readOutput(true);
-            Assert.assertTrue(output.trim().contains("WARNING [default_method.bal:(4:5,5:6)] Generated OpenAPI " +
-                    "definition" +
-                    " does not contain details for the `default` resource method in the Ballerina service."));
+            Assert.assertTrue(outputStream.toString().contains("WARNING [default_method.bal:(4:5,5:6)] " +
+                    "Generated OpenAPI definition does not contain details for the `default` resource " +
+                    "method in the Ballerina service."));
         } catch (BLauncherException | IOException e) {
             output = e.toString();
             Assert.fail(output);
@@ -92,8 +96,9 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
         try {
             cmd.execute();
             output = readOutput(true);
-            Assert.assertTrue(output.trim().contains("WARNING [default_method_02.bal:(4:5,5:6)] Generated OpenAPI " +
-                    "definition does not contain details for the `default` resource method in the Ballerina service."));
+            Assert.assertTrue(outputStream.toString().contains("WARNING [default_method_02.bal:(4:5,5:6)]" +
+                    " Generated OpenAPI definition does not contain details for the `default`" +
+                    " resource method in the Ballerina service."));
         } catch (BLauncherException | IOException e) {
             output = e.toString();
             Assert.fail(output);
@@ -222,6 +227,6 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
     @AfterTest
     public void clean() {
         System.setErr(null);
-        System.setOut(null);
+        System.setOut(standardOut);
     }
 }
