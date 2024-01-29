@@ -96,8 +96,11 @@ public class ResponseMapperImpl implements ResponseMapper {
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
         this.semanticModel = additionalData.semanticModel();
         this.operationInventory = operationInventory;
-        extractAnnotationDetails(resourceNode);
+        initializeResponseMapper(resourceNode);
+    }
 
+    public void initializeResponseMapper(FunctionDefinitionNode resourceNode) {
+        extractAnnotationDetails(resourceNode);
         String defaultStatusCode = operationInventory.getHttpOperation().equalsIgnoreCase(POST) ? HTTP_201 : HTTP_200;
         TypeSymbol returnTypeSymbol = getReturnTypeSymbol(resourceNode);
         createResponseMapping(returnTypeSymbol, defaultStatusCode);
