@@ -17,7 +17,10 @@
  */
 package io.ballerina.openapi.service.mapper.interceptor;
 
+import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
@@ -31,14 +34,17 @@ import java.util.stream.StreamSupport;
 public class InterceptableResponseMapperImpl implements ResponseMapper {
     private final ApiResponses apiResponses = new ApiResponses();
     private final OperationInventory operationInventory;
+    private final SemanticModel semanticModel;
 
     public InterceptableResponseMapperImpl(ServiceDeclarationNode serviceNode, FunctionDefinitionNode resource,
                                            OperationInventory operationInventory, Components components,
                                            AdditionalData additionalData) {
         this.operationInventory = operationInventory;
+        this.semanticModel = additionalData.semanticModel();
 
-        if (isInterceptable(serviceNode, resource)) {
-            getInterceptorReturnTypes(resource);
+
+        if (isInterceptable(serviceNode)) {
+            getInterceptorReturnTypes(semanticModel);
         } else {
             ResponseMapper responseMapperImpl = new ResponseMapperImpl(resource, operationInventory, components,
                     additionalData);
@@ -54,25 +60,26 @@ public class InterceptableResponseMapperImpl implements ResponseMapper {
     @Override
     public void initializeResponseMapper(FunctionDefinitionNode resourceNode) {}
 
-    private boolean isInterceptable(ServiceDeclarationNode serviceNode, FunctionDefinitionNode resource) {
+    private boolean isInterceptable(ServiceDeclarationNode serviceNode) {
         if (isInterceptableServiceType(serviceNode)) {
-            return hasCreateInterceptorsFunction(resource);
+            return hasCreateInterceptorsFunction(serviceNode.members());
         }
         return false;
     }
 
     private boolean isInterceptableServiceType(ServiceDeclarationNode serviceNode) {
         return serviceNode.typeDescriptor()
-                .map(type -> type.toString().trim().equals("INTERCEPTABLE_SERVICE"))
+                .map(type -> type.toString().trim().equals("http:InterceptableService"))
                 .orElse(false);
     }
 
-    private boolean hasCreateInterceptorsFunction(FunctionDefinitionNode resource) {
-        return StreamSupport.stream(resource.children().spliterator(), false)
-                .anyMatch(child -> child.toString().trim().equals("createInterceptors"));
+    private boolean hasCreateInterceptorsFunction(NodeList<Node> functions) {
+        return functions.stream()
+                .anyMatch(function -> StreamSupport.stream(((FunctionDefinitionNode) function).children().spliterator(),
+                                false).anyMatch(child -> child.toString().equals("createInterceptors")));
     }
 
-    private void getInterceptorReturnTypes(FunctionDefinitionNode resource) {
+    private void getInterceptorReturnTypes(SemanticModel semanticModel) {
 
     }
 }
