@@ -15,7 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.mapper.interceptor;
+package io.ballerina.openapi.service.mapper.response;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -28,29 +28,39 @@ import io.ballerina.openapi.service.mapper.response.ResponseMapper;
 import io.ballerina.openapi.service.mapper.response.ResponseMapperImpl;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import org.ballerinalang.model.symbols.TypeSymbol;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.StreamSupport;
 
 public class InterceptableResponseMapperImpl implements ResponseMapper {
     private final ApiResponses apiResponses = new ApiResponses();
     private final OperationInventory operationInventory;
     private final SemanticModel semanticModel;
+    private final ServiceDeclarationNode serviceNode;
 
-    public InterceptableResponseMapperImpl(ServiceDeclarationNode serviceNode, FunctionDefinitionNode resource,
-                                           OperationInventory operationInventory, Components components,
-                                           AdditionalData additionalData) {
+    public InterceptableResponseMapperImpl(ServiceDeclarationNode serviceNode, OperationInventory operationInventory,
+                                           Components components, SemanticModel semanticModel) {
         this.operationInventory = operationInventory;
-        this.semanticModel = additionalData.semanticModel();
+        this.semanticModel = semanticModel;
+        this.serviceNode = serviceNode;
 
-
-        if (isInterceptable(serviceNode)) {
-            getInterceptorReturnTypes(semanticModel);
-        } else {
-            ResponseMapper responseMapperImpl = new ResponseMapperImpl(resource, operationInventory, components,
-                    additionalData);
-            responseMapperImpl.initializeResponseMapper(resource);
-        }
+//        if (isInterceptable(serviceNode)) {
+//            getInterceptorReturnTypes(semanticModel);
+//        } else {
+//            ResponseMapper responseMapperImpl = new ResponseMapperImpl(resource, operationInventory, components,
+//                    additionalData);
+//            responseMapperImpl.initializeResponseMapper(resource);
+//        }
     }
+
+    // Find out a given service is an interceptable service
+    //  if (true)
+    //      - get the return type of create interceptors function and construct the interceptor pipeline
+    //      - for individual resource function, get the relevant return types by evaluating interceptor pipeline
+    // else
+    //      - call the default response mapper
 
     @Override
     public void setApiResponses() {
@@ -58,16 +68,23 @@ public class InterceptableResponseMapperImpl implements ResponseMapper {
     }
 
     @Override
-    public void initializeResponseMapper(FunctionDefinitionNode resourceNode) {}
+    public void initializeResponseMapper(FunctionDefinitionNode resourceNode) {
 
-    private boolean isInterceptable(ServiceDeclarationNode serviceNode) {
-        if (isInterceptableServiceType(serviceNode)) {
+    }
+
+    private boolean isInterceptable() {
+        if (isInterceptableServiceType()) {
             return hasCreateInterceptorsFunction(serviceNode.members());
         }
         return false;
     }
 
-    private boolean isInterceptableServiceType(ServiceDeclarationNode serviceNode) {
+    // todo: implement this method properly
+    private boolean supportsInterceptorTuple() {
+        return false;
+    }
+
+    private boolean isInterceptableServiceType() {
         return serviceNode.typeDescriptor()
                 .map(type -> type.toString().trim().equals("http:InterceptableService"))
                 .orElse(false);
@@ -79,7 +96,19 @@ public class InterceptableResponseMapperImpl implements ResponseMapper {
                                 false).anyMatch(child -> child.toString().equals("createInterceptors")));
     }
 
-    private void getInterceptorReturnTypes(SemanticModel semanticModel) {
+    // todo: implement this method properly
+    private List<Interceptor> getInterceptorPipeline() {
+        return List.of();
+    }
 
+    // todo: implement this method properly
+    private List<TypeSymbol> effectiveInterceptorReturnTypes(FunctionDefinitionNode resource) {
+        // analyze the function node, and identify whether any interceptor is relevant to this particular resource
+        //  if (true)
+        //      - construct the accumulative return type (as list) [ function return types + interceptor return types ]
+        // else
+        //      - function return type (as list)
+        // note: use semantic model
+        return List.of();
     }
 }
