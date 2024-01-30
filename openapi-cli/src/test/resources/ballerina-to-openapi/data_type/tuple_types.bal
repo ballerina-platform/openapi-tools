@@ -3,6 +3,7 @@ import ballerina/http;
 public type Pet record {
     int id;
     [int, string, decimal, float, User] address;
+    TupleType? tupleSingle;
     TupleType[]? tuples;
     [int, decimal]? unionTuple;
 };

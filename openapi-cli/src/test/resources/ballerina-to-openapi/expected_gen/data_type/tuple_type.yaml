@@ -118,6 +118,7 @@ components:
       required:
         - address
         - id
+        - tupleSingle
         - tuples
         - unionTuple
       type: object
@@ -137,6 +138,10 @@ components:
               - type: number
                 format: float
               - $ref: '#/components/schemas/User'
+        tupleSingle:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/TupleType'
         tuples:
           type: array
           nullable: true
