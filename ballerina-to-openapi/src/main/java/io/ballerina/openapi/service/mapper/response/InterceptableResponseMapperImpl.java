@@ -18,42 +18,43 @@
 package io.ballerina.openapi.service.mapper.response;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
-import io.ballerina.openapi.service.mapper.response.ResponseMapper;
-import io.ballerina.openapi.service.mapper.response.ResponseMapperImpl;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.ballerinalang.model.symbols.TypeSymbol;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
+
+import static io.ballerina.openapi.service.mapper.interceptors.Constants.INTERCEPTABLE_SERVICE;
+import static io.ballerina.openapi.service.mapper.interceptors.Constants.CREATE_INTERCEPTORS_FUNC;
 
 public class InterceptableResponseMapperImpl implements ResponseMapper {
     private final ApiResponses apiResponses = new ApiResponses();
     private final OperationInventory operationInventory;
     private final SemanticModel semanticModel;
     private final ServiceDeclarationNode serviceNode;
+    private final Components components;
+    private final AdditionalData additionalData;
 
-    public InterceptableResponseMapperImpl(ServiceDeclarationNode serviceNode, OperationInventory operationInventory,
-                                           Components components, SemanticModel semanticModel) {
+    public InterceptableResponseMapperImpl(ServiceDeclarationNode serviceNode, FunctionDefinitionNode resource,
+                                           OperationInventory operationInventory, Components components,
+                                           SemanticModel semanticModel, AdditionalData additionalData) {
         this.operationInventory = operationInventory;
         this.semanticModel = semanticModel;
         this.serviceNode = serviceNode;
-
-//        if (isInterceptable(serviceNode)) {
-//            getInterceptorReturnTypes(semanticModel);
-//        } else {
-//            ResponseMapper responseMapperImpl = new ResponseMapperImpl(resource, operationInventory, components,
-//                    additionalData);
-//            responseMapperImpl.initializeResponseMapper(resource);
-//        }
+        this.components = components;
+        this.additionalData = additionalData;
+        initializeResponseMapper(resource);
     }
 
     // Find out a given service is an interceptable service
@@ -69,46 +70,62 @@ public class InterceptableResponseMapperImpl implements ResponseMapper {
     }
 
     @Override
-    public void initializeResponseMapper(FunctionDefinitionNode resourceNode) {
-
-    }
-
+    public void initializeResponseMapper(FunctionDefinitionNode resource) {
+        if (isInterceptable()) {
+            Optional<FunctionDefinitionNode> interceptorFunction = findCreateInterceptorsFunction(serviceNode.members());
+            if (supportsTupleType(interceptorFunction.get())) {
+                getInterceptorPipeline(interceptorFunction.get());
+                effectiveInterceptorReturnTypes(resource);
+            }
+        } else {
+            new ResponseMapperImpl(resource, operationInventory, components, additionalData);
+        }
     }
 
     private boolean isInterceptable() {
         if (isInterceptableServiceType()) {
-            return hasCreateInterceptorsFunction(serviceNode.members());
+            return findCreateInterceptorsFunction(serviceNode.members()).isPresent();
         }
         return false;
     }
 
     private boolean isInterceptableServiceType() {
         return serviceNode.typeDescriptor()
-                .map(type -> type.toString().trim().equals("http:InterceptableService"))
+                .map(type -> type.toString().trim().equals(INTERCEPTABLE_SERVICE))
                 .orElse(false);
     }
 
-    private boolean hasCreateInterceptorsFunction(NodeList<Node> functions) {
+    private Optional<FunctionDefinitionNode> findCreateInterceptorsFunction(NodeList<Node> functions) {
         return functions.stream()
-                .anyMatch(function -> StreamSupport.stream(((FunctionDefinitionNode) function).children().spliterator(),
-                                false).anyMatch(child -> child.toString().equals("createInterceptors")));
+                .filter(function -> function instanceof FunctionDefinitionNode)
+                .map(function -> (FunctionDefinitionNode) function)
+                .filter(this::hasCreateInterceptorsFunction)
+                .findFirst();
+    }
+
+    private boolean hasCreateInterceptorsFunction(FunctionDefinitionNode function) {
+        return StreamSupport.stream(function.children().spliterator(), false)
+                .anyMatch(child -> child.toString().equals(CREATE_INTERCEPTORS_FUNC));
     }
 
     private boolean supportsTupleType(FunctionDefinitionNode resource) {
-        return resource.functionSignature().returnTypeDesc().get().type().kind().equals(SyntaxKind.TUPLE_TYPE_DESC);
+        return resource.functionSignature()
+                .returnTypeDesc()
+                .map(returnType -> returnType.type().kind().equals(SyntaxKind.TUPLE_TYPE_DESC))
+                .orElse(false);
+    }
+
     // todo: implement this method properly
-    private List<Interceptor> getInterceptorPipeline() {
+    private List<Interceptor> getInterceptorPipeline(FunctionDefinitionNode resource) {
+        Object returnInterceptors = resource.functionSignature()
+                .returnTypeDesc()
+                .map(ReturnTypeDescriptorNode::type).get();
         return List.of();
     }
 
     // todo: implement this method properly
     private List<TypeSymbol> effectiveInterceptorReturnTypes(FunctionDefinitionNode resource) {
-        // analyze the function node, and identify whether any interceptor is relevant to this particular resource
-        //  if (true)
-        //      - construct the accumulative return type (as list) [ function return types + interceptor return types ]
-        // else
-        //      - function return type (as list)
-        // note: use semantic model
+        TypeSymbol typeSymbol = (TypeSymbol) (((ResourceMethodSymbol)semanticModel.symbol(resource).get()).typeDescriptor());
         return List.of();
     }
 }

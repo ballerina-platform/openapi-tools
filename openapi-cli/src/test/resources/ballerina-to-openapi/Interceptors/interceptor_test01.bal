@@ -22,7 +22,6 @@ service class RequestInterceptor {
             http:RequestContext ctx,
             @http:Header {name: "x-api-version"} string xApiVersion)
         returns http:NotImplemented|http:NextService|error? {
-        // Checks the API version header.
         if xApiVersion != "v1" {
             return http:NOT_IMPLEMENTED;
         }
