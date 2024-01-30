@@ -413,7 +413,7 @@ public abstract class AbstractResponseMapper implements ResponseMapper {
             return new HashMap<>();
         }
 
-        io.ballerina.openapi.service.mapper.response.HeadersInfo headersInfo = getHeadersInfo(statusCodeRecordType);
+        HeadersInfo headersInfo = getHeadersInfo(statusCodeRecordType);
         if (Objects.isNull(headersInfo)) {
             return new HashMap<>();
         }
@@ -425,21 +425,18 @@ public abstract class AbstractResponseMapper implements ResponseMapper {
         return mapRecordFieldToHeaders(recordFieldsMapping);
     }
 
-    private io.ballerina.openapi.service.mapper.response.HeadersInfo getHeadersInfo(RecordTypeSymbol statusCodeRecordType) {
+    private HeadersInfo getHeadersInfo(RecordTypeSymbol statusCodeRecordType) {
         if (statusCodeRecordType.fieldDescriptors().containsKey("headers")) {
             TypeSymbol headersType = typeMapper.getReferredType(
                     statusCodeRecordType.fieldDescriptors().get("headers").typeDescriptor());
             if (Objects.nonNull(headersType) && headersType instanceof TypeReferenceTypeSymbol headersRefType &&
                     headersRefType.typeDescriptor() instanceof RecordTypeSymbol recordType) {
-                return new io.ballerina.openapi.service.mapper.response.HeadersInfo(recordType, MapperCommonUtils.getTypeName(headersType));
+                return new HeadersInfo(recordType, MapperCommonUtils.getTypeName(headersType));
             } else if (Objects.nonNull(headersType) && headersType instanceof RecordTypeSymbol recordType) {
-                return new io.ballerina.openapi.service.mapper.response.HeadersInfo(recordType, MapperCommonUtils.getTypeName(recordType));
+                return new HeadersInfo(recordType, MapperCommonUtils.getTypeName(recordType));
             }
         }
         return null;
-    }
-
-    private record HeadersInfo(RecordTypeSymbol headerRecordType, String recordName) {
     }
 
     private RecordTypeSymbol getStatusCodeRecordTypeSymbol(TypeSymbol typeSymbol) {
