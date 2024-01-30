@@ -23,6 +23,7 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
@@ -32,6 +33,8 @@ import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapperImpl;
 import io.ballerina.openapi.service.mapper.response.ResponseMapper;
 import io.ballerina.openapi.service.mapper.response.ResponseMapperImpl;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.Components;
@@ -61,16 +64,18 @@ public class ResourceMapperImpl implements ResourceMapper {
     private final AdditionalData additionalData;
     private final OpenAPI openAPI;
     private final List<FunctionDefinitionNode> resources;
+    private final ServiceDeclarationNode serviceNode;
     private final boolean treatNilableAsOptional;
 
     /**
      * Initializes a resource parser for openApi.
      */
-    ResourceMapperImpl(OpenAPI openAPI, List<FunctionDefinitionNode> resources, AdditionalData additionalData,
-                       boolean treatNilableAsOptional) {
+    ResourceMapperImpl(OpenAPI openAPI, ServiceDeclarationNode serviceNode, List<FunctionDefinitionNode> resources,
+                       AdditionalData additionalData, boolean treatNilableAsOptional) {
         this.openAPI = openAPI;
         this.resources = resources;
         this.additionalData = additionalData;
+        this.serviceNode = serviceNode;
         this.treatNilableAsOptional = treatNilableAsOptional;
     }
 
@@ -206,10 +211,9 @@ public class ResourceMapperImpl implements ResourceMapper {
                 return Optional.empty();
             }
         }
-
-        ResponseMapper responseMapper = new ResponseMapperImpl(resource, operationInventory, components,
-                additionalData);
-        responseMapper.setApiResponses();
+        TypeMapper typeMapper = new TypeMapperImpl(components, additionalData);
+        ResponseMapper responseMapper = new ResponseMapperImpl(typeMapper, additionalData.semanticModel());
+        responseMapper.setApiResponses(operationInventory, resource);
         return Optional.of(operationInventory);
     }
 
