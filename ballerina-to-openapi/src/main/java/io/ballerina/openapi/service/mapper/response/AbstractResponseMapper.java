@@ -491,7 +491,7 @@ public abstract class AbstractResponseMapper implements ResponseMapper {
         return typeSymbol.subtypeOf(semanticModel.types().ERROR);
     }
 
-    public boolean isSubTypeOfHttpResponse(TypeSymbol returnType, SemanticModel semanticModel) {
+    public static boolean isSubTypeOfHttpResponse(TypeSymbol returnType, SemanticModel semanticModel) {
         Optional<Symbol> optionalRecordSymbol = semanticModel.types().getTypeByName("ballerina", "http",
                 "", "Response");
         if (optionalRecordSymbol.isPresent() &&
