@@ -33,6 +33,9 @@ import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapperImpl;
 import io.ballerina.openapi.service.mapper.response.ResponseMapper;
+import io.ballerina.openapi.service.mapper.response.ResponseMapperImpl;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
+import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.Components;
@@ -62,19 +65,19 @@ public class ResourceMapperImpl implements ResourceMapper {
     private final AdditionalData additionalData;
     private final OpenAPI openAPI;
     private final List<FunctionDefinitionNode> resources;
-    private final boolean treatNilableAsOptional;
     private final ServiceDeclarationNode serviceNode;
+    private final boolean treatNilableAsOptional;
 
     /**
      * Initializes a resource parser for openApi.
      */
-    ResourceMapperImpl(OpenAPI openAPI, List<FunctionDefinitionNode> resources, AdditionalData additionalData,
-                       boolean treatNilableAsOptional, ServiceDeclarationNode serviceNode) {
+    ResourceMapperImpl(OpenAPI openAPI, ServiceDeclarationNode serviceNode, List<FunctionDefinitionNode> resources,
+                       AdditionalData additionalData, boolean treatNilableAsOptional) {
         this.openAPI = openAPI;
         this.resources = resources;
         this.additionalData = additionalData;
-        this.treatNilableAsOptional = treatNilableAsOptional;
         this.serviceNode = serviceNode;
+        this.treatNilableAsOptional = treatNilableAsOptional;
     }
 
     public void setOperation() {
@@ -209,11 +212,9 @@ public class ResourceMapperImpl implements ResourceMapper {
                 return Optional.empty();
             }
         }
-
-        ResponseMapper responseMapper = new InterceptableResponseMapperImpl(serviceNode, resource, operationInventory,
-                components, additionalData.semanticModel(), additionalData);
-        responseMapper.initializeResponseMapper(resource);
-        responseMapper.setApiResponses();
+        TypeMapper typeMapper = new TypeMapperImpl(components, additionalData);
+        ResponseMapper responseMapper = new ResponseMapperImpl(typeMapper, additionalData.semanticModel());
+        responseMapper.setApiResponses(operationInventory, resource);
         return Optional.of(operationInventory);
     }
 

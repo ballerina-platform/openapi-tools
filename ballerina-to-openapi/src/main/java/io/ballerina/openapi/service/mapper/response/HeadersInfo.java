@@ -15,19 +15,17 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+
 package io.ballerina.openapi.service.mapper.response;
 
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.openapi.service.mapper.model.OperationInventory;
+import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 
 /**
- * This {@link ResponseMapper} represents the interface for response mapper.
+ * This {@link HeadersInfo} record stores the headers data required for the openapi response mapper.
+ * @param headerRecordType - The header record type.
+ * @param recordName - The name of the header record.
  *
  * @since 1.9.0
  */
-public interface ResponseMapper {
-
-    void setApiResponses(OperationInventory operationInventory, FunctionDefinitionNode resource);
-
-    void initializeResponseMapper(FunctionDefinitionNode resourceNode);
+public record HeadersInfo(RecordTypeSymbol headerRecordType, String recordName) {
 }
