@@ -36,12 +36,15 @@ import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
@@ -97,19 +100,46 @@ public class MapperCommonUtils {
     private static final SyntaxKind[] validExpressionKind = {STRING_LITERAL, NUMERIC_LITERAL, BOOLEAN_LITERAL,
             LIST_CONSTRUCTOR, MAPPING_CONSTRUCTOR};
 
+    public static String generateRelativePath(FunctionDefinitionNode resourceFunction) {
+        StringBuilder relativePath = new StringBuilder();
+        relativePath.append("/");
+        if (!resourceFunction.relativeResourcePath().isEmpty()) {
+            for (Node node: resourceFunction.relativeResourcePath()) {
+                if (node instanceof ResourcePathParameterNode pathNode) {
+                    relativePath.append("{");
+                    relativePath.append(pathNode.paramName().get());
+                    relativePath.append("}");
+                } else if ((resourceFunction.relativeResourcePath().size() == 1)
+                        && (node.toString().trim().equals("."))) {
+                    return relativePath.toString();
+                } else {
+                    relativePath.append(node.toString().trim());
+                }
+            }
+        }
+        return relativePath.toString();
+    }
+
     /**
      * Generate operationId by removing special characters.
      *
-     * @param operationID input function name, record name or operation Id
-     * @return string with new generated name
+     * @param resourceFunction resource function definition
+     * @return string with a unique operationId
      */
-    public static String getOperationId(String operationID) {
+    public static String getOperationId(FunctionDefinitionNode resourceFunction) {
         //For the flatten enable we need to remove first Part of valid name check
         // this - > !operationID.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
-        if (operationID.matches("\\b[0-9]*\\b")) {
-            return operationID;
+        String relativePath = MapperCommonUtils.generateRelativePath(resourceFunction);
+        String cleanResourcePath = MapperCommonUtils.unescapeIdentifier(relativePath);
+        String resName = (resourceFunction.functionName().text() + "_" +
+                cleanResourcePath).replaceAll("\\{///\\}", "_");
+        if (cleanResourcePath.equals("/")) {
+            resName = resourceFunction.functionName().text();
         }
-        String[] split = operationID.split(Constants.SPECIAL_CHAR_REGEX);
+        if (resName.matches("\\b[0-9]*\\b")) {
+            return resName;
+        }
+        String[] split = resName.split(Constants.SPECIAL_CHAR_REGEX);
         StringBuilder validName = new StringBuilder();
         for (String part : split) {
             if (!part.isBlank()) {
@@ -120,8 +150,8 @@ public class MapperCommonUtils {
                 validName.append(part);
             }
         }
-        operationID = validName.toString();
-        return operationID.substring(0, 1).toLowerCase(Locale.ENGLISH) + operationID.substring(1);
+        resName = validName.toString();
+        return resName.substring(0, 1).toLowerCase(Locale.ENGLISH) + resName.substring(1);
     }
 
     /**
@@ -422,5 +452,32 @@ public class MapperCommonUtils {
     public static boolean isNotSimpleValueLiteralKind(SyntaxKind valueExpressionKind) {
         return Arrays.stream(validExpressionKind).noneMatch(syntaxKind -> syntaxKind ==
                 valueExpressionKind);
+    }
+
+    public static Optional<AnnotationNode> getResourceConfigAnnotation(FunctionDefinitionNode resourceFunction) {
+        Optional<MetadataNode> metadata = resourceFunction.metadata();
+        if (metadata.isEmpty()) {
+            return Optional.empty();
+        }
+        MetadataNode metaData = metadata.get();
+        NodeList<AnnotationNode> annotations = metaData.annotations();
+        return annotations.stream()
+                .filter(ann -> "http:ResourceConfig".equals(ann.annotReference().toString().trim()))
+                .findFirst();
+    }
+
+    public static Optional<String> getValueForAnnotationFields(AnnotationNode resourceConfigAnnotation,
+                                                               String fieldName) {
+        return resourceConfigAnnotation
+                .annotValue()
+                .map(MappingConstructorExpressionNode::fields)
+                .flatMap(fields ->
+                        fields.stream()
+                                .filter(fld -> fld instanceof SpecificFieldNode)
+                                .map(fld -> (SpecificFieldNode) fld)
+                                .filter(fld -> fieldName.equals(fld.fieldName().toString().trim()))
+                                .findFirst()
+                ).flatMap(SpecificFieldNode::valueExpr)
+                .map(en -> en.toString().trim());
     }
 }
