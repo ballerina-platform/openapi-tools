@@ -22,7 +22,7 @@ package io.ballerina.openapi.service.mapper.hateoas;
  * A context-holder to save and retrieve HATEOAS meta-data for a given resources.
  * @param resourceMethod http resource for the method
  * @param operationId generated operationId
- * @since 1.6.0
+ * @since 1.9.0
  */
 public record Resource(String resourceMethod, String operationId) {
 }
