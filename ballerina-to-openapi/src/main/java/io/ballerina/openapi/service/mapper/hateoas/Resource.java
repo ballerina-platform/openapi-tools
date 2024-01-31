@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org).
  *
  *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -22,7 +22,7 @@ package io.ballerina.openapi.service.mapper.hateoas;
  * A context-holder to save and retrieve HATEOAS meta-data for a given resources.
  * @param resourceMethod http resource for the method
  * @param operationId generated operationId
- * @since 1.6.0
+ * @since 1.9.0
  */
 public record Resource(String resourceMethod, String operationId) {
 }
