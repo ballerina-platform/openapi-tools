@@ -29,14 +29,7 @@ import java.util.Map;
  * @since 1.6.0
  */
 public class Service {
-    private final String packageId;
-    private final int serviceId;
     private final Map<String, List<Resource>> hateoasResourceMapping = new HashMap<>();
-
-    public Service(String packageId, int serviceId) {
-        this.packageId = packageId;
-        this.serviceId = serviceId;
-    }
 
     public void addResource(String resourceName, Resource resource) {
         if (hateoasResourceMapping.containsKey(resourceName)) {
@@ -44,14 +37,6 @@ public class Service {
             return;
         }
         hateoasResourceMapping.put(resourceName, Arrays.asList(resource));
-    }
-
-    public String getPackageId() {
-        return packageId;
-    }
-
-    public int getServiceId() {
-        return serviceId;
     }
 
     public Map<String, List<Resource>> getHateoasResourceMapping() {

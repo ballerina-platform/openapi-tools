@@ -37,7 +37,6 @@ import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapper;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapperImpl;
-import io.ballerina.openapi.service.mapper.hateoas.HateoasMetadataVisitor;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
@@ -100,8 +99,6 @@ public class ServiceToOpenAPIMapper {
                         null, serviceName, availableService.toString());
                 diagnostics.add(error);
             }
-            // Extract HATEOAS meta-data for the all the service-declarations in the current project
-            extractHateoasLinkMetadata(project);
             // Generating openapi specification for selected services
             for (Map.Entry<String, ServiceDeclarationNode> serviceNode : servicesToGenerate.entrySet()) {
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNode.getKey(), needJson);
@@ -272,18 +269,5 @@ public class ServiceToOpenAPIMapper {
             }
         }
         return true;
-    }
-
-    private static void extractHateoasLinkMetadata(Project project) {
-        String packageId = project.currentPackage().packageId().id().toString();
-        project.currentPackage().moduleIds().forEach(moduleId -> {
-            Module module = project.currentPackage().module(moduleId);
-            SemanticModel semanticModel = project.currentPackage().getCompilation().getSemanticModel(moduleId);
-            HateoasMetadataVisitor hateoasMetadataVisitor = new HateoasMetadataVisitor(packageId, semanticModel);
-            module.documentIds().forEach(documentId -> {
-                SyntaxTree syntaxTreeDoc = module.document(documentId).syntaxTree();
-                syntaxTreeDoc.rootNode().accept(hateoasMetadataVisitor);
-            });
-        });
     }
 }

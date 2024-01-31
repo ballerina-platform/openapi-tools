@@ -70,7 +70,7 @@ public class HateoasMapperImpl implements HateoasMapper {
     }
 
     private Service extractHateoasMetaInfo(ServiceDeclarationNode serviceNode) {
-        Service service = new Service("ss", 0);
+        Service service = new Service();
         for (Node child : serviceNode.children()) {
             if (SyntaxKind.RESOURCE_ACCESSOR_DEFINITION.equals(child.kind())) {
                 FunctionDefinitionNode resourceFunction = (FunctionDefinitionNode) child;
