@@ -207,12 +207,11 @@ public class ServiceToOpenAPIMapper {
                 serversMapperImpl.setServers();
                 // 03. Filter path and component sections in OAS.
                 // Generate openApi string for the mentioned service name.
-                String packageId = oasGenerationMetaInfo.getProject().currentPackage().packageId().id().toString();
                 convertServiceToOpenAPI(serviceDefinition, openapi, semanticModel, moduleMemberVisitor, diagnostics);
                 ConstraintMapper constraintMapper = new ConstraintMapperImpl(openapi, moduleMemberVisitor,
                         diagnostics);
                 constraintMapper.setConstraints();
-                HateoasMapper hateoasMapper = new HateoasMapperImpl(packageId, semanticModel);
+                HateoasMapper hateoasMapper = new HateoasMapperImpl();
                 hateoasMapper.setOpenApiLinks(serviceDefinition, openapi);
                 return new OASResult(openapi, diagnostics);
             } else {
