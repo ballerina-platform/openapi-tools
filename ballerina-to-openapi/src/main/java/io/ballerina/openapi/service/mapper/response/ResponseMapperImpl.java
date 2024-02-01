@@ -42,7 +42,6 @@ import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.openapi.service.mapper.utils.MediaTypeUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.headers.Header;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -221,38 +220,18 @@ public class ResponseMapperImpl implements ResponseMapper {
     }
 
     private void updateExistingApiResponse(ApiResponse apiResponse, String statusCode) {
-        ApiResponse res = apiResponses.get(statusCode);
-        if (apiResponse.getContent() != null) {
-            Content content = res.getContent();
-            if (content == null) {
-                content = new Content();
-            }
-
-            updateApiResponseContentWithMediaType(apiResponse, content);
-            res.setContent(content);
-        }
-        apiResponses.put(statusCode, res);
-    }
-
-    private static void updateApiResponseContentWithMediaType(ApiResponse apiResponse, Content content) {
-        String mediaType = apiResponse.getContent().keySet().iterator().next();
-        Schema newSchema = apiResponse.getContent().values().iterator().next().getSchema();
-        if (content.containsKey(mediaType)) {
-            Schema<?> schema = content.get(mediaType).getSchema();
-            if (schema instanceof ComposedSchema && schema.getOneOf() != null) {
-                schema.getOneOf().add(newSchema);
-                content.put(mediaType, new MediaType().schema(schema));
+        ApiResponse existingRes = apiResponses.get(statusCode);
+        Content newContent = apiResponse.getContent();
+        if (Objects.nonNull(newContent)) {
+            Content content = existingRes.getContent();
+            if (Objects.isNull(content)) {
+                content = newContent;
             } else {
-                ComposedSchema composedSchema = new ComposedSchema();
-                composedSchema.addOneOfItem(schema);
-                composedSchema.addOneOfItem(newSchema);
-                MediaType updatedMediaContent =
-                        new MediaType().schema(composedSchema);
-                content.put(mediaType, updatedMediaContent);
+                content.put(newContent.keySet().iterator().next(), newContent.values().iterator().next());
             }
-        } else {
-            content.put(mediaType, apiResponse.getContent().values().iterator().next());
+            existingRes.setContent(content);
         }
+        apiResponses.put(statusCode, existingRes);
     }
 
     private void updateApiResponseContentWithMediaType(ApiResponse apiResponse, String mediaType,
@@ -297,7 +276,7 @@ public class ResponseMapperImpl implements ResponseMapper {
             TypeSymbol bodyType = getBodyTypeFromStatusCodeResponse(returnType, semanticModel);
             Map<String, Header> headersFromStatusCodeResponse = getHeadersFromStatusCodeResponse(returnType);
             String statusCode = getResponseCode(returnType, defaultStatusCode, semanticModel);
-            headersMap.put(statusCode, headersFromStatusCodeResponse);
+            updateHeaderMap(statusCode, headersFromStatusCodeResponse);
             createResponseMapping(bodyType, getResponseCode(returnType, defaultStatusCode, semanticModel));
         } else {
             ApiResponse apiResponse = new ApiResponse();
@@ -376,7 +355,7 @@ public class ResponseMapperImpl implements ResponseMapper {
             if (isHttpStatusCodeResponseType(semanticModel, directMemberType)) {
                 Map<String, Header> headersFromStatusCodeResponse = getHeadersFromStatusCodeResponse(directMemberType);
                 if (!headersFromStatusCodeResponse.isEmpty()) {
-                    headersMap.put(code, headersFromStatusCodeResponse);
+                    updateHeaderMap(code, headersFromStatusCodeResponse);
                 }
                 directMemberType = getBodyTypeFromStatusCodeResponse(directMemberType, semanticModel);
             }
@@ -394,6 +373,14 @@ public class ResponseMapperImpl implements ResponseMapper {
                 }
                 extractBasicMembers(unionType, code, responses);
             }
+        }
+    }
+
+    private void updateHeaderMap(String code, Map<String, Header> headers) {
+        if (headersMap.containsKey(code)) {
+            headersMap.get(code).putAll(headers);
+        } else {
+            headersMap.put(code, headers);
         }
     }
 

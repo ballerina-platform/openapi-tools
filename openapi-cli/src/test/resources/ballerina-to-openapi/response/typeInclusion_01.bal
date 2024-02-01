@@ -14,6 +14,7 @@ type Link record {|
     string[] mediaTypes?;
     Action[] actions?;
 |};
+
 type Links record {|
     Link[] links;
 |};
@@ -45,7 +46,7 @@ enum RoomStatus {
 type Room record {|
     # Unique identification
     string id;
-    #Types of rooms available
+    # Types of rooms available
     RoomCategory category;
     # Number of people that can be accommodate
     int capacity;
@@ -60,6 +61,7 @@ type Room record {|
     # Number of rooms as per the status
     int count;
 |};
+
 # Represents a collection of resort rooms
 type Rooms record {|
     *Links;
@@ -74,6 +76,7 @@ type ReserveRoom record {|
     # Number of rooms
     int count;
 |};
+
 # Represents a reservation of rooms
 type Reservation record {|
     # Rooms to be reserved
@@ -83,6 +86,7 @@ type Reservation record {|
     # End date in yyyy-mm-dd
     string endDate;
 |};
+
 # Represents a receipt for the reservation
 type ReservationReceipt record {|
     *Links;
@@ -95,14 +99,17 @@ type ReservationReceipt record {|
     # Reservation
     Reservation reservation;
 |};
+
 type ReservationUpdated record {|
     *http:Ok;
     ReservationReceipt body;
 |};
+
 type ReservationCreated record {|
     *http:Created;
     ReservationReceipt body;
 |};
+
 type ReservationConflict record {|
     *http:Conflict;
     string body = "Error occurred while updating the reservation";
@@ -131,10 +138,33 @@ type PaymentReceipt record {|
     # Booked rooms
     Room[] rooms;
 |};
+
+type PaymentSourceHeaders record {|
+    string payment\-type;
+    string[] payment\-tokens;
+    string location?;
+|};
+
 type PaymentCreated record {|
     *http:Created;
     PaymentReceipt body;
+    PaymentSourceHeaders headers;
 |};
+
+type SimplePaymentSourceHeaders record {|
+    string simple\-payment\-type;
+    string[] simple\-payment\-tokens;
+|};
+
+type SimplePaymentCreated record {|
+    *http:Created;
+    PaymentReceipt body;
+    record {|
+        string simple\-payment\-type;
+        string[] simple\-payment\-tokens;
+    |} headers;
+|};
+
 type PaymentConflict record {|
     *http:Conflict;
     string body = "Error occurred while updating the payment";
@@ -150,6 +180,28 @@ service /payloadV on new http:Listener(9090) {
                 returns ReservationCreated|ReservationConflict {
         ReservationCreated created = createReservation(reservation);
         return created;
+    }
+
+    # Represents Snowpeak payment resource
+    #
+    # + id - Unique identification of payment
+    # + payment - Payment representation
+    # + return - `PaymentCreated` or `PaymentConflict` representation
+    resource function post payment/[string id](@http:Payload Payment payment)
+                returns SimplePaymentCreated|PaymentCreated|PaymentConflict {
+        PaymentCreated paymentCreated = createPayment(id, payment);
+        return paymentCreated;
+    }
+
+    # Represents Snowpeak payment resource
+    #
+    # + id - Unique identification of payment
+    # + payment - Payment representation
+    # + return - `PaymentCreated` or `PaymentConflict` representation
+    resource function post simple\-payment/[string id](@http:Payload Payment payment)
+                returns SimplePaymentCreated|PaymentCreated|PaymentConflict {
+        PaymentCreated paymentCreated = createPayment(id, payment);
+        return paymentCreated;
     }
 }
 
@@ -295,14 +347,16 @@ function updateReservation(Reservation reservation) returns ReservationUpdated {
 function createPayment(string id, Payment payment) returns PaymentCreated {
     return {
         headers: {
-            location: "http://localhost:9090/reservation/p1000"
+            location: "http://localhost:9090/reservation/p1000",
+            payment\-type: "card",
+            payment\-tokens: ["token1", "token2"]
         },
         body: {
             id: "p1000",
             total: 400.00,
             lastUpdated: "2021-06-29T13:01:30Z",
             rooms: [
-                    {
+                {
                     id: "r1000",
                     category: DELUXE,
                     capacity: 5,

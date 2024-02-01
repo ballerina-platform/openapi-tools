@@ -13,6 +13,14 @@ paths:
   /pet:
     post:
       operationId: postPet
+      parameters:
+        - name: rec
+          in: query
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Record'
       requestBody:
         content:
           application/json:
@@ -96,3 +104,35 @@ components:
           exclusiveMinimum: true
           type: number
           format: double
+    Record:
+      required:
+        - user
+      type: object
+      properties:
+        user:
+          required:
+            - age
+            - auth
+            - name
+          type: object
+          properties:
+            name:
+              maxLength: 10
+              minLength: 10
+              type: string
+            age:
+              minimum: 18
+              type: integer
+              format: int64
+            auth:
+              required:
+                - password
+                - username
+              type: object
+              properties:
+                username:
+                  pattern: "^[a-zA-Z0-9]+$"
+                  type: string
+                password:
+                  minLength: 8
+                  type: string

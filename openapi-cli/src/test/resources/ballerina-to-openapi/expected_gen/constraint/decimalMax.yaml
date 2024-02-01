@@ -36,6 +36,11 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    AdjustedMarks:
+      maximum: 6.0
+      minimum: 3.0
+      allOf:
+        - $ref: '#/components/schemas/Marks'
     ErrorPayload:
       required:
         - message
@@ -67,8 +72,11 @@ components:
       format: double
     School:
       required:
+        - adjustedMarks
         - marks
       type: object
       properties:
         marks:
           $ref: '#/components/schemas/Marks'
+        adjustedMarks:
+          $ref: '#/components/schemas/AdjustedMarks'

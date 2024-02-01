@@ -23,8 +23,15 @@ import ballerina/constraint;
 }
 public type Position int;
 
+@constraint:Int {
+    minValue: 50,
+    maxValue: 100
+}
+public type NewPosition Position;
+
 public type Child record {
     Position position;
+    NewPosition newPosition;
 };
 
 service /payloadV on new http:Listener(9090) {

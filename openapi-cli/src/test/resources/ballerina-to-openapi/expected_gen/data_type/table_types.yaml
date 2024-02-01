@@ -1,0 +1,192 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /pets:
+    get:
+      operationId: getPets
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+  /pets/{tag}:
+    get:
+      operationId: getPetsTag
+      parameters:
+        - name: tag
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /pets/{tag}/appointments:
+    get:
+      operationId: getPetsTagAppointments
+      parameters:
+        - name: tag
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentTable'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    Appointment:
+      required:
+        - description
+        - doctorId
+        - id
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        doctorId:
+          type: string
+        date:
+          $ref: '#/components/schemas/Date'
+      additionalProperties: false
+    AppointmentTable:
+      type: array
+      items:
+        $ref: '#/components/schemas/Appointment'
+    Date:
+      type: object
+      description: Date in proleptic Gregorian calendar.
+      allOf:
+        - $ref: '#/components/schemas/DateFields'
+        - $ref: '#/components/schemas/OptionalTimeOfDayFields'
+        - type: object
+          properties:
+            utcOffset:
+              $ref: '#/components/schemas/ZoneOffset'
+    DateFields:
+      required:
+        - day
+        - month
+        - year
+      type: object
+      properties:
+        year:
+          type: integer
+          format: int64
+        month:
+          type: integer
+          format: int64
+        day:
+          type: integer
+          format: int64
+      description: Fields of the Date record.
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    OptionalTimeOfDayFields:
+      type: object
+      properties:
+        hour:
+          type: integer
+          format: int64
+        minute:
+          type: integer
+          format: int64
+        second:
+          $ref: '#/components/schemas/Seconds'
+      description: TimeOfDay with all the fields beign optional.
+    Pet:
+      required:
+        - age
+        - name
+        - tag
+      type: object
+      properties:
+        name:
+          type: string
+        tag:
+          type: string
+        age:
+          type: number
+          format: double
+        appointments:
+          $ref: '#/components/schemas/AppointmentTable'
+      additionalProperties: false
+    Seconds:
+      type: number
+      description: Holds the seconds as a decimal value.
+      format: double
+    ZoneOffset:
+      required:
+        - hours
+      type: object
+      properties:
+        hours:
+          type: integer
+          format: int64
+        minutes:
+          type: integer
+          format: int64
+        seconds:
+          type: number
+          description: |-
+            IETF zone files have historical zones that are offset by
+            integer seconds; we use Seconds type so that this is a subtype
+            of Delta
+          format: double
+      additionalProperties: false

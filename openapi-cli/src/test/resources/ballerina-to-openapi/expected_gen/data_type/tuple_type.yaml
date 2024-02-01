@@ -10,15 +10,76 @@ servers:
       port:
         default: "9090"
 paths:
-  /:
+  /path1:
     post:
-      operationId: post
+      operationId: postPath1
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Pet'
         required: true
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /path2:
+    post:
+      operationId: postPath2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TupleType'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /path3:
+    post:
+      operationId: postPath3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TupleType'
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /path4:
+    post:
+      operationId: postPath4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                oneOf:
+                  - type: integer
+                    format: int64
+                  - type: number
+                    format: double
+                  - type: string
       responses:
         "202":
           description: Accepted
@@ -57,6 +118,7 @@ components:
       required:
         - address
         - id
+        - tupleSingle
         - tuples
         - unionTuple
       type: object
@@ -76,10 +138,15 @@ components:
               - type: number
                 format: float
               - $ref: '#/components/schemas/User'
-        tuples:
+        tupleSingle:
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/ReturnTypes'
+            - $ref: '#/components/schemas/TupleType'
+        tuples:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/TupleType'
         unionTuple:
           type: array
           nullable: true
@@ -89,7 +156,7 @@ components:
                 format: int64
               - type: number
                 format: double
-    ReturnTypes:
+    TupleType:
       type: array
       items:
         oneOf:

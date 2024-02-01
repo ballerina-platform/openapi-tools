@@ -355,7 +355,6 @@ public class MapperCommonUtils {
      * Remove special characters from the given file name.
      */
     public static String getNormalizedFileName(String openAPIFileName) {
-
         String[] splitNames = openAPIFileName.split("[^a-zA-Z0-9]");
         if (splitNames.length > 0) {
             return Arrays.stream(splitNames)
@@ -363,12 +362,6 @@ public class MapperCommonUtils {
                     .collect(Collectors.joining(UNDERSCORE));
         }
         return openAPIFileName;
-    }
-
-    public static boolean isHttpService(ModuleSymbol moduleSymbol) {
-        Optional<String> moduleNameOpt = moduleSymbol.getName();
-        return moduleNameOpt.isPresent() && Constants.HTTP.equals(moduleNameOpt.get())
-                && Constants.BALLERINA.equals(moduleSymbol.id().orgName());
     }
 
     public static boolean containErrors(List<Diagnostic> diagnostics) {

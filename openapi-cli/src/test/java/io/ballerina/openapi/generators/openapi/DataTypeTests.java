@@ -65,6 +65,12 @@ public class DataTypeTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/built_in_sub_types_in_record.yaml");
     }
 
+    @Test(description = "test for Ballerina table types")
+    public void testForTableType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("data_type/table_types.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/table_types.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
