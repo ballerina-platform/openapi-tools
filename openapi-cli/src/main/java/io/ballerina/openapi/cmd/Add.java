@@ -75,6 +75,7 @@ import static io.ballerina.toml.syntax.tree.AbstractNodeFactory.createToken;
         description = "Update Ballerina.toml with the OpenAPI CLI code generation implementation"
 )
 public class Add implements BLauncherCmd {
+    private static final String COMMAND_IDENTIFIER = "openapi-add";
     private final PrintStream outStream;
     private final boolean exitWhenFinish;
 
@@ -108,6 +109,11 @@ public class Add implements BLauncherCmd {
                 Paths.get(System.getProperty("user.dir")).toAbsolutePath();
 
         try {
+            if (baseCmd.helpFlag) {
+                String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(COMMAND_IDENTIFIER);
+                outStream.println(commandUsageInfo);
+                return;
+            }
             //check the given path is the Ballerina package
             Optional<Path> ballerinaTomlPath = validateBallerinaProject(projectPath);
             if (ballerinaTomlPath.isEmpty()) {
@@ -136,6 +142,7 @@ public class Add implements BLauncherCmd {
                 //write toml file
                 try (FileWriter writer = new FileWriter(tomlPath.toString(), StandardCharsets.UTF_8)) {
                     writer.write(content);
+                    outStream.print(ErrorMessages.TOML_UPDATED_MSG);
                 }
             }
         } catch (BallerinaOpenApiException | IOException e) {
@@ -212,7 +219,7 @@ public class Add implements BLauncherCmd {
             SeparatedNodeList<ValueNode> value = createSeparatedNodeList(arrayItems);
             ArrayNode arrayNode = NodeFactory.createArrayNode(createToken(SyntaxKind.OPEN_BRACKET_TOKEN), value,
                     createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-            KeyValueNode tagNodes = NodeFactory.createKeyValueNode(getKeyNode("option.tags"), getAssignToken(),
+            KeyValueNode tagNodes = NodeFactory.createKeyValueNode(getKeyNode("options.tags"), getAssignToken(),
                     arrayNode);
             moduleMembers = moduleMembers.add(tagNodes);
         }
@@ -224,7 +231,7 @@ public class Add implements BLauncherCmd {
             SeparatedNodeList<ValueNode> value = createSeparatedNodeList(arrayItems);
             ArrayNode arrayNode = NodeFactory.createArrayNode(createToken(SyntaxKind.OPEN_BRACKET_TOKEN), value,
                     createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-            KeyValueNode tagNodes = NodeFactory.createKeyValueNode(getKeyNode("option.operations"),
+            KeyValueNode tagNodes = NodeFactory.createKeyValueNode(getKeyNode("options.operations"),
                     getAssignToken(), arrayNode);
             moduleMembers = moduleMembers.add(tagNodes);;
         }
@@ -236,7 +243,7 @@ public class Add implements BLauncherCmd {
             moduleMembers = moduleMembers.add(SampleNodeGenerator.createStringKV("options.clientMethods",
                     optionsBuilder.getClientMethod(), null));
         }
-        if (optionsBuilder.getLicensePath() != null || !optionsBuilder.getLicensePath().isBlank()) {
+        if (optionsBuilder.getLicensePath() != null && !optionsBuilder.getLicensePath().isBlank()) {
             moduleMembers = moduleMembers.add(SampleNodeGenerator.createStringKV("options.licensePath",
                     optionsBuilder.getLicensePath(), null));
         }
