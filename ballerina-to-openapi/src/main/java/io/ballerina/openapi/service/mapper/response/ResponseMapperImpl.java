@@ -19,6 +19,7 @@ package io.ballerina.openapi.service.mapper.response;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ClassSymbol;
+import io.ballerina.compiler.api.symbols.ErrorTypeSymbol;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
@@ -66,6 +67,7 @@ import static io.ballerina.openapi.service.mapper.Constants.HTTP_500;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_CODES;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_CODE_DESCRIPTIONS;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_PAYLOAD;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP_STATUS_CODE_ERRORS;
 import static io.ballerina.openapi.service.mapper.Constants.MEDIA_TYPE;
 import static io.ballerina.openapi.service.mapper.Constants.POST;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractAnnotationFieldDetails;
@@ -273,17 +275,25 @@ public class ResponseMapperImpl implements ResponseMapper {
         } else if (isSubTypeOfHttpResponse(returnType, semanticModel)) {
             addResponseMappingForHttpResponse();
         } else if (isSubTypeOfHttpStatusCodeResponse(returnType, semanticModel)) {
-            TypeSymbol bodyType = getBodyTypeFromStatusCodeResponse(returnType, semanticModel);
-            Map<String, Header> headersFromStatusCodeResponse = getHeadersFromStatusCodeResponse(returnType);
-            String statusCode = getResponseCode(returnType, defaultStatusCode, semanticModel);
+            RecordTypeSymbol statusCodeRecordType = getRecordTypeSymbol(returnType);
+            TypeSymbol bodyType = getBodyTypeFromResponseRecord(statusCodeRecordType, semanticModel);
+            Map<String, Header> headersFromStatusCodeResponse = getHeadersFromResponseRecord(statusCodeRecordType);
+            String statusCode = getResponseCodeForStatusCodeResponse(returnType, defaultStatusCode, semanticModel);
             updateHeaderMap(statusCode, headersFromStatusCodeResponse);
-            createResponseMapping(bodyType, getResponseCode(returnType, defaultStatusCode, semanticModel));
+            createResponseMapping(bodyType, statusCode);
+        } else if (isSubTypeOfHttpStatusCodeError(returnType, semanticModel)) {
+            RecordTypeSymbol errorDetailRecordType = getStatusCodeErrorDetailRecordTypeSymbol(returnType);
+            TypeSymbol bodyType = getBodyTypeFromResponseRecord(errorDetailRecordType, semanticModel);
+            Map<String, Header> headersFromStatusCodeResponse = getHeadersFromResponseRecord(errorDetailRecordType);
+            String statusCode = getResponseCodeForStatusCodeError(returnType, semanticModel);
+            updateHeaderMap(statusCode, headersFromStatusCodeResponse);
+            createResponseMapping(bodyType, statusCode);
         } else {
             ApiResponse apiResponse = new ApiResponse();
             String mediaType = getMediaTypeFromType(returnType, mediaTypeSubTypePrefix, allowedMediaTypes,
                     semanticModel);
             addResponseContent(returnType, apiResponse, mediaType);
-            String statusCode = getResponseCode(returnType, defaultStatusCode, semanticModel);
+            String statusCode = getResponseCodeForAnydata(returnType, defaultStatusCode, semanticModel);
             apiResponse.description(HTTP_CODE_DESCRIPTIONS.get(statusCode));
             addApiResponse(apiResponse, statusCode);
         }
@@ -345,19 +355,29 @@ public class ResponseMapperImpl implements ResponseMapper {
         if (isSameMediaType(unionTypeSymbol, semanticModel)) {
             String mediaType = getMediaTypeFromType(unionTypeSymbol, mediaTypeSubTypePrefix, allowedMediaTypes,
                     semanticModel);
-            String code = getResponseCode(unionTypeSymbol, defaultCode, semanticModel);
+            String code = getResponseCodeForAnydata(unionTypeSymbol, defaultCode, semanticModel);
             updateResponseCodeMap(responses, unionTypeSymbol, code, mediaType);
             return;
         }
         List<TypeSymbol> directMemberTypes = unionTypeSymbol.userSpecifiedMemberTypes();
         for (TypeSymbol directMemberType : directMemberTypes) {
-            String code = getResponseCode(directMemberType, defaultCode, semanticModel);
-            if (isHttpStatusCodeResponseType(semanticModel, directMemberType)) {
-                Map<String, Header> headersFromStatusCodeResponse = getHeadersFromStatusCodeResponse(directMemberType);
+            String code = getResponseCodeForAnydata(directMemberType, defaultCode, semanticModel);
+            if (isSubTypeOfHttpStatusCodeResponse(directMemberType, semanticModel)) {
+                code = getResponseCodeForStatusCodeResponse(directMemberType, code, semanticModel);
+                RecordTypeSymbol statusCodeRecordType = getRecordTypeSymbol(directMemberType);
+                Map<String, Header> headersFromStatusCodeResponse = getHeadersFromResponseRecord(statusCodeRecordType);
                 if (!headersFromStatusCodeResponse.isEmpty()) {
                     updateHeaderMap(code, headersFromStatusCodeResponse);
                 }
-                directMemberType = getBodyTypeFromStatusCodeResponse(directMemberType, semanticModel);
+                directMemberType = getBodyTypeFromResponseRecord(statusCodeRecordType, semanticModel);
+            } else if (isSubTypeOfHttpStatusCodeError(directMemberType, semanticModel)) {
+                code = getResponseCodeForStatusCodeError(directMemberType, semanticModel);
+                RecordTypeSymbol errorDetailRecordType = getStatusCodeErrorDetailRecordTypeSymbol(directMemberType);
+                Map<String, Header> headersFromStatusCodeResponse = getHeadersFromResponseRecord(errorDetailRecordType);
+                if (!headersFromStatusCodeResponse.isEmpty()) {
+                    updateHeaderMap(code, headersFromStatusCodeResponse);
+                }
+                directMemberType = getBodyTypeFromResponseRecord(errorDetailRecordType, semanticModel);
             }
             if (isSameMediaType(directMemberType, semanticModel)) {
                 String mediaType = getMediaTypeFromType(directMemberType, mediaTypeSubTypePrefix, allowedMediaTypes,
@@ -384,31 +404,19 @@ public class ResponseMapperImpl implements ResponseMapper {
         }
     }
 
-    public static boolean isHttpStatusCodeResponseType(SemanticModel semanticModel, TypeSymbol typeSymbol) {
-        Optional<Symbol> optionalStatusCodeRecordSymbol = semanticModel.types().getTypeByName("ballerina", "http",
-                "", "StatusCodeResponse");
-        if (optionalStatusCodeRecordSymbol.isPresent() &&
-                optionalStatusCodeRecordSymbol.get() instanceof TypeDefinitionSymbol statusCodeRecordSymbol) {
-            return typeSymbol.subtypeOf(statusCodeRecordSymbol.typeDescriptor());
-        }
-        return false;
-    }
-
-    public TypeSymbol getBodyTypeFromStatusCodeResponse(TypeSymbol typeSymbol, SemanticModel semanticModel) {
-        RecordTypeSymbol statusCodeRecordType = getStatusCodeRecordTypeSymbol(typeSymbol);
-        if (Objects.nonNull(statusCodeRecordType) && statusCodeRecordType.fieldDescriptors().containsKey("body")) {
-            return statusCodeRecordType.fieldDescriptors().get("body").typeDescriptor();
+    public TypeSymbol getBodyTypeFromResponseRecord(RecordTypeSymbol responseRecordType, SemanticModel semanticModel) {
+        if (Objects.nonNull(responseRecordType) && responseRecordType.fieldDescriptors().containsKey("body")) {
+            return responseRecordType.fieldDescriptors().get("body").typeDescriptor();
         }
         return semanticModel.types().ANYDATA;
     }
 
-    public Map<String, Header> getHeadersFromStatusCodeResponse(TypeSymbol typeSymbol) {
-        RecordTypeSymbol statusCodeRecordType = getStatusCodeRecordTypeSymbol(typeSymbol);
-        if (Objects.isNull(statusCodeRecordType)) {
+    public Map<String, Header> getHeadersFromResponseRecord(RecordTypeSymbol responseRecordType) {
+        if (Objects.isNull(responseRecordType)) {
             return new HashMap<>();
         }
 
-        HeadersInfo headersInfo = getHeadersInfo(statusCodeRecordType);
+        HeadersInfo headersInfo = getHeadersInfo(responseRecordType);
         if (Objects.isNull(headersInfo)) {
             return new HashMap<>();
         }
@@ -420,10 +428,10 @@ public class ResponseMapperImpl implements ResponseMapper {
         return mapRecordFieldToHeaders(recordFieldsMapping);
     }
 
-    private HeadersInfo getHeadersInfo(RecordTypeSymbol statusCodeRecordType) {
-        if (statusCodeRecordType.fieldDescriptors().containsKey("headers")) {
+    private HeadersInfo getHeadersInfo(RecordTypeSymbol responseRecordType) {
+        if (responseRecordType.fieldDescriptors().containsKey("headers")) {
             TypeSymbol headersType = typeMapper.getReferredType(
-                    statusCodeRecordType.fieldDescriptors().get("headers").typeDescriptor());
+                    responseRecordType.fieldDescriptors().get("headers").typeDescriptor());
             if (Objects.nonNull(headersType) && headersType instanceof TypeReferenceTypeSymbol headersRefType &&
                     headersRefType.typeDescriptor() instanceof RecordTypeSymbol recordType) {
                 return new HeadersInfo(recordType, MapperCommonUtils.getTypeName(headersType));
@@ -437,7 +445,7 @@ public class ResponseMapperImpl implements ResponseMapper {
     private record HeadersInfo(RecordTypeSymbol headerRecordType, String recordName) {
     }
 
-    private RecordTypeSymbol getStatusCodeRecordTypeSymbol(TypeSymbol typeSymbol) {
+    private RecordTypeSymbol getRecordTypeSymbol(TypeSymbol typeSymbol) {
         TypeSymbol statusCodeResType = typeMapper.getReferredType(typeSymbol);
         RecordTypeSymbol statusCodeRecordType = null;
         if (statusCodeResType instanceof TypeReferenceTypeSymbol statusCodeResRefType &&
@@ -447,6 +455,15 @@ public class ResponseMapperImpl implements ResponseMapper {
             statusCodeRecordType = recordTypeSymbol;
         }
         return statusCodeRecordType;
+    }
+
+    private RecordTypeSymbol getStatusCodeErrorDetailRecordTypeSymbol(TypeSymbol typeSymbol) {
+        IntersectionTypeSymbol errorIntersectionType = typeMapper.getReferredIntersectionType(typeSymbol);
+        if (Objects.isNull(errorIntersectionType) ||
+                !(errorIntersectionType.effectiveTypeDescriptor() instanceof ErrorTypeSymbol errorTypeSymbol)) {
+            return null;
+        }
+        return getRecordTypeSymbol(errorTypeSymbol.detailTypeDescriptor());
     }
 
     public Map<String, Header> mapRecordFieldToHeaders(Map<String, Schema> recordFields) {
@@ -459,14 +476,28 @@ public class ResponseMapperImpl implements ResponseMapper {
         return headers;
     }
 
-    private static String getResponseCode(TypeSymbol typeSymbol, String defaultCode, SemanticModel semanticModel) {
+    private static String getResponseCodeForAnydata(TypeSymbol typeSymbol, String defaultCode, SemanticModel semanticModel) {
         if (isSubTypeOfNil(typeSymbol, semanticModel)) {
             return HTTP_202;
         } else if (isSubTypeOfError(typeSymbol, semanticModel)) {
             return HTTP_500;
         }
+        return defaultCode;
+    }
+
+    private static String getResponseCodeForStatusCodeError(TypeSymbol typeSymbol, SemanticModel semanticModel) {
+        for (Map.Entry<String, String> entry : HTTP_STATUS_CODE_ERRORS.entrySet()) {
+            if (isSubTypeOfBallerinaModuleType(entry.getKey(), "http.httpscerr", typeSymbol, semanticModel)) {
+                return entry.getValue();
+            }
+        }
+        return HTTP_500;
+    }
+
+    private static String getResponseCodeForStatusCodeResponse(TypeSymbol typeSymbol, String defaultCode,
+                                                               SemanticModel semanticModel) {
         for (Map.Entry<String, String> entry : HTTP_CODES.entrySet()) {
-            if (isSubTypeOfHttpRecordType(entry.getKey(), typeSymbol, semanticModel)) {
+            if (isSubTypeOfBallerinaModuleType(entry.getKey(), "http", typeSymbol, semanticModel)) {
                 return entry.getValue();
             }
         }
@@ -500,11 +531,16 @@ public class ResponseMapperImpl implements ResponseMapper {
     }
     
     private static boolean isSubTypeOfHttpStatusCodeResponse(TypeSymbol typeSymbol, SemanticModel semanticModel) {
-        return isSubTypeOfHttpRecordType("StatusCodeResponse", typeSymbol, semanticModel);
+        return isSubTypeOfBallerinaModuleType("StatusCodeResponse", "http", typeSymbol, semanticModel);
     }
 
-    private static boolean isSubTypeOfHttpRecordType(String type, TypeSymbol typeSymbol, SemanticModel semanticModel) {
-        Optional<Symbol> optionalRecordSymbol = semanticModel.types().getTypeByName("ballerina", "http",
+    private static boolean isSubTypeOfHttpStatusCodeError(TypeSymbol typeSymbol, SemanticModel semanticModel) {
+        return isSubTypeOfBallerinaModuleType("StatusCodeError", "http.httpscerr", typeSymbol, semanticModel);
+    }
+
+    private static boolean isSubTypeOfBallerinaModuleType(String type, String moduleName, TypeSymbol typeSymbol,
+                                                          SemanticModel semanticModel) {
+        Optional<Symbol> optionalRecordSymbol = semanticModel.types().getTypeByName("ballerina", moduleName,
                 "", type);
         if (optionalRecordSymbol.isPresent() &&
                 optionalRecordSymbol.get() instanceof TypeDefinitionSymbol recordSymbol) {
