@@ -15,10 +15,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.ballerina.openapi.service.mapper.response;
+package io.ballerina.openapi.service.mapper.response.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
 /**
  * This class uses to store all the cache configuration details.
  *

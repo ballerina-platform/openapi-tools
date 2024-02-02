@@ -23,6 +23,7 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -49,12 +50,12 @@ public class ModuleMemberVisitor extends NodeVisitor {
         return listenerDeclarationNodes;
     }
 
-    public TypeDefinitionNode getTypeDefinitionNode(String typeName) {
+    public Optional<TypeDefinitionNode> getTypeDefinitionNode(String typeName) {
         for (TypeDefinitionNode typeDefinitionNode : typeDefinitionNodes) {
             if (MapperCommonUtils.unescapeIdentifier(typeDefinitionNode.typeName().text()).equals(typeName)) {
-                return typeDefinitionNode;
+                return Optional.of(typeDefinitionNode);
             }
         }
-        return null;
+        return Optional.empty();
     }
 }
