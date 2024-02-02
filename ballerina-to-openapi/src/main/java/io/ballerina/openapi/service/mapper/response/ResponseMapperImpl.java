@@ -43,6 +43,7 @@ import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.openapi.service.mapper.utils.MediaTypeUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -56,8 +57,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import static io.ballerina.openapi.service.mapper.Constants.ACCEPTED;
-import static io.ballerina.openapi.service.mapper.Constants.BAD_REQUEST;
 import static io.ballerina.openapi.service.mapper.Constants.DEFAULT;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_200;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_201;
@@ -242,19 +241,26 @@ public class ResponseMapperImpl implements ResponseMapper {
         if (Objects.isNull(content)) {
             content = new Content();
         }
-        content.addMediaType(mediaType, mediaTypeObj);
+        if (content.containsKey(mediaType) && Objects.nonNull(content.get(mediaType).getSchema())) {
+            MediaType existingMediaType = content.get(mediaType);
+            if (Objects.nonNull(mediaTypeObj.getSchema())) {
+                Schema updatedSchema = new ComposedSchema().oneOf(List.of(existingMediaType.getSchema(),
+                        mediaTypeObj.getSchema()));
+                existingMediaType.setSchema(updatedSchema);
+            }
+        } else {
+            content.addMediaType(mediaType, mediaTypeObj);
+        }
         apiResponse.setContent(content);
     }
 
     private void addResponseMappingForNil() {
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.description(ACCEPTED);
+        ApiResponse apiResponse = getApiResponse(HTTP_202);
         addApiResponse(apiResponse, HTTP_202);
     }
 
     private void addResponseMappingForDataBindingFailures() {
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.description(BAD_REQUEST);
+        ApiResponse apiResponse = getApiResponse(HTTP_400);
         TypeSymbol errorType = semanticModel.types().ERROR;
         addResponseContent(errorType, apiResponse, "application/json");
         addApiResponse(apiResponse, HTTP_400);
@@ -263,10 +269,19 @@ public class ResponseMapperImpl implements ResponseMapper {
     private void addResponseMappingForHttpResponse() {
         MediaType mediaTypeObj = new MediaType();
         mediaTypeObj.setSchema(new Schema().description("Any type of entity body"));
-        ApiResponse apiResponse = new ApiResponse();
+        ApiResponse apiResponse = getApiResponse(DEFAULT);
         apiResponse.setDescription("Any Response");
         apiResponse.setContent(new Content().addMediaType("*/*", mediaTypeObj));
         addApiResponse(apiResponse, DEFAULT);
+    }
+
+    private ApiResponse getApiResponse(String statusCode) {
+        if (apiResponses.containsKey(statusCode)) {
+            return apiResponses.get(statusCode);
+        }
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setDescription(HTTP_CODE_DESCRIPTIONS.get(statusCode));
+        return apiResponse;
     }
 
     private void addResponseMappingForSimpleType(TypeSymbol returnType, String defaultStatusCode) {
