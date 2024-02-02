@@ -48,7 +48,7 @@ public final class StatusCodeResponseUtils extends StatusCodeTypeUtils {
         RecordTypeSymbol statusCodeRecordType = getRecordTypeSymbol(statusCodeResponseType, typeMapper);
         TypeSymbol bodyType = getBodyType(statusCodeRecordType, semanticModel);
         Map<String, Header> headers = getHeaders(statusCodeRecordType, typeMapper);
-        String statusCode = getResponseCode(statusCodeRecordType, defaultStatusCode, semanticModel);
+        String statusCode = getResponseCode(statusCodeResponseType, defaultStatusCode, semanticModel);
         return new ResponseInfo(statusCode, bodyType, headers);
     }
 

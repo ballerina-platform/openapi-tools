@@ -47,12 +47,12 @@ public final class StatusCodeErrorUtils extends StatusCodeTypeUtils {
         return isSubTypeOfBallerinaModuleType("StatusCodeError", "http.httpscerr", typeSymbol, semanticModel);
     }
 
-    public static ResponseInfo extractResponseInfo(TypeSymbol statusCodeResponseType, TypeMapper typeMapper,
+    public static ResponseInfo extractResponseInfo(TypeSymbol statusCodeErrorType, TypeMapper typeMapper,
                                                    SemanticModel semanticModel) {
-        RecordTypeSymbol errorDetailRecordType = getErrorDetailTypeSymbol(statusCodeResponseType, typeMapper);
+        RecordTypeSymbol errorDetailRecordType = getErrorDetailTypeSymbol(statusCodeErrorType, typeMapper);
         TypeSymbol bodyType = getBodyType(errorDetailRecordType, semanticModel);
         Map<String, Header> headers = getHeaders(errorDetailRecordType, typeMapper);
-        String statusCode = getResponseCode(errorDetailRecordType, semanticModel);
+        String statusCode = getResponseCode(statusCodeErrorType, semanticModel);
         return new ResponseInfo(statusCode, bodyType, headers);
     }
 
