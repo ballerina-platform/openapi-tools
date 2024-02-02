@@ -393,6 +393,26 @@ public class ResponseTests {
         compareWithGeneratedFile(ballerinaFilePath, "response/nil_union_return_type.yaml");
     }
 
+    @Test(description = "When the resource has all the http status code error return")
+    public void testHttpStatusCodeErrorReturnType1() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/status_code_errors_01.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "response/status_code_errors_01.yaml");
+    }
+
+    @Test(description = "When the resource has http status code error return with common detail")
+    public void testHttpStatusCodeErrorReturnType2() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/status_code_errors_02.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "response/status_code_errors_02.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
