@@ -29,15 +29,14 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * This {@link ResponseMapperImpl} class is the implementation of the {@link ResponseMapper} interface.
- * This class provides functionalities for mapping the Ballerina return type to OpenAPI
- * response.
+ * This {@link DefaultResponseMapper} class is the implementation of the {@link ResponseMapper} interface.
+ * This class provides functionalities for mapping the Ballerina HTTP service responses to OAS responses.
  *
  * @since 1.9.0
  */
-public class ResponseMapperImpl extends AbstractResponseMapper {
+public class DefaultResponseMapper extends AbstractResponseMapper {
 
-    public ResponseMapperImpl(TypeMapper typeMapper, SemanticModel semanticModel) {
+    public DefaultResponseMapper(TypeMapper typeMapper, SemanticModel semanticModel) {
         super(typeMapper, semanticModel);
     }
 
