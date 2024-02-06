@@ -15,14 +15,11 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.mapper.response;
 
-/**
- * This {@link ResponseMapper} represents the interface for response mapper.
- *
- * @since 1.9.0
- */
-public interface ResponseMapper {
+package io.ballerina.openapi.service.mapper.hateoas;
 
-    void setApiResponses();
+public class Constants {
+
+    public static final String OPENAPI_LINK_DEFAULT_REL = "_self";
+    public static final String BALLERINA_LINKEDTO_KEYWORD = "linkedTo";
 }

@@ -35,6 +35,8 @@ import io.ballerina.openapi.service.mapper.constraint.ConstraintMapperImpl;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.hateoas.HateoasMapper;
+import io.ballerina.openapi.service.mapper.hateoas.HateoasMapperImpl;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
@@ -209,6 +211,8 @@ public final class ServiceToOpenAPIMapper {
                 ConstraintMapper constraintMapper = new ConstraintMapperImpl(openapi, moduleMemberVisitor,
                         diagnostics);
                 constraintMapper.setConstraints();
+                HateoasMapper hateoasMapper = new HateoasMapperImpl();
+                hateoasMapper.setOpenApiLinks(serviceDefinition, openapi);
                 return new OASResult(openapi, diagnostics);
             } else {
                 return new OASResult(openapi, oasResult.getDiagnostics());
