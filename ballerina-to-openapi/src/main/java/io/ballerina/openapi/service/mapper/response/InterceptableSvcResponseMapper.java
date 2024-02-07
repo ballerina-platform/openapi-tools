@@ -19,22 +19,31 @@
 package io.ballerina.openapi.service.mapper.response;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ClassSymbol;
+import io.ballerina.compiler.api.symbols.FunctionTypeSymbol;
+import io.ballerina.compiler.api.symbols.MethodSymbol;
 import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.openapi.service.mapper.type.TypeMapper;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.SymbolKind;
+import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.MemberTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.TupleTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.StreamSupport;
-
-import static io.ballerina.openapi.service.mapper.interceptors.Constants.INTERCEPTABLE_SERVICE;
-import static io.ballerina.openapi.service.mapper.interceptors.Constants.CREATE_INTERCEPTORS_FUNC;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * This {@link InterceptableSvcResponseMapper} class is the implementation of the {@link ResponseMapper} interface
@@ -43,13 +52,12 @@ import static io.ballerina.openapi.service.mapper.interceptors.Constants.CREATE_
  * @since 1.9.0
  */
 public class InterceptableSvcResponseMapper extends AbstractResponseMapper {
-    private final ServiceDeclarationNode serviceNode;
-    private final List<Interceptor> interceptorPipeline = new ArrayList<>();
+    private final List<Interceptor> interceptorPipeline;
 
     public InterceptableSvcResponseMapper(TypeMapper typeMapper, SemanticModel semanticModel,
-                                          ServiceDeclarationNode serviceNode) {
+                                          TupleTypeDescriptorNode interceptorTypes) {
         super(typeMapper, semanticModel);
-        this.serviceNode = serviceNode;
+        this.interceptorPipeline = constructInterceptorPipeline(interceptorTypes);
     }
 
     // Find out a given service is an interceptable service
@@ -62,65 +70,118 @@ public class InterceptableSvcResponseMapper extends AbstractResponseMapper {
     // todo: implement this properly
     @Override
     public List<TypeSymbol> getReturnTypes(FunctionDefinitionNode resource) {
-        return List.of();
+        Set<TypeSymbol> returnTypes = new HashSet<>();
+        for (Interceptor interceptor: interceptorPipeline) {
+            returnTypes.addAll(interceptor.getReturnTypes());
+        }
+        return returnTypes.stream().toList();
     }
 
-    public void initializeResponseMapper(FunctionDefinitionNode resource) {
-        if (isInterceptable()) {
-            Optional<FunctionDefinitionNode> interceptorFunction = findCreateInterceptorsFunction(serviceNode.members());
-            if (supportsTupleType(interceptorFunction.get())) {
-                this.interceptorPipeline.addAll(getInterceptorPipeline(interceptorFunction.get()));
-                effectiveInterceptorReturnTypes(resource);
+    private List<Interceptor> constructInterceptorPipeline(TupleTypeDescriptorNode interceptorTypes) {
+        List<Interceptor> interceptors = new ArrayList<>();
+        for (Node member: interceptorTypes.memberTypeDesc()) {
+            TypeDescriptorNode memberTypeDescriptor = ((MemberTypeDescriptorNode) member).typeDescriptor();
+            Optional<Symbol> memberTypeSymbol = semanticModel.symbol(memberTypeDescriptor);
+            if (memberTypeSymbol.isEmpty()) {
+                continue;
             }
+            TypeSymbol memberType = ((TypeReferenceTypeSymbol) memberTypeSymbol.get()).typeDescriptor();
+            if (!SymbolKind.CLASS.equals(memberType.kind())) {
+                continue;
+            }
+            ClassSymbol classSymbol = (ClassSymbol) memberType;
+            Optional<Interceptor.InterceptorType> interceptorType = getInterceptorType(classSymbol);
+            if (interceptorType.isEmpty()) {
+                continue;
+            }
+            MethodSymbol[] interceptorMethods = classSymbol.methods().values()
+                    .toArray(new MethodSymbol[]{});
+            for (MethodSymbol method: interceptorMethods) {
+                if (SymbolKind.RESOURCE_METHOD.equals(method.kind())) {
+                    ResourceMethodSymbol resourceMethod = (ResourceMethodSymbol) method;
+                    FunctionTypeSymbol functionTypeSymbol = resourceMethod.typeDescriptor();
+                    List<TypeSymbol> returnTypes = extractReturnTypes(functionTypeSymbol);
+                    if (returnTypes.isEmpty()) {
+                        continue;
+                    }
+                    Interceptor interceptor = new Interceptor(interceptorType.get());
+                    interceptor.setResourceMethod(resourceMethod.getName().orElse("").trim());
+                    interceptor.setRelativeResourcePath(resourceMethod.resourcePath().signature());
+                    interceptor.setReturnTypes(returnTypes);
+                    interceptors.add(interceptor);
+                    continue;
+                }
+                String methodName = method.getName().orElse("");
+                if (!"interceptResponse".equals(methodName) && !"interceptResponseError".equals(methodName)) {
+                    continue;
+                }
+                FunctionTypeSymbol functionTypeSymbol = method.typeDescriptor();
+                List<TypeSymbol> returnTypes = extractReturnTypes(functionTypeSymbol);
+                Interceptor interceptor = new Interceptor(interceptorType.get());
+                interceptor.setReturnTypes(returnTypes);
+                interceptors.add(interceptor);
+            }
+        }
+        return interceptors;
+    }
+
+    private Optional<Interceptor.InterceptorType> getInterceptorType(ClassSymbol classSymbol) {
+        List<TypeSymbol> availableTypeInclusions = classSymbol.typeInclusions();
+        if (availableTypeInclusions.isEmpty()) {
+            return Optional.empty();
+        }
+        for (TypeSymbol type: availableTypeInclusions) {
+            if (type instanceof TypeReferenceTypeSymbol typeRefSymbol) {
+                Symbol definition = typeRefSymbol.definition();
+                if (SymbolKind.TYPE_DEFINITION.equals(definition.kind())) {
+                    String qualifiedTypeName = ((TypeDefinitionSymbol) definition).moduleQualifiedName();
+                    if ("http:RequestInterceptor".equals(qualifiedTypeName)) {
+                        return Optional.of(Interceptor.InterceptorType.REQUEST);
+                    } else if ("http:RequestErrorInterceptor".equals(qualifiedTypeName)) {
+                        return Optional.of(Interceptor.InterceptorType.REQUEST_ERROR);
+                    } else if ("http:ResponseInterceptor".equals(qualifiedTypeName)) {
+                        return Optional.of(Interceptor.InterceptorType.RESPONSE);
+                    } else if ("http:ResponseErrorInterceptor".equals(qualifiedTypeName)) {
+                        return Optional.of(Interceptor.InterceptorType.RESPONSE_ERROR);
+                    }
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    private List<TypeSymbol> extractReturnTypes(FunctionTypeSymbol functionSymbol) {
+        Optional<TypeSymbol> returnTypeOpt = functionSymbol.returnTypeDescriptor();
+        if (returnTypeOpt.isEmpty()) {
+            return Collections.emptyList();
+        }
+        TypeSymbol returnType = returnTypeOpt.get();
+        if (TypeDescKind.UNION.equals(returnType.typeKind())) {
+            return ((UnionTypeSymbol) returnType).memberTypeDescriptors().stream()
+                    .filter(rt -> !isSubtypeOfHttpNextService(rt))
+                    .collect(Collectors.toList());
         } else {
-            new DefaultResponseMapper(this.typeMapper, this.semanticModel);
+            if (!isSubtypeOfHttpNextService(returnType)) {
+                return List.of(returnType);
+            }
         }
+        return Collections.emptyList();
     }
 
-    private boolean isInterceptable() {
-        if (isInterceptableServiceType()) {
-            return findCreateInterceptorsFunction(serviceNode.members()).isPresent();
+    private boolean isSubtypeOfHttpNextService(TypeSymbol typeSymbol) {
+        Optional<Symbol> nextSvcTypeOpt = semanticModel.types()
+                .getTypeByName("ballerina", "http", "", "NextService");
+        if (nextSvcTypeOpt.isEmpty() || !(nextSvcTypeOpt.get() instanceof TypeDefinitionSymbol)) {
+            return false;
         }
-        return false;
-    }
-
-    private boolean isInterceptableServiceType() {
-        return serviceNode.typeDescriptor()
-                .map(type -> type.toString().trim().equals(INTERCEPTABLE_SERVICE))
-                .orElse(false);
-    }
-
-    private Optional<FunctionDefinitionNode> findCreateInterceptorsFunction(NodeList<Node> functions) {
-        return functions.stream()
-                .filter(function -> function instanceof FunctionDefinitionNode)
-                .map(function -> (FunctionDefinitionNode) function)
-                .filter(this::hasCreateInterceptorsFunction)
-                .findFirst();
-    }
-
-    private boolean hasCreateInterceptorsFunction(FunctionDefinitionNode function) {
-        return StreamSupport.stream(function.children().spliterator(), false)
-                .anyMatch(child -> child.toString().equals(CREATE_INTERCEPTORS_FUNC));
-    }
-
-    private boolean supportsTupleType(FunctionDefinitionNode resource) {
-        return resource.functionSignature()
-                .returnTypeDesc()
-                .map(returnType -> returnType.type().kind().equals(SyntaxKind.TUPLE_TYPE_DESC))
-                .orElse(false);
+        TypeSymbol httpNextSvcType = ((TypeDefinitionSymbol) nextSvcTypeOpt.get()).typeDescriptor();
+        return typeSymbol.subtypeOf(httpNextSvcType);
     }
 
     // todo: implement this method properly
-    private List<Interceptor> getInterceptorPipeline(FunctionDefinitionNode resource) {
-//        Object returnInterceptors = resource.functionSignature()
-//                .returnTypeDesc()
-//                .map(ReturnTypeDescriptorNode::type).get();
-        return List.of();
-    }
-
-    // todo: implement this method properly
-    private List<TypeSymbol> effectiveInterceptorReturnTypes(FunctionDefinitionNode resource) {
-        TypeSymbol typeSymbol = (TypeSymbol) (((ResourceMethodSymbol)semanticModel.symbol(resource).get()).typeDescriptor());
-        return List.of(typeSymbol);
-    }
+//    private List<TypeSymbol> effectiveInterceptorReturnTypes(FunctionDefinitionNode resource) {
+//        TypeSymbol typeSymbol = (TypeSymbol)
+//          (((ResourceMethodSymbol)semanticModel.symbol(resource).get()).typeDescriptor());
+//        return List.of(typeSymbol);
+//    }
 }

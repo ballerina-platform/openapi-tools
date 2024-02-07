@@ -15,9 +15,10 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+
 package io.ballerina.openapi.service.mapper.response;
 
-import org.ballerinalang.model.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 
 import java.util.List;
 
@@ -26,16 +27,25 @@ public class Interceptor {
         REQUEST, REQUEST_ERROR, RESPONSE, RESPONSE_ERROR
     }
 
-    private InterceptorType type;
+    private final InterceptorType type;
     private String relativeResourcePath;
+    private String resourceMethod;
     private List<TypeSymbol> returnTypes;
+
+    public Interceptor(InterceptorType type) {
+        this.type = type;
+    }
 
     public InterceptorType getType() {
         return type;
     }
 
-    public void setType(InterceptorType type) {
-        this.type = type;
+    public String getResourceMethod() {
+        return resourceMethod;
+    }
+
+    public void setResourceMethod(String resourceMethod) {
+        this.resourceMethod = resourceMethod;
     }
 
     public String getRelativeResourcePath() {

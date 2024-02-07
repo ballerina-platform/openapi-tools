@@ -31,8 +31,8 @@ import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapperImpl;
+import io.ballerina.openapi.service.mapper.response.DynamicResponseMapper;
 import io.ballerina.openapi.service.mapper.response.ResponseMapper;
-import io.ballerina.openapi.service.mapper.response.DefaultResponseMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
@@ -212,7 +212,8 @@ public class ResourceMapperImpl implements ResourceMapper {
             }
         }
         TypeMapper typeMapper = new TypeMapperImpl(components, additionalData);
-        ResponseMapper responseMapper = new DefaultResponseMapper(typeMapper, additionalData.semanticModel());
+        ResponseMapper responseMapper = new DynamicResponseMapper(
+                typeMapper, additionalData.semanticModel(), serviceNode);
         responseMapper.setApiResponses(operationInventory, resource);
         return Optional.of(operationInventory);
     }

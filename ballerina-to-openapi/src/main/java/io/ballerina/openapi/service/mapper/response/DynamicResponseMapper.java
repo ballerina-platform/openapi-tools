@@ -25,6 +25,7 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.TupleTypeDescriptorNode;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 
@@ -52,11 +53,12 @@ public class DynamicResponseMapper implements ResponseMapper {
     private ResponseMapper getResponseMapper(TypeMapper typeMapper, SemanticModel semanticModel,
                                              ServiceDeclarationNode serviceNode) {
         if (isInterceptableSvcType(serviceNode)) {
-            Optional<ReturnTypeDescriptorNode> interceptorTypes = getCreateInterceptorsFunction(serviceNode.members())
+            Optional<ReturnTypeDescriptorNode> returnTypes = getCreateInterceptorsFunction(serviceNode.members())
                     .flatMap(createInterceptors -> createInterceptors.functionSignature().returnTypeDesc())
                     .filter(s -> SyntaxKind.TUPLE_TYPE_DESC.equals(s.type().kind()));
-            if (interceptorTypes.isPresent()) {
-                return new InterceptableSvcResponseMapper(typeMapper, semanticModel, serviceNode);
+            if (returnTypes.isPresent()) {
+                TupleTypeDescriptorNode interceptorTypes = (TupleTypeDescriptorNode) returnTypes.get().type();
+                return new InterceptableSvcResponseMapper(typeMapper, semanticModel, interceptorTypes);
             }
         }
         return new DefaultResponseMapper(typeMapper, semanticModel);
