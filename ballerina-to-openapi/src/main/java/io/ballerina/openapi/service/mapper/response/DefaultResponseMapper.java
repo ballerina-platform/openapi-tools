@@ -23,6 +23,7 @@ import io.ballerina.compiler.api.symbols.ClassSymbol;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
+import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
@@ -71,12 +72,12 @@ import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.getMediaT
 import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.isSameMediaType;
 
 /**
- * This {@link AbstractResponseMapper} class is an abstract implementation of the {@link ResponseMapper} interface.
- * This class contains the common functionalities related to mapping the Ballerina return type to OpenAPI response.
+ * This {@link DefaultResponseMapper} class is the implementation of the {@link ResponseMapper} interface.
+ * This class provides functionalities for mapping the Ballerina HTTP service responses to OAS responses.
  *
  * @since 1.9.0
  */
-public abstract class AbstractResponseMapper implements ResponseMapper {
+public class DefaultResponseMapper implements ResponseMapper {
     protected final Map<String, Header> cacheHeaders = new HashMap<>();
     protected final Map<String, Map<String, Header>> headersMap = new HashMap<>();
     protected final TypeMapper typeMapper;
@@ -85,7 +86,7 @@ public abstract class AbstractResponseMapper implements ResponseMapper {
 
     protected List<String> allowedMediaTypes = new ArrayList<>();
 
-    public AbstractResponseMapper(TypeMapper typeMapper, SemanticModel semanticModel) {
+    public DefaultResponseMapper(TypeMapper typeMapper, SemanticModel semanticModel) {
         this.typeMapper = typeMapper;
         this.semanticModel = semanticModel;
     }
@@ -128,7 +129,14 @@ public abstract class AbstractResponseMapper implements ResponseMapper {
         }
     }
 
-    abstract List<TypeSymbol> getReturnTypes(FunctionDefinitionNode resource);
+    List<TypeSymbol> getReturnTypes(FunctionDefinitionNode resource) {
+        Optional<Symbol> symbol = semanticModel.symbol(resource);
+        if (symbol.isEmpty() || !(symbol.get() instanceof ResourceMethodSymbol resourceMethodSymbol)) {
+            return List.of();
+        }
+        Optional<TypeSymbol> returnTypeOpt = resourceMethodSymbol.typeDescriptor().returnTypeDescriptor();
+        return returnTypeOpt.map(List::of).orElseGet(List::of);
+    }
 
     private void createResponseMapping(TypeSymbol returnType, String defaultStatusCode, String mediaTypeSubTypePrefix) {
         UnionTypeSymbol unionType = getUnionType(returnType, semanticModel);

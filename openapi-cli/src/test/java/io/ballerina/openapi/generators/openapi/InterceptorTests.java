@@ -28,7 +28,7 @@ public class InterceptorTests {
 
     @Test(description = "Interceptor Test 01")
     public void testInterceptor01() throws IOException {
-        Path ballerinafilePath = RES_DIR.resolve("interceptors/interceptor_test01.bal");
+        Path ballerinafilePath = RES_DIR.resolve("Interceptors/interceptor_test01.bal");
         TestUtils.compareWithGeneratedFile(ballerinafilePath, "interceptors/interceptor_test01.yaml");
     }
 }

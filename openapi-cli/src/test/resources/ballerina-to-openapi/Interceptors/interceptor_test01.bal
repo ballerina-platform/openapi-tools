@@ -40,7 +40,8 @@ service class RequestErrorInterceptor {
 }
 
 service http:InterceptableService /payloadV on new http:Listener(9090) {
-    public function createInterceptors() returns [RequestInterceptor, RequestErrorInterceptor] {
+    public function createInterceptors()
+        returns [RequestInterceptor, RequestErrorInterceptor] {
         return [new RequestInterceptor(), new RequestErrorInterceptor()];
     }
 

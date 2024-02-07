@@ -28,6 +28,4 @@ import io.ballerina.openapi.service.mapper.model.OperationInventory;
 public interface ResponseMapper {
 
     void setApiResponses(OperationInventory operationInventory, FunctionDefinitionNode resource);
-
-    void initializeResponseMapper(FunctionDefinitionNode resourceNode);
 }
