@@ -64,7 +64,8 @@ service class ResponseErrorInterceptor {
 service http:InterceptableService /payloadV on new http:Listener(9090) {
     public function createInterceptors()
         returns [RequestInterceptor, RequestErrorInterceptor, ResponseInterceptor, ResponseErrorInterceptor] {
-        return [new RequestInterceptor(), new RequestErrorInterceptor()];
+        return [new RequestInterceptor(), new RequestErrorInterceptor(),
+            new ResponseInterceptor(), new ResponseErrorInterceptor()];
     }
 
     resource function get locations() returns error? {
