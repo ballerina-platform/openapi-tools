@@ -39,8 +39,31 @@ service class RequestErrorInterceptor {
     }
 }
 
+service class ResponseInterceptor {
+    *http:ResponseInterceptor;
+
+    remote function interceptResponse(http:Response res, http:Request req) returns error? {
+        string id = check req.getHeader("id");
+        res.setHeader("id", id);
+    }
+}
+
+service class ResponseErrorInterceptor {
+    *http:ResponseErrorInterceptor;
+
+    remote function interceptResponseError(error err) returns http:BadRequest {
+        return {
+            mediaType: "application/org+json",
+            body: {
+                message: err.message()
+            }
+        };
+    }
+}
+
 service http:InterceptableService /payloadV on new http:Listener(9090) {
-    public function createInterceptors() returns [RequestInterceptor, RequestErrorInterceptor] {
+    public function createInterceptors()
+        returns [RequestInterceptor, RequestErrorInterceptor, ResponseInterceptor, ResponseErrorInterceptor] {
         return [new RequestInterceptor(), new RequestErrorInterceptor()];
     }
 
