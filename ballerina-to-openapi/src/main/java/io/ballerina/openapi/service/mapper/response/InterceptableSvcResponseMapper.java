@@ -60,23 +60,6 @@ public class InterceptableSvcResponseMapper extends AbstractResponseMapper {
         this.interceptorPipeline = constructInterceptorPipeline(interceptorTypes);
     }
 
-    // Find out a given service is an interceptable service
-    //  if (true)
-    //      - get the return type of create interceptors function and construct the interceptor pipeline
-    //      - for individual resource function, get the relevant return types by evaluating interceptor pipeline
-    // else
-    //      - call the default response mapper
-
-    // todo: implement this properly
-    @Override
-    public List<TypeSymbol> getReturnTypes(FunctionDefinitionNode resource) {
-        Set<TypeSymbol> returnTypes = new HashSet<>();
-        for (Interceptor interceptor: interceptorPipeline) {
-            returnTypes.addAll(interceptor.getReturnTypes());
-        }
-        return returnTypes.stream().toList();
-    }
-
     private List<Interceptor> constructInterceptorPipeline(TupleTypeDescriptorNode interceptorTypes) {
         List<Interceptor> interceptors = new ArrayList<>();
         for (Node member: interceptorTypes.memberTypeDesc()) {
@@ -106,7 +89,7 @@ public class InterceptableSvcResponseMapper extends AbstractResponseMapper {
                     }
                     Interceptor interceptor = new Interceptor(interceptorType.get());
                     interceptor.setResourceMethod(resourceMethod.getName().orElse("").trim());
-                    interceptor.setRelativeResourcePath(resourceMethod.resourcePath().signature());
+                    interceptor.setRelativeResourcePath(getRelativeResourcePth(resourceMethod));
                     interceptor.setReturnTypes(returnTypes);
                     interceptors.add(interceptor);
                     continue;
@@ -168,6 +151,10 @@ public class InterceptableSvcResponseMapper extends AbstractResponseMapper {
         return Collections.emptyList();
     }
 
+    private String getRelativeResourcePth(ResourceMethodSymbol resource) {
+        return resource.resourcePath().signature();
+    }
+
     private boolean isSubtypeOfHttpNextService(TypeSymbol typeSymbol) {
         Optional<Symbol> nextSvcTypeOpt = semanticModel.types()
                 .getTypeByName("ballerina", "http", "", "NextService");
@@ -177,11 +164,38 @@ public class InterceptableSvcResponseMapper extends AbstractResponseMapper {
         TypeSymbol httpNextSvcType = ((TypeDefinitionSymbol) nextSvcTypeOpt.get()).typeDescriptor();
         return typeSymbol.subtypeOf(httpNextSvcType);
     }
-
-    // todo: implement this method properly
-//    private List<TypeSymbol> effectiveInterceptorReturnTypes(FunctionDefinitionNode resource) {
-//        TypeSymbol typeSymbol = (TypeSymbol)
-//          (((ResourceMethodSymbol)semanticModel.symbol(resource).get()).typeDescriptor());
-//        return List.of(typeSymbol);
-//    }
+    
+    @Override
+    List<TypeSymbol> getReturnTypes(FunctionDefinitionNode resource) {
+        Optional<Symbol> symbol = semanticModel.symbol(resource);
+        if (symbol.isEmpty() || !(symbol.get() instanceof ResourceMethodSymbol resourceMethodSymbol)) {
+            return List.of();
+        }
+        String relativeResourcePath = resourceMethodSymbol.resourcePath().signature();
+        String httpMethod = resource.functionName().toString().trim();
+        Set<TypeSymbol> returnTypes = new HashSet<>();
+        for (Interceptor interceptor: interceptorPipeline) {
+            if (Interceptor.InterceptorType.REQUEST.equals(interceptor.getType())) {
+                if (!relativeResourcePath.startsWith(interceptor.getRelativeResourcePath())) {
+                    continue;
+                }
+                if (!httpMethod.equals(interceptor.getResourceMethod())) {
+                    continue;
+                }
+            }
+            // todo: identify the logic to be used for request-error interceptor
+            if (Interceptor.InterceptorType.RESPONSE.equals(interceptor.getType())) {
+                boolean hasNillableReturnType = interceptor.getReturnTypes().stream()
+                        .anyMatch(t -> t.subtypeOf(semanticModel.types().NIL));
+                if (!hasNillableReturnType) {
+                    returnTypes.addAll(interceptor.getReturnTypes());
+                    return returnTypes.stream().toList();
+                }
+            }
+            // todo: identify the logic to be used for response-error interceptor
+            returnTypes.addAll(interceptor.getReturnTypes());
+        }
+        resourceMethodSymbol.typeDescriptor().returnTypeDescriptor().ifPresent(returnTypes::add);
+        return returnTypes.stream().toList();
+    }
 }
