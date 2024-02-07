@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
  *
  * @since 1.9.0
  */
-public class InterceptableSvcResponseMapper extends AbstractResponseMapper {
+public class InterceptableSvcResponseMapper extends DefaultResponseMapper {
     private final List<Interceptor> interceptorPipeline;
 
     public InterceptableSvcResponseMapper(TypeMapper typeMapper, SemanticModel semanticModel,
