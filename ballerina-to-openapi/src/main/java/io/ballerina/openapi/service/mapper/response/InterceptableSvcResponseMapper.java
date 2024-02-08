@@ -35,6 +35,7 @@ import io.ballerina.compiler.syntax.tree.MemberTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.TupleTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.service.mapper.Constants;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 
 import java.util.ArrayList;
@@ -176,10 +177,18 @@ public class InterceptableSvcResponseMapper extends DefaultResponseMapper {
         Set<TypeSymbol> returnTypes = new HashSet<>();
         for (Interceptor interceptor: interceptorPipeline) {
             if (Interceptor.InterceptorType.REQUEST.equals(interceptor.getType())) {
-                if (!relativeResourcePath.startsWith(interceptor.getRelativeResourcePath())) {
+                if (!relativeResourcePath.startsWith(interceptor.getRelativeResourcePath())
+                        && !".".equals(interceptor.getRelativeResourcePath())) {
                     continue;
                 }
-                if (!httpMethod.equals(interceptor.getResourceMethod())) {
+                if (!httpMethod.equals(interceptor.getResourceMethod()) &&
+                        !Constants.DEFAULT.equals(interceptor.getResourceMethod())) {
+                    continue;
+                }
+            }
+            if (Interceptor.InterceptorType.REQUEST_ERROR.equals(interceptor.getType())) {
+                if (!httpMethod.equals(interceptor.getResourceMethod()) &&
+                        !Constants.DEFAULT.equals(interceptor.getResourceMethod())) {
                     continue;
                 }
             }
