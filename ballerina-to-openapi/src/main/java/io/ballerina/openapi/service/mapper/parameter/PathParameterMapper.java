@@ -26,9 +26,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
-import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.tools.diagnostics.Location;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 
 import java.util.List;
@@ -53,14 +51,14 @@ public class PathParameterMapper extends AbstractParameterMapper {
     private final PathSegment.Kind pathSegmentKind;
     private final List<OpenAPIMapperDiagnostic> diagnostics;
 
-    public PathParameterMapper(PathParameterSymbol pathParameterSymbol, Components components,
-                               Map<String, String> apiDocs, OperationInventory operationInventory,
-                               AdditionalData additionalData) {
+    public PathParameterMapper(PathParameterSymbol pathParameterSymbol, Map<String, String> apiDocs,
+                               OperationInventory operationInventory, AdditionalData additionalData,
+                               TypeMapper typeMapper) {
         super(operationInventory);
         this.location = pathParameterSymbol.getLocation().orElse(null);
         this.pathSegmentKind = pathParameterSymbol.pathSegmentKind();
         this.type = pathParameterSymbol.typeDescriptor();
-        this.typeMapper = new TypeMapperImpl(components, additionalData);
+        this.typeMapper = typeMapper;
         this.name = unescapeIdentifier(pathParameterSymbol.getName().get());
         this.description = apiDocs.get(removeStartingSingleQuote(pathParameterSymbol.getName().get()));
         this.diagnostics = additionalData.diagnostics();

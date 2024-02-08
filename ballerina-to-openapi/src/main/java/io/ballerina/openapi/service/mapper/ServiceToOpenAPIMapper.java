@@ -31,13 +31,10 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.service.mapper.constraint.ConstraintMapper;
-import io.ballerina.openapi.service.mapper.constraint.ConstraintMapperImpl;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapper;
-import io.ballerina.openapi.service.mapper.hateoas.HateoasMapperImpl;
-import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
@@ -201,18 +198,23 @@ public final class ServiceToOpenAPIMapper {
             OpenAPI openapi = oasResult.getOpenAPI().get();
             List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
             if (openapi.getPaths() == null) {
-                // Take base path of service
-                // 02. Filter and set the ServerURLs according to endpoints. Complete the server section in OAS
-                ServersMapper serversMapperImpl = new ServersMapperImpl(openapi, listeners, serviceDefinition);
+                ServiceMapperFactory serviceMapperFactory = new ServiceMapperFactory(openapi, semanticModel,
+                        moduleMemberVisitor, diagnostics, isTreatNilableAsOptionalParameter(serviceDefinition));
+
+                ServersMapper serversMapperImpl = serviceMapperFactory.getServersMapper(listeners, serviceDefinition);
                 serversMapperImpl.setServers();
-                // 03. Filter path and component sections in OAS.
-                // Generate openApi string for the mentioned service name.
-                convertServiceToOpenAPI(serviceDefinition, openapi, semanticModel, moduleMemberVisitor, diagnostics);
-                ConstraintMapper constraintMapper = new ConstraintMapperImpl(openapi, moduleMemberVisitor,
-                        diagnostics);
+
+                convertServiceToOpenAPI(serviceDefinition, serviceMapperFactory);
+
+                ConstraintMapper constraintMapper = serviceMapperFactory.getConstraintMapper();
                 constraintMapper.setConstraints();
-                HateoasMapper hateoasMapper = new HateoasMapperImpl();
+
+                HateoasMapper hateoasMapper = serviceMapperFactory.getHateoasMapper();
                 hateoasMapper.setOpenApiLinks(serviceDefinition, openapi);
+
+                if (openapi.getComponents().getSchemas().isEmpty()) {
+                    openapi.setComponents(null);
+                }
                 return new OASResult(openapi, diagnostics);
             } else {
                 return new OASResult(openapi, oasResult.getDiagnostics());
@@ -239,9 +241,8 @@ public final class ServiceToOpenAPIMapper {
         return balNodeVisitor;
     }
 
-    private static void convertServiceToOpenAPI(ServiceDeclarationNode serviceNode, OpenAPI openAPI,
-                                                SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
-                                                List<OpenAPIMapperDiagnostic> diagnostics) {
+    private static void convertServiceToOpenAPI(ServiceDeclarationNode serviceNode,
+                                                ServiceMapperFactory serviceMapperFactory) {
         NodeList<Node> functions = serviceNode.members();
         List<FunctionDefinitionNode> resources = new ArrayList<>();
         for (Node function: functions) {
@@ -250,9 +251,7 @@ public final class ServiceToOpenAPIMapper {
                 resources.add((FunctionDefinitionNode) function);
             }
         }
-        AdditionalData additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
-        ResourceMapper resourceMapper = new ResourceMapperImpl(openAPI, resources, additionalData,
-                isTreatNilableAsOptionalParameter(serviceNode));
+        ResourceMapper resourceMapper = serviceMapperFactory.getResourceMapper(resources);
         resourceMapper.setOperation();
     }
 

@@ -27,9 +27,7 @@ import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
-import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.openapi.service.mapper.type.UnionTypeMapper;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -59,8 +57,8 @@ public class QueryParameterMapper extends AbstractParameterMapper {
     private SemanticModel semanticModel;
 
     public QueryParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs,
-                                OperationInventory operationInventory, Components components,
-                                boolean treatNilableAsOptional, AdditionalData additionalData) {
+                                OperationInventory operationInventory, boolean treatNilableAsOptional,
+                                AdditionalData additionalData, TypeMapper typeMapper) {
         super(operationInventory);
         Symbol parameterSymbol = additionalData.semanticModel().symbol(parameterNode).orElse(null);
         if (Objects.nonNull(parameterSymbol) && (parameterSymbol instanceof ParameterSymbol queryParameter)) {
@@ -70,7 +68,7 @@ public class QueryParameterMapper extends AbstractParameterMapper {
             this.description = apiDocs.get(removeStartingSingleQuote(queryParameter.getName().get()));
             this.treatNilableAsOptional = treatNilableAsOptional;
             this.semanticModel = additionalData.semanticModel();
-            this.typeMapper = new TypeMapperImpl(components, additionalData);
+            this.typeMapper = typeMapper;
             if (parameterNode instanceof DefaultableParameterNode defaultableQueryParam) {
                 this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableQueryParam);
             }

@@ -28,9 +28,7 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
-import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.openapi.service.mapper.utils.MediaTypeUtils;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -43,10 +41,10 @@ import java.util.Objects;
 
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_PAYLOAD;
 import static io.ballerina.openapi.service.mapper.Constants.MEDIA_TYPE;
-import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.getMediaTypeFromType;
-import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.isSameMediaType;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractAnnotationFieldDetails;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
+import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.getMediaTypeFromType;
+import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.isSameMediaType;
 
 /**
  * This {@link RequestBodyMapper} class represents the request body mapper.
@@ -64,8 +62,8 @@ public class RequestBodyMapper {
 
     public RequestBodyMapper(ParameterSymbol reqParameter, AnnotationNode annotation,
                              OperationInventory operationInventory, FunctionDefinitionNode resourceNode,
-                             Components components, Map<String, String> apiDocs, AdditionalData additionalData) {
-        this.typeMapper = new TypeMapperImpl(components, additionalData);
+                             Map<String, String> apiDocs, AdditionalData additionalData, TypeMapper typeMapper) {
+        this.typeMapper = typeMapper;
         this.semanticModel = additionalData.semanticModel();
         this.operationInventory = operationInventory;
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
