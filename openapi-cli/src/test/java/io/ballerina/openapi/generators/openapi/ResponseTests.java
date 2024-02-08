@@ -413,6 +413,16 @@ public class ResponseTests {
         compareWithGeneratedFile(ballerinaFilePath, "response/status_code_errors_02.yaml");
     }
 
+    @Test(description = "When the resource has http status code error return with different detail types")
+    public void testHttpStatusCodeErrorReturnType3() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/status_code_errors_03.bal");
+        OASContractGenerator openApiConverterUtils = new OASContractGenerator();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "response/status_code_errors_03.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
