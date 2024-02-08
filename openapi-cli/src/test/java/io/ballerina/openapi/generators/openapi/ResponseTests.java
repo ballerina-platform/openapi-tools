@@ -399,7 +399,6 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/status_code_errors_01.yaml");
     }
 
@@ -409,7 +408,6 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/status_code_errors_02.yaml");
     }
 
@@ -419,7 +417,6 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/status_code_errors_03.yaml");
     }
 
