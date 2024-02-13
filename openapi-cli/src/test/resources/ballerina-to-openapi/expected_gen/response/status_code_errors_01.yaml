@@ -39,6 +39,8 @@ paths:
           description: NetworkAuthenticationRequired
         "413":
           description: PayloadTooLarge
+        "414":
+          description: UriTooLong
         "415":
           description: UnsupportedMediaType
         "416":
@@ -59,9 +61,6 @@ paths:
           description: Unauthorized
         "500":
           description: InternalServerError
-          content:
-            application/json:
-              schema: {}
         "423":
           description: Locked
         "402":
@@ -88,6 +87,8 @@ paths:
           description: NotAcceptable
         "428":
           description: PreconditionRequired
+        "505":
+          description: HttpVersionNotSupported
         "407":
           description: ProxyAuthenticationRequired
         "429":
