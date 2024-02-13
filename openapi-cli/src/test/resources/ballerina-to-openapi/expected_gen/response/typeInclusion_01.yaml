@@ -63,20 +63,24 @@ paths:
           description: Created
           headers:
             payment-type:
+              required: true
               schema:
                 type: string
             simple-payment-tokens:
+              required: true
               schema:
                 type: array
                 items:
                   type: string
             simple-payment-type:
+              required: true
               schema:
                 type: string
             location:
               schema:
                 type: string
             payment-tokens:
+              required: true
               schema:
                 type: array
                 items:
@@ -120,20 +124,24 @@ paths:
           description: Created
           headers:
             payment-type:
+              required: true
               schema:
                 type: string
             simple-payment-tokens:
+              required: true
               schema:
                 type: array
                 items:
                   type: string
             simple-payment-type:
+              required: true
               schema:
                 type: string
             location:
               schema:
                 type: string
             payment-tokens:
+              required: true
               schema:
                 type: array
                 items:

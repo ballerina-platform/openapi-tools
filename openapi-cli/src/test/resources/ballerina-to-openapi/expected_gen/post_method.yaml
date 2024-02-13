@@ -79,9 +79,11 @@ paths:
           description: Ok
           headers:
             header2:
+              required: true
               schema:
                 type: string
             header1:
+              required: true
               schema:
                 type: string
           content:
