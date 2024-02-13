@@ -20,6 +20,10 @@ package io.ballerina.openapi.service.mapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
@@ -35,6 +39,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapper;
+import io.ballerina.openapi.service.mapper.interceptor.Interceptor;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
@@ -49,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.ballerina.openapi.service.mapper.Constants.HYPHEN;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.containErrors;
@@ -180,8 +186,8 @@ public final class ServiceToOpenAPIMapper {
      * Provides an instance of {@code OASResult}, which contains the generated contract as well as
      * all the diagnostics information.
      *
-     * @param oasGenerationMetaInfo    Includes the service definition node, endpoints, semantic model, openapi file
-     *                                 name and ballerina file path
+     * @param oasGenerationMetaInfo Includes the service definition node, endpoints, semantic model, openapi file
+     *                              name and ballerina file path
      * @return {@code OASResult}
      */
     public static OASResult generateOAS(OASGenerationMetaInfo oasGenerationMetaInfo) {
@@ -198,6 +204,9 @@ public final class ServiceToOpenAPIMapper {
             OpenAPI openapi = oasResult.getOpenAPI().get();
             List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
             if (openapi.getPaths() == null) {
+                if (isInterceptableService(serviceDefinition, semanticModel)) {
+                    List<Interceptor> interceptors = buildInterceptorPipeline(serviceDefinition, semanticModel);
+                }
                 ServiceMapperFactory serviceMapperFactory = new ServiceMapperFactory(openapi, semanticModel,
                         moduleMemberVisitor, diagnostics, isTreatNilableAsOptionalParameter(serviceDefinition));
 
@@ -222,6 +231,52 @@ public final class ServiceToOpenAPIMapper {
         } else {
             return oasResult;
         }
+    }
+
+    private static boolean isInterceptableService(ServiceDeclarationNode serviceDefinition,
+                                                  SemanticModel semanticModel) {
+        AtomicBoolean isInterceptable = new AtomicBoolean(false);
+        semanticModel.symbol(serviceDefinition).ifPresent(symbol -> {
+            if (symbol instanceof ServiceDeclarationSymbol serviceSymbol) {
+                serviceSymbol.typeDescriptor().ifPresent(serviceType ->
+                    semanticModel.types().getTypeByName("ballerina", "http", "",
+                        "InterceptableService").ifPresent(typeSymbol -> {
+                            if (typeSymbol instanceof TypeDefinitionSymbol interceptableServiceType) {
+                                isInterceptable.set(serviceType.subtypeOf(interceptableServiceType.typeDescriptor()));
+                            }
+                        }
+                    ));
+            }
+        });
+        return isInterceptable.get();
+    }
+
+    private static List<Interceptor> buildInterceptorPipeline(ServiceDeclarationNode serviceDefinition,
+                                                       SemanticModel semanticModel) {
+        Optional<Symbol> optServiceSymbol = semanticModel.symbol(serviceDefinition);
+        if (optServiceSymbol.isEmpty() ||
+                !(optServiceSymbol.get() instanceof ServiceDeclarationSymbol serviceSymbol)) {
+            return new ArrayList<>();
+        }
+
+        Optional<TypeSymbol> optInterceptorReturn = serviceSymbol.methods().get("createInterceptors").
+                typeDescriptor().returnTypeDescriptor();
+        if (optInterceptorReturn.isEmpty()) {
+            return new ArrayList<>();
+        }
+        if (!(optInterceptorReturn.get() instanceof TupleTypeSymbol interceptorTupleType)) {
+            // Print a warning since OAS can not extract interceptors from a
+            // common return type: `http:Interceptor|http:Interceptor[]`
+            return new ArrayList<>();
+        }
+
+        List<Interceptor> interceptors = new ArrayList<>();
+        interceptorTupleType.memberTypeDescriptors().forEach(typeDescriptor -> {
+            if (typeDescriptor instanceof TypeReferenceTypeSymbol interceptorType) {
+                interceptors.add(new Interceptor(interceptorType, semanticModel));
+            }
+        });
+        return interceptors;
     }
 
     /**
