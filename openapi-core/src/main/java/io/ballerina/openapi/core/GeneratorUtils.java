@@ -1175,4 +1175,23 @@ public class GeneratorUtils {
         }
         return type;
     }
+
+    /**
+     *  Filter the complex paths.
+     *
+     * @param openAPI
+     * @return
+     */
+    public static List<String> collectComplexPaths(OpenAPI openAPI) {
+        //Check given openapi has complex path
+        List<String> complexPathList = new ArrayList<>();
+        if (openAPI.getPaths() != null) {
+            for (Map.Entry<String, PathItem> path : openAPI.getPaths().entrySet()) {
+                if (isComplexURL(path.getKey())) {
+                    complexPathList.add(path.getKey());
+                }
+            }
+        }
+        return complexPathList;
+    }
 }
