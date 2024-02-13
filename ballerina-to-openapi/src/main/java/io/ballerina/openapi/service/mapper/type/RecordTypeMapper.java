@@ -178,7 +178,8 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         RecordFieldWithDefaultValueNode defaultValueNode = recordFields.stream()
                 .filter(field -> field instanceof RecordFieldWithDefaultValueNode)
                 .map(field -> (RecordFieldWithDefaultValueNode) field)
-                .filter(field -> field.fieldName().toString().trim().equals(fieldName)).findFirst().orElse(null);
+                .filter(field -> MapperCommonUtils.unescapeIdentifier(field.fieldName().toString().trim()).
+                        equals(fieldName)).findFirst().orElse(null);
         if (Objects.isNull(defaultValueNode)) {
             return Optional.empty();
         }

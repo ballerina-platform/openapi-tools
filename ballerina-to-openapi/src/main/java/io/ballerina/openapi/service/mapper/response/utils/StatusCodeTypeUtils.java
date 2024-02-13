@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * This {@link StatusCodeTypeUtils} class provides common functionalities for mapping the Ballerina HTTP status code
@@ -73,8 +74,7 @@ public abstract class StatusCodeTypeUtils {
         return semanticModel.types().ANYDATA;
     }
 
-    static Map<String, Header> getHeaders(RecordTypeSymbol responseRecordType,
-                                                 TypeMapper typeMapper) {
+    static Map<String, Header> getHeaders(RecordTypeSymbol responseRecordType, TypeMapper typeMapper) {
         if (Objects.isNull(responseRecordType)) {
             return new HashMap<>();
         }
@@ -86,9 +86,10 @@ public abstract class StatusCodeTypeUtils {
 
         Map<String, RecordFieldSymbol> recordFieldMap = new HashMap<>(headersInfo.recordType().
                 fieldDescriptors());
-        Map<String, Schema> recordFieldsMapping = typeMapper.getSchemaForRecordFields(recordFieldMap, new HashSet<>(),
+        Set<String> requiredFields = new HashSet<>();
+        Map<String, Schema> recordFieldsMapping = typeMapper.getSchemaForRecordFields(recordFieldMap, requiredFields,
                 headersInfo.recordName(), false);
-        return mapRecordFieldToHeaders(recordFieldsMapping);
+        return mapRecordFieldToHeaders(recordFieldsMapping, requiredFields);
     }
 
     private static HeaderRecordInfo getHeadersInfo(RecordTypeSymbol responseRecordType, TypeMapper typeMapper) {
@@ -105,12 +106,16 @@ public abstract class StatusCodeTypeUtils {
         return null;
     }
 
-    private static Map<String, Header> mapRecordFieldToHeaders(Map<String, Schema> recordFields) {
+    private static Map<String, Header> mapRecordFieldToHeaders(Map<String, Schema> recordFields,
+                                                               Set<String> requiredFields) {
         Map<String, Header> headers = new HashMap<>();
         for (Map.Entry<String, Schema> entry : recordFields.entrySet()) {
             Header header = new Header();
             header.setSchema(entry.getValue());
             headers.put(entry.getKey(), header);
+            if (requiredFields.contains(entry.getKey())) {
+                header.setRequired(true);
+            }
         }
         return headers;
     }
