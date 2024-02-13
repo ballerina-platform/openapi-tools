@@ -82,7 +82,7 @@ public class BallerinaCodeGenerator {
     private String licenseHeader = "";
     private boolean includeTestFiles;
 
-    private static final PrintStream outStream = System.err;
+    private static final PrintStream outStream = System.out;
 
     /**
      * Generates ballerina source for provided Open API Definition in {@code definitionPath}.

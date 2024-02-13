@@ -1177,10 +1177,10 @@ public class GeneratorUtils {
     }
 
     /**
-     *  Filter the complex paths.
+     *  Collect the complex paths in the OAS definition.
      *
-     * @param openAPI
-     * @return
+     * @param openAPI - openAPI definition.
+     * @return List of complex paths
      */
     public static List<String> collectComplexPaths(OpenAPI openAPI) {
         //Check given openapi has complex path
