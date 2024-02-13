@@ -198,7 +198,7 @@ public final class Constants {
         httpErrorCodeMap.put("LengthRequiredError", "411");
         httpErrorCodeMap.put("PreconditionFailedError", "412");
         httpErrorCodeMap.put("PayloadTooLargeError", "413");
-        httpErrorCodeMap.put("UriTooLongError", "414");
+        httpErrorCodeMap.put("URITooLongError", "414");
         httpErrorCodeMap.put("UnsupportedMediaTypeError", "415");
         httpErrorCodeMap.put("RangeNotSatisfiableError", "416");
         httpErrorCodeMap.put("ExpectationFailedError", "417");
@@ -217,7 +217,7 @@ public final class Constants {
         httpErrorCodeMap.put("BadGatewayError", "502");
         httpErrorCodeMap.put("ServiceUnavailableError", "503");
         httpErrorCodeMap.put("GatewayTimeoutError", "504");
-        httpErrorCodeMap.put("HttpVersionNotSupportedError", "505");
+        httpErrorCodeMap.put("HTTPVersionNotSupportedError", "505");
         httpErrorCodeMap.put("VariantAlsoNegotiatesError", "506");
         httpErrorCodeMap.put("InsufficientStorageError", "507");
         httpErrorCodeMap.put("LoopDetectedError", "508");

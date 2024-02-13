@@ -55,16 +55,15 @@ public abstract class StatusCodeTypeUtils {
         return false;
     }
 
-    static RecordTypeSymbol getRecordTypeSymbol(TypeSymbol typeSymbol, TypeMapper typeMapper) {
+    static Optional<RecordTypeSymbol> getRecordTypeSymbol(TypeSymbol typeSymbol, TypeMapper typeMapper) {
         TypeSymbol statusCodeResType = typeMapper.getReferredType(typeSymbol);
-        RecordTypeSymbol statusCodeRecordType = null;
         if (statusCodeResType instanceof TypeReferenceTypeSymbol statusCodeResRefType &&
                 statusCodeResRefType.typeDescriptor() instanceof RecordTypeSymbol recordTypeSymbol) {
-            statusCodeRecordType = recordTypeSymbol;
+            return Optional.of(recordTypeSymbol);
         } else if (statusCodeResType instanceof RecordTypeSymbol recordTypeSymbol) {
-            statusCodeRecordType = recordTypeSymbol;
+            return Optional.of(recordTypeSymbol);
         }
-        return statusCodeRecordType;
+        return Optional.empty();
     }
 
     static TypeSymbol getBodyType(RecordTypeSymbol responseRecordType, SemanticModel semanticModel) {

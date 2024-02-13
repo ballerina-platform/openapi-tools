@@ -26,8 +26,10 @@ import io.ballerina.openapi.service.mapper.response.model.ResponseInfo;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.swagger.v3.oas.models.headers.Header;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_500;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_STATUS_CODE_ERRORS;
@@ -49,18 +51,21 @@ public final class StatusCodeErrorUtils extends StatusCodeTypeUtils {
 
     public static ResponseInfo extractResponseInfo(TypeSymbol statusCodeErrorType, TypeMapper typeMapper,
                                                    SemanticModel semanticModel) {
-        RecordTypeSymbol errorDetailRecordType = getErrorDetailTypeSymbol(statusCodeErrorType, typeMapper);
-        TypeSymbol bodyType = getBodyType(errorDetailRecordType, semanticModel);
-        Map<String, Header> headers = getHeaders(errorDetailRecordType, typeMapper);
         String statusCode = getResponseCode(statusCodeErrorType, semanticModel);
+        Optional<RecordTypeSymbol> errorDetailRecordType = getErrorDetailTypeSymbol(statusCodeErrorType, typeMapper);
+        if (errorDetailRecordType.isEmpty()) {
+            return new ResponseInfo(statusCode, semanticModel.types().ANYDATA, new HashMap<>());
+        }
+        TypeSymbol bodyType = getBodyType(errorDetailRecordType.get(), semanticModel);
+        Map<String, Header> headers = getHeaders(errorDetailRecordType.get(), typeMapper);
         return new ResponseInfo(statusCode, bodyType, headers);
     }
 
-    private static RecordTypeSymbol getErrorDetailTypeSymbol(TypeSymbol typeSymbol, TypeMapper typeMapper) {
+    private static Optional<RecordTypeSymbol> getErrorDetailTypeSymbol(TypeSymbol typeSymbol, TypeMapper typeMapper) {
         IntersectionTypeSymbol errorIntersectionType = typeMapper.getReferredIntersectionType(typeSymbol);
         if (Objects.isNull(errorIntersectionType) ||
                 !(errorIntersectionType.effectiveTypeDescriptor() instanceof ErrorTypeSymbol errorTypeSymbol)) {
-            return null;
+            return Optional.empty();
         }
         return getRecordTypeSymbol(errorTypeSymbol.detailTypeDescriptor(), typeMapper);
     }

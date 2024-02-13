@@ -339,7 +339,9 @@ public class ResponseMapperImpl implements ResponseMapper {
                                        String responseCode, String mediaType) {
         if (responsesMap.containsKey(responseCode)) {
             if (responsesMap.get(responseCode).containsKey(mediaType)) {
-                responsesMap.get(responseCode).get(mediaType).add(typesymbol);
+                if (!responsesMap.get(responseCode).get(mediaType).contains(typesymbol)) {
+                    responsesMap.get(responseCode).get(mediaType).add(typesymbol);
+                }
             } else {
                 List<TypeSymbol> typeSymbols = new ArrayList<>();
                 typeSymbols.add(typesymbol);

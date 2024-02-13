@@ -25,6 +25,7 @@ import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.swagger.v3.oas.models.headers.Header;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_CODES;
 
@@ -45,10 +46,13 @@ public final class StatusCodeResponseUtils extends StatusCodeTypeUtils {
 
     public static ResponseInfo extractResponseInfo(TypeSymbol statusCodeResponseType, String defaultStatusCode,
                                                    TypeMapper typeMapper, SemanticModel semanticModel) {
-        RecordTypeSymbol statusCodeRecordType = getRecordTypeSymbol(statusCodeResponseType, typeMapper);
-        TypeSymbol bodyType = getBodyType(statusCodeRecordType, semanticModel);
-        Map<String, Header> headers = getHeaders(statusCodeRecordType, typeMapper);
+        Optional<RecordTypeSymbol> statusCodeRecordType = getRecordTypeSymbol(statusCodeResponseType, typeMapper);
         String statusCode = getResponseCode(statusCodeResponseType, defaultStatusCode, semanticModel);
+        if (statusCodeRecordType.isEmpty()) {
+            return new ResponseInfo(statusCode, semanticModel.types().ANYDATA, Map.of());
+        }
+        TypeSymbol bodyType = getBodyType(statusCodeRecordType.get(), semanticModel);
+        Map<String, Header> headers = getHeaders(statusCodeRecordType.get(), typeMapper);
         return new ResponseInfo(statusCode, bodyType, headers);
     }
 
