@@ -20,13 +20,20 @@ package io.ballerina.openapi.service.mapper.interceptor;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ClassSymbol;
+import io.ballerina.compiler.api.symbols.MethodSymbol;
+import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.api.symbols.resourcepath.util.PathSegment;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.api.symbols.resourcepath.ResourcePath;
+import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class Interceptor {
@@ -35,16 +42,110 @@ public class Interceptor {
     }
 
     private final InterceptorType type;
-    private String relativeResourcePath;
     private String resourceMethod;
     private TypeSymbol returnType;
-    private List<PathSegment> pathSegments;
+    private ResourcePath resourcePath = null;
     private ClassSymbol serviceClass;
+    private ClassDefinitionNode serviceClassNode = null;
 
-    public Interceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel) {
+    public Interceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
+                       ModuleMemberVisitor moduleMemberVisitor) {
+        typeSymbol.getName().ifPresent(
+                name -> this.serviceClassNode = moduleMemberVisitor.getInterceptorServiceClassNode(name));
         this.serviceClass = typeSymbol.typeDescriptor() instanceof ClassSymbol ?
                 (ClassSymbol) typeSymbol.typeDescriptor() : null;
         this.type = getInterceptorType(typeSymbol, semanticModel);
+        extractInterceptorDetails(semanticModel);
+    }
+
+    private void extractInterceptorDetails(SemanticModel semanticModel) {
+        if (Objects.isNull(type)) {
+            return;
+        }
+
+        Map<String, MethodSymbol> serviceMethods = serviceClass.methods();
+        Optional<TypeSymbol> optReturnType;
+        if (type.equals(InterceptorType.REQUEST) || type.equals(InterceptorType.REQUEST_ERROR)) {
+            // Request and Request Error Interceptors has only one resource method`
+            Optional<ResourceMethodSymbol> resourceMethodOpt = serviceMethods.values().stream()
+                    .filter(methodSymbol -> methodSymbol instanceof ResourceMethodSymbol)
+                    .map(methodSymbol -> (ResourceMethodSymbol) methodSymbol)
+                    .findFirst();
+            if (resourceMethodOpt.isEmpty()) {
+                return;
+            }
+            ResourceMethodSymbol resourceMethod = resourceMethodOpt.get();
+            optReturnType = resourceMethod.typeDescriptor().returnTypeDescriptor();
+            this.resourcePath = resourceMethod.resourcePath();
+        } else if (type.equals(InterceptorType.RESPONSE)){
+            // Response Interceptor has a remote function called `interceptResponse`
+            MethodSymbol remoteMethod = serviceMethods.get("interceptResponse");
+            if (Objects.isNull(remoteMethod)) {
+                return;
+            }
+            optReturnType = remoteMethod.typeDescriptor().returnTypeDescriptor();
+        } else {
+            // Response Error Interceptor has a remote function called `interceptResponseError`
+            MethodSymbol remoteMethod = serviceMethods.get("interceptResponseError");
+            if (Objects.isNull(remoteMethod)) {
+                return;
+            }
+            optReturnType = remoteMethod.typeDescriptor().returnTypeDescriptor();
+        }
+        if (optReturnType.isEmpty()) {
+            return;
+        }
+        if (isSubTypeOfDefaultInterceptorReturnType(optReturnType.get(), semanticModel)) {
+            this.returnType = getEffectiveReturnType(optReturnType.get(), semanticModel);
+        } else {
+            this.returnType = optReturnType.get();
+        }
+    }
+
+    private boolean isSubTypeOfDefaultInterceptorReturnType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
+        Optional<Symbol> optNextServiceType = semanticModel.types().getTypeByName("ballerina", "http", "", "NextService");
+        if (optNextServiceType.isEmpty() ||
+                !(optNextServiceType.get() instanceof TypeDefinitionSymbol nextServiceType)) {
+            return false;
+        }
+        UnionTypeSymbol defaultInterceptorReturnType = semanticModel.types().builder().UNION_TYPE.withMemberTypes(
+                nextServiceType.typeDescriptor(), semanticModel.types().NIL).build();
+        return defaultInterceptorReturnType.subtypeOf(typeSymbol);
+    }
+
+    private boolean isSubTypeOfHttpNextServiceType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
+        Optional<Symbol> optNextServiceType = semanticModel.types().getTypeByName("ballerina", "http", "", "NextService");
+        if (optNextServiceType.isEmpty() ||
+                !(optNextServiceType.get() instanceof TypeDefinitionSymbol nextServiceType)) {
+            return false;
+        }
+        return typeSymbol.subtypeOf(nextServiceType.typeDescriptor());
+    }
+
+    private TypeSymbol getEffectiveReturnType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
+        if (isSubTypeOfHttpNextServiceType(typeSymbol, semanticModel) ||
+                typeSymbol.subtypeOf(semanticModel.types().NIL)) {
+            return null;
+        }
+
+        if (typeSymbol instanceof TypeReferenceTypeSymbol) {
+            return getEffectiveReturnType(((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor(), semanticModel);
+        } else if (typeSymbol instanceof UnionTypeSymbol) {
+            List<TypeSymbol> memberTypes = ((UnionTypeSymbol) typeSymbol).userSpecifiedMemberTypes();
+            // Stream effective types and for each compute the effective type and filter out non-null types
+            List<TypeSymbol> effectiveMemberTypes = memberTypes.stream()
+                    .map(memberType -> getEffectiveReturnType(memberType, semanticModel))
+                    .filter(Objects::nonNull)
+                    .toList();
+            if (effectiveMemberTypes.isEmpty()) {
+                return null;
+            } else if (effectiveMemberTypes.size() == 1) {
+                return effectiveMemberTypes.get(0);
+            }
+            return semanticModel.types().builder().UNION_TYPE.withMemberTypes(
+                    effectiveMemberTypes.toArray(TypeSymbol[]::new)).build();
+        }
+        return typeSymbol;
     }
 
     private InterceptorType getInterceptorType(TypeSymbol interceptorType, SemanticModel semanticModel) {
@@ -83,14 +184,6 @@ public class Interceptor {
 
     public void setResourceMethod(String resourceMethod) {
         this.resourceMethod = resourceMethod;
-    }
-
-    public String getRelativeResourcePath() {
-        return relativeResourcePath;
-    }
-
-    public void setRelativeResourcePath(String relativeResourcePath) {
-        this.relativeResourcePath = relativeResourcePath;
     }
 
     public TypeSymbol getReturnType() {

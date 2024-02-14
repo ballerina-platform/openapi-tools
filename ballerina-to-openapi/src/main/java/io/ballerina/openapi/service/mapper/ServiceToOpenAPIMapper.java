@@ -192,9 +192,10 @@ public final class ServiceToOpenAPIMapper {
      */
     public static OASResult generateOAS(OASGenerationMetaInfo oasGenerationMetaInfo) {
         ServiceDeclarationNode serviceDefinition = oasGenerationMetaInfo.getServiceDeclarationNode();
-        ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(oasGenerationMetaInfo.getProject());
-        Set<ListenerDeclarationNode> listeners = moduleMemberVisitor.getListenerDeclarationNodes();
         SemanticModel semanticModel = oasGenerationMetaInfo.getSemanticModel();
+        ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(oasGenerationMetaInfo.getProject(),
+                semanticModel);
+        Set<ListenerDeclarationNode> listeners = moduleMemberVisitor.getListenerDeclarationNodes();
         String openApiFileName = oasGenerationMetaInfo.getOpenApiFileName();
         Path ballerinaFilePath = oasGenerationMetaInfo.getBallerinaFilePath();
         // 01.Fill the openAPI info section
@@ -205,7 +206,8 @@ public final class ServiceToOpenAPIMapper {
             List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
             if (openapi.getPaths() == null) {
                 if (isInterceptableService(serviceDefinition, semanticModel)) {
-                    List<Interceptor> interceptors = buildInterceptorPipeline(serviceDefinition, semanticModel);
+                    List<Interceptor> interceptors = buildInterceptorPipeline(serviceDefinition,
+                            semanticModel, moduleMemberVisitor);
                 }
                 ServiceMapperFactory serviceMapperFactory = new ServiceMapperFactory(openapi, semanticModel,
                         moduleMemberVisitor, diagnostics, isTreatNilableAsOptionalParameter(serviceDefinition));
@@ -252,7 +254,8 @@ public final class ServiceToOpenAPIMapper {
     }
 
     private static List<Interceptor> buildInterceptorPipeline(ServiceDeclarationNode serviceDefinition,
-                                                       SemanticModel semanticModel) {
+                                                              SemanticModel semanticModel,
+                                                              ModuleMemberVisitor moduleMemberVisitor) {
         Optional<Symbol> optServiceSymbol = semanticModel.symbol(serviceDefinition);
         if (optServiceSymbol.isEmpty() ||
                 !(optServiceSymbol.get() instanceof ServiceDeclarationSymbol serviceSymbol)) {
@@ -273,7 +276,7 @@ public final class ServiceToOpenAPIMapper {
         List<Interceptor> interceptors = new ArrayList<>();
         interceptorTupleType.memberTypeDescriptors().forEach(typeDescriptor -> {
             if (typeDescriptor instanceof TypeReferenceTypeSymbol interceptorType) {
-                interceptors.add(new Interceptor(interceptorType, semanticModel));
+                interceptors.add(new Interceptor(interceptorType, semanticModel, moduleMemberVisitor));
             }
         });
         return interceptors;
@@ -284,8 +287,8 @@ public final class ServiceToOpenAPIMapper {
      *
      * @param project - current project
      */
-    public static ModuleMemberVisitor extractNodesFromProject(Project project) {
-        ModuleMemberVisitor balNodeVisitor = new ModuleMemberVisitor();
+    public static ModuleMemberVisitor extractNodesFromProject(Project project, SemanticModel semanticModel) {
+        ModuleMemberVisitor balNodeVisitor = new ModuleMemberVisitor(semanticModel);
         project.currentPackage().moduleIds().forEach(moduleId -> {
             Module module = project.currentPackage().module(moduleId);
             module.documentIds().forEach(documentId -> {
