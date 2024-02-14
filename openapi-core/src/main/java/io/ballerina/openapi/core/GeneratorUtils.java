@@ -1182,7 +1182,7 @@ public class GeneratorUtils {
      * @param openAPI - openAPI definition.
      * @return List of complex paths
      */
-    public static List<String> collectComplexPaths(OpenAPI openAPI) {
+    public static List<String> getComplexPaths(OpenAPI openAPI) {
         //Check given openapi has complex path
         List<String> complexPathList = new ArrayList<>();
         if (openAPI.getPaths() != null) {
