@@ -298,9 +298,7 @@ paths:
                     additionalProperties: false
             text/plain:
               schema:
-                oneOf:
-                  - type: string
-                  - type: string
+                type: string
 components:
   schemas:
     ErrorPayload:

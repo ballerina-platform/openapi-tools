@@ -120,4 +120,8 @@ public class TypeMapperImpl implements TypeMapper {
     public TypeSymbol getReferredType(TypeSymbol typeSymbol) {
         return ReferenceTypeMapper.getReferredType(typeSymbol);
     }
+
+    public IntersectionTypeSymbol getReferredIntersectionType(TypeSymbol typeSymbol) {
+        return ReferenceTypeMapper.getReferredIntersectionType(typeSymbol);
+    }
 }

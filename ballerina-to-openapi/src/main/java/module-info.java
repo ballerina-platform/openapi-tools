@@ -40,5 +40,7 @@ module io.ballerina.openapi.service {
     exports io.ballerina.openapi.service.mapper.utils;
     exports io.ballerina.openapi.service.mapper.parameter;
     exports io.ballerina.openapi.service.mapper.response;
+    exports io.ballerina.openapi.service.mapper.response.model;
+    exports io.ballerina.openapi.service.mapper.response.utils;
 }
 

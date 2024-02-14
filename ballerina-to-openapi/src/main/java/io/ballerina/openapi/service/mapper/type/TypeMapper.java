@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.service.mapper.type;
 
+import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.swagger.v3.oas.models.media.Schema;
@@ -39,6 +40,8 @@ public interface TypeMapper {
                                                  boolean treatNilableAsOptional);
 
     TypeSymbol getReferredType(TypeSymbol typeSymbol);
+
+    IntersectionTypeSymbol getReferredIntersectionType(TypeSymbol typeSymbol);
 
     static void setDefaultValue(Schema schema, Object defaultValue) {
         if (Objects.isNull(defaultValue)) {
