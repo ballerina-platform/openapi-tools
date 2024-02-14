@@ -15,14 +15,24 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.mapper.response;
+
+package io.ballerina.openapi.service.mapper.hateoas;
+
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.swagger.v3.oas.models.OpenAPI;
 
 /**
- * This {@link ResponseMapper} represents the interface for response mapper.
+ * This {@link HateoasMapper} uses to set HATEOAS links into the OpenAPI context.
  *
  * @since 1.9.0
  */
-public interface ResponseMapper {
+public interface HateoasMapper {
 
-    void setApiResponses();
+    /**
+     * Sets HATEOAS links into the OpenAPI context.
+     *
+     * @param serviceNode Specific service declaration node
+     * @param openAPI Current OpenAPI context
+     */
+    void setOpenApiLinks(ServiceDeclarationNode serviceNode, OpenAPI openAPI);
 }

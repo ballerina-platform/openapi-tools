@@ -59,8 +59,6 @@ public type ProxyConfig record {|
     string password = "";
 |};
 
-public type PetArr Pet[];
-
 public type Pet record {
     int petId;
     string name;

@@ -19,8 +19,12 @@
 package io.ballerina.openapi.core;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
+import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.SymbolKind;
+import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
@@ -95,6 +99,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -890,7 +895,7 @@ public class GeneratorUtils {
         tempSourceFiles.put(CLIENT_FILE_NAME, clientContent);
         tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);
         if (serviceContent != null) {
-            tempSourceFiles.put(SERVICE_FILE_NAME, schemaContent);
+            tempSourceFiles.put(SERVICE_FILE_NAME, serviceContent);
         }
         List<String> unusedTypeDefinitionNameList = getUnusedTypeDefinitionNameList(tempSourceFiles);
         while (unusedTypeDefinitionNameList.size() > 0) {
@@ -998,15 +1003,23 @@ public class GeneratorUtils {
         List<String> unusedTypeDefinitionNameList = new ArrayList<>();
         Path tmpDir = Files.createTempDirectory(".openapi-tmp" + System.nanoTime());
         writeFilesTemp(srcFiles, tmpDir);
-        if (Files.exists(tmpDir.resolve(CLIENT_FILE_NAME)) && Files.exists(tmpDir.resolve(TYPE_FILE_NAME)) &&
+        if ((Files.exists(tmpDir.resolve(CLIENT_FILE_NAME)) || Files.exists(tmpDir.resolve(SERVICE_FILE_NAME)))
+                && Files.exists(tmpDir.resolve(TYPE_FILE_NAME)) &&
                 Files.exists(tmpDir.resolve(BALLERINA_TOML))) {
-            SemanticModel semanticModel = getSemanticModel(tmpDir.resolve(CLIENT_FILE_NAME));
+            SemanticModel semanticModel = Files.exists(tmpDir.resolve(CLIENT_FILE_NAME)) ?
+                    getSemanticModel(tmpDir.resolve(CLIENT_FILE_NAME)) :
+                    getSemanticModel(tmpDir.resolve(SERVICE_FILE_NAME));
             List<Symbol> symbols = semanticModel.moduleSymbols();
             for (Symbol symbol : symbols) {
                 if (symbol.kind().equals(SymbolKind.TYPE_DEFINITION) || symbol.kind().equals(SymbolKind.ENUM)) {
                     List<Location> references = semanticModel.references(symbol);
                     if (references.size() == 1) {
                         unusedTypeDefinitionNameList.add(symbol.getName().get());
+                    } else if (references.size() == 2) {
+                        if (symbol.kind().equals(SymbolKind.TYPE_DEFINITION)) {
+                            TypeDefinitionSymbol typeDef = (TypeDefinitionSymbol) symbol;
+                            handleCyclicType(unusedTypeDefinitionNameList, typeDef);
+                        }
                     }
                 }
             }
@@ -1019,6 +1032,29 @@ public class GeneratorUtils {
             }
         }));
         return unusedTypeDefinitionNameList;
+    }
+
+    private static void handleCyclicType(List<String> unusedTypeDefinitionNameList, TypeDefinitionSymbol symbol) {
+        TypeDescKind typeDescKind = symbol.typeDescriptor().typeKind();
+        if (typeDescKind.equals(TypeDescKind.RECORD)) {
+            RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) symbol.typeDescriptor();
+            Map<String, RecordFieldSymbol> fields = recordTypeSymbol.fieldDescriptors();
+            Collection<RecordFieldSymbol> values = fields.values();
+            boolean isCyclic = false;
+            for (RecordFieldSymbol field: values) {
+                if (field.typeDescriptor().getName().isPresent()) {
+                    if (field.typeDescriptor().getName().get().trim().equals(symbol.getName().get().trim())) {
+                        isCyclic = true;
+                        break;
+                    }
+                }
+            }
+            if (isCyclic) {
+                unusedTypeDefinitionNameList.add(symbol.getName().get());
+            }
+        }
+        //TODO: Handle cyclic type for other ex: array after this fix
+        //https://github.com/ballerina-platform/ballerina-lang/issues/36442
     }
 
     private static void writeFilesTemp(Map<String, String> srcFiles, Path tmpDir) throws IOException {

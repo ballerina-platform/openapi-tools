@@ -15,14 +15,14 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.mapper.response;
+
+package io.ballerina.openapi.service.mapper.hateoas;
 
 /**
- * This {@link ResponseMapper} represents the interface for response mapper.
- *
+ * A context-holder to save and retrieve HATEOAS meta-data for a given resources.
+ * @param resourceMethod http resource for the method
+ * @param operationId generated operationId
  * @since 1.9.0
  */
-public interface ResponseMapper {
-
-    void setApiResponses();
+public record Resource(String resourceMethod, String operationId) {
 }
