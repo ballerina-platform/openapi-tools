@@ -325,6 +325,7 @@ publishing {
                 password = System.getenv("packagePAT")
             }
         }
+        mavenLocal()
     }
 }
 

@@ -1,6 +1,7 @@
 package io.ballerina.openapi.service.mapper;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
@@ -9,6 +10,8 @@ import io.ballerina.openapi.service.mapper.constraint.ConstraintMapperImpl;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapper;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapperImpl;
+import io.ballerina.openapi.service.mapper.interceptor.InterceptorPipeline;
+import io.ballerina.openapi.service.mapper.interceptor.ReturnTypes;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
@@ -36,12 +39,15 @@ public class ServiceMapperFactory {
     private final TypeMapper typeMapper;
     private final ConstraintMapper constraintMapper;
     private final HateoasMapper hateoasMapper;
+    private final InterceptorPipeline interceptorPipeline;
 
     public ServiceMapperFactory(OpenAPI openAPI, SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
-                                List<OpenAPIMapperDiagnostic> diagnostics, Boolean treatNilableAsOptional) {
+                                List<OpenAPIMapperDiagnostic> diagnostics, Boolean treatNilableAsOptional,
+                                InterceptorPipeline interceptorPipeline) {
         this.additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
         this.treatNilableAsOptional = treatNilableAsOptional;
         this.openAPI = openAPI;
+        this.interceptorPipeline = interceptorPipeline;
 
         this.typeMapper = new TypeMapperImpl(getComponents(openAPI), additionalData);
         this.constraintMapper = new ConstraintMapperImpl(openAPI, moduleMemberVisitor, diagnostics);
@@ -53,6 +59,18 @@ public class ServiceMapperFactory {
     }
 
     public ResourceMapper getResourceMapper(List<FunctionDefinitionNode> resources) {
+        for (FunctionDefinitionNode resource : resources) {
+            ResourceMethodSymbol resourceMethodSymbol = (ResourceMethodSymbol) additionalData.semanticModel().
+                    symbol(resource).get();
+            ReturnTypes returnType = interceptorPipeline.getEffectiveReturnType(resourceMethodSymbol);
+            System.out.println("Effective interceptor return type for resource: " + resourceMethodSymbol.getName().get() + " " +
+                    resourceMethodSymbol.resourcePath().signature() + " is: " +
+                    (Objects.isNull(returnType.fromInterceptors()) ? "null" : returnType.fromInterceptors().signature()));
+            System.out.println("Effective target resource return type for resource: " + resourceMethodSymbol.getName().get() + " " +
+                    resourceMethodSymbol.resourcePath().signature() + " is: " +
+                    (Objects.isNull(returnType.fromTargetResource()) ? "null" : returnType.fromTargetResource().signature()));
+            System.out.println("\n");
+        }
         return new ResourceMapperImpl(openAPI, resources, additionalData, this);
     }
 

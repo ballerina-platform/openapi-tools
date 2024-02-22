@@ -20,10 +20,7 @@ package io.ballerina.openapi.service.mapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
-import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
-import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
@@ -39,7 +36,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapper;
-import io.ballerina.openapi.service.mapper.interceptor.Interceptor;
+import io.ballerina.openapi.service.mapper.interceptor.InterceptorPipeline;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
@@ -205,12 +202,13 @@ public final class ServiceToOpenAPIMapper {
             OpenAPI openapi = oasResult.getOpenAPI().get();
             List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
             if (openapi.getPaths() == null) {
+                InterceptorPipeline interceptorPipeline = null;
                 if (isInterceptableService(serviceDefinition, semanticModel)) {
-                    List<Interceptor> interceptors = buildInterceptorPipeline(serviceDefinition,
-                            semanticModel, moduleMemberVisitor);
+                    interceptorPipeline = InterceptorPipeline.build(serviceDefinition, semanticModel, moduleMemberVisitor);
                 }
                 ServiceMapperFactory serviceMapperFactory = new ServiceMapperFactory(openapi, semanticModel,
-                        moduleMemberVisitor, diagnostics, isTreatNilableAsOptionalParameter(serviceDefinition));
+                        moduleMemberVisitor, diagnostics, isTreatNilableAsOptionalParameter(serviceDefinition),
+                        interceptorPipeline);
 
                 ServersMapper serversMapperImpl = serviceMapperFactory.getServersMapper(listeners, serviceDefinition);
                 serversMapperImpl.setServers();
@@ -251,35 +249,6 @@ public final class ServiceToOpenAPIMapper {
             }
         });
         return isInterceptable.get();
-    }
-
-    private static List<Interceptor> buildInterceptorPipeline(ServiceDeclarationNode serviceDefinition,
-                                                              SemanticModel semanticModel,
-                                                              ModuleMemberVisitor moduleMemberVisitor) {
-        Optional<Symbol> optServiceSymbol = semanticModel.symbol(serviceDefinition);
-        if (optServiceSymbol.isEmpty() ||
-                !(optServiceSymbol.get() instanceof ServiceDeclarationSymbol serviceSymbol)) {
-            return new ArrayList<>();
-        }
-
-        Optional<TypeSymbol> optInterceptorReturn = serviceSymbol.methods().get("createInterceptors").
-                typeDescriptor().returnTypeDescriptor();
-        if (optInterceptorReturn.isEmpty()) {
-            return new ArrayList<>();
-        }
-        if (!(optInterceptorReturn.get() instanceof TupleTypeSymbol interceptorTupleType)) {
-            // Print a warning since OAS can not extract interceptors from a
-            // common return type: `http:Interceptor|http:Interceptor[]`
-            return new ArrayList<>();
-        }
-
-        List<Interceptor> interceptors = new ArrayList<>();
-        interceptorTupleType.memberTypeDescriptors().forEach(typeDescriptor -> {
-            if (typeDescriptor instanceof TypeReferenceTypeSymbol interceptorType) {
-                interceptors.add(new Interceptor(interceptorType, semanticModel, moduleMemberVisitor));
-            }
-        });
-        return interceptors;
     }
 
     /**
