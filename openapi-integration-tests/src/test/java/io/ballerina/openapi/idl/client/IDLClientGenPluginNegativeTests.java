@@ -94,7 +94,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
 
     @Test
     public void testInvalidSwaggerContract() throws IOException, InterruptedException {
-        Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_10"),
+        Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_12"),
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_12/generated/").toString());
         Assert.assertFalse(dir.exists());
