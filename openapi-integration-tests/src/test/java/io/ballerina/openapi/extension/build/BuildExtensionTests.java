@@ -85,7 +85,7 @@ public class BuildExtensionTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");
         boolean successful = TestUtil.executeBuild(DISTRIBUTION_FILE_NAME,
-                TEST_RESOURCE.resolve("project_5/service.bal"), buildArgs);
+                TEST_RESOURCE.resolve("project_5/main.bal"), buildArgs);
     }
 
     @Test(description = "Check --export-openapi flag with grpc service")
@@ -124,6 +124,24 @@ public class BuildExtensionTests {
                 TEST_RESOURCE.resolve("project_9"), buildArgs);
         Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_9/target/openapi/ชื่อ_openapi.yaml")));
     }
+
+    @Test(description = "Empty base path service inside tests directory")
+    public void emptyBastPathServiceInTests() throws IOException, InterruptedException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("--export-openapi");
+        boolean successful = executeBuild(DISTRIBUTION_FILE_NAME,
+                TEST_RESOURCE.resolve("project_11"), buildArgs);
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_11/target/openapi/" +
+                "main_openapi.yaml")));
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_11/target/openapi/" +
+                "module_openapi.yaml")));
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_11/target/openapi/" +
+                "tests_test_openapi.yaml")));
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_11/target/openapi/" +
+                "tests_module_test_openapi.yaml")));
+    }
+
+
     private void executeCommand(String resourcePath) throws IOException, InterruptedException {
         List<String> buildArgs = new LinkedList<>();
         boolean successful = executeBuild(DISTRIBUTION_FILE_NAME,
