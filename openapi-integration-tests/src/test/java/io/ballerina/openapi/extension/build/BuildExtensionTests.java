@@ -130,7 +130,7 @@ public class BuildExtensionTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");
         boolean successful = executeBuild(DISTRIBUTION_FILE_NAME,
-                TEST_RESOURCE.resolve("project_100"), buildArgs);
+                TEST_RESOURCE.resolve("project_10"), buildArgs);
         Assert.assertTrue(successful);
         Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_10/target/openapi/" +
                 "main_openapi.yaml")));
