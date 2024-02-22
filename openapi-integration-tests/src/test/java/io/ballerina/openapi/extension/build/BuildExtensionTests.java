@@ -126,7 +126,7 @@ public class BuildExtensionTests {
     }
 
     @Test(description = "Empty base path service inside tests directory")
-    public void emptyBastPathServiceInTests() throws IOException, InterruptedException {
+    public void emptyBasePathServiceInTests() throws IOException, InterruptedException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");
         boolean successful = executeBuild(DISTRIBUTION_FILE_NAME,
