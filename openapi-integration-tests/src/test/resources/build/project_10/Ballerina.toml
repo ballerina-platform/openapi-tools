@@ -1,6 +1,6 @@
 [package]
 org = "openapi_extension_test"
-name = "sample_12"
+name = "project_10"
 version = "0.1.0"
 
 [build-options]
