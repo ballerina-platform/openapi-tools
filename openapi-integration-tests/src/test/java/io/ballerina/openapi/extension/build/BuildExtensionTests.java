@@ -85,7 +85,7 @@ public class BuildExtensionTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");
         boolean successful = TestUtil.executeBuild(DISTRIBUTION_FILE_NAME,
-                TEST_RESOURCE.resolve("project_5/main.bal"), buildArgs);
+                TEST_RESOURCE.resolve("project_5/service.bal"), buildArgs);
     }
 
     @Test(description = "Check --export-openapi flag with grpc service")
@@ -130,14 +130,15 @@ public class BuildExtensionTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");
         boolean successful = executeBuild(DISTRIBUTION_FILE_NAME,
-                TEST_RESOURCE.resolve("project_11"), buildArgs);
-        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_11/target/openapi/" +
+                TEST_RESOURCE.resolve("project_12"), buildArgs);
+        Assert.assertTrue(successful);
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_12/target/openapi/" +
                 "main_openapi.yaml")));
-        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_11/target/openapi/" +
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_12/target/openapi/" +
                 "module_openapi.yaml")));
-        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_11/target/openapi/" +
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_12/target/openapi/" +
                 "tests_test_openapi.yaml")));
-        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_11/target/openapi/" +
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_12/target/openapi/" +
                 "tests_module_test_openapi.yaml")));
     }
 

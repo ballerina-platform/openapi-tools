@@ -1,8 +1,7 @@
-import ballerina/http;
+import ballerina/graphql;
 
-service / on new http:Listener(9090) {
-
-    resource function get path/test(string query) returns string {
-        return "Hello, " + query;
-    }
+service graphql:Service /query on new graphql:Listener(8080) {
+   resource function get name() returns string {
+       return "Jack";
+   }
 }
