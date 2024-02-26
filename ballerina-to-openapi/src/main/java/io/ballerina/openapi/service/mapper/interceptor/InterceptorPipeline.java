@@ -150,7 +150,9 @@ public class InterceptorPipeline {
             if (Objects.nonNull(nextErrorInterceptor)) {
                 updateReturnTypeForReqInterceptor(nextErrorInterceptor, returnTypes, targetResource);
             } else {
-                nextErrorInterceptor = initResInterceptor.getNextInResErrorPath();
+                if (Objects.nonNull(initResInterceptor)) {
+                    nextErrorInterceptor = initResInterceptor.getNextInResErrorPath();
+                }
                 if (Objects.nonNull(nextErrorInterceptor)) {
                     updateReturnTypeForResInterceptor(nextErrorInterceptor, returnTypes, null, false);
                 } else {

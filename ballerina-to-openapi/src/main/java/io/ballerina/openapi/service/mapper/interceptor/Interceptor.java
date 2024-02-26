@@ -10,6 +10,7 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.utils.MediaTypeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -125,6 +126,9 @@ public abstract class Interceptor {
         if (typeSymbol instanceof TypeReferenceTypeSymbol) {
             return getEffectiveReturnType(((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor(), semanticModel);
         } else if (typeSymbol instanceof UnionTypeSymbol) {
+            if (MediaTypeUtils.isSameMediaType(typeSymbol, semanticModel)) {
+                return typeSymbol;
+            }
             List<TypeSymbol> memberTypes = ((UnionTypeSymbol) typeSymbol).userSpecifiedMemberTypes();
             List<TypeSymbol> effectiveMemberTypes = memberTypes.stream()
                     .map(memberType -> getEffectiveReturnType(memberType, semanticModel))

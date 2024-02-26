@@ -18,7 +18,8 @@ import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.parameter.DefaultParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
 import io.ballerina.openapi.service.mapper.response.ResponseMapper;
-import io.ballerina.openapi.service.mapper.response.ResponseMapperImpl;
+import io.ballerina.openapi.service.mapper.response.DefaultResponseMapper;
+import io.ballerina.openapi.service.mapper.response.ResponseMapperWithInterceptors;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.swagger.v3.oas.models.Components;
@@ -85,7 +86,11 @@ public class ServiceMapperFactory {
     }
 
     public ResponseMapper getResponseMapper(FunctionDefinitionNode resourceNode, OperationInventory opInventory) {
-        return new ResponseMapperImpl(resourceNode, opInventory, additionalData, this);
+        if (Objects.nonNull(interceptorPipeline)) {
+            return new ResponseMapperWithInterceptors(resourceNode, opInventory, additionalData,
+                    interceptorPipeline, this);
+        }
+        return new DefaultResponseMapper(resourceNode, opInventory, additionalData, this);
     }
 
     public ConstraintMapper getConstraintMapper() {

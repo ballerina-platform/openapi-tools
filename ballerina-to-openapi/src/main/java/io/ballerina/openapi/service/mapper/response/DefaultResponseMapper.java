@@ -73,13 +73,13 @@ import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.getMediaT
 import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.isSameMediaType;
 
 /**
- * This {@link ResponseMapperImpl} class is the implementation of the {@link ResponseMapper} interface.
+ * This {@link DefaultResponseMapper} class is the implementation of the {@link ResponseMapper} interface.
  * This class provides functionalities for mapping the Ballerina return type to OpenAPI
  * response.
  *
  * @since 1.9.0
  */
-public class ResponseMapperImpl implements ResponseMapper {
+public class DefaultResponseMapper implements ResponseMapper {
     private final TypeMapper typeMapper;
     private final SemanticModel semanticModel;
     private List<String> allowedMediaTypes = new ArrayList<>();
@@ -88,17 +88,25 @@ public class ResponseMapperImpl implements ResponseMapper {
     private final String mediaTypeSubTypePrefix;
     private final ApiResponses apiResponses = new ApiResponses();
     private final OperationInventory operationInventory;
+    private final FunctionDefinitionNode resourceNode;
 
-    public ResponseMapperImpl(FunctionDefinitionNode resourceNode, OperationInventory operationInventory,
-                              AdditionalData additionalData, ServiceMapperFactory serviceMapperFactory) {
+    public DefaultResponseMapper(FunctionDefinitionNode resourceNode, OperationInventory operationInventory,
+                                 AdditionalData additionalData, ServiceMapperFactory serviceMapperFactory) {
         this.typeMapper = serviceMapperFactory.getTypeMapper();
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
         this.semanticModel = additionalData.semanticModel();
         this.operationInventory = operationInventory;
+        this.resourceNode = resourceNode;
+    }
+
+    private void generateApiResponses(FunctionDefinitionNode resourceNode, OperationInventory operationInventory) {
         extractAnnotationDetails(resourceNode);
 
         String defaultStatusCode = operationInventory.getHttpOperation().equalsIgnoreCase(POST) ? HTTP_201 : HTTP_200;
         TypeSymbol returnTypeSymbol = getReturnTypeSymbol(resourceNode);
+        if (Objects.isNull(returnTypeSymbol)) {
+            return;
+        }
         createResponseMapping(returnTypeSymbol, defaultStatusCode);
         if (operationInventory.hasDataBinding()) {
             addResponseMappingForDataBindingFailures();
@@ -106,10 +114,11 @@ public class ResponseMapperImpl implements ResponseMapper {
     }
 
     public void setApiResponses() {
+        generateApiResponses(resourceNode, operationInventory);
         operationInventory.setApiResponses(apiResponses);
     }
 
-    private TypeSymbol getReturnTypeSymbol(FunctionDefinitionNode resourceNode) {
+    protected TypeSymbol getReturnTypeSymbol(FunctionDefinitionNode resourceNode) {
         Optional<Symbol> symbol = semanticModel.symbol(resourceNode);
         if (symbol.isEmpty() || !(symbol.get() instanceof ResourceMethodSymbol resourceMethodSymbol)) {
             return null;
@@ -142,7 +151,7 @@ public class ResponseMapperImpl implements ResponseMapper {
         }
     }
 
-    private void createResponseMapping(TypeSymbol returnType, String defaultStatusCode) {
+    protected void createResponseMapping(TypeSymbol returnType, String defaultStatusCode) {
         Optional<UnionTypeSymbol> unionTypeOpt = getUnionType(returnType, semanticModel);
         if (unionTypeOpt.isPresent()) {
             addResponseMappingForUnion(defaultStatusCode, unionTypeOpt.get());
@@ -225,11 +234,11 @@ public class ResponseMapperImpl implements ResponseMapper {
         if (Objects.nonNull(newContent)) {
             Content content = existingRes.getContent();
             if (Objects.isNull(content)) {
-                content = newContent;
+                existingRes.setContent(newContent);
             } else {
-                content.put(newContent.keySet().iterator().next(), newContent.values().iterator().next());
+                updateApiResponseContentWithMediaType(existingRes, newContent.keySet().iterator().next(),
+                        newContent.values().iterator().next());
             }
-            existingRes.setContent(content);
         }
         apiResponses.put(statusCode, existingRes);
     }
