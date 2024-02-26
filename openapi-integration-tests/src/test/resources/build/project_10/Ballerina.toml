@@ -1,0 +1,7 @@
+[package]
+org = "openapi_extension_test"
+name = "project_10"
+version = "0.1.0"
+
+[build-options]
+observabilityIncluded = true
