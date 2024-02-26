@@ -32,6 +32,8 @@ configurations {
 
 dependencies {
     implementation project(':ballerina-to-openapi')
+    implementation project(':openapi-typegenerator')
+    implementation project(':openapi-service')
     implementation ("io.swagger.parser.v3:swagger-parser:${swaggerParserVersion}") {
         exclude group: "io.swagger", module: "swagger-compat-spec-parser"
         exclude group: "org.slf4j", module: "slf4j-ext"

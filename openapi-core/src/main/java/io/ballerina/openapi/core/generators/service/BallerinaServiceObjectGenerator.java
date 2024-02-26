@@ -66,51 +66,51 @@ public class BallerinaServiceObjectGenerator {
         this.resourceFunctionList = resourceFunctionList;
     }
 
-    public SyntaxTree generateSyntaxTree() {
-        // TODO: Check the possibility of having imports other than `ballerina/http`
-        NodeList<ImportDeclarationNode> imports = createImportDeclarationNodes();
-        NodeList<ModuleMemberDeclarationNode> moduleMembers = createNodeList(generateServiceObject());
-        Token eofToken = createIdentifierToken("");
-        ModulePartNode modulePartNode = createModulePartNode(imports, moduleMembers, eofToken);
+//    public SyntaxTree generateSyntaxTree() {
+//        // TODO: Check the possibility of having imports other than `ballerina/http`
+//        NodeList<ImportDeclarationNode> imports = createImportDeclarationNodes();
+//        NodeList<ModuleMemberDeclarationNode> moduleMembers = createNodeList(generateServiceObject());
+//        Token eofToken = createIdentifierToken("");
+//        ModulePartNode modulePartNode = createModulePartNode(imports, moduleMembers, eofToken);
+//
+//        TextDocument textDocument = TextDocuments.from("");
+//        SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
+//        return syntaxTree.modifyWith(modulePartNode);
+//    }
 
-        TextDocument textDocument = TextDocuments.from("");
-        SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
-        return syntaxTree.modifyWith(modulePartNode);
-    }
-
-    public TypeDefinitionNode generateServiceObject() {
-        List<Node> serviceObjectMemberNodes = new ArrayList<>();
-        TypeReferenceNode httpServiceTypeRefNode = createTypeReferenceNode(createToken(ASTERISK_TOKEN),
-                createIdentifierToken("http:Service"), createToken(SEMICOLON_TOKEN));
-        serviceObjectMemberNodes.add(httpServiceTypeRefNode);
-        for (Node functionNode : resourceFunctionList) {
-            NodeList<Token> methodQualifierList = createNodeList(createToken(RESOURCE_KEYWORD));
-            if (functionNode instanceof FunctionDefinitionNode &&
-                    ((FunctionDefinitionNode) functionNode).qualifierList()
-                            .stream().anyMatch(token -> Objects.equals(token.text(), RESOURCE_KEYWORD.stringValue()))) {
-                FunctionDefinitionNode resourceFunctionDefinitionNode = (FunctionDefinitionNode) functionNode;
-                MethodDeclarationNode resourceMethodDeclarationNode = createMethodDeclarationNode(
-                        RESOURCE_ACCESSOR_DECLARATION, null,
-                        methodQualifierList,
-                        createToken(FUNCTION_KEYWORD),
-                        resourceFunctionDefinitionNode.functionName(),
-                        resourceFunctionDefinitionNode.relativeResourcePath(),
-                        resourceFunctionDefinitionNode.functionSignature(),
-                        createToken(SEMICOLON_TOKEN));
-                serviceObjectMemberNodes.add(resourceMethodDeclarationNode);
-            }
-        }
-
-        NodeList<Node> members = createNodeList(serviceObjectMemberNodes);
-        NodeList<Token> objectQualifierList = createNodeList(createToken(SERVICE_KEYWORD));
-        ObjectTypeDescriptorNode objectTypeDescriptorNode = createObjectTypeDescriptorNode(
-                objectQualifierList,
-                createToken(SyntaxKind.OBJECT_KEYWORD),
-                createToken(SyntaxKind.OPEN_BRACE_TOKEN),
-                members,
-                createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
-
-        return createTypeDefinitionNode(null, null, createToken(TYPE_KEYWORD),
-                createIdentifierToken(SERVICE_TYPE_NAME), objectTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
-    }
+//    public TypeDefinitionNode generateServiceObject() {
+//        List<Node> serviceObjectMemberNodes = new ArrayList<>();
+//        TypeReferenceNode httpServiceTypeRefNode = createTypeReferenceNode(createToken(ASTERISK_TOKEN),
+//                createIdentifierToken("http:Service"), createToken(SEMICOLON_TOKEN));
+//        serviceObjectMemberNodes.add(httpServiceTypeRefNode);
+//        for (Node functionNode : resourceFunctionList) {
+//            NodeList<Token> methodQualifierList = createNodeList(createToken(RESOURCE_KEYWORD));
+//            if (functionNode instanceof FunctionDefinitionNode &&
+//                    ((FunctionDefinitionNode) functionNode).qualifierList()
+//                            .stream().anyMatch(token -> Objects.equals(token.text(), RESOURCE_KEYWORD.stringValue()))) {
+//                FunctionDefinitionNode resourceFunctionDefinitionNode = (FunctionDefinitionNode) functionNode;
+//                MethodDeclarationNode resourceMethodDeclarationNode = createMethodDeclarationNode(
+//                        RESOURCE_ACCESSOR_DECLARATION, null,
+//                        methodQualifierList,
+//                        createToken(FUNCTION_KEYWORD),
+//                        resourceFunctionDefinitionNode.functionName(),
+//                        resourceFunctionDefinitionNode.relativeResourcePath(),
+//                        resourceFunctionDefinitionNode.functionSignature(),
+//                        createToken(SEMICOLON_TOKEN));
+//                serviceObjectMemberNodes.add(resourceMethodDeclarationNode);
+//            }
+//        }
+//
+//        NodeList<Node> members = createNodeList(serviceObjectMemberNodes);
+//        NodeList<Token> objectQualifierList = createNodeList(createToken(SERVICE_KEYWORD));
+//        ObjectTypeDescriptorNode objectTypeDescriptorNode = createObjectTypeDescriptorNode(
+//                objectQualifierList,
+//                createToken(SyntaxKind.OBJECT_KEYWORD),
+//                createToken(SyntaxKind.OPEN_BRACE_TOKEN),
+//                members,
+//                createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+//
+//        return createTypeDefinitionNode(null, null, createToken(TYPE_KEYWORD),
+//                createIdentifierToken(SERVICE_TYPE_NAME), objectTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
+//    }
 }

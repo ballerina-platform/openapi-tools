@@ -347,6 +347,8 @@ ballerinaBuild.dependsOn compileTestJava
 ballerinaBuild.dependsOn checkstyleMain
 ballerinaBuild.dependsOn checkstyleTest
 ballerinaBuild.dependsOn jar
+ballerinaBuild.dependsOn ":openapi-typegenerator:build"
+ballerinaBuild.dependsOn ":openapi-service:build"
 ballerinaBuild.finalizedBy revertTomlFile
 build.dependsOn ballerinaBuild
 

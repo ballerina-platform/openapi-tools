@@ -26,7 +26,7 @@ import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
+import io.ballerina.openapi.corenew.service.BallerinaServiceGenerator;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
@@ -35,6 +35,7 @@ import io.ballerina.projects.ProjectException;
 import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.SpecVersion;
@@ -44,6 +45,7 @@ import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -99,6 +101,8 @@ public class TestUtils {
         return semanticModel.diagnostics();
     }
 
+    static int i = 0;
+
     public static List<Diagnostic> getDiagnosticsForService(SyntaxTree serviceSyntaxTree, OpenAPI openAPI,
                                                             BallerinaServiceGenerator ballerinaServiceGenerator)
             throws FormatterException, IOException, BallerinaOpenApiException {
@@ -114,6 +118,23 @@ public class TestUtils {
         writeFile(servicePath, serviceContent);
         writeFile(schemaPath, schemaContent);
         SemanticModel semanticModel = getSemanticModel(servicePath);
+        boolean hasErrors = semanticModel.diagnostics().stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        if (hasErrors) {
+            File f = new File("/home/dilan/Documents/tempopenapigenfiles/folder" + i);
+            f.mkdir();
+            FileWriter myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + i + "/servicefile" + i + ".bal");
+            myWriter.write(serviceContent);
+            myWriter.close();
+
+            myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + i + "/schemafile" + i + ".bal");
+            myWriter.write(schemaContent);
+            myWriter.close();
+            myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + i + "/Ballerina.toml");
+            myWriter.write("");
+            myWriter.close();
+            i++;
+        }
         return semanticModel.diagnostics();
     }
 

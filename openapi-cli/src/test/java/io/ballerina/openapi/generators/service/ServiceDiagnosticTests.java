@@ -19,11 +19,11 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
-import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.openapi.corenew.service.BallerinaServiceGenerator;
+import io.ballerina.openapi.corenew.service.model.OASServiceMetadata;
+import io.ballerina.openapi.corenew.typegenerator.GeneratorUtils;
+import io.ballerina.openapi.corenew.typegenerator.model.Filter;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -58,7 +58,7 @@ public class ServiceDiagnosticTests {
     @Test(description = "Test for compilation errors in OpenAPI definition to ballerina service skeleton generation",
             dataProvider = "singleFileProviderForDiagnosticCheck")
     public void checkDiagnosticIssues(String yamlFile) throws IOException, BallerinaOpenApiException,
-            FormatterException {
+            FormatterException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -79,7 +79,7 @@ public class ServiceDiagnosticTests {
     @Test(description = "Test for compilation errors in OpenAPI definition to ballerina service skeleton generation",
             dataProvider = "singleFileProviderForDiagnosticCheck")
     public void checkDiagnosticIssuesInGenericServiceGen(String yamlFile) throws IOException, BallerinaOpenApiException,
-            FormatterException {
+            FormatterException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -101,7 +101,7 @@ public class ServiceDiagnosticTests {
             "skeleton generation",
             dataProvider = "fileProviderForOpenAPI31DiagnosticCheck")
     public void checkDiagnosticIssuesWith31OpenAPIs(String yamlFile) throws IOException, BallerinaOpenApiException,
-            FormatterException {
+            FormatterException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = normalizeOpenAPI(definitionPath, true, SpecVersion.V31);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

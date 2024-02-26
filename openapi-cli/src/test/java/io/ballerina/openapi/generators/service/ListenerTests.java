@@ -20,10 +20,10 @@ package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CmdUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
-import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.openapi.corenew.service.BallerinaServiceGenerator;
+import io.ballerina.openapi.corenew.service.model.OASServiceMetadata;
+import io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.corenew.typegenerator.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
@@ -46,7 +46,7 @@ public class ListenerTests {
 
 
     @Test(description = "Generate importors")
-    public void generateImports() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateImports() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -60,7 +60,7 @@ public class ListenerTests {
 
     @Test(description = "Generate listeners", expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Failed to read endpoint details of the server: /v1")
-    public void generatelisteners() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generatelisteners() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners02.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -73,7 +73,7 @@ public class ListenerTests {
     }
 
     @Test(description = "Generate listeners")
-    public void generatelisteners02() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generatelisteners02() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners03.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -86,7 +86,7 @@ public class ListenerTests {
     }
 
     @Test(description = "Generate listeners when the server url is there and variables are absent")
-    public void generatelisteners03() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generatelisteners03() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners04.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -99,7 +99,7 @@ public class ListenerTests {
     }
 
     @Test(description = "Generate listeners when the server url base path is absent")
-    public void generatelisteners04() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generatelisteners04() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners05.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

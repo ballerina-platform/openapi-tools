@@ -31,6 +31,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -120,6 +121,9 @@ public class CodeGeneratorTest {
                     false, false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
+                FileWriter myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/filename.txt");
+                myWriter.write(generatedService);
+                myWriter.close();
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
                 expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedService.contains(expectedServiceContent),
@@ -568,9 +572,12 @@ public class CodeGeneratorTest {
             String expectedServiceContent = getStringFromGivenBalFile(expectedDirPath,
                     "generic_service_petstore_original.bal");
             generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter,
-                    false, false, true);
+                    false, false, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
+                FileWriter myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/filename.txt");
+                myWriter.write(generatedService);
+                myWriter.close();
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
                 expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedService.contains(expectedServiceContent));
