@@ -53,12 +53,12 @@ import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_CONTENT_KE
 import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_SUMMARY;
 
 /**
- * The {@link DefaultParameterMapper} class is the implementation class for the {@link ParameterMapper}.
+ * The {@link ParameterMapperImpl} class is the implementation class for the {@link ParameterMapper}.
  * This class provides functionalities to map the Ballerina resource parameters to OpenAPI operation parameters.
  *
  * @since 1.9.0
  */
-public class DefaultParameterMapper implements ParameterMapper {
+public class ParameterMapperImpl implements ParameterMapper {
     private final FunctionDefinitionNode functionDefinitionNode;
     private final OperationInventory operationInventory;
     private final Map<String, String> apiDocs;
@@ -66,9 +66,9 @@ public class DefaultParameterMapper implements ParameterMapper {
     private final boolean treatNilableAsOptional;
     private final TypeMapper typeMapper;
 
-    public DefaultParameterMapper(FunctionDefinitionNode functionDefinitionNode, OperationInventory operationInventory,
-                                  Map<String, String> apiDocs, AdditionalData additionalData,
-                                  Boolean treatNilableAsOptional, ServiceMapperFactory serviceMapperFactory) {
+    public ParameterMapperImpl(FunctionDefinitionNode functionDefinitionNode, OperationInventory operationInventory,
+                               Map<String, String> apiDocs, AdditionalData additionalData,
+                               Boolean treatNilableAsOptional, ServiceMapperFactory serviceMapperFactory) {
         this.functionDefinitionNode = functionDefinitionNode;
         this.operationInventory = operationInventory;
         this.apiDocs = apiDocs;

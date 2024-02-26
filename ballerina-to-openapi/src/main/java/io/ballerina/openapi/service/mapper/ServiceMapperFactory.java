@@ -15,7 +15,7 @@ import io.ballerina.openapi.service.mapper.interceptor.ReturnTypes;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
-import io.ballerina.openapi.service.mapper.parameter.DefaultParameterMapper;
+import io.ballerina.openapi.service.mapper.parameter.ParameterMapperImpl;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
 import io.ballerina.openapi.service.mapper.response.ResponseMapper;
 import io.ballerina.openapi.service.mapper.response.DefaultResponseMapper;
@@ -77,7 +77,7 @@ public class ServiceMapperFactory {
 
     public ParameterMapper getParameterMapper(FunctionDefinitionNode resourceNode, Map<String, String> apiDocs,
                                               OperationInventory opInventory) {
-        return new DefaultParameterMapper(resourceNode, opInventory, apiDocs, additionalData, treatNilableAsOptional,
+        return new ParameterMapperImpl(resourceNode, opInventory, apiDocs, additionalData, treatNilableAsOptional,
                 this);
     }
 
