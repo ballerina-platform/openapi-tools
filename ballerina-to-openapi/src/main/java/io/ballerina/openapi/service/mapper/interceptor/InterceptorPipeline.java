@@ -35,6 +35,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * This {@link InterceptorPipeline} class represents the interceptor pipeline. This class is responsible for building
+ * the interceptor pipeline and extracting the effective return types from the pipeline.
+ *
+ * @since 1.9.0
+ */
 public class InterceptorPipeline {
 
     private Interceptor initReqInterceptor = null;

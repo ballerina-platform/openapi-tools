@@ -27,6 +27,11 @@ import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * This {@link RequestInterceptor} class represents the request interceptor service.
+ *
+ * @since 1.9.0
+ */
 public class RequestInterceptor extends Interceptor {
 
     public RequestInterceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,

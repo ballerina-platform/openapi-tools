@@ -23,6 +23,11 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 
 import java.util.Optional;
 
+/**
+ * This {@link TargetResource} class represents the target resource service.
+ *
+ * @since 1.9.0
+ */
 public class TargetResource extends Service {
 
     private final TypeSymbol effectiveReturnType;

@@ -46,6 +46,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 
+/**
+ * This {@link ServiceMapperFactory} class represents the factory for creating mappers for the service to
+ * OpenAPI mapping.
+ *
+ * @since 1.9.0
+ */
 public class ServiceMapperFactory {
 
     private final OpenAPI openAPI;

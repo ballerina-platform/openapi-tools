@@ -33,6 +33,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * This {@link Interceptor} class represents the abstract interceptor service.
+ *
+ * @since 1.9.0
+ */
 public abstract class Interceptor extends Service {
 
     public enum InterceptorType {

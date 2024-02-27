@@ -28,6 +28,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * This {@link RequestErrorInterceptor} class represents the response interceptor service.
+ *
+ * @since 1.9.0
+ */
 public class ResponseInterceptor extends Interceptor {
 
     public ResponseInterceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,

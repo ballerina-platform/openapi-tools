@@ -40,9 +40,9 @@ import static io.ballerina.compiler.api.symbols.resourcepath.util.PathSegment.Ki
 import static io.ballerina.compiler.api.symbols.resourcepath.util.PathSegment.Kind.PATH_REST_PARAMETER;
 
 /**
- * This {@link ResourceMatcher} class represents the resource matcher.
- * This class provides functionalities to compare the HTTP resource A with the HTTP resource B to find whether the
- * requests to resource B can be dispatched to resource A.
+ * This {@link ResourceMatcher} class represents the resource matcher. This class provides functionalities to compare
+ * the HTTP resource A with the HTTP resource B to find whether the requests to resource B can be dispatched
+ * to resource A.
  *
  * @since 1.9.0
  */

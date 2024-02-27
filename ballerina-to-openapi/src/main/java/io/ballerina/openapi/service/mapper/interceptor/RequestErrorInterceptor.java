@@ -21,6 +21,11 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 
+/**
+ * This {@link RequestErrorInterceptor} class represents the request error interceptor service.
+ *
+ * @since 1.9.0
+ */
 public class RequestErrorInterceptor extends RequestInterceptor {
 
     public RequestErrorInterceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,

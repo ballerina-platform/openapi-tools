@@ -23,6 +23,13 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * This {@link ReturnTypes} record stores the return types from the interceptors and the target resource.
+ * @param fromInterceptors - The return types from the interceptors.
+ * @param fromTargetResource - The return types from the target resource.
+ *
+ * @since 1.9.0
+ */
 public record ReturnTypes(Set<TypeSymbol> fromInterceptors, Set<TypeSymbol> fromTargetResource) {
 
     public TypeSymbol getTypeSymbolFromInterceptors(SemanticModel semanticModel) {

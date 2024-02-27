@@ -26,6 +26,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * This {@link Service} class represents the abstract service.
+ *
+ * @since 1.9.0
+ */
 public abstract class Service {
 
     private TypeSymbol errorReturnType = null;
