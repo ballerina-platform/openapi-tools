@@ -61,8 +61,8 @@ public class TestUtils {
     }
 
     public static List<OpenAPIMapperDiagnostic> compareWithGeneratedFile(OASContractGenerator openApiConverter,
-                                                                            Path ballerinaFilePath, String yamlFile)
-                                                                            throws IOException {
+                                                                         Path ballerinaFilePath, String yamlFile)
+            throws IOException {
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), yamlFile);
