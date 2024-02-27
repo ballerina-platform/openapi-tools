@@ -21,7 +21,10 @@ package io.ballerina.openapi.service.mapper.interceptor;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.PathParameterSymbol;
 import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
+import io.ballerina.compiler.api.symbols.SingletonTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.api.symbols.resourcepath.PathRestParam;
 import io.ballerina.compiler.api.symbols.resourcepath.PathSegmentList;
 import io.ballerina.compiler.api.symbols.resourcepath.ResourcePath;
@@ -30,6 +33,7 @@ import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static io.ballerina.compiler.api.symbols.resourcepath.ResourcePath.Kind.DOT_RESOURCE_PATH;
 import static io.ballerina.compiler.api.symbols.resourcepath.util.PathSegment.Kind.NAMED_SEGMENT;
@@ -44,10 +48,6 @@ import static io.ballerina.compiler.api.symbols.resourcepath.util.PathSegment.Ki
  * @since 1.9.0
  */
 public final class ResourceMatcher {
-
-    public enum PathParamType {
-        STRING, INT, FLOAT, BOOLEAN, DECIMAL
-    }
 
     private ResourceMatcher() {
     }
@@ -72,7 +72,6 @@ public final class ResourceMatcher {
             }
             case PATH_REST_PARAM -> {
                 TypeSymbol restPathParamType = ((PathRestParam) resourcePath).parameter().typeDescriptor();
-                // TODO: Need to handle enum, union of singletons and literal types
                 return matchRestPath(restPathParamType, targetResourcePath, semanticModel);
             }
             default -> { // PATH_SEGMENT_LIST
@@ -84,20 +83,13 @@ public final class ResourceMatcher {
 
     private static boolean matchRestPath(TypeSymbol restPathParamType, ResourcePath targetResourcePath,
                                          SemanticModel semanticModel) {
-        if (semanticModel.types().INT.subtypeOf(restPathParamType)) {
-            return matchType(PathParamType.INT, targetResourcePath, semanticModel);
-        } else if (semanticModel.types().FLOAT.subtypeOf(restPathParamType)) {
-            return matchType(PathParamType.FLOAT, targetResourcePath, semanticModel);
-        } else if (semanticModel.types().BOOLEAN.subtypeOf(restPathParamType)) {
-            return matchType(PathParamType.BOOLEAN, targetResourcePath, semanticModel);
-        } else if (semanticModel.types().DECIMAL.subtypeOf(restPathParamType)) {
-            return matchType(PathParamType.DECIMAL, targetResourcePath, semanticModel);
-        } else { // STRING
+        if (semanticModel.types().STRING.subtypeOf(restPathParamType)) {
             return true;
         }
+        return matchType(restPathParamType, targetResourcePath, semanticModel);
     }
 
-    private static boolean matchType(PathParamType pathParamType, ResourcePath targetResourcePath,
+    private static boolean matchType(TypeSymbol pathParamType, ResourcePath targetResourcePath,
                                      SemanticModel semanticModel) {
         switch (targetResourcePath.kind()) {
             case PATH_SEGMENT_LIST -> {
@@ -107,7 +99,7 @@ public final class ResourceMatcher {
             case PATH_REST_PARAM -> {
                 PathParameterSymbol pathRestParam = ((PathRestParam) targetResourcePath).parameter();
                 TypeSymbol targetRestPathParamType = pathRestParam.typeDescriptor();
-                return targetRestPathParamType.subtypeOf(getTypeSymbol(pathParamType, semanticModel));
+                return targetRestPathParamType.subtypeOf(pathParamType);
             }
             default -> { // DOT_RESOURCE_PATH
                 return false;
@@ -115,35 +107,25 @@ public final class ResourceMatcher {
         }
     }
 
-    private static TypeSymbol getTypeSymbol(PathParamType pathParamType, SemanticModel semanticModel) {
-        return switch (pathParamType) {
-            case STRING -> semanticModel.types().STRING;
-            case INT -> semanticModel.types().INT;
-            case FLOAT -> semanticModel.types().FLOAT;
-            case BOOLEAN -> semanticModel.types().BOOLEAN;
-            case DECIMAL -> semanticModel.types().DECIMAL;
-        };
-    }
-
-    private static boolean matchPathSegListWithType(PathParamType pathParamType, List<PathSegment> pathSegments,
+    private static boolean matchPathSegListWithType(TypeSymbol pathParamType, List<PathSegment> pathSegments,
                                                     SemanticModel semanticModel) {
         for (PathSegment pathSegment : pathSegments) {
             switch (pathSegment.pathSegmentKind()) {
                 case NAMED_SEGMENT -> {
-                    if (matchNamedSegWithType(pathParamType, pathSegment)) {
+                    if (matchNamedSegWithType(pathParamType, pathSegment, semanticModel)) {
                         return false;
                     }
                 }
                 case PATH_REST_PARAMETER -> {
                     TypeSymbol targetRestPathParamType = ((PathRestParam) pathSegment).
                             parameter().typeDescriptor();
-                    if (!targetRestPathParamType.subtypeOf(getTypeSymbol(pathParamType, semanticModel))) {
+                    if (!targetRestPathParamType.subtypeOf(pathParamType)) {
                         return false;
                     }
                 }
                 case PATH_PARAMETER -> {
                     TypeSymbol targetPathParamType = ((PathParameterSymbol) pathSegment).typeDescriptor();
-                    if (!targetPathParamType.subtypeOf(getTypeSymbol(pathParamType, semanticModel))) {
+                    if (!targetPathParamType.subtypeOf(pathParamType)) {
                         return false;
                     }
                 }
@@ -152,18 +134,43 @@ public final class ResourceMatcher {
         return true;
     }
 
-    private static boolean matchNamedSegWithType(PathParamType pathParamType, PathSegment pathSegment) {
+    private static boolean matchNamedSegWithType(TypeSymbol pathParamType, PathSegment pathSegment,
+                                                 SemanticModel semanticModel) {
         return Objects.nonNull(pathSegment.signature()) &&
-                pathSegment.signature().matches(getRegex(pathParamType));
+                pathSegment.signature().matches(getRegex(pathParamType, semanticModel));
     }
 
-    private static String getRegex(PathParamType pathParamType) {
-        return switch (pathParamType) {
-            case STRING -> "[^/]+";
-            case INT -> "\\d+";
-            case FLOAT, DECIMAL -> "\\d+\\.\\d+";
-            case BOOLEAN -> "true|false";
-        };
+    private static String getRegex(TypeSymbol pathParamType, SemanticModel semanticModel) {
+        if (semanticModel.types().INT.subtypeOf(pathParamType)) {
+            return "\\d+";
+        } else if (semanticModel.types().FLOAT.subtypeOf(pathParamType)) {
+            return "\\d+\\.\\d+";
+        } else if (semanticModel.types().BOOLEAN.subtypeOf(pathParamType)) {
+            return "true|false";
+        } else if (semanticModel.types().DECIMAL.subtypeOf(pathParamType)) {
+            return "\\d+\\.\\d+";
+        }
+        Optional<UnionTypeSymbol> unionType = getUnionType(pathParamType);
+        if (unionType.isPresent() && unionType.get().memberTypeDescriptors().stream().allMatch(
+                typeSymbol -> typeSymbol instanceof SingletonTypeSymbol)) {
+            return unionType.get().memberTypeDescriptors().stream()
+                    .map(TypeSymbol::signature)
+                    .reduce((s, s2) -> s + "|" + s2).orElse("[^/]+");
+        }
+        return "[^/]+";
+    }
+
+    private static Optional<UnionTypeSymbol> getUnionType(TypeSymbol pathParamType) {
+        if (pathParamType instanceof TypeReferenceTypeSymbol typeReferenceTypeSymbol) {
+            TypeSymbol referredType = typeReferenceTypeSymbol.typeDescriptor();
+            if (referredType instanceof UnionTypeSymbol unionTypeSymbol) {
+                return Optional.of(unionTypeSymbol);
+            }
+            return getUnionType(referredType);
+        } else if (pathParamType instanceof UnionTypeSymbol unionTypeSymbol) {
+            return Optional.of(unionTypeSymbol);
+        }
+        return Optional.empty();
     }
 
     private static boolean matchPathSegList(List<PathSegment> pathSegments, ResourcePath targetResourcePath,
@@ -174,27 +181,12 @@ public final class ResourceMatcher {
             }
             case PATH_REST_PARAM -> {
                 TypeSymbol restPathParamType = ((PathRestParam) targetResourcePath).parameter().typeDescriptor();
-                return matchPathSegListWithType(getPathParamType(restPathParamType, semanticModel), pathSegments,
-                        semanticModel);
+                return matchPathSegListWithType(restPathParamType, pathSegments, semanticModel);
             }
             default -> { // PATH_SEGMENT_LIST
                 List<PathSegment> targetPathSegments = ((PathSegmentList) targetResourcePath).list();
                 return matchPathSegLists(pathSegments, targetPathSegments, semanticModel);
             }
-        }
-    }
-
-    private static PathParamType getPathParamType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
-        if (semanticModel.types().INT.subtypeOf(typeSymbol)) {
-            return PathParamType.INT;
-        } else if (semanticModel.types().FLOAT.subtypeOf(typeSymbol)) {
-            return PathParamType.FLOAT;
-        } else if (semanticModel.types().BOOLEAN.subtypeOf(typeSymbol)) {
-            return PathParamType.BOOLEAN;
-        } else if (semanticModel.types().DECIMAL.subtypeOf(typeSymbol)) {
-            return PathParamType.DECIMAL;
-        } else { // STRING
-            return PathParamType.STRING;
         }
     }
 
@@ -234,10 +226,10 @@ public final class ResourceMatcher {
                 return targetSeg.signature().equals(pathSeg.signature());
             } else if (pathSeg.pathSegmentKind().equals(PATH_PARAMETER)) {
                 TypeSymbol pathParamType = ((PathParameterSymbol) pathSeg).typeDescriptor();
-                return matchNamedSegWithType(getPathParamType(pathParamType, semanticModel), targetSeg);
+                return matchNamedSegWithType(pathParamType, targetSeg, semanticModel);
             } else { // PATH_REST_PARAMETER
                 TypeSymbol restPathParamType = ((PathParameterSymbol) pathSeg).typeDescriptor();
-                return matchNamedSegWithType(getPathParamType(restPathParamType, semanticModel), targetSeg);
+                return matchNamedSegWithType(restPathParamType, targetSeg, semanticModel);
             }
         } else if (targetSeg.pathSegmentKind().equals(PATH_PARAMETER)) {
             if (pathSeg.pathSegmentKind().equals(NAMED_SEGMENT)) {
