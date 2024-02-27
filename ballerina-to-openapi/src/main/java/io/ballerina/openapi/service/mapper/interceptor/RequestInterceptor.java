@@ -22,6 +22,7 @@ import io.ballerina.compiler.api.symbols.MethodSymbol;
 import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.openapi.service.mapper.interceptor.resource_matcher.ResourceMatcher;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 
 import java.util.Map;
