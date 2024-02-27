@@ -23,6 +23,7 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
@@ -223,7 +224,12 @@ public class ResourceMapperImpl implements ResourceMapper {
             for (Node node: resource.relativeResourcePath()) {
                 if (node instanceof ResourcePathParameterNode pathNode) {
                     relativePath.append("{");
-                    relativePath.append(pathNode.paramName().get());
+                    Optional<Token> pathParamToken = pathNode.paramName();
+                    if (pathParamToken.isPresent()) {
+                        relativePath.append(pathParamToken.get());
+                    } else {
+                        relativePath.append("unsupported");
+                    }
                     relativePath.append("}");
                 } else if ((resource.relativeResourcePath().size() == 1) && (node.toString().trim().equals("."))) {
                     return relativePath.toString();

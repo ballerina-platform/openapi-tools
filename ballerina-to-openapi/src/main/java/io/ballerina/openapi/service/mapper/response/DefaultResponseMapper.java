@@ -104,9 +104,6 @@ public class DefaultResponseMapper implements ResponseMapper {
 
         String defaultStatusCode = operationInventory.getHttpOperation().equalsIgnoreCase(POST) ? HTTP_201 : HTTP_200;
         TypeSymbol returnTypeSymbol = getReturnTypeSymbol(resourceNode);
-        if (Objects.isNull(returnTypeSymbol)) {
-            return;
-        }
         createResponseMapping(returnTypeSymbol, defaultStatusCode);
         if (operationInventory.hasDataBinding()) {
             addResponseMappingForDataBindingFailures();
@@ -152,6 +149,9 @@ public class DefaultResponseMapper implements ResponseMapper {
     }
 
     protected void createResponseMapping(TypeSymbol returnType, String defaultStatusCode) {
+        if (Objects.isNull(returnType)) {
+            return;
+        }
         Optional<UnionTypeSymbol> unionTypeOpt = getUnionType(returnType, semanticModel);
         if (unionTypeOpt.isPresent()) {
             addResponseMappingForUnion(defaultStatusCode, unionTypeOpt.get());

@@ -27,7 +27,6 @@ import io.ballerina.openapi.service.mapper.interceptor.ReturnTypes;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -60,7 +59,7 @@ public class ResponseMapperWithInterceptors extends DefaultResponseMapper {
 
     @Override
     protected void createResponseMapping(TypeSymbol returnType, String defaultStatusCode) {
-        if (Objects.nonNull(returnTypes.fromInterceptors())) {
+        if (!returnTypes.fromInterceptors().isEmpty()) {
             super.createResponseMapping(returnTypes.getTypeSymbolFromInterceptors(semanticModel), defaultStatusCode);
         }
         super.createResponseMapping(returnType, defaultStatusCode);

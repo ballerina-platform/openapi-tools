@@ -21,6 +21,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.PathParameterSymbol;
 import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
 import io.ballerina.compiler.api.symbols.SingletonTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
@@ -153,7 +154,13 @@ public final class ResourceMatcher {
         if (unionType.isPresent() && unionType.get().memberTypeDescriptors().stream().allMatch(
                 typeSymbol -> typeSymbol instanceof SingletonTypeSymbol)) {
             return unionType.get().memberTypeDescriptors().stream()
-                    .map(TypeSymbol::signature)
+                    .map(typeSymbol -> {
+                        String signature = typeSymbol.signature();
+                        if (((SingletonTypeSymbol) typeSymbol).originalType().typeKind().equals(TypeDescKind.STRING)) {
+                            signature = signature.substring(1, signature.length() - 1);
+                        }
+                        return signature;
+                    })
                     .reduce((s, s2) -> s + "|" + s2).orElse("[^/]+");
         }
         return "[^/]+";
