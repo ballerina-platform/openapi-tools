@@ -12,23 +12,19 @@ import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.utils.MediaTypeUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public abstract class Interceptor {
+public abstract class Interceptor extends Service {
 
     public enum InterceptorType {
         REQUEST, REQUEST_ERROR, RESPONSE, RESPONSE_ERROR
     }
 
     private final String name;
-    private TypeSymbol nonErrorReturnType = null;
-    private TypeSymbol errorReturnType = null;
     protected final ClassSymbol serviceClass;
     public ClassDefinitionNode serviceClassNode = null;
-    protected final SemanticModel semanticModel;
     protected ResourceMethodSymbol resourceMethod = null;
     protected boolean continueExecution = false;
     protected boolean hasNilReturn = false;
@@ -37,7 +33,7 @@ public abstract class Interceptor {
 
     public Interceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
                        ModuleMemberVisitor moduleMemberVisitor) {
-        this.semanticModel = semanticModel;
+        super(semanticModel);
         this.name = typeSymbol.getName().orElse("");
         typeSymbol.getName().ifPresent(
                 name -> this.serviceClassNode = moduleMemberVisitor.getInterceptorServiceClassNode(name));
@@ -48,8 +44,8 @@ public abstract class Interceptor {
 
     protected abstract void extractInterceptorDetails(SemanticModel semanticModel);
 
-    public boolean isInvokableFor(ResourceMethodSymbol targetResource) {
-        return true;
+    public boolean isNotInvokable(ResourceMethodSymbol targetResource) {
+        return false;
     }
 
     protected void setReturnType(TypeSymbol returnType) {
@@ -67,34 +63,6 @@ public abstract class Interceptor {
         }
 
         extractErrorAndNonErrorReturnTypes(effectiveReturnType);
-    }
-
-    private void extractErrorAndNonErrorReturnTypes(TypeSymbol effectiveReturnType) {
-        if (effectiveReturnType instanceof TypeReferenceTypeSymbol) {
-            extractErrorAndNonErrorReturnTypes(((TypeReferenceTypeSymbol) effectiveReturnType).typeDescriptor());
-        } else if (effectiveReturnType instanceof UnionTypeSymbol) {
-            List<TypeSymbol> memberTypes = ((UnionTypeSymbol) effectiveReturnType).userSpecifiedMemberTypes();
-            List<TypeSymbol> errorTypes = new ArrayList<>();
-            List<TypeSymbol> nonErrorTypes = new ArrayList<>();
-
-            memberTypes.forEach(type -> {
-                if (type.subtypeOf(semanticModel.types().ERROR)) {
-                    errorTypes.add(type);
-                } else {
-                    nonErrorTypes.add(type);
-                }
-            });
-            errorReturnType = errorTypes.isEmpty() ? null : semanticModel.types().builder().UNION_TYPE
-                    .withMemberTypes(errorTypes.toArray(TypeSymbol[]::new)).build();
-            nonErrorReturnType = nonErrorTypes.isEmpty() ? null : semanticModel.types().builder().UNION_TYPE
-                    .withMemberTypes(nonErrorTypes.toArray(TypeSymbol[]::new)).build();
-        } else {
-            if (effectiveReturnType.subtypeOf(semanticModel.types().ERROR)) {
-                errorReturnType = effectiveReturnType;
-            } else {
-                nonErrorReturnType = effectiveReturnType;
-            }
-        }
     }
 
     private boolean isSubTypeOfDefaultInterceptorReturnType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
@@ -151,22 +119,10 @@ public abstract class Interceptor {
         return name;
     }
 
-    public TypeSymbol getNonErrorReturnType() {
-        return nonErrorReturnType;
-    }
-
     public abstract InterceptorType getType();
 
     public boolean isContinueExecution() {
         return continueExecution;
-    }
-
-    public boolean hasErrorReturn() {
-        return Objects.nonNull(errorReturnType);
-    }
-
-    public TypeSymbol getErrorReturnType() {
-        return errorReturnType;
     }
 
     public ClassDefinitionNode getServiceClassNode() {
