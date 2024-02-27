@@ -15,7 +15,7 @@ public abstract class Service {
     private TypeSymbol nonErrorReturnType = null;
     protected final SemanticModel semanticModel;
 
-    public Service(SemanticModel semanticModel) {
+    protected Service(SemanticModel semanticModel) {
         this.semanticModel = semanticModel;
     }
 

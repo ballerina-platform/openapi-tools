@@ -24,19 +24,19 @@ public abstract class Interceptor extends Service {
 
     private final String name;
     protected final ClassSymbol serviceClass;
-    public ClassDefinitionNode serviceClassNode = null;
+    private ClassDefinitionNode serviceClassNode = null;
     protected ResourceMethodSymbol resourceMethod = null;
     protected boolean continueExecution = false;
     protected boolean hasNilReturn = false;
     private Interceptor nextInReqPath = null;
     protected Interceptor nextInResPath = null;
 
-    public Interceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
+    protected Interceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
                        ModuleMemberVisitor moduleMemberVisitor) {
         super(semanticModel);
         this.name = typeSymbol.getName().orElse("");
         typeSymbol.getName().ifPresent(
-                name -> this.serviceClassNode = moduleMemberVisitor.getInterceptorServiceClassNode(name));
+                svcName -> this.serviceClassNode = moduleMemberVisitor.getInterceptorServiceClassNode(svcName));
         this.serviceClass = typeSymbol.typeDescriptor() instanceof ClassSymbol ?
                 (ClassSymbol) typeSymbol.typeDescriptor() : null;
         extractInterceptorDetails(semanticModel);
@@ -44,9 +44,7 @@ public abstract class Interceptor extends Service {
 
     protected abstract void extractInterceptorDetails(SemanticModel semanticModel);
 
-    public boolean isNotInvokable(ResourceMethodSymbol targetResource) {
-        return false;
-    }
+    public abstract boolean isNotInvokable(ResourceMethodSymbol targetResource);
 
     protected void setReturnType(TypeSymbol returnType) {
         hasNilReturn = semanticModel.types().NIL.subtypeOf(returnType);

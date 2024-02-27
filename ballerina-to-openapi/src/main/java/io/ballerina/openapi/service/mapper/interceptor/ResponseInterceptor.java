@@ -2,6 +2,7 @@ package io.ballerina.openapi.service.mapper.interceptor;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.MethodSymbol;
+import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
@@ -29,6 +30,11 @@ public class ResponseInterceptor extends Interceptor {
     }
 
     @Override
+    public boolean isNotInvokable(ResourceMethodSymbol targetResource) {
+        return true;
+    }
+
+    @Override
     public InterceptorType getType() {
         return InterceptorType.RESPONSE;
     }
@@ -42,6 +48,7 @@ public class ResponseInterceptor extends Interceptor {
         return "interceptResponse";
     }
 
+    @Override
     public void setNextInReqPath(Interceptor nextInReqPath) {
         super.setNextInReqPath(null);
     }

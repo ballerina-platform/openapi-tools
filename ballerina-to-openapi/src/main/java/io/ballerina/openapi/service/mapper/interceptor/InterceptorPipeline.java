@@ -195,13 +195,11 @@ public class InterceptorPipeline {
             return;
         }
 
-        if (interceptor.isContinueExecution()) {
-            if (Objects.nonNull(prevReturnType)) {
-                if (fromTarget) {
-                    returnTypes.fromTargetResource().add(prevReturnType);
-                } else {
-                    returnTypes.fromInterceptors().add(prevReturnType);
-                }
+        if (interceptor.isContinueExecution() && Objects.nonNull(prevReturnType)) {
+            if (fromTarget) {
+                returnTypes.fromTargetResource().add(prevReturnType);
+            } else {
+                returnTypes.fromInterceptors().add(prevReturnType);
             }
         }
 
