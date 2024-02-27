@@ -663,16 +663,18 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         OpenApiCmd cmd = new OpenApiCmd(standardOut, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
-        Assert.assertTrue(outputStream.toString().contains("service generation can not be done due to the given" +
-                " openapi definition contains following complex path(s):\n" +
-                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo\n" +
-                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom\n" +
-                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo\n" +
+        String expectedOutput = "service generation can not be done due to the given" +
+                " openapi definition contains following complex path(s):" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
                 "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/" +
-                "{imageId}.{imageExtension}\n" +
+                "{imageId}.{imageExtension}" + System.lineSeparator() +
                 "/v3/ClientGroups/GetClientGroupByUserDefinedIdentifier(UserDefinedIdentifier=" +
-                "'{userDefinedIdentifier}')\n" +
-                "/companies({company_id})/items({item_id})"));
+                "'{userDefinedIdentifier}')" + System.lineSeparator() +
+                "/companies({company_id})/items({item_id})";
+
+        Assert.assertTrue(outputStream.toString().contains(expectedOutput));
     }
 
     @Test(description = "service type generation for the parameterized path in OAS")
@@ -684,14 +686,14 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Assert.assertTrue(outputStream.toString().contains("service generation can not be done due to the " +
-                "given openapi definition contains following complex path(s):\n" +
-                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo\n" +
-                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom\n" +
-                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo\n" +
+                "given openapi definition contains following complex path(s):" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
                 "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/" +
-                "{imageId}.{imageExtension}\n" +
+                "{imageId}.{imageExtension}" + System.lineSeparator() +
                 "/v3/ClientGroups/GetClientGroupByUserDefinedIdentifier(UserDefinedIdentifier='" +
-                "{userDefinedIdentifier}')\n" +
+                "{userDefinedIdentifier}')" + System.lineSeparator() +
                 "/companies({company_id})/items({item_id})"));
     }
 
@@ -703,15 +705,15 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Assert.assertTrue(outputStream.toString().contains("remote function(s) will be generated for client " +
-                "due to the given openapi definition contains following complex path(s):\n" +
-                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo\n" +
-                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom\n" +
-                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo\n" +
+                "due to the given openapi definition contains following complex path(s):" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
                 "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/" +
-                "{imageId}.{imageExtension}\n" +
+                "{imageId}.{imageExtension}" + System.lineSeparator() +
                 "/v3/ClientGroups/GetClientGroupByUserDefinedIdentifier(UserDefinedIdentifier=" +
-                "'{userDefinedIdentifier}')\n" +
-                "/companies({company_id})/items({item_id})\n" +
+                "'{userDefinedIdentifier}')" + System.lineSeparator() +
+                "/companies({company_id})/items({item_id})" + System.lineSeparator() +
                 "Client generated successfully."));
     }
 
@@ -724,15 +726,15 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         cmd.execute();
         Assert.assertTrue(outputStream.toString().contains("remote function(s) will be generated for client" +
                 " and the service generation can not be proceed due to the given openapi definition contains" +
-                " following complex path(s):\n" +
-                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo\n" +
-                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom\n" +
-                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo\n" +
+                " following complex path(s):" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
                 "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/" +
-                "{imageId}.{imageExtension}\n" +
+                "{imageId}.{imageExtension}" + System.lineSeparator() +
                 "/v3/ClientGroups/GetClientGroupByUserDefinedIdentifier(UserDefinedIdentifier=" +
-                "'{userDefinedIdentifier}')\n" +
-                "/companies({company_id})/items({item_id})\n" +
+                "'{userDefinedIdentifier}')" + System.lineSeparator() +
+                "/companies({company_id})/items({item_id})" + System.lineSeparator() +
                 "Following files were created."));
     }
 
