@@ -251,15 +251,43 @@ public class DefaultResponseMapper implements ResponseMapper {
         }
         if (content.containsKey(mediaType) && Objects.nonNull(content.get(mediaType).getSchema())) {
             MediaType existingMediaType = content.get(mediaType);
-            if (Objects.nonNull(mediaTypeObj.getSchema())) {
-                Schema updatedSchema = new ComposedSchema().oneOf(List.of(existingMediaType.getSchema(),
-                        mediaTypeObj.getSchema()));
-                existingMediaType.setSchema(updatedSchema);
+            if (Objects.nonNull(mediaTypeObj.getSchema()) &&
+                    !existingMediaType.getSchema().equals(mediaTypeObj.getSchema())) {
+                updateContentWithSameMediaType(mediaTypeObj, existingMediaType);
             }
         } else {
             content.addMediaType(mediaType, mediaTypeObj);
         }
         apiResponse.setContent(content);
+    }
+
+    private static void updateContentWithSameMediaType(MediaType mediaTypeObj, MediaType existingMediaType) {
+        if (existingMediaType.getSchema() instanceof ComposedSchema existingSchema) {
+            List<Schema> oneOf = existingSchema.getOneOf();
+            if (mediaTypeObj.getSchema() instanceof ComposedSchema mediaTypeSchema) {
+                List<Schema> mediaTypeOneOf = mediaTypeSchema.getOneOf();
+                for (Schema schema : mediaTypeOneOf) {
+                    if (!oneOf.contains(schema)) {
+                        oneOf.add(schema);
+                    }
+                }
+                existingSchema.setOneOf(oneOf);
+            } else if (!oneOf.contains(mediaTypeObj.getSchema())) {
+                oneOf.add(mediaTypeObj.getSchema());
+                existingSchema.setOneOf(oneOf);
+            }
+        } else {
+            if (mediaTypeObj.getSchema() instanceof ComposedSchema mediaTypeSchema) {
+                if (!mediaTypeSchema.getOneOf().contains(existingMediaType.getSchema())) {
+                    mediaTypeSchema.getOneOf().add(existingMediaType.getSchema());
+                }
+                existingMediaType.setSchema(mediaTypeSchema);
+            } else {
+                Schema updatedSchema = new ComposedSchema().oneOf(List.of(existingMediaType.getSchema(),
+                        mediaTypeObj.getSchema()));
+                existingMediaType.setSchema(updatedSchema);
+            }
+        }
     }
 
     private void addResponseMappingForNil() {
