@@ -12,7 +12,8 @@ import java.util.Optional;
 
 public class RequestInterceptor extends Interceptor {
 
-    public RequestInterceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
+    public RequestInterceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
+                              ModuleMemberVisitor moduleMemberVisitor) {
         super(typeSymbol, semanticModel, moduleMemberVisitor);
     }
 

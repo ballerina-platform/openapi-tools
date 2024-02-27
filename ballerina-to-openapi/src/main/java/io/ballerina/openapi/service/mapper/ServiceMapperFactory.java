@@ -1,7 +1,6 @@
 package io.ballerina.openapi.service.mapper;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
@@ -11,14 +10,13 @@ import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapper;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapperImpl;
 import io.ballerina.openapi.service.mapper.interceptor.InterceptorPipeline;
-import io.ballerina.openapi.service.mapper.interceptor.ReturnTypes;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
-import io.ballerina.openapi.service.mapper.parameter.ParameterMapperImpl;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
-import io.ballerina.openapi.service.mapper.response.ResponseMapper;
+import io.ballerina.openapi.service.mapper.parameter.ParameterMapperImpl;
 import io.ballerina.openapi.service.mapper.response.DefaultResponseMapper;
+import io.ballerina.openapi.service.mapper.response.ResponseMapper;
 import io.ballerina.openapi.service.mapper.response.ResponseMapperWithInterceptors;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
@@ -60,18 +58,6 @@ public class ServiceMapperFactory {
     }
 
     public ResourceMapper getResourceMapper(List<FunctionDefinitionNode> resources) {
-        for (FunctionDefinitionNode resource : resources) {
-            ResourceMethodSymbol resourceMethodSymbol = (ResourceMethodSymbol) additionalData.semanticModel().
-                    symbol(resource).get();
-            ReturnTypes returnType = interceptorPipeline.getEffectiveReturnType(resourceMethodSymbol);
-            System.out.println("Effective interceptor return type for resource: " + resourceMethodSymbol.getName().get() + " " +
-                    resourceMethodSymbol.resourcePath().signature() + " is: " +
-                    (Objects.isNull(returnType.fromInterceptors()) ? "null" : returnType.fromInterceptors().signature()));
-            System.out.println("Effective target resource return type for resource: " + resourceMethodSymbol.getName().get() + " " +
-                    resourceMethodSymbol.resourcePath().signature() + " is: " +
-                    (Objects.isNull(returnType.fromTargetResource()) ? "null" : returnType.fromTargetResource().signature()));
-            System.out.println("\n");
-        }
         return new ResourceMapperImpl(openAPI, resources, additionalData, this);
     }
 

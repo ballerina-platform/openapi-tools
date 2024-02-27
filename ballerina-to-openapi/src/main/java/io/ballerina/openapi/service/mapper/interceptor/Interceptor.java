@@ -27,7 +27,7 @@ public abstract class Interceptor {
     private TypeSymbol nonErrorReturnType = null;
     private TypeSymbol errorReturnType = null;
     protected final ClassSymbol serviceClass;
-    private ClassDefinitionNode serviceClassNode = null;
+    public ClassDefinitionNode serviceClassNode = null;
     protected final SemanticModel semanticModel;
     protected ResourceMethodSymbol resourceMethod = null;
     protected boolean continueExecution = false;
@@ -46,7 +46,7 @@ public abstract class Interceptor {
         extractInterceptorDetails(semanticModel);
     }
 
-    abstract protected void extractInterceptorDetails(SemanticModel semanticModel);
+    protected abstract void extractInterceptorDetails(SemanticModel semanticModel);
 
     public boolean isInvokableFor(ResourceMethodSymbol targetResource) {
         return true;
@@ -98,7 +98,8 @@ public abstract class Interceptor {
     }
 
     private boolean isSubTypeOfDefaultInterceptorReturnType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
-        Optional<Symbol> optNextServiceType = semanticModel.types().getTypeByName("ballerina", "http", "", "NextService");
+        Optional<Symbol> optNextServiceType = semanticModel.types().getTypeByName("ballerina", "http",
+                "", "NextService");
         if (optNextServiceType.isEmpty() ||
                 !(optNextServiceType.get() instanceof TypeDefinitionSymbol nextServiceType)) {
             return false;
@@ -109,7 +110,8 @@ public abstract class Interceptor {
     }
 
     private boolean isSubTypeOfHttpNextServiceType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
-        Optional<Symbol> optNextServiceType = semanticModel.types().getTypeByName("ballerina", "http", "", "NextService");
+        Optional<Symbol> optNextServiceType = semanticModel.types().getTypeByName("ballerina", "http",
+                "", "NextService");
         if (optNextServiceType.isEmpty() ||
                 !(optNextServiceType.get() instanceof TypeDefinitionSymbol nextServiceType)) {
             return false;
@@ -153,14 +155,10 @@ public abstract class Interceptor {
         return nonErrorReturnType;
     }
 
-    abstract public InterceptorType getType();
+    public abstract InterceptorType getType();
 
     public boolean isContinueExecution() {
         return continueExecution;
-    }
-
-    public boolean hasNilReturn() {
-        return hasNilReturn;
     }
 
     public boolean hasErrorReturn() {
@@ -169,6 +167,10 @@ public abstract class Interceptor {
 
     public TypeSymbol getErrorReturnType() {
         return errorReturnType;
+    }
+
+    public ClassDefinitionNode getServiceClassNode() {
+        return serviceClassNode;
     }
 
     public void setNextInReqPath(Interceptor nextInReqPath) {
@@ -186,7 +188,7 @@ public abstract class Interceptor {
         return nextInReqPath.getNextInReqErrorPath();
     }
 
-    public Interceptor getNextInResErrorPath() {;
+    public Interceptor getNextInResErrorPath() {
         if (Objects.isNull(nextInResPath) || nextInResPath.getType().equals(InterceptorType.RESPONSE_ERROR)) {
             return nextInResPath;
         }

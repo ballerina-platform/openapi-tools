@@ -190,8 +190,7 @@ public final class ServiceToOpenAPIMapper {
     public static OASResult generateOAS(OASGenerationMetaInfo oasGenerationMetaInfo) {
         ServiceDeclarationNode serviceDefinition = oasGenerationMetaInfo.getServiceDeclarationNode();
         SemanticModel semanticModel = oasGenerationMetaInfo.getSemanticModel();
-        ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(oasGenerationMetaInfo.getProject(),
-                semanticModel);
+        ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(oasGenerationMetaInfo.getProject());
         Set<ListenerDeclarationNode> listeners = moduleMemberVisitor.getListenerDeclarationNodes();
         String openApiFileName = oasGenerationMetaInfo.getOpenApiFileName();
         Path ballerinaFilePath = oasGenerationMetaInfo.getBallerinaFilePath();
@@ -204,7 +203,8 @@ public final class ServiceToOpenAPIMapper {
             if (openapi.getPaths() == null) {
                 InterceptorPipeline interceptorPipeline = null;
                 if (isInterceptableService(serviceDefinition, semanticModel)) {
-                    interceptorPipeline = InterceptorPipeline.build(serviceDefinition, semanticModel, moduleMemberVisitor);
+                    interceptorPipeline = InterceptorPipeline.build(serviceDefinition, semanticModel,
+                            moduleMemberVisitor);
                 }
                 ServiceMapperFactory serviceMapperFactory = new ServiceMapperFactory(openapi, semanticModel,
                         moduleMemberVisitor, diagnostics, isTreatNilableAsOptionalParameter(serviceDefinition),
@@ -256,8 +256,8 @@ public final class ServiceToOpenAPIMapper {
      *
      * @param project - current project
      */
-    public static ModuleMemberVisitor extractNodesFromProject(Project project, SemanticModel semanticModel) {
-        ModuleMemberVisitor balNodeVisitor = new ModuleMemberVisitor(semanticModel);
+    public static ModuleMemberVisitor extractNodesFromProject(Project project) {
+        ModuleMemberVisitor balNodeVisitor = new ModuleMemberVisitor();
         project.currentPackage().moduleIds().forEach(moduleId -> {
             Module module = project.currentPackage().module(moduleId);
             module.documentIds().forEach(documentId -> {

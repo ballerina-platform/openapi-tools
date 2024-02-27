@@ -6,7 +6,8 @@ import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 
 public class RequestErrorInterceptor extends RequestInterceptor {
 
-    public RequestErrorInterceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
+    public RequestErrorInterceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
+                                   ModuleMemberVisitor moduleMemberVisitor) {
         super(typeSymbol, semanticModel, moduleMemberVisitor);
     }
 

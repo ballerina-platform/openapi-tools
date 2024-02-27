@@ -56,7 +56,8 @@ public class InterceptorPipeline {
         return pipeline;
     }
 
-    private static List<Interceptor> buildInterceptors(ServiceDeclarationNode serviceDefinition, SemanticModel semanticModel,
+    private static List<Interceptor> buildInterceptors(ServiceDeclarationNode serviceDefinition,
+                                                       SemanticModel semanticModel,
                                                        ModuleMemberVisitor moduleMemberVisitor) {
         Optional<Symbol> optServiceSymbol = semanticModel.symbol(serviceDefinition);
         if (optServiceSymbol.isEmpty() ||
@@ -241,7 +242,8 @@ public class InterceptorPipeline {
             } else {
                 Interceptor nextResponseErrorInterceptor = initResInterceptor.getNextInResPath();
                 if (Objects.nonNull(nextResponseErrorInterceptor)) {
-                    updateReturnTypeForResInterceptor(nextResponseErrorInterceptor, returnTypes, nonErrorReturnType, true);
+                    updateReturnTypeForResInterceptor(nextResponseErrorInterceptor, returnTypes,
+                            nonErrorReturnType, true);
                 } else {
                     returnTypes.fromTargetResource().add(nonErrorReturnType);
                 }
