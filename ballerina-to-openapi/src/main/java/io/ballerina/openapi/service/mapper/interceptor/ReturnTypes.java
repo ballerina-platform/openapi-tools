@@ -23,12 +23,14 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import java.util.Objects;
 import java.util.Set;
 
-public record ReturnTypes(TypeSymbol fromInterceptors, TypeSymbol fromTargetResource) {
+public record ReturnTypes(Set<TypeSymbol> fromInterceptors, Set<TypeSymbol> fromTargetResource) {
 
-    public static ReturnTypes create(ReturnTypeLists returnTypeLists, SemanticModel semanticModel) {
-        TypeSymbol fromInterceptors = buildTypeSymbolFromList(returnTypeLists.fromInterceptors(), semanticModel);
-        TypeSymbol fromTargetResource = buildTypeSymbolFromList(returnTypeLists.fromTargetResource(), semanticModel);
-        return new ReturnTypes(fromInterceptors, fromTargetResource);
+    public TypeSymbol getTypeSymbolFromInterceptors(SemanticModel semanticModel) {
+        return buildTypeSymbolFromList(fromInterceptors, semanticModel);
+    }
+
+    public TypeSymbol getTypeSymbolFromTargetResource(SemanticModel semanticModel) {
+        return buildTypeSymbolFromList(fromTargetResource, semanticModel);
     }
 
     private static TypeSymbol buildTypeSymbolFromList(Set<TypeSymbol> typeSymbols, SemanticModel semanticModel) {

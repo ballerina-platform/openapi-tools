@@ -81,7 +81,7 @@ import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.isSameMed
  */
 public class DefaultResponseMapper implements ResponseMapper {
     private final TypeMapper typeMapper;
-    private final SemanticModel semanticModel;
+    protected final SemanticModel semanticModel;
     private List<String> allowedMediaTypes = new ArrayList<>();
     private final Map<String, Header> cacheHeaders = new HashMap<>();
     private final Map<String, Map<String, Header>> headersMap = new HashMap<>();

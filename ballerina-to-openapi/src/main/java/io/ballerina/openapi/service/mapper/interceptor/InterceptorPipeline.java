@@ -135,12 +135,11 @@ public class InterceptorPipeline {
     }
 
     public ReturnTypes getEffectiveReturnType(ResourceMethodSymbol targetResource) {
-        ReturnTypeLists returnTypeLists = getReturnTypes(targetResource);
-        return ReturnTypes.create(returnTypeLists, semanticModel);
+        return getReturnTypes(targetResource);
     }
 
-    private ReturnTypeLists getReturnTypes(ResourceMethodSymbol targetResource) {
-        ReturnTypeLists returnTypes = new ReturnTypeLists(new HashSet<>(), new HashSet<>());
+    private ReturnTypes getReturnTypes(ResourceMethodSymbol targetResource) {
+        ReturnTypes returnTypes = new ReturnTypes(new HashSet<>(), new HashSet<>());
         if (Objects.isNull(initReqInterceptor)) {
             updateReturnTypeForTarget(returnTypes, targetResource);
         } else {
@@ -149,7 +148,7 @@ public class InterceptorPipeline {
         return returnTypes;
     }
 
-    private void updateReturnTypeForReqInterceptor(Interceptor interceptor, ReturnTypeLists returnTypes,
+    private void updateReturnTypeForReqInterceptor(Interceptor interceptor, ReturnTypes returnTypes,
                                                    ResourceMethodSymbol targetResource) {
         if (Objects.isNull(interceptor)) {
             updateReturnTypeForTarget(returnTypes, targetResource);
@@ -178,7 +177,7 @@ public class InterceptorPipeline {
         updateNonErrorReturnType(interceptor, returnTypes);
     }
 
-    private void updateErrorReturnType(Interceptor interceptor, ReturnTypeLists returnTypes,
+    private void updateErrorReturnType(Interceptor interceptor, ReturnTypes returnTypes,
                                        Interceptor nextErrorInterceptor) {
         if (Objects.nonNull(nextErrorInterceptor)) {
             updateReturnTypeForResInterceptor(nextErrorInterceptor, returnTypes, null, false);
@@ -187,7 +186,7 @@ public class InterceptorPipeline {
         }
     }
 
-    private void updateNonErrorReturnType(Interceptor interceptor, ReturnTypeLists returnTypes) {
+    private void updateNonErrorReturnType(Interceptor interceptor, ReturnTypes returnTypes) {
         TypeSymbol nonErrorReturnType = interceptor.getNonErrorReturnType();
         if (Objects.nonNull(nonErrorReturnType)) {
             Interceptor nextResInterceptor = interceptor.getNextInResPath();
@@ -199,7 +198,7 @@ public class InterceptorPipeline {
         }
     }
 
-    private void updateReturnTypeForResInterceptor(Interceptor interceptor, ReturnTypeLists returnTypes,
+    private void updateReturnTypeForResInterceptor(Interceptor interceptor, ReturnTypes returnTypes,
                                                    TypeSymbol prevReturnType, boolean fromTarget) {
         if (Objects.isNull(interceptor)) {
             if (Objects.nonNull(prevReturnType)) {
@@ -228,7 +227,7 @@ public class InterceptorPipeline {
         updateNonErrorReturnType(interceptor, returnTypes);
     }
 
-    private void updateReturnTypeForTarget(ReturnTypeLists returnTypes, ResourceMethodSymbol targetResource) {
+    private void updateReturnTypeForTarget(ReturnTypes returnTypes, ResourceMethodSymbol targetResource) {
         TargetResource target = new TargetResource(targetResource, semanticModel);
         TypeSymbol returnType = target.getEffectiveReturnType();
         if (Objects.isNull(initResInterceptor)) {

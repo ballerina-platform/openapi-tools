@@ -55,13 +55,13 @@ public class ResponseMapperWithInterceptors extends DefaultResponseMapper {
 
     @Override
     protected TypeSymbol getReturnTypeSymbol(FunctionDefinitionNode resourceNode) {
-        return returnTypes.fromTargetResource();
+        return returnTypes.getTypeSymbolFromTargetResource(semanticModel);
     }
 
     @Override
     protected void createResponseMapping(TypeSymbol returnType, String defaultStatusCode) {
         if (Objects.nonNull(returnTypes.fromInterceptors())) {
-            super.createResponseMapping(returnTypes.fromInterceptors(), defaultStatusCode);
+            super.createResponseMapping(returnTypes.getTypeSymbolFromInterceptors(semanticModel), defaultStatusCode);
         }
         super.createResponseMapping(returnType, defaultStatusCode);
     }
