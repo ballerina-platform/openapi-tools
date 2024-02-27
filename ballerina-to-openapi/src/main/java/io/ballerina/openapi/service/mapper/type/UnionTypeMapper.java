@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.parseBalSimpleLiteral;
+
 /**
  * This {@link UnionTypeMapper} class represents the union type mapper.
  * This class provides functionalities for mapping the Ballerina union type to OpenAPI type schema.
@@ -122,28 +124,59 @@ public class UnionTypeMapper extends AbstractTypeMapper {
 
     static Schema getSingletonUnionTypeSchema(UnionTypeSymbol typeSymbol, List<OpenAPIMapperDiagnostic> diagnostics) {
         List<TypeSymbol> memberTypeSymbols = typeSymbol.userSpecifiedMemberTypes();
-        List<String> enumValues = new ArrayList<>();
+        List<Object> enumValues = new ArrayList<>();
         boolean nullable = hasNilableType(typeSymbol);
-        for (TypeSymbol memberTypeSymbol : memberTypeSymbols) {
-            if (memberTypeSymbol.typeKind().equals(TypeDescKind.NIL)) {
-                continue;
-            } else if (!((SingletonTypeSymbol) memberTypeSymbol).originalType().
-                    typeKind().equals(TypeDescKind.STRING)) {
-                DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_122;
-                ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
-                        message.getDescription(), null, MapperCommonUtils.getTypeName(typeSymbol));
-                diagnostics.add(error);
-                return null;
-            }
-            String signature = memberTypeSymbol.signature();
-            enumValues.add(signature.substring(1, signature.length() - 1));
+        TypeDescKind enumType = getEnumType(memberTypeSymbols);
+        if (Objects.isNull(enumType)) {
+            addUnsupportedUnionError(typeSymbol, diagnostics);
+            return null;
         }
-        StringSchema schema = new StringSchema();
+        for (TypeSymbol memberTypeSymbol : memberTypeSymbols) {
+            if (((SingletonTypeSymbol) memberTypeSymbol).originalType().typeKind().equals(TypeDescKind.STRING)) {
+                String signature = memberTypeSymbol.signature();
+                enumValues.add(signature.substring(1, signature.length() - 1));
+            } else {
+                enumValues.add(parseBalSimpleLiteral(memberTypeSymbol.signature()));
+            }
+        }
+        Schema schema = SimpleTypeMapper.getSchema(enumType);
+        if (Objects.isNull(schema)) {
+            addUnsupportedUnionError(typeSymbol, diagnostics);
+            return null;
+        }
         schema.setEnum(enumValues);
         if (nullable) {
             schema.setNullable(true);
         }
         return schema;
+    }
+
+    private static void addUnsupportedUnionError(UnionTypeSymbol typeSymbol,
+                                                 List<OpenAPIMapperDiagnostic> diagnostics) {
+        DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_122;
+        ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
+                message.getDescription(), null, MapperCommonUtils.getTypeName(typeSymbol));
+        diagnostics.add(error);
+    }
+
+    static TypeDescKind getEnumType(List<TypeSymbol> memberTypeSymbols) {
+        if (memberTypeSymbols.stream().allMatch(
+                symbol -> ((SingletonTypeSymbol) symbol).originalType().typeKind().equals(TypeDescKind.STRING))) {
+            return TypeDescKind.STRING;
+        } else if (memberTypeSymbols.stream().allMatch(
+                symbol -> ((SingletonTypeSymbol) symbol).originalType().typeKind().equals(TypeDescKind.INT))) {
+            return TypeDescKind.INT;
+        } else if (memberTypeSymbols.stream().allMatch(
+                symbol -> ((SingletonTypeSymbol) symbol).originalType().typeKind().equals(TypeDescKind.FLOAT))) {
+            return TypeDescKind.FLOAT;
+        } else if (memberTypeSymbols.stream().allMatch(
+                symbol -> ((SingletonTypeSymbol) symbol).originalType().typeKind().equals(TypeDescKind.BOOLEAN))) {
+            return TypeDescKind.BOOLEAN;
+        } else if (memberTypeSymbols.stream().allMatch(
+                symbol -> ((SingletonTypeSymbol) symbol).originalType().typeKind().equals(TypeDescKind.DECIMAL))) {
+            return TypeDescKind.DECIMAL;
+        }
+        return null;
     }
 
     static boolean isEnumTypeDefinition(TypeReferenceTypeSymbol typeSymbol) {
