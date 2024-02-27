@@ -17,11 +17,6 @@
  */
 package io.ballerina.openapi.service.mapper.model;
 
-import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.ClassSymbol;
-import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
-import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
@@ -29,7 +24,6 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -43,18 +37,6 @@ public class ModuleMemberVisitor extends NodeVisitor {
     Set<TypeDefinitionNode> typeDefinitionNodes = new LinkedHashSet<>();
     Set<ListenerDeclarationNode> listenerDeclarationNodes = new LinkedHashSet<>();
     Set<ClassDefinitionNode> interceptorServiceClassNodes = new LinkedHashSet<>();
-    SemanticModel semanticModel;
-    TypeSymbol interceptorType;
-
-    public ModuleMemberVisitor(SemanticModel semanticModel) {
-        this.semanticModel = semanticModel;
-        Optional<Symbol> optInterceptorType = semanticModel.types().getTypeByName("ballerina", "http", "",
-                "Interceptor");
-        if (optInterceptorType.isPresent() &&
-                optInterceptorType.get() instanceof TypeDefinitionSymbol interceptorTypeDef) {
-            interceptorType = interceptorTypeDef.typeDescriptor();
-        }
-    }
 
     @Override
     public void visit(TypeDefinitionNode typeDefinitionNode) {
@@ -68,11 +50,7 @@ public class ModuleMemberVisitor extends NodeVisitor {
 
     @Override
     public void visit(ClassDefinitionNode classDefinitionNode) {
-        Optional<Symbol> classSymbolOpt = semanticModel.symbol(classDefinitionNode);
-        if (Objects.nonNull(interceptorType) && classSymbolOpt.isPresent() &&
-                classSymbolOpt.get() instanceof ClassSymbol classSymbol && classSymbol.subtypeOf(interceptorType)) {
-            interceptorServiceClassNodes.add(classDefinitionNode);
-        }
+        interceptorServiceClassNodes.add(classDefinitionNode);
     }
 
     public Set<ListenerDeclarationNode> getListenerDeclarationNodes() {
