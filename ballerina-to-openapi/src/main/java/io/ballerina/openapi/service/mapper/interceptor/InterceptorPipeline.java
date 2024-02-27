@@ -176,15 +176,15 @@ public class InterceptorPipeline {
                 if (Objects.nonNull(initResInterceptor)) {
                     nextErrorInterceptor = initResInterceptor.getNextInResErrorPath();
                 }
-                updateErrorReturnType(interceptor, returnTypes, nextErrorInterceptor);
+                updateErrorReturnTypeForInterceptor(interceptor, returnTypes, nextErrorInterceptor);
             }
         }
 
-        updateNonErrorReturnType(interceptor, returnTypes);
+        updateNonErrorReturnTypeForInterceptor(interceptor, returnTypes);
     }
 
-    private void updateErrorReturnType(Interceptor interceptor, ReturnTypes returnTypes,
-                                       Interceptor nextErrorInterceptor) {
+    private void updateErrorReturnTypeForInterceptor(Interceptor interceptor, ReturnTypes returnTypes,
+                                                     Interceptor nextErrorInterceptor) {
         if (Objects.nonNull(nextErrorInterceptor)) {
             updateReturnTypeForResInterceptor(nextErrorInterceptor, returnTypes, null, false);
         } else {
@@ -192,7 +192,7 @@ public class InterceptorPipeline {
         }
     }
 
-    private void updateNonErrorReturnType(Interceptor interceptor, ReturnTypes returnTypes) {
+    private void updateNonErrorReturnTypeForInterceptor(Interceptor interceptor, ReturnTypes returnTypes) {
         TypeSymbol nonErrorReturnType = interceptor.getNonErrorReturnType();
         if (Objects.nonNull(nonErrorReturnType)) {
             Interceptor nextResInterceptor = interceptor.getNextInResPath();
@@ -227,10 +227,10 @@ public class InterceptorPipeline {
 
         if (interceptor.hasErrorReturn()) {
             Interceptor nextErrorInterceptor = interceptor.getNextInResErrorPath();
-            updateErrorReturnType(interceptor, returnTypes, nextErrorInterceptor);
+            updateErrorReturnTypeForInterceptor(interceptor, returnTypes, nextErrorInterceptor);
         }
 
-        updateNonErrorReturnType(interceptor, returnTypes);
+        updateNonErrorReturnTypeForInterceptor(interceptor, returnTypes);
     }
 
     private void updateReturnTypeForTarget(ReturnTypes returnTypes, ResourceMethodSymbol targetResource) {
@@ -241,29 +241,37 @@ public class InterceptorPipeline {
             return;
         }
         if (target.hasErrorReturn()) {
-            if (initResInterceptor.getType().equals(InterceptorType.RESPONSE_ERROR)) {
-                updateReturnTypeForResInterceptor(initResInterceptor, returnTypes, null, true);
-            } else {
-                Interceptor nextResponseErrorInterceptor = initResInterceptor.getNextInResErrorPath();
-                if (Objects.nonNull(nextResponseErrorInterceptor)) {
-                    updateReturnTypeForResInterceptor(nextResponseErrorInterceptor, returnTypes, null, true);
-                } else {
-                    returnTypes.fromTargetResource().add(target.getErrorReturnType());
-                }
-            }
+            updateErrorReturnTypeForTarget(returnTypes, target);
         }
         TypeSymbol nonErrorReturnType = target.getNonErrorReturnType();
         if (Objects.nonNull(nonErrorReturnType)) {
-            if (initResInterceptor.getType().equals(InterceptorType.RESPONSE)) {
-                updateReturnTypeForResInterceptor(initResInterceptor, returnTypes, nonErrorReturnType, true);
+            updateNonErrorReturnTypeForTarget(returnTypes, nonErrorReturnType);
+        }
+    }
+
+    private void updateNonErrorReturnTypeForTarget(ReturnTypes returnTypes, TypeSymbol nonErrorReturnType) {
+        if (initResInterceptor.getType().equals(InterceptorType.RESPONSE)) {
+            updateReturnTypeForResInterceptor(initResInterceptor, returnTypes, nonErrorReturnType, true);
+        } else {
+            Interceptor nextResponseErrorInterceptor = initResInterceptor.getNextInResPath();
+            if (Objects.nonNull(nextResponseErrorInterceptor)) {
+                updateReturnTypeForResInterceptor(nextResponseErrorInterceptor, returnTypes,
+                        nonErrorReturnType, true);
             } else {
-                Interceptor nextResponseErrorInterceptor = initResInterceptor.getNextInResPath();
-                if (Objects.nonNull(nextResponseErrorInterceptor)) {
-                    updateReturnTypeForResInterceptor(nextResponseErrorInterceptor, returnTypes,
-                            nonErrorReturnType, true);
-                } else {
-                    returnTypes.fromTargetResource().add(nonErrorReturnType);
-                }
+                returnTypes.fromTargetResource().add(nonErrorReturnType);
+            }
+        }
+    }
+
+    private void updateErrorReturnTypeForTarget(ReturnTypes returnTypes, TargetResource target) {
+        if (initResInterceptor.getType().equals(InterceptorType.RESPONSE_ERROR)) {
+            updateReturnTypeForResInterceptor(initResInterceptor, returnTypes, null, true);
+        } else {
+            Interceptor nextResponseErrorInterceptor = initResInterceptor.getNextInResErrorPath();
+            if (Objects.nonNull(nextResponseErrorInterceptor)) {
+                updateReturnTypeForResInterceptor(nextResponseErrorInterceptor, returnTypes, null, true);
+            } else {
+                returnTypes.fromTargetResource().add(target.getErrorReturnType());
             }
         }
     }
