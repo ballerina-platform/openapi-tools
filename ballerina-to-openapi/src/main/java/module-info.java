@@ -45,6 +45,6 @@ module io.ballerina.openapi.service {
     exports io.ballerina.openapi.service.mapper.hateoas;
     exports io.ballerina.openapi.service.mapper.constraint;
     exports io.ballerina.openapi.service.mapper.interceptor;
-    exports io.ballerina.openapi.service.mapper.interceptor.resource_matcher;
+    exports io.ballerina.openapi.service.mapper.interceptor.resource;
 }
 

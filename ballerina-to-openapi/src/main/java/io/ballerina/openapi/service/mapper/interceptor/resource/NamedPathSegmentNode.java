@@ -15,7 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.mapper.interceptor.resource_matcher;
+package io.ballerina.openapi.service.mapper.interceptor.resource;
 
 import io.ballerina.compiler.api.SemanticModel;
 
