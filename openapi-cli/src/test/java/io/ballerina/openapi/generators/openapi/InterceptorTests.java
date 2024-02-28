@@ -52,6 +52,15 @@ public class InterceptorTests {
         }
     }
 
+    @Test(description = "Test with Response interceptor")
+    public void testResponseInterceptor() throws IOException {
+        for (int i = 0; i <= 5; i++) {
+            Path ballerinaFilePath = INTERCEPTOR_DIR.resolve("response_interceptors/interceptors0" + i + ".bal");
+            compareWithGeneratedFile(ballerinaFilePath,
+                    "interceptors/response_interceptors/interceptors0" + i + ".yaml");
+        }
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

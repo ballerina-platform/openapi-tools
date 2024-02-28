@@ -23,7 +23,7 @@ type Person record {|
 service http:InterceptableService /payloadV on new http:Listener(9090) {
 
     public function createInterceptors() returns [RequestInterceptor] {
-        return [new];
+        return [];
     }
 
     resource function get hello() returns string {
