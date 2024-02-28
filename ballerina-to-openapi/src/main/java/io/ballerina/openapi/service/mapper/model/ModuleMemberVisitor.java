@@ -57,21 +57,21 @@ public class ModuleMemberVisitor extends NodeVisitor {
         return listenerDeclarationNodes;
     }
 
-    public TypeDefinitionNode getTypeDefinitionNode(String typeName) {
+    public Optional<TypeDefinitionNode> getTypeDefinitionNode(String typeName) {
         for (TypeDefinitionNode typeDefinitionNode : typeDefinitionNodes) {
             if (MapperCommonUtils.unescapeIdentifier(typeDefinitionNode.typeName().text()).equals(typeName)) {
-                return typeDefinitionNode;
+                return Optional.of(typeDefinitionNode);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
-    public ClassDefinitionNode getInterceptorServiceClassNode(String typeName) {
+    public Optional<ClassDefinitionNode> getInterceptorServiceClassNode(String typeName) {
         for (ClassDefinitionNode classDefinitionNode : interceptorServiceClassNodes) {
             if (MapperCommonUtils.unescapeIdentifier(classDefinitionNode.className().text()).equals(typeName)) {
-                return classDefinitionNode;
+                return Optional.of(classDefinitionNode);
             }
         }
-        return null;
+        return Optional.empty();
     }
 }

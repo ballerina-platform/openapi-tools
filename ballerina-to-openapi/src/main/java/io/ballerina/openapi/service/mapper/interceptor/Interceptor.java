@@ -57,8 +57,10 @@ public abstract class Interceptor extends Service {
                        ModuleMemberVisitor moduleMemberVisitor) {
         super(semanticModel);
         this.name = typeSymbol.getName().orElse("");
-        typeSymbol.getName().ifPresent(
-                svcName -> this.serviceClassNode = moduleMemberVisitor.getInterceptorServiceClassNode(svcName));
+        if (typeSymbol.getName().isPresent() &&
+                moduleMemberVisitor.getInterceptorServiceClassNode(this.name).isPresent()) {
+            this.serviceClassNode = moduleMemberVisitor.getInterceptorServiceClassNode(this.name).get();
+        }
         this.serviceClass = typeSymbol.typeDescriptor() instanceof ClassSymbol ?
                 (ClassSymbol) typeSymbol.typeDescriptor() : null;
         extractInterceptorDetails(semanticModel);
