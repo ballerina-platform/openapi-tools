@@ -180,7 +180,8 @@ public class InterceptorPipeline {
             }
         }
 
-        updateNonErrorReturnTypeForInterceptor(interceptor, returnTypes);
+        TypeSymbol nonErrorReturnType = interceptor.getNonErrorReturnType();
+        updateNonErrorReturnTypeForInterceptor(interceptor, nonErrorReturnType, returnTypes, false);
     }
 
     private void updateErrorReturnTypeForInterceptor(Interceptor interceptor, ReturnTypes returnTypes,
@@ -192,12 +193,12 @@ public class InterceptorPipeline {
         }
     }
 
-    private void updateNonErrorReturnTypeForInterceptor(Interceptor interceptor, ReturnTypes returnTypes) {
-        TypeSymbol nonErrorReturnType = interceptor.getNonErrorReturnType();
+    private void updateNonErrorReturnTypeForInterceptor(Interceptor interceptor, TypeSymbol nonErrorReturnType,
+                                                        ReturnTypes returnTypes, boolean fromTarget) {
         if (Objects.nonNull(nonErrorReturnType)) {
             Interceptor nextResInterceptor = interceptor.getNextInResPath();
             if (Objects.nonNull(nextResInterceptor)) {
-                updateReturnTypeForResInterceptor(nextResInterceptor, returnTypes, nonErrorReturnType, false);
+                updateReturnTypeForResInterceptor(nextResInterceptor, returnTypes, nonErrorReturnType, fromTarget);
             } else {
                 returnTypes.fromInterceptors().add(nonErrorReturnType);
             }
@@ -218,11 +219,7 @@ public class InterceptorPipeline {
         }
 
         if (interceptor.isContinueExecution() && Objects.nonNull(prevReturnType)) {
-            if (fromTarget) {
-                returnTypes.fromTargetResource().add(prevReturnType);
-            } else {
-                returnTypes.fromInterceptors().add(prevReturnType);
-            }
+            updateNonErrorReturnTypeForInterceptor(interceptor, prevReturnType, returnTypes, fromTarget);
         }
 
         if (interceptor.hasErrorReturn()) {
@@ -230,7 +227,8 @@ public class InterceptorPipeline {
             updateErrorReturnTypeForInterceptor(interceptor, returnTypes, nextErrorInterceptor);
         }
 
-        updateNonErrorReturnTypeForInterceptor(interceptor, returnTypes);
+        TypeSymbol nonErrorReturnType = interceptor.getNonErrorReturnType();
+        updateNonErrorReturnTypeForInterceptor(interceptor, nonErrorReturnType, returnTypes, false);
     }
 
     private void updateReturnTypeForTarget(ReturnTypes returnTypes, ResourceMethodSymbol targetResource) {
