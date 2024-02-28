@@ -704,7 +704,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         OpenApiCmd cmd = new OpenApiCmd(standardOut, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
-        Assert.assertTrue(outputStream.toString().contains("remote function(s) will be generated for client " +
+        Assert.assertTrue(outputStream.toString().contains("WARNING: remote function(s) will be generated for client " +
                 "due to the given openapi definition contains following complex path(s):" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
@@ -724,7 +724,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         OpenApiCmd cmd = new OpenApiCmd(standardOut, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
-        Assert.assertTrue(outputStream.toString().contains("remote function(s) will be generated for client" +
+        Assert.assertTrue(outputStream.toString().contains("WARNING: remote function(s) will be generated for client" +
                 " and the service generation can not be proceed due to the given openapi definition contains" +
                 " following complex path(s):" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +

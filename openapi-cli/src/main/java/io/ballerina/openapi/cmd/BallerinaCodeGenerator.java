@@ -111,8 +111,9 @@ public class BallerinaCodeGenerator {
         List<String> complexPaths = GeneratorUtils.getComplexPaths(openAPIDef);
         if (!complexPaths.isEmpty()) {
             isResource = false;
-            outStream.println("remote function(s) will be generated for client and the service generation can not be " +
-                    "proceed due to the given openapi definition contains following complex path(s):");
+            outStream.println("WARNING: remote function(s) will be generated for client and the service" +
+                    " generation can not be proceed due to the given openapi definition contains following" +
+                    " complex path(s):");
             for (String path: complexPaths) {
                 outStream.println(path);
             }
@@ -360,8 +361,8 @@ public class BallerinaCodeGenerator {
         // Validate the service generation
         List<String> complexPaths = GeneratorUtils.getComplexPaths(openAPIDef);
         if (!complexPaths.isEmpty()) {
-            outStream.println("remote function(s) will be generated for client due to the given openapi definition" +
-                    " contains following complex path(s):");
+            outStream.println("WARNING: remote function(s) will be generated for client due to the given openapi " +
+                    "definition contains following complex path(s):");
             for (String path: complexPaths) {
                 outStream.println(path);
             }
