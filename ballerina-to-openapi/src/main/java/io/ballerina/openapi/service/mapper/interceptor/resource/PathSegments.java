@@ -100,6 +100,12 @@ public class PathSegments {
             if (!targetPathSegNode.matches(refPathSegNode, semanticModel)) {
                 return false;
             }
+            // This condition will not be covered since we are not generating operation for
+            // target resources with the rest path parameter.
+            if (refPathSegNode instanceof PathRestParameterSegmentNode
+                    && targetPathSegNode instanceof PathRestParameterSegmentNode) {
+                return true;
+            }
             refPathSegNode = refPathSegNode.next();
             targetPathSegNode = targetPathSegNode.next();
         }
