@@ -20,11 +20,8 @@ package io.ballerina.openapi.service.mapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -36,7 +33,6 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapper;
-import io.ballerina.openapi.service.mapper.interceptor.InterceptorPipeline;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
@@ -51,11 +47,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.ballerina.openapi.service.mapper.Constants.HYPHEN;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.containErrors;
-import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractServiceAnnotationDetails;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpenApiFileName;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.isHttpService;
 
@@ -201,14 +195,8 @@ public final class ServiceToOpenAPIMapper {
             OpenAPI openapi = oasResult.getOpenAPI().get();
             List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
             if (openapi.getPaths() == null) {
-                InterceptorPipeline interceptorPipeline = null;
-                if (isInterceptableService(serviceDefinition, semanticModel)) {
-                    interceptorPipeline = InterceptorPipeline.build(serviceDefinition, semanticModel,
-                            moduleMemberVisitor);
-                }
                 ServiceMapperFactory serviceMapperFactory = new ServiceMapperFactory(openapi, semanticModel,
-                        moduleMemberVisitor, diagnostics, isTreatNilableAsOptionalParameter(serviceDefinition),
-                        interceptorPipeline);
+                        moduleMemberVisitor, diagnostics, serviceDefinition);
 
                 ServersMapper serversMapperImpl = serviceMapperFactory.getServersMapper(listeners, serviceDefinition);
                 serversMapperImpl.setServers();
@@ -231,24 +219,6 @@ public final class ServiceToOpenAPIMapper {
         } else {
             return oasResult;
         }
-    }
-
-    private static boolean isInterceptableService(ServiceDeclarationNode serviceDefinition,
-                                                  SemanticModel semanticModel) {
-        AtomicBoolean isInterceptable = new AtomicBoolean(false);
-        semanticModel.symbol(serviceDefinition).ifPresent(symbol -> {
-            if (symbol instanceof ServiceDeclarationSymbol serviceSymbol) {
-                serviceSymbol.typeDescriptor().ifPresent(serviceType ->
-                    semanticModel.types().getTypeByName("ballerina", "http", "",
-                        "InterceptableService").ifPresent(typeSymbol -> {
-                            if (typeSymbol instanceof TypeDefinitionSymbol interceptableServiceType) {
-                                isInterceptable.set(serviceType.subtypeOf(interceptableServiceType.typeDescriptor()));
-                            }
-                        }
-                    ));
-            }
-        });
-        return isInterceptable.get();
     }
 
     /**
@@ -280,23 +250,5 @@ public final class ServiceToOpenAPIMapper {
         }
         ResourceMapper resourceMapper = serviceMapperFactory.getResourceMapper(resources);
         resourceMapper.setOperation();
-    }
-
-    private static boolean isTreatNilableAsOptionalParameter(ServiceDeclarationNode serviceNode) {
-        if (serviceNode.metadata().isEmpty()) {
-            return true;
-        }
-
-        MetadataNode metadataNode = serviceNode.metadata().get();
-        NodeList<AnnotationNode> annotations = metadataNode.annotations();
-
-        if (!annotations.isEmpty()) {
-            Optional<String> values = extractServiceAnnotationDetails(annotations,
-                    "http:ServiceConfig", "treatNilableAsOptional");
-            if (values.isPresent()) {
-                return values.get().equals(Constants.TRUE);
-            }
-        }
-        return true;
     }
 }

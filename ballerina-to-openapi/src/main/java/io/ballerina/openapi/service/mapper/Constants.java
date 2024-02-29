@@ -34,9 +34,12 @@ public final class Constants {
     public static final String FLOAT = "float";
     public static final String DOUBLE = "double";
     public static final String HTTP_PAYLOAD = "http:Payload";
-    public static final String HTTP_QUERY = "http:Query";
+    public static final String HTTP_SERVICE_CONFIG = "http:ServiceConfig";
     public static final String HTTP = "http";
     public static final String BALLERINA = "ballerina";
+    public static final String EMPTY = "";
+    public static final String INTERCEPTABLE_SERVICE = "interceptableService";
+    public static final String TREAT_NILABLE_AS_OPTIONAL = "treatNilableAsOptional";
     public static final String HTTP_HEADER = "http:Header";
     public static final String BYTE = "byte";
     public static final String XML = "xml";
@@ -297,7 +300,6 @@ public final class Constants {
     public static final String HTTP_202 = "202";
     public static final String ACCEPTED = "Accepted";
     public static final String HTTP_400 = "400";
-    public static final String BAD_REQUEST = "BadRequest";
     public static final String HTTP_500 = "500";
     public static final String SPECIAL_CHAR_REGEX = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
 

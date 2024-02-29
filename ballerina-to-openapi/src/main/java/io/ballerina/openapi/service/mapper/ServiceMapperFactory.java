@@ -18,8 +18,13 @@
 package io.ballerina.openapi.service.mapper;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
+import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.constraint.ConstraintMapper;
 import io.ballerina.openapi.service.mapper.constraint.ConstraintMapperImpl;
@@ -43,8 +48,17 @@ import io.swagger.v3.oas.models.OpenAPI;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+
+import static io.ballerina.openapi.service.mapper.Constants.BALLERINA;
+import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP_SERVICE_CONFIG;
+import static io.ballerina.openapi.service.mapper.Constants.INTERCEPTABLE_SERVICE;
+import static io.ballerina.openapi.service.mapper.Constants.TREAT_NILABLE_AS_OPTIONAL;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractServiceAnnotationDetails;
 
 /**
  * This {@link ServiceMapperFactory} class represents the factory for creating mappers for the service to
@@ -64,12 +78,11 @@ public class ServiceMapperFactory {
     private final InterceptorPipeline interceptorPipeline;
 
     public ServiceMapperFactory(OpenAPI openAPI, SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
-                                List<OpenAPIMapperDiagnostic> diagnostics, Boolean treatNilableAsOptional,
-                                InterceptorPipeline interceptorPipeline) {
+                                List<OpenAPIMapperDiagnostic> diagnostics, ServiceDeclarationNode serviceDefinition) {
         this.additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
-        this.treatNilableAsOptional = treatNilableAsOptional;
+        this.treatNilableAsOptional = isTreatNilableAsOptionalParameter(serviceDefinition);
         this.openAPI = openAPI;
-        this.interceptorPipeline = interceptorPipeline;
+        this.interceptorPipeline = getInterceptorPipeline(serviceDefinition, semanticModel, moduleMemberVisitor);
 
         this.typeMapper = new TypeMapperImpl(getComponents(openAPI), additionalData);
         this.constraintMapper = new ConstraintMapperImpl(openAPI, moduleMemberVisitor, diagnostics);
@@ -120,5 +133,50 @@ public class ServiceMapperFactory {
             components.setSchemas(new TreeMap<>());
         }
         return components;
+    }
+
+    private static boolean isTreatNilableAsOptionalParameter(ServiceDeclarationNode serviceNode) {
+        if (serviceNode.metadata().isEmpty()) {
+            return true;
+        }
+
+        MetadataNode metadataNode = serviceNode.metadata().get();
+        NodeList<AnnotationNode> annotations = metadataNode.annotations();
+
+        if (!annotations.isEmpty()) {
+            Optional<String> values = extractServiceAnnotationDetails(annotations, HTTP_SERVICE_CONFIG,
+                    TREAT_NILABLE_AS_OPTIONAL);
+            if (values.isPresent()) {
+                return values.get().equals(Constants.TRUE);
+            }
+        }
+        return true;
+    }
+
+    private static boolean isInterceptableService(ServiceDeclarationNode serviceDefinition,
+                                                  SemanticModel semanticModel) {
+        boolean[] isInterceptable = {false};
+        semanticModel.symbol(serviceDefinition).ifPresent(symbol -> {
+            if (symbol instanceof ServiceDeclarationSymbol serviceSymbol) {
+                serviceSymbol.typeDescriptor().ifPresent(serviceType ->
+                    semanticModel.types().getTypeByName(BALLERINA, HTTP, EMPTY, INTERCEPTABLE_SERVICE).ifPresent(
+                        typeSymbol -> {
+                            if (typeSymbol instanceof TypeDefinitionSymbol interceptableServiceType) {
+                                isInterceptable[0] = serviceType.subtypeOf(interceptableServiceType.typeDescriptor());
+                            }
+                        }
+                    ));
+            }
+        });
+        return isInterceptable[0];
+    }
+
+    private static InterceptorPipeline getInterceptorPipeline(ServiceDeclarationNode serviceDefinition,
+                                                              SemanticModel semanticModel,
+                                                              ModuleMemberVisitor moduleMemberVisitor) {
+        if (!isInterceptableService(serviceDefinition, semanticModel)) {
+            return null;
+        }
+        return InterceptorPipeline.build(serviceDefinition, semanticModel, moduleMemberVisitor);
     }
 }
