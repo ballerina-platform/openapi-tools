@@ -81,6 +81,7 @@ public class InterceptorPipeline {
                     pipeline.initResInterceptor = prevInterceptor;
                 }
             }
+            return pipeline;
         }
         return null;
     }
