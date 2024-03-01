@@ -83,7 +83,11 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_124("OAS_CONVERTOR_124", "Generated OpenAPI definition does not contain the default " +
             "value for the record field: %s", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_125("OAS_CONVERTOR_125", "Generated OpenAPI specification excludes details for " +
-            "operation with rest parameter in the resource path", DiagnosticSeverity.WARNING);
+            "operation with rest parameter in the resource path", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_126("OAS_CONVERTOR_126", "Generated OpenAPI definition does not contain the information " +
+            "from the interceptor pipeline. Define the return type of `createInterceptors` function as a tuple with " +
+            "specific interceptor types as members. For example: `[ResponseInterceptor_, RequestInterceptor_, " +
+            "RequestErrorInterceptor_]", DiagnosticSeverity.WARNING);
 
     private final String code;
     private final String description;

@@ -82,7 +82,7 @@ public class ServiceMapperFactory {
         this.additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
         this.treatNilableAsOptional = isTreatNilableAsOptionalParameter(serviceDefinition);
         this.openAPI = openAPI;
-        this.interceptorPipeline = getInterceptorPipeline(serviceDefinition, semanticModel, moduleMemberVisitor);
+        this.interceptorPipeline = getInterceptorPipeline(serviceDefinition, additionalData);
 
         this.typeMapper = new TypeMapperImpl(getComponents(openAPI), additionalData);
         this.constraintMapper = new ConstraintMapperImpl(openAPI, moduleMemberVisitor, diagnostics);
@@ -172,11 +172,10 @@ public class ServiceMapperFactory {
     }
 
     private static InterceptorPipeline getInterceptorPipeline(ServiceDeclarationNode serviceDefinition,
-                                                              SemanticModel semanticModel,
-                                                              ModuleMemberVisitor moduleMemberVisitor) {
-        if (!isInterceptableService(serviceDefinition, semanticModel)) {
+                                                              AdditionalData additionalData) {
+        if (!isInterceptableService(serviceDefinition, additionalData.semanticModel())) {
             return null;
         }
-        return InterceptorPipeline.build(serviceDefinition, semanticModel, moduleMemberVisitor);
+        return InterceptorPipeline.build(serviceDefinition, additionalData);
     }
 }

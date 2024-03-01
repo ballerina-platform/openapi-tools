@@ -26,7 +26,10 @@ import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.interceptor.Interceptor.InterceptorType;
+import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 
 import java.util.ArrayList;
@@ -34,6 +37,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import static io.ballerina.openapi.service.mapper.Constants.BALLERINA;
+import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP;
+import static io.ballerina.openapi.service.mapper.Constants.INTERCEPTOR;
 
 /**
  * This {@link InterceptorPipeline} class represents the interceptor pipeline. This class is responsible for building
@@ -51,12 +59,11 @@ public class InterceptorPipeline {
         this.semanticModel = semanticModel;
     }
 
-    public static InterceptorPipeline build(ServiceDeclarationNode serviceDefinition, SemanticModel semanticModel,
-                                            ModuleMemberVisitor moduleMemberVisitor) {
-        List<Interceptor> interceptors = buildInterceptors(serviceDefinition, semanticModel, moduleMemberVisitor);
+    public static InterceptorPipeline build(ServiceDeclarationNode serviceDefinition, AdditionalData additionalData) {
+        List<Interceptor> interceptors = buildInterceptors(serviceDefinition, additionalData);
 
-        InterceptorPipeline pipeline = new InterceptorPipeline(semanticModel);
         if (!interceptors.isEmpty()) {
+            InterceptorPipeline pipeline = new InterceptorPipeline(additionalData.semanticModel());
             Interceptor prevInterceptor = interceptors.get(0);
             if (prevInterceptor.getType().equals(InterceptorType.REQUEST)) {
                 pipeline.initReqInterceptor = prevInterceptor;
@@ -75,12 +82,13 @@ public class InterceptorPipeline {
                 }
             }
         }
-        return pipeline;
+        return null;
     }
 
     private static List<Interceptor> buildInterceptors(ServiceDeclarationNode serviceDefinition,
-                                                       SemanticModel semanticModel,
-                                                       ModuleMemberVisitor moduleMemberVisitor) {
+                                                       AdditionalData additionalData) {
+        SemanticModel semanticModel = additionalData.semanticModel();
+        ModuleMemberVisitor moduleMemberVisitor = additionalData.moduleMemberVisitor();
         Optional<Symbol> optServiceSymbol = semanticModel.symbol(serviceDefinition);
         if (optServiceSymbol.isEmpty() ||
                 !(optServiceSymbol.get() instanceof ServiceDeclarationSymbol serviceSymbol)) {
@@ -92,26 +100,44 @@ public class InterceptorPipeline {
         if (optInterceptorReturn.isEmpty()) {
             return new ArrayList<>();
         }
-        if (!(optInterceptorReturn.get() instanceof TupleTypeSymbol interceptorTupleType)) {
-            // Print a warning since OAS can not extract interceptors from a
-            // common return type: `http:Interceptor|http:Interceptor[]`
-            return new ArrayList<>();
+
+        TypeSymbol interceptorReturn = optInterceptorReturn.get();
+
+        if (interceptorReturn instanceof TypeReferenceTypeSymbol interceptorType &&
+                isSubTypeOf(interceptorReturn, INTERCEPTOR, semanticModel)) {
+            Interceptor.InterceptorType type = getInterceptorType(interceptorType, semanticModel);
+            Interceptor interceptor = getInterceptor(interceptorType, type, semanticModel, moduleMemberVisitor);
+            return List.of(interceptor);
+        } else if (interceptorReturn instanceof TupleTypeSymbol interceptorTupleType) {
+            return getInterceptorListFromReturnType(interceptorTupleType, semanticModel, moduleMemberVisitor);
         }
 
+        DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_126;
+        ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(), message.getDescription(),
+                interceptorReturn.getLocation().orElse(null));
+        additionalData.diagnostics().add(error);
+        return new ArrayList<>();
+    }
+
+    private static Interceptor getInterceptor(TypeReferenceTypeSymbol interceptorType, InterceptorType type,
+                                              SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
+        return switch (Objects.requireNonNull(type)) {
+            case REQUEST -> new RequestInterceptor(interceptorType, semanticModel, moduleMemberVisitor);
+            case REQUEST_ERROR -> new RequestErrorInterceptor(interceptorType, semanticModel, moduleMemberVisitor);
+            case RESPONSE -> new ResponseInterceptor(interceptorType, semanticModel, moduleMemberVisitor);
+            default -> // RESPONSE_ERROR
+                    new ResponseErrorInterceptor(interceptorType, semanticModel, moduleMemberVisitor);
+        };
+    }
+
+    private static List<Interceptor> getInterceptorListFromReturnType(TupleTypeSymbol interceptorTupleType,
+                                                                      SemanticModel semanticModel,
+                                                                      ModuleMemberVisitor moduleMemberVisitor) {
         List<Interceptor> interceptors = new ArrayList<>();
         interceptorTupleType.memberTypeDescriptors().forEach(typeDescriptor -> {
             if (typeDescriptor instanceof TypeReferenceTypeSymbol interceptorType) {
                 Interceptor.InterceptorType type = getInterceptorType(interceptorType, semanticModel);
-                Interceptor interceptor = switch (Objects.requireNonNull(type)) {
-                    case REQUEST ->
-                            new RequestInterceptor(interceptorType, semanticModel, moduleMemberVisitor);
-                    case REQUEST_ERROR ->
-                            new RequestErrorInterceptor(interceptorType, semanticModel, moduleMemberVisitor);
-                    case RESPONSE ->
-                            new ResponseInterceptor(interceptorType, semanticModel, moduleMemberVisitor);
-                    default -> // RESPONSE_ERROR
-                            new ResponseErrorInterceptor(interceptorType, semanticModel, moduleMemberVisitor);
-                };
+                Interceptor interceptor = getInterceptor(interceptorType, type, semanticModel, moduleMemberVisitor);
                 interceptors.add(interceptor);
             }
         });
@@ -132,7 +158,7 @@ public class InterceptorPipeline {
     }
 
     private static boolean isSubTypeOf(TypeSymbol typeSymbol, String typeName, SemanticModel semanticModel) {
-        Optional<Symbol> optType = semanticModel.types().getTypeByName("ballerina", "http", "", typeName);
+        Optional<Symbol> optType = semanticModel.types().getTypeByName(BALLERINA, HTTP, EMPTY, typeName);
         if (optType.isEmpty() || !(optType.get() instanceof TypeDefinitionSymbol typeDef)) {
             return false;
         }
