@@ -60,8 +60,7 @@ public class InterceptorPipeline {
             Interceptor prevInterceptor = interceptors.get(0);
             if (prevInterceptor.getType().equals(InterceptorType.REQUEST)) {
                 pipeline.initReqInterceptor = prevInterceptor;
-            }
-            if (prevInterceptor instanceof ResponseInterceptor) {
+            } else if (prevInterceptor instanceof ResponseInterceptor) {
                 pipeline.initResInterceptor = prevInterceptor;
             }
             for (int i = 1; i < interceptors.size(); i++) {
