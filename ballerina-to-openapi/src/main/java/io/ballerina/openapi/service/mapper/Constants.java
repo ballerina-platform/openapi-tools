@@ -39,6 +39,7 @@ public final class Constants {
     public static final String BALLERINA = "ballerina";
     public static final String EMPTY = "";
     public static final String INTERCEPTABLE_SERVICE = "InterceptableService";
+    public static final String NEXT_SERVICE = "NextService";
     public static final String TREAT_NILABLE_AS_OPTIONAL = "treatNilableAsOptional";
     public static final String HTTP_HEADER = "http:Header";
     public static final String BYTE = "byte";

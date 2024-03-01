@@ -33,6 +33,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static io.ballerina.openapi.service.mapper.Constants.BALLERINA;
+import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP;
+import static io.ballerina.openapi.service.mapper.Constants.NEXT_SERVICE;
+
 /**
  * This {@link Interceptor} class represents the abstract interceptor service.
  *
@@ -88,8 +93,8 @@ public abstract class Interceptor extends Service {
     }
 
     private boolean isSubTypeOfDefaultInterceptorReturnType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
-        Optional<Symbol> optNextServiceType = semanticModel.types().getTypeByName("ballerina", "http",
-                "", "NextService");
+        Optional<Symbol> optNextServiceType = semanticModel.types().getTypeByName(BALLERINA, HTTP,
+                EMPTY, NEXT_SERVICE);
         if (optNextServiceType.isEmpty() ||
                 !(optNextServiceType.get() instanceof TypeDefinitionSymbol nextServiceType)) {
             return false;
@@ -100,8 +105,8 @@ public abstract class Interceptor extends Service {
     }
 
     private boolean isSubTypeOfHttpNextServiceType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
-        Optional<Symbol> optNextServiceType = semanticModel.types().getTypeByName("ballerina", "http",
-                "", "NextService");
+        Optional<Symbol> optNextServiceType = semanticModel.types().getTypeByName(BALLERINA, HTTP,
+                EMPTY, NEXT_SERVICE);
         if (optNextServiceType.isEmpty() ||
                 !(optNextServiceType.get() instanceof TypeDefinitionSymbol nextServiceType)) {
             return false;
