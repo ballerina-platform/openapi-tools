@@ -22,8 +22,8 @@ import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
-import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;
 
@@ -228,39 +228,33 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param fileName  input resource file
      */
     private void ballerinaToOpenApi(String fileName) {
-        List<OpenAPIMapperDiagnostic> errors = new ArrayList<>();
+        List<OpenAPIMapperDiagnostic> mapperDiagnostics = new ArrayList<>();
         final File balFile = new File(fileName);
         Path balFilePath = null;
         try {
             balFilePath = Paths.get(balFile.getCanonicalPath());
         } catch (IOException e) {
-            DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_108;
-            ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
-                    message.getDescription(), null,  e.getLocalizedMessage());
-            errors.add(error);
+            ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_108,
+                    e.getLocalizedMessage());
+            mapperDiagnostics.add(error);
         }
         getTargetOutputPath();
         // Check service name it is mandatory
         OASContractGenerator openApiConverter = new OASContractGenerator();
         openApiConverter.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, service,
                 generatedFileType);
-        errors.addAll(openApiConverter.getErrors());
+        mapperDiagnostics.addAll(openApiConverter.getDiagnostics());
         boolean exitWithError = false;
-        if (!errors.isEmpty()) {
-            for (OpenAPIMapperDiagnostic error: errors) {
-                if (error instanceof ExceptionDiagnostic exceptionDiagnostic) {
-                    this.outStream = System.err;
-                    OpenAPIDiagnostic diagnostic = CmdUtils.constructOpenAPIDiagnostic(exceptionDiagnostic.getCode(),
-                            exceptionDiagnostic.getMessage(), exceptionDiagnostic.getDiagnosticSeverity(),
-                            exceptionDiagnostic.getLocation().orElse(null));
-                    outStream.println(diagnostic);
-                    exitWithError = true;
-                } else if (error instanceof IncompatibleResourceDiagnostic incompatibleError) {
-                    OpenAPIDiagnostic diagnostic = CmdUtils.constructOpenAPIDiagnostic(incompatibleError.getCode(),
-                            incompatibleError.getMessage(), incompatibleError.getDiagnosticSeverity(),
-                            incompatibleError.getLocation().orElse(null));
-                    outStream.println(diagnostic);
-                }
+        if (mapperDiagnostics.stream().anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.getDiagnosticSeverity()))) {
+            this.outStream = System.err;
+            exitWithError = true;
+        }
+        if (!mapperDiagnostics.isEmpty()) {
+            for (OpenAPIMapperDiagnostic mapperDiagnostic: mapperDiagnostics) {
+                OpenAPIDiagnostic diagnostic = CmdUtils.constructOpenAPIDiagnostic(mapperDiagnostic.getCode(),
+                        mapperDiagnostic.getMessage(), mapperDiagnostic.getDiagnosticSeverity(),
+                        mapperDiagnostic.getLocation().orElse(null));
+                outStream.println(diagnostic);
             }
         }
         if (exitWithError) {

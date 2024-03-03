@@ -82,18 +82,15 @@ public final class ServiceToOpenAPIMapper {
         List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
         List<OASResult> outputs = new ArrayList<>();
         if (containErrors(semanticModel.diagnostics())) {
-            DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_106;
-            ExceptionDiagnostic error = new ExceptionDiagnostic(messages.getCode(), messages.getDescription(),
-                    null);
+            ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_106);
             diagnostics.add(error);
         } else {
             ModulePartNode modulePartNode = syntaxTree.rootNode();
             extractServiceNodes(serviceName, availableService, servicesToGenerate, modulePartNode, semanticModel);
             // If there are no services found for a given mapper name.
             if (serviceName != null && servicesToGenerate.isEmpty()) {
-                DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_107;
-                ExceptionDiagnostic error = new ExceptionDiagnostic(messages.getCode(), messages.getDescription(),
-                        null, serviceName, availableService.toString());
+                ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_107, serviceName,
+                        availableService.toString());
                 diagnostics.add(error);
             }
             // Generating openapi specification for selected services

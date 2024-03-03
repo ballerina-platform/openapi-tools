@@ -146,9 +146,8 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                         serviceName, false);
                 writeFile(outPath.resolve(OPENAPI + OAS_PATH_SEPARATOR + fileName), oasResult.getYaml().get());
             } catch (IOException e) {
-                DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
-                ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
-                        error.getDescription(), null, e.toString());
+                ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_108,
+                        e.toString());
                 diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
             }
         }

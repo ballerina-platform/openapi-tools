@@ -36,7 +36,7 @@ import java.util.Optional;
 public class ResponseInterceptor extends Interceptor {
 
     public ResponseInterceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
-                               ModuleMemberVisitor moduleMemberVisitor) {
+                               ModuleMemberVisitor moduleMemberVisitor) throws InterceptorMapperException {
         super(typeSymbol, semanticModel, moduleMemberVisitor);
     }
 

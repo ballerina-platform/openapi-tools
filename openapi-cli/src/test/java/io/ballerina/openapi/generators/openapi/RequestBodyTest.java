@@ -204,7 +204,7 @@ public class RequestBodyTest {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , true);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "rb_scenario13.yaml");
     }
 
@@ -214,8 +214,8 @@ public class RequestBodyTest {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , true);
-        Assert.assertFalse(openApiConverterUtils.getErrors().isEmpty());
-        Assert.assertEquals(openApiConverterUtils.getErrors().get(0).getMessage(), "Generated OpenAPI" +
+        Assert.assertFalse(openApiConverterUtils.getDiagnostics().isEmpty());
+        Assert.assertEquals(openApiConverterUtils.getDiagnostics().get(0).getMessage(), "Generated OpenAPI" +
                 " definition does not contain `http:Request` body information of the `GET` method, as it's not " +
                 "supported by the OpenAPI specification.");
         compareWithGeneratedFile(ballerinaFilePath, "rb_scenario14.yaml");
@@ -227,7 +227,7 @@ public class RequestBodyTest {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , true);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "rb_scenario15.yaml");
     }
     @Test(description = "Generate OpenAPI spec with json file")
@@ -260,7 +260,7 @@ public class RequestBodyTest {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , true);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "service_config_with_cors.yaml");
     }
 

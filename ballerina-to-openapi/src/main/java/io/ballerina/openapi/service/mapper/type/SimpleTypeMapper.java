@@ -62,9 +62,8 @@ public class SimpleTypeMapper extends AbstractTypeMapper {
     public static Schema getTypeSchema(TypeSymbol typeSymbol, AdditionalData additionalData) {
         Schema schema = getSchema(typeSymbol.typeKind());
         if (Objects.isNull(schema)) {
-            DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_121;
-            ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
-                    message.getDescription(), null, MapperCommonUtils.getTypeName(typeSymbol));
+            ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_121,
+                    MapperCommonUtils.getTypeName(typeSymbol));
             additionalData.diagnostics().add(error);
         }
         return schema;

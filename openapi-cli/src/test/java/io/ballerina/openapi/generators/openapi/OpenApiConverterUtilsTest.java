@@ -65,8 +65,8 @@ public class OpenApiConverterUtilsTest {
         OASContractGenerator openApiConverter = new OASContractGenerator();
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, "/abc",
                 false);
-        Assert.assertFalse(openApiConverter.getErrors().isEmpty());
-        Assert.assertEquals(openApiConverter.getErrors().get(0).getMessage(),
+        Assert.assertFalse(openApiConverter.getDiagnostics().isEmpty());
+        Assert.assertEquals(openApiConverter.getDiagnostics().get(0).getMessage(),
                 "No Ballerina HTTP services found with name '/abc' to generate an OpenAPI specification. " +
                         "These services are available in ballerina file. [/hello, /hello02]");
     }

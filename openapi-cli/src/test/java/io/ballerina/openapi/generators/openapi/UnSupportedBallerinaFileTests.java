@@ -55,7 +55,7 @@ public class UnSupportedBallerinaFileTests {
         OASContractGenerator openApiConverter = new OASContractGenerator();
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                 , false);
-        List<OpenAPIMapperDiagnostic> errors = openApiConverter.getErrors();
+        List<OpenAPIMapperDiagnostic> errors = openApiConverter.getDiagnostics();
         Assert.assertFalse(errors.isEmpty(), "Error list is empty");
         Assert.assertEquals(errors.get(0).getMessage(),
                 "Given Ballerina file does not contain any HTTP service.");
@@ -67,7 +67,7 @@ public class UnSupportedBallerinaFileTests {
         OASContractGenerator openApiConverter = new OASContractGenerator();
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                 , false);
-        List<OpenAPIMapperDiagnostic> errors = openApiConverter.getErrors();
+        List<OpenAPIMapperDiagnostic> errors = openApiConverter.getDiagnostics();
         Assert.assertFalse(errors.isEmpty());
         Assert.assertEquals(errors.get(0).getMessage(),
                 "Given Ballerina file does not contain any HTTP service.");

@@ -54,7 +54,7 @@ public class HttpMethodTests {
         OASContractGenerator openApiConverter = new OASContractGenerator();
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                 , false);
-        List<OpenAPIMapperDiagnostic> errors = openApiConverter.getErrors();
+        List<OpenAPIMapperDiagnostic> errors = openApiConverter.getDiagnostics();
         Assert.assertFalse(errors.isEmpty());
         Assert.assertEquals(errors.get(0).getMessage(), "Generated OpenAPI definition does not " +
                 "contain details for the `default` resource method in the Ballerina service.");

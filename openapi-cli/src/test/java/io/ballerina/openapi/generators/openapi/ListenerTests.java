@@ -81,7 +81,7 @@ public class ListenerTests {
         OASContractGenerator openApiConverter = new OASContractGenerator();
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                 , false);
-        List<OpenAPIMapperDiagnostic> errors = openApiConverter.getErrors();
+        List<OpenAPIMapperDiagnostic> errors = openApiConverter.getDiagnostics();
         Assert.assertTrue(errors.isEmpty());
     }
 

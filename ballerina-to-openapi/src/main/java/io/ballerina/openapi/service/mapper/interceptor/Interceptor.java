@@ -59,15 +59,23 @@ public abstract class Interceptor extends Service {
     protected Interceptor nextInResPath = null;
 
     protected Interceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
-                       ModuleMemberVisitor moduleMemberVisitor) {
+                          ModuleMemberVisitor moduleMemberVisitor) throws InterceptorMapperException {
         super(semanticModel);
         this.name = typeSymbol.getName().orElse("");
         if (typeSymbol.getName().isPresent() &&
                 moduleMemberVisitor.getInterceptorServiceClassNode(this.name).isPresent()) {
             this.serviceClassNode = moduleMemberVisitor.getInterceptorServiceClassNode(this.name).get();
+        } else {
+            throw new InterceptorMapperException("no class definition found for the interceptor: " + this.name +
+                    " within the package. Make sure that the interceptor class is defined within the package");
         }
         this.serviceClass = typeSymbol.typeDescriptor() instanceof ClassSymbol ?
                 (ClassSymbol) typeSymbol.typeDescriptor() : null;
+        if (Objects.isNull(this.serviceClass)) {
+            throw new InterceptorMapperException("no class definition found for the interceptor: " + this.name +
+                    ". Make sure that the interceptor return type is defined with the specific interceptor class " +
+                    "type rather than the generic `http:Interceptor` type");
+        }
         extractInterceptorDetails(semanticModel);
     }
 

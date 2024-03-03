@@ -76,7 +76,7 @@ public class TestUtils {
             } else {
                 Assert.fail("Yaml was not generated");
             }
-            return openApiConverter.getErrors();
+            return openApiConverter.getDiagnostics();
         } catch (IOException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
             return List.of();

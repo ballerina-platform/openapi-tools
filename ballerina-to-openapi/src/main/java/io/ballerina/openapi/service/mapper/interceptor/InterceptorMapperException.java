@@ -17,24 +17,18 @@
  */
 package io.ballerina.openapi.service.mapper.interceptor;
 
-import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
-
 /**
- * This {@link RequestErrorInterceptor} class represents the request error interceptor service.
- *
- * @since 1.9.0
+ * This {@link InterceptorMapperException} class represents the exceptions that can occur
+ * while processing the interceptors.
  */
-public class RequestErrorInterceptor extends RequestInterceptor {
+public class InterceptorMapperException extends Exception {
+    private final String message;
 
-    public RequestErrorInterceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
-                                   ModuleMemberVisitor moduleMemberVisitor) throws InterceptorMapperException {
-        super(typeSymbol, semanticModel, moduleMemberVisitor);
+    public InterceptorMapperException(String message) {
+        this.message = message;
     }
 
-    @Override
-    public InterceptorType getType() {
-        return InterceptorType.REQUEST_ERROR;
+    public String getMessage() {
+        return message;
     }
 }

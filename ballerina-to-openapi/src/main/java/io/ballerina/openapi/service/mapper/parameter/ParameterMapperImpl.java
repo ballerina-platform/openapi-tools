@@ -35,7 +35,7 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.openapi.service.mapper.Constants;
 import io.ballerina.openapi.service.mapper.ServiceMapperFactory;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
@@ -92,8 +92,7 @@ public class ParameterMapperImpl implements ParameterMapper {
             }
             if ((parameterType.equals("REQUEST") || parameterType.equals("PAYLOAD")) &&
                     (Constants.GET.equalsIgnoreCase(operationInventory.getHttpOperation()))) {
-                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
-                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_113,
                         parameterNode.location());
                 additionalData.diagnostics().add(error);
                 continue;

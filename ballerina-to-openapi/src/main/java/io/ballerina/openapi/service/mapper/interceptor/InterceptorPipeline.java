@@ -103,25 +103,35 @@ public class InterceptorPipeline {
         }
 
         TypeSymbol interceptorReturn = optInterceptorReturn.get();
-
-        if (interceptorReturn instanceof TypeReferenceTypeSymbol interceptorType &&
-                isSubTypeOf(interceptorReturn, INTERCEPTOR, semanticModel)) {
-            Interceptor.InterceptorType type = getInterceptorType(interceptorType, semanticModel);
-            Interceptor interceptor = getInterceptor(interceptorType, type, semanticModel, moduleMemberVisitor);
-            return List.of(interceptor);
-        } else if (interceptorReturn instanceof TupleTypeSymbol interceptorTupleType) {
-            return getInterceptorListFromReturnType(interceptorTupleType, semanticModel, moduleMemberVisitor);
+        try {
+            if (interceptorReturn instanceof TypeReferenceTypeSymbol interceptorType &&
+                    isSubTypeOf(interceptorReturn, INTERCEPTOR, semanticModel)) {
+                Interceptor.InterceptorType type = getInterceptorType(interceptorType, semanticModel);
+                Interceptor interceptor = getInterceptor(interceptorType, type, semanticModel, moduleMemberVisitor);
+                return List.of(interceptor);
+            } else if (interceptorReturn instanceof TupleTypeSymbol interceptorTupleType) {
+                return getInterceptorListFromReturnType(interceptorTupleType, semanticModel, moduleMemberVisitor);
+            }
+        } catch (InterceptorMapperException e) {
+            addWarningDiagnostic(additionalData, e.getMessage());
+            return new ArrayList<>();
         }
 
-        DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_126;
-        ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(), message.getDescription(),
-                interceptorReturn.getLocation().orElse(null));
-        additionalData.diagnostics().add(error);
+        String cause = "the return type of `createInterceptors` function should be defined as a tuple with specific" +
+                " interceptor types as members. For example: `[ResponseInterceptor_, RequestInterceptor_, " +
+                "RequestErrorInterceptor_]`";
+        addWarningDiagnostic(additionalData, cause);
         return new ArrayList<>();
     }
 
+    private static void addWarningDiagnostic(AdditionalData additionalData, String cause) {
+        ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_126, cause);
+        additionalData.diagnostics().add(error);
+    }
+
     private static Interceptor getInterceptor(TypeReferenceTypeSymbol interceptorType, InterceptorType type,
-                                              SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
+                                              SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor)
+            throws InterceptorMapperException {
         return switch (Objects.requireNonNull(type)) {
             case REQUEST -> new RequestInterceptor(interceptorType, semanticModel, moduleMemberVisitor);
             case REQUEST_ERROR -> new RequestErrorInterceptor(interceptorType, semanticModel, moduleMemberVisitor);
@@ -133,15 +143,17 @@ public class InterceptorPipeline {
 
     private static List<Interceptor> getInterceptorListFromReturnType(TupleTypeSymbol interceptorTupleType,
                                                                       SemanticModel semanticModel,
-                                                                      ModuleMemberVisitor moduleMemberVisitor) {
+                                                                      ModuleMemberVisitor moduleMemberVisitor)
+            throws InterceptorMapperException {
         List<Interceptor> interceptors = new ArrayList<>();
-        interceptorTupleType.memberTypeDescriptors().forEach(typeDescriptor -> {
+        for (TypeSymbol typeDescriptor : interceptorTupleType.memberTypeDescriptors()) {
             if (typeDescriptor instanceof TypeReferenceTypeSymbol interceptorType) {
-                Interceptor.InterceptorType type = getInterceptorType(interceptorType, semanticModel);
-                Interceptor interceptor = getInterceptor(interceptorType, type, semanticModel, moduleMemberVisitor);
+                InterceptorType type = getInterceptorType(interceptorType, semanticModel);
+                Interceptor interceptor = getInterceptor(interceptorType, type, semanticModel,
+                        moduleMemberVisitor);
                 interceptors.add(interceptor);
             }
-        });
+        }
         return interceptors;
     }
 

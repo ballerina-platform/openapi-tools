@@ -57,7 +57,7 @@ public class OASContractGenerator {
     private SyntaxTree syntaxTree;
     private SemanticModel semanticModel;
     private Project project;
-    private List<OpenAPIMapperDiagnostic> errors = new ArrayList<>();
+    private List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
     private PrintStream outStream = System.out;
 
     /**
@@ -67,8 +67,8 @@ public class OASContractGenerator {
 
     }
 
-    public List<OpenAPIMapperDiagnostic> getErrors() {
-        return errors;
+    public List<OpenAPIMapperDiagnostic> getDiagnostics() {
+        return diagnostics;
     }
 
     /**
@@ -119,7 +119,7 @@ public class OASContractGenerator {
             List<String> fileNames = new ArrayList<>();
             for (OASResult definition : openAPIDefinitions) {
                 try {
-                    this.errors.addAll(definition.getDiagnostics());
+                    this.diagnostics.addAll(definition.getDiagnostics());
                     if (definition.getOpenAPI().isPresent()) {
                         Optional<String> content;
                         if (needJson) {
@@ -132,11 +132,9 @@ public class OASContractGenerator {
                         fileNames.add(fileName);
                     }
                 } catch (IOException e) {
-                    DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_108;
-                    ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
-                            message.getDescription() + e.getLocalizedMessage(),
-                            null);
-                    this.errors.add(error);
+                    ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_108,
+                            e.getLocalizedMessage());
+                    this.diagnostics.add(error);
                 }
             }
             if (fileNames.isEmpty()) {
@@ -148,10 +146,8 @@ public class OASContractGenerator {
                 outStream.println("-- " + iterator.next());
             }
         } else {
-            DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_115;
-            ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
-                    message.getDescription(), null);
-            this.errors.add(error);
+            ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_115);
+            this.diagnostics.add(error);
         }
     }
 }

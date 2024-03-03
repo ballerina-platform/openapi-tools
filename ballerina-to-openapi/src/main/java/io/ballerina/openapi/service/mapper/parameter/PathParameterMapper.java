@@ -21,7 +21,7 @@ import io.ballerina.compiler.api.symbols.PathParameterSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.resourcepath.util.PathSegment;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
@@ -67,8 +67,7 @@ public class PathParameterMapper extends AbstractParameterMapper {
     @Override
     public PathParameter getParameterSchema() {
         if (pathSegmentKind.equals(PathSegment.Kind.PATH_REST_PARAMETER)) {
-            DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_125;
-            IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage, location, name);
+            ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_125, location, name);
             diagnostics.add(error);
             return null;
         }

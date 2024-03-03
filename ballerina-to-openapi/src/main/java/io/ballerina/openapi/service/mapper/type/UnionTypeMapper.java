@@ -153,9 +153,8 @@ public class UnionTypeMapper extends AbstractTypeMapper {
 
     private static void addUnsupportedUnionError(UnionTypeSymbol typeSymbol,
                                                  List<OpenAPIMapperDiagnostic> diagnostics) {
-        DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_122;
-        ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
-                message.getDescription(), null, MapperCommonUtils.getTypeName(typeSymbol));
+        ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_122,
+                MapperCommonUtils.getTypeName(typeSymbol));
         diagnostics.add(error);
     }
 

@@ -53,9 +53,8 @@ public class TupleTypeMapper extends AbstractTypeMapper {
     public static Schema getSchema(TupleTypeSymbol typeSymbol, Components components, AdditionalData additionalData) {
         Optional<TypeSymbol> restTypeSymbol = typeSymbol.restTypeDescriptor();
         if (restTypeSymbol.isPresent()) {
-            DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_123;
-            ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
-                    message.getDescription(), null, MapperCommonUtils.getTypeName(typeSymbol));
+            ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_123,
+                    MapperCommonUtils.getTypeName(typeSymbol));
             additionalData.diagnostics().add(error);
         }
         List<TypeSymbol> memberTypeSymbols = typeSymbol.memberTypeDescriptors();

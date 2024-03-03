@@ -23,7 +23,7 @@ import io.ballerina.tools.diagnostics.Location;
 import java.util.Optional;
 
 /**
- * This {@link ExceptionDiagnostic} represents all the errors that happens during the code generation process.
+ * This {@link ExceptionDiagnostic} represents all the exceptions that happens during the code generation process.
  *
  * @since 1.0.0
  */
@@ -33,11 +33,15 @@ public class ExceptionDiagnostic implements OpenAPIMapperDiagnostic {
     private final DiagnosticSeverity diagnosticSeverity;
     private final Location location;
 
-    public ExceptionDiagnostic(String code, String message, Location location, String... args) {
-        this.code = code;
-        this.message = String.format(message, (Object[]) args);
-        this.diagnosticSeverity = DiagnosticSeverity.ERROR;
+    public ExceptionDiagnostic(DiagnosticMessages diagnostic, Location location, String... args) {
+        this.code = diagnostic.getCode();
+        this.message = String.format(diagnostic.getDescription(), (Object[]) args);
+        this.diagnosticSeverity = diagnostic.getSeverity();
         this.location = location;
+    }
+
+    public ExceptionDiagnostic(DiagnosticMessages diagnostic, String... args) {
+        this(diagnostic, null, args);
     }
 
     @Override
