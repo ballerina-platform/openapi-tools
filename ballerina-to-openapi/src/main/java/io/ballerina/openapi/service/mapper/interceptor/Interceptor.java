@@ -67,7 +67,9 @@ public abstract class Interceptor extends Service {
             this.serviceClassNode = moduleMemberVisitor.getInterceptorServiceClassNode(this.name).get();
         } else {
             throw new InterceptorMapperException("no class definition found for the interceptor: " + this.name +
-                    " within the package. Make sure that the interceptor class is defined within the package");
+                    " within the package. Make sure that the interceptor return type is defined with the specific" +
+                    " interceptor class type rather than the generic `http:Interceptor` type and the specific " +
+                    "interceptor class is defined within the package");
         }
         this.serviceClass = typeSymbol.typeDescriptor() instanceof ClassSymbol ?
                 (ClassSymbol) typeSymbol.typeDescriptor() : null;
