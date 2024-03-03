@@ -24,6 +24,7 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
 import io.ballerina.openapi.corenew.typegenerator.GeneratorUtils;
 import io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.corenew.typegenerator.model.GeneratorMetaData;
@@ -33,6 +34,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
@@ -50,17 +52,20 @@ public abstract class TypeGenerator {
 
     Schema schema;
     String typeName;
-    final List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
+//    final List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
     final LinkedHashSet<String> imports = new LinkedHashSet<>();
 
     public TypeGenerator(Schema schema, String typeName) {
         this.schema = schema;
         this.typeName = typeName;
+//        if (this instanceof RecordTypeGenerator || this instanceof ArrayTypeGenerator) {
+//            BallerinaTypesGenerator.typeInclusionRecords2.add(typeName);
+//        }
     }
 
-    public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
-        return typeDefinitionNodeList;
-    }
+//    public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
+//        return typeDefinitionNodeList;
+//    }
 
     public LinkedHashSet<String> getImports() {
         return imports;
@@ -102,4 +107,9 @@ public abstract class TypeGenerator {
      * @throws BallerinaOpenApiException when unsupported schema type is found
      */
     public abstract TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException;
+
+    public void addToTypeListAndRemoveFromTempList(TypeDefinitionNode typeDefinitionNode) {
+//        BallerinaTypesGenerator.typeInclusionRecords.put(typeName, typeDefinitionNode);
+        BallerinaTypesGenerator.typeInclusionRecords2.remove(typeName);
+    }
 }

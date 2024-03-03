@@ -71,6 +71,7 @@ public class PrimitiveTypeGenerator extends TypeGenerator {
         }
         TypeDescriptorNode typeDescriptorNode = createSimpleNameReferenceNode(
                 createIdentifierToken(typeDescriptorName));
+        addToTypeListAndRemoveFromTempList(null);
         return TypeGeneratorUtils.getNullableType(schema, typeDescriptorNode);
     }
 }

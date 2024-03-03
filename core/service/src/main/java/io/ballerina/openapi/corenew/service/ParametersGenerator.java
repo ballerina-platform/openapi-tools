@@ -242,11 +242,7 @@ public class ParametersGenerator {
             }
             BuiltinSimpleNameReferenceNode headerArrayItemTypeName = createBuiltinSimpleNameReferenceNode(
                     null, createIdentifierToken(arrayType));
-            ArrayDimensionNode dimensionNode =
-                    NodeFactory.createArrayDimensionNode(createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
-                            createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-            NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
-            headerTypeName = createArrayTypeDescriptorNode(headerArrayItemTypeName, nodeList);
+            headerTypeName = TypeHandler.getArrayTypeDescriptorNodeFromTypeDescriptorNode(headerArrayItemTypeName);
         } else {
             headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
                     headerType, GeneratorUtils.SINGLE_WS_MINUTIAE,
@@ -362,33 +358,17 @@ public class ParametersGenerator {
             throws BallerinaOpenApiException {
 
         Schema<?> parameterSchema;
-        if (mediaTypeEntry.getValue().getSchema() != null &&
-                mediaTypeEntry.getValue().getSchema().get$ref() != null) {
+        if (mediaTypeEntry.getValue().getSchema() != null && mediaTypeEntry.getValue().getSchema().get$ref() != null) {
             String type = getValidName(ServiceGenerationUtils.extractReferenceType(mediaTypeEntry.getValue().getSchema().get$ref()), true);
             parameterSchema = (Schema<?>) openAPI.getComponents().getSchemas().get(type.trim());
         } else {
             parameterSchema = mediaTypeEntry.getValue().getSchema();
         }
-
-        if (mediaTypeEntry.getKey().equals(GeneratorConstants.APPLICATION_JSON) &&
-                isMapSchema(parameterSchema)) {
-            if (parameter.getRequired()) {
-                BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(GeneratorConstants.MAP_JSON));
-                return createRequiredParameterNode(annotations, rTypeName, parameterName);
-            } else {
-                BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(GeneratorConstants.MAP_JSON));
-                OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(rTypeName,
-                        createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-                return createRequiredParameterNode(annotations, optionalNode, parameterName);
-            }
-        } else {
-            String type = GeneratorUtils.getBallerinaMediaType(mediaTypeEntry.getKey(), false);
-            ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
-            throw new BallerinaOpenApiException(String.format(messages.getDescription(),
-                    type));
+        if (mediaTypeEntry.getKey().equals(GeneratorConstants.APPLICATION_JSON) && isMapSchema(parameterSchema)) {
+            return TypeHandler.getMapJsonParameterNode(parameterName, parameter, annotations);
         }
+        String type = GeneratorUtils.getBallerinaMediaType(mediaTypeEntry.getKey(), false);
+        throw new BallerinaOpenApiException(String.format(ServiceDiagnosticMessages.OAS_SERVICE_102.getDescription(), type));
     }
 
     /**

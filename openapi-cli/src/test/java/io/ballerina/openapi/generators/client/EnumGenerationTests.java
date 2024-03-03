@@ -59,7 +59,7 @@ public class EnumGenerationTests {
             "Use case 03 : Enum in header parameter" +
             "Use case 04 : Enum in reusable parameter" +
             "Use case 05 : Enum in parameter with referenced schema")
-    public void generateRemoteParametersWithEnums() throws IOException, BallerinaOpenApiException,
+    public void generateRemoteParametersWithEnums() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_enum.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/parameters_with_enum.bal");
@@ -82,7 +82,7 @@ public class EnumGenerationTests {
             "Use case 03 : Nullable enum in header parameter" +
             "Use case 04 : Nullable enum in reusable parameter" +
             "Use case 05 : Nullable enum in parameter with referenced schema")
-    public void generateRemoteParametersWithNullableEnums() throws IOException, BallerinaOpenApiException,
+    public void generateRemoteParametersWithNullableEnums() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_nullable_enums.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/parameters_with_nullable_enums.bal");
@@ -105,7 +105,7 @@ public class EnumGenerationTests {
             "Use case 03 : Enum in header parameter" +
             "Use case 04 : Enum in reusable parameter" +
             "Use case 05 : Enum in parameter with referenced schema")
-    public void generateResourceParametersWithEnums() throws IOException, BallerinaOpenApiException,
+    public void generateResourceParametersWithEnums() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_enum.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/paramters_with_enum_resource.bal");
@@ -128,7 +128,7 @@ public class EnumGenerationTests {
             "Use case 03 : Nullable enum in header parameter" +
             "Use case 04 : Nullable enum in reusable parameter" +
             "Use case 05 : Nullable enum in parameter with referenced schema")
-    public void generateResourceParametersWithNullableEnums() throws IOException, BallerinaOpenApiException,
+    public void generateResourceParametersWithNullableEnums() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_nullable_enums.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/parameters_with_nullable_enums_resource.bal");

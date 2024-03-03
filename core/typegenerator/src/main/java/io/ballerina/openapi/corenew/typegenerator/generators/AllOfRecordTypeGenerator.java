@@ -27,6 +27,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
+import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
 import io.ballerina.openapi.corenew.typegenerator.GeneratorUtils;
 import io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.corenew.typegenerator.model.GeneratorMetaData;
@@ -41,7 +42,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ASTERISK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_PIPE_TOKEN;
@@ -50,8 +53,10 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.ELLIPSIS_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for allOf schemas.
@@ -83,7 +88,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
     public AllOfRecordTypeGenerator(Schema schema, String typeName) {
         super(schema, typeName);
     }
-
+static int i =0;
     /**
      * Generates TypeDescriptorNode for allOf schemas.
      */
@@ -99,23 +104,30 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
         if (allOfSchemas.size() == 1 && allOfSchemas.get(0).get$ref() != null) {
             ReferencedTypeGenerator referencedTypeGenerator = new ReferencedTypeGenerator(allOfSchemas.get(0),
                     typeName);
-            return referencedTypeGenerator.generateTypeDescriptorNode();
+            TypeDescriptorNode typeDescriptorNode = referencedTypeGenerator.generateTypeDescriptorNode();
+            addToTypeListAndRemoveFromTempList(null);
+            return typeDescriptorNode;
         } else {
             ImmutablePair<List<Node>, List<Schema<?>>> recordFlist = generateAllOfRecordFields(allOfSchemas);
             List<Node> recordFieldList = recordFlist.getLeft();
             List<Schema<?>> validSchemas = recordFlist.getRight();
             if (validSchemas.isEmpty()) {
                 AnyDataTypeGenerator anyDataTypeGenerator = new AnyDataTypeGenerator(schema, typeName);
-                return anyDataTypeGenerator.generateTypeDescriptorNode();
+                TypeDescriptorNode typeDescriptorNode = anyDataTypeGenerator.generateTypeDescriptorNode();
+                addToTypeListAndRemoveFromTempList(null);
+                return typeDescriptorNode;
             } else if (validSchemas.size() == 1) {
                 TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(validSchemas.get(0), typeName, null);
-                return typeGenerator.generateTypeDescriptorNode();
+                TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
+                addToTypeListAndRemoveFromTempList(null);
+                return typeDescriptorNode;
             } else {
                 addAdditionalSchemas(schema);
                 restDescriptorNode =
                         restSchemas.size() > 1 ? getRestDescriptorNodeForAllOf(restSchemas) : restDescriptorNode;
 
                 NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
+                addToTypeListAndRemoveFromTempList(null);
                 return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
                         recordMetadata.isOpenRecord() ?
                                 createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
@@ -144,6 +156,15 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                 Schema<?> refSchema = openAPI.getComponents().getSchemas().get(modifiedSchemaName);
                 addAdditionalSchemas(refSchema);
 
+                TypeGenerator reffredTypeGenerator = TypeGeneratorUtils.getTypeGenerator(refSchema, extractedSchemaName, this.typeName);
+                TypeDescriptorNode typeDescriptorNode1 = reffredTypeGenerator.generateTypeDescriptorNode();
+                BallerinaTypesGenerator.getInstance().addTypeDefinitionNode(extractedSchemaName, createTypeDefinitionNode(null,
+                        createToken(PUBLIC_KEYWORD),
+                        createToken(TYPE_KEYWORD),
+                        createIdentifierToken(extractedSchemaName),
+                        typeDescriptorNode1,
+                        createToken(SEMICOLON_TOKEN)));
+
                 recordFieldList.add(recordField);
             } else if (allOfSchema.getProperties() != null) {
                 Map<String, Schema<?>> properties = allOfSchema.getProperties();
@@ -154,7 +175,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                 if (allOfSchema.getAllOf() != null) {
                     ImmutablePair<List<Node>, List<Schema<?>>> immutablePair =
                             generateAllOfRecordFields(allOfSchema.getAllOf());
-                    List<Node> recordAllFields = (List<Node>) immutablePair.getLeft();
+                    List<Node> recordAllFields = immutablePair.getLeft();
                     recordFieldList.addAll(recordAllFields);
                 } else {
                     // TODO: Needs to improve the error message. Could not access the schema name at this level.

@@ -21,11 +21,15 @@ package io.ballerina.openapi.generators.schema;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.Formatter;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,88 +42,99 @@ public class AllOfDataTypeTests {
     SyntaxTree syntaxTree;
 
     @Test(description = "Generate record for schema has allOf reference")
-    public void generateAllOf() throws IOException, BallerinaOpenApiException {
+    public void generateAllOf() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario09.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema09.bal", syntaxTree);
     }
 
     @Test(description = "Generate record for schema has allOf reference in record field")
-    public void generateAllOfInRecordField() throws IOException, BallerinaOpenApiException {
+    public void generateAllOfInRecordField() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/allOf.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/allOf.bal", syntaxTree);
     }
 
     @Test(description = "Generate record when allOf schema has only one references schema")
-    public void generateTypeForSingleAllOfSchema() throws IOException, BallerinaOpenApiException {
+    public void generateTypeForSingleAllOfSchema() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/allOf_with_one_ref.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/allOf_with_one_ref.bal", syntaxTree);
     }
 
     @Test(description = "Generate record when allOf schema has only one references schema with cyclic dependency " +
             "schema")
-    public void generateCyclicSchemaAllOfSchema() throws IOException, BallerinaOpenApiException {
+    public void generateCyclicSchemaAllOfSchema() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/allOf_with_cyclic.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/allOf_with_cyclic.bal", syntaxTree);
     }
 
     @Test(description = "Generate record for allOf schema with array schema")
-    public void generateAllOfWithTypeUnSpecifiedObjectSchema() throws IOException, BallerinaOpenApiException {
+    public void generateAllOfWithTypeUnSpecifiedObjectSchema() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/allOfWithNoType.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/allOfWithNoType.bal", syntaxTree);
     }
 
     @Test(description = "Generate record for allOf type array schemas with inline object schemas")
-    public void generateArrayAllOfInlineObjects() throws IOException, BallerinaOpenApiException {
+    public void generateArrayAllOfInlineObjects() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/array_with_inline_allOf.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/array_with_inline_allOf.bal", syntaxTree);
     }
 
     @Test(description = "Generate record for allOf schema with empty object schema")
-    public void generateAllOfWithEmptyObjectSchema() throws IOException, BallerinaOpenApiException {
+    public void generateAllOfWithEmptyObjectSchema() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/allOfWithEmptyObject.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/allOfWithEmptyObject.bal", syntaxTree);
     }
 
     @Test(description = "Generate record for nested allOf schemas")
-    public void generateNestedAllOfSchema() throws IOException, BallerinaOpenApiException {
+    public void generateNestedAllOfSchema() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/nested_allOf_with_allOf.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+
+        File f = new File("/home/dilan/Documents/tempopenapigenfiles/folder9999");
+        f.mkdir();
+        FileWriter myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + 9999
+                + "/servicefile" + 9999 + ".bal");
+        try {
+            myWriter.write(Formatter.format(syntaxTree).toSourceCode());
+        } catch (FormatterException e) {
+            throw new RuntimeException(e);
+        }
+        myWriter.close();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/nested_all_of.bal", syntaxTree);
     }
 
     @Test(description = "Generate type definition from allOf schema with valid single item")
-    public void generateAllOfwithValidSingleItem() throws IOException, BallerinaOpenApiException {
+    public void generateAllOfwithValidSingleItem() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/single_item_allOf.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/single_item_allOf.bal", syntaxTree);
     }
@@ -128,10 +143,10 @@ public class AllOfDataTypeTests {
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp =
                     "Unsupported nested OneOf or AnyOf schema is found inside a AllOf schema.")
-    public void arrayHasMaxItemsExceedLimit02() throws IOException, BallerinaOpenApiException {
+    public void arrayHasMaxItemsExceedLimit02() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/nested_allOf_with_oneOf.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
     }
 }

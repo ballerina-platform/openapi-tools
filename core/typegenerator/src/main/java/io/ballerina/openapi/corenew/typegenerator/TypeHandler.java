@@ -1,82 +1,67 @@
 package io.ballerina.openapi.corenew.typegenerator;
 
-import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
-import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
-import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.RecordFieldNode;
-import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
-import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.corenew.typegenerator.generators.PrimitiveTypeGenerator;
-import io.ballerina.openapi.corenew.typegenerator.generators.RecordTypeGenerator;
-import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 public class TypeHandler {
-
-    private final static SyntaxTree typesSyntaxTree = SyntaxTree.from(TextDocuments.from(""));
-    private static BallerinaTypesGenerator typesGenerator = new BallerinaTypesGenerator(null);
-
     public static SimpleNameReferenceNode getSimpleNameReferenceNode(String name) {
-        return BallerinaTypesGenerator.getSimpleNameReferenceNode(name);
+        return BallerinaTypesGenerator.getInstance().getSimpleNameReferenceNode(name);
     }
 
     public static QualifiedNameReferenceNode getQualifiedNameReferenceNode(String modulePrefix, String identifier) {
-        return BallerinaTypesGenerator.getQualifiedNameReferenceNode(modulePrefix, identifier);
+        return BallerinaTypesGenerator.getInstance().getQualifiedNameReferenceNode(modulePrefix, identifier);
     }
 
-    public static Optional<TypeDescriptorNode> generateTypeDescNodeForOASSchema(Schema<?> schema)
+    public static Optional<TypeDescriptorNode> generateTypeDescriptorNodeForOASSchema(Schema<?> schema)
             throws BallerinaOpenApiException {
-        return BallerinaTypesGenerator.generateTypeDescNodeForOASSchema(schema);
+        return BallerinaTypesGenerator.getInstance().generateTypeDescriptorNodeForOASSchema(schema);
     }
 
-    public static SimpleNameReferenceNode createReturnTypeInclusionRecord(String statusCode, TypeDescriptorNode type) {
-        return BallerinaTypesGenerator.createReturnTypeInclusionRecord(statusCode, type);
+    public static SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode type) {
+        return BallerinaTypesGenerator.getInstance().createTypeInclusionRecord(statusCode, type);
     }
 
     public static ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>> generateTypeDescriptorForMediaTypes(
-            Map.Entry<String, MediaType> mediaType, String recordName) throws BallerinaOpenApiException {
-        return BallerinaTypesGenerator.generateTypeDescriptorForMediaTypes(mediaType, recordName);
+            String mediaTypeContent, Schema<?> schema, String recordName) throws BallerinaOpenApiException {
+        return BallerinaTypesGenerator.getInstance().generateTypeDescriptorForMediaTypes(mediaTypeContent, schema, recordName);
     }
 
-    public static TypeDescriptorNode getReturnNodeForSchemaType(Set<Map.Entry<String, MediaType>> contentEntries, String recordName)
+    public static Optional<TypeDescriptorNode> getNodeForPayloadType(Map.Entry<String, MediaType> mediaType) // check
             throws BallerinaOpenApiException {
-        return BallerinaTypesGenerator.getReturnNodeForSchemaType(contentEntries, recordName);
-    }
-
-    public static Optional<TypeDescriptorNode> getNodeForPayloadType(Map.Entry<String, MediaType> mediaType)
-            throws BallerinaOpenApiException {
-        return BallerinaTypesGenerator.getNodeForPayloadType(mediaType);
+        return BallerinaTypesGenerator.getInstance().getNodeForPayloadType(mediaType);
     }
 
     public static ArrayTypeDescriptorNode getArrayTypeDescriptorNode(OpenAPI openAPI, Schema<?> items) throws BallerinaOpenApiException {
-        return BallerinaTypesGenerator.getArrayTypeDescriptorNode(openAPI, items);
+        return BallerinaTypesGenerator.getInstance().getArrayTypeDescriptorNode(openAPI, items);
     }
 
     public static Token getQueryParamTypeToken(Schema<?> schema) throws BallerinaOpenApiException {
-        return BallerinaTypesGenerator.getQueryParamTypeToken(schema);
+        return BallerinaTypesGenerator.getInstance().getQueryParamTypeToken(schema);
+    }
+
+    public static RequiredParameterNode getMapJsonParameterNode(IdentifierToken parameterName, Parameter parameter, NodeList<AnnotationNode> annotations) {
+        return BallerinaTypesGenerator.getInstance().getMapJsonParameterNode(parameterName, parameter, annotations);
+    }
+
+    public static ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(TypeDescriptorNode typeDescriptorNode) {
+        return BallerinaTypesGenerator.getInstance().getArrayTypeDescriptorNodeFromTypeDescriptorNode(typeDescriptorNode);
     }
 }

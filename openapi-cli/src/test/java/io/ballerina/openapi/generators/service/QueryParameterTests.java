@@ -361,7 +361,7 @@ public class QueryParameterTests {
                 "query/object_query.bal", syntaxTree);
         //Check types
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "query/object_query_type.bal", syntaxTree);
     }

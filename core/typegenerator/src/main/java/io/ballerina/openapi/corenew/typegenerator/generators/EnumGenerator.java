@@ -79,6 +79,7 @@ public class EnumGenerator extends TypeGenerator {
             if (enumBuilder.length() > 0) {
                 enumBuilder.deleteCharAt(enumBuilder.length() - 1);
                 String enumString = isNull ? enumBuilder.toString() + GeneratorConstants.NILLABLE : enumBuilder.toString();
+                addToTypeListAndRemoveFromTempList(null);
                 return NodeParser.parseTypeDescriptor(enumString);
             } else {
                 String typeDescriptorName;
@@ -89,10 +90,12 @@ public class EnumGenerator extends TypeGenerator {
                     throw new BallerinaOpenApiException("Unsupported OAS data type `" + schema.getType().trim() + "`");
                 }
                 if (isNull) {
+                    addToTypeListAndRemoveFromTempList(null);
                     return createSimpleNameReferenceNode(createIdentifierToken(typeDescriptorName + GeneratorConstants.NILLABLE));
                 } else {
                     TypeDescriptorNode typeDescriptorNode = createSimpleNameReferenceNode(
                             createIdentifierToken(typeDescriptorName));
+                    addToTypeListAndRemoveFromTempList(null);
                     return TypeGeneratorUtils.getNullableType(schema, typeDescriptorNode);
                 }
             }

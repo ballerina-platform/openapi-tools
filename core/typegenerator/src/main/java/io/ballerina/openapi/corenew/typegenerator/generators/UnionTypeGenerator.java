@@ -24,6 +24,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 
+import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
 import io.ballerina.openapi.corenew.typegenerator.TypeGeneratorUtils;
 import io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.corenew.typegenerator.model.GeneratorMetaData;
@@ -42,7 +43,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescr
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPTIONAL_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
-import static io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator.generateTypeDescNodeForOASSchema;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for anyOf and oneOf schemas.
@@ -78,6 +78,7 @@ public class UnionTypeGenerator extends TypeGenerator {
             schemas = schema.getAnyOf();
         }
         TypeDescriptorNode unionTypeDesc = getUnionType(schemas, typeName);
+        addToTypeListAndRemoveFromTempList(null);
         return TypeGeneratorUtils.getNullableType(schema, unionTypeDesc);
     }
 
@@ -89,11 +90,15 @@ public class UnionTypeGenerator extends TypeGenerator {
      * @return Union type
      * @throws BallerinaOpenApiException when unsupported combination of schemas found
      */
-    private TypeDescriptorNode getUnionType(List<Schema> schemas, String typeName)
-            throws BallerinaOpenApiException {
-
+    private TypeDescriptorNode getUnionType(List<Schema> schemas, String typeName) throws BallerinaOpenApiException {
         List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
         for (Schema<?> schema : schemas) {
+            String subTypeName;
+//            if (schema.get$ref() != null) {
+//                subTypeName = GeneratorUtils.extractReferenceType(schema.get$ref());
+//            } else {
+//                subTypeName = typeName + "random" + i++;
+//            }
             TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, typeName, null);
             TypeDescriptorNode typeDescNode = typeGenerator.generateTypeDescriptorNode();
             imports.addAll(typeGenerator.getImports());
@@ -102,9 +107,9 @@ public class UnionTypeGenerator extends TypeGenerator {
                 typeDescNode = (TypeDescriptorNode) internalTypeDesc;
             }
             typeDescriptorNodes.add(typeDescNode);
-            if (typeGenerator instanceof ArrayTypeGenerator && !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
-                typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
-            }
+//            if (typeGenerator instanceof ArrayTypeGenerator && !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
+//                typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
+//            }
         }
 
         return createUnionTypeNode(typeDescriptorNodes);
@@ -153,7 +158,8 @@ public class UnionTypeGenerator extends TypeGenerator {
         Token pipeToken = createIdentifierToken("|");
         while (iterator.hasNext()) {
             Schema<?> contentType = iterator.next();
-            Optional<TypeDescriptorNode> qualifiedNodeType = generateTypeDescNodeForOASSchema(contentType);
+            Optional<TypeDescriptorNode> qualifiedNodeType = BallerinaTypesGenerator.getInstance()
+                    .generateTypeDescriptorNodeForOASSchema(contentType);
             if (qualifiedNodeType.isEmpty()) {
                 continue;
             }

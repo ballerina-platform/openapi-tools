@@ -21,7 +21,7 @@ package io.ballerina.openapi.generators.common;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -43,21 +43,23 @@ public class SwaggerParserTests {
     //TODO: readd expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*" after checking failure
     @Test(description = "Functionality tests for getBallerinaOpenApiType",
             expectedExceptions = BallerinaOpenApiException.class)
-    public void generateHandleUnsupportedData() throws  IOException, BallerinaOpenApiException {
+    public void generateHandleUnsupportedData() throws  IOException, BallerinaOpenApiException,
+            io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/invalid.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
     }
 
     @Test(description = "Functionality tests for swagger parser behaviour when the regex is having syntax errors",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OpenAPI definition has errors: .*")
-    public void testInvalidRegexPatterns() throws  IOException, BallerinaOpenApiException {
+    public void testInvalidRegexPatterns() throws  IOException, BallerinaOpenApiException,
+            io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/invalid_pattern_string.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
     }
 
     //Get string as a content of ballerina file

@@ -20,7 +20,7 @@ package io.ballerina.openapi.generators.schema;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -53,12 +53,12 @@ public class ConstraintTests {
 
     @Test(description = "Tests with record field has constraint and record field type can be user defined datatype " +
             "with constraint.")
-    public void testRecordFiledConstraint() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void testRecordFiledConstraint() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/record_field.yaml"),
                 true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
 
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/record_field.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -71,10 +71,10 @@ public class ConstraintTests {
             "Use case 03 : Reference array" +
             "Use case 04 : Array items have constrained with number format" +
             "Use case 05 : Only array items have constrained with number format")
-    public void testForArray() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void testForArray() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/array.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/array.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -85,11 +85,11 @@ public class ConstraintTests {
             "Use case 01 : Annotations on a record field" +
             "Use case 02 : Annotations on a type" +
             "Use case 03 : Annotations on a type used as a record field")
-    public void testForReference() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void testForReference() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/type_def_node.yaml"),
                 true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/type_def_node.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -98,13 +98,13 @@ public class ConstraintTests {
 
 
     @Test(description = "Tests with record field has constraint value with zero.")
-    public void testRecordFiledConstraintWithZeroValue() throws IOException, BallerinaOpenApiException,
+    public void testRecordFiledConstraintWithZeroValue() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/record_field_02.yaml"),
                 true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
 
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/record_field_02.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -112,12 +112,12 @@ public class ConstraintTests {
     }
 
     @Test(description = "Tests with nested array field has constraint.")
-    public void testNestedArrayWithConstraint() throws IOException, BallerinaOpenApiException,
+    public void testNestedArrayWithConstraint() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                         "/nested_array_with_constraint.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/nested_array.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -127,12 +127,12 @@ public class ConstraintTests {
     }
 
     @Test(description = "Tests with additional properties field has constraint.")
-    public void testAdditionalPropertiesWithConstraint() throws IOException, BallerinaOpenApiException,
+    public void testAdditionalPropertiesWithConstraint() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/additional_properties_with_constraint.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/additional_properties_with_constraint.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -144,11 +144,11 @@ public class ConstraintTests {
     // generation available in tool.
 
     @Test(description = "Test for invalid constraint value")
-    public void testInvalidConstraintUses() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void testInvalidConstraintUses() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/invalidConstraintFieldWithDataType.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/invalidConstraintFieldWithDtaType.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -158,12 +158,12 @@ public class ConstraintTests {
     }
 
     @Test(description = "Test for invalid constraint value with valid constraint value")
-    public void testInvalidAndValidBothConstraintUses() throws IOException, BallerinaOpenApiException,
+    public void testInvalidAndValidBothConstraintUses() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/invalidAndValidConstraintFieldWithDataType.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/invalidAndValidConstraintFieldWithDtaType.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -173,11 +173,11 @@ public class ConstraintTests {
     }
 
     @Test(description = "Test for allowing zero value for number and integer type")
-    public void testAllowedZeroValuesForNumber() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void testAllowedZeroValuesForNumber() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/allow_zero_values_for_number_constraint.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/allow_zero_values_for_number_constraint.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -187,12 +187,12 @@ public class ConstraintTests {
     }
 
     @Test(description = "Tests for nullable reference types with constraint.")
-    public void testNullableRefTypesWithConstraint() throws IOException, BallerinaOpenApiException,
+    public void testNullableRefTypesWithConstraint() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/constraint_with_nullable.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/constraint_with_nullable.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -202,12 +202,12 @@ public class ConstraintTests {
     }
 
     @Test(description = "Test for schema properties having pattern constraint.")
-    public void testStringSchemaPropertyWithPattern() throws IOException, BallerinaOpenApiException,
+    public void testStringSchemaPropertyWithPattern() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/pattern_string.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/string_pattern.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -217,12 +217,12 @@ public class ConstraintTests {
     }
 
     @Test(description = "Test for exclusiveMin and exclusiveMax property changes in OpenAPI 3.1")
-    public void testExclusiveMinMaxInV31() throws IOException, BallerinaOpenApiException,
+    public void testExclusiveMinMaxInV31() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/exclusive_min_max_3_1.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/exclusive_min_max_3_1.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -232,11 +232,11 @@ public class ConstraintTests {
     }
 
     @Test(description = "Test for schema properties containing data types with format constraints.")
-    public void testDataTypeHasFormatWithConstraint() throws IOException, BallerinaOpenApiException {
+    public void testDataTypeHasFormatWithConstraint() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/format_types_v3_0.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/format_type.bal", syntaxTree);
 
@@ -244,7 +244,7 @@ public class ConstraintTests {
         OpenAPI openAPIV31 = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/format_types_v3_1.yaml"), true);
         BallerinaTypesGenerator schemaGenerator = new BallerinaTypesGenerator(openAPIV31);
-        SyntaxTree syntaxTreeV3 = schemaGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTreeV3 = schemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/format_type.bal", syntaxTreeV3);
     }

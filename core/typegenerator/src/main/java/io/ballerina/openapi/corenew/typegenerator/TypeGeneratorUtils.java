@@ -40,6 +40,7 @@ import io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiExce
 import io.ballerina.openapi.corenew.typegenerator.generators.AllOfRecordTypeGenerator;
 import io.ballerina.openapi.corenew.typegenerator.generators.AnyDataTypeGenerator;
 import io.ballerina.openapi.corenew.typegenerator.generators.ArrayTypeGenerator;
+import io.ballerina.openapi.corenew.typegenerator.generators.PregeneratedTypeGenerator;
 import io.ballerina.openapi.corenew.typegenerator.generators.PrimitiveTypeGenerator;
 import io.ballerina.openapi.corenew.typegenerator.generators.RecordTypeGenerator;
 import io.ballerina.openapi.corenew.typegenerator.generators.ReferencedTypeGenerator;
@@ -71,11 +72,14 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.AT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.getOpenAPIType;
 
@@ -100,7 +104,17 @@ public class TypeGeneratorUtils {
      * @return Relevant SchemaType object
      */
     public static TypeGenerator getTypeGenerator(Schema<?> schemaValue, String typeName, String parentName) {
-
+//        if (BallerinaTypesGenerator.typeInclusionRecords.containsKey(typeName)) {
+//            return new PregeneratedTypeGenerator(schemaValue, typeName,
+//                    BallerinaTypesGenerator.typeInclusionRecords.get(typeName));
+//        } else
+//        if (BallerinaTypesGenerator.typeInclusionRecords2.contains(typeName)) {
+//            return new PregeneratedTypeGenerator(schemaValue, typeName, createTypeDefinitionNode(null, createToken(PUBLIC_KEYWORD),
+//                    createToken(TYPE_KEYWORD),
+//                    createIdentifierToken(typeName),
+//                    createSimpleNameReferenceNode(createIdentifierToken(typeName)),
+//                    createToken(SEMICOLON_TOKEN)));
+//        }
         if (schemaValue.get$ref() != null) {
             return new ReferencedTypeGenerator(schemaValue, typeName);
         } else if (GeneratorUtils.isComposedSchema(schemaValue)) {
@@ -113,8 +127,22 @@ public class TypeGeneratorUtils {
                 getOpenAPIType(schemaValue).equals(GeneratorConstants.OBJECT)) ||
                 GeneratorUtils.isObjectSchema(schemaValue) || schemaValue.getProperties() != null ||
                 GeneratorUtils.isMapSchema(schemaValue)) {
+            if (BallerinaTypesGenerator.typeInclusionRecords2.contains(typeName)) {
+                return new PregeneratedTypeGenerator(schemaValue, typeName, createTypeDefinitionNode(null, createToken(PUBLIC_KEYWORD),
+                        createToken(TYPE_KEYWORD),
+                        createIdentifierToken(typeName),
+                        createSimpleNameReferenceNode(createIdentifierToken(typeName)),
+                        createToken(SEMICOLON_TOKEN)));
+            }
             return new RecordTypeGenerator(schemaValue, typeName);
         } else if (GeneratorUtils.isArraySchema(schemaValue)) {
+            if (BallerinaTypesGenerator.typeInclusionRecords2.contains(typeName)) {
+                return new PregeneratedTypeGenerator(schemaValue, typeName, createTypeDefinitionNode(null, createToken(PUBLIC_KEYWORD),
+                        createToken(TYPE_KEYWORD),
+                        createIdentifierToken(typeName),
+                        createSimpleNameReferenceNode(createIdentifierToken(typeName)),
+                        createToken(SEMICOLON_TOKEN)));
+            }
             return new ArrayTypeGenerator(schemaValue, typeName, parentName);
         } else if (getOpenAPIType(schemaValue) != null &&
                 PRIMITIVE_TYPE_LIST.contains(getOpenAPIType(schemaValue))) {
@@ -175,7 +203,7 @@ public class TypeGeneratorUtils {
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
         Set<String> imports = new HashSet<>();
         //Generate constraint annotation.
-        AnnotationNode constraintNode = generateConstraintNode(fieldName.text(), fieldSchema);
+        AnnotationNode constraintNode = null;// generateConstraintNode(fieldName.text(), fieldSchema);
         MetadataNode metadataNode;
         boolean isConstraintSupport =
                 constraintNode != null && fieldSchema.getNullable() != null && fieldSchema.getNullable() ||

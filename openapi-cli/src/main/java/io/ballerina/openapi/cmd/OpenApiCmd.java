@@ -370,7 +370,8 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             generator.generateClient(resourcePath.toString(), targetOutputPath.toString(), filter, nullable,
                     resourceMode);
-        } catch (IOException | FormatterException | BallerinaOpenApiException e) {
+        } catch (IOException | FormatterException | BallerinaOpenApiException |
+                 io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException e) {
             if (e.getLocalizedMessage() != null) {
                 outStream.println(e.getLocalizedMessage());
                 exitError(this.exitWhenFinish);
@@ -394,7 +395,8 @@ public class OpenApiCmd implements BLauncherCmd {
             assert resourcePath != null;
             generator.generateService(resourcePath.toString(), serviceName, targetOutputPath.toString(), filter,
                     nullable, generateServiceType, generateWithoutDataBinding);
-        } catch (IOException | FormatterException | BallerinaOpenApiException e) {
+        } catch (IOException | FormatterException | BallerinaOpenApiException |
+                 io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException e) {
             outStream.println("Error occurred when generating service for OpenAPI contract at " + argList.get(0) +
                     ". " + e.getMessage() + ".");
             exitError(this.exitWhenFinish);
@@ -413,7 +415,9 @@ public class OpenApiCmd implements BLauncherCmd {
             assert resourcePath != null;
             generator.generateClientAndService(resourcePath.toString(), fileName, targetOutputPath.toString(), filter,
                     nullable, generateClientResourceFunctions, generateServiceType, generateWithoutDataBinding);
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException |
+                 io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException |
+                 FormatterException e) {
             outStream.println("Error occurred when generating service for openAPI contract at " + argList.get(0) + "." +
                     " " + e.getMessage() + ".");
             exitError(this.exitWhenFinish);

@@ -105,7 +105,6 @@ public class BallerinaServiceGenerator {
     private final boolean generateWithoutDataBinding;
     private final BallerinaTypesGenerator ballerinaSchemaGenerator;
     private List<Node> functionList = new ArrayList<>();
-    private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
     private final Set<String> paths = new LinkedHashSet<>();
 
     public BallerinaServiceGenerator(OASServiceMetadata oasServiceMetadata) {
@@ -126,14 +125,6 @@ public class BallerinaServiceGenerator {
 
     public void setFunctionList(List<Node> functionList) {
         this.functionList = functionList;
-    }
-
-    public List<TypeDefinitionNode> getTypeInclusionRecords() {
-        List<TypeDefinitionNode> typeRecords = new ArrayList<>();
-        this.typeInclusionRecords.forEach((key, value) -> {
-            typeRecords.add(value);
-        });
-        return typeRecords;
     }
 
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
@@ -379,7 +370,7 @@ public class BallerinaServiceGenerator {
 //        }
         ReturnTypeDescriptorNode returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation,
                 createEmptyNodeList(), path, resourceFunctionDocs);
-        typeInclusionRecords.putAll(returnTypeGenerator.getTypeInclusionRecords());
+//        typeInclusionRecords.putAll(BallerinaTypesGenerator.getTypeDefinitionNodes());
 
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(
                 createToken(SyntaxKind.OPEN_PAREN_TOKEN),

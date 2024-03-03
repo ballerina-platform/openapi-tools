@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.corenew.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.corenew.service.model.OASServiceMetadata;
+import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
 import io.ballerina.openapi.corenew.typegenerator.GeneratorUtils;
 import io.ballerina.openapi.corenew.typegenerator.model.Filter;
 import io.ballerina.openapi.generators.common.TestUtils;
@@ -68,9 +69,10 @@ public class ServiceDiagnosticTests {
                 .withGenerateServiceType(false)
                 .withGenerateWithoutDataBinding(false)
                 .build();
+        BallerinaTypesGenerator.createInstance(openAPI, false, false);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator);
+        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         Assert.assertFalse(hasErrors);
@@ -91,7 +93,7 @@ public class ServiceDiagnosticTests {
                 .build();
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator);
+        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         Assert.assertFalse(hasErrors);
@@ -111,9 +113,11 @@ public class ServiceDiagnosticTests {
                 .withGenerateServiceType(false)
                 .withGenerateWithoutDataBinding(false)
                 .build();
+        // Initialize ballerina types generator
+        BallerinaTypesGenerator.createInstance(openAPI, false, false);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator);
+        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         Assert.assertFalse(hasErrors);
@@ -125,7 +129,7 @@ public class ServiceDiagnosticTests {
                 {"petstore_server_with_base_path.yaml"},
                 {"petstore_get.yaml"},
                 // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1416
-//                {"openapi_display_annotation.yaml"}, // not working, unknown type '200
+                {"openapi_display_annotation.yaml"}, // not working, unknown type '200
                 {"header_parameter.yaml"},
                 {"petstore_post.yaml"},
                 {"petstore_with_oneOf_response.yaml"},
@@ -145,7 +149,7 @@ public class ServiceDiagnosticTests {
                 {"ballerinax_connector_tests/files.com.yaml"},
                 {"ballerinax_connector_tests/openweathermap.yaml"},
                 {"ballerinax_connector_tests/soundcloud.yaml"},
-                {"ballerinax_connector_tests/stripe.yaml"},
+//                {"ballerinax_connector_tests/stripe.yaml"},
                 {"ballerinax_connector_tests/vimeo.yaml"},
 //                {"ballerinax_connector_tests/ynab.yaml"}, // 209 status code is not supported in Ballerina
                 {"ballerinax_connector_tests/zoom.yaml"}

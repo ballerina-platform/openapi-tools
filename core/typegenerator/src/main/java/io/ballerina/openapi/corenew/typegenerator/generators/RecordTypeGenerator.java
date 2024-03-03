@@ -108,12 +108,14 @@ public class RecordTypeGenerator extends TypeGenerator {
             List<String> required = schema.getRequired();
             recordFields.addAll(addRecordFields(required, properties.entrySet(), typeName));
             NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFields);
+            addToTypeListAndRemoveFromTempList(null);
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
                     metadataBuilder.isOpenRecord() ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
                     fieldNodes, metadataBuilder.getRestDescriptorNode(),
                     metadataBuilder.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) :
                             createToken(CLOSE_BRACE_PIPE_TOKEN));
         } else {
+            addToTypeListAndRemoveFromTempList(null);
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
                     metadataBuilder.isOpenRecord() ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
                     createNodeList(recordFields), metadataBuilder.getRestDescriptorNode(),
@@ -243,13 +245,13 @@ public class RecordTypeGenerator extends TypeGenerator {
             if (typeGenerator instanceof RecordTypeGenerator) {
                 fieldTypeName = TypeGeneratorUtils.getNullableType(fieldSchema, fieldTypeName);
             }
-            if (typeGenerator instanceof ArrayTypeGenerator && !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
-                typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
-            } else if (typeGenerator instanceof UnionTypeGenerator &&
-                    !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
-                List<TypeDefinitionNode> newConstraintNode = typeGenerator.getTypeDefinitionNodeList();
-                typeDefinitionNodeList.addAll(newConstraintNode);
-            }
+//            if (typeGenerator instanceof ArrayTypeGenerator && !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
+//                typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
+//            } else if (typeGenerator instanceof UnionTypeGenerator &&
+//                    !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
+//                List<TypeDefinitionNode> newConstraintNode = typeGenerator.getTypeDefinitionNodeList();
+//                typeDefinitionNodeList.addAll(newConstraintNode);
+//            }
             imports.addAll(typeGenerator.getImports());
             ImmutablePair<List<Node>, Set<String>> fieldListWithImports =
                     TypeGeneratorUtils.updateRecordFieldListWithImports(required, recordFieldList, field, fieldSchema,

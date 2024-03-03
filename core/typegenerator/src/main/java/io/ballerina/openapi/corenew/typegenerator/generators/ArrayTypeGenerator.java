@@ -29,6 +29,7 @@ import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
 import io.ballerina.openapi.corenew.typegenerator.GeneratorConstants;
 import io.ballerina.openapi.corenew.typegenerator.GeneratorUtils;
 import io.ballerina.openapi.corenew.typegenerator.TypeGeneratorUtils;
@@ -48,6 +49,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createParenthesisedT
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
+import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.extractReferenceType;
 
 /**
@@ -73,6 +75,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
     public ArrayTypeGenerator(Schema schema, String typeName, String parentType) {
         super(schema, typeName);
         this.parentType = parentType;
+        addToTypeListAndRemoveFromTempList(null);
     }
 
     /**
@@ -89,7 +92,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         if (isConstraintsAvailable) {
             String normalizedTypeName = typeName.replaceAll(GeneratorConstants.SPECIAL_CHARACTER_REGEX, "").trim();
             List<AnnotationNode> typeAnnotations = new ArrayList<>();
-            AnnotationNode constraintNode = TypeGeneratorUtils.generateConstraintNode(typeName, items);
+            AnnotationNode constraintNode = null;//TypeGeneratorUtils.generateConstraintNode(typeName, items);
             if (constraintNode != null) {
                 typeAnnotations.add(constraintNode);
             }
@@ -103,13 +106,14 @@ public class ArrayTypeGenerator extends TypeGenerator {
                     createIdentifierToken(typeName),
                     typeAnnotations);
             imports.addAll(typeGenerator.getImports());
-            typeDefinitionNodeList.add(arrayItemWithConstraint);
+//            typeDefinitionNodeList.add(arrayItemWithConstraint);
+            BallerinaTypesGenerator.getInstance().addTypeDefinitionNode(typeName, arrayItemWithConstraint);
         } else {
             typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
         }
 
         TypeDescriptorNode typeDescriptorNode;
-        typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
+//        typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
         if ((typeGenerator instanceof PrimitiveTypeGenerator ||
                 typeGenerator instanceof ArrayTypeGenerator) && isConstraintsAvailable) {
             typeDescriptorNode = NodeParser.parseTypeDescriptor(typeName);
@@ -146,6 +150,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         ArrayTypeDescriptorNode arrayTypeDescriptorNode = createArrayTypeDescriptorNode(typeDescriptorNode,
                 arrayDimensions);
         imports.addAll(typeGenerator.getImports());
+        addToTypeListAndRemoveFromTempList(null);
         return TypeGeneratorUtils.getNullableType(schema, arrayTypeDescriptorNode);
     }
 
@@ -157,9 +162,17 @@ public class ArrayTypeGenerator extends TypeGenerator {
         TypeDescriptorNode member;
         String schemaType = GeneratorUtils.getOpenAPIType(schema.getItems());
         if (schema.getItems().get$ref() != null) {
+            String typeName = GeneratorUtils.getValidName(extractReferenceType(schema.getItems().get$ref()), true);
+            String validTypeName = escapeIdentifier(typeName);
+            TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(
+                    GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(typeName), validTypeName, null);
+            TypeDefinitionNode typeDefinitionNode = typeGenerator.generateTypeDefinitionNode(
+                    createIdentifierToken(validTypeName), new ArrayList<>());
+            BallerinaTypesGenerator.getInstance().addTypeDefinitionNode(validTypeName, typeDefinitionNode);
+
             member = createBuiltinSimpleNameReferenceNode(null,
-                    createIdentifierToken(GeneratorUtils.getValidName(
-                            extractReferenceType(schema.getItems().get$ref()), true)));
+                    createIdentifierToken(escapeIdentifier(GeneratorUtils.getValidName(
+                            extractReferenceType(schema.getItems().get$ref()), true))));
         } else if (schemaType != null && (schemaType.equals(GeneratorConstants.INTEGER) || schemaType.equals(GeneratorConstants.NUMBER) ||
                 schemaType.equals(GeneratorConstants.BOOLEAN) || schemaType.equals(GeneratorConstants.STRING))) {
             member = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
@@ -167,10 +180,14 @@ public class ArrayTypeGenerator extends TypeGenerator {
         } else {
             return Optional.empty();
         }
-        ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
+        return Optional.ofNullable(getArrayTypeDescriptorNodeFromTypeDescriptorNode(member));
+    }
+
+    public static ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(TypeDescriptorNode typeDescriptorNode) {
+        ArrayDimensionNode arrayDimensionNode = NodeFactory.createArrayDimensionNode(
                 createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                 createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-        NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
-        return Optional.ofNullable(createArrayTypeDescriptorNode(member, nodeList));
+        NodeList<ArrayDimensionNode> nodeList = createNodeList(arrayDimensionNode);
+        return createArrayTypeDescriptorNode(typeDescriptorNode, nodeList);
     }
 }

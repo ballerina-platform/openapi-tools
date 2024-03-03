@@ -122,93 +122,93 @@ public class BallerinaTypesGenerator {
         this.typeDefinitionNodeList = typeDefinitionNodeList;
     }
 
-    /**
-     * Generate syntaxTree for component schema.
-     */
-    public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
-        OpenAPI openAPI = GeneratorMetaData.getInstance().getOpenAPI();
-        List<TypeDefinitionNode> typeDefinitionNodeListForSchema = new ArrayList<>();
-        if (openAPI.getComponents() != null) {
-            // Create typeDefinitionNode
-            Components components = openAPI.getComponents();
-            Map<String, Schema> schemas = components.getSchemas();
-            if (schemas != null) {
-                for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
-                    String schemaKey = schema.getKey().trim();
-                    if (GeneratorUtils.isValidSchemaName(schemaKey)) {
-                        List<Node> schemaDoc = new ArrayList<>();
-                        typeDefinitionNodeListForSchema.add(getTypeDefinitionNode(schema.getValue(), schemaKey,
-                                schemaDoc));
-                    }
-                }
-            }
-        }
-        //Create imports for the http module, when record has http type inclusions.
-        NodeList<ImportDeclarationNode> imports = generateImportNodes();
-        typeDefinitionNodeList.addAll(typeDefinitionNodeListForSchema);
-        // Create module member declaration
-        NodeList<ModuleMemberDeclarationNode> moduleMembers = AbstractNodeFactory.createNodeList(
-                typeDefinitionNodeList.toArray(new TypeDefinitionNode[typeDefinitionNodeList.size()]));
+//    /**
+//     * Generate syntaxTree for component schema.
+//     */
+//    public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
+//        OpenAPI openAPI = GeneratorMetaData.getInstance().getOpenAPI();
+//        List<TypeDefinitionNode> typeDefinitionNodeListForSchema = new ArrayList<>();
+//        if (openAPI.getComponents() != null) {
+//            // Create typeDefinitionNode
+//            Components components = openAPI.getComponents();
+//            Map<String, Schema> schemas = components.getSchemas();
+//            if (schemas != null) {
+//                for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
+//                    String schemaKey = schema.getKey().trim();
+//                    if (GeneratorUtils.isValidSchemaName(schemaKey)) {
+//                        List<Node> schemaDoc = new ArrayList<>();
+//                        typeDefinitionNodeListForSchema.add(getTypeDefinitionNode(schema.getValue(), schemaKey,
+//                                schemaDoc));
+//                    }
+//                }
+//            }
+//        }
+//        //Create imports for the http module, when record has http type inclusions.
+//        NodeList<ImportDeclarationNode> imports = generateImportNodes();
+//        typeDefinitionNodeList.addAll(typeDefinitionNodeListForSchema);
+//        // Create module member declaration
+//        NodeList<ModuleMemberDeclarationNode> moduleMembers = AbstractNodeFactory.createNodeList(
+//                typeDefinitionNodeList.toArray(new TypeDefinitionNode[typeDefinitionNodeList.size()]));
+//
+//        Token eofToken = AbstractNodeFactory.createIdentifierToken("");
+//        ModulePartNode modulePartNode = NodeFactory.createModulePartNode(imports, moduleMembers, eofToken);
+//
+//        TextDocument textDocument = TextDocuments.from("");
+//        SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
+//        return syntaxTree.modifyWith(modulePartNode);
+//    }
 
-        Token eofToken = AbstractNodeFactory.createIdentifierToken("");
-        ModulePartNode modulePartNode = NodeFactory.createModulePartNode(imports, moduleMembers, eofToken);
+//    private NodeList<ImportDeclarationNode> generateImportNodes() {
+//        Set<ImportDeclarationNode> importDeclarationNodes = new LinkedHashSet<>();
+//        // Imports for the http module, when record has http type inclusions.
+//        if (!typeDefinitionNodeList.isEmpty()) {
+//            importsForTypeDefinitions(importDeclarationNodes);
+//        }
+//        //Imports for constraints
+//        if (!imports.isEmpty()) {
+//            for (String importValue : imports) {
+//                ImportDeclarationNode importDeclarationNode = NodeParser.parseImportDeclaration(importValue);
+//                importDeclarationNodes.add(importDeclarationNode);
+//            }
+//        }
+//        if (importDeclarationNodes.isEmpty()) {
+//            return createEmptyNodeList();
+//        }
+//        return createNodeList(importDeclarationNodes);
+//    }
 
-        TextDocument textDocument = TextDocuments.from("");
-        SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
-        return syntaxTree.modifyWith(modulePartNode);
-    }
-
-    private NodeList<ImportDeclarationNode> generateImportNodes() {
-        Set<ImportDeclarationNode> importDeclarationNodes = new LinkedHashSet<>();
-        // Imports for the http module, when record has http type inclusions.
-        if (!typeDefinitionNodeList.isEmpty()) {
-            importsForTypeDefinitions(importDeclarationNodes);
-        }
-        //Imports for constraints
-        if (!imports.isEmpty()) {
-            for (String importValue : imports) {
-                ImportDeclarationNode importDeclarationNode = NodeParser.parseImportDeclaration(importValue);
-                importDeclarationNodes.add(importDeclarationNode);
-            }
-        }
-        if (importDeclarationNodes.isEmpty()) {
-            return createEmptyNodeList();
-        }
-        return createNodeList(importDeclarationNodes);
-    }
-
-    private void importsForTypeDefinitions(Set<ImportDeclarationNode> imports) {
-        for (TypeDefinitionNode node : typeDefinitionNodeList) {
-            if (!(node.typeDescriptor() instanceof RecordTypeDescriptorNode)) {
-                continue;
-            }
-            if (node.typeName().text().equals(CONNECTION_CONFIG)) {
-                ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(
-                        GeneratorConstants.BALLERINA,
-                        HTTP);
-                imports.add(importForHttp);
-            }
-            RecordTypeDescriptorNode record = (RecordTypeDescriptorNode) node.typeDescriptor();
-            for (Node field : record.fields()) {
-                if (!(field instanceof TypeReferenceNode) ||
-                        !(((TypeReferenceNode) field).typeName() instanceof QualifiedNameReferenceNode)) {
-                    continue;
-                }
-                TypeReferenceNode recordField = (TypeReferenceNode) field;
-                QualifiedNameReferenceNode typeInclusion = (QualifiedNameReferenceNode) recordField.typeName();
-                boolean isHttpImportExist = imports.stream().anyMatch(importNode -> importNode.moduleName().stream()
-                        .anyMatch(moduleName -> moduleName.text().equals(HTTP)));
-
-                if (!isHttpImportExist && typeInclusion.modulePrefix().text().equals(HTTP)) {
-                    ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(
-                            GeneratorConstants.BALLERINA,
-                            GeneratorConstants.HTTP);
-                    imports.add(importForHttp);
-                    break;
-                }
-            }
-        }
-    }
+//    private void importsForTypeDefinitions(Set<ImportDeclarationNode> imports) {
+//        for (TypeDefinitionNode node : typeDefinitionNodeList) {
+//            if (!(node.typeDescriptor() instanceof RecordTypeDescriptorNode)) {
+//                continue;
+//            }
+//            if (node.typeName().text().equals(CONNECTION_CONFIG)) {
+//                ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(
+//                        GeneratorConstants.BALLERINA,
+//                        HTTP);
+//                imports.add(importForHttp);
+//            }
+//            RecordTypeDescriptorNode record = (RecordTypeDescriptorNode) node.typeDescriptor();
+//            for (Node field : record.fields()) {
+//                if (!(field instanceof TypeReferenceNode) ||
+//                        !(((TypeReferenceNode) field).typeName() instanceof QualifiedNameReferenceNode)) {
+//                    continue;
+//                }
+//                TypeReferenceNode recordField = (TypeReferenceNode) field;
+//                QualifiedNameReferenceNode typeInclusion = (QualifiedNameReferenceNode) recordField.typeName();
+//                boolean isHttpImportExist = imports.stream().anyMatch(importNode -> importNode.moduleName().stream()
+//                        .anyMatch(moduleName -> moduleName.text().equals(HTTP)));
+//
+//                if (!isHttpImportExist && typeInclusion.modulePrefix().text().equals(HTTP)) {
+//                    ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(
+//                            GeneratorConstants.BALLERINA,
+//                            GeneratorConstants.HTTP);
+//                    imports.add(importForHttp);
+//                    break;
+//                }
+//            }
+//        }
+//    }
 
     /**
      * Create Type Definition Node for a given OpenAPI schema.
