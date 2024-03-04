@@ -25,7 +25,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
  */
 public class ParameterMapperException extends Exception {
 
-    private final ExceptionDiagnostic diagnostic;
+    private final transient ExceptionDiagnostic diagnostic;
 
     public ParameterMapperException(ExceptionDiagnostic diagnostic) {
         this.diagnostic = diagnostic;
