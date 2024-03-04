@@ -43,7 +43,7 @@ public class InterceptorTests {
         this.tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
     }
 
-    @Test(description = "Test with Request interceptor")
+    @Test(description = "Test with request interceptor")
     public void testRequestInterceptor() throws IOException {
         for (int i = 0; i <= 9; i++) {
             Path ballerinaFilePath = INTERCEPTOR_DIR.resolve("request_interceptors/interceptors0" + i + ".bal");
@@ -52,7 +52,13 @@ public class InterceptorTests {
         }
     }
 
-    @Test(description = "Test with Response interceptor")
+    @Test(description = "Test with two request interceptors")
+    public void testTwoRequestInterceptors() throws IOException {
+        Path ballerinaFilePath = INTERCEPTOR_DIR.resolve("request_interceptors/interceptors10.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "interceptors/request_interceptors/interceptors10.yaml");
+    }
+
+    @Test(description = "Test with response interceptor")
     public void testResponseInterceptor() throws IOException {
         for (int i = 0; i <= 5; i++) {
             Path ballerinaFilePath = INTERCEPTOR_DIR.resolve("response_interceptors/interceptors0" + i + ".bal");

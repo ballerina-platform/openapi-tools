@@ -10,6 +10,16 @@ servers:
       port:
         default: "9090"
 paths:
+  /:
+    get:
+      operationId: get
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
   /hello:
     get:
       operationId: getHello

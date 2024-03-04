@@ -15,8 +15,8 @@ service class ResponseInterceptor {
 
 service http:InterceptableService /payloadV on new http:Listener(9090) {
 
-    public function createInterceptors() returns [ResponseInterceptor] {
-        return [];
+    public function createInterceptors() returns ResponseInterceptor {
+        return new;
     }
 
     resource function get greet() returns string {
