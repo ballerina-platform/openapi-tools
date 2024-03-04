@@ -26,13 +26,12 @@ import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
-import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
+import io.ballerina.openapi.service.mapper.parameter.ParameterMapperException;
 import io.ballerina.openapi.service.mapper.response.ResponseMapper;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -171,17 +170,11 @@ public class ResourceMapperImpl implements ResourceMapper {
         //Add path parameters if in path and query parameters
         ParameterMapper parameterMapper = serviceMapperFactory.getParameterMapper(resourceFunction, apiDocs,
                 operationInventory);
-        parameterMapper.setParameters();
-        List<OpenAPIMapperDiagnostic> diagnostics = additionalData.diagnostics();
-        if (diagnostics.size() > 1 || (diagnostics.size() == 1 && !diagnostics.get(0).getCode().equals(
-                DiagnosticMessages.OAS_CONVERTOR_113.getCode()))) {
-            boolean isErrorIncluded = diagnostics.stream().anyMatch(diagnostic ->
-                    DiagnosticSeverity.ERROR.equals(diagnostic.getDiagnosticSeverity()));
-            boolean hasRestPathParam = diagnostics.stream().anyMatch(diagnostic ->
-                    DiagnosticMessages.OAS_CONVERTOR_125.getCode().equals(diagnostic.getCode()));
-            if (isErrorIncluded || hasRestPathParam) {
-                return Optional.empty();
-            }
+        try {
+            parameterMapper.setParameters();
+        } catch (ParameterMapperException exception) {
+            additionalData.diagnostics().add(exception.getDiagnostic());
+            return Optional.empty();
         }
 
         ResponseMapper responseMapper = serviceMapperFactory.getResponseMapper(resourceFunction, operationInventory);

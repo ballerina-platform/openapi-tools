@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org).
  *
  *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -17,12 +17,21 @@
  */
 package io.ballerina.openapi.service.mapper.parameter;
 
-/**
- * This {@link ParameterMapper} represents the interface for parameter mapper.
- *
- * @since 1.9.0
- */
-public interface ParameterMapper {
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 
-    void setParameters() throws ParameterMapperException;
+/**
+ * This {@link ParameterMapperException} class represents the exceptions that can occur
+ * while processing the parameters.
+ */
+public class ParameterMapperException extends Exception {
+
+    private final ExceptionDiagnostic diagnostic;
+
+    public ParameterMapperException(ExceptionDiagnostic diagnostic) {
+        this.diagnostic = diagnostic;
+    }
+
+    public ExceptionDiagnostic getDiagnostic() {
+        return diagnostic;
+    }
 }

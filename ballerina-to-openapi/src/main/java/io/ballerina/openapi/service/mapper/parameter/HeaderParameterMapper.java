@@ -130,7 +130,8 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
         return null;
     }
 
-    public List<Parameter> getParameterSchemaList() {
+    @Override
+    public List<Parameter> getParameterSchemaList() throws ParameterMapperException {
         if (Objects.isNull(type)) {
             return List.of();
         }

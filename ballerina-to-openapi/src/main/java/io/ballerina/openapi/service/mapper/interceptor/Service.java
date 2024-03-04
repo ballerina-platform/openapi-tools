@@ -56,9 +56,11 @@ public abstract class Service {
                     nonErrorTypes.add(type);
                 }
             });
-            errorReturnType = errorTypes.isEmpty() ? null : semanticModel.types().builder().UNION_TYPE
+            errorReturnType = errorTypes.isEmpty() ? null :
+                    errorTypes.size() == 1 ? errorTypes.get(0) : semanticModel.types().builder().UNION_TYPE
                     .withMemberTypes(errorTypes.toArray(TypeSymbol[]::new)).build();
-            nonErrorReturnType = nonErrorTypes.isEmpty() ? null : semanticModel.types().builder().UNION_TYPE
+            nonErrorReturnType = nonErrorTypes.isEmpty() ? null :
+                    nonErrorTypes.size() == 1 ? nonErrorTypes.get(0) : semanticModel.types().builder().UNION_TYPE
                     .withMemberTypes(nonErrorTypes.toArray(TypeSymbol[]::new)).build();
         } else {
             if (effectiveReturnType.subtypeOf(semanticModel.types().ERROR)) {

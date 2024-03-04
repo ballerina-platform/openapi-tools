@@ -18,6 +18,7 @@
 package io.ballerina.openapi.service.mapper.interceptor.resource;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 
 import java.util.Objects;
 
@@ -31,7 +32,7 @@ public class NamedPathSegmentNode extends PathSegmentNode {
     String name;
 
     public NamedPathSegmentNode(String name) {
-        this.name = Objects.isNull(name) ? "" : name;
+        this.name = Objects.nonNull(name) ? MapperCommonUtils.unescapeIdentifier(name) : "";
     }
 
     @Override

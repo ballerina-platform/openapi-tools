@@ -77,7 +77,7 @@ public class ParameterMapperImpl implements ParameterMapper {
         this.typeMapper = serviceMapperFactory.getTypeMapper();
     }
 
-    public void setParameters() {
+    public void setParameters() throws ParameterMapperException {
         NodeList<Node> pathParams = functionDefinitionNode.relativeResourcePath();
         if (!pathParams.isEmpty()) {
             setPathParameters(pathParams);
@@ -101,7 +101,7 @@ public class ParameterMapperImpl implements ParameterMapper {
         }
     }
 
-    private void setParameter(ParameterNode parameterNode, String parameterType) {
+    private void setParameter(ParameterNode parameterNode, String parameterType) throws ParameterMapperException {
         switch (parameterType) {
             case "QUERY" -> {
                 QueryParameterMapper queryParameterMapper = new QueryParameterMapper(parameterNode, apiDocs,
@@ -152,7 +152,7 @@ public class ParameterMapperImpl implements ParameterMapper {
         return null;
     }
 
-    private void setPathParameters(NodeList<Node> pathParams) {
+    private void setPathParameters(NodeList<Node> pathParams) throws ParameterMapperException {
         for (Node param: pathParams) {
             if (param instanceof ResourcePathParameterNode pathParam) {
                 SemanticModel semanticModel = additionalData.semanticModel();

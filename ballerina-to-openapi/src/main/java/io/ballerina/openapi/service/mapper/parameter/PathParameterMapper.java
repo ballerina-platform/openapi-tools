@@ -22,14 +22,12 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.resourcepath.util.PathSegment;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
-import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 
-import java.util.List;
 import java.util.Map;
 
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
@@ -49,7 +47,6 @@ public class PathParameterMapper extends AbstractParameterMapper {
     private final TypeMapper typeMapper;
     private final Location location;
     private final PathSegment.Kind pathSegmentKind;
-    private final List<OpenAPIMapperDiagnostic> diagnostics;
 
     public PathParameterMapper(PathParameterSymbol pathParameterSymbol, Map<String, String> apiDocs,
                                OperationInventory operationInventory, AdditionalData additionalData,
@@ -61,15 +58,13 @@ public class PathParameterMapper extends AbstractParameterMapper {
         this.typeMapper = typeMapper;
         this.name = unescapeIdentifier(pathParameterSymbol.getName().get());
         this.description = apiDocs.get(removeStartingSingleQuote(pathParameterSymbol.getName().get()));
-        this.diagnostics = additionalData.diagnostics();
     }
 
     @Override
-    public PathParameter getParameterSchema() {
+    public PathParameter getParameterSchema() throws ParameterMapperException {
         if (pathSegmentKind.equals(PathSegment.Kind.PATH_REST_PARAMETER)) {
             ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_125, location, name);
-            diagnostics.add(error);
-            return null;
+            throw new ParameterMapperException(error);
         }
         PathParameter pathParameter = new PathParameter();
         pathParameter.setName(name);

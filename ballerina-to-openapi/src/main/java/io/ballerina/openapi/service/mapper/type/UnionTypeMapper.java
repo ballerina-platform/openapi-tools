@@ -132,12 +132,11 @@ public class UnionTypeMapper extends AbstractTypeMapper {
             return null;
         }
         for (TypeSymbol memberTypeSymbol : memberTypeSymbols) {
-            if (((SingletonTypeSymbol) memberTypeSymbol).originalType().typeKind().equals(TypeDescKind.STRING)) {
-                String signature = memberTypeSymbol.signature();
-                enumValues.add(signature.substring(1, signature.length() - 1));
-            } else {
-                enumValues.add(parseBalSimpleLiteral(memberTypeSymbol.signature()));
+            Object enumValue = getSigletonStringValue((SingletonTypeSymbol) memberTypeSymbol);
+            if (!((SingletonTypeSymbol) memberTypeSymbol).originalType().typeKind().equals(TypeDescKind.STRING)) {
+                enumValue = parseBalSimpleLiteral(enumValue.toString());
             }
+            enumValues.add(enumValue);
         }
         Schema schema = SimpleTypeMapper.getSchema(enumType);
         if (Objects.isNull(schema)) {
@@ -149,6 +148,18 @@ public class UnionTypeMapper extends AbstractTypeMapper {
             schema.setNullable(true);
         }
         return schema;
+    }
+
+    private static String getSigletonStringValue(SingletonTypeSymbol typeSymbol) {
+        String signature = typeSymbol.signature();
+        if (typeSymbol instanceof ConstantSymbol) {
+            return ((ConstantSymbol) typeSymbol).constValue().toString();
+        }
+
+        if (typeSymbol.originalType().typeKind().equals(TypeDescKind.STRING)) {
+            return signature.substring(1, signature.length() - 1);
+        }
+        return signature;
     }
 
     private static void addUnsupportedUnionError(UnionTypeSymbol typeSymbol,
