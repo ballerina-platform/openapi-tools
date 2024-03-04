@@ -158,7 +158,7 @@ public class ParameterMapperImpl implements ParameterMapper {
                 SemanticModel semanticModel = additionalData.semanticModel();
                 PathParameterSymbol pathParameterSymbol = (PathParameterSymbol) semanticModel.symbol(pathParam).get();
                 PathParameterMapper pathParameterMapper = new PathParameterMapper(pathParameterSymbol, apiDocs,
-                        operationInventory, additionalData, typeMapper);
+                        operationInventory, typeMapper);
                 pathParameterMapper.setParameter();
             }
         }

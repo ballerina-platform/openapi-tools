@@ -30,6 +30,11 @@ import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Objects;
 import java.util.Optional;
 
+import static io.ballerina.openapi.service.mapper.Constants.BALLERINA;
+import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
+import static io.ballerina.openapi.service.mapper.Constants.ERROR_PAYLOAD;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP;
+
 /**
  * This {@link ErrorTypeMapper} class represents the error type mapper.
  * This class provides functionalities for mapping the Ballerina error type to OpenAPI type schema.
@@ -49,13 +54,13 @@ public class ErrorTypeMapper extends AbstractTypeMapper {
     }
 
     public static Schema getSchema(ErrorTypeSymbol typeSymbol, Components components, AdditionalData additionalData) {
-        Optional<Symbol> optErrorPayload = additionalData.semanticModel().types().getTypeByName("ballerina", "http",
-                "", "ErrorPayload");
+        Optional<Symbol> optErrorPayload = additionalData.semanticModel().types().getTypeByName(BALLERINA, HTTP,
+                EMPTY, ERROR_PAYLOAD);
         if (optErrorPayload.isPresent() && optErrorPayload.get() instanceof TypeDefinitionSymbol errorPayload) {
             Schema schema = TypeMapperImpl.getTypeSchema(errorPayload.typeDescriptor(), components, additionalData);
             if (Objects.nonNull(schema)) {
-                components.addSchemas("ErrorPayload", schema);
-                return new ObjectSchema().$ref("ErrorPayload");
+                components.addSchemas(ERROR_PAYLOAD, schema);
+                return new ObjectSchema().$ref(ERROR_PAYLOAD);
             }
         }
         return new StringSchema();

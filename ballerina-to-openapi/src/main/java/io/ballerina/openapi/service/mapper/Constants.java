@@ -41,6 +41,9 @@ public final class Constants {
     public static final String INTERCEPTABLE_SERVICE = "InterceptableService";
     public static final String NEXT_SERVICE = "NextService";
     public static final String INTERCEPTOR = "Interceptor";
+    public static final String RESPONSE = "Response";
+    public static final String STATUS_CODE_RESPONSE = "StatusCodeResponse";
+    public static final String ERROR_PAYLOAD = "ErrorPayload";
     public static final String TREAT_NILABLE_AS_OPTIONAL = "treatNilableAsOptional";
     public static final String HTTP_HEADER = "http:Header";
     public static final String BYTE = "byte";

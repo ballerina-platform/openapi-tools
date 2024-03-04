@@ -56,7 +56,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static io.ballerina.openapi.service.mapper.Constants.BALLERINA;
 import static io.ballerina.openapi.service.mapper.Constants.DEFAULT;
+import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_200;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_201;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_202;
@@ -66,6 +69,7 @@ import static io.ballerina.openapi.service.mapper.Constants.HTTP_CODE_DESCRIPTIO
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_PAYLOAD;
 import static io.ballerina.openapi.service.mapper.Constants.MEDIA_TYPE;
 import static io.ballerina.openapi.service.mapper.Constants.POST;
+import static io.ballerina.openapi.service.mapper.Constants.RESPONSE;
 import static io.ballerina.openapi.service.mapper.response.utils.StatusCodeErrorUtils.isSubTypeOfHttpStatusCodeError;
 import static io.ballerina.openapi.service.mapper.response.utils.StatusCodeResponseUtils.isSubTypeOfHttpStatusCodeResponse;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractAnnotationFieldDetails;
@@ -478,8 +482,8 @@ public class DefaultResponseMapper implements ResponseMapper {
     }
     
     public static boolean isSubTypeOfHttpResponse(TypeSymbol returnType, SemanticModel semanticModel) {
-        Optional<Symbol> optionalRecordSymbol = semanticModel.types().getTypeByName("ballerina", "http",
-                "", "Response");
+        Optional<Symbol> optionalRecordSymbol = semanticModel.types().getTypeByName(BALLERINA, HTTP,
+                EMPTY, RESPONSE);
         if (optionalRecordSymbol.isPresent() &&
                 optionalRecordSymbol.get() instanceof ClassSymbol classSymbol) {
             return returnType.subtypeOf(classSymbol);

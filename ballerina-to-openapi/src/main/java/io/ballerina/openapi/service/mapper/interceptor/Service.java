@@ -21,10 +21,10 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.openapi.service.mapper.response.utils.StatusCodeResponseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * This {@link Service} class represents the abstract service.
@@ -33,8 +33,8 @@ import java.util.Objects;
  */
 public abstract class Service {
 
-    private TypeSymbol errorReturnType = null;
-    private TypeSymbol nonErrorReturnType = null;
+    private final List<TypeSymbol> errorReturnType = new ArrayList<>();
+    private final List<TypeSymbol> nonErrorReturnType = new ArrayList<>();
     protected final SemanticModel semanticModel;
 
     protected Service(SemanticModel semanticModel) {
@@ -42,44 +42,54 @@ public abstract class Service {
     }
 
     protected void extractErrorAndNonErrorReturnTypes(TypeSymbol effectiveReturnType) {
-        if (effectiveReturnType instanceof TypeReferenceTypeSymbol) {
-            extractErrorAndNonErrorReturnTypes(((TypeReferenceTypeSymbol) effectiveReturnType).typeDescriptor());
-        } else if (effectiveReturnType instanceof UnionTypeSymbol) {
-            List<TypeSymbol> memberTypes = ((UnionTypeSymbol) effectiveReturnType).userSpecifiedMemberTypes();
-            List<TypeSymbol> errorTypes = new ArrayList<>();
-            List<TypeSymbol> nonErrorTypes = new ArrayList<>();
+        List<TypeSymbol> baseTypes = new ArrayList<>();
+        destructUnionType(effectiveReturnType, baseTypes);
+        baseTypes.forEach(this::addBaseReturnType);
+    }
 
-            memberTypes.forEach(type -> {
-                if (type.subtypeOf(semanticModel.types().ERROR)) {
-                    errorTypes.add(type);
-                } else {
-                    nonErrorTypes.add(type);
-                }
-            });
-            errorReturnType = errorTypes.isEmpty() ? null :
-                    errorTypes.size() == 1 ? errorTypes.get(0) : semanticModel.types().builder().UNION_TYPE
-                    .withMemberTypes(errorTypes.toArray(TypeSymbol[]::new)).build();
-            nonErrorReturnType = nonErrorTypes.isEmpty() ? null :
-                    nonErrorTypes.size() == 1 ? nonErrorTypes.get(0) : semanticModel.types().builder().UNION_TYPE
-                    .withMemberTypes(nonErrorTypes.toArray(TypeSymbol[]::new)).build();
+    private void addBaseReturnType(TypeSymbol typeSymbol) {
+        if (typeSymbol.subtypeOf(semanticModel.types().ERROR)) {
+            errorReturnType.add(typeSymbol);
         } else {
-            if (effectiveReturnType.subtypeOf(semanticModel.types().ERROR)) {
-                errorReturnType = effectiveReturnType;
-            } else {
-                nonErrorReturnType = effectiveReturnType;
-            }
+            nonErrorReturnType.add(typeSymbol);
+        }
+    }
+
+    private void destructUnionType(TypeSymbol typeSymbol, List<TypeSymbol> memberTypes) {
+        if (typeSymbol.subtypeOf(semanticModel.types().ERROR) ||
+                typeSymbol.subtypeOf(semanticModel.types().ANYDATA) ||
+                StatusCodeResponseUtils.isSubTypeOfHttpStatusCodeResponse(typeSymbol, semanticModel)) {
+            memberTypes.add(typeSymbol);
+        } else if (typeSymbol instanceof UnionTypeSymbol) {
+            ((UnionTypeSymbol) typeSymbol).userSpecifiedMemberTypes().forEach(
+                    memberType -> destructUnionType(memberType, memberTypes));
+        } else if (typeSymbol instanceof TypeReferenceTypeSymbol) {
+            destructUnionType(((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor(), memberTypes);
+        } else {
+            memberTypes.add(typeSymbol);
         }
     }
 
     public TypeSymbol getErrorReturnType() {
-        return errorReturnType;
+        return getTypeSymbol(errorReturnType);
     }
 
     public TypeSymbol getNonErrorReturnType() {
-        return nonErrorReturnType;
+        return getTypeSymbol(nonErrorReturnType);
+    }
+
+    private TypeSymbol getTypeSymbol(List<TypeSymbol> listOfTypeSymbols) {
+        if (listOfTypeSymbols.isEmpty()) {
+            return null;
+        }
+        if (listOfTypeSymbols.size() == 1) {
+            return listOfTypeSymbols.get(0);
+        }
+        return semanticModel.types().builder().UNION_TYPE.withMemberTypes(
+                listOfTypeSymbols.toArray(TypeSymbol[]::new)).build();
     }
 
     public boolean hasErrorReturn() {
-        return Objects.nonNull(errorReturnType);
+        return !errorReturnType.isEmpty();
     }
 }
