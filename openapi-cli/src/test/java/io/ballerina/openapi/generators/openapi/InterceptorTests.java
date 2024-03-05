@@ -58,6 +58,12 @@ public class InterceptorTests {
         compareWithGeneratedFile(ballerinaFilePath, "interceptors/request_interceptors/interceptors10.yaml");
     }
 
+    @Test(description = "Test with request error interceptor")
+    public void testRequestErrorInterceptor() throws IOException {
+        Path ballerinaFilePath = INTERCEPTOR_DIR.resolve("request_interceptors/interceptors11.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "interceptors/request_interceptors/interceptors11.yaml");
+    }
+
     @Test(description = "Test with response interceptor")
     public void testResponseInterceptor() throws IOException {
         for (int i = 0; i <= 5; i++) {
