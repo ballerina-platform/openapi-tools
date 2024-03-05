@@ -199,20 +199,25 @@ public class InterceptorPipeline {
             return;
         }
 
-        if (interceptor.isContinueExecution() || interceptor.isNotInvokable(targetResource)) {
+        if (interceptor.isContinueExecution() || !interceptor.isInvokable(targetResource)) {
             updateReturnTypeForReqInterceptor(interceptor.getNextInReqPath(), returnTypes, targetResource);
-            if (interceptor.isNotInvokable(targetResource)) {
+            if (!interceptor.isInvokable(targetResource)) {
                 return;
             }
         }
 
         if (interceptor.hasErrorReturn()) {
             Interceptor nextErrorInterceptor = interceptor.getNextInReqErrorPath();
-            if (Objects.nonNull(nextErrorInterceptor)) {
+            if (Objects.nonNull(nextErrorInterceptor) && nextErrorInterceptor.isInvokable(targetResource)) {
                 updateReturnTypeForReqInterceptor(nextErrorInterceptor, returnTypes, targetResource);
             } else {
+                nextErrorInterceptor = null;
                 if (Objects.nonNull(initResInterceptor)) {
-                    nextErrorInterceptor = initResInterceptor.getNextInResErrorPath();
+                    if (initResInterceptor.getType().equals(InterceptorType.RESPONSE_ERROR)) {
+                        nextErrorInterceptor = initResInterceptor;
+                    } else {
+                        nextErrorInterceptor = initResInterceptor.getNextInResErrorPath();
+                    }
                 }
                 updateErrorReturnTypeForInterceptor(interceptor, returnTypes, nextErrorInterceptor);
             }

@@ -52,7 +52,7 @@ public class ResponseInterceptor extends Interceptor {
     }
 
     @Override
-    public boolean isNotInvokable(ResourceMethodSymbol targetResource) {
+    public boolean isInvokable(ResourceMethodSymbol targetResource) {
         return true;
     }
 

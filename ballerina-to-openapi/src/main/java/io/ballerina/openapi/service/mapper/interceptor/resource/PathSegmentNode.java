@@ -24,7 +24,8 @@ import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This {@link PathSegmentNode} represents a segment in the resource path as a node.
@@ -54,39 +55,45 @@ public abstract class PathSegmentNode {
     protected static String getRegex(TypeSymbol pathParamType, SemanticModel semanticModel) {
         if (semanticModel.types().INT.subtypeOf(pathParamType)) {
             return "\\d+";
-        } else if (semanticModel.types().FLOAT.subtypeOf(pathParamType)) {
+        } else if (semanticModel.types().FLOAT.subtypeOf(pathParamType) ||
+                semanticModel.types().DECIMAL.subtypeOf(pathParamType)) {
             return "\\d+\\.\\d+";
         } else if (semanticModel.types().BOOLEAN.subtypeOf(pathParamType)) {
             return "true|false";
-        } else if (semanticModel.types().DECIMAL.subtypeOf(pathParamType)) {
-            return "\\d+\\.\\d+";
         }
-        Optional<UnionTypeSymbol> unionType = getUnionType(pathParamType);
-        if (unionType.isPresent() && unionType.get().memberTypeDescriptors().stream().allMatch(
-                typeSymbol -> typeSymbol instanceof SingletonTypeSymbol)) {
-            return unionType.get().memberTypeDescriptors().stream()
-                    .map(typeSymbol -> {
-                        String signature = typeSymbol.signature();
-                        if (((SingletonTypeSymbol) typeSymbol).originalType().typeKind().equals(TypeDescKind.STRING)) {
-                            signature = signature.substring(1, signature.length() - 1);
-                        }
-                        return signature;
-                    })
-                    .reduce((s, s2) -> s + "|" + s2).orElse("[^/]+");
+
+        List<SingletonTypeSymbol> singletons = new ArrayList<>();
+        if (!extractSingletonTypeSymbols(pathParamType, singletons) || singletons.isEmpty()) {
+            return "[^/]+";
         }
-        return "[^/]+";
+        return singletons.stream()
+                .map(PathSegmentNode::getSignature)
+                .reduce((s, s2) -> s + "|" + s2).orElse("[^/]+");
     }
 
-    private static Optional<UnionTypeSymbol> getUnionType(TypeSymbol pathParamType) {
-        if (pathParamType instanceof TypeReferenceTypeSymbol typeReferenceTypeSymbol) {
-            TypeSymbol referredType = typeReferenceTypeSymbol.typeDescriptor();
-            if (referredType instanceof UnionTypeSymbol unionTypeSymbol) {
-                return Optional.of(unionTypeSymbol);
-            }
-            return getUnionType(referredType);
-        } else if (pathParamType instanceof UnionTypeSymbol unionTypeSymbol) {
-            return Optional.of(unionTypeSymbol);
+    private static String getSignature(SingletonTypeSymbol singletonTypeSymbol) {
+        String signature = singletonTypeSymbol.signature();
+        if (singletonTypeSymbol.originalType().typeKind().equals(TypeDescKind.STRING)) {
+            signature = signature.substring(1, signature.length() - 1);
         }
-        return Optional.empty();
+        return signature;
+    }
+
+    private static boolean extractSingletonTypeSymbols(TypeSymbol typeSymbol, List<SingletonTypeSymbol> singletons) {
+        if (typeSymbol instanceof SingletonTypeSymbol singleton) {
+            singletons.add(singleton);
+        } else if (typeSymbol instanceof UnionTypeSymbol unionTypeSymbol) {
+            List<TypeSymbol> memberTypes = unionTypeSymbol.memberTypeDescriptors();
+            for (TypeSymbol memberType : memberTypes) {
+                if (!extractSingletonTypeSymbols(memberType, singletons)) {
+                    return false;
+                }
+            }
+        } else if (typeSymbol instanceof TypeReferenceTypeSymbol) {
+            return extractSingletonTypeSymbols(((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor(), singletons);
+        } else {
+            return false;
+        }
+        return true;
     }
 }
