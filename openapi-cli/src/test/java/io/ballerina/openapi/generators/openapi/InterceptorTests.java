@@ -73,6 +73,21 @@ public class InterceptorTests {
         }
     }
 
+    @Test(description = "Test with response error interceptor")
+    public void testResponseErrorInterceptor() throws IOException {
+        Path ballerinaFilePath = INTERCEPTOR_DIR.resolve("response_interceptors/interceptors06.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "interceptors/response_interceptors/interceptors06.yaml");
+    }
+
+    @Test(description = "Test with two response interceptors")
+    public void testTwoResponseInterceptors() throws IOException {
+        Path ballerinaFilePath = INTERCEPTOR_DIR.resolve("response_interceptors/interceptors07.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "interceptors/response_interceptors/interceptors07.yaml");
+
+        ballerinaFilePath = INTERCEPTOR_DIR.resolve("response_interceptors/interceptors08.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "interceptors/response_interceptors/interceptors08.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

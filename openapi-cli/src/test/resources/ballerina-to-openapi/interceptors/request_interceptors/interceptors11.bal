@@ -58,7 +58,15 @@ service http:InterceptableService /payloadV on new http:Listener(9090) {
         return [];
     }
 
-    resource function put .(Person p) returns Person {
+    resource function put .(Person p) returns () {
+        return;
+    }
+
+    resource function put foo(Person p) {
+        return;
+    }
+
+    resource function put [string path](Person p) returns Person {
         return p;
     }
 

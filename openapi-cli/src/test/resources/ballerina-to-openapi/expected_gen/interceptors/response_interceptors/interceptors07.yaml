@@ -1,0 +1,109 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /person:
+    post:
+      operationId: postPerson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Person'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    additionalProperties:
+                      type: string
+                  - $ref: '#/components/schemas/Person'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /persons:
+    post:
+      operationId: postPersons
+      parameters:
+        - name: p
+          in: query
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Person'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    additionalProperties:
+                      type: string
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Person'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Person:
+      required:
+        - address
+        - age
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        age:
+          type: integer
+          format: int64
+        address:
+          type: string
+      additionalProperties: false
