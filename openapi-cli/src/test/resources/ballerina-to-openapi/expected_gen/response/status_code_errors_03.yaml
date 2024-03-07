@@ -1,0 +1,173 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9000"
+paths:
+  /users/{id}:
+    get:
+      operationId: getUsersId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "202":
+          description: Accepted
+        "404":
+          description: NotFound
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserApiErrorInfo'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /users:
+    post:
+      operationId: postUsers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserWithoutId'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/UserApiErrorInfo'
+                  - $ref: '#/components/schemas/ErrorPayload'
+        "202":
+          description: Accepted
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserApiErrorInfo'
+  /test1:
+    get:
+      operationId: getTest1
+      responses:
+        default:
+          description: Any Response
+          content:
+            '*/*':
+              schema:
+                description: Any type of entity body
+        "202":
+          description: Accepted
+  /test2:
+    get:
+      operationId: getTest2
+      responses:
+        default:
+          description: Any Response
+          content:
+            '*/*':
+              schema:
+                description: Any type of entity body
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorInfo'
+        "202":
+          description: Accepted
+components:
+  schemas:
+    DefaultErrorInfo:
+      required:
+        - message
+        - timeStamp
+      type: object
+      properties:
+        timeStamp:
+          type: string
+        message:
+          type: string
+      additionalProperties: false
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    User:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/UserWithoutId'
+        - required:
+            - id
+          type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+          additionalProperties: false
+    UserApiErrorInfo:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/DefaultErrorInfo'
+        - required:
+            - userId
+          type: object
+          properties:
+            userId:
+              type: string
+          additionalProperties: false
+    UserWithoutId:
+      required:
+        - age
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        age:
+          type: integer
+          format: int64
+      additionalProperties: false

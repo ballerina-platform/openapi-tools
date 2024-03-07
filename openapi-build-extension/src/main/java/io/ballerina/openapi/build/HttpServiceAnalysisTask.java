@@ -90,7 +90,8 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         if (!isErrorPrinted) {
             setIsErrorPrinted(true);
             PrintStream outStream = System.out;
-            outStream.println("openapi contract generation is skipped because the compilation error(s) in the ballerina package");
+            outStream.println("openapi contract generation is skipped because the compilation error(s)" +
+                    " in the ballerina package");
             return;
         }
         boolean hasErrors = context.compilation().diagnosticResult()
@@ -140,7 +141,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
      */
     private String constructFileName(SyntaxTree syntaxTree, Map<Integer, String> services, Symbol serviceSymbol) {
         String fileName = getNormalizedFileName(services.get(serviceSymbol.hashCode()));
-        String balFileName = syntaxTree.filePath().split("\\.")[0];
+        String balFileName = syntaxTree.filePath().replaceAll(SLASH, UNDERSCORE).split("\\.")[0];
         if (fileName.equals(SLASH)) {
             return balFileName + OPENAPI_SUFFIX + YAML_EXTENSION;
         } else if (fileName.contains(HYPHEN) && fileName.split(HYPHEN)[0].equals(SLASH) || fileName.isBlank()) {

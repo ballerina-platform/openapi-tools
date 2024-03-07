@@ -96,4 +96,20 @@ public class ReferenceTypeMapper extends AbstractTypeMapper {
         }
         return typeSymbol;
     }
+
+    public static IntersectionTypeSymbol getReferredIntersectionType(TypeSymbol typeSymbol) {
+        if (typeSymbol.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
+            TypeSymbol referencedType = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
+            if (referencedType.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
+                return getReferredIntersectionType(referencedType);
+            } else if (referencedType.typeKind().equals(TypeDescKind.INTERSECTION)) {
+                return (IntersectionTypeSymbol) referencedType;
+            } else {
+                return null;
+            }
+        } else if (typeSymbol.typeKind().equals(TypeDescKind.INTERSECTION)) {
+            return (IntersectionTypeSymbol) typeSymbol;
+        }
+        return null;
+    }
 }

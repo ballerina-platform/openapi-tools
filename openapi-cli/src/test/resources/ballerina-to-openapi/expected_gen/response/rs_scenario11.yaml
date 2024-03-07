@@ -20,3 +20,78 @@ paths:
             text/plain:
               schema:
                 type: string
+  /hello:
+    get:
+      operationId: getHello
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/String'
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/String'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /howdy:
+    get:
+      operationId: getHowdy
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/String'
+              - type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/String'
+                  - type: string
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    String:
+      type: string

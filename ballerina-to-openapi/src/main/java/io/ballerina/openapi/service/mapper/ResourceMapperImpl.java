@@ -174,26 +174,19 @@ public class ResourceMapperImpl implements ResourceMapper {
      *
      * @return Operation Adaptor object of given resource
      */
-    private Optional<OperationInventory> convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
-                                                                    String generateRelativePath,
+    private Optional<OperationInventory> convertResourceToOperation(FunctionDefinitionNode resourceFunction,
+                                                                    String httpMethod, String generateRelativePath,
                                                                     Components components) {
         OperationInventory operationInventory = new OperationInventory();
         operationInventory.setHttpOperation(httpMethod);
         operationInventory.setPath(generateRelativePath);
-        /* Set operation id */
-        String resName = (resource.functionName().text() + "_" +
-                generateRelativePath).replaceAll("\\{///}", "_");
-
-        if (generateRelativePath.equals("/")) {
-            resName = resource.functionName().text();
-        }
-        operationInventory.setOperationId(getOperationId(resName));
+        operationInventory.setOperationId(getOperationId(resourceFunction));
         // Set operation summary
         // Map API documentation
-        Map<String, String> apiDocs = listAPIDocumentations(resource, operationInventory);
+        Map<String, String> apiDocs = listAPIDocumentations(resourceFunction, operationInventory);
         //Add path parameters if in path and query parameters
-        ParameterMapper parameterMapper = new ParameterMapperImpl(resource, operationInventory, components, apiDocs,
-                additionalData, treatNilableAsOptional);
+        ParameterMapper parameterMapper = new ParameterMapperImpl(resourceFunction, operationInventory, components,
+                apiDocs, additionalData, treatNilableAsOptional);
         parameterMapper.setParameters();
         List<OpenAPIMapperDiagnostic> diagnostics = additionalData.diagnostics();
         if (diagnostics.size() > 1 || (diagnostics.size() == 1 && !diagnostics.get(0).getCode().equals(
@@ -207,7 +200,7 @@ public class ResourceMapperImpl implements ResourceMapper {
             }
         }
 
-        ResponseMapper responseMapper = new ResponseMapperImpl(resource, operationInventory, components,
+        ResponseMapper responseMapper = new ResponseMapperImpl(resourceFunction, operationInventory, components,
                 additionalData);
         responseMapper.setApiResponses();
         return Optional.of(operationInventory);

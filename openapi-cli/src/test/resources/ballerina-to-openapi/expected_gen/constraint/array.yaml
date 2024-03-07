@@ -68,6 +68,10 @@ components:
     HobbyItemsString:
       maxLength: 23
       type: string
+    Modules:
+      type: array
+      items:
+        type: string
     Person:
       required:
         - id
@@ -95,6 +99,10 @@ components:
             query or by default).
           items:
             $ref: '#/components/schemas/PersonLimitItemsInteger'
+        subjects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subjects'
     PersonDetailsItemsString:
       minLength: 7
       type: string
@@ -115,3 +123,7 @@ components:
     SchoolName:
       minLength: 5
       type: string
+    Subjects:
+      maxItems: 5
+      allOf:
+        - $ref: '#/components/schemas/Modules'
