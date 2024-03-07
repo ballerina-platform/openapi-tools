@@ -21,11 +21,14 @@ service http:InterceptableService /payloadV on new http:Listener(9090) {
     }
 
     resource function get .() returns string {
-            return "Hello, World!";
-        }
+        return "Hello, World!";
+    }
 
     resource function get hello() returns string {
         return "Hello, World!";
+    }
+
+    resource function get hi() {
     }
 
     resource function post foo/bar() returns Person {

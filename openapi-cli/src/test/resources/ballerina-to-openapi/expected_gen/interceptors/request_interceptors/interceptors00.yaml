@@ -36,6 +36,18 @@ paths:
             text/plain:
               schema:
                 type: string
+  /hi:
+    get:
+      operationId: getHi
+      responses:
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "202":
+          description: Accepted
   /foo/bar:
     get:
       operationId: getFooBar
