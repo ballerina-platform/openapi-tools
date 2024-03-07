@@ -69,10 +69,10 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.isHttp
  * @since 2.0.0
  */
 public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
-    static boolean isWarningPrinted = false;
+    static boolean isErrorPrinted = false;
 
-    static void setIsWarningPrinted(boolean isWarningPrinted) {
-        HttpServiceAnalysisTask.isWarningPrinted = isWarningPrinted;
+    static void setIsErrorPrinted(boolean isErrorPrinted) {
+        HttpServiceAnalysisTask.isErrorPrinted = isErrorPrinted;
     }
 
     @Override
@@ -87,8 +87,8 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
             return;
         }
         // if there are any compilation errors, do not proceed
-        if (!isWarningPrinted) {
-            setIsWarningPrinted(true);
+        if (!isErrorPrinted) {
+            setIsErrorPrinted(true);
             PrintStream outStream = System.out;
             outStream.println("openapi contract generation is skipped because the compilation error(s) in the ballerina package");
             return;
