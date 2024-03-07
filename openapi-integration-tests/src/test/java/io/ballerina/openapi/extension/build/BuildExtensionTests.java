@@ -142,7 +142,6 @@ public class BuildExtensionTests {
                 "tests_module_test_openapi.yaml")));
     }
 
-
     private void executeCommand(String resourcePath) throws IOException, InterruptedException {
         List<String> buildArgs = new LinkedList<>();
         boolean successful = executeBuild(DISTRIBUTION_FILE_NAME,

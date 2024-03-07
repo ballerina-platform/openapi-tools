@@ -19,15 +19,16 @@
 package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.openapi.cmd.OASContractGenerator;
-import io.ballerina.openapi.service.mapper.MapperException;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,14 +43,17 @@ public class RequestBodyTest {
     private static final Path RES_DIR =
             Paths.get("src/test/resources/ballerina-to-openapi").toAbsolutePath();
     private Path tempDir;
+    private final PrintStream standardOut = System.out;
+    private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
     @BeforeMethod
     public void setup() throws IOException {
         this.tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
+        System.setOut(new PrintStream(outputStream));
     }
 
     @Test(description = "Generate OpenAPI spec with json payload")
-    public void testJsonPayLoad() throws MapperException {
+    public void testJsonPayLoad() {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/json_payload_service.bal");
         //Compare generated yaml file with expected yaml content
         compareWithGeneratedFile(ballerinaFilePath, "json_payload.yaml");
@@ -65,7 +69,7 @@ public class RequestBodyTest {
     }
 
     @Test(description = "Generate OpenAPI spec with mulitple payload")
-    public void testMultiplePayLoad() throws IOException, MapperException {
+    public void testMultiplePayLoad() {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/multiple_payload_service.bal");
         compareWithGeneratedFile(ballerinaFilePath, "multiple_payload.yaml");
     }
@@ -187,7 +191,7 @@ public class RequestBodyTest {
     }
 
     @Test(description = "Generate OpenAPI spec for multiple records")
-    public void testMultipleRecords() throws MapperException {
+    public void testMultipleRecords() {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/rb_scenario11.bal");
         compareWithGeneratedFile(ballerinaFilePath, "rb_scenario11.yaml");
     }
@@ -214,10 +218,9 @@ public class RequestBodyTest {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , true);
-        Assert.assertFalse(openApiConverterUtils.getErrors().isEmpty());
-        Assert.assertEquals(openApiConverterUtils.getErrors().get(0).getMessage(), "Generated OpenAPI" +
-                " definition does not contain `http:Request` body information of the `GET` method, as it's not " +
-                "supported by the OpenAPI specification.");
+        Assert.assertTrue(outputStream.toString().contains("WARNING [rb_scenario14.bal:(6:32,6:48)] Generated" +
+                " OpenAPI definition does not contain `http:Request` body information of the `GET` method," +
+                " as its not supported by the OpenAPI specification."));
         compareWithGeneratedFile(ballerinaFilePath, "rb_scenario14.yaml");
     }
 
@@ -331,6 +334,6 @@ public class RequestBodyTest {
     @AfterTest
     public void clean() {
         System.setErr(null);
-        System.setOut(null);
+        System.setOut(standardOut);
     }
 }
