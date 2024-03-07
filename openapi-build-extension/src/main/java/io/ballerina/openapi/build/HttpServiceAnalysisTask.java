@@ -86,18 +86,18 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         if (!buildOptions.exportOpenAPI()) {
             return;
         }
+        // if there are any compilation errors, do not proceed
+        if (!isWarningPrinted) {
+            setIsWarningPrinted(true);
+            PrintStream outStream = System.out;
+            outStream.println("openapi contract generation is skipped because the compilation error(s) in the ballerina package");
+            return;
+        }
         boolean hasErrors = context.compilation().diagnosticResult()
                 .diagnostics().stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
 
         if (hasErrors) {
-            // if there are any compilation errors, do not proceed
-            if (!isWarningPrinted) {
-                setIsWarningPrinted(true);
-                PrintStream outStream = System.out;
-                outStream.println("OpenAPI contract generation failed due to Ballerina package has compilation" +
-                        " error.");
-            }
             return;
         }
         Path outPath = project.targetDir();
