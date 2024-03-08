@@ -125,9 +125,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                     return;
                 }
                 if (options.containsKey(MODE)) {
-                    Object value = options.get(MODE);
-                    String mode = value.toString().trim();
-                    handleCodeGenerationMode(toolContext, codeGeneratorConfig, location, mode);
+                    String value = (String) options.get(MODE).value().toString().trim();
+                    handleCodeGenerationMode(toolContext, codeGeneratorConfig, location, value);
                 } else {
                     // Create client for the given OAS
                     generateClient(toolContext, codeGeneratorConfig);
@@ -232,7 +231,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         serviceMetaDataBuilder.withOpenAPI(openAPI);
         Map<String, ToolContext.Option> options = toolContext.options();
         for (Map.Entry<String, ToolContext.Option> field : options.entrySet()) {
-            String value = field.getValue().toString().trim();
+            String value = field.getValue().value().toString().trim();
             String fieldName = field.getKey();
             switch (fieldName) {
                 case TAGS:
@@ -377,8 +376,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         Path ballerinaFilePath = packageInstance.project().sourceRoot();
         try {
             Path relativePath = getLicensePath(licensePath, ballerinaFilePath);
-            return (relativePath != null) ? Optional.ofNullable(String.valueOf(createLicenseContent(relativePath,
-                    location, context))) : Optional.empty();
+            return (relativePath != null) ? createLicenseContent(relativePath,
+                    location, context) : Optional.empty();
         } catch (IOException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_READING_LICENSE_FILE;
             createDiagnostics(context, error, location);
