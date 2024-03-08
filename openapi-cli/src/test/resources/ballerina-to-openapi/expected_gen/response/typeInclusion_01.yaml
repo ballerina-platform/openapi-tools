@@ -20,6 +20,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Reservation'
+        required: true
       responses:
         "201":
           description: Created
@@ -33,22 +34,244 @@ paths:
             text/plain:
               schema:
                 type: string
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /payment/{id}:
+    post:
+      summary: Represents Snowpeak payment resource
+      operationId: postPaymentId
+      parameters:
+        - name: id
+          in: path
+          description: Unique identification of payment
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Payment representation
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payment'
+        required: true
+      responses:
+        "201":
+          description: Created
+          headers:
+            payment-type:
+              required: true
+              schema:
+                type: string
+            simple-payment-tokens:
+              required: true
+              schema:
+                type: array
+                items:
+                  type: string
+            simple-payment-type:
+              required: true
+              schema:
+                type: string
+            location:
+              schema:
+                type: string
+            payment-tokens:
+              required: true
+              schema:
+                type: array
+                items:
+                  type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentReceipt'
+        "409":
+          description: Conflict
+          content:
+            text/plain:
+              schema:
+                type: string
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /simple-payment/{id}:
+    post:
+      summary: Represents Snowpeak payment resource
+      operationId: postSimplePaymentId
+      parameters:
+        - name: id
+          in: path
+          description: Unique identification of payment
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Payment representation
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payment'
+        required: true
+      responses:
+        "201":
+          description: Created
+          headers:
+            payment-type:
+              required: true
+              schema:
+                type: string
+            simple-payment-tokens:
+              required: true
+              schema:
+                type: array
+                items:
+                  type: string
+            simple-payment-type:
+              required: true
+              schema:
+                type: string
+            location:
+              schema:
+                type: string
+            payment-tokens:
+              required: true
+              schema:
+                type: array
+                items:
+                  type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentReceipt'
+        "409":
+          description: Conflict
+          content:
+            text/plain:
+              schema:
+                type: string
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    ReserveRoom:
+    Action:
+      type: string
+      enum:
+        - PATCH
+        - DELETE
+        - PUT
+        - POST
+        - GET
+    ErrorPayload:
       required:
-        - count
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Link:
+      required:
+        - href
+        - rel
+      type: object
+      properties:
+        rel:
+          type: string
+        href:
+          type: string
+        mediaTypes:
+          type: array
+          items:
+            type: string
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+      additionalProperties: false
+    Links:
+      required:
+        - links
+      type: object
+      properties:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+      additionalProperties: false
+    Payment:
+      required:
+        - cardNumber
+        - cardholderName
+        - expiryMonth
+        - expiryYear
+      type: object
+      properties:
+        cardholderName:
+          type: string
+          description: Name of the card holder
+        cardNumber:
+          type: integer
+          description: Card number
+          format: int64
+        expiryMonth:
+          type: string
+          description: Expiration month of the card in mm
+        expiryYear:
+          type: string
+          description: Expiaration year of the card in yyyy
+      additionalProperties: false
+      description: Reperesents payement for rooms
+    PaymentReceipt:
+      required:
         - id
+        - lastUpdated
+        - rooms
+        - total
       type: object
       properties:
         id:
           type: string
-          description: Unique identification of the room
-        count:
-          type: integer
-          description: Number of rooms
-          format: int64
-      description: Represents rooms be reserved
+          description: Unique identification
+        total:
+          type: number
+          description: Total amount paid
+          format: double
+        lastUpdated:
+          type: string
+          description: Last updated time stamp
+        rooms:
+          type: array
+          description: Booked rooms
+          items:
+            $ref: '#/components/schemas/Room'
+      additionalProperties: false
+      description: Reperesents receipt for the payment
     Reservation:
       required:
         - endDate
@@ -67,17 +290,11 @@ components:
         endDate:
           type: string
           description: End date in yyyy-mm-dd
+      additionalProperties: false
       description: Represents a reservation of rooms
-    Links:
-      required:
-        - links
-      type: object
-      properties:
-        links:
-          type: array
-          items:
-            $ref: '#/components/schemas/Link'
     ReservationReceipt:
+      type: object
+      description: Represents a receipt for the reservation
       allOf:
         - $ref: '#/components/schemas/Links'
         - required:
@@ -98,27 +315,70 @@ components:
               description: Last updated time stamp
             reservation:
               $ref: '#/components/schemas/Reservation'
-    Link:
+          additionalProperties: false
+    ReserveRoom:
       required:
-        - href
-        - rel
+        - count
+        - id
       type: object
       properties:
-        rel:
+        id:
           type: string
-        href:
+          description: Unique identification of the room
+        count:
+          type: integer
+          description: Number of rooms
+          format: int64
+      additionalProperties: false
+      description: Represents rooms be reserved
+    Room:
+      required:
+        - capacity
+        - category
+        - count
+        - currency
+        - id
+        - price
+        - status
+        - wifi
+      type: object
+      properties:
+        id:
           type: string
-        mediaTypes:
-          type: array
-          items:
-            type: string
-        actions:
-          type: array
-          items:
-            type: string
-            enum:
-              - PATCH
-              - DELETE
-              - PUT
-              - POST
-              - GET
+          description: Unique identification
+        category:
+          $ref: '#/components/schemas/RoomCategory'
+        capacity:
+          type: integer
+          description: Number of people that can be accommodate
+          format: int64
+        wifi:
+          type: boolean
+          description: Availability of wifi
+        status:
+          $ref: '#/components/schemas/RoomStatus'
+        currency:
+          type: string
+          description: Currency used in price
+        price:
+          type: number
+          description: Cost for the room
+          format: double
+        count:
+          type: integer
+          description: Number of rooms as per the status
+          format: int64
+      additionalProperties: false
+      description: Represents resort room
+    RoomCategory:
+      type: string
+      enum:
+        - FAMILY
+        - KING
+        - DELUXE
+    RoomStatus:
+      type: string
+      enum:
+        - BOOKED
+        - RESERVED
+        - AVAILABLE

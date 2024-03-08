@@ -26,4 +26,3 @@ paths:
                     format: int64
                   body:
                     type: string
-components: {}

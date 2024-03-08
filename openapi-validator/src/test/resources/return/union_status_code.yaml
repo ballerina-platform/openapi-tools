@@ -18,4 +18,3 @@ paths:
           description: Ok
         "202":
           description: Accepted
-components: {}

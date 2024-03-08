@@ -7,11 +7,69 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Pet'
+        required: true
       responses:
         "200":
           description: Ok
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Pet:
+      required:
+        - id
+        - name
+        - tag
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          $ref: '#/components/schemas/Tag'
+    Tag:
+      required:
+        - id
+        - name
+        - tagType
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tagType:
+          $ref: '#/components/schemas/TagType'
     TagType:
       required:
         - category
@@ -31,31 +89,3 @@ components:
                 type: array
                 items:
                   type: string
-    Tag:
-      required:
-        - id
-        - name
-        - tagType
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
-        tagType:
-          $ref: '#/components/schemas/TagType'
-    Pet:
-      required:
-        - id
-        - name
-        - tag
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
-        tag:
-          $ref: '#/components/schemas/Tag'

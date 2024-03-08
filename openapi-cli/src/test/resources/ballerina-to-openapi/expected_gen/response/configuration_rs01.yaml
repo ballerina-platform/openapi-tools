@@ -1,3 +1,14 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /cachingBackEnd:
     get:
@@ -6,14 +17,14 @@ paths:
         "200":
           description: Ok
           headers:
+            Last-Modified:
+              schema:
+                type: string
             Cache-Control:
               schema:
                 type: string
                 default: "must-revalidate,public,max-age=3600"
             ETag:
-              schema:
-                type: string
-            Last-Modified:
               schema:
                 type: string
           content:
@@ -27,6 +38,9 @@ paths:
         "200":
           description: Ok
           headers:
+            Last-Modified:
+              schema:
+                type: string
             Cache-Control:
               schema:
                 type: string
@@ -34,11 +48,7 @@ paths:
             ETag:
               schema:
                 type: string
-            Last-Modified:
-              schema:
-                type: string
           content:
             text/plain:
               schema:
                 type: string
-components: {}

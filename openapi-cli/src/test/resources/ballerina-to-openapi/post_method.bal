@@ -10,6 +10,15 @@ public type OkString record {|
     string body;
 |};
 
+public type OkStringWithHeader record {|
+    *http:Ok;
+    string body;
+    record{|
+        string header1;
+        string header2;
+    |} headers;
+|};
+
 service /payloadV on new http:Listener(9090) {
 
     //POST method is with default value
@@ -39,6 +48,17 @@ service /payloadV on new http:Listener(9090) {
     resource function post pet3() returns OkString {
         OkString u = {
             body: "lna"
+        };
+        return u;
+    }
+
+    resource function post pet4() returns OkStringWithHeader {
+        OkStringWithHeader u = {
+            body: "lna",
+            headers: {
+                header1: "header1",
+                header2: "header2"
+            }
         };
         return u;
     }

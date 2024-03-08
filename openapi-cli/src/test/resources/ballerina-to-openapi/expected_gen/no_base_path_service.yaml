@@ -25,5 +25,4 @@ paths:
           content:
             application/json:
               example: Ok
-components: {}
 x-original-swagger-version: "2.0"

@@ -20,7 +20,7 @@ plugins {
 rootProject.name = 'openapi-tools'
 include(':checkstyle')
 include(':module-ballerina-openapi')
-include(':openapi-bal-service')
+include(':ballerina-to-openapi')
 include(':openapi-build-extension')
 include(':openapi-cli')
 include(':openapi-ls-extension')

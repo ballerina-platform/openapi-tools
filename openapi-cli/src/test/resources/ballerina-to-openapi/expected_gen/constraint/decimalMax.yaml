@@ -18,51 +18,65 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/School'
+        required: true
       responses:
         "202":
           description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
         "400":
           description: BadRequest
-        "500":
-          description: Internal server error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    School:
-      required:
-        - marks
-      type: object
-      properties:
-        marks:
-          $ref: '#/components/schemas/Marks'
+    AdjustedMarks:
+      maximum: 6.0
+      minimum: 3.0
+      allOf:
+        - $ref: '#/components/schemas/Marks'
     ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        reason:
-          type: string
-          description: Reason phrase
-        path:
-          type: string
-          description: Request path
-        method:
-          type: string
-          description: Method type of the request
-        message:
-          type: string
-          description: Error message
         timestamp:
           type: string
-          description: Timestamp of the error
         status:
           type: integer
-          description: Relevant HTTP status code
-          format: int32
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Marks:
       maximum: 5.55
       exclusiveMaximum: true
       minimum: 2.55
       type: number
       format: double
+    School:
+      required:
+        - adjustedMarks
+        - marks
+      type: object
+      properties:
+        marks:
+          $ref: '#/components/schemas/Marks'
+        adjustedMarks:
+          $ref: '#/components/schemas/AdjustedMarks'

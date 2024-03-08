@@ -1,14 +1,27 @@
 components:
   schemas:
-    Pet:
+    ErrorPayload:
       required:
-        - id
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        id:
+        timestamp:
+          type: string
+        status:
           type: integer
           format: int64
-        name:
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
           type: string
     Link:
       required:
@@ -25,3 +38,15 @@ components:
             type: string
         pet:
           $ref: '#/components/schemas/Pet'
+      additionalProperties: false
+    Pet:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+      additionalProperties: false

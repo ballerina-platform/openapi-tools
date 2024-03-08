@@ -24,13 +24,13 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
-import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
-import io.ballerina.openapi.converter.model.OASGenerationMetaInfo;
-import io.ballerina.openapi.converter.model.OASResult;
-import io.ballerina.openapi.converter.service.OpenAPIEndpointMapper;
-import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
+import io.ballerina.openapi.service.mapper.ServersMapper;
+import io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
+import io.ballerina.openapi.service.mapper.model.OASResult;
 import io.ballerina.projects.BuildOptions;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
@@ -52,15 +52,15 @@ import java.util.Optional;
 import static io.ballerina.openapi.build.PluginConstants.OAS_PATH_SEPARATOR;
 import static io.ballerina.openapi.build.PluginConstants.OPENAPI;
 import static io.ballerina.openapi.build.PluginConstants.UNDERSCORE;
-import static io.ballerina.openapi.converter.Constants.HYPHEN;
-import static io.ballerina.openapi.converter.Constants.OPENAPI_SUFFIX;
-import static io.ballerina.openapi.converter.Constants.SLASH;
-import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
-import static io.ballerina.openapi.converter.utils.CodegenUtils.resolveContractFileName;
-import static io.ballerina.openapi.converter.utils.CodegenUtils.writeFile;
-import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.containErrors;
-import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getNormalizedFileName;
-import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.isHttpService;
+import static io.ballerina.openapi.service.mapper.Constants.HYPHEN;
+import static io.ballerina.openapi.service.mapper.Constants.OPENAPI_SUFFIX;
+import static io.ballerina.openapi.service.mapper.Constants.SLASH;
+import static io.ballerina.openapi.service.mapper.Constants.YAML_EXTENSION;
+import static io.ballerina.openapi.service.mapper.utils.CodegenUtils.resolveContractFileName;
+import static io.ballerina.openapi.service.mapper.utils.CodegenUtils.writeFile;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.containErrors;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getNormalizedFileName;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.isHttpService;
 
 /**
  * SyntaxNodeAnalyzer for getting all service node.
@@ -106,7 +106,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 builder.setServiceDeclarationNode(serviceNode).setSemanticModel(semanticModel)
                         .setOpenApiFileName(services.get(serviceSymbol.get().hashCode()))
                         .setBallerinaFilePath(inputPath).setProject(project);
-                OASResult oasResult = ServiceToOpenAPIConverterUtils.generateOAS(builder.build());
+                OASResult oasResult = ServiceToOpenAPIMapper.generateOAS(builder.build());
                 oasResult.setServiceName(constructFileName(syntaxTree, services, serviceSymbol.get()));
                 writeOpenAPIYaml(outPath, oasResult, diagnostics);
             }
@@ -127,7 +127,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
      */
     private String constructFileName(SyntaxTree syntaxTree, Map<Integer, String> services, Symbol serviceSymbol) {
         String fileName = getNormalizedFileName(services.get(serviceSymbol.hashCode()));
-        String balFileName = syntaxTree.filePath().split("\\.")[0];
+        String balFileName = syntaxTree.filePath().replaceAll(SLASH, UNDERSCORE).split("\\.")[0];
         if (fileName.equals(SLASH)) {
             return balFileName + OPENAPI_SUFFIX + YAML_EXTENSION;
         } else if (fileName.contains(HYPHEN) && fileName.split(HYPHEN)[0].equals(SLASH) || fileName.isBlank()) {
@@ -153,7 +153,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
             }
         }
         if (!oasResult.getDiagnostics().isEmpty()) {
-            for (OpenAPIConverterDiagnostic diagnostic : oasResult.getDiagnostics()) {
+            for (OpenAPIMapperDiagnostic diagnostic : oasResult.getDiagnostics()) {
                 diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
             }
         }
@@ -174,7 +174,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                     // module by checking listener type that attached to service endpoints.
                     Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
                     if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
-                        String service = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
+                        String service = ServersMapper.getServiceBasePath(serviceNode);
                         String updateServiceName = service;
                         if (allServices.contains(service)) {
                             updateServiceName = service + HYPHEN + serviceSymbol.get().hashCode();

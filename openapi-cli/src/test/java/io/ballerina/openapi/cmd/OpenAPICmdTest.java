@@ -29,8 +29,10 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import picocli.CommandLine;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,10 +45,14 @@ import java.util.stream.Stream;
 public class OpenAPICmdTest extends OpenAPICommandTest {
 
     private static final String LINE_SEPARATOR = System.lineSeparator();
+    private final PrintStream standardOut = System.out;
+    private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
 
     @BeforeTest(description = "This will create a new ballerina project for testing below scenarios.")
     public void setupBallerinaProject() throws IOException {
         super.setup();
+        System.setOut(new PrintStream(outputStream));
     }
 
     @Test(description = "Test openapi command with help flag")
@@ -651,6 +657,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 equals("..\\..\\dir2\\dir3\\dir4\\test.txt"));
     }
 
+
     @Test(description = "Test openapi add sub command")
     public void testAddCmd() throws IOException {
         Path resourceDir = Paths.get(System.getProperty("user.dir")).resolve("build/resources/test");
@@ -672,11 +679,93 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "options.clientMethods = \"resource\"" + newLine +
                 "options.licensePath = \"license.txt\"" + newLine;
         Assert.assertTrue(tomlContent.contains(generatedTool));
+
+    @Test(description = "service generation for the parameterized path in OAS")
+    public void testForComplexPathInService() {
+        Path yamlContract = resourceDir.resolve(Paths.get("complexPath.yaml"));
+        String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString(), "--mode", "service"};
+        OpenApiCmd cmd = new OpenApiCmd(standardOut, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        String expectedOutput = "service generation can not be done due to the given" +
+                " openapi definition contains following complex path(s):" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/" +
+                "{imageId}.{imageExtension}" + System.lineSeparator() +
+                "/v3/ClientGroups/GetClientGroupByUserDefinedIdentifier(UserDefinedIdentifier=" +
+                "'{userDefinedIdentifier}')" + System.lineSeparator() +
+                "/companies({company_id})/items({item_id})";
+
+        Assert.assertTrue(outputStream.toString().contains(expectedOutput));
+    }
+
+    @Test(description = "service type generation for the parameterized path in OAS")
+    public void testForComplexPathInServiceType() {
+        Path yamlContract = resourceDir.resolve(Paths.get("complexPath.yaml"));
+        String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString(), "--mode", "service",
+                "--with-service-type"};
+        OpenApiCmd cmd = new OpenApiCmd(standardOut, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Assert.assertTrue(outputStream.toString().contains("service generation can not be done due to the " +
+                "given openapi definition contains following complex path(s):" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/" +
+                "{imageId}.{imageExtension}" + System.lineSeparator() +
+                "/v3/ClientGroups/GetClientGroupByUserDefinedIdentifier(UserDefinedIdentifier='" +
+                "{userDefinedIdentifier}')" + System.lineSeparator() +
+                "/companies({company_id})/items({item_id})"));
+    }
+
+    @Test(description = "client generation for the parameterized path in OAS")
+    public void testForComplexPathInClient() {
+        Path yamlContract = resourceDir.resolve(Paths.get("complexPath.yaml"));
+        String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString(), "--mode", "client"};
+        OpenApiCmd cmd = new OpenApiCmd(standardOut, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Assert.assertTrue(outputStream.toString().contains("WARNING: remote function(s) will be generated for client " +
+                "due to the given openapi definition contains following complex path(s):" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/" +
+                "{imageId}.{imageExtension}" + System.lineSeparator() +
+                "/v3/ClientGroups/GetClientGroupByUserDefinedIdentifier(UserDefinedIdentifier=" +
+                "'{userDefinedIdentifier}')" + System.lineSeparator() +
+                "/companies({company_id})/items({item_id})" + System.lineSeparator() +
+                "Client generated successfully."));
+    }
+
+    @Test(description = "both client and service generation for the parameterized path in OAS")
+    public void testForComplexPathInBothClientAndService() {
+        Path yamlContract = resourceDir.resolve(Paths.get("complexPath.yaml"));
+        String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString()};
+        OpenApiCmd cmd = new OpenApiCmd(standardOut, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Assert.assertTrue(outputStream.toString().contains("WARNING: remote function(s) will be generated for client" +
+                " and the service generation can not be proceed due to the given openapi definition contains" +
+                " following complex path(s):" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/" +
+                "{imageId}.{imageExtension}" + System.lineSeparator() +
+                "/v3/ClientGroups/GetClientGroupByUserDefinedIdentifier(UserDefinedIdentifier=" +
+                "'{userDefinedIdentifier}')" + System.lineSeparator() +
+                "/companies({company_id})/items({item_id})" + System.lineSeparator() +
+                "Following files were created."));
+
     }
 
     @AfterTest
     public void clean() {
         System.setErr(null);
-        System.setOut(null);
+        System.setOut(standardOut);
     }
 }

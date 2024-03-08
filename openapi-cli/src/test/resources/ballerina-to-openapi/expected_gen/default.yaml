@@ -10,4 +10,3 @@ servers:
       port:
         default: "9090"
 paths: {}
-components: {}

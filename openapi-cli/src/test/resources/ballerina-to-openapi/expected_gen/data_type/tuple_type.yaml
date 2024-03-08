@@ -10,45 +10,115 @@ servers:
       port:
         default: "9090"
 paths:
-  /:
+  /path1:
     post:
-      operationId: post
+      operationId: postPath1
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Pet'
+        required: true
       responses:
         "202":
           description: Accepted
         "400":
           description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /path2:
+    post:
+      operationId: postPath2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TupleType'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /path3:
+    post:
+      operationId: postPath3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TupleType'
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /path4:
+    post:
+      operationId: postPath4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                oneOf:
+                  - type: integer
+                    format: int64
+                  - type: number
+                    format: double
+                  - type: string
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    User:
+    ErrorPayload:
       required:
-        - age
-        - id
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        id:
+        timestamp:
+          type: string
+        status:
           type: integer
           format: int64
-        age:
-          type: integer
-          format: int64
-    ReturnTypes:
-      type: array
-      items:
-        oneOf:
-          - type: integer
-            format: int64
-          - type: number
-            format: double
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Pet:
       required:
         - address
         - id
+        - tupleSingle
         - tuples
         - unionTuple
       type: object
@@ -68,10 +138,15 @@ components:
               - type: number
                 format: float
               - $ref: '#/components/schemas/User'
-        tuples:
+        tupleSingle:
           nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/ReturnTypes'
+          allOf:
+            - $ref: '#/components/schemas/TupleType'
+        tuples:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/TupleType'
         unionTuple:
           type: array
           nullable: true
@@ -81,3 +156,24 @@ components:
                 format: int64
               - type: number
                 format: double
+    TupleType:
+      type: array
+      items:
+        oneOf:
+          - type: integer
+            format: int64
+          - type: number
+            format: double
+    User:
+      required:
+        - age
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        age:
+          type: integer
+          format: int64
+      additionalProperties: false

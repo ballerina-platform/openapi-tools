@@ -16,6 +16,7 @@ paths:
           application/vnd.snowpeak.reservation+json:
             schema:
               $ref: '#/components/schemas/Payment'
+        required: true
       responses:
         "200":
           description: Ok
@@ -23,8 +24,37 @@ paths:
             text/vnd.snowpeak.reservation+plain:
               schema:
                 type: string
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Payment:
       required:
         - cardNumber
@@ -46,4 +76,5 @@ components:
         expiryYear:
           type: string
           description: Expiaration year of the card in yyyy
+      additionalProperties: false
       description: Reperesents payement for rooms

@@ -18,47 +18,24 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Child'
+        required: true
       responses:
         "202":
           description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
         "400":
           description: BadRequest
-        "500":
-          description: Internal server error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    ErrorPayload:
-      type: object
-      properties:
-        reason:
-          type: string
-          description: Reason phrase
-        path:
-          type: string
-          description: Request path
-        method:
-          type: string
-          description: Method type of the request
-        message:
-          type: string
-          description: Error message
-        timestamp:
-          type: string
-          description: Timestamp of the error
-        status:
-          type: integer
-          description: Relevant HTTP status code
-          format: int32
-    Position:
-      maximum: 100
-      exclusiveMaximum: true
-      minimum: 10
-      type: integer
-      format: int32
     Child:
       required:
         - position
@@ -66,3 +43,32 @@ components:
       properties:
         position:
           $ref: '#/components/schemas/Position'
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Position:
+      maximum: 100
+      exclusiveMaximum: true
+      minimum: 10
+      type: integer
+      format: int64

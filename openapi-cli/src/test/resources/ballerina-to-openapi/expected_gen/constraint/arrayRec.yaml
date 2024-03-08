@@ -18,52 +18,47 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Person'
+        required: true
       responses:
         "202":
           description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
         "400":
           description: BadRequest
-        "500":
-          description: Internal server error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    PersonDetailsItemsString:
-      minLength: 7
-      type: string
     ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        reason:
-          type: string
-          description: Reason phrase
-        path:
-          type: string
-          description: Request path
-        method:
-          type: string
-          description: Method type of the request
-        message:
-          type: string
-          description: Error message
         timestamp:
           type: string
-          description: Timestamp of the error
         status:
           type: integer
-          description: Relevant HTTP status code
-          format: int32
-    PersonFeeItemsNumber:
-      maximum: 445.4
-      type: number
-      format: float
-    PersonLimitItemsInteger:
-      maximum: 67
-      type: integer
-      format: int32
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Hobby:
       maxItems: 5
       minItems: 2
@@ -98,3 +93,14 @@ components:
             query or by default).
           items:
             $ref: '#/components/schemas/PersonLimitItemsInteger'
+    PersonDetailsItemsString:
+      minLength: 7
+      type: string
+    PersonFeeItemsNumber:
+      maximum: 445.4
+      type: number
+      format: float
+    PersonLimitItemsInteger:
+      maximum: 67
+      type: integer
+      format: int64

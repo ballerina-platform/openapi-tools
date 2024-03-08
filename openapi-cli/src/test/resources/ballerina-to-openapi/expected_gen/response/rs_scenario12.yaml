@@ -19,6 +19,9 @@ paths:
           content:
             application/json:
               schema:
+                required:
+                  - body
+                  - id
                 type: object
                 properties:
                   id:
@@ -26,4 +29,4 @@ paths:
                     format: int64
                   body:
                     type: string
-components: {}
+                additionalProperties: false

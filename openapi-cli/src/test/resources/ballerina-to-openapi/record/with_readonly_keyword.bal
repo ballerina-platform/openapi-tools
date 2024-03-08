@@ -29,7 +29,7 @@ service /payloadV on new http:Listener(port) {
         }
     }
 
-    resource function post albums(@http:Payload Album album) returns Album {
+    resource function post albums(@http:Payload readonly & Album album) returns Album {
         albums.add(album);
         return album;
     }

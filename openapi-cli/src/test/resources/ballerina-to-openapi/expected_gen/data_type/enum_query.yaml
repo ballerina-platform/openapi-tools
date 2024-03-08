@@ -41,15 +41,18 @@ paths:
         - name: format
           in: query
           schema:
-            $ref: '#/components/schemas/Format'
+            nullable: true
+            allOf:
+              - $ref: '#/components/schemas/Format'
         - name: type
           in: query
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: true
-                default: live
+          schema:
+            type: string
+            default: live
+            enum:
+              - scheduled
+              - live
+              - upcoming
         - name: q-default-ref
           in: query
           schema:
@@ -65,19 +68,37 @@ paths:
                 $ref: '#/components/schemas/MeetingList'
         "404":
           description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    Status:
-      type: string
-      enum:
-        - PENDING
-        - AVAILABLE
-    RoomNo:
-      type: string
-      enum:
-        - R6
-        - R5
-        - R3
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Format:
       type: string
       enum:
@@ -91,6 +112,12 @@ components:
       properties:
         topic:
           type: string
+    MeetingGroup:
+      type: string
+      enum:
+        - ENGINEERING
+        - HR
+        - ADMIN
     MeetingList:
       required:
         - meetings
@@ -100,9 +127,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Meeting'
-    MeetingGroup:
+    RoomNo:
       type: string
       enum:
-        - ENGINEERING
-        - HR
-        - ADMIN
+        - R6
+        - R5
+        - R3
+    Status:
+      type: string
+      enum:
+        - PENDING
+        - AVAILABLE

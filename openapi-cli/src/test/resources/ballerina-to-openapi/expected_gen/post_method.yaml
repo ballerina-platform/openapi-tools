@@ -37,14 +37,14 @@ paths:
         "201":
           description: Created
           headers:
+            Last-Modified:
+              schema:
+                type: string
             Cache-Control:
               schema:
                 type: string
                 default: "must-revalidate,public,max-age=3600"
             ETag:
-              schema:
-                type: string
-            Last-Modified:
               schema:
                 type: string
           content:
@@ -67,6 +67,25 @@ paths:
       responses:
         "200":
           description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+  /pet4:
+    post:
+      operationId: postPet4
+      responses:
+        "200":
+          description: Ok
+          headers:
+            header2:
+              required: true
+              schema:
+                type: string
+            header1:
+              required: true
+              schema:
+                type: string
           content:
             text/plain:
               schema:

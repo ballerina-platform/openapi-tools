@@ -18,7 +18,8 @@
 package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.openapi.cmd.OASContractGenerator;
-import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
+import io.ballerina.openapi.service.mapper.constraint.ConstraintAnnotation;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.ProjectException;
@@ -37,7 +38,7 @@ import static io.ballerina.openapi.generators.openapi.TestUtils.getCompilation;
 
 /**
  * This test class for the covering the negative tests for constraint
- * {@link io.ballerina.openapi.converter.service.ConstraintAnnotation} scenarios.
+ * {@link ConstraintAnnotation} scenarios.
  *
  */
 public class NegativeConstraintTests {
@@ -46,10 +47,10 @@ public class NegativeConstraintTests {
     @Test(description = "When the string constraint has incompatible REGEX patterns with OAS")
     public void testInterpolationInRegexPatterns() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("constraint-negative/negative_patternInterpolation.bal");
-        List<OpenAPIConverterDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
+        List<OpenAPIMapperDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
                                     ballerinaFilePath, "constraint-negative/negative_patternInterpolation.yaml");
-        List<String> expectedPatterns = Arrays.asList("^${i}[a-zA-Z]+$", "^[A-Z]${j}+$", "^[\\${2}a-z]+$"
-                                                     , "^[a-z${2}]+$");
+        List<String> expectedPatterns = Arrays.asList("^[A-Z]${j}+$", "^[\\${2}a-z]+$", "^[a-z${2}]+$",
+                "^${i}[a-zA-Z]+$");
         for (int i = 0; i < errors.size(); i++) {
             Assert.assertEquals(errors.get(i).getMessage(), "Given REGEX pattern '" + expectedPatterns.get(i) +
                     "' is not supported by the OpenAPI tool, it may also not support interpolation within the " +
@@ -60,7 +61,7 @@ public class NegativeConstraintTests {
     @Test(description = "When a constraint has values referenced with variables")
     public void testConstNameRef() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("constraint-negative/negative_constNameRef.bal");
-        List<OpenAPIConverterDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
+        List<OpenAPIMapperDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
                 ballerinaFilePath, "constraint-negative/negative_constNameRef.yaml");
         List<String> expectedVariables = Arrays.asList("maxVal", "5 + minVal", "Value");
         for (int i = 0; i < errors.size(); i++) {
@@ -78,10 +79,15 @@ public class NegativeConstraintTests {
     @Test(description = "when the record field has time:Date record type")
     public void testDateType() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("constraint-negative/negative_date.bal");
-        List<OpenAPIConverterDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
+        List<OpenAPIMapperDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
                 ballerinaFilePath, "constraint-negative/negative_date.yaml");
-        errors.forEach(error -> Assert.assertEquals(error.getMessage(), "Ballerina Date constraints might " +
-                "not be reflected in the OpenAPI definition"));
+        Assert.assertEquals(errors.size(), 3);
+        Assert.assertEquals(errors.get(0).getMessage(), "Generated OpenAPI definition does not contain the default " +
+                "value for the record field: minutes");
+        Assert.assertEquals(errors.get(1).getMessage(), "Ballerina Date constraints might not be reflected in the " +
+                "OpenAPI definition");
+        Assert.assertEquals(errors.get(2).getMessage(), "Ballerina Date constraints might not be reflected in the " +
+                "OpenAPI definition");
     }
 
     /*

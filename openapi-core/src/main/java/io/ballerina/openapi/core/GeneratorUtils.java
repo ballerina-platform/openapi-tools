@@ -19,8 +19,12 @@
 package io.ballerina.openapi.core;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
+import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.SymbolKind;
+import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
@@ -95,6 +99,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -221,7 +226,8 @@ public class GeneratorUtils {
      * @return - node lists
      * @throws BallerinaOpenApiException
      */
-    public static List<Node> getRelativeResourcePath(String path, Operation operation, List<Node> resourceFunctionDocs)
+    public static List<Node> getRelativeResourcePath(String path, Operation operation, List<Node> resourceFunctionDocs,
+                                                     Components components, boolean isWithoutDataBinding)
             throws BallerinaOpenApiException {
 
         List<Node> functionRelativeResourcePath = new ArrayList<>();
@@ -241,7 +247,7 @@ public class GeneratorUtils {
                      */
                     if (operation.getParameters() != null) {
                         extractPathParameterDetails(operation, functionRelativeResourcePath, pathNode,
-                                pathParam, resourceFunctionDocs);
+                                pathParam, resourceFunctionDocs, components, isWithoutDataBinding);
                     }
                 } else if (!pathNode.isBlank()) {
                     IdentifierToken idToken = createIdentifierToken(escapeIdentifier(pathNode.trim()));
@@ -261,7 +267,9 @@ public class GeneratorUtils {
     }
 
     private static void extractPathParameterDetails(Operation operation, List<Node> functionRelativeResourcePath,
-                                                    String pathNode, String pathParam, List<Node> resourceFunctionDocs)
+                                                    String pathNode, String pathParam,
+                                                    List<Node> resourceFunctionDocs,
+                                                    Components components, boolean isWithoutDataBinding)
             throws BallerinaOpenApiException {
         // check whether path parameter segment has special character
         String[] split = pathNode.split(CLOSE_CURLY_BRACE, 2);
@@ -281,9 +289,10 @@ public class GeneratorUtils {
                     && parameter.getIn().equals("path")) {
                 String paramType;
                 if (parameter.getSchema().get$ref() != null) {
-                    paramType = getValidName(extractReferenceType(parameter.getSchema().get$ref()), true);
+                    paramType = resolveReferenceType(parameter.getSchema(), components, isWithoutDataBinding,
+                            pathParam);
                 } else {
-                    paramType = convertOpenAPITypeToBallerina(parameter.getSchema());
+                    paramType = getPathParameterType(parameter.getSchema(), pathParam);
                     if (paramType.endsWith(NILLABLE)) {
                         throw new BallerinaOpenApiException("Path parameter value cannot be null.");
                     }
@@ -886,7 +895,7 @@ public class GeneratorUtils {
         tempSourceFiles.put(CLIENT_FILE_NAME, clientContent);
         tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);
         if (serviceContent != null) {
-            tempSourceFiles.put(SERVICE_FILE_NAME, schemaContent);
+            tempSourceFiles.put(SERVICE_FILE_NAME, serviceContent);
         }
         List<String> unusedTypeDefinitionNameList = getUnusedTypeDefinitionNameList(tempSourceFiles);
         while (unusedTypeDefinitionNameList.size() > 0) {
@@ -994,15 +1003,23 @@ public class GeneratorUtils {
         List<String> unusedTypeDefinitionNameList = new ArrayList<>();
         Path tmpDir = Files.createTempDirectory(".openapi-tmp" + System.nanoTime());
         writeFilesTemp(srcFiles, tmpDir);
-        if (Files.exists(tmpDir.resolve(CLIENT_FILE_NAME)) && Files.exists(tmpDir.resolve(TYPE_FILE_NAME)) &&
+        if ((Files.exists(tmpDir.resolve(CLIENT_FILE_NAME)) || Files.exists(tmpDir.resolve(SERVICE_FILE_NAME)))
+                && Files.exists(tmpDir.resolve(TYPE_FILE_NAME)) &&
                 Files.exists(tmpDir.resolve(BALLERINA_TOML))) {
-            SemanticModel semanticModel = getSemanticModel(tmpDir.resolve(CLIENT_FILE_NAME));
+            SemanticModel semanticModel = Files.exists(tmpDir.resolve(CLIENT_FILE_NAME)) ?
+                    getSemanticModel(tmpDir.resolve(CLIENT_FILE_NAME)) :
+                    getSemanticModel(tmpDir.resolve(SERVICE_FILE_NAME));
             List<Symbol> symbols = semanticModel.moduleSymbols();
             for (Symbol symbol : symbols) {
                 if (symbol.kind().equals(SymbolKind.TYPE_DEFINITION) || symbol.kind().equals(SymbolKind.ENUM)) {
                     List<Location> references = semanticModel.references(symbol);
                     if (references.size() == 1) {
                         unusedTypeDefinitionNameList.add(symbol.getName().get());
+                    } else if (references.size() == 2) {
+                        if (symbol.kind().equals(SymbolKind.TYPE_DEFINITION)) {
+                            TypeDefinitionSymbol typeDef = (TypeDefinitionSymbol) symbol;
+                            handleCyclicType(unusedTypeDefinitionNameList, typeDef);
+                        }
                     }
                 }
             }
@@ -1015,6 +1032,29 @@ public class GeneratorUtils {
             }
         }));
         return unusedTypeDefinitionNameList;
+    }
+
+    private static void handleCyclicType(List<String> unusedTypeDefinitionNameList, TypeDefinitionSymbol symbol) {
+        TypeDescKind typeDescKind = symbol.typeDescriptor().typeKind();
+        if (typeDescKind.equals(TypeDescKind.RECORD)) {
+            RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) symbol.typeDescriptor();
+            Map<String, RecordFieldSymbol> fields = recordTypeSymbol.fieldDescriptors();
+            Collection<RecordFieldSymbol> values = fields.values();
+            boolean isCyclic = false;
+            for (RecordFieldSymbol field: values) {
+                if (field.typeDescriptor().getName().isPresent()) {
+                    if (field.typeDescriptor().getName().get().trim().equals(symbol.getName().get().trim())) {
+                        isCyclic = true;
+                        break;
+                    }
+                }
+            }
+            if (isCyclic) {
+                unusedTypeDefinitionNameList.add(symbol.getName().get());
+            }
+        }
+        //TODO: Handle cyclic type for other ex: array after this fix
+        //https://github.com/ballerina-platform/ballerina-lang/issues/36442
     }
 
     private static void writeFilesTemp(Map<String, String> srcFiles, Path tmpDir) throws IOException {
@@ -1101,5 +1141,57 @@ public class GeneratorUtils {
 
     public static boolean isNumberSchema(Schema<?> fieldSchema) {
         return Objects.equals(GeneratorUtils.getOpenAPIType(fieldSchema), NUMBER);
+    }
+
+    public static String resolveReferenceType(Schema<?> schema, Components components, boolean isWithoutDataBinding,
+                                              String pathParam) throws BallerinaOpenApiException {
+        String type = GeneratorUtils.extractReferenceType(schema.get$ref());
+
+        if (isWithoutDataBinding) {
+            Schema<?> referencedSchema = components.getSchemas().get(getValidName(type, true));
+            if (referencedSchema != null) {
+                if (referencedSchema.get$ref() != null) {
+                    type = resolveReferenceType(referencedSchema, components, isWithoutDataBinding, pathParam);
+                } else {
+                    type = getPathParameterType(referencedSchema, pathParam);
+                }
+            }
+        } else {
+            type = getValidName(type, true);
+        }
+        return type;
+    }
+
+    private static String getPathParameterType(Schema<?> typeSchema, String pathParam)
+            throws BallerinaOpenApiException {
+        String type;
+        if (!(isStringSchema(typeSchema) || isNumberSchema(typeSchema) || isBooleanSchema(typeSchema)
+                || isIntegerSchema(typeSchema))) {
+            type = STRING;
+            LOGGER.warn("unsupported path parameter type found in the parameter `" + pathParam + "`. hence the " +
+                    "parameter type is set to string.");
+        } else {
+            type = GeneratorUtils.convertOpenAPITypeToBallerina(typeSchema);
+        }
+        return type;
+    }
+
+    /**
+     *  Collect the complex paths in the OAS definition.
+     *
+     * @param openAPI - openAPI definition.
+     * @return List of complex paths
+     */
+    public static List<String> getComplexPaths(OpenAPI openAPI) {
+        //Check given openapi has complex path
+        List<String> complexPathList = new ArrayList<>();
+        if (openAPI.getPaths() != null) {
+            for (Map.Entry<String, PathItem> path : openAPI.getPaths().entrySet()) {
+                if (isComplexURL(path.getKey())) {
+                    complexPathList.add(path.getKey());
+                }
+            }
+        }
+        return complexPathList;
     }
 }

@@ -26,6 +26,12 @@ paths:
             text/plain:
               schema:
                 $ref: '#/components/schemas/ReturnValueStr'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /lift02:
     get:
       operationId: getLift02
@@ -41,7 +47,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueIntNil'
+                type: integer
+                format: int64
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /lift03:
     get:
       operationId: getLift03
@@ -58,6 +73,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReturnValueIntArray'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /lift05:
     get:
       operationId: getLift05
@@ -74,6 +95,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReturnValueMapJson'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /lift06:
     get:
       operationId: getLift06
@@ -90,6 +117,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReturnValueJson'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /lift07:
     get:
       operationId: getLift07
@@ -106,6 +139,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReturnValueMapRec'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /lift08:
     get:
       operationId: getLift08
@@ -122,6 +161,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReturnValueMapString'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /lift09:
     get:
       operationId: getLift09
@@ -138,6 +183,12 @@ paths:
             application/xml:
               schema:
                 $ref: '#/components/schemas/ReturnValueXML'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /lift10:
     get:
       operationId: getLift10
@@ -149,11 +200,17 @@ paths:
             type: string
       responses:
         "500":
-          description: Internal server error
+          description: InternalServerError
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/ReturnValueError'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /lift11:
     get:
       operationId: getLift11
@@ -170,6 +227,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReturnValuePrimitiveUnion'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /lift12:
     get:
       operationId: getLift12
@@ -185,7 +248,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueRecUnion'
+                oneOf:
+                  - $ref: '#/components/schemas/Pet'
+                  - $ref: '#/components/schemas/Dog'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /res13:
     get:
       operationId: getRes13
@@ -198,6 +269,10 @@ paths:
       responses:
         "400":
           description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /res14:
     get:
       operationId: getRes14
@@ -208,14 +283,22 @@ paths:
           schema:
             type: string
       responses:
-        "400":
-          description: BadRequest
         "200":
           description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResUnion'
+                oneOf:
+                  - type: number
+                    format: float
+                  - type: integer
+                    format: int64
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /res16:
     get:
       operationId: getRes16
@@ -231,7 +314,15 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/StrNil'
+                type: string
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /res17:
     get:
       operationId: getRes17
@@ -245,9 +336,15 @@ paths:
         "200":
           description: Ok
           content:
-            text/plain:
+            application/json:
               schema:
                 $ref: '#/components/schemas/StrArray'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
   /res19:
     get:
       operationId: getRes19
@@ -264,49 +361,19 @@ paths:
             application/octet-stream:
               schema:
                 $ref: '#/components/schemas/ByteArr'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
-    ReturnValueJson:
-      type: object
-    ReturnValueIntNil:
-      type: integer
-      format: int64
-      nullable: true
-    ReturnValueRecUnion:
-      oneOf:
-        - $ref: '#/components/schemas/Pet'
-        - $ref: '#/components/schemas/Dog'
-    ReturnValueIntArray:
-      type: array
-      items:
-        type: integer
-        format: int64
-    StrArray:
+    ByteArr:
       type: array
       items:
         type: string
-    ReturnValueMapString:
-      type: object
-      additionalProperties:
-        type: string
-    ReturnValuePrimitiveUnion:
-      oneOf:
-        - type: number
-          format: float
-        - type: integer
-          format: int64
-    ReturnValueMapJson:
-      type: object
-      additionalProperties: true
-    ReturnValueMapRec:
-      type: object
-      additionalProperties:
-        $ref: '#/components/schemas/Pet'
-    ReturnValueStr:
-      type: string
-    StrNil:
-      type: string
-      nullable: true
+        format: byte
     Dog:
       required:
         - breed
@@ -317,6 +384,29 @@ components:
           type: string
         isBark:
           type: boolean
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Pet:
       required:
         - name
@@ -324,14 +414,36 @@ components:
       properties:
         name:
           type: string
-    ErrorResUnion:
+    ReturnValueError:
+      $ref: '#/components/schemas/ErrorPayload'
+    ReturnValueIntArray:
+      type: array
+      items:
+        type: integer
+        format: int64
+    ReturnValueJson:
+      type: object
+    ReturnValueMapJson:
+      type: object
+    ReturnValueMapRec:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/Pet'
+    ReturnValueMapString:
+      type: object
+      additionalProperties:
+        type: string
+    ReturnValuePrimitiveUnion:
       oneOf:
         - type: number
           format: float
         - type: integer
           format: int64
-    ByteArr:
-      type: array
-      items: {}
+    ReturnValueStr:
+      type: string
     ReturnValueXML:
       type: object
+    StrArray:
+      type: array
+      items:
+        type: string

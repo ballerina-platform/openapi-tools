@@ -24,7 +24,7 @@ module io.ballerina.openapi {
     requires io.ballerina.toml;
     requires io.ballerina.tools.api;
     requires io.ballerina.formatter.core;
-    requires io.ballerina.openapi.converter;
+    requires io.ballerina.openapi.service;
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
     requires java.ws.rs;

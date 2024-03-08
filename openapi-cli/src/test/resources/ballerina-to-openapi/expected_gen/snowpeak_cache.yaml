@@ -1,3 +1,14 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /locations:
     get:
@@ -7,14 +18,14 @@ paths:
         "200":
           description: Ok
           headers:
+            Last-Modified:
+              schema:
+                type: string
             Cache-Control:
               schema:
                 type: string
                 default: "must-revalidate,public,max-age=3600"
             ETag:
-              schema:
-                type: string
-            Last-Modified:
               schema:
                 type: string
           content:
@@ -50,15 +61,7 @@ components:
           type: array
           description: Allowed resource methods
           items:
-            type: string
-            enum:
-              - OPTIONS
-              - HEAD
-              - PATCH
-              - DELETE
-              - PUT
-              - POST
-              - GET
+            $ref: '#/components/schemas/Method'
       description: Represents a server-provided hyperlink
     Links:
       required:
@@ -69,7 +72,12 @@ components:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/Link'
+          description: Map of available links
+      additionalProperties: false
+      description: Represents available server-provided links
     Location:
+      type: object
+      description: Represents location
       allOf:
         - $ref: '#/components/schemas/Links'
         - required:
@@ -87,6 +95,7 @@ components:
             address:
               type: string
               description: Address of the location
+          additionalProperties: false
     Locations:
       required:
         - locations
@@ -97,4 +106,16 @@ components:
           description: collection of locations
           items:
             $ref: '#/components/schemas/Location'
+      additionalProperties: false
       description: Represents a collection of locations
+    Method:
+      type: string
+      description: Represents HTTP methods.
+      enum:
+        - OPTIONS
+        - HEAD
+        - PATCH
+        - DELETE
+        - PUT
+        - POST
+        - GET
