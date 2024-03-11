@@ -79,7 +79,7 @@ import static io.ballerina.openapi.core.GeneratorUtils.normalizeOpenAPI;
  * @since 1.9.0
  */
 public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
-    static String md5HexOpenAPI;
+    static String hashOpenAPI;
 
     @Override
     public String toolName() {
@@ -146,14 +146,14 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
      */
     private static boolean validateCache(ToolContext toolContext, OASClientConfig clientConfig) throws IOException {
         Path cachePath = toolContext.cachePath();
-        md5HexOpenAPI = getHashValue(clientConfig, toolContext.targetModule());
+        hashOpenAPI = getHashValue(clientConfig, toolContext.targetModule());
         if (!Files.isDirectory(cachePath)) {
             return false;
         }
         // read the cache file
         Path cacheFilePath = Paths.get(cachePath.toString(), CACHE_FILE);
         String cacheContent = Files.readString(Paths.get(cacheFilePath.toString()));
-        return cacheContent.equals(md5HexOpenAPI);
+        return cacheContent.equals(hashOpenAPI);
     }
 
     /**
@@ -288,7 +288,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         Path cachePath = toolContext.cachePath();
         List<GenSrcFile> sourcesForCache = new ArrayList<>();
         GenSrcFile genSrcFile = new GenSrcFile(GenSrcFile.GenFileType.CACHE_SRC, null,
-                CACHE_FILE, md5HexOpenAPI);
+                CACHE_FILE, hashOpenAPI);
         sourcesForCache.add(genSrcFile);
         writeGeneratedSources(sourcesForCache, cachePath);
     }
@@ -315,7 +315,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         for (String str : operations) {
             summaryOfCodegen.append(str);
         }
-        return DigestUtils.md5Hex(summaryOfCodegen.toString()).toUpperCase(Locale.ENGLISH);
+        return DigestUtils.sha256Hex(summaryOfCodegen.toString()).toUpperCase(Locale.ENGLISH);
     }
 
     /**
