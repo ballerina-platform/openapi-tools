@@ -20,10 +20,11 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.BallerinaAuthConfigGenerator;
+import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.core.generators.client.FunctionBodyGenerator;
 import io.ballerina.openapi.core.generators.schemaOld.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.client.FunctionBodyGeneratorImp;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -61,11 +62,11 @@ public class FunctionBodyNodeTests {
         Set<Map.Entry<PathItem.HttpMethod, Operation>> operation =
                 display.getPaths().get(path).readOperationsMap().entrySet();
         Iterator<Map.Entry<PathItem.HttpMethod, Operation>> iterator = operation.iterator();
-        FunctionBodyGenerator functionBodyGenerator = new FunctionBodyGenerator(new ArrayList<>(),
+        FunctionBodyGeneratorImp functionBodyGeneratorImp = new FunctionBodyGeneratorImp(new ArrayList<>(),
                 new ArrayList<>(), display, new BallerinaTypesGenerator(display),
-                new BallerinaAuthConfigGenerator(false, false), new BallerinaUtilGenerator(),
+                new AuthConfigGeneratorImp(false, false, new ArrayList<>()), new BallerinaUtilGenerator(),
                 false);
-        FunctionBodyNode bodyNode = functionBodyGenerator.getFunctionBodyNode(path, iterator.next());
+        FunctionBodyNode bodyNode = functionBodyGeneratorImp.getFunctionBodyNode(path, iterator.next());
         content = content.trim().replaceAll("\n", "").replaceAll("\\s+", "");
         String bodyNodeContent = bodyNode.toString().trim().replaceAll("\n", "")
                 .replaceAll("\\s+", "");

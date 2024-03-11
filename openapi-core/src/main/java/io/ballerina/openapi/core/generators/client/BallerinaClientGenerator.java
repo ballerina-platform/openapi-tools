@@ -21,6 +21,7 @@ package io.ballerina.openapi.core.generators.client;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.AssignmentStatementNode;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -39,6 +40,7 @@ import io.ballerina.compiler.syntax.tree.ObjectFieldNode;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
@@ -55,6 +57,7 @@ import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.schemaOld.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.common.model.Filter;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -62,11 +65,9 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.servers.Server;
-import io.swagger.v3.oas.models.servers.ServerVariables;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -99,6 +100,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLIENT_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.DOT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EOF_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
@@ -127,17 +129,25 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.X_B
  */
 public class BallerinaClientGenerator {
 
-    private final Filter filters;
+    private final Filter filter;
     private List<ImportDeclarationNode> imports;
     private List<TypeDefinitionNode> typeDefinitionNodeList;
     private List<String> apiKeyNameList = new ArrayList<>();
     private final OpenAPI openAPI;
-    private final BallerinaTypesGenerator ballerinaSchemaGenerator;
+    private final BallerinaTypesGenerator balTypeGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final List<String> remoteFunctionNameList;
-    private String serverURL;
-    private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
+//    private String serverURL;
+    private final AuthConfigGeneratorImp authConfigGeneratorImp;
     private final boolean resourceMode;
+    private final List<Diagnostic> diagnostics = new ArrayList<>();
+
+    /**
+     * Return a Diagnostic list.
+     */
+    public List<Diagnostic> getDiagnostics() {
+        return diagnostics;
+    }
 
     /**
      * Returns a list of type definition nodes.
@@ -150,9 +160,9 @@ public class BallerinaClientGenerator {
     /**
      * Returns ballerinaAuthConfigGenerator.
      */
-    public BallerinaAuthConfigGenerator getBallerinaAuthConfigGenerator() {
+    public AuthConfigGeneratorImp getBallerinaAuthConfigGenerator() {
 
-        return ballerinaAuthConfigGenerator;
+        return authConfigGeneratorImp;
     }
 
     /**
@@ -170,27 +180,27 @@ public class BallerinaClientGenerator {
     }
 
     /**
+     * //todo: add changes
      * Returns server URL.
      *
      * @return {@link String}
      */
     public String getServerUrl() {
-
-        return serverURL;
+        return "serverURL";
     }
 
     public BallerinaClientGenerator(OASClientConfig oasClientConfig) {
 
-        this.filters = oasClientConfig.getFilters();
+        this.filter = oasClientConfig.getFilter();
         this.imports = new ArrayList<>();
         this.typeDefinitionNodeList = new ArrayList<>();
         this.openAPI = oasClientConfig.getOpenAPI();
-        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI,
+        this.balTypeGenerator = new BallerinaTypesGenerator(openAPI,
                 oasClientConfig.isNullable(), new LinkedList<>());
         this.ballerinaUtilGenerator = new BallerinaUtilGenerator();
         this.remoteFunctionNameList = new ArrayList<>();
-        this.serverURL = "/";
-        this.ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false, false);
+//        this.serverURL = "/";
+        this.authConfigGeneratorImp = new AuthConfigGeneratorImp(false, false, diagnostics);
         this.resourceMode = oasClientConfig.isResourceMode();
     }
 
@@ -208,8 +218,8 @@ public class BallerinaClientGenerator {
         imports.add(importForHttp);
         List<ModuleMemberDeclarationNode> nodes = new ArrayList<>();
         // Add authentication related records
-        ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI);
-
+        authConfigGeneratorImp.addAuthRelatedRecords(openAPI);
+        List<Server> servers = openAPI.getServers();
         // Add class definition node to module member nodes
         nodes.add(getClassDefinitionNode());
 
@@ -253,7 +263,7 @@ public class BallerinaClientGenerator {
         // Add init function to class definition node
         memberNodeList.add(createInitFunction());
         // Generate remote function Nodes
-        memberNodeList.addAll(createRemoteFunctions(openAPI.getPaths(), filters));
+        memberNodeList.addAll(createRemoteFunctions(openAPI.getPaths(), filter));
         // Generate the class combining members
         MetadataNode metadataNode = getClassMetadataNode();
         IdentifierToken className = createIdentifierToken(GeneratorConstants.CLIENT_CLASS);
@@ -336,16 +346,16 @@ public class BallerinaClientGenerator {
 
         List<StatementNode> assignmentNodes = new ArrayList<>();
 
-        assignmentNodes.add(ballerinaAuthConfigGenerator.getHttpClientConfigVariableNode());
-        assignmentNodes.add(ballerinaAuthConfigGenerator.getClientConfigDoStatementNode());
+        assignmentNodes.add(authConfigGeneratorImp.getHttpClientConfigVariableNode());
+        assignmentNodes.add(authConfigGeneratorImp.getClientConfigDoStatementNode());
 
         // If both apiKey and httpOrOAuth is supported
         // todo : After revamping
-        if (ballerinaAuthConfigGenerator.isApiKey() && ballerinaAuthConfigGenerator.isHttpOROAuth()) {
-            assignmentNodes.add(ballerinaAuthConfigGenerator.handleInitForMixOfApiKeyAndHTTPOrOAuth());
+        if (authConfigGeneratorImp.isApiKey() && authConfigGeneratorImp.isHttpOROAuth()) {
+            assignmentNodes.add(authConfigGeneratorImp.handleInitForMixOfApiKeyAndHTTPOrOAuth());
         }
         // create initialization statement of http:Client class instance
-        assignmentNodes.add(ballerinaAuthConfigGenerator.getClientInitializationNode());
+        assignmentNodes.add(authConfigGeneratorImp.getClientInitializationNode());
         // create {@code self.clientEp = httpEp;} assignment node
         FieldAccessExpressionNode varRef = createFieldAccessExpressionNode(
                 createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
@@ -357,13 +367,13 @@ public class BallerinaClientGenerator {
 
 
         // Get API key assignment node if authentication mechanism type is only `apiKey`
-        if (ballerinaAuthConfigGenerator.isApiKey() && !ballerinaAuthConfigGenerator.isHttpOROAuth()) {
-            assignmentNodes.add(ballerinaAuthConfigGenerator.getApiKeyAssignmentNode());
+        if (authConfigGeneratorImp.isApiKey() && !authConfigGeneratorImp.isHttpOROAuth()) {
+            assignmentNodes.add(authConfigGeneratorImp.getApiKeyAssignmentNode());
         }
-        if (ballerinaAuthConfigGenerator.isApiKey()) {
+        if (authConfigGeneratorImp.isApiKey()) {
             List<String> apiKeyNames = new ArrayList<>();
-            apiKeyNames.addAll(ballerinaAuthConfigGenerator.getHeaderApiKeyNameList().values());
-            apiKeyNames.addAll(ballerinaAuthConfigGenerator.getQueryApiKeyNameList().values());
+            apiKeyNames.addAll(authConfigGeneratorImp.getHeaderApiKeyNameList().values());
+            apiKeyNames.addAll(authConfigGeneratorImp.getQueryApiKeyNameList().values());
             setApiKeyNameList(apiKeyNames);
         }
         ReturnStatementNode returnStatementNode = createReturnStatementNode(createToken(
@@ -381,16 +391,51 @@ public class BallerinaClientGenerator {
      * @throws BallerinaOpenApiException When invalid server URL is provided
      */
     private FunctionSignatureNode getInitFunctionSignatureNode() throws BallerinaOpenApiException {
-
-        serverURL = getServerURL(openAPI.getServers());
-        SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(
-                ballerinaAuthConfigGenerator.getConfigParamForClassInit(serverURL));
+        List<ParameterNode> parameterNodes  = new ArrayList<>();
+        ServerURLGeneratorImp serverURLGeneratorImp = new ServerURLGeneratorImp(openAPI.getServers(), diagnostics);
+        ParameterNode serverURLNode = serverURLGeneratorImp.generateServerURL();
+        parameterNodes.add(serverURLNode);
+        // get auth config details
+        List<ParameterNode> configParams = authConfigGeneratorImp.getConfigParamForClassInit();
+        parameterNodes.addAll(configParams);
+        LinkedHashSet<Node> orderedParam = sortParameters(parameterNodes);
+        SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(orderedParam);
         OptionalTypeDescriptorNode returnType = createOptionalTypeDescriptorNode(createToken(ERROR_KEYWORD),
                 createToken(QUESTION_MARK_TOKEN));
         ReturnTypeDescriptorNode returnTypeDescriptorNode = createReturnTypeDescriptorNode(
                 createToken(RETURNS_KEYWORD), createEmptyNodeList(), returnType);
         return createFunctionSignatureNode(
                 createToken(OPEN_PAREN_TOKEN), parameterList, createToken(CLOSE_PAREN_TOKEN), returnTypeDescriptorNode);
+    }
+
+
+    /**
+     * Sort the parameters of the init function.
+     *
+     * @param parameters list of parameters
+     * @return sorted list of parameters
+     */
+    private LinkedHashSet<Node> sortParameters(List<ParameterNode> parameters) {
+        // init (required, default)
+
+        LinkedHashSet<Node> requiredParams = new LinkedHashSet<>();
+        List<Node> defaultParams = new ArrayList<>();
+        for (ParameterNode parameter : parameters) {
+            if (parameter instanceof RequiredParameterNode requiredParameterNode) {
+                requiredParams.add(requiredParameterNode);
+                requiredParams.add(createToken(COMMA_TOKEN));
+            } else if (parameter instanceof DefaultableParameterNode defaultableParameterNode) {
+                defaultParams.add(defaultableParameterNode);
+                defaultParams.add(createToken(COMMA_TOKEN));
+            }
+        }
+        // todo handle the parameter order in ascending order
+
+        if (!defaultParams.isEmpty()) {
+            requiredParams.addAll(defaultParams);
+        }
+
+        return requiredParams;
     }
 
     /**
@@ -413,7 +458,7 @@ public class BallerinaClientGenerator {
         }
         //todo: setInitDocComment() pass the references
         docs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(clientInitDocComment, true));
-        if (ballerinaAuthConfigGenerator.isApiKey() && !ballerinaAuthConfigGenerator.isHttpOROAuth()) {
+        if (authConfigGeneratorImp.isApiKey() && !authConfigGeneratorImp.isHttpOROAuth()) {
             MarkdownParameterDocumentationLineNode apiKeyConfig = DocCommentsGenerator.createAPIParamDoc(
                     "apiKeyConfig", DEFAULT_API_KEY_DESC);
             docs.add(apiKeyConfig);
@@ -450,7 +495,7 @@ public class BallerinaClientGenerator {
                 qualifierList, typeName, fieldName, null, null, createToken(SEMICOLON_TOKEN));
         fieldNodeList.add(httpClientField);
         // add apiKey instance variable when API key security schema is given
-        ObjectFieldNode apiKeyFieldNode = ballerinaAuthConfigGenerator.getApiKeyMapClassVariable();
+        ObjectFieldNode apiKeyFieldNode = authConfigGeneratorImp.getApiKeyMapClassVariable();
         if (apiKeyFieldNode != null) {
             fieldNodeList.add(apiKeyFieldNode);
         }
@@ -474,8 +519,8 @@ public class BallerinaClientGenerator {
         Set<Map.Entry<String, PathItem>> pathsItems = paths.entrySet();
         for (Map.Entry<String, PathItem> path : pathsItems) {
             if (!path.getValue().readOperationsMap().isEmpty()) {
-                for (Map.Entry<PathItem.HttpMethod, Operation> operation :
-                        path.getValue().readOperationsMap().entrySet()) {
+                Map<PathItem.HttpMethod, Operation> operationMap = path.getValue().readOperationsMap();
+                for (Map.Entry<PathItem.HttpMethod, Operation> operation : operationMap.entrySet()) {
                     // create display annotation of the operation
                     List<AnnotationNode> functionLevelAnnotationNodes = new ArrayList<>();
                     if (operation.getValue().getExtensions() != null) {
@@ -562,8 +607,8 @@ public class BallerinaClientGenerator {
 
         remoteFunctionNameList.add(operation.getValue().getOperationId());
 
-        FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                ballerinaSchemaGenerator, typeDefinitionNodeList, resourceMode);
+        FunctionSignatureGeneratorImp functionSignatureGenerator = new FunctionSignatureGeneratorImp(openAPI,
+                balTypeGenerator, typeDefinitionNodeList, resourceMode);
         FunctionSignatureNode functionSignatureNode =
                 functionSignatureGenerator.getFunctionSignatureNode(operation.getValue(),
                         remoteFunctionDocs);
@@ -578,10 +623,10 @@ public class BallerinaClientGenerator {
                 createNodeList(remoteFunctionDocs)), createNodeList(annotationNodes));
 
         // Create Function Body
-        FunctionBodyGenerator functionBodyGenerator = new FunctionBodyGenerator(imports, typeDefinitionNodeList,
-                openAPI, ballerinaSchemaGenerator, ballerinaAuthConfigGenerator, ballerinaUtilGenerator, resourceMode);
-        FunctionBodyNode functionBodyNode = functionBodyGenerator.getFunctionBodyNode(path, operation);
-        imports = functionBodyGenerator.getImports();
+        FunctionBodyGeneratorImp functionBodyGeneratorImp = new FunctionBodyGeneratorImp(imports, typeDefinitionNodeList,
+                openAPI, balTypeGenerator, authConfigGeneratorImp, ballerinaUtilGenerator, resourceMode);
+        FunctionBodyNode functionBodyNode = functionBodyGeneratorImp.getFunctionBodyNode(path, operation);
+        imports = functionBodyGeneratorImp.getImports();
 
         //Generate relative path
         NodeList<Node> relativeResourcePath = resourceMode ?
@@ -593,39 +638,39 @@ public class BallerinaClientGenerator {
                 functionSignatureNode, functionBodyNode);
     }
 
-    /**
-     * Generate serverUrl for client default value.
-     */
-    private String getServerURL(List<Server> servers) throws BallerinaOpenApiException {
-
-        String serverURL;
-        Server selectedServer = servers.get(0);
-        if (!selectedServer.getUrl().startsWith("https:") && servers.size() > 1) {
-            for (Server server : servers) {
-                if (server.getUrl().startsWith("https:")) {
-                    selectedServer = server;
-                    break;
-                }
-            }
-        }
-        if (selectedServer.getUrl() == null) {
-            serverURL = "http://localhost:9090/v1";
-        } else if (selectedServer.getVariables() != null) {
-            ServerVariables variables = selectedServer.getVariables();
-            URL url;
-            String resolvedUrl = GeneratorUtils.buildUrl(selectedServer.getUrl(), variables);
-            try {
-                url = new URL(resolvedUrl);
-                serverURL = url.toString();
-            } catch (MalformedURLException e) {
-                throw new BallerinaOpenApiException("Failed to read endpoint details of the server: " +
-                        selectedServer.getUrl(), e);
-            }
-        } else {
-            serverURL = selectedServer.getUrl();
-        }
-        return serverURL;
-    }
+//    /**
+//     * Generate serverUrl for client default value.
+//     */
+//    private String getServerURL(List<Server> servers) throws BallerinaOpenApiException {
+//
+//        String serverURL;
+//        Server selectedServer = servers.get(0);
+//        if (!selectedServer.getUrl().startsWith("https:") && servers.size() > 1) {
+//            for (Server server : servers) {
+//                if (server.getUrl().startsWith("https:")) {
+//                    selectedServer = server;
+//                    break;
+//                }
+//            }
+//        }
+//        if (selectedServer.getUrl() == null) {
+//            serverURL = "http://localhost:9090/v1";
+//        } else if (selectedServer.getVariables() != null) {
+//            ServerVariables variables = selectedServer.getVariables();
+//            URL url;
+//            String resolvedUrl = GeneratorUtils.buildUrl(selectedServer.getUrl(), variables);
+//            try {
+//                url = new URL(resolvedUrl);
+//                serverURL = url.toString();
+//            } catch (MalformedURLException e) {
+//                throw new BallerinaOpenApiException("Failed to read endpoint details of the server: " +
+//                        selectedServer.getUrl(), e);
+//            }
+//        } else {
+//            serverURL = selectedServer.getUrl();
+//        }
+//        return serverURL;
+//    }
 
     /**
      * Return auth type to generate test file.
@@ -633,7 +678,7 @@ public class BallerinaClientGenerator {
      * @return {@link Set<String>}
      */
     public Set<String> getAuthType() {
-        return ballerinaAuthConfigGenerator.getAuthType();
+        return authConfigGeneratorImp.getAuthType();
     }
 
     /**

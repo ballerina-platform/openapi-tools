@@ -134,7 +134,7 @@ import static io.ballerina.openapi.core.generators.serviceOld.ServiceGenerationU
  *
  * @since 1.3.0
  */
-public class FunctionBodyGenerator {
+public class FunctionBodyGeneratorImp {
 
     private List<ImportDeclarationNode> imports;
     private boolean isHeader;
@@ -142,7 +142,7 @@ public class FunctionBodyGenerator {
     private final OpenAPI openAPI;
     private final BallerinaTypesGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
-    private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
+    private final AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp;
     private final boolean resourceMode;
 
     public List<ImportDeclarationNode> getImports() {
@@ -153,10 +153,10 @@ public class FunctionBodyGenerator {
         this.imports = imports;
     }
 
-    public FunctionBodyGenerator(List<ImportDeclarationNode> imports, List<TypeDefinitionNode> typeDefinitionNodeList,
-                                 OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
-                                 BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator,
-                                 BallerinaUtilGenerator ballerinaUtilGenerator, boolean resourceMode) {
+    public FunctionBodyGeneratorImp(List<ImportDeclarationNode> imports, List<TypeDefinitionNode> typeDefinitionNodeList,
+                                    OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
+                                    AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp,
+                                    BallerinaUtilGenerator ballerinaUtilGenerator, boolean resourceMode) {
 
         this.imports = imports;
         this.isHeader = false;
@@ -164,7 +164,7 @@ public class FunctionBodyGenerator {
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.ballerinaUtilGenerator = ballerinaUtilGenerator;
-        this.ballerinaAuthConfigGenerator = ballerinaAuthConfigGenerator;
+        this.ballerinaAuthConfigGeneratorImp = ballerinaAuthConfigGeneratorImp;
         this.resourceMode = resourceMode;
     }
 
@@ -180,7 +180,7 @@ public class FunctionBodyGenerator {
             throws BallerinaOpenApiException {
 
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
                 openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
         isHeader = false;
         // Create statements
@@ -227,8 +227,8 @@ public class FunctionBodyGenerator {
         Set<String> securitySchemesAvailable = getSecurityRequirementForOperation(operation.getValue());
 
         if (securitySchemesAvailable.size() > 0) {
-            Map<String, String> queryApiKeyMap = ballerinaAuthConfigGenerator.getQueryApiKeyNameList();
-            Map<String, String> headerApiKeyMap = ballerinaAuthConfigGenerator.getHeaderApiKeyNameList();
+            Map<String, String> queryApiKeyMap = ballerinaAuthConfigGeneratorImp.getQueryApiKeyNameList();
+            Map<String, String> headerApiKeyMap = ballerinaAuthConfigGeneratorImp.getHeaderApiKeyNameList();
             for (String schemaName : securitySchemesAvailable) {
                 if (queryApiKeyMap.containsKey(schemaName)) {
                     queryApiKeyNameList.add(queryApiKeyMap.get(schemaName));
@@ -266,8 +266,8 @@ public class FunctionBodyGenerator {
                                             List<StatementNode> statementsList, List<String> queryApiKeyNameList,
                                             List<String> headerApiKeyNameList) throws BallerinaOpenApiException {
 
-        boolean combinationOfApiKeyAndHTTPOAuth = ballerinaAuthConfigGenerator.isHttpOROAuth() &&
-                ballerinaAuthConfigGenerator.isApiKey();
+        boolean combinationOfApiKeyAndHTTPOAuth = ballerinaAuthConfigGeneratorImp.isHttpOROAuth() &&
+                ballerinaAuthConfigGeneratorImp.isApiKey();
         if (combinationOfApiKeyAndHTTPOAuth) {
             addUpdatedPathAndHeaders(statementsList, queryApiKeyNameList, queryParameters,
                     headerApiKeyNameList, headerParameters);
@@ -757,7 +757,7 @@ public class FunctionBodyGenerator {
                 IdentifierToken fieldName = createIdentifierToken('"' + apiKey.trim() + '"');
                 Token colon = createToken(COLON_TOKEN);
                 IdentifierToken apiKeyConfigIdentifierToken = createIdentifierToken(API_KEY_CONFIG_PARAM);
-                if (ballerinaAuthConfigGenerator.isHttpOROAuth() && ballerinaAuthConfigGenerator.isApiKey()) {
+                if (ballerinaAuthConfigGeneratorImp.isHttpOROAuth() && ballerinaAuthConfigGeneratorImp.isApiKey()) {
                     apiKeyConfigIdentifierToken = createIdentifierToken(API_KEY_CONFIG_PARAM +
                             QUESTION_MARK_TOKEN.stringValue());
                 }
