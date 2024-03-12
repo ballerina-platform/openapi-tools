@@ -248,9 +248,7 @@ public class GeneratorUtils {
                     paramType = resolveReferenceType(parameter.getSchema(), components, isWithoutDataBinding,
                             pathParam);
                     Schema<?> schema = GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(paramType);
-                    TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, paramType, null);
-                    TypeDefinitionNode typeDefinitionNode = typeGenerator.generateTypeDefinitionNode(createIdentifierToken(paramType), new ArrayList<>());
-                    BallerinaTypesGenerator.getInstance().addTypeDefinitionNode(paramType, typeDefinitionNode);
+                    TypeHandler.getInstance().generateTypeDescriptorForOASSchema(schema, paramType);
                 } else {
                     paramType = getPathParameterType(parameter.getSchema(), pathParam);
                     if (paramType.endsWith(GeneratorConstants.NILLABLE)) {
@@ -303,7 +301,7 @@ public class GeneratorUtils {
     public static String convertOpenAPITypeToBallerina(Schema<?> schema) throws BallerinaOpenApiException {
         String type = getOpenAPIType(schema);
         if (schema.getEnum() != null && !schema.getEnum().isEmpty() && primitiveTypeList.contains(type)) {
-            EnumGenerator enumGenerator = new EnumGenerator(schema, null);
+            EnumGenerator enumGenerator = new EnumGenerator(schema, null, new HashMap<>(), new HashMap<>());
             return enumGenerator.generateTypeDescriptorNode().toString();
         } else if ((GeneratorConstants.INTEGER.equals(type) || GeneratorConstants.NUMBER.equals(type) || GeneratorConstants.STRING.equals(type)) && schema.getFormat() != null) {
             return convertOpenAPITypeFormatToBallerina(type, schema);
@@ -376,29 +374,24 @@ public class GeneratorUtils {
     public static String getValidName(String identifier, boolean isSchema) {
         //For the flatten enable we need to remove first Part of valid name check
         // this - > !identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
-        try {
-            if (!identifier.matches("\\b[0-9]*\\b")) {
-                String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN);
-                StringBuilder validName = new StringBuilder();
-                for (String part : split) {
-                    if (!part.isBlank()) {
-                        if (split.length > 1) {
-                            part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
-                                    part.substring(1).toLowerCase(Locale.ENGLISH);
-                        }
-                        validName.append(part);
+        if (!identifier.matches("\\b[0-9]*\\b")) {
+            String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN);
+            StringBuilder validName = new StringBuilder();
+            for (String part : split) {
+                if (!part.isBlank()) {
+                    if (split.length > 1) {
+                        part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
+                                part.substring(1).toLowerCase(Locale.ENGLISH);
                     }
+                    validName.append(part);
                 }
-                identifier = validName.toString();
             }
-            if (isSchema) {
-                return identifier.substring(0, 1).toUpperCase(Locale.ENGLISH) + identifier.substring(1);
-            } else {
-                return escapeIdentifier(identifier.substring(0, 1).toLowerCase(Locale.ENGLISH) + identifier.substring(1));
-            }
-        } catch (PatternSyntaxException pt) {
-            LOGGER.error("Error occurred while validating the identifier : " + identifier, pt);
-            return identifier;
+            identifier = validName.toString();
+        }
+        if (isSchema) {
+            return identifier.substring(0, 1).toUpperCase(Locale.ENGLISH) + identifier.substring(1);
+        } else {
+            return escapeIdentifier(identifier.substring(0, 1).toLowerCase(Locale.ENGLISH) + identifier.substring(1));
         }
     }
 

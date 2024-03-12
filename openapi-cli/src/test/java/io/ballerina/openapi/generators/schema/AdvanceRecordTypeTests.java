@@ -33,6 +33,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree;
 
@@ -82,7 +83,7 @@ public class AdvanceRecordTypeTests {
         ObjectSchema objectSchema = (ObjectSchema) schema;
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         TypeDefinitionNode recordNode =
-                ballerinaSchemaGenerator.getTypeDefinitionNode(objectSchema, "Error");
+                ballerinaSchemaGenerator.getTypeDefinitionNode(objectSchema, "Error", new HashMap<>(), new HashMap<>());
         Assert.assertTrue(((RecordTypeDescriptorNode) recordNode.typeDescriptor()).fields().isEmpty());
     }
 }

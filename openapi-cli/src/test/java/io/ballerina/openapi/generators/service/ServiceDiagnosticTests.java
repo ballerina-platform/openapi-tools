@@ -24,6 +24,7 @@ import io.ballerina.openapi.corenew.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.corenew.service.model.OASServiceMetadata;
 import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
 import io.ballerina.openapi.corenew.typegenerator.GeneratorUtils;
+import io.ballerina.openapi.corenew.typegenerator.TypeHandler;
 import io.ballerina.openapi.corenew.typegenerator.model.Filter;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -69,6 +70,7 @@ public class ServiceDiagnosticTests {
                 .withGenerateServiceType(false)
                 .withGenerateWithoutDataBinding(false)
                 .build();
+        TypeHandler.createInstance(openAPI, false, false);
         BallerinaTypesGenerator.createInstance(openAPI, false, false);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
@@ -91,6 +93,8 @@ public class ServiceDiagnosticTests {
                 .withGenerateServiceType(false)
                 .withGenerateWithoutDataBinding(true)
                 .build();
+        TypeHandler.createInstance(openAPI, false, false);
+        BallerinaTypesGenerator.createInstance(openAPI, false, false);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);
@@ -114,6 +118,7 @@ public class ServiceDiagnosticTests {
                 .withGenerateWithoutDataBinding(false)
                 .build();
         // Initialize ballerina types generator
+        TypeHandler.createInstance(openAPI, false, false);
         BallerinaTypesGenerator.createInstance(openAPI, false, false);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
@@ -149,7 +154,7 @@ public class ServiceDiagnosticTests {
                 {"ballerinax_connector_tests/files.com.yaml"},
                 {"ballerinax_connector_tests/openweathermap.yaml"},
                 {"ballerinax_connector_tests/soundcloud.yaml"},
-//                {"ballerinax_connector_tests/stripe.yaml"},
+                {"ballerinax_connector_tests/stripe.yaml"},
                 {"ballerinax_connector_tests/vimeo.yaml"},
 //                {"ballerinax_connector_tests/ynab.yaml"}, // 209 status code is not supported in Ballerina
                 {"ballerinax_connector_tests/zoom.yaml"}

@@ -17,10 +17,12 @@
  */
 package io.ballerina.openapi.corenew.typegenerator.generators;
 
+import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 
@@ -31,6 +33,7 @@ import io.ballerina.openapi.corenew.typegenerator.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -64,8 +67,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
  */
 public class UnionTypeGenerator extends TypeGenerator {
 
-    public UnionTypeGenerator(Schema<?> schema, String typeName) {
-        super(schema, typeName);
+    public UnionTypeGenerator(Schema<?> schema, String typeName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
+        super(schema, typeName,subTypesMap, pregeneratedTypeMap);
     }
 
     @Override
@@ -78,7 +81,6 @@ public class UnionTypeGenerator extends TypeGenerator {
             schemas = schema.getAnyOf();
         }
         TypeDescriptorNode unionTypeDesc = getUnionType(schemas, typeName);
-        addToTypeListAndRemoveFromTempList(null);
         return TypeGeneratorUtils.getNullableType(schema, unionTypeDesc);
     }
 
@@ -93,13 +95,7 @@ public class UnionTypeGenerator extends TypeGenerator {
     private TypeDescriptorNode getUnionType(List<Schema> schemas, String typeName) throws BallerinaOpenApiException {
         List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
         for (Schema<?> schema : schemas) {
-            String subTypeName;
-//            if (schema.get$ref() != null) {
-//                subTypeName = GeneratorUtils.extractReferenceType(schema.get$ref());
-//            } else {
-//                subTypeName = typeName + "random" + i++;
-//            }
-            TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, typeName, null);
+            TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, typeName, null, subTypesMap, pregeneratedTypeMap);
             TypeDescriptorNode typeDescNode = typeGenerator.generateTypeDescriptorNode();
             imports.addAll(typeGenerator.getImports());
             if (typeDescNode instanceof OptionalTypeDescriptorNode && GeneratorMetaData.getInstance().isNullable()) {
@@ -151,15 +147,14 @@ public class UnionTypeGenerator extends TypeGenerator {
         return unionTypeDescNode;
     }
 
-    public static UnionTypeDescriptorNode getUnionNodeForOneOf(Iterator<Schema> iterator)
-            throws BallerinaOpenApiException {
-
+    public UnionTypeDescriptorNode getUnionNodeForOneOf() throws BallerinaOpenApiException {
+        Iterator<Schema> iterator = schema.getOneOf().iterator();
         List<SimpleNameReferenceNode> qualifiedNodes = new ArrayList<>();
         Token pipeToken = createIdentifierToken("|");
         while (iterator.hasNext()) {
             Schema<?> contentType = iterator.next();
             Optional<TypeDescriptorNode> qualifiedNodeType = BallerinaTypesGenerator.getInstance()
-                    .generateTypeDescriptorNodeForOASSchema(contentType);
+                    .generateTypeDescriptorNodeForOASSchema(contentType, subTypesMap, pregeneratedTypeMap);
             if (qualifiedNodeType.isEmpty()) {
                 continue;
             }

@@ -26,6 +26,7 @@ import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -34,13 +35,13 @@ import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.corenew.typegenerator.document.DocCommentsGenerator;
 import io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.corenew.typegenerator.generators.AllOfRecordTypeGenerator;
 import io.ballerina.openapi.corenew.typegenerator.generators.AnyDataTypeGenerator;
 import io.ballerina.openapi.corenew.typegenerator.generators.ArrayTypeGenerator;
-import io.ballerina.openapi.corenew.typegenerator.generators.PregeneratedTypeGenerator;
 import io.ballerina.openapi.corenew.typegenerator.generators.PrimitiveTypeGenerator;
 import io.ballerina.openapi.corenew.typegenerator.generators.RecordTypeGenerator;
 import io.ballerina.openapi.corenew.typegenerator.generators.ReferencedTypeGenerator;
@@ -57,6 +58,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -103,52 +105,27 @@ public class TypeGeneratorUtils {
      * @param typeName    parameter name
      * @return Relevant SchemaType object
      */
-    public static TypeGenerator getTypeGenerator(Schema<?> schemaValue, String typeName, String parentName) {
-//        if (BallerinaTypesGenerator.typeInclusionRecords.containsKey(typeName)) {
-//            return new PregeneratedTypeGenerator(schemaValue, typeName,
-//                    BallerinaTypesGenerator.typeInclusionRecords.get(typeName));
-//        } else
-//        if (BallerinaTypesGenerator.typeInclusionRecords2.contains(typeName)) {
-//            return new PregeneratedTypeGenerator(schemaValue, typeName, createTypeDefinitionNode(null, createToken(PUBLIC_KEYWORD),
-//                    createToken(TYPE_KEYWORD),
-//                    createIdentifierToken(typeName),
-//                    createSimpleNameReferenceNode(createIdentifierToken(typeName)),
-//                    createToken(SEMICOLON_TOKEN)));
-//        }
+    public static TypeGenerator getTypeGenerator(Schema<?> schemaValue, String typeName, String parentName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
         if (schemaValue.get$ref() != null) {
-            return new ReferencedTypeGenerator(schemaValue, typeName);
+            return new ReferencedTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
         } else if (GeneratorUtils.isComposedSchema(schemaValue)) {
             if (schemaValue.getAllOf() != null) {
-                return new AllOfRecordTypeGenerator(schemaValue, typeName);
+                return new AllOfRecordTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
             } else {
-                return new UnionTypeGenerator(schemaValue, typeName);
+                return new UnionTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
             }
         } else if ((getOpenAPIType(schemaValue) != null &&
                 getOpenAPIType(schemaValue).equals(GeneratorConstants.OBJECT)) ||
                 GeneratorUtils.isObjectSchema(schemaValue) || schemaValue.getProperties() != null ||
                 GeneratorUtils.isMapSchema(schemaValue)) {
-            if (BallerinaTypesGenerator.typeInclusionRecords2.contains(typeName)) {
-                return new PregeneratedTypeGenerator(schemaValue, typeName, createTypeDefinitionNode(null, createToken(PUBLIC_KEYWORD),
-                        createToken(TYPE_KEYWORD),
-                        createIdentifierToken(typeName),
-                        createSimpleNameReferenceNode(createIdentifierToken(typeName)),
-                        createToken(SEMICOLON_TOKEN)));
-            }
-            return new RecordTypeGenerator(schemaValue, typeName);
+            return new RecordTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
         } else if (GeneratorUtils.isArraySchema(schemaValue)) {
-            if (BallerinaTypesGenerator.typeInclusionRecords2.contains(typeName)) {
-                return new PregeneratedTypeGenerator(schemaValue, typeName, createTypeDefinitionNode(null, createToken(PUBLIC_KEYWORD),
-                        createToken(TYPE_KEYWORD),
-                        createIdentifierToken(typeName),
-                        createSimpleNameReferenceNode(createIdentifierToken(typeName)),
-                        createToken(SEMICOLON_TOKEN)));
-            }
-            return new ArrayTypeGenerator(schemaValue, typeName, parentName);
+            return new ArrayTypeGenerator(schemaValue, typeName, parentName, subTypesMap, pregeneratedTypeMap);
         } else if (getOpenAPIType(schemaValue) != null &&
                 PRIMITIVE_TYPE_LIST.contains(getOpenAPIType(schemaValue))) {
-            return new PrimitiveTypeGenerator(schemaValue, typeName);
+            return new PrimitiveTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
         } else { // when schemaValue.type == null
-            return new AnyDataTypeGenerator(schemaValue, typeName);
+            return new AnyDataTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
         }
     }
 

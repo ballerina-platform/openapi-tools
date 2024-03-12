@@ -21,23 +21,30 @@ package io.ballerina.openapi.corenew.typegenerator.generators;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
 import io.ballerina.openapi.corenew.typegenerator.GeneratorConstants;
 import io.ballerina.openapi.corenew.typegenerator.GeneratorUtils;
+import io.ballerina.openapi.corenew.typegenerator.ServiceDiagnosticMessages;
 import io.ballerina.openapi.corenew.typegenerator.TypeGeneratorUtils;
 import io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.corenew.typegenerator.model.GeneratorMetaData;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,12 +52,17 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createParenthesisedTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
+import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.extractReferenceType;
+import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.getOpenAPIType;
+import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.getValidName;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for array schemas.
@@ -70,12 +82,14 @@ import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.extractR
  * @since 1.3.0
  */
 public class ArrayTypeGenerator extends TypeGenerator {
-    private String parentType = null;
+    private String parentType;
+    private static final List<String> queryParamSupportedTypes =
+            new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
+                    GeneratorConstants.STRING, GeneratorConstants.BOOLEAN, GeneratorConstants.OBJECT));
 
-    public ArrayTypeGenerator(Schema schema, String typeName, String parentType) {
-        super(schema, typeName);
+    public ArrayTypeGenerator(Schema schema, String typeName, String parentType, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
+        super(schema, typeName, subTypesMap, pregeneratedTypeMap);
         this.parentType = parentType;
-        addToTypeListAndRemoveFromTempList(null);
     }
 
     /**
@@ -101,19 +115,20 @@ public class ArrayTypeGenerator extends TypeGenerator {
                             parentType + "-" + normalizedTypeName + "-Items-" + GeneratorUtils.getOpenAPIType(items) :
                             normalizedTypeName + "-Items-" + GeneratorUtils.getOpenAPIType(items),
                     true);
-            typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
-            TypeDefinitionNode arrayItemWithConstraint = typeGenerator.generateTypeDefinitionNode(
-                    createIdentifierToken(typeName),
-                    typeAnnotations);
-            imports.addAll(typeGenerator.getImports());
-//            typeDefinitionNodeList.add(arrayItemWithConstraint);
-            BallerinaTypesGenerator.getInstance().addTypeDefinitionNode(typeName, arrayItemWithConstraint);
+            typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null, subTypesMap, pregeneratedTypeMap);
+            if (!pregeneratedTypeMap.containsKey(typeName)) {
+                pregeneratedTypeMap.put(typeName, createSimpleNameReferenceNode(createIdentifierToken(typeName)));
+                TypeDefinitionNode arrayItemWithConstraint = typeGenerator.generateTypeDefinitionNode(
+                        createIdentifierToken(typeName),
+                        typeAnnotations);
+                imports.addAll(typeGenerator.getImports());
+                subTypesMap.put(typeName, arrayItemWithConstraint);
+            }
         } else {
-            typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
+            typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null, subTypesMap, pregeneratedTypeMap);
         }
 
         TypeDescriptorNode typeDescriptorNode;
-//        typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
         if ((typeGenerator instanceof PrimitiveTypeGenerator ||
                 typeGenerator instanceof ArrayTypeGenerator) && isConstraintsAvailable) {
             typeDescriptorNode = NodeParser.parseTypeDescriptor(typeName);
@@ -150,14 +165,13 @@ public class ArrayTypeGenerator extends TypeGenerator {
         ArrayTypeDescriptorNode arrayTypeDescriptorNode = createArrayTypeDescriptorNode(typeDescriptorNode,
                 arrayDimensions);
         imports.addAll(typeGenerator.getImports());
-        addToTypeListAndRemoveFromTempList(null);
         return TypeGeneratorUtils.getNullableType(schema, arrayTypeDescriptorNode);
     }
 
     /**
      * Generate {@code TypeDescriptorNode} for ArraySchema in OAS.
      */
-    public static Optional<TypeDescriptorNode> getTypeDescNodeForArraySchema(Schema schema)
+    public Optional<TypeDescriptorNode> getTypeDescNodeForArraySchema(Schema schema, HashMap<String, TypeDefinitionNode> subTypesMap)
             throws BallerinaOpenApiException {
         TypeDescriptorNode member;
         String schemaType = GeneratorUtils.getOpenAPIType(schema.getItems());
@@ -165,11 +179,13 @@ public class ArrayTypeGenerator extends TypeGenerator {
             String typeName = GeneratorUtils.getValidName(extractReferenceType(schema.getItems().get$ref()), true);
             String validTypeName = escapeIdentifier(typeName);
             TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(
-                    GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(typeName), validTypeName, null);
-            TypeDefinitionNode typeDefinitionNode = typeGenerator.generateTypeDefinitionNode(
-                    createIdentifierToken(validTypeName), new ArrayList<>());
-            BallerinaTypesGenerator.getInstance().addTypeDefinitionNode(validTypeName, typeDefinitionNode);
-
+                    GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(typeName), validTypeName, null, subTypesMap, pregeneratedTypeMap);
+            if (!pregeneratedTypeMap.containsKey(validTypeName)) {
+                pregeneratedTypeMap.put(validTypeName, createSimpleNameReferenceNode(createIdentifierToken(validTypeName)));
+                TypeDefinitionNode typeDefinitionNode = typeGenerator.generateTypeDefinitionNode(
+                        createIdentifierToken(validTypeName), new ArrayList<>());
+                subTypesMap.put(validTypeName, typeDefinitionNode);
+            }
             member = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(escapeIdentifier(GeneratorUtils.getValidName(
                             extractReferenceType(schema.getItems().get$ref()), true))));
@@ -181,6 +197,50 @@ public class ArrayTypeGenerator extends TypeGenerator {
             return Optional.empty();
         }
         return Optional.ofNullable(getArrayTypeDescriptorNodeFromTypeDescriptorNode(member));
+    }
+
+    // Create ArrayTypeDescriptorNode using Schema
+    public static ArrayTypeDescriptorNode getArrayTypeDescriptorNode(OpenAPI openAPI, Schema<?> items, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) throws BallerinaOpenApiException {
+        String arrayName;
+        if (items.get$ref() != null) {
+            String referenceType = extractReferenceType(items.get$ref());
+            String type = getValidName(referenceType, true);
+            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type);
+            TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(refSchema, type, null, subTypesMap, pregeneratedTypeMap);
+            if (!pregeneratedTypeMap.containsKey(type)) {
+                pregeneratedTypeMap.put(type, createSimpleNameReferenceNode(createIdentifierToken(type)));
+                TypeDefinitionNode typeDefinitionNode = typeGenerator.generateTypeDefinitionNode(
+                        createIdentifierToken(type), new ArrayList<>());
+                subTypesMap.put(type, typeDefinitionNode);
+            }
+            if (queryParamSupportedTypes.contains(getOpenAPIType(refSchema))) {
+                arrayName = type;
+            } else {
+                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
+                throw new BallerinaOpenApiException(String.format(messages.getDescription(), type));
+            }
+        } else {
+            arrayName = convertOpenAPITypeToBallerina(items);
+            if (items.getEnum() != null && !items.getEnum().isEmpty()) {
+                arrayName = OPEN_PAREN_TOKEN.stringValue() + arrayName + CLOSE_PAREN_TOKEN.stringValue();
+            }
+        }
+        Token arrayNameToken = createIdentifierToken(arrayName, GeneratorUtils.SINGLE_WS_MINUTIAE,
+                GeneratorUtils.SINGLE_WS_MINUTIAE);
+        BuiltinSimpleNameReferenceNode memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, arrayNameToken);
+        ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
+                createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
+                createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+        NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
+
+        if (items.getNullable() != null && items.getNullable() && items.getEnum() == null) {
+            // generate -> int?[]
+            OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(memberTypeDesc,
+                    createToken(SyntaxKind.QUESTION_MARK_TOKEN));
+            return createArrayTypeDescriptorNode(optionalNode, nodeList);
+        }
+        // generate -> int[]
+        return createArrayTypeDescriptorNode(memberTypeDesc, nodeList);
     }
 
     public static ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(TypeDescriptorNode typeDescriptorNode) {

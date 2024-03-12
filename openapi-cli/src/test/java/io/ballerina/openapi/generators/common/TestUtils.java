@@ -27,6 +27,7 @@ import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.corenew.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
+import io.ballerina.openapi.corenew.typegenerator.TypeHandler;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
@@ -110,9 +111,9 @@ public class TestUtils {
 //        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
 //                ballerinaServiceGenerator.getTypeInclusionRecords());
 //        preGeneratedTypeDefNodes.addAll(BallerinaTypesGenerator.getTypeInclusionRecords().values());
-        BallerinaTypesGenerator ballerinaSchemaGenerator = BallerinaTypesGenerator.getInstance();
+        TypeHandler typeHandler = TypeHandler.getInstance();
         String schemaContent = Formatter.format(
-                ballerinaSchemaGenerator.generateTypeSyntaxTree()).toSourceCode();
+                typeHandler.generateTypeSyntaxTree()).toSourceCode();
         String serviceContent = Formatter.format(serviceSyntaxTree).toSourceCode();
         serviceContent = serviceContent.replaceAll(
                 "\\{" + System.lineSeparator() + "\\s*\\}", "\\{panic error(\"Tests\");\\}");
@@ -120,8 +121,8 @@ public class TestUtils {
         writeFile(schemaPath, schemaContent);
         SemanticModel semanticModel = getSemanticModel(servicePath);
         boolean hasErrors = true;
-        hasErrors = semanticModel.diagnostics().stream()
-                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+//        hasErrors = semanticModel.diagnostics().stream()
+//                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         String yamlFileName = yamlFile.split("/")[yamlFile.split("/").length - 1];
         if (hasErrors) {
             File f = new File("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i);

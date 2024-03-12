@@ -18,11 +18,15 @@
 
 package io.ballerina.openapi.corenew.typegenerator.generators;
 
+import io.ballerina.compiler.syntax.tree.NameReferenceNode;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.corenew.typegenerator.GeneratorConstants;
 import io.ballerina.openapi.corenew.typegenerator.TypeGeneratorUtils;
 import io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.media.Schema;
+
+import java.util.HashMap;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
@@ -44,8 +48,8 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameRefe
  */
 public class AnyDataTypeGenerator extends TypeGenerator {
 
-    public AnyDataTypeGenerator(Schema schema, String typeName) {
-        super(schema, typeName);
+    public AnyDataTypeGenerator(Schema schema, String typeName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
+        super(schema, typeName, subTypesMap, pregeneratedTypeMap);
     }
 
     /**
@@ -53,7 +57,6 @@ public class AnyDataTypeGenerator extends TypeGenerator {
      */
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
-        addToTypeListAndRemoveFromTempList(null);
         return TypeGeneratorUtils.getNullableType(schema, createSimpleNameReferenceNode(
                 createIdentifierToken(GeneratorConstants.ANY_DATA)));
     }

@@ -32,6 +32,7 @@ import io.ballerina.openapi.corenew.service.BallerinaServiceObjectGenerator;
 import io.ballerina.openapi.corenew.service.CodegenUtils;
 import io.ballerina.openapi.corenew.service.model.OASServiceMetadata;
 import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
+import io.ballerina.openapi.corenew.typegenerator.TypeHandler;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -173,9 +174,8 @@ public class BallerinaCodeGenerator {
 //        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
 //                openAPIDef, nullable, preGeneratedTypeDefNodes);
 
-        BallerinaTypesGenerator ballerinaTypesGenerator = BallerinaTypesGenerator.getInstance();
-
-        SyntaxTree schemaSyntaxTree = ballerinaTypesGenerator.generateTypeSyntaxTree();
+        TypeHandler typeHandler = TypeHandler.getInstance();
+        SyntaxTree schemaSyntaxTree = typeHandler.generateTypeSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
 
         if (filter.getTags().size() > 0) {
@@ -458,6 +458,7 @@ public class BallerinaCodeGenerator {
                 .build();
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         // Initialize ballerina types generator
+        TypeHandler.createInstance(openAPIDef, nullable, generateServiceType);
         BallerinaTypesGenerator.createInstance(openAPIDef, nullable, generateServiceType);
         String mainContent;
         try {
@@ -479,8 +480,8 @@ public class BallerinaCodeGenerator {
 //                    (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaContent));
 //        }
 
-        BallerinaTypesGenerator ballerinaTypesGenerator = BallerinaTypesGenerator.getInstance();
-        String schemaSyntaxTree = Formatter.format(ballerinaTypesGenerator.generateTypeSyntaxTree()).toSourceCode();
+        TypeHandler typeHandler = TypeHandler.getInstance();
+        String schemaSyntaxTree = Formatter.format(typeHandler.generateTypeSyntaxTree()).toSourceCode();
         if (!schemaSyntaxTree.isBlank() && !generateWithoutDataBinding) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME,
                     (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaSyntaxTree));

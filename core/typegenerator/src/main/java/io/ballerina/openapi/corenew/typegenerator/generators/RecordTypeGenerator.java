@@ -20,6 +20,7 @@ package io.ballerina.openapi.corenew.typegenerator.generators;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -36,6 +37,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +46,7 @@ import java.util.Set;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ELLIPSIS_TOKEN;
@@ -51,6 +54,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_PIPE_TOKEN
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
+import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.getValidName;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for object type schema.
@@ -89,8 +93,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 public class RecordTypeGenerator extends TypeGenerator {
 
     public static final PrintStream OUT_STREAM = System.err;
-    public RecordTypeGenerator(Schema schema, String typeName) {
-        super(schema, typeName);
+    public RecordTypeGenerator(Schema schema, String typeName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
+        super(schema, typeName, subTypesMap, pregeneratedTypeMap);
     }
 
     /**
@@ -98,7 +102,6 @@ public class RecordTypeGenerator extends TypeGenerator {
      */
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
-
         List<Node> recordFields = new LinkedList<>();
         // extract metadata with additional properties
         RecordMetadata metadataBuilder = getRecordMetadata();
@@ -108,14 +111,12 @@ public class RecordTypeGenerator extends TypeGenerator {
             List<String> required = schema.getRequired();
             recordFields.addAll(addRecordFields(required, properties.entrySet(), typeName));
             NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFields);
-            addToTypeListAndRemoveFromTempList(null);
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
                     metadataBuilder.isOpenRecord() ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
                     fieldNodes, metadataBuilder.getRestDescriptorNode(),
                     metadataBuilder.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) :
                             createToken(CLOSE_BRACE_PIPE_TOKEN));
         } else {
-            addToTypeListAndRemoveFromTempList(null);
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
                     metadataBuilder.isOpenRecord() ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
                     createNodeList(recordFields), metadataBuilder.getRestDescriptorNode(),
@@ -173,7 +174,7 @@ public class RecordTypeGenerator extends TypeGenerator {
      */
     public RecordRestDescriptorNode getRestDescriptorNodeForReference(Schema<?> additionalPropSchema)
             throws BallerinaOpenApiException {
-        ReferencedTypeGenerator referencedTypeGenerator = new ReferencedTypeGenerator(additionalPropSchema, null);
+        ReferencedTypeGenerator referencedTypeGenerator = new ReferencedTypeGenerator(additionalPropSchema, null, subTypesMap, pregeneratedTypeMap);
         TypeDescriptorNode refNode = referencedTypeGenerator.generateTypeDescriptorNode();
         return NodeFactory.createRecordRestDescriptorNode(refNode, createToken(ELLIPSIS_TOKEN),
                 createToken(SEMICOLON_TOKEN));
@@ -187,13 +188,13 @@ public class RecordTypeGenerator extends TypeGenerator {
      *     }
      * </pre>
      */
-    public static RecordRestDescriptorNode getRecordRestDescriptorNode(Schema<?> additionalPropSchema)
+    public RecordRestDescriptorNode getRecordRestDescriptorNode(Schema<?> additionalPropSchema)
             throws BallerinaOpenApiException {
 
         RecordRestDescriptorNode recordRestDescNode = null;
         if (GeneratorUtils.isNumberSchema(additionalPropSchema) && additionalPropSchema.getFormat() != null) {
             // this is special for `NumberSchema` because it has format with its expected type.
-            SimpleNameReferenceNode numberNode = NodeFactory.createSimpleNameReferenceNode(
+            SimpleNameReferenceNode numberNode = createSimpleNameReferenceNode(
                     createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(additionalPropSchema)));
             recordRestDescNode = NodeFactory.createRecordRestDescriptorNode(
                     TypeGeneratorUtils.getNullableType(additionalPropSchema, numberNode),
@@ -201,20 +202,20 @@ public class RecordTypeGenerator extends TypeGenerator {
                     createToken(SEMICOLON_TOKEN));
         } else if (GeneratorUtils.isObjectSchema(additionalPropSchema) ||
                 GeneratorUtils.isMapSchema(additionalPropSchema)) {
-            RecordTypeGenerator record = new RecordTypeGenerator(additionalPropSchema, null);
+            RecordTypeGenerator record = new RecordTypeGenerator(additionalPropSchema, null, subTypesMap, pregeneratedTypeMap);
             TypeDescriptorNode recordNode = TypeGeneratorUtils.getNullableType(additionalPropSchema,
                     record.generateTypeDescriptorNode());
             recordRestDescNode = NodeFactory.createRecordRestDescriptorNode(recordNode, createToken(ELLIPSIS_TOKEN),
                     createToken(SEMICOLON_TOKEN));
         } else if (GeneratorUtils.isArraySchema(additionalPropSchema)) {
-            ArrayTypeGenerator arrayTypeGenerator = new ArrayTypeGenerator(additionalPropSchema, null, null);
+            ArrayTypeGenerator arrayTypeGenerator = new ArrayTypeGenerator(additionalPropSchema, null, null, subTypesMap, pregeneratedTypeMap);
             TypeDescriptorNode arrayNode = arrayTypeGenerator.generateTypeDescriptorNode();
             recordRestDescNode = NodeFactory.createRecordRestDescriptorNode(arrayNode, createToken(ELLIPSIS_TOKEN),
                     createToken(SEMICOLON_TOKEN));
         } else if (GeneratorUtils.isIntegerSchema(additionalPropSchema) ||
                 GeneratorUtils.isStringSchema(additionalPropSchema) ||
                 GeneratorUtils.isBooleanSchema(additionalPropSchema)) {
-            PrimitiveTypeGenerator primitiveTypeGenerator = new PrimitiveTypeGenerator(additionalPropSchema, null);
+            PrimitiveTypeGenerator primitiveTypeGenerator = new PrimitiveTypeGenerator(additionalPropSchema, null, subTypesMap, pregeneratedTypeMap);
             TypeDescriptorNode primitiveNode = primitiveTypeGenerator.generateTypeDescriptorNode();
             recordRestDescNode = NodeFactory.createRecordRestDescriptorNode(primitiveNode, createToken(ELLIPSIS_TOKEN),
                     createToken(SEMICOLON_TOKEN));
@@ -228,7 +229,7 @@ public class RecordTypeGenerator extends TypeGenerator {
     /**
      * This util for generating record field with given schema properties.
      */
-    public List<Node> addRecordFields(List<String> required, Set<Map.Entry<String, Schema<?>>> fields,
+    List<Node> addRecordFields(List<String> required, Set<Map.Entry<String, Schema<?>>> fields,
                                       String recordName) throws BallerinaOpenApiException {
         // TODO: Handle allOf , oneOf, anyOf
         List<Node> recordFieldList = new ArrayList<>();
@@ -240,18 +241,11 @@ public class RecordTypeGenerator extends TypeGenerator {
             NodeList<Node> schemaDocNodes = createNodeList(schemaDoc);
 
             IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldNameStr);
-            TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(fieldSchema, fieldNameStr, recordName);
+            TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(fieldSchema, fieldNameStr, recordName, subTypesMap, pregeneratedTypeMap);
             TypeDescriptorNode fieldTypeName = typeGenerator.generateTypeDescriptorNode();
             if (typeGenerator instanceof RecordTypeGenerator) {
                 fieldTypeName = TypeGeneratorUtils.getNullableType(fieldSchema, fieldTypeName);
             }
-//            if (typeGenerator instanceof ArrayTypeGenerator && !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
-//                typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
-//            } else if (typeGenerator instanceof UnionTypeGenerator &&
-//                    !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
-//                List<TypeDefinitionNode> newConstraintNode = typeGenerator.getTypeDefinitionNodeList();
-//                typeDefinitionNodeList.addAll(newConstraintNode);
-//            }
             imports.addAll(typeGenerator.getImports());
             ImmutablePair<List<Node>, Set<String>> fieldListWithImports =
                     TypeGeneratorUtils.updateRecordFieldListWithImports(required, recordFieldList, field, fieldSchema,

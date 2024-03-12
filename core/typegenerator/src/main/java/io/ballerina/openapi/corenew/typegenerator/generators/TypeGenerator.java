@@ -22,6 +22,7 @@ package io.ballerina.openapi.corenew.typegenerator.generators;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
+import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
@@ -32,16 +33,20 @@ import io.ballerina.openapi.corenew.typegenerator.GeneratorConstants;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
+import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.getValidName;
 
 /**
  * Abstract class for schema types.
@@ -52,20 +57,16 @@ public abstract class TypeGenerator {
 
     Schema schema;
     String typeName;
-//    final List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
     final LinkedHashSet<String> imports = new LinkedHashSet<>();
+    final HashMap<String, TypeDefinitionNode> subTypesMap;
+    final HashMap<String, NameReferenceNode> pregeneratedTypeMap;
 
-    public TypeGenerator(Schema schema, String typeName) {
+    public TypeGenerator(Schema schema, String typeName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
         this.schema = schema;
         this.typeName = typeName;
-//        if (this instanceof RecordTypeGenerator || this instanceof ArrayTypeGenerator) {
-//            BallerinaTypesGenerator.typeInclusionRecords2.add(typeName);
-//        }
+        this.subTypesMap = subTypesMap;
+        this.pregeneratedTypeMap = pregeneratedTypeMap;
     }
-
-//    public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
-//        return typeDefinitionNodeList;
-//    }
 
     public LinkedHashSet<String> getImports() {
         return imports;
@@ -81,7 +82,6 @@ public abstract class TypeGenerator {
      */
     public TypeDefinitionNode generateTypeDefinitionNode(IdentifierToken typeName, List<AnnotationNode> typeAnnotations)
             throws BallerinaOpenApiException {
-
         //Check the annotation for constraint support
         boolean nullable = GeneratorMetaData.getInstance().isNullable();
         for (AnnotationNode annotation : typeAnnotations) {
@@ -96,8 +96,7 @@ public abstract class TypeGenerator {
 //        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
 //        MetadataNode metadataNode = createMetadataNode(documentationNode, createNodeList(typeAnnotations));
         return createTypeDefinitionNode(null, createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD),
-                typeName, generateTypeDescriptorNode(),
-                createToken(SEMICOLON_TOKEN));
+                typeName, generateTypeDescriptorNode(), createToken(SEMICOLON_TOKEN));
     }
 
     /**
@@ -107,9 +106,4 @@ public abstract class TypeGenerator {
      * @throws BallerinaOpenApiException when unsupported schema type is found
      */
     public abstract TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException;
-
-    public void addToTypeListAndRemoveFromTempList(TypeDefinitionNode typeDefinitionNode) {
-//        BallerinaTypesGenerator.typeInclusionRecords.put(typeName, typeDefinitionNode);
-        BallerinaTypesGenerator.typeInclusionRecords2.remove(typeName);
-    }
 }

@@ -27,6 +27,7 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -44,19 +45,20 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.corenew.typegenerator.generators.AllOfRecordTypeGenerator;
 import io.ballerina.openapi.corenew.typegenerator.generators.ArrayTypeGenerator;
 import io.ballerina.openapi.corenew.typegenerator.generators.PrimitiveTypeGenerator;
 import io.ballerina.openapi.corenew.typegenerator.generators.RecordTypeGenerator;
 import io.ballerina.openapi.corenew.typegenerator.generators.TypeGenerator;
+import io.ballerina.openapi.corenew.typegenerator.generators.UnionTypeGenerator;
 import io.ballerina.openapi.corenew.typegenerator.model.GeneratorMetaData;
+import io.ballerina.openapi.corenew.typegenerator.model.ReturnType;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.MapSchema;
-import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,8 +99,6 @@ import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.escapeId
 import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.corenew.typegenerator.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.corenew.typegenerator.generators.ArrayTypeGenerator.getTypeDescNodeForArraySchema;
-import static io.ballerina.openapi.corenew.typegenerator.generators.UnionTypeGenerator.getUnionNodeForOneOf;
 
 /**
  * This class wraps the {@link Schema} from openapi models inorder to overcome complications
@@ -108,23 +108,10 @@ import static io.ballerina.openapi.corenew.typegenerator.generators.UnionTypeGen
  */
 public class BallerinaTypesGenerator {
 
-    private final List<TypeDefinitionNode> typeDefinitionNodeList;
     private final Set<String> imports = new LinkedHashSet<>();
 
     public final Map<String, TypeDefinitionNode> typeDefinitionNodes = new HashMap<>();
-    public static final HashSet typeInclusionRecords2 = new HashSet();
-    private static final List<String> queryParamSupportedTypes =
-            new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
-                    GeneratorConstants.STRING, GeneratorConstants.BOOLEAN, GeneratorConstants.OBJECT));
     private static BallerinaTypesGenerator typesGeneratorInstance;
-
-//    public static Map<String, TypeDefinitionNode> getTypeDefinitionNodes() {
-//        return typeDefinitionNodes;
-//    }
-
-    public void addTypeDefinitionNode(String typeName, TypeDefinitionNode typeDefinitionNode) {
-        typeDefinitionNodes.put(typeName, typeDefinitionNode);
-    }
 
     /**
      * This public constructor is used to generate record and other relevant data type when the nullable flag is
@@ -137,7 +124,6 @@ public class BallerinaTypesGenerator {
     public BallerinaTypesGenerator(OpenAPI openAPI, boolean isNullable,
                                    List<TypeDefinitionNode> typeDefinitionNodeList) {
         GeneratorMetaData.createInstance(openAPI, isNullable, false);
-        this.typeDefinitionNodeList = typeDefinitionNodeList;
     }
 
     /**
@@ -173,7 +159,6 @@ public class BallerinaTypesGenerator {
     public BallerinaTypesGenerator(OpenAPI openAPI, boolean isNullable, List<TypeDefinitionNode> typeDefinitionNodeList,
                                    boolean generateServiceType) {
         GeneratorMetaData.createInstance(openAPI, isNullable, generateServiceType);
-        this.typeDefinitionNodeList = typeDefinitionNodeList;
     }
 
     public static void createInstance(OpenAPI openAPI, boolean isNullable, boolean generateServiceType) {
@@ -287,12 +272,12 @@ public class BallerinaTypesGenerator {
      * @return {@link TypeDefinitionNode}
      * @throws BallerinaOpenApiException when unsupported schema type is found
      */
-    public TypeDefinitionNode getTypeDefinitionNode(Schema schema, String typeName)
+    public TypeDefinitionNode getTypeDefinitionNode(Schema schema, String typeName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap)
             throws BallerinaOpenApiException {
         IdentifierToken typeNameToken = AbstractNodeFactory.createIdentifierToken(GeneratorUtils.getValidName(
                 typeName.trim(), true));
         TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, GeneratorUtils.getValidName(
-                typeName.trim(), true), null);
+                typeName.trim(), true), null, subTypesMap, pregeneratedTypeMap);
         List<AnnotationNode> typeAnnotations = new ArrayList<>();
 //        if (TypeGeneratorUtils.isConstraintAllowed(typeName, schema)) {
 //            AnnotationNode constraintNode = TypeGeneratorUtils.generateConstraintNode(typeName, schema);
@@ -303,23 +288,14 @@ public class BallerinaTypesGenerator {
 //        TypeGeneratorUtils.getRecordDocs(schemaDocs, schema, typeAnnotations);
         TypeDefinitionNode typeDefinitionNode =
                 typeGenerator.generateTypeDefinitionNode(typeNameToken, typeAnnotations);
-//        if (typeGenerator instanceof ArrayTypeGenerator && !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
-//            typeDefinitionNodeList.addAll(typeGenerator.getTypeDefinitionNodeList());
-//        } else if ((typeGenerator instanceof RecordTypeGenerator ||
-//                typeGenerator instanceof UnionTypeGenerator) &&
-//                !typeGenerator.getTypeDefinitionNodeList().isEmpty()) {
-//            removeDuplicateNode(typeGenerator.getTypeDefinitionNodeList());
-//        }
         imports.addAll(typeGenerator.getImports());
         return typeDefinitionNode;
     }
 
-    public static TypeDescriptorNode getTypeDescriptorNode(Schema schema, String typeName)
+    public static TypeDescriptorNode getTypeDescriptorNode(Schema schema, String typeName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap)
             throws BallerinaOpenApiException {
-//        IdentifierToken typeNameToken = AbstractNodeFactory.createIdentifierToken(GeneratorUtils.getValidName(
-//                typeName.trim(), true));
         TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, GeneratorUtils.getValidName(
-                typeName.trim(), true), null);
+                typeName.trim(), true), null, subTypesMap, pregeneratedTypeMap);
         List<AnnotationNode> typeAnnotations = new ArrayList<>();
 //        if (TypeGeneratorUtils.isConstraintAllowed(typeName, schema)) {
 //            AnnotationNode constraintNode = TypeGeneratorUtils.generateConstraintNode(typeName, schema);
@@ -330,25 +306,6 @@ public class BallerinaTypesGenerator {
 //        TypeGeneratorUtils.getRecordDocs(schemaDocs, schema, typeAnnotations);
         TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
         return typeDescriptorNode;
-    }
-
-    /**
-     * Remove duplicate of the TypeDefinitionNode.
-     */
-    private void removeDuplicateNode(List<TypeDefinitionNode> newConstraintNode) {
-
-        for (TypeDefinitionNode newNode : newConstraintNode) {
-            boolean isExist = false;
-            for (TypeDefinitionNode oldNode : typeDefinitionNodeList) {
-                if (newNode.typeName().text().equals(oldNode.typeName().text())) {
-                    isExist = true;
-                    break;
-                }
-            }
-            if (!isExist) {
-                typeDefinitionNodeList.add(newNode);
-            }
-        }
     }
 
     public SimpleNameReferenceNode getSimpleNameReferenceNode(String name) {
@@ -365,7 +322,7 @@ public class BallerinaTypesGenerator {
     /**
      * Generate typeDescriptor for given schema.
      */
-    public Optional<TypeDescriptorNode> generateTypeDescriptorNodeForOASSchema(Schema<?> schema)
+    public Optional<TypeDescriptorNode> generateTypeDescriptorNodeForOASSchema(Schema<?> schema, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap)
             throws BallerinaOpenApiException {
         if (schema == null) {
             return Optional.empty();
@@ -373,22 +330,23 @@ public class BallerinaTypesGenerator {
 
         if (schema.get$ref() != null) {
             String schemaName = GeneratorUtils.getValidName(extractReferenceType(schema.get$ref()), true);
-            TypeDescriptorNode typeDescriptorNode = getTypeDescriptorNode(
-                    GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(schemaName),
-                    schemaName);
             String typeName = escapeIdentifier(schemaName);
-            TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
-                    createToken(PUBLIC_KEYWORD),
-                    createToken(TYPE_KEYWORD),
-                    createIdentifierToken(typeName),
-                    typeDescriptorNode,
-                    createToken(SEMICOLON_TOKEN));
-            typeDefinitionNodes.put(typeName, typeDefinitionNode);
-//            return ArrayTypeGenerator.getTypeDescNodeForArraySchema(GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(schema.get$ref().split("/")[schema.get$ref().split("/").length - 1]));
+            if (!pregeneratedTypeMap.containsKey(typeName)) {
+                pregeneratedTypeMap.put(typeName, getSimpleNameReferenceNode(typeName));
+                TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(schemaName), GeneratorUtils.getValidName(
+                        schemaName.trim(), true), null, subTypesMap, pregeneratedTypeMap);
+                TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
+                TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
+                        createToken(PUBLIC_KEYWORD),
+                        createToken(TYPE_KEYWORD),
+                        createIdentifierToken(typeName),
+                        typeDescriptorNode,
+                        createToken(SEMICOLON_TOKEN));
+                subTypesMap.put(typeName, typeDefinitionNode);
+            }
             return Optional.ofNullable(getSimpleNameReferenceNode(typeName));
-//            return Optional.of(typeDescriptorNode);
         } else if (GeneratorUtils.isMapSchema(schema)) {
-            RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null);
+            RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null, subTypesMap, pregeneratedTypeMap);
             TypeDescriptorNode record = recordTypeGenerator.generateTypeDescriptorNode();
             return Optional.ofNullable(record);
         } else if (GeneratorUtils.getOpenAPIType(schema) != null) {
@@ -396,9 +354,10 @@ public class BallerinaTypesGenerator {
             boolean isPrimitiveType = schemaType.equals(GeneratorConstants.INTEGER) || schemaType.equals(GeneratorConstants.NUMBER) ||
                     schemaType.equals(GeneratorConstants.BOOLEAN) || schemaType.equals(GeneratorConstants.STRING);
             if (GeneratorUtils.isArraySchema(schema)) {
-                return getTypeDescNodeForArraySchema(schema);
+                ArrayTypeGenerator arrayTypeGenerator = new ArrayTypeGenerator(schema, null, schemaType, subTypesMap, pregeneratedTypeMap);
+                return arrayTypeGenerator.getTypeDescNodeForArraySchema(schema, subTypesMap);
             } else if (isPrimitiveType) {
-                PrimitiveTypeGenerator primitiveTypeGenerator = new PrimitiveTypeGenerator(schema, null);
+                PrimitiveTypeGenerator primitiveTypeGenerator = new PrimitiveTypeGenerator(schema, null, subTypesMap, pregeneratedTypeMap);
                 return Optional.ofNullable(primitiveTypeGenerator.generateTypeDescriptorNode());
                 //This returns identifier node for the types: int, float, decimal, boolean, string
 //                IdentifierToken identifierToken = createIdentifierToken(
@@ -409,8 +368,14 @@ public class BallerinaTypesGenerator {
                 return Optional.empty();
             }
         } else if (schema.getOneOf() != null) {
-            Iterator<Schema> iterator = schema.getOneOf().iterator();
-            return Optional.ofNullable(getUnionNodeForOneOf(iterator));
+            UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(schema, null, subTypesMap, pregeneratedTypeMap);
+            return Optional.ofNullable(unionTypeGenerator.getUnionNodeForOneOf());
+        } else if (schema.getAllOf() != null) {
+            AllOfRecordTypeGenerator allOfRecordTypeGenerator = new AllOfRecordTypeGenerator(schema, null, subTypesMap, pregeneratedTypeMap);
+            return Optional.ofNullable(allOfRecordTypeGenerator.generateTypeDescriptorNode());
+        } else if (schema.getAnyOf() != null) {
+            UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(schema, null, subTypesMap, pregeneratedTypeMap);
+            return Optional.ofNullable(unionTypeGenerator.generateTypeDescriptorNode());
         } else {
             return Optional.empty();
         }
@@ -419,8 +384,7 @@ public class BallerinaTypesGenerator {
     /**
      * Create recordType TypeDescriptor.
      */
-    public SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode type) {
-
+    public SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode type, HashMap<String, TypeDefinitionNode> subTypesMap) {
         String recordName = statusCode + GeneratorUtils.getValidName(type.toString(), true);
         Token recordKeyWord = createToken(RECORD_KEYWORD);
         Token bodyStartDelimiter = createIdentifierToken("{|");
@@ -460,169 +424,40 @@ public class BallerinaTypesGenerator {
                 createIdentifierToken(recordName),
                 recordTypeDescriptorNode,
                 createToken(SEMICOLON_TOKEN));
-
-        typeDefinitionNodes.put(typeDefinitionNode.typeName().text(), typeDefinitionNode);
-
+        subTypesMap.put(typeDefinitionNode.typeName().text(), typeDefinitionNode);
         return createSimpleNameReferenceNode(createIdentifierToken(recordName));
     }
 
-    public ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>> generateTypeDescriptorForMediaTypes(
-            String mediaTypeContent, Schema<?> schema, String recordName) throws BallerinaOpenApiException {
-        switch (mediaTypeContent) {
-            case GeneratorConstants.APPLICATION_JSON:
-                Optional<TypeDescriptorNode> returnTypeDecNode = generateTypeDescriptorNodeForOASSchema(schema);
-                if (returnTypeDecNode.isEmpty()) {
-                    return ImmutablePair.of(Optional.ofNullable(TypeHandler.getSimpleNameReferenceNode(GeneratorConstants.JSON)),
-                            Optional.empty());
-                } else if (returnTypeDecNode.get() instanceof RecordTypeDescriptorNode recordNode) {
-                    if (recordName == null) {
-                        return ImmutablePair.of(returnTypeDecNode, Optional.empty());
-                    }
-                    Token rname;
-                    if (schema.get$ref() != null) {
-                        rname = createIdentifierToken(GeneratorUtils.getValidName(extractReferenceType(schema.get$ref()), true));
-                    } else {
-                        rname = createIdentifierToken(recordName);
-                    }
-                    TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
-                            createToken(PUBLIC_KEYWORD),
-                            createToken(TYPE_KEYWORD),
-                            rname,
-                            recordNode,
-                            createToken(SEMICOLON_TOKEN));
-                    typeDefinitionNodes.put(typeDefinitionNode.typeName().text(), typeDefinitionNode);
-                    return ImmutablePair.of(returnTypeDecNode, Optional.of(typeDefinitionNode));
-                }
-                return ImmutablePair.of(returnTypeDecNode, Optional.empty());
-            case GeneratorConstants.APPLICATION_XML:
-                return ImmutablePair.of(Optional.ofNullable(getSimpleNameReferenceNode(GeneratorConstants.XML)),
-                        Optional.empty());
-            case GeneratorConstants.APPLICATION_URL_ENCODE:
-                return ImmutablePair.of(Optional.ofNullable(TypeHandler.getSimpleNameReferenceNode(GeneratorConstants.MAP_STRING)),
-                        Optional.empty());
-            case GeneratorConstants.TEXT:
-                return ImmutablePair.of(Optional.ofNullable(TypeHandler.getSimpleNameReferenceNode(GeneratorConstants.STRING)),
-                        Optional.empty());
-            case GeneratorConstants.APPLICATION_OCTET_STREAM:
-                ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
-                        createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
-                        createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-                return ImmutablePair.of(Optional.ofNullable(
-                        createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
-                                        createIdentifierToken(GeneratorConstants.BYTE)),
-                                NodeFactory.createNodeList(dimensionNode))), Optional.empty());
-            default:
-                return ImmutablePair.of(Optional.empty(), Optional.empty());
-        }
-    }
-
-    /**
-     * This util function is for generating type node for request payload in resource function.
-     */
-    public Optional<TypeDescriptorNode> getNodeForPayloadType(Map.Entry<String, MediaType> mediaType)
-            throws BallerinaOpenApiException {
-
-        Optional<TypeDescriptorNode> typeName;
-        if (mediaType.getValue() != null && mediaType.getValue().getSchema() != null &&
-                mediaType.getValue().getSchema().get$ref() != null) {
-            String reference = mediaType.getValue().getSchema().get$ref();
-            String schemaName = GeneratorUtils.getValidName(extractReferenceType(reference), true);
-            String mediaTypeContent = selectMediaType(mediaType.getKey().trim());
-            IdentifierToken identifierToken;
-            switch (mediaTypeContent) {
-                case GeneratorConstants.APPLICATION_XML:
-                    identifierToken = createIdentifierToken(GeneratorConstants.XML);
-                    typeName = Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
-                    break;
-                case GeneratorConstants.TEXT:
-                    identifierToken = createIdentifierToken(schemaName);
-                    typeName = Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
-                    break;
-                case GeneratorConstants.APPLICATION_OCTET_STREAM:
-                    ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
-                            createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
-                            createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-                    typeName = Optional.ofNullable(createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(
-                                    null, createIdentifierToken(GeneratorConstants.BYTE)),
-                            NodeFactory.createNodeList(dimensionNode)));
-                    break;
-                case GeneratorConstants.APPLICATION_JSON:
-                    TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(
-                            GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(schemaName),
-                            schemaName, null);
-                    String validSchemaName = GeneratorUtils.escapeIdentifier(schemaName);
-                    TypeDefinitionNode typeDefinitionNode = typeGenerator
-                            .generateTypeDefinitionNode(createIdentifierToken(validSchemaName), new ArrayList<>());
-                    typeDefinitionNodes.put(validSchemaName, typeDefinitionNode);
-                    typeName = Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(schemaName)));
-                    break;
-                case GeneratorConstants.APPLICATION_URL_ENCODE:
-                    typeName = Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.MAP_STRING)));
-                    //Commented due to the data binding issue in the ballerina http module
-                    //TODO: Related issue:https://github.com/ballerina-platform/ballerina-standard-library/issues/4090
-//                    typeName = Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(
-//                            GeneratorUtils.getValidName(schemaName, true))));
-                    break;
-                default:
-                    ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>> mediaTypeTokens =
-                            generateTypeDescriptorForMediaTypes(mediaTypeContent, null, schemaName);
-                    if (mediaTypeTokens.getLeft().isPresent()) {
-                        typeName = mediaTypeTokens.getLeft();
-                    } else {
-                        identifierToken = createIdentifierToken(GeneratorConstants.HTTP_REQUEST);
-                        typeName = Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
-                    }
+    public ReturnType generateTypeDescriptorForJsonContent(Schema<?> schema, String recordName, HashMap<String, TypeDefinitionNode> subTypesMap) throws BallerinaOpenApiException {
+        Optional<TypeDescriptorNode> returnTypeDecNode = generateTypeDescriptorNodeForOASSchema(schema, subTypesMap, new HashMap<>());
+        if (returnTypeDecNode.isEmpty()) {
+            return new ReturnType(recordName, Optional.of(TypeHandler.getSimpleNameReferenceNode(
+                    GeneratorConstants.JSON)), Optional.empty());
+        } else if (returnTypeDecNode.get() instanceof RecordTypeDescriptorNode recordNode) {
+            if (recordName == null) {
+                return new ReturnType(null, returnTypeDecNode, Optional.empty());
             }
-        } else {
-            String mediaTypeContent = selectMediaType(mediaType.getKey().trim());
-            ImmutablePair<Optional<TypeDescriptorNode>, Optional<TypeDefinitionNode>> mediaTypeTokens =
-                    generateTypeDescriptorForMediaTypes(mediaTypeContent, null, null);
-            typeName = mediaTypeTokens.left;
-        }
-        return typeName;
-    }
-
-    // Create ArrayTypeDescriptorNode using Schema
-    public ArrayTypeDescriptorNode getArrayTypeDescriptorNode(OpenAPI openAPI, Schema<?> items) throws BallerinaOpenApiException {
-        String arrayName;
-        if (items.get$ref() != null) {
-            String referenceType = extractReferenceType(items.get$ref());
-            String type = getValidName(referenceType, true);
-            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type);
-            if (queryParamSupportedTypes.contains(getOpenAPIType(refSchema))) {
-                arrayName = type;
+            Token rname;
+            if (schema.get$ref() != null) {
+                rname = createIdentifierToken(GeneratorUtils.getValidName(extractReferenceType(schema.get$ref()), true));
             } else {
-                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
-                throw new BallerinaOpenApiException(String.format(messages.getDescription(), type));
+                rname = createIdentifierToken(recordName);
             }
-        } else {
-            arrayName = convertOpenAPITypeToBallerina(items);
-            if (items.getEnum() != null && !items.getEnum().isEmpty()) {
-                arrayName = OPEN_PAREN_TOKEN.stringValue() + arrayName + CLOSE_PAREN_TOKEN.stringValue();
-            }
+            TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
+                    createToken(PUBLIC_KEYWORD),
+                    createToken(TYPE_KEYWORD),
+                    rname,
+                    recordNode,
+                    createToken(SEMICOLON_TOKEN));
+            return new ReturnType(recordName, Optional.of(recordNode), Optional.of(typeDefinitionNode));
         }
-        Token arrayNameToken = createIdentifierToken(arrayName, GeneratorUtils.SINGLE_WS_MINUTIAE,
-                GeneratorUtils.SINGLE_WS_MINUTIAE);
-        BuiltinSimpleNameReferenceNode memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, arrayNameToken);
-        ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
-                createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
-                createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-        NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
-
-        if (items.getNullable() != null && items.getNullable() && items.getEnum() == null) {
-            // generate -> int?[]
-            OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(memberTypeDesc,
-                    createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-            return createArrayTypeDescriptorNode(optionalNode, nodeList);
-        }
-        // generate -> int[]
-        return createArrayTypeDescriptorNode(memberTypeDesc, nodeList);
+        return new ReturnType(recordName, Optional.of(returnTypeDecNode.get()), Optional.empty());
     }
 
-    public Token getQueryParamTypeToken(Schema<?> schema) throws BallerinaOpenApiException {
+    public Token getQueryParamTypeToken(Schema<?> schema, HashMap<String, TypeDefinitionNode> subTypesMap) throws BallerinaOpenApiException {
         if (schema instanceof MapSchema) {
             // handle inline record open
-            RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null);
+            RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null, subTypesMap, new HashMap<>());
             TypeDescriptorNode recordNode = recordTypeGenerator.generateTypeDescriptorNode();
             return createIdentifierToken(recordNode.toSourceCode(),
                     GeneratorUtils.SINGLE_WS_MINUTIAE,
@@ -647,24 +482,5 @@ public class BallerinaTypesGenerator {
 
     public ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(TypeDescriptorNode typeDescriptorNode) {
         return ArrayTypeGenerator.getArrayTypeDescriptorNodeFromTypeDescriptorNode(typeDescriptorNode);
-    }
-
-    /**
-     *
-     * This util is used for selecting standard media type by looking at the user defined media type.
-     */
-    private String selectMediaType(String mediaTypeContent) {
-        if (mediaTypeContent.matches("application/.*\\+json") || mediaTypeContent.matches(".*/json")) {
-            mediaTypeContent = GeneratorConstants.APPLICATION_JSON;
-        } else if (mediaTypeContent.matches("application/.*\\+xml") || mediaTypeContent.matches(".*/xml")) {
-            mediaTypeContent = GeneratorConstants.APPLICATION_XML;
-        } else if (mediaTypeContent.matches("text/.*")) {
-            mediaTypeContent = GeneratorConstants.TEXT;
-        }  else if (mediaTypeContent.matches("application/.*\\+octet-stream")) {
-            mediaTypeContent = GeneratorConstants.APPLICATION_OCTET_STREAM;
-        } else if (mediaTypeContent.matches("application/.*\\+x-www-form-urlencoded")) {
-            mediaTypeContent = GeneratorConstants.APPLICATION_URL_ENCODE;
-        }
-        return mediaTypeContent;
     }
 }

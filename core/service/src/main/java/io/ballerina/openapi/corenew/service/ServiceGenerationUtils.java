@@ -93,32 +93,6 @@ public class ServiceGenerationUtils {
         return createAnnotationNode(atToken, annotReference, annotValue);
     }
 
-    public static UnionTypeDescriptorNode getUnionNodeForOneOf(Iterator<Schema> iterator)
-            throws BallerinaOpenApiException {
-
-        List<SimpleNameReferenceNode> qualifiedNodes = new ArrayList<>();
-        Token pipeToken = createIdentifierToken("|");
-        while (iterator.hasNext()) {
-            Schema<?> contentType = iterator.next();
-            Optional<TypeDescriptorNode> qualifiedNodeType = TypeHandler.generateTypeDescriptorNodeForOASSchema(contentType);
-            if (qualifiedNodeType.isEmpty()) {
-                continue;
-            }
-            qualifiedNodes.add((SimpleNameReferenceNode) qualifiedNodeType.get());
-        }
-        SimpleNameReferenceNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
-        SimpleNameReferenceNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
-        UnionTypeDescriptorNode traversUnion = createUnionTypeDescriptorNode(traversRight, pipeToken,
-                right);
-        if (qualifiedNodes.size() >= 3) {
-            for (int i = qualifiedNodes.size() - 3; i >= 0; i--) {
-                traversUnion = createUnionTypeDescriptorNode(qualifiedNodes.get(i), pipeToken,
-                        traversUnion);
-            }
-        }
-        return traversUnion;
-    }
-
     /**
      * This util function is for generating service config annotation.
      * <pre>

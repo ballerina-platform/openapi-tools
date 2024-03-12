@@ -18,7 +18,9 @@
 
 package io.ballerina.openapi.corenew.typegenerator.generators;
 
+import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
 import io.ballerina.openapi.corenew.typegenerator.GeneratorUtils;
@@ -26,6 +28,8 @@ import io.ballerina.openapi.corenew.typegenerator.TypeGeneratorUtils;
 import io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.corenew.typegenerator.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.media.Schema;
+
+import java.util.HashMap;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIdentifierToken;
@@ -56,8 +60,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
  */
 public class ReferencedTypeGenerator extends TypeGenerator {
 
-    public ReferencedTypeGenerator(Schema schema, String typeName) {
-        super(schema, typeName);
+    public ReferencedTypeGenerator(Schema schema, String typeName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
+        super(schema, typeName, subTypesMap, pregeneratedTypeMap);
     }
 
     /**
@@ -72,19 +76,21 @@ public class ReferencedTypeGenerator extends TypeGenerator {
         refSchema = refSchema == null ?
                 GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(extractName) : refSchema;
         SimpleNameReferenceNode nameReferenceNode = createSimpleNameReferenceNode(createIdentifierToken(typeName));
-        TypeGenerator reffredTypeGenerator = TypeGeneratorUtils.getTypeGenerator(refSchema, extractName, this.typeName);
-        TypeDescriptorNode typeDescriptorNode = reffredTypeGenerator.generateTypeDescriptorNode();
-        BallerinaTypesGenerator.getInstance().addTypeDefinitionNode(typeName, createTypeDefinitionNode(null,
-                createToken(PUBLIC_KEYWORD),
-                createToken(TYPE_KEYWORD),
-                createIdentifierToken(typeName),
-                typeDescriptorNode,
-                createToken(SEMICOLON_TOKEN)));
+        TypeGenerator reffredTypeGenerator = TypeGeneratorUtils.getTypeGenerator(refSchema, extractName, this.typeName, subTypesMap, pregeneratedTypeMap);
+        if (!pregeneratedTypeMap.containsKey(typeName)) {
+            pregeneratedTypeMap.put(typeName, createSimpleNameReferenceNode(createIdentifierToken(typeName)));
+            TypeDescriptorNode typeDescriptorNode = reffredTypeGenerator.generateTypeDescriptorNode();
+            subTypesMap.put(typeName, createTypeDefinitionNode(null,
+                    createToken(PUBLIC_KEYWORD),
+                    createToken(TYPE_KEYWORD),
+                    createIdentifierToken(typeName),
+                    typeDescriptorNode,
+                    createToken(SEMICOLON_TOKEN)));
+        }
         if (refSchema == null) {
             throw new BallerinaOpenApiException(String.format("Undefined $ref: '%s' in openAPI contract.",
                     schema.get$ref()));
         }
-        addToTypeListAndRemoveFromTempList(null);
         return TypeGeneratorUtils.getNullableType(refSchema, nameReferenceNode);
     }
 }
