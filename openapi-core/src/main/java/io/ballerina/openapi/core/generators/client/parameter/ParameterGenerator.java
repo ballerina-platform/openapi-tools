@@ -6,6 +6,7 @@ import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import java.util.List;
 
 public interface ParameterGenerator {
+    //type handler attribute
     ParameterNode generateParameter();
     List<ClientDiagnostic> getDiagnostics();
 

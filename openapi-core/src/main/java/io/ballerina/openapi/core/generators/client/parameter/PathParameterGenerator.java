@@ -50,7 +50,7 @@ public class PathParameterGenerator implements ParameterGenerator {
             }
             //todo 1. call type handler get type node
 
-            Schema schema = openAPI.getComponents().getSchemas().get(type.trim());
+            Schema<?> schema = openAPI.getComponents().getSchemas().get(type.trim());
 //            TypeDefinitionNode typeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
 //                    (schema, type, new ArrayList<>());
 //            if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
