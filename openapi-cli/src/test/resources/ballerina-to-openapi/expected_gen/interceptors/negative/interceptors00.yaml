@@ -1,0 +1,119 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+- url: "{server}:{port}/payloadV"
+  variables:
+    server:
+      default: http://localhost
+    port:
+      default: "9090"
+paths:
+  /users:
+    get:
+      operationId: getUsers
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      operationId: postUsers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /users/{id}:
+    get:
+      operationId: getUsersId
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /user:
+    post:
+      operationId: postUser
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+components:
+  schemas:
+    ErrorPayload:
+      required:
+      - message
+      - method
+      - path
+      - reason
+      - status
+      - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    User:
+      required:
+      - age
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+        age:
+          type: integer
+          format: int64
+      additionalProperties: false
