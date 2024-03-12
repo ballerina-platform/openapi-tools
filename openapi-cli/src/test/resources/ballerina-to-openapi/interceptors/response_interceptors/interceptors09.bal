@@ -8,15 +8,32 @@ type ErrorPayloadNew record {|
     int code?;
 |};
 
+type ErrorDetails record {|
+    *httpscerr:ErrorDetail;
+    ErrorPayloadNew body;
+|};
+
+type HTTPVersionNotSupportedError httpscerr:HTTPVersionNotSupportedError & error<ErrorDetails>;
+
+type DefaultStatusCodeError httpscerr:DefaultStatusCodeError & error<record {|*httpscerr:DefaultErrorDetail; map<json> body;|}>;
+
 type InternalServerError record {|
     *http:InternalServerError;
     ErrorPayloadNew body;
 |};
 
+service class ResponseInterceptor {
+    *http:ResponseInterceptor;
+
+    remote function interceptResponse(http:RequestContext ctx) returns http:Accepted|map<Person[]>|http:NextService|error? {
+        return ctx.next();
+    }
+}
+
 service class ResponseErrorInterceptor {
     *http:ResponseErrorInterceptor;
 
-    remote function interceptResponseError(error err, http:RequestContext ctx) returns InternalServerError {
+    remote function interceptResponseError(error err, http:RequestContext ctx) returns InternalServerError|HTTPVersionNotSupportedError|DefaultStatusCodeError {
         return {
             body: {
                 timestamp: {
@@ -39,8 +56,8 @@ type Person record {|
 
 service http:InterceptableService /payloadV on new http:Listener(9090) {
 
-    public function createInterceptors() returns ResponseErrorInterceptor {
-        return new;
+    public function createInterceptors() returns [ResponseErrorInterceptor] {
+        return [];
     }
 
     resource function get persons/[int id]() returns Person {
@@ -55,7 +72,11 @@ service http:InterceptableService /payloadV on new http:Listener(9090) {
         return p;
     }
 
-    resource function post persons(Person[] p) returns Person[]|http:BadRequest|httpscerr:DefaultStatusCodeError {
+    resource function get persont(Person p) returns error {
+        return error("some error");
+    }
+
+    resource function post persons(Person[] p) returns Person[]|http:BadRequest|DefaultStatusCodeError|httpscerr:BadRequestError {
         return p;
     }
 }

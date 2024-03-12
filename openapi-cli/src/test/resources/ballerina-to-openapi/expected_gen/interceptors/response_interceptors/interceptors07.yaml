@@ -39,15 +39,14 @@ paths:
   /persons:
     post:
       operationId: postPersons
-      parameters:
-        - name: p
-          in: query
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Person'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Person'
+        required: true
       responses:
         "201":
           description: Created

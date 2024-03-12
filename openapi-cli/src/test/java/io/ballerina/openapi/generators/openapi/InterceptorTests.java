@@ -77,6 +77,9 @@ public class InterceptorTests {
     public void testResponseErrorInterceptor() throws IOException {
         Path ballerinaFilePath = INTERCEPTOR_DIR.resolve("response_interceptors/interceptors06.bal");
         compareWithGeneratedFile(ballerinaFilePath, "interceptors/response_interceptors/interceptors06.yaml");
+
+        ballerinaFilePath = INTERCEPTOR_DIR.resolve("response_interceptors/interceptors09.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "interceptors/response_interceptors/interceptors09.yaml");
     }
 
     @Test(description = "Test with two response interceptors")

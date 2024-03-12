@@ -55,7 +55,7 @@ service http:InterceptableService /payloadV on new http:Listener(9090) {
         return p;
     }
 
-    resource function post persons(Person... p) returns Person[]|http:BadRequest|httpscerr:DefaultStatusCodeError {
+    resource function post persons(Person[] p) returns Person[]|http:BadRequest|httpscerr:DefaultStatusCodeError {
         return p;
     }
 }

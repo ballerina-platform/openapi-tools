@@ -47,9 +47,11 @@ public class MediaTypeUtils {
     private static final String TEXT_PATTERN = "^(text)\\/(.*[.+-]|)plain$";
     private static final String OCTET_STREAM_PATTERN = "^(application)\\/(.*[.+-]|)octet-stream$";
 
+    private final SemanticModel semanticModel;
     private final TypeSymbol structuredType;
     private final TypeSymbol byteArrayType;
-    private final SemanticModel semanticModel;
+    private final TypeSymbol basicTypesWithoutString;
+
 
     private static MediaTypeUtils mediaTypeUtils = null;
 
@@ -66,6 +68,9 @@ public class MediaTypeUtils {
         structuredType = semanticModel.types().builder().UNION_TYPE.withMemberTypes(
                 mapOfAnydata, tableOfAnydataMap, tupleOfAnydata, structuredArray).build();
         byteArrayType = semanticModel.types().builder().ARRAY_TYPE.withType(semanticModel.types().BYTE).build();
+        basicTypesWithoutString = semanticModel.types().builder().UNION_TYPE.withMemberTypes(
+                semanticModel.types().BOOLEAN, semanticModel.types().INT, semanticModel.types().FLOAT,
+                semanticModel.types().DECIMAL).build();
     }
 
     public static synchronized MediaTypeUtils getInstance(SemanticModel semanticModel) {
@@ -120,8 +125,7 @@ public class MediaTypeUtils {
 
     public boolean isSameMediaType(TypeSymbol typeSymbol) {
         if (typeSymbol.subtypeOf(semanticModel.types().STRING) || typeSymbol.subtypeOf(semanticModel.types().XML) ||
-                typeSymbol.subtypeOf(semanticModel.types().builder().ARRAY_TYPE.withType(
-                        semanticModel.types().BYTE).build())) {
+                typeSymbol.subtypeOf(byteArrayType) || typeSymbol.subtypeOf(basicTypesWithoutString)) {
             return true;
         }
         return isStructuredType(typeSymbol);

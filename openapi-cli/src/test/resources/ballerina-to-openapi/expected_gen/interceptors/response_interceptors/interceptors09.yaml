@@ -10,35 +10,23 @@ servers:
       port:
         default: "9090"
 paths:
-  /person:
-    post:
-      operationId: postPerson
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Person'
-        required: true
+  /persons/{id}:
+    get:
+      operationId: getPersonsId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
       responses:
-        "201":
-          description: Created
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: object
-                    additionalProperties:
-                      type: string
-                  - $ref: '#/components/schemas/Person'
-            text/plain:
-              schema:
-                type: string
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayloadNew'
+                $ref: '#/components/schemas/Person'
         "400":
           description: BadRequest
           content:
@@ -46,6 +34,17 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorPayload'
   /persons:
+    get:
+      operationId: getPersons
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Person'
     post:
       operationId: postPersons
       requestBody:
@@ -57,23 +56,104 @@ paths:
                 $ref: '#/components/schemas/Person'
         required: true
       responses:
+        default:
+          description: Default response
+          content:
+            application/json:
+              schema:
+                type: object
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayloadNew'
+        "505":
+          description: HttpVersionNotSupported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayloadNew'
         "201":
           description: Created
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: object
-                    additionalProperties:
-                      type: string
-                  - type: array
-                    items:
-                      $ref: '#/components/schemas/Person'
-            text/plain:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Person'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/ErrorPayload'
+  /person:
+    post:
+      operationId: postPerson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Person'
+        required: true
+      responses:
+        default:
+          description: Default response
+          content:
+            application/json:
+              schema:
+                type: object
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayloadNew'
+        "505":
+          description: HttpVersionNotSupported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayloadNew'
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /persont:
+    get:
+      operationId: getPersont
+      parameters:
+        - name: p
+          in: query
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+      responses:
+        default:
+          description: Default response
+          content:
+            application/json:
+              schema:
+                type: object
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayloadNew'
+        "505":
+          description: HttpVersionNotSupported
           content:
             application/json:
               schema:
