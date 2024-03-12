@@ -207,25 +207,36 @@ public class InterceptorPipeline {
         }
 
         if (interceptor.hasErrorReturn()) {
-            Interceptor nextErrorInterceptor = interceptor.getNextInReqErrorPath();
-            if (Objects.nonNull(nextErrorInterceptor) &&
-                    nextErrorInterceptor.isInvokable(targetResource)) {
-                updateReturnTypeForReqInterceptor(nextErrorInterceptor, infoFromInterceptors, targetResource);
-            } else {
-                nextErrorInterceptor = null;
-                if (Objects.nonNull(initResInterceptor)) {
-                    if (initResInterceptor.getType().equals(InterceptorType.RESPONSE_ERROR)) {
-                        nextErrorInterceptor = initResInterceptor;
-                    } else {
-                        nextErrorInterceptor = initResInterceptor.getNextInResErrorPath();
-                    }
-                }
-                updateErrorReturnTypeForInterceptor(interceptor, infoFromInterceptors, nextErrorInterceptor);
-            }
+            updateErrorReturnTypeInReqPath(interceptor, infoFromInterceptors, targetResource);
         }
 
         TypeSymbol nonErrorReturnType = interceptor.getNonErrorReturnType();
         updateNonErrorReturnTypeForInterceptor(interceptor, nonErrorReturnType, infoFromInterceptors, false);
+    }
+
+    private void updateErrorReturnTypeInReqPath(Interceptor interceptor, InfoFromInterceptors infoFromInterceptors,
+                                                TargetResource targetResource) {
+        Interceptor nextErrorInterceptor = interceptor.getNextInReqErrorPath();
+        if (Objects.nonNull(nextErrorInterceptor) &&
+                nextErrorInterceptor.isInvokable(targetResource)) {
+            updateReturnTypeForReqInterceptor(nextErrorInterceptor, infoFromInterceptors, targetResource);
+        } else {
+            nextErrorInterceptor = getNextErrorInterceptor();
+            updateErrorReturnTypeForInterceptor(interceptor, infoFromInterceptors, nextErrorInterceptor);
+        }
+    }
+
+    private Interceptor getNextErrorInterceptor() {
+        Interceptor nextErrorInterceptor;
+        nextErrorInterceptor = null;
+        if (Objects.nonNull(initResInterceptor)) {
+            if (initResInterceptor.getType().equals(InterceptorType.RESPONSE_ERROR)) {
+                nextErrorInterceptor = initResInterceptor;
+            } else {
+                nextErrorInterceptor = initResInterceptor.getNextInResErrorPath();
+            }
+        }
+        return nextErrorInterceptor;
     }
 
     private void updateErrorReturnTypeForInterceptor(Interceptor interceptor, InfoFromInterceptors infoFromInterceptors,

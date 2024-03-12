@@ -270,30 +270,38 @@ public class DefaultResponseMapper implements ResponseMapper {
 
     private static void updateContentWithSameMediaType(MediaType mediaTypeObj, MediaType existingMediaType) {
         if (existingMediaType.getSchema() instanceof ComposedSchema existingSchema) {
-            List<Schema> oneOf = existingSchema.getOneOf();
-            if (mediaTypeObj.getSchema() instanceof ComposedSchema mediaTypeSchema) {
-                List<Schema> mediaTypeOneOf = mediaTypeSchema.getOneOf();
-                for (Schema schema : mediaTypeOneOf) {
-                    if (!oneOf.contains(schema)) {
-                        oneOf.add(schema);
-                    }
-                }
-                existingSchema.setOneOf(oneOf);
-            } else if (!oneOf.contains(mediaTypeObj.getSchema())) {
-                oneOf.add(mediaTypeObj.getSchema());
-                existingSchema.setOneOf(oneOf);
-            }
+            updateContentOnComposedSchema(mediaTypeObj, existingSchema);
         } else {
-            if (mediaTypeObj.getSchema() instanceof ComposedSchema mediaTypeSchema) {
-                if (!mediaTypeSchema.getOneOf().contains(existingMediaType.getSchema())) {
-                    mediaTypeSchema.getOneOf().add(existingMediaType.getSchema());
-                }
-                existingMediaType.setSchema(mediaTypeSchema);
-            } else {
-                Schema updatedSchema = new ComposedSchema().oneOf(List.of(existingMediaType.getSchema(),
-                        mediaTypeObj.getSchema()));
-                existingMediaType.setSchema(updatedSchema);
+            updateContentWithComposedSchema(mediaTypeObj, existingMediaType);
+        }
+    }
+
+    private static void updateContentWithComposedSchema(MediaType mediaTypeObj, MediaType existingMediaType) {
+        if (mediaTypeObj.getSchema() instanceof ComposedSchema mediaTypeSchema) {
+            if (!mediaTypeSchema.getOneOf().contains(existingMediaType.getSchema())) {
+                mediaTypeSchema.getOneOf().add(existingMediaType.getSchema());
             }
+            existingMediaType.setSchema(mediaTypeSchema);
+        } else {
+            Schema updatedSchema = new ComposedSchema().oneOf(List.of(existingMediaType.getSchema(),
+                    mediaTypeObj.getSchema()));
+            existingMediaType.setSchema(updatedSchema);
+        }
+    }
+
+    private static void updateContentOnComposedSchema(MediaType mediaTypeObj, ComposedSchema existingSchema) {
+        List<Schema> oneOf = existingSchema.getOneOf();
+        if (mediaTypeObj.getSchema() instanceof ComposedSchema mediaTypeSchema) {
+            List<Schema> mediaTypeOneOf = mediaTypeSchema.getOneOf();
+            for (Schema schema : mediaTypeOneOf) {
+                if (!oneOf.contains(schema)) {
+                    oneOf.add(schema);
+                }
+            }
+            existingSchema.setOneOf(oneOf);
+        } else if (!oneOf.contains(mediaTypeObj.getSchema())) {
+            oneOf.add(mediaTypeObj.getSchema());
+            existingSchema.setOneOf(oneOf);
         }
     }
 
