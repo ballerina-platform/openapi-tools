@@ -21,7 +21,7 @@ package io.ballerina.openapi.generators.schema;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
 
@@ -38,21 +38,21 @@ public class SwaggerFileParserTests {
     @Test(description = "Test invalid file path",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OpenAPI contract doesn't exist in the given .*")
-    public void testInvalidFilePath() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void testInvalidFilePath() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("user.yaml"));
     }
 
     //TODO: expectedExceptionsMessageRegExp = "Invalid file type.*"
     @Test(description = "Test invalid file type",
             expectedExceptions = BallerinaOpenApiException.class)
-    public void testInvalidFileType() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void testInvalidFileType() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("swagger/petstore.txt"));
     }
 
     //TODO expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*"
     @Test(description = "Test invalid swagger file ",
             expectedExceptions = BallerinaOpenApiException.class)
-    public void testInvalidFile() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void testInvalidFile() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("swagger/invalid.yaml"));
     }
 
@@ -60,7 +60,7 @@ public class SwaggerFileParserTests {
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OpenAPI definition has errors: \n" +
                     "attribute components.schemas.Person.Person01 is not of type `schema`.*")
-    public void testForUndocumentedReference() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void testForUndocumentedReference() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/undocument_ref.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();

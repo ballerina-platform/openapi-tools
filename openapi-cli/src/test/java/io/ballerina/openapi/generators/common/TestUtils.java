@@ -25,9 +25,9 @@ import io.ballerina.openapi.cmd.CmdUtils;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.corenew.service.BallerinaServiceGenerator;
-import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
-import io.ballerina.openapi.corenew.typegenerator.TypeHandler;
+import io.ballerina.openapi.core.service.BallerinaServiceGenerator;
+import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.typegenerator.TypeHandler;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
@@ -36,7 +36,6 @@ import io.ballerina.projects.ProjectException;
 import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.tools.diagnostics.Diagnostic;
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.SpecVersion;
@@ -80,7 +79,7 @@ public class TestUtils {
     public static List<Diagnostic> getDiagnostics(SyntaxTree syntaxTree, OpenAPI openAPI,
                                                   BallerinaClientGenerator ballerinaClientGenerator)
             throws FormatterException, IOException,
-            io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         List<TypeDefinitionNode> preGeneratedTypeDefinitionNodes = new LinkedList<>();
         preGeneratedTypeDefinitionNodes.addAll(ballerinaClientGenerator.
                 getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
@@ -107,7 +106,7 @@ public class TestUtils {
     public static List<Diagnostic> getDiagnosticsForService(SyntaxTree serviceSyntaxTree, OpenAPI openAPI,
                                                             BallerinaServiceGenerator ballerinaServiceGenerator, String yamlFile)
             throws FormatterException, IOException,
-            io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
 //        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
 //                ballerinaServiceGenerator.getTypeInclusionRecords());
 //        preGeneratedTypeDefNodes.addAll(BallerinaTypesGenerator.getTypeInclusionRecords().values());

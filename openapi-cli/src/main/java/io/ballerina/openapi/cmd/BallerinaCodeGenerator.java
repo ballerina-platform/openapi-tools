@@ -27,19 +27,20 @@ import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.core.model.GenSrcFile;
-import io.ballerina.openapi.corenew.service.BallerinaServiceGenerator;
-import io.ballerina.openapi.corenew.service.BallerinaServiceObjectGenerator;
-import io.ballerina.openapi.corenew.service.CodegenUtils;
-import io.ballerina.openapi.corenew.service.model.OASServiceMetadata;
-import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
-import io.ballerina.openapi.corenew.typegenerator.TypeHandler;
+import io.ballerina.openapi.core.service.BallerinaServiceGenerator;
+import io.ballerina.openapi.core.service.BallerinaServiceObjectGenerator;
+import io.ballerina.openapi.core.service.model.OASServiceMetadata;
+import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.typegenerator.TypeHandler;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -95,9 +96,9 @@ public class BallerinaCodeGenerator {
                                          boolean isResource, boolean generateServiceType,
                                          boolean generateWithoutDataBinding)
             throws IOException, FormatterException, io.ballerina.openapi.core.exception.BallerinaOpenApiException,
-            io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path srcPath = Paths.get(outPath);
-        Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
+        Path implPath = getImplPath(srcPackage, srcPath);
 
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         Path openAPIPath = Path.of(definitionPath);
@@ -109,8 +110,8 @@ public class BallerinaCodeGenerator {
         // Generate service
         String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
-        io.ballerina.openapi.corenew.typegenerator.model.Filter filter1 =
-                new io.ballerina.openapi.corenew.typegenerator.model.Filter();
+        io.ballerina.openapi.core.typegenerator.model.Filter filter1 =
+                new io.ballerina.openapi.core.typegenerator.model.Filter();
         filter1.setOperations(filter.getOperations());
         filter1.setTags(filter.getTags());
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -125,7 +126,7 @@ public class BallerinaCodeGenerator {
         try {
             serviceContent = Formatter.format
                     (serviceGenerator.generateSyntaxTree()).toSourceCode();
-        } catch (io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException e) {
+        } catch (io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException e) {
             throw new io.ballerina.openapi.core.exception.BallerinaOpenApiException(e.getMessage(), e.getCause());
         }
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile,
@@ -231,9 +232,9 @@ public class BallerinaCodeGenerator {
     public void generateClient(String definitionPath, String outPath, Filter filter, boolean nullable,
                                boolean isResource)
             throws IOException, FormatterException, BallerinaOpenApiException,
-            io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path srcPath = Paths.get(outPath);
-        Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
+        Path implPath = getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles;
         genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource);
         writeGeneratedSources(genFiles, srcPath, implPath, GEN_CLIENT);
@@ -254,9 +255,9 @@ public class BallerinaCodeGenerator {
     public void generateService(String definitionPath, String serviceName, String outPath, Filter filter,
                                 boolean nullable, boolean generateServiceType, boolean generateWithoutDataBinding)
             throws IOException, FormatterException, io.ballerina.openapi.core.exception.BallerinaOpenApiException,
-            io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path srcPath = Paths.get(outPath);
-        Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
+        Path implPath = getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles = null;
         try {
             genFiles = generateBallerinaService(Paths.get(definitionPath), serviceName,
@@ -311,7 +312,7 @@ public class BallerinaCodeGenerator {
                 filePath = implPath.resolve(file.getFileName());
                 if (Files.notExists(filePath)) {
                     String fileContent = file.getContent();
-                    CodegenUtils.writeFile(filePath, fileContent);
+                    writeFile(filePath, fileContent);
                 }
             } else {
                 boolean isDuplicatedFileInTests = file.getFileName().matches("test.+[0-9]+.bal") ||
@@ -326,7 +327,7 @@ public class BallerinaCodeGenerator {
                     filePath = Paths.get(srcPath.resolve(file.getFileName()).toFile().getCanonicalPath());
                 }
                 String fileContent = file.getContent();
-                CodegenUtils.writeFile(filePath, fileContent);
+                writeFile(filePath, fileContent);
             }
         }
 
@@ -352,7 +353,7 @@ public class BallerinaCodeGenerator {
      */
     private List<GenSrcFile> generateClientFiles(Path openAPI, Filter filter, boolean nullable, boolean isResource)
             throws IOException, FormatterException, io.ballerina.openapi.core.exception.BallerinaOpenApiException,
-            io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_CLIENT_PKG;
         }
@@ -422,7 +423,7 @@ public class BallerinaCodeGenerator {
                                                      Filter filter, boolean nullable, boolean generateServiceType,
                                                      boolean generateWithoutDataBinding)
             throws IOException, FormatterException, io.ballerina.openapi.core.exception.BallerinaOpenApiException,
-            io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_MOCK_PKG;
         }
@@ -445,8 +446,8 @@ public class BallerinaCodeGenerator {
                 openAPIDef.getInfo().getTitle().toLowerCase(Locale.ENGLISH) :
                 serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
-        io.ballerina.openapi.corenew.typegenerator.model.Filter filter1 =
-                new io.ballerina.openapi.corenew.typegenerator.model.Filter();
+        io.ballerina.openapi.core.typegenerator.model.Filter filter1 =
+                new io.ballerina.openapi.core.typegenerator.model.Filter();
         filter1.setOperations(filter.getOperations());
         filter1.setTags(filter.getTags());
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -463,7 +464,7 @@ public class BallerinaCodeGenerator {
         String mainContent;
         try {
             mainContent = Formatter.format(ballerinaServiceGenerator.generateSyntaxTree()).toSourceCode();
-        } catch (io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException e) {
+        } catch (io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException e) {
                 throw new io.ballerina.openapi.core.exception.BallerinaOpenApiException(e.getMessage(), e.getCause());
         }
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile,
@@ -520,6 +521,30 @@ public class BallerinaCodeGenerator {
         if (!SUPPORTED_OPENAPI_VERSIONS.contains(openAPIDef.getOpenapi())) {
             outStream.printf("WARNING: The tool has not been tested with OpenAPI version %s. " +
                     "The generated code may potentially contain errors.%n", openAPIDef.getOpenapi());
+        }
+    }
+
+    /**
+     * Resolves path to write generated implementation source files.
+     *
+     * @param pkg     module
+     * @param srcPath resolved path for main source files
+     * @return path to write generated source files
+     */
+    private static Path getImplPath(String pkg, Path srcPath) {
+        return (pkg == null || pkg.isEmpty()) ? srcPath : srcPath.getParent();
+    }
+
+    /**
+     * Writes a file with content to specified {@code filePath}.
+     *
+     * @param filePath valid file path to write the content
+     * @param content  content of the file
+     * @throws IOException when a file operation fails
+     */
+    private static void writeFile(Path filePath, String content) throws IOException {
+        try (FileWriter writer = new FileWriter(filePath.toString(), StandardCharsets.UTF_8)) {
+            writer.write(content);
         }
     }
 }

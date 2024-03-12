@@ -118,7 +118,7 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
     public void testWithoutDataBinding() throws IOException {
         Path yamlPath = resourceDir.resolve(Paths.get("withoutDataBinding.yaml"));
         String[] args = {"--input", yamlPath.toString(), "--without-data-binding", "-o",
-                this.tmpDir.toString(), "--mode", "service"};
+                this.tmpDir.toString(), "--mode", "io/ballerina/openapi/corenew/service"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, this.tmpDir);
         new CommandLine(cmd).parseArgs(args);
         String output = "";

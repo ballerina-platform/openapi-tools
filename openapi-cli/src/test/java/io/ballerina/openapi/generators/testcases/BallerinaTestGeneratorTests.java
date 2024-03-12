@@ -27,7 +27,7 @@ import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.model.Filter;
-import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -67,7 +67,7 @@ public class BallerinaTestGeneratorTests {
     Filter filter = new Filter(list1, list2);
 
     @Test(description = "Generate Client with test skelotins", dataProvider = "httpAuthIOProvider")
-    public void generateclientWithTestSkel(String yamlFile) throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
+    public void generateclientWithTestSkel(String yamlFile) throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
             FormatterException, BallerinaOpenApiException, URISyntaxException {
         Files.createDirectories(Paths.get(PROJECT_DIR + OAS_PATH_SEPARATOR + TEST_DIR));
         Path definitionPath = RES_DIR.resolve("sample_yamls/" + yamlFile);

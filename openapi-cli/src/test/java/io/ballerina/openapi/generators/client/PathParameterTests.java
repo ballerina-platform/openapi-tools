@@ -24,7 +24,7 @@ import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.model.Filter;
-import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
 
@@ -47,7 +47,7 @@ public class PathParameterTests {
     Filter filter = new Filter(list1, list2);
 
     @Test(description = "Generate Client for path parameter has parameter name as key word - unit tests for method")
-    public void generatePathWithPathParameterTests() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void generatePathWithPathParameterTests() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         // "/v1/v2"), "/v1/v2"
         // "/v1/{version}/v2/{name}", "/v1/${'version}/v2/${name}"
         // "/v1/{version}/v2/{limit}", "/v1/${'version}/v2/${'limit}"
@@ -68,7 +68,7 @@ public class PathParameterTests {
     }
 
     @Test(description = "Generate Client for path parameter with referenced schema")
-    public void generatePathParamWithReferencedSchema() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void generatePathParamWithReferencedSchema() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/path_param_with_ref_schemas.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/path_param_with_ref_schema.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -83,7 +83,7 @@ public class PathParameterTests {
     }
 
     @Test(description = "Generate Client while handling special characters in path parameter name")
-    public void generateFormattedPathParamName() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void generateFormattedPathParamName() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/path_parameter_special_name.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/path_parameter_with_special_name.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -98,7 +98,7 @@ public class PathParameterTests {
     }
 
     @Test(description = "Generate Client with duplicated path parameter name in the path")
-    public void generateFormattedDuplicatedPathParamName() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void generateFormattedDuplicatedPathParamName() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/path_param_duplicated_name.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/path_param_duplicated_name.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -115,7 +115,7 @@ public class PathParameterTests {
     @Test(description = "When path parameter has given unmatch data type in ballerina",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Invalid path parameter data type for the parameter: .*")
-    public void testInvalidPathParameterType() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void testInvalidPathParameterType() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/path_parameter_invalid.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
@@ -130,7 +130,7 @@ public class PathParameterTests {
     @Test(description = "When given data type not match with ballerina data type",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Unsupported OAS data type .*")
-    public void testInvalidDataType() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void testInvalidDataType() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/path_parameter_invalid02.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
@@ -143,7 +143,7 @@ public class PathParameterTests {
     }
 
     @Test (description = "Generate Client for path parameter with anyOf, oneOf type")
-    public void unionPathParameter() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void unionPathParameter() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/union_path_parameter.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/union_path_parameter.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -166,7 +166,7 @@ public class PathParameterTests {
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Path parameter: 'id' is invalid. " +
                     "Ballerina does not support object type path parameters.")
-    public void allOfPathParameter() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void allOfPathParameter() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/allOf_path_parameter.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
@@ -179,7 +179,7 @@ public class PathParameterTests {
     }
 
     @Test (description = "Generate Client for path parameter with integer int32 and int64 types")
-    public void testIntegerPathParameters() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void testIntegerPathParameters() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/integer_signed32_path_parameter.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/integer_signed32_path_parameter.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);

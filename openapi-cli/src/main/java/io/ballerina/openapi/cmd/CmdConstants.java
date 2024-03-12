@@ -30,7 +30,7 @@ import java.util.Map;
 public class CmdConstants {
     public static final String RESOURCE = "resource";
     public static final String REMOTE = "remote";
-    public static final String SERVICE = "service";
+    public static final String SERVICE = "io/ballerina/openapi/corenew/service";
     public static final String CLIENT = "client";
 
     /**

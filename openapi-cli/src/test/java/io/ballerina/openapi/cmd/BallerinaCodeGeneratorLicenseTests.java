@@ -98,7 +98,7 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
     public void testServiceGeneration() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--with-service-type",
-                "--mode", "service"};
+                "--mode", "io/ballerina/openapi/corenew/service"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();

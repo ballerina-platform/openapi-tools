@@ -19,7 +19,7 @@ package io.ballerina.openapi.generators.schema;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -50,7 +50,7 @@ public class MapSchemaNegativeTests {
     @Test(expectedExceptions = BallerinaOpenApiException.class,
     expectedExceptionsMessageRegExp = "OpenAPI definition has errors: \n" +
             "attribute components.schemas.User02.additionalProperties.*")
-    public void testForAdditionalPropertiesWithParserIssue() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void testForAdditionalPropertiesWithParserIssue() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/additional_properties_true_negative.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
@@ -59,7 +59,7 @@ public class MapSchemaNegativeTests {
 
     @Test
     public void testForAdditionalPropertiesWithoutParserIssue()
-            throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException, FormatterException {
+            throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/additional_properties_true_negative_without_parser_issue.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);

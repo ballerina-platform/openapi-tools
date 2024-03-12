@@ -45,6 +45,11 @@ module io.ballerina.openapi.core {
     exports io.ballerina.openapi.core.generators.schema;
     exports io.ballerina.openapi.core;
     exports io.ballerina.openapi.core.generators.client.model;
-//    exports io.ballerina.openapi.core.generators.service.model;
-}
+    exports io.ballerina.openapi.core.service;
+    exports io.ballerina.openapi.core.service.model;
 
+    exports io.ballerina.openapi.core.typegenerator;
+    exports io.ballerina.openapi.core.typegenerator.generators;
+    exports io.ballerina.openapi.core.typegenerator.model;
+    exports io.ballerina.openapi.core.typegenerator.exception;
+}

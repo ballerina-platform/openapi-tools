@@ -21,7 +21,7 @@ package io.ballerina.openapi.generators.common;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -44,7 +44,7 @@ public class SwaggerParserTests {
     @Test(description = "Functionality tests for getBallerinaOpenApiType",
             expectedExceptions = BallerinaOpenApiException.class)
     public void generateHandleUnsupportedData() throws  IOException, BallerinaOpenApiException,
-            io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/invalid.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -55,7 +55,7 @@ public class SwaggerParserTests {
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OpenAPI definition has errors: .*")
     public void testInvalidRegexPatterns() throws  IOException, BallerinaOpenApiException,
-            io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/invalid_pattern_string.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);

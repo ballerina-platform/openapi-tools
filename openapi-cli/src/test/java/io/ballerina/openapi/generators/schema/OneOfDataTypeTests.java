@@ -25,7 +25,7 @@ import io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.TypeGenerator;
 import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.UnionTypeGenerator;
 import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
-import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -46,7 +46,7 @@ public class OneOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
 
     @Test(description = "Generate record for schema has oneOF")
-    public void generateForSchemaHasOneOf() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void generateForSchemaHasOneOf() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario12.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
@@ -59,7 +59,7 @@ public class OneOfDataTypeTests {
     }
 
     @Test(description = "Generate record for schema has object type with OneOf")
-    public void generateForSchemaObjectType() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void generateForSchemaObjectType() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario13.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
@@ -71,7 +71,7 @@ public class OneOfDataTypeTests {
     }
 
     @Test(description = "Generate union type when nullable is true")
-    public void generateUnionTypeWhenNullableTrue() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void generateUnionTypeWhenNullableTrue() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario12.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
@@ -82,7 +82,7 @@ public class OneOfDataTypeTests {
     }
 
     @Test(description = "Tests full schema genrations with oneOf type")
-    public void generateOneOFTests() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void generateOneOFTests() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/oneOf.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -91,7 +91,7 @@ public class OneOfDataTypeTests {
     }
 
     @Test(description = "Tests record generation for oneOf schemas with inline object schemas")
-    public void oneOfWithInlineObject() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void oneOfWithInlineObject() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/oneOf_with_inline_schemas.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -101,7 +101,7 @@ public class OneOfDataTypeTests {
     }
 
     @Test(description = "Tests record generation for nested OneOf schema inside AllOf schema")
-    public void oneOfWithNestedAllOf() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void oneOfWithNestedAllOf() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/nested_oneOf_with_allOf.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);

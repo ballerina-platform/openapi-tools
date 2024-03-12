@@ -50,7 +50,7 @@ public class UtilGenerationTests {
 
 
     @Test(description = "Test default util file generation")
-    public void testDefaultUtilFileGen() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void testDefaultUtilFileGen() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/no_util.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
@@ -66,7 +66,7 @@ public class UtilGenerationTests {
     }
 
     @Test(description = "Validate the util functions generated for OpenAPI definition with query parameters")
-    public void testUtilFileGenForQueryParams() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
+    public void testUtilFileGenForQueryParams() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/query_param.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -85,7 +85,7 @@ public class UtilGenerationTests {
     }
 
     @Test(description = "Validate the util functions generated for OpenAPI definition with headers")
-    public void testUtilFileGenForHeader() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
+    public void testUtilFileGenForHeader() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/header.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -106,7 +106,7 @@ public class UtilGenerationTests {
     }
 
     @Test(description = "Validate the util functions generated for OpenAPI definition with URL encoded request body")
-    public void testUtilFileGenURLEncodedRequestBody() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
+    public void testUtilFileGenURLEncodedRequestBody() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/url_encoded.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -126,7 +126,7 @@ public class UtilGenerationTests {
 
     @Test(description = "Validate the util functions generated for OpenAPI definition with URL encoded " +
             "request body with encoding styles specified")
-    public void testUtilFileGenURLEncodedRequestWithEncoding() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
+    public void testUtilFileGenURLEncodedRequestWithEncoding() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/url_encoded_with_map.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -145,7 +145,7 @@ public class UtilGenerationTests {
     }
 
     @Test(description = "Validate the util functions generated for OpenAPI definition when all the scenarios are given")
-    public void testCompleteUtilFileGen() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
+    public void testCompleteUtilFileGen() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/complete_util_gen.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -161,7 +161,7 @@ public class UtilGenerationTests {
     }
 
     @Test(description = "Test the utilsbal file generation when only in:query api-key auth given")
-    public void testApiKeyauthUtilGen() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
+    public void testApiKeyauthUtilGen() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/apikey_with_no_query_param.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -177,7 +177,7 @@ public class UtilGenerationTests {
     }
 
     @Test(description = "Validate the util functions generated for OpenAPI definition with multi part request bodies")
-    public void testMultipartBodyParts() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException, FormatterException {
+    public void testMultipartBodyParts() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException, FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/multipart_formdata.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
@@ -193,7 +193,7 @@ public class UtilGenerationTests {
 
     @Test(description = "Validate the util functions generated for OpenAPI definition with multi part " +
             "request custom bodies")
-    public void testMultipartCustomBodyParts() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException, FormatterException {
+    public void testMultipartCustomBodyParts() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException, FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/multipart_formdata_custom.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();

@@ -23,7 +23,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -47,7 +47,7 @@ public class AdvanceRecordTypeTests {
 
     // Enable after adding `not` data bind support
     @Test(description = "Generate record for schema has not type", enabled = false)
-    public void generateSchemaHasNotType() throws IOException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException, BallerinaOpenApiException {
+    public void generateSchemaHasNotType() throws IOException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario10.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -56,7 +56,7 @@ public class AdvanceRecordTypeTests {
     }
 
     @Test(description = "Generate record for schema has inline record in fields reference")
-    public void generateSchemaHasInlineRecord() throws IOException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException, BallerinaOpenApiException {
+    public void generateSchemaHasInlineRecord() throws IOException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario11.yaml");
 
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -66,7 +66,7 @@ public class AdvanceRecordTypeTests {
     }
 
     @Test(description = "Generate record for openapi weather api", enabled = false)
-    public void generateOpenAPIWeatherAPI() throws IOException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException, BallerinaOpenApiException {
+    public void generateOpenAPIWeatherAPI() throws IOException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
 
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -76,7 +76,7 @@ public class AdvanceRecordTypeTests {
     }
 
     @Test(description = "Generate record for schema has object type only")
-    public void generateForSchemaHasObjectTypeOnly() throws IOException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException, BallerinaOpenApiException {
+    public void generateForSchemaHasObjectTypeOnly() throws IOException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario14.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema schema = openAPI.getComponents().getSchemas().get("Error");

@@ -19,11 +19,11 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.corenew.service.BallerinaServiceGenerator;
-import io.ballerina.openapi.corenew.service.model.OASServiceMetadata;
-import io.ballerina.openapi.corenew.typegenerator.GeneratorUtils;
-import io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.corenew.typegenerator.model.Filter;
+import io.ballerina.openapi.core.service.BallerinaServiceGenerator;
+import io.ballerina.openapi.core.service.model.OASServiceMetadata;
+import io.ballerina.openapi.core.typegenerator.GeneratorUtils;
+import io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.typegenerator.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;

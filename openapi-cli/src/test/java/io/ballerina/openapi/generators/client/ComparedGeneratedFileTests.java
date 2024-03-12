@@ -60,7 +60,7 @@ public class ComparedGeneratedFileTests {
 
     @Test(description = "Generate Client for path parameter has parameter name as key word", enabled = false)
     public void generateClientForJira() throws IOException, BallerinaOpenApiException,
-            io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException,
+            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
             FormatterException, URISyntaxException {
 //        Path definitionPath = RES_DIR.resolve("swagger/request_body_oneOf_scenarios.yaml");
         Path definitionPath = RES_DIR.resolve("openapi.yaml");
@@ -81,7 +81,7 @@ public class ComparedGeneratedFileTests {
     @Test(description = "Test openAPI definition to ballerina client source code generation",
             dataProvider = "fileProviderForFilesComparison")
     public void  openApiToBallerinaCodeGenTestForClient(String yamlFile, String expectedFile) throws IOException,
-            BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException
+            BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException
             , FormatterException, URISyntaxException {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/" + yamlFile);
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/" + expectedFile);

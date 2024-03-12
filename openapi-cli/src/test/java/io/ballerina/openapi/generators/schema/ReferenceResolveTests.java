@@ -23,7 +23,7 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.FunctionSignatureGenerator;
-import io.ballerina.openapi.corenew.typegenerator.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
@@ -40,7 +40,7 @@ import java.util.List;
 public class ReferenceResolveTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     @Test(description = "Tests with object type include reference")
-    public void testReferenceIncludeWithObjectType() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void testReferenceIncludeWithObjectType() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/world_bank.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
 
@@ -49,7 +49,7 @@ public class ReferenceResolveTests {
     }
 
     @Test(description = "Test for object data type when absent reference and properties fields")
-    public void testWorldBank() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void testWorldBank() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/object_without_fields_reference.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -59,7 +59,7 @@ public class ReferenceResolveTests {
                 "schema/ballerina/object_without_fields_reference.bal", syntaxTree);
     }
     @Test(description = "Test for type generation for query parameters with referenced schemas")
-    public void testParameterSchemaReferences() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void testParameterSchemaReferences() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/schema_referenced_in_parameters.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -70,7 +70,7 @@ public class ReferenceResolveTests {
     }
 
     @Test(description = "Test Ballerina types generation when referred by another record with no additional fields")
-    public void testReferredTypesWithoutAdditionalFields() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void testReferredTypesWithoutAdditionalFields() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/referred_inclusion.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -80,7 +80,7 @@ public class ReferenceResolveTests {
     }
 
     @Test(description = "Test doc comment generation of record fields when property is reffered to another schema")
-    public void testDocCommentResolvingForRefferedSchemas() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void testDocCommentResolvingForRefferedSchemas() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/resolve_reference_docs.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -90,7 +90,7 @@ public class ReferenceResolveTests {
     }
 
     @Test(description = "Test for type generation for request body with reference")
-    public void testRequestBodyReferences() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.corenew.typegenerator.exception.BallerinaOpenApiException {
+    public void testRequestBodyReferences() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/request_body_with_ref.yaml"), true);
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,

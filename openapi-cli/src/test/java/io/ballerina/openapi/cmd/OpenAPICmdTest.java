@@ -576,7 +576,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     @Test(description = "Test for service generation with yaml contract without operationID")
     public void testForYamlContractWithoutOperationID() throws IOException {
         Path yamlContract = resourceDir.resolve(Paths.get("without_operationID.yaml"));
-        String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString(), "--mode", "service"};
+        String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString(), "--mode", "io/ballerina/openapi/corenew/service"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
