@@ -40,26 +40,48 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
  *
  * @since 1.9.0
  */
-public final class MediaTypeUtils {
+public class MediaTypeUtils {
 
     private static final String JSON_PATTERN = "^(application|text)\\/(.*[.+-]|)json$";
     private static final String XML_PATTERN = "^(application|text)\\/(.*[.+-]|)xml$";
     private static final String TEXT_PATTERN = "^(text)\\/(.*[.+-]|)plain$";
     private static final String OCTET_STREAM_PATTERN = "^(application)\\/(.*[.+-]|)octet-stream$";
 
-    private MediaTypeUtils() {
+    private final TypeSymbol structuredType;
+    private final TypeSymbol byteArrayType;
+    private final SemanticModel semanticModel;
 
+    private static MediaTypeUtils mediaTypeUtils = null;
+
+    private MediaTypeUtils(SemanticModel semanticModel) {
+        this.semanticModel = semanticModel;
+        TypeSymbol mapOfAnydata = semanticModel.types().builder().MAP_TYPE.withTypeParam(
+                semanticModel.types().ANYDATA).build();
+        TypeSymbol tableOfAnydataMap = semanticModel.types().builder().TABLE_TYPE.withRowType(mapOfAnydata).build();
+        TypeSymbol tupleOfAnydata = semanticModel.types().builder().TUPLE_TYPE.withRestType(
+                semanticModel.types().ANYDATA).build();
+        TypeSymbol structuredUnion = semanticModel.types().builder().UNION_TYPE.withMemberTypes(
+                mapOfAnydata, tableOfAnydataMap, tupleOfAnydata).build();
+        TypeSymbol structuredArray = semanticModel.types().builder().ARRAY_TYPE.withType(structuredUnion).build();
+        structuredType = semanticModel.types().builder().UNION_TYPE.withMemberTypes(
+                mapOfAnydata, tableOfAnydataMap, tupleOfAnydata, structuredArray).build();
+        byteArrayType = semanticModel.types().builder().ARRAY_TYPE.withType(semanticModel.types().BYTE).build();
     }
 
-    public static String getMediaTypeFromType(TypeSymbol typeSymbol, String prefix, List<String> allowedMediaTypes,
-                                              SemanticModel semanticModel) {
+    public static synchronized MediaTypeUtils getInstance(SemanticModel semanticModel) {
+        if (Objects.isNull(mediaTypeUtils) || !mediaTypeUtils.semanticModel.equals(semanticModel)) {
+            mediaTypeUtils = new MediaTypeUtils(semanticModel);
+        }
+        return mediaTypeUtils;
+    }
+
+    public String getMediaTypeFromType(TypeSymbol typeSymbol, String prefix, List<String> allowedMediaTypes) {
         String mediaType;
         if (typeSymbol.subtypeOf(semanticModel.types().STRING)) {
             mediaType = getCompatibleMediaType(allowedMediaTypes, TEXT_PATTERN, TEXT_PLAIN);
         } else if (typeSymbol.subtypeOf(semanticModel.types().XML)) {
             mediaType = getCompatibleMediaType(allowedMediaTypes, XML_PATTERN, APPLICATION_XML);
-        } else if (typeSymbol.subtypeOf(
-                semanticModel.types().builder().ARRAY_TYPE.withType(semanticModel.types().BYTE).build())) {
+        } else if (typeSymbol.subtypeOf(byteArrayType)) {
             mediaType = getCompatibleMediaType(allowedMediaTypes, OCTET_STREAM_PATTERN, APPLICATION_OCTET_STREAM);
         } else if (DefaultResponseMapper.isSubTypeOfHttpResponse(typeSymbol, semanticModel)) {
             return "*/*";
@@ -96,14 +118,17 @@ public final class MediaTypeUtils {
         return defaultMediaType;
     }
 
-    public static boolean isSameMediaType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
+    public boolean isSameMediaType(TypeSymbol typeSymbol) {
         if (typeSymbol.subtypeOf(semanticModel.types().STRING) || typeSymbol.subtypeOf(semanticModel.types().XML) ||
                 typeSymbol.subtypeOf(semanticModel.types().builder().ARRAY_TYPE.withType(
                         semanticModel.types().BYTE).build())) {
             return true;
         }
-        return typeSymbol.subtypeOf(semanticModel.types().JSON) && !semanticModel.types().STRING.subtypeOf(typeSymbol)
-                && !semanticModel.types().NIL.subtypeOf(typeSymbol);
+        return isStructuredType(typeSymbol);
+    }
+
+    private boolean isStructuredType(TypeSymbol typeSymbol) {
+        return typeSymbol.subtypeOf(structuredType);
     }
 
     public static Optional<String> extractCustomMediaType(FunctionDefinitionNode functionDefNode) {

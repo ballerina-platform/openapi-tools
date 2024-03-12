@@ -44,6 +44,9 @@ public record ReturnTypes(Set<TypeSymbol> fromInterceptors, Set<TypeSymbol> from
         if (Objects.isNull(typeSymbols) || typeSymbols.isEmpty()) {
             return null;
         }
+        if (typeSymbols.size() == 1) {
+            return typeSymbols.iterator().next();
+        }
         return semanticModel.types().builder().UNION_TYPE.withMemberTypes(
                 typeSymbols.toArray(TypeSymbol[]::new)).build();
     }

@@ -73,8 +73,6 @@ import static io.ballerina.openapi.service.mapper.Constants.RESPONSE;
 import static io.ballerina.openapi.service.mapper.response.utils.StatusCodeErrorUtils.isSubTypeOfHttpStatusCodeError;
 import static io.ballerina.openapi.service.mapper.response.utils.StatusCodeResponseUtils.isSubTypeOfHttpStatusCodeResponse;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractAnnotationFieldDetails;
-import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.getMediaTypeFromType;
-import static io.ballerina.openapi.service.mapper.utils.MediaTypeUtils.isSameMediaType;
 
 /**
  * This {@link DefaultResponseMapper} class is the implementation of the {@link ResponseMapper} interface.
@@ -153,6 +151,10 @@ public class DefaultResponseMapper implements ResponseMapper {
     }
 
     protected void createResponseMapping(TypeSymbol returnType, String defaultStatusCode) {
+        createResponseMappingInternal(returnType, defaultStatusCode);
+    }
+
+    private void createResponseMappingInternal(TypeSymbol returnType, String defaultStatusCode) {
         if (Objects.isNull(returnType)) {
             return;
         }
@@ -170,7 +172,8 @@ public class DefaultResponseMapper implements ResponseMapper {
         }
         return switch (typeSymbol.typeKind()) {
             case UNION -> Optional.of((UnionTypeSymbol) typeSymbol);
-            case TYPE_REFERENCE -> isSameMediaType(typeSymbol, semanticModel) ? Optional.empty() :
+            case TYPE_REFERENCE -> MediaTypeUtils.getInstance(semanticModel).isSameMediaType(typeSymbol) ?
+                    Optional.empty() :
                     getUnionType(((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor(), semanticModel);
             case INTERSECTION ->
                     getUnionType(((IntersectionTypeSymbol) typeSymbol).effectiveTypeDescriptor(), semanticModel);
@@ -338,8 +341,8 @@ public class DefaultResponseMapper implements ResponseMapper {
             updateApiResponseWithResponseInfo(responseInfo);
         } else {
             ApiResponse apiResponse = new ApiResponse();
-            String mediaType = getMediaTypeFromType(returnType, mediaTypeSubTypePrefix, allowedMediaTypes,
-                    semanticModel);
+            String mediaType = MediaTypeUtils.getInstance(semanticModel).
+                    getMediaTypeFromType(returnType, mediaTypeSubTypePrefix, allowedMediaTypes);
             addResponseContent(returnType, apiResponse, mediaType);
             String statusCode = getResponseCode(returnType, defaultStatusCode, semanticModel);
             apiResponse.description(HTTP_CODE_DESCRIPTIONS.get(statusCode));
@@ -349,7 +352,7 @@ public class DefaultResponseMapper implements ResponseMapper {
 
     private void updateApiResponseWithResponseInfo(ResponseInfo responseInfo) {
         updateHeaderMap(responseInfo.statusCode(), responseInfo.headers());
-        createResponseMapping(responseInfo.bodyType(), responseInfo.statusCode());
+        createResponseMappingInternal(responseInfo.bodyType(), responseInfo.statusCode());
     }
 
     public Map<String, Map<String, TypeSymbol>> getResponseCodeMap(UnionTypeSymbol typeSymbol, String defaultCode) {
@@ -405,19 +408,40 @@ public class DefaultResponseMapper implements ResponseMapper {
         }
     }
 
-    private void extractBasicMembers(UnionTypeSymbol unionTypeSymbol, String defaultCode,
+    private void extractBasicMembers(TypeSymbol typeSymbol, String defaultCode,
                                      Map<String, Map<String, List<TypeSymbol>>> responses) {
-        if (isSameMediaType(unionTypeSymbol, semanticModel)) {
-            String mediaType = getMediaTypeFromType(unionTypeSymbol, mediaTypeSubTypePrefix, allowedMediaTypes,
-                    semanticModel);
-            String code = getResponseCode(unionTypeSymbol, defaultCode, semanticModel);
-            updateResponseCodeMap(responses, unionTypeSymbol, code, mediaType);
+        MediaTypeUtils mediaTypeUtils = MediaTypeUtils.getInstance(semanticModel);
+        if (mediaTypeUtils.isSameMediaType(typeSymbol)) {
+            updateResponseCodeMapForBasicType(typeSymbol, defaultCode, responses, mediaTypeUtils);
             return;
         }
-        List<TypeSymbol> directMemberTypes = unionTypeSymbol.userSpecifiedMemberTypes();
+        Optional<UnionTypeSymbol> unionTypeOpt = getUnionType(typeSymbol, semanticModel);
+        if (unionTypeOpt.isPresent()) {
+            extractBasicMembersFromUnion(unionTypeOpt.get(), defaultCode, responses);
+        } else {
+            updateResponseCodeMapForBasicType(typeSymbol, defaultCode, responses, mediaTypeUtils);
+        }
+    }
+
+    private void updateResponseCodeMapForBasicType(TypeSymbol typeSymbol, String defaultCode, Map<String,
+            Map<String, List<TypeSymbol>>> responses, MediaTypeUtils mediaTypeUtils) {
+        String mediaType = mediaTypeUtils.getMediaTypeFromType(typeSymbol, mediaTypeSubTypePrefix,
+                allowedMediaTypes);
+        String code = getResponseCode(typeSymbol, defaultCode, semanticModel);
+        updateResponseCodeMap(responses, typeSymbol, code, mediaType);
+    }
+
+    private void extractBasicMembersFromUnion(UnionTypeSymbol unionType, String defaultCode,
+                                              Map<String, Map<String, List<TypeSymbol>>> responses) {
+        List<TypeSymbol> directMemberTypes = unionType.userSpecifiedMemberTypes();
         for (TypeSymbol directMemberType : directMemberTypes) {
             String code = getResponseCode(directMemberType, defaultCode, semanticModel);
             ResponseInfo responseInfo = null;
+            Optional<UnionTypeSymbol> unionMemberTypeOpt = getUnionType(directMemberType, semanticModel);
+            if (unionMemberTypeOpt.isPresent()) {
+                extractBasicMembers(unionMemberTypeOpt.get(), code, responses);
+                continue;
+            }
             if (isSubTypeOfHttpStatusCodeResponse(directMemberType, semanticModel)) {
                 responseInfo = StatusCodeResponseUtils.extractResponseInfo(directMemberType, code,
                         typeMapper, semanticModel);
@@ -431,20 +455,7 @@ public class DefaultResponseMapper implements ResponseMapper {
                 }
                 directMemberType = responseInfo.bodyType();
             }
-            if (isSameMediaType(directMemberType, semanticModel)) {
-                String mediaType = getMediaTypeFromType(directMemberType, mediaTypeSubTypePrefix, allowedMediaTypes,
-                        semanticModel);
-                updateResponseCodeMap(responses, directMemberType, code, mediaType);
-            } else {
-                Optional<UnionTypeSymbol> unionTypeOpt = getUnionType(directMemberType, semanticModel);
-                if (unionTypeOpt.isEmpty()) {
-                    String mediaType = getMediaTypeFromType(directMemberType, mediaTypeSubTypePrefix,
-                            allowedMediaTypes, semanticModel);
-                    updateResponseCodeMap(responses, directMemberType, code, mediaType);
-                    continue;
-                }
-                extractBasicMembers(unionTypeOpt.get(), code, responses);
-            }
+            extractBasicMembers(directMemberType, code, responses);
         }
     }
 

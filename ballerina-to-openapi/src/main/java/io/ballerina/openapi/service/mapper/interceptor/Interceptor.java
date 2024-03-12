@@ -130,12 +130,13 @@ public abstract class Interceptor extends Service {
             return null;
         }
 
+        if (MediaTypeUtils.getInstance(semanticModel).isSameMediaType(typeSymbol)) {
+            return typeSymbol;
+        }
+
         if (typeSymbol instanceof TypeReferenceTypeSymbol) {
             return getEffectiveReturnType(((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor(), semanticModel);
         } else if (typeSymbol instanceof UnionTypeSymbol) {
-            if (MediaTypeUtils.isSameMediaType(typeSymbol, semanticModel)) {
-                return typeSymbol;
-            }
             List<TypeSymbol> memberTypes = ((UnionTypeSymbol) typeSymbol).userSpecifiedMemberTypes();
             List<TypeSymbol> effectiveMemberTypes = memberTypes.stream()
                     .map(memberType -> getEffectiveReturnType(memberType, semanticModel))
