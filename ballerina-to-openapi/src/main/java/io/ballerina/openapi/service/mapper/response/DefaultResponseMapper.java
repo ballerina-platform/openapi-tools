@@ -302,7 +302,7 @@ public class DefaultResponseMapper implements ResponseMapper {
         addApiResponse(apiResponse, HTTP_202);
     }
 
-    private void addResponseMappingForDataBindingFailures() {
+    protected void addResponseMappingForDataBindingFailures() {
         ApiResponse apiResponse = getApiResponse(HTTP_400);
         TypeSymbol errorType = semanticModel.types().ERROR;
         addResponseContent(errorType, apiResponse, "application/json");

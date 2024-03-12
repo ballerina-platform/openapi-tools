@@ -31,9 +31,14 @@ import java.util.Optional;
 public class TargetResource extends Service {
 
     private final TypeSymbol effectiveReturnType;
+    private final boolean hasDataBinding;
+    private final ResourceMethodSymbol resourceMethodSymbol;
 
-    public TargetResource(ResourceMethodSymbol resourceMethodSymbol, SemanticModel semanticModel) {
+    public TargetResource(ResourceMethodSymbol resourceMethodSymbol, boolean hasDataBinding,
+                          SemanticModel semanticModel) {
         super(semanticModel);
+        this.hasDataBinding = hasDataBinding;
+        this.resourceMethodSymbol = resourceMethodSymbol;
         Optional<TypeSymbol> optReturnType = resourceMethodSymbol.typeDescriptor().returnTypeDescriptor();
         if (optReturnType.isEmpty()) {
             effectiveReturnType = semanticModel.types().NIL;
@@ -45,5 +50,14 @@ public class TargetResource extends Service {
 
     public TypeSymbol getEffectiveReturnType() {
         return effectiveReturnType;
+    }
+
+    @Override
+    public boolean hasErrorReturn() {
+        return hasDataBinding || super.hasErrorReturn();
+    }
+
+    public ResourceMethodSymbol getResourceMethodSymbol() {
+        return resourceMethodSymbol;
     }
 }

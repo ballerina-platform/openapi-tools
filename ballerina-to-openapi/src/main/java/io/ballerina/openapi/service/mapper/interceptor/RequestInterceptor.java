@@ -62,7 +62,7 @@ public class RequestInterceptor extends Interceptor {
     }
 
     @Override
-    public boolean isInvokable(ResourceMethodSymbol targetResource) {
-        return ResourceMatcher.match(resourceMethod, targetResource, semanticModel);
+    public boolean isInvokable(TargetResource targetResource) {
+        return ResourceMatcher.match(resourceMethod, targetResource.getResourceMethodSymbol(), semanticModel);
     }
 }

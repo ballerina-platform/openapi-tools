@@ -82,7 +82,7 @@ public abstract class Interceptor extends Service {
 
     protected abstract void extractInterceptorDetails(SemanticModel semanticModel);
 
-    public abstract boolean isInvokable(ResourceMethodSymbol targetResource);
+    public abstract boolean isInvokable(TargetResource targetResource);
 
     protected void setReturnType(TypeSymbol returnType) {
         hasNilReturn = semanticModel.types().NIL.subtypeOf(returnType);
