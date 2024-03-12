@@ -49,9 +49,8 @@ public abstract class Interceptor extends Service {
         REQUEST, REQUEST_ERROR, RESPONSE, RESPONSE_ERROR
     }
 
-    private final String name;
     protected final ClassSymbol serviceClass;
-    private ClassDefinitionNode serviceClassNode = null;
+    private final ClassDefinitionNode serviceClassNode;
     protected ResourceMethodSymbol resourceMethod = null;
     protected boolean continueExecution = false;
     protected boolean hasNilReturn = false;
@@ -61,12 +60,12 @@ public abstract class Interceptor extends Service {
     protected Interceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
                           ModuleMemberVisitor moduleMemberVisitor) throws InterceptorMapperException {
         super(semanticModel);
-        this.name = typeSymbol.getName().orElse("");
+        String name = typeSymbol.getName().orElse("");
         if (typeSymbol.getName().isPresent() &&
-                moduleMemberVisitor.getInterceptorServiceClassNode(this.name).isPresent()) {
-            this.serviceClassNode = moduleMemberVisitor.getInterceptorServiceClassNode(this.name).get();
+                moduleMemberVisitor.getInterceptorServiceClassNode(name).isPresent()) {
+            this.serviceClassNode = moduleMemberVisitor.getInterceptorServiceClassNode(name).get();
         } else {
-            throw new InterceptorMapperException("no class definition found for the interceptor: " + this.name +
+            throw new InterceptorMapperException("no class definition found for the interceptor: " + name +
                     " within the package. Make sure that the interceptor return type is defined with the specific" +
                     " interceptor class type rather than the generic `http:Interceptor` type and the specific " +
                     "interceptor class is defined within the package");
@@ -74,7 +73,7 @@ public abstract class Interceptor extends Service {
         this.serviceClass = typeSymbol.typeDescriptor() instanceof ClassSymbol ?
                 (ClassSymbol) typeSymbol.typeDescriptor() : null;
         if (Objects.isNull(this.serviceClass)) {
-            throw new InterceptorMapperException("no class definition found for the interceptor: " + this.name +
+            throw new InterceptorMapperException("no class definition found for the interceptor: " + name +
                     ". Make sure that the interceptor return type is defined with the specific interceptor class " +
                     "type rather than the generic `http:Interceptor` type");
         }
@@ -151,10 +150,6 @@ public abstract class Interceptor extends Service {
                     effectiveMemberTypes.toArray(TypeSymbol[]::new)).build();
         }
         return typeSymbol;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public abstract InterceptorType getType();

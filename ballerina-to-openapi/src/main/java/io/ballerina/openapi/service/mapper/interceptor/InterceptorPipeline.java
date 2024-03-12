@@ -33,7 +33,7 @@ import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -183,7 +183,7 @@ public class InterceptorPipeline {
     }
 
     private ReturnTypes getReturnTypes(ResourceMethodSymbol targetResource) {
-        ReturnTypes returnTypes = new ReturnTypes(new HashSet<>(), new HashSet<>());
+        ReturnTypes returnTypes = new ReturnTypes(new LinkedHashSet<>(), new LinkedHashSet<>());
         if (Objects.isNull(initReqInterceptor)) {
             updateReturnTypeForTarget(returnTypes, targetResource);
         } else {
@@ -243,24 +243,13 @@ public class InterceptorPipeline {
             if (Objects.nonNull(nextResInterceptor)) {
                 updateReturnTypeForResInterceptor(nextResInterceptor, returnTypes, nonErrorReturnType, fromTarget);
             } else {
-                returnTypes.fromInterceptors().add(nonErrorReturnType);
+                updateReturnType(returnTypes, nonErrorReturnType, fromTarget);
             }
         }
     }
 
     private void updateReturnTypeForResInterceptor(Interceptor interceptor, ReturnTypes returnTypes,
                                                    TypeSymbol prevReturnType, boolean fromTarget) {
-        if (Objects.isNull(interceptor)) {
-            if (Objects.nonNull(prevReturnType)) {
-                if (fromTarget) {
-                    returnTypes.fromTargetResource().add(prevReturnType);
-                } else {
-                    returnTypes.fromInterceptors().add(prevReturnType);
-                }
-            }
-            return;
-        }
-
         if (interceptor.isContinueExecution() && Objects.nonNull(prevReturnType)) {
             updateNonErrorReturnTypeForInterceptor(interceptor, prevReturnType, returnTypes, fromTarget);
         }
@@ -272,6 +261,14 @@ public class InterceptorPipeline {
 
         TypeSymbol nonErrorReturnType = interceptor.getNonErrorReturnType();
         updateNonErrorReturnTypeForInterceptor(interceptor, nonErrorReturnType, returnTypes, false);
+    }
+
+    private static void updateReturnType(ReturnTypes returnTypes, TypeSymbol prevReturnType, boolean fromTarget) {
+        if (fromTarget) {
+            returnTypes.fromTargetResource().add(prevReturnType);
+        } else {
+            returnTypes.fromInterceptors().add(prevReturnType);
+        }
     }
 
     private void updateReturnTypeForTarget(ReturnTypes returnTypes, ResourceMethodSymbol targetResource) {
