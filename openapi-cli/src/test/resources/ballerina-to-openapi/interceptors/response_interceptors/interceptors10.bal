@@ -56,7 +56,7 @@ type Person record {|
 
 service http:InterceptableService /payloadV on new http:Listener(9090) {
 
-    public function createInterceptors() returns [ResponseInterceptor, ResponseErrorInterceptor] {
+    public function createInterceptors() returns [ResponseErrorInterceptor, ResponseInterceptor] {
         return [];
     }
 

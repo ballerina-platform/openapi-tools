@@ -14,18 +14,18 @@ paths:
     get:
       operationId: getGreet
       responses:
-        "200":
-          description: Ok
-          content:
-            text/plain:
-              schema:
-                type: string
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorPayload'
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
 components:
   schemas:
     ErrorPayload:

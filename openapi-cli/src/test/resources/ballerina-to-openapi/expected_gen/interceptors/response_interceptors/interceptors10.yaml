@@ -21,6 +21,12 @@ paths:
             type: integer
             format: int64
       responses:
+        default:
+          description: Default response
+          content:
+            application/json:
+              schema:
+                type: object
         "200":
           description: Ok
           content:
@@ -40,7 +46,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayloadNew'
+        "505":
+          description: HttpVersionNotSupported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayloadNew'
         "400":
           description: BadRequest
           content:
@@ -51,6 +63,12 @@ paths:
     get:
       operationId: getPersons
       responses:
+        default:
+          description: Default response
+          content:
+            application/json:
+              schema:
+                type: object
         "200":
           description: Ok
           content:
@@ -72,7 +90,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayloadNew'
+        "505":
+          description: HttpVersionNotSupported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayloadNew'
     post:
       operationId: postPersons
       requestBody:
@@ -111,9 +135,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayloadNew'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayloadNew'
         "505":
           description: HttpVersionNotSupported
           content:
@@ -161,9 +183,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayloadNew'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayloadNew'
         "505":
           description: HttpVersionNotSupported
           content:
@@ -194,26 +214,12 @@ paths:
             application/json:
               schema:
                 type: object
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/Person'
-        "202":
-          description: Accepted
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ErrorPayloadNew'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayloadNew'
         "505":
           description: HttpVersionNotSupported
           content:
