@@ -21,6 +21,12 @@ paths:
             type: integer
             format: int64
       responses:
+        default:
+          description: Default response
+          content:
+            application/json:
+              schema:
+                type: object
         "200":
           description: Ok
           content:
@@ -40,13 +46,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
-        "400":
-          description: BadRequest
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorPayloadNew'
+                  - $ref: '#/components/schemas/ErrorPayload'
+        "505":
+          description: HttpVersionNotSupported
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/ErrorPayloadNew'
   /persons:
     get:
       operationId: getPersons
@@ -122,10 +130,6 @@ paths:
                 $ref: '#/components/schemas/ErrorPayloadNew'
         "400":
           description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
   /person:
     post:
       operationId: postPerson
@@ -170,12 +174,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorPayloadNew'
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
   /persont:
     get:
       operationId: getPersont
@@ -220,12 +218,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorPayloadNew'
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     Civil:
@@ -372,9 +364,3 @@ components:
             of Delta
           format: double
       additionalProperties: false
-      description: |-
-        This is closed so it is a subtype of Delta
-        Fields can negative
-        if any of the three fields are > 0, then all must be >= 0
-        if any of the three fields are < 0, then all must be <= 0
-        Semantic is that durations should be left out

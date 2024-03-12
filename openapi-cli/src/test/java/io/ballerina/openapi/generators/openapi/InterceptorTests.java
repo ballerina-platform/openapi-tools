@@ -97,6 +97,17 @@ public class InterceptorTests {
         compareWithGeneratedFile(ballerinaFilePath, "interceptors/response_interceptors/interceptors10.yaml");
     }
 
+    @Test(description = "Test with mixed interceptors")
+    public void testMixedInterceptors() throws IOException {
+        for (int i = 0; i <= 9; i++) {
+            Path ballerinaFilePath = INTERCEPTOR_DIR.resolve("mixed_interceptors/interceptors0" + i + ".bal");
+            compareWithGeneratedFile(ballerinaFilePath, "interceptors/mixed_interceptors/interceptors0" + i + ".yaml");
+        }
+
+        Path ballerinaFilePath = INTERCEPTOR_DIR.resolve("mixed_interceptors/interceptors10.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "interceptors/mixed_interceptors/interceptors10.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

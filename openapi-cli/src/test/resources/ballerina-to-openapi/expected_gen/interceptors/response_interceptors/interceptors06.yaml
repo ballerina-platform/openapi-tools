@@ -21,18 +21,18 @@ paths:
             type: integer
             format: int64
       responses:
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayloadNew'
         "200":
           description: Ok
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Person'
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
   /persons:
     get:
       operationId: getPersons
@@ -72,10 +72,6 @@ paths:
                   $ref: '#/components/schemas/Person'
         "400":
           description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
   /person:
     post:
       operationId: postPerson
@@ -98,12 +94,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Person'
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     Civil:
@@ -153,29 +143,6 @@ components:
         - 4
         - 5
         - 6
-    ErrorPayload:
-      required:
-        - message
-        - method
-        - path
-        - reason
-        - status
-        - timestamp
-      type: object
-      properties:
-        timestamp:
-          type: string
-        status:
-          type: integer
-          format: int64
-        reason:
-          type: string
-        message:
-          type: string
-        path:
-          type: string
-        method:
-          type: string
     ErrorPayloadNew:
       required:
         - timestamp
