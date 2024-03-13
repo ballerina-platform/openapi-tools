@@ -1,0 +1,45 @@
+[package]
+org = "hansaninissanka"
+name = "client_bal_task"
+version = "0.1.0"
+distribution = "2201.9.0"
+
+[build-options]
+observabilityIncluded = true
+
+# with input valid yaml
+[[tool.openapi]]
+id = "client"
+filePath = "./openapi.yaml"
+targetModule = "delivery01"
+options.mode = "client"
+
+
+# with input as url
+[[tool.openapi]]
+id = "client02"
+filePath = "openapi.yaml"
+targetModule = "delivery02"
+options.mode = "client"
+
+# without target
+[[tool.openapi]]
+id = "client03"
+filePath = "openapi.yaml"
+targetModule = "delivery03"
+options.mode = "client"
+options.license = "license.txt"
+
+# with license file
+[[tool.openapi]]
+id = "client04"
+filePath = "openapi.yaml"
+targetModule = "delivery04"
+options.mode = "client"
+options.license = "license.txt"
+
+# defualt behaviour
+[[tool.openapi]]
+id = "client05"
+filePath = "openapi.yaml"
+targetModule = "delivery05"

@@ -87,14 +87,15 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "       ballerina-openapi - Generate a Ballerina service"));
     }
 
-    @Test(description = "Test openapi gen-service without openapi contract file")
+    @Test(description = "Test openapi gen-service without openapi contract file",
+    expectedExceptions = {CommandLine.MissingParameterException.class})
     public void testWithoutOpenApiContract() throws IOException {
         String[] args = {"--input"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("An OpenAPI definition path is required to generate the service."));
+        Assert.assertTrue(output.contains("Missing required parameter for option '--input' (<inputPath>)"));
     }
 
     @Test(description = "Test openapi gen-service for successful service generation")
@@ -736,6 +737,29 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "'{userDefinedIdentifier}')" + System.lineSeparator() +
                 "/companies({company_id})/items({item_id})" + System.lineSeparator() +
                 "Following files were created."));
+    }
+
+    @Test(description = "Test openapi add sub command")
+    public void testAddCmd() throws IOException {
+        Path resourceDir = Paths.get(System.getProperty("user.dir")).resolve("build/resources/test");
+        Path packagePath = resourceDir.resolve(Paths.get("cmd/bal-task-client"));
+        String[] addArgs = {"--input", "petstore.yaml", "-p", packagePath.toString(),
+                "--module", "delivery", "--nullable", "--license", "license.txt", "--mode", "client",
+                "--client-methods", "resource"};
+        Add add = new Add(printStream,  false);
+        new CommandLine(add).parseArgs(addArgs);
+        add.execute();
+        String newLine = System.lineSeparator();
+        String tomlContent = Files.readString(packagePath.resolve("Ballerina.toml"));
+        String generatedTool = "[[tool.openapi]]" + newLine +
+                "id = \"oas_client_petstore\"" + newLine +
+                "filePath = \"petstore.yaml\"" + newLine +
+                "targetModule = \"delivery\"" + newLine +
+                "options.mode = \"client\"" + newLine +
+                "options.nullable = true" + newLine +
+                "options.clientMethods = \"resource\"" + newLine +
+                "options.licensePath = \"license.txt\"" + newLine;
+        Assert.assertTrue(tomlContent.contains(generatedTool));
     }
 
     @AfterTest
