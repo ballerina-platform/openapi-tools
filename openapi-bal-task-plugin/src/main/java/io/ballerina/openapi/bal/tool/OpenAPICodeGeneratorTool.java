@@ -353,7 +353,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
 
-        if (oasClientConfig.getFilters().getTags().size() > 0) {
+        if (oasClientConfig.getFilters().getTags().isEmpty()) {
             // Remove unused records and enums when generating the client by the tags given.
             schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent,
                     null);

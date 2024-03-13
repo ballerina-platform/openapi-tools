@@ -233,7 +233,7 @@ public class Add implements BLauncherCmd {
                     createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
             KeyValueNode tagNodes = NodeFactory.createKeyValueNode(getKeyNode("options.operations"),
                     getAssignToken(), arrayNode);
-            moduleMembers = moduleMembers.add(tagNodes);;
+            moduleMembers = moduleMembers.add(tagNodes);
         }
         if (optionsBuilder.isNullable()) {
             moduleMembers = moduleMembers.add(SampleNodeGenerator.createBooleanKV("options.nullable",
@@ -273,14 +273,17 @@ public class Add implements BLauncherCmd {
 
     @Override
     public void printLongDesc(StringBuilder stringBuilder) {
+        //This is the long description of the command and all handle within help command
     }
 
     @Override
     public void printUsage(StringBuilder stringBuilder) {
+        //This is the usage description of the command and all handle within help command
     }
 
     @Override
     public void setParentCmdParser(CommandLine commandLine) {
+        //This is not using in this command
     }
 
     private Optional<Path> validateBallerinaProject(Path projectPath) throws BallerinaOpenApiException {
