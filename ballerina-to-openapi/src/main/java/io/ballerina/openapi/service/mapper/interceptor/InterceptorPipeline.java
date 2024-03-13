@@ -156,8 +156,7 @@ public class InterceptorPipeline {
         return interceptors;
     }
 
-    private static InterceptorType getInterceptorType(TypeSymbol interceptorType,
-                                                                  SemanticModel semanticModel) {
+    private static InterceptorType getInterceptorType(TypeSymbol interceptorType, SemanticModel semanticModel) {
         if (isSubTypeOf(interceptorType, "RequestInterceptor", semanticModel)) {
             return InterceptorType.REQUEST;
         } else if (isSubTypeOf(interceptorType, "RequestErrorInterceptor", semanticModel)) {
