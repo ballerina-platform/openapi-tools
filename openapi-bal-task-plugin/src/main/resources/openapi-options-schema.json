@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "clientMethods": {
+      "type": "string"
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "nullable": {
+      "type": "boolean"
+    },
+    "mode": {
+      "type":"string"
+    },
+    "license": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}
