@@ -20,9 +20,11 @@ package io.ballerina.openapi.core.service;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
+import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
@@ -120,5 +122,12 @@ public class ServiceGenerationUtils {
                 , GeneratorConstants.HTTP);
         imports.add(importForHttp);
         return AbstractNodeFactory.createNodeList(imports);
+    }
+
+    public static QualifiedNameReferenceNode getQualifiedNameReferenceNode(String modulePrefix, String identifier) {
+        Token modulePrefixToken = AbstractNodeFactory.createIdentifierToken(modulePrefix);
+        Token colon = AbstractNodeFactory.createIdentifierToken(":");
+        IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier);
+        return NodeFactory.createQualifiedNameReferenceNode(modulePrefixToken, colon, identifierToken);
     }
 }

@@ -1,10 +1,8 @@
 package io.ballerina.openapi.core.typegenerator;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
@@ -15,7 +13,6 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
@@ -29,15 +26,11 @@ import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.parameters.Parameter;
 import io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.typegenerator.generators.ArrayTypeGenerator;
-import io.ballerina.openapi.core.typegenerator.model.ReturnType;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -51,18 +44,19 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleN
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
 
 public class TypeHandler {
-
-    public static final Map<String, TypeDefinitionNode> typeDefinitionNodes = new HashMap<>();
-    private final Set<String> imports = new LinkedHashSet<>();
     private static TypeHandler typeHandlerInstance;
+    private static BallerinaTypesGenerator ballerinaTypesGenerator;
 
-    private TypeHandler(OpenAPI openAPI, boolean isNullable, List<TypeDefinitionNode> typeDefinitionNodeList,
-                        boolean generateServiceType) {
+    public final Map<String, TypeDefinitionNode> typeDefinitionNodes = new HashMap<>();
+    private final Set<String> imports = new LinkedHashSet<>();
+
+    private TypeHandler(OpenAPI openAPI, boolean isNullable, boolean generateServiceType) {
         GeneratorMetaData.createInstance(openAPI, isNullable, generateServiceType);
     }
 
     public static void createInstance(OpenAPI openAPI, boolean isNullable, boolean generateServiceType) {
-        typeHandlerInstance = new TypeHandler(openAPI, isNullable, new ArrayList<>(), generateServiceType);
+        typeHandlerInstance = new TypeHandler(openAPI, isNullable, generateServiceType);
+        ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI, isNullable, generateServiceType);
     }
 
     public static TypeHandler getInstance() {
@@ -133,24 +127,16 @@ public class TypeHandler {
         }
     }
 
-    public static SimpleNameReferenceNode getSimpleNameReferenceNode(String name) {
-        return BallerinaTypesGenerator.getInstance().getSimpleNameReferenceNode(name);
-    }
-
-    public static QualifiedNameReferenceNode getQualifiedNameReferenceNode(String modulePrefix, String identifier) {
-        return BallerinaTypesGenerator.getInstance().getQualifiedNameReferenceNode(modulePrefix, identifier);
-    }
-
-    public SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode type) {
-        HashMap subTypesMap = new HashMap<String, TypeDefinitionNode>();
-        SimpleNameReferenceNode nameReferenceNode = BallerinaTypesGenerator.getInstance().createTypeInclusionRecord(statusCode, type, subTypesMap);
+    public SimpleNameReferenceNode createStatusCodeTypeInclusionRecord(String statusCode, TypeDescriptorNode type) {
+        HashMap<String, TypeDefinitionNode> subTypesMap = new HashMap<>();
+        SimpleNameReferenceNode nameReferenceNode = ballerinaTypesGenerator.createStatusCodeTypeInclusionRecord(statusCode, type, subTypesMap);
         handleSubtypes(subTypesMap);
         return nameReferenceNode;
     }
 
     public Optional<TypeDescriptorNode> generateTypeDescriptorForOASSchema(Schema<?> schema, String recordName) throws BallerinaOpenApiException {
-        HashMap<String, TypeDefinitionNode> subTypesMap = new HashMap();
-        Optional<TypeDescriptorNode> typeDescriptorNode = BallerinaTypesGenerator.getInstance().generateTypeDescriptorNodeForOASSchema(schema, subTypesMap, new HashMap<>());
+        HashMap<String, TypeDefinitionNode> subTypesMap = new HashMap<>();
+        Optional<TypeDescriptorNode> typeDescriptorNode = ballerinaTypesGenerator.generateTypeDescriptorNodeForOASSchema(schema, subTypesMap, new HashMap<>());
         handleSubtypes(subTypesMap);
         if (typeDescriptorNode.isPresent()) {
             typeDefinitionNodes.put(recordName, createTypeDefinitionNode(null,
@@ -170,7 +156,7 @@ public class TypeHandler {
 
     public Token getQueryParamTypeToken(Schema<?> schema) throws BallerinaOpenApiException {
         HashMap<String, TypeDefinitionNode> subTypesMap = new HashMap<>();
-        Token token = BallerinaTypesGenerator.getInstance().getQueryParamTypeToken(schema, subTypesMap);
+        Token token = ballerinaTypesGenerator.getQueryParamTypeToken(schema, subTypesMap);
         handleSubtypes(subTypesMap);
         return token;
     }
@@ -179,12 +165,6 @@ public class TypeHandler {
         HashMap<String, TypeDefinitionNode> subTypesMap = new HashMap<>();
         TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, typeName, null, subTypesMap, new HashMap<>());
         TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
-//        Optional<TypeDescriptorNode> nameReferenceNode = BallerinaTypesGenerator.getInstance().generateTypeDescriptorNodeForOASSchema(schema, subTypesMap, new HashMap<>());
-//        if (nameReferenceNode.isPresent()) {
-//            subTypesMap.put(typeName, createTypeDefinitionNode(null,
-//                    createToken(SyntaxKind.PUBLIC_KEYWORD), createToken(SyntaxKind.TYPE_KEYWORD),
-//                    createIdentifierToken(typeName), nameReferenceNode.get(), createToken(SyntaxKind.SEMICOLON_TOKEN)));
-//        }
         subTypesMap.put(typeName, createTypeDefinitionNode(null,
                 createToken(SyntaxKind.PUBLIC_KEYWORD), createToken(SyntaxKind.TYPE_KEYWORD),
                 createIdentifierToken(typeName), typeDescriptorNode, createToken(SyntaxKind.SEMICOLON_TOKEN)));
@@ -192,37 +172,33 @@ public class TypeHandler {
         return createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(typeName));
     }
 
-    public RequiredParameterNode getMapJsonParameterNode(IdentifierToken parameterName, Parameter parameter, NodeList<AnnotationNode> annotations) {
-        return BallerinaTypesGenerator.getInstance().getMapJsonParameterNode(parameterName, parameter, annotations);
+    public ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(
+            TypeDescriptorNode typeDescriptorNode) {
+        return ballerinaTypesGenerator.getArrayTypeDescriptorNodeFromTypeDescriptorNode(typeDescriptorNode);
     }
 
-    public ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(TypeDescriptorNode typeDescriptorNode) {
-        return BallerinaTypesGenerator.getInstance().getArrayTypeDescriptorNodeFromTypeDescriptorNode(typeDescriptorNode);
-    }
-
-    public TypeDescriptorNode generateTypeDescriptorForJsonContent(Schema<?> schema, String recordName) throws BallerinaOpenApiException {
-        HashMap subTypesMap = new HashMap<String, TypeDefinitionNode>();
-        ReturnType returnType = BallerinaTypesGenerator.getInstance().generateTypeDescriptorForJsonContent(schema, recordName, subTypesMap);
-        if (returnType.originalType().isPresent()) {
-            typeDefinitionNodes.put(returnType.recordName() != null ? returnType.recordName() : recordName, returnType.originalType().get());
-        }
+    public TypeDescriptorNode generateTypeDescriptorForJsonContent(Schema<?> schema, String recordName) throws
+            BallerinaOpenApiException {
+        HashMap<String, TypeDefinitionNode> subTypesMap = new HashMap<>();
+        Optional<TypeDescriptorNode> returnType = ballerinaTypesGenerator
+                .generateTypeDescriptorForJsonContent(schema, recordName, subTypesMap);
         handleSubtypes(subTypesMap);
-        return returnType.nameReferenceNode().get();
+        return returnType.get();
     }
 
-    public TypeDescriptorNode generateTypeDescriptorForXMLContent(Schema<?> schema) {
-        return getSimpleNameReferenceNode(GeneratorConstants.XML);
+    public TypeDescriptorNode generateTypeDescriptorForXMLContent() {
+        return ballerinaTypesGenerator.getSimpleNameReferenceNode(GeneratorConstants.XML);
     }
 
-    public TypeDescriptorNode generateTypeDescriptorForMapStringContent(Schema<?> schema) {
-        return getSimpleNameReferenceNode(GeneratorConstants.MAP_STRING);
+    public TypeDescriptorNode generateTypeDescriptorForMapStringContent() {
+        return ballerinaTypesGenerator.getSimpleNameReferenceNode(GeneratorConstants.MAP_STRING);
     }
 
-    public TypeDescriptorNode generateTypeDescriptorForTextContent(Schema<?> schema, String typeName) {
-        return getSimpleNameReferenceNode(typeName);
+    public TypeDescriptorNode generateTypeDescriptorForTextContent(String typeName) {
+        return ballerinaTypesGenerator.getSimpleNameReferenceNode(typeName);
     }
 
-    public TypeDescriptorNode generateTypeDescriptorForOctetStreamContent(Schema<?> schema) {
+    public TypeDescriptorNode generateTypeDescriptorForOctetStreamContent() {
         ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
                 createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                 createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));

@@ -33,10 +33,6 @@ public class ErrorMessages {
         return "Invalid file type. Provide either a .yaml or .json file.";
     }
 
-    public static String invalidPathParamType(String parameterName) {
-        return String.format("Invalid path parameter data type for the parameter: '%s'", parameterName);
-    }
-
     public static String unsupportedOpenAPIVersion() {
         return "Provided OpenAPI contract version is not supported in the tool. " +
                 "Use OpenAPI specification version 2 or higher";

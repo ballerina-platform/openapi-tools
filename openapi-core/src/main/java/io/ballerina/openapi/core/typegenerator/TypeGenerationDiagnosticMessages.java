@@ -26,53 +26,32 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
  *
  * @since 1.3.0
  */
-public enum ServiceDiagnosticMessages {
-    OAS_SERVICE_100("OAS_SERVICE_100", "Query parameters with nested array types are not " +
-            "supported in Ballerina.", DiagnosticSeverity.ERROR),
-    OAS_SERVICE_101("OAS_SERVICE_101",
-            "Query parameters with no array item type can not be mapped to Ballerina resource" +
-                    " query parameters.", DiagnosticSeverity.ERROR),
+public enum TypeGenerationDiagnosticMessages {
     OAS_SERVICE_102("OAS_SERVICE_102",
             "Type '%s' is not a valid query parameter type in Ballerina. " +
                     "The supported types are string, int, float, boolean, decimal, array types of the aforementioned " +
                     "types and map<json>.",
-            DiagnosticSeverity.ERROR),
-    OAS_SERVICE_103("OAS_SERVICE_103", "Header '%s' with array item type: '%s' is not " +
-            "supported in Ballerina.", DiagnosticSeverity.ERROR),
-    OAS_SERVICE_104("OAS_SERVICE_104",
-            "Header '%s' with no array item type can not be mapped as a valid Ballerina" +
-                    " header parameter.", DiagnosticSeverity.ERROR),
-    OAS_SERVICE_105("OAS_SERVICE_105",
-            "Header '%s' with type '%s' can not be mapped as a valid Ballerina header parameter.",
-            DiagnosticSeverity.ERROR),
-    OAS_SERVICE_106("OAS_SERVICE_106",
-            "Header '%s' with no header type can not be mapped to the Ballerina headers.",
-            DiagnosticSeverity.ERROR),
-    OAS_SERVICE_107("OAS_SERVICE_107", "HTTP status code '%s' is not supported in Ballerina.",
             DiagnosticSeverity.ERROR);
 
     private final String code;
     private final String description;
     private final DiagnosticSeverity severity;
 
-    ServiceDiagnosticMessages(String code, String description, DiagnosticSeverity severity) {
+    TypeGenerationDiagnosticMessages(String code, String description, DiagnosticSeverity severity) {
         this.code = code;
         this.description = description;
         this.severity = severity;
     }
 
     public String getCode() {
-
         return code;
     }
 
     public String getDescription() {
-
         return description;
     }
 
     public DiagnosticSeverity getSeverity() {
-
         return severity;
     }
 }

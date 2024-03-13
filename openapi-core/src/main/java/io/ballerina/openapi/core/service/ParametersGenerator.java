@@ -339,16 +339,30 @@ public class ParametersGenerator {
 
         Schema<?> parameterSchema;
         if (mediaTypeEntry.getValue().getSchema() != null && mediaTypeEntry.getValue().getSchema().get$ref() != null) {
-            String type = getValidName(ServiceGenerationUtils.extractReferenceType(mediaTypeEntry.getValue().getSchema().get$ref()), true);
+            String type = getValidName(ServiceGenerationUtils.extractReferenceType(mediaTypeEntry.getValue()
+                    .getSchema().get$ref()), true);
             parameterSchema = (Schema<?>) openAPI.getComponents().getSchemas().get(type.trim());
         } else {
             parameterSchema = mediaTypeEntry.getValue().getSchema();
         }
         if (mediaTypeEntry.getKey().equals(GeneratorConstants.APPLICATION_JSON) && isMapSchema(parameterSchema)) {
-            return TypeHandler.getInstance().getMapJsonParameterNode(parameterName, parameter, annotations);
+            return getMapJsonParameterNode(parameterName, parameter, annotations);
         }
         String type = GeneratorUtils.getBallerinaMediaType(mediaTypeEntry.getKey(), false);
-        throw new BallerinaOpenApiException(String.format(ServiceDiagnosticMessages.OAS_SERVICE_102.getDescription(), type));
+        throw new BallerinaOpenApiException(String.format(ServiceDiagnosticMessages.OAS_SERVICE_102.getDescription(),
+                type));
+    }
+
+    private RequiredParameterNode getMapJsonParameterNode(IdentifierToken parameterName, Parameter parameter,
+                                                         NodeList<AnnotationNode> annotations) {
+        BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null,
+                createIdentifierToken(io.ballerina.openapi.core.typegenerator.GeneratorConstants.MAP_JSON));
+        if (parameter.getRequired()) {
+            return createRequiredParameterNode(annotations, rTypeName, parameterName);
+        }
+        OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(rTypeName,
+                createToken(SyntaxKind.QUESTION_MARK_TOKEN));
+        return createRequiredParameterNode(annotations, optionalNode, parameterName);
     }
 
     /**

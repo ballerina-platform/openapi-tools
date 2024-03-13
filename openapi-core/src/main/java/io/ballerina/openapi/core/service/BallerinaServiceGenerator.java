@@ -96,7 +96,6 @@ public class BallerinaServiceGenerator {
     private final Filter filter;
     private final boolean isServiceTypeRequired;
     private final boolean generateWithoutDataBinding;
-    private final BallerinaTypesGenerator ballerinaSchemaGenerator;
     private List<Node> functionList = new ArrayList<>();
     private final Set<String> paths = new LinkedHashSet<>();
 
@@ -106,8 +105,6 @@ public class BallerinaServiceGenerator {
         this.isNullableRequired = false;
         this.isServiceTypeRequired = oasServiceMetadata.isServiceTypeRequired();
         this.generateWithoutDataBinding = oasServiceMetadata.generateWithoutDataBinding();
-        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, oasServiceMetadata.isNullable(),
-                new LinkedList<>());
         GeneratorMetaData.createInstance(openAPI, oasServiceMetadata.isNullable(),
                 oasServiceMetadata.isServiceTypeRequired());
     }
@@ -338,15 +335,9 @@ public class BallerinaServiceGenerator {
         SeparatedNodeList<ParameterNode> parameters = createSeparatedNodeList(params);
         String pathForRecord = Objects.equals(path, GeneratorConstants.SLASH) || Objects.equals(path, GeneratorConstants.CATCH_ALL_PATH) ? "" :
                 GeneratorUtils.getValidName(path, true);
-        ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator(ballerinaSchemaGenerator, pathForRecord,
-                openAPI);
-//        if (!paths.contains(path)) {
-//            returnTypeGenerator.setCountForRecord(0);
-//            paths.add(path);
-//        }
+        ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator(pathForRecord, openAPI);
         ReturnTypeDescriptorNode returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation,
                 createEmptyNodeList(), path);
-//        typeInclusionRecords.putAll(BallerinaTypesGenerator.getTypeDefinitionNodes());
 
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(
                 createToken(SyntaxKind.OPEN_PAREN_TOKEN),

@@ -460,7 +460,6 @@ public class BallerinaCodeGenerator {
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         // Initialize ballerina types generator
         TypeHandler.createInstance(openAPIDef, nullable, generateServiceType);
-        BallerinaTypesGenerator.createInstance(openAPIDef, nullable, generateServiceType);
         String mainContent;
         try {
             mainContent = Formatter.format(ballerinaServiceGenerator.generateSyntaxTree()).toSourceCode();

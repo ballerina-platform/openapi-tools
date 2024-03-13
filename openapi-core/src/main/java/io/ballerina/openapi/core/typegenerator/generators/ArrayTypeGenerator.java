@@ -34,7 +34,7 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.typegenerator.GeneratorConstants;
 import io.ballerina.openapi.core.typegenerator.GeneratorUtils;
-import io.ballerina.openapi.core.typegenerator.ServiceDiagnosticMessages;
+import io.ballerina.openapi.core.typegenerator.TypeGenerationDiagnosticMessages;
 import io.ballerina.openapi.core.typegenerator.TypeGeneratorUtils;
 import io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.typegenerator.model.GeneratorMetaData;
@@ -210,7 +210,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
             if (queryParamSupportedTypes.contains(GeneratorUtils.getOpenAPIType(refSchema))) {
                 arrayName = type;
             } else {
-                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
+                TypeGenerationDiagnosticMessages messages = TypeGenerationDiagnosticMessages.OAS_SERVICE_102;
                 throw new BallerinaOpenApiException(String.format(messages.getDescription(), type));
             }
         } else {

@@ -29,9 +29,7 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.typegenerator.GeneratorUtils;
-import io.ballerina.openapi.core.typegenerator.ServiceDiagnosticMessages;
 import io.ballerina.openapi.core.typegenerator.TypeHandler;
 import io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -76,7 +74,7 @@ public class ReturnTypeGenerator {
 
     private static int countForRecord = 0;
 
-    public ReturnTypeGenerator(BallerinaTypesGenerator ballerinaSchemaGenerator, String pathRecord, OpenAPI openAPI) {
+    public ReturnTypeGenerator(String pathRecord, OpenAPI openAPI) {
         this.pathRecord = pathRecord;
         this.openAPI = openAPI;
     }
@@ -159,12 +157,12 @@ public class ReturnTypeGenerator {
                 content = responseValue.getContent();
             }
             if (responseCode.equals(GeneratorConstants.DEFAULT)) {
-                TypeDescriptorNode record = TypeHandler.getSimpleNameReferenceNode(HTTP_RESPONSE);
+                TypeDescriptorNode record = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
                 typeName = record.toSourceCode();
             } else if (content == null && (responseValue == null || responseValue.get$ref() == null) ||
                     content != null && content.size() == 0) {
                 //key and value
-                QualifiedNameReferenceNode node = TypeHandler.getQualifiedNameReferenceNode(GeneratorConstants.HTTP,
+                QualifiedNameReferenceNode node = ServiceGenerationUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP,
                         code);
                 typeName = node.toSourceCode();
             } else if (content != null) {
@@ -176,7 +174,7 @@ public class ReturnTypeGenerator {
                 if (isWithOutStatusCode) {
                     typeName = bodyType.toSourceCode();
                 } else {
-                    SimpleNameReferenceNode node = TypeHandler.getInstance().createTypeInclusionRecord(code, bodyType);
+                    SimpleNameReferenceNode node = TypeHandler.getInstance().createStatusCodeTypeInclusionRecord(code, bodyType);
                     typeName = node.name().text();
                 }
             }
@@ -205,7 +203,7 @@ public class ReturnTypeGenerator {
             String recordName = getNewRecordName(pathRecord);
             TypeDescriptorNode mediaTypeToken = generateTypeDescriptorForMediaTypes(contentType, recordName);
             if (mediaTypeToken == null) {
-                SimpleNameReferenceNode httpResponse = TypeHandler.getSimpleNameReferenceNode(GeneratorConstants.ANYDATA);
+                SimpleNameReferenceNode httpResponse = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
                 qualifiedNodes.add(httpResponse.name().text());
             } else if (mediaTypeToken instanceof NameReferenceNode nameReferenceNode) {
 //                BallerinaTypesGenerator.typeDefinitionNodes.put(rightNode.get().typeName().text(), rightNode.get());
@@ -245,9 +243,9 @@ public class ReturnTypeGenerator {
             String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
             TypeDescriptorNode statues;
             if (response.getKey().trim().equals(GeneratorConstants.DEFAULT)) {
-                statues = TypeHandler.getSimpleNameReferenceNode(HTTP_RESPONSE);
+                statues = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
             } else {
-                statues = TypeHandler.getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
+                statues = ServiceGenerationUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
             }
             returnNode = createReturnTypeDescriptorNode(returnKeyWord, annotations, statues);
         } else if (responseContent != null) {
@@ -287,13 +285,13 @@ public class ReturnTypeGenerator {
                     TypeDescriptorNode mediaTypeToken = generateTypeDescriptorForMediaTypes(mediaTypeEntry, recordName);
 
                     if (mediaTypeToken == null) {
-                        type = TypeHandler.getSimpleNameReferenceNode(GeneratorConstants.ANYDATA);
+                        type = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
                     } else {
                         type = mediaTypeToken;
                     }
                 }
                 if (!type.toString().equals(HTTP_RESPONSE)) {
-                    SimpleNameReferenceNode recordType = TypeHandler.getInstance().createTypeInclusionRecord(code, type);
+                    SimpleNameReferenceNode recordType = TypeHandler.getInstance().createStatusCodeTypeInclusionRecord(code, type);
                     NodeList<AnnotationNode> annotation = createEmptyNodeList();
                     returnNode = createReturnTypeDescriptorNode(returnKeyWord, annotation, recordType);
                 }
@@ -319,16 +317,16 @@ public class ReturnTypeGenerator {
                 TypeDescriptorNode typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForJsonContent(schema, recordName);
                 return typeDescriptorNode;
             case GeneratorConstants.APPLICATION_XML:
-                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForXMLContent(schema);
+                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForXMLContent();
                 return typeDescriptorNode;
             case GeneratorConstants.APPLICATION_URL_ENCODE:
-                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForMapStringContent(schema);
+                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForMapStringContent();
                 return typeDescriptorNode;
             case GeneratorConstants.TEXT:
-                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForTextContent(schema, GeneratorConstants.STRING);
+                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForTextContent(GeneratorConstants.STRING);
                 return typeDescriptorNode;
             case GeneratorConstants.APPLICATION_OCTET_STREAM:
-                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForOctetStreamContent(schema);
+                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForOctetStreamContent();
                 return typeDescriptorNode;
             default:
                 return null;
@@ -340,7 +338,7 @@ public class ReturnTypeGenerator {
         TypeDescriptorNode returnNode;
         TypeDescriptorNode mediaTypeToken = generateTypeDescriptorForMediaTypes(contentEntry, recordName);
         if (mediaTypeToken == null) {
-            returnNode = TypeHandler.getSimpleNameReferenceNode(GeneratorConstants.ANYDATA);
+            returnNode = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
         } else {
             returnNode = mediaTypeToken;
         }

@@ -71,7 +71,6 @@ public class ServiceDiagnosticTests {
                 .withGenerateWithoutDataBinding(false)
                 .build();
         TypeHandler.createInstance(openAPI, false, false);
-        BallerinaTypesGenerator.createInstance(openAPI, false, false);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);
@@ -94,7 +93,6 @@ public class ServiceDiagnosticTests {
                 .withGenerateWithoutDataBinding(true)
                 .build();
         TypeHandler.createInstance(openAPI, false, false);
-        BallerinaTypesGenerator.createInstance(openAPI, false, false);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);
@@ -119,7 +117,6 @@ public class ServiceDiagnosticTests {
                 .build();
         // Initialize ballerina types generator
         TypeHandler.createInstance(openAPI, false, false);
-        BallerinaTypesGenerator.createInstance(openAPI, false, false);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);

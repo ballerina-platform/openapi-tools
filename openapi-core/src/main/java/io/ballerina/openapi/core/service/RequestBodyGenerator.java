@@ -104,20 +104,20 @@ public class RequestBodyGenerator {
             String mediaTypeContent = selectMediaType(mediaType.getKey().trim());
             switch (mediaTypeContent) {
                 case GeneratorConstants.APPLICATION_XML:
-                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForXMLContent(mediaType.getValue().getSchema()));
+                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForXMLContent());
                     break;
                 case GeneratorConstants.TEXT:
-                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForTextContent(mediaType.getValue().getSchema(), schemaName));
+                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForTextContent(schemaName));
                     break;
                 case GeneratorConstants.APPLICATION_OCTET_STREAM:
-                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForOctetStreamContent(mediaType.getValue().getSchema()));
+                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForOctetStreamContent());
                     break;
                 case GeneratorConstants.APPLICATION_JSON:
                     typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForJsonContent(GeneratorMetaData.getInstance()
                             .getOpenAPI().getComponents().getSchemas().get(schemaName), schemaName));
                     break;
                 case GeneratorConstants.APPLICATION_URL_ENCODE:
-                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForMapStringContent(mediaType.getValue().getSchema()));
+                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForMapStringContent());
                     break;
                 default:
                     typeName = Optional.of(createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_REQUEST)));
