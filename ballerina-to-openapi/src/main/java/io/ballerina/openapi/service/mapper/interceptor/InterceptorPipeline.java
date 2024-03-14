@@ -226,8 +226,7 @@ public class InterceptorPipeline {
     }
 
     private Interceptor getNextErrorInterceptor() {
-        Interceptor nextErrorInterceptor;
-        nextErrorInterceptor = null;
+        Interceptor nextErrorInterceptor = null;
         if (Objects.nonNull(initResInterceptor)) {
             if (initResInterceptor.getType().equals(InterceptorType.RESPONSE_ERROR)) {
                 nextErrorInterceptor = initResInterceptor;
