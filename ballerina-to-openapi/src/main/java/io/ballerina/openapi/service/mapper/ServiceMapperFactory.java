@@ -61,7 +61,7 @@ import static io.ballerina.openapi.service.mapper.Constants.TREAT_NILABLE_AS_OPT
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractServiceAnnotationDetails;
 
 /**
- * This {@link ServiceMapperFactory} class represents the factory for creating mappers for the service to
+ * This {@link ServiceMapperFactory} class represents the factory for creating mappers for the ballerina service to
  * OpenAPI mapping.
  *
  * @since 1.9.0
