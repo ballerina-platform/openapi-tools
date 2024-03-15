@@ -1,7 +1,0 @@
-[package]
-org = "openapi_client_idl_test"
-name = "project_1"
-version = "0.1.0"
-
-[build-options]
-observabilityIncluded = true

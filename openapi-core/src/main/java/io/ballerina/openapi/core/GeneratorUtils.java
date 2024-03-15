@@ -1175,4 +1175,23 @@ public class GeneratorUtils {
         }
         return type;
     }
+
+    /**
+     *  Collect the complex paths in the OAS definition.
+     *
+     * @param openAPI - openAPI definition.
+     * @return List of complex paths
+     */
+    public static List<String> getComplexPaths(OpenAPI openAPI) {
+        //Check given openapi has complex path
+        List<String> complexPathList = new ArrayList<>();
+        if (openAPI.getPaths() != null) {
+            for (Map.Entry<String, PathItem> path : openAPI.getPaths().entrySet()) {
+                if (isComplexURL(path.getKey())) {
+                    complexPathList.add(path.getKey());
+                }
+            }
+        }
+        return complexPathList;
+    }
 }

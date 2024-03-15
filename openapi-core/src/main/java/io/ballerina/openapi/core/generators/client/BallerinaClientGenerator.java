@@ -487,8 +487,7 @@ public class BallerinaClientGenerator {
                     if (!filterTags.isEmpty() || !filterOperations.isEmpty()) {
                         // Generate remote function only if it is available in tag filter or operation filter or both
                         if (operationTags != null || ((!filterOperations.isEmpty()) && (operationId != null))) {
-                            if (GeneratorUtils.hasTags(operationTags, filterTags) ||
-                                    ((operationId != null) && filterOperations.contains(operationId.trim()))) {
+                            if (isaFilteredOperation(filterTags, filterOperations, operationTags, operationId)) {
                                 // Generate remote function
                                 FunctionDefinitionNode functionDefinitionNode =
                                         getClientMethodFunctionDefinitionNode(
@@ -506,6 +505,12 @@ public class BallerinaClientGenerator {
             }
         }
         return functionDefinitionNodeList;
+    }
+
+    private static boolean isaFilteredOperation(List<String> filterTags, List<String> filterOperations,
+                                                List<String> operationTags, String operationId) {
+        return (operationTags != null && GeneratorUtils.hasTags(operationTags, filterTags)) ||
+                ((operationId != null) && filterOperations.contains(operationId.trim()));
     }
 
     /**
