@@ -6,7 +6,6 @@ import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
-import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -20,8 +19,10 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
-import io.ballerina.openapi.core.typegenerator.generators.TypeGenerator;
 import io.ballerina.openapi.core.typegenerator.model.GeneratorMetaData;
+import io.ballerina.openapi.core.typegenerator.model.NameReferenceNodeReturnType;
+import io.ballerina.openapi.core.typegenerator.model.TokenReturnType;
+import io.ballerina.openapi.core.typegenerator.model.TypeDescriptorReturnType;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -41,7 +42,6 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeLi
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
 
 public class TypeHandler {
     private static TypeHandler typeHandlerInstance;
@@ -128,48 +128,34 @@ public class TypeHandler {
     }
 
     public SimpleNameReferenceNode createStatusCodeTypeInclusionRecord(String statusCode, TypeDescriptorNode type) {
-        HashMap<String, TypeDefinitionNode> subTypesMap = new HashMap<>();
-        SimpleNameReferenceNode nameReferenceNode = ballerinaTypesGenerator.createStatusCodeTypeInclusionRecord(statusCode, type, subTypesMap);
-        handleSubtypes(subTypesMap);
-        return nameReferenceNode;
+        NameReferenceNodeReturnType returnType = ballerinaTypesGenerator
+                .createStatusCodeTypeInclusionRecord(statusCode, type);
+        handleSubtypes(returnType.subtypeDefinitions());
+        return returnType.nameReferenceNode().get();
     }
 
     public Optional<TypeDescriptorNode> generateTypeDescriptorForOASSchema(Schema<?> schema, String recordName) throws BallerinaOpenApiException {
-        HashMap<String, TypeDefinitionNode> subTypesMap = new HashMap<>();
-        Optional<TypeDescriptorNode> typeDescriptorNode = ballerinaTypesGenerator.generateTypeDescriptorNodeForOASSchema(schema, subTypesMap, new HashMap<>());
-        handleSubtypes(subTypesMap);
-        if (typeDescriptorNode.isPresent()) {
-            typeDefinitionNodes.put(recordName, createTypeDefinitionNode(null,
-                    createToken(SyntaxKind.PUBLIC_KEYWORD), createToken(SyntaxKind.TYPE_KEYWORD),
-                    createIdentifierToken(recordName), typeDescriptorNode.get(), createToken(SyntaxKind.SEMICOLON_TOKEN)));
-        }
-        return typeDescriptorNode;
+        TypeDescriptorReturnType returnType = ballerinaTypesGenerator.generateTypeDescriptorNodeForOASSchema(schema, recordName);
+        handleSubtypes(returnType.subtypeDefinitions());
+        return returnType.typeDescriptorNode();
     }
 
-    public ArrayTypeDescriptorNode getArrayTypeDescriptorNode(OpenAPI openAPI, Schema<?> items) throws BallerinaOpenApiException {
-//        ArrayTypeGenerator arrayTypeGenerator = new ArrayTypeGenerator(items,)
-        HashMap<String, TypeDefinitionNode> subTypesMap = new HashMap<>();
-        ArrayTypeDescriptorNode typeDescriptorNode = ArrayTypeGenerator.getArrayTypeDescriptorNode(openAPI, items, subTypesMap, new HashMap<>());
-        handleSubtypes(subTypesMap);
-        return typeDescriptorNode;
+    public TypeDescriptorNode getArrayTypeDescriptorNode(Schema<?> items) throws BallerinaOpenApiException {
+        TypeDescriptorReturnType returnType = ArrayTypeGenerator.getArrayTypeDescriptorNode(items);
+        handleSubtypes(returnType.subtypeDefinitions());
+        return returnType.typeDescriptorNode().get();
     }
 
     public Token getQueryParamTypeToken(Schema<?> schema) throws BallerinaOpenApiException {
-        HashMap<String, TypeDefinitionNode> subTypesMap = new HashMap<>();
-        Token token = ballerinaTypesGenerator.getQueryParamTypeToken(schema, subTypesMap);
-        handleSubtypes(subTypesMap);
-        return token;
+        TokenReturnType returnType = ballerinaTypesGenerator.getQueryParamTypeToken(schema);
+        handleSubtypes(returnType.subtypeDefinitions());
+        return returnType.token().get();
     }
 
-    public NameReferenceNode getReferencedQueryParameterTypeFromSchema(Schema<?> schema, String typeName) throws BallerinaOpenApiException {
-        HashMap<String, TypeDefinitionNode> subTypesMap = new HashMap<>();
-        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, typeName, null, subTypesMap, new HashMap<>());
-        TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
-        subTypesMap.put(typeName, createTypeDefinitionNode(null,
-                createToken(SyntaxKind.PUBLIC_KEYWORD), createToken(SyntaxKind.TYPE_KEYWORD),
-                createIdentifierToken(typeName), typeDescriptorNode, createToken(SyntaxKind.SEMICOLON_TOKEN)));
-        handleSubtypes(subTypesMap);
-        return createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(typeName));
+    public TypeDescriptorNode getReferencedQueryParameterTypeFromSchema(Schema<?> schema, String typeName) throws BallerinaOpenApiException {
+        TypeDescriptorReturnType returnType = ballerinaTypesGenerator.getReferencedQueryParamTypeFromSchema(schema, typeName);
+        handleSubtypes(returnType.subtypeDefinitions());
+        return returnType.typeDescriptorNode().get();
     }
 
     public ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(
@@ -179,11 +165,9 @@ public class TypeHandler {
 
     public TypeDescriptorNode generateTypeDescriptorForJsonContent(Schema<?> schema, String recordName) throws
             BallerinaOpenApiException {
-        HashMap<String, TypeDefinitionNode> subTypesMap = new HashMap<>();
-        Optional<TypeDescriptorNode> returnType = ballerinaTypesGenerator
-                .generateTypeDescriptorForJsonContent(schema, recordName, subTypesMap);
-        handleSubtypes(subTypesMap);
-        return returnType.get();
+        TypeDescriptorReturnType returnType = ballerinaTypesGenerator.generateTypeDescriptorForJsonContent(schema, recordName);
+        handleSubtypes(returnType.subtypeDefinitions());
+        return returnType.typeDescriptorNode().get();
     }
 
     public TypeDescriptorNode generateTypeDescriptorForXMLContent() {

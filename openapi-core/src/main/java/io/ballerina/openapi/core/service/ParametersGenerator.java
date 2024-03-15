@@ -380,7 +380,7 @@ public class ParametersGenerator {
             } else if ((!(isObjectSchema(items)) && !(getOpenAPIType(items) != null &&
                     getOpenAPIType(items).equals(GeneratorConstants.ARRAY))) || items.get$ref() != null) {
                 // create arrayTypeDescriptor
-                ArrayTypeDescriptorNode arrayTypeName = TypeHandler.getInstance().getArrayTypeDescriptorNode(openAPI, items);
+                TypeDescriptorNode arrayTypeName = TypeHandler.getInstance().getArrayTypeDescriptorNode(items);
                 OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(arrayTypeName,
                         createToken(SyntaxKind.QUESTION_MARK_TOKEN));
                 return createRequiredParameterNode(annotations, optionalNode, parameterName);
@@ -406,7 +406,7 @@ public class ParametersGenerator {
 
     private Node handleReferencedQueryParameter(Parameter parameter, String refTypeName, Schema<?> refSchema,
                                                 NodeList<AnnotationNode> annotations, IdentifierToken parameterName) throws BallerinaOpenApiException {
-        NameReferenceNode refTypeNameNode = TypeHandler.getInstance().getReferencedQueryParameterTypeFromSchema(refSchema, refTypeName);
+        TypeDescriptorNode refTypeNameNode = TypeHandler.getInstance().getReferencedQueryParameterTypeFromSchema(refSchema, refTypeName);
         if (refSchema.getDefault() != null) {
             String defaultValue = getOpenAPIType(refSchema).equals(GeneratorConstants.STRING) ?
                     String.format("\"%s\"", refSchema.getDefault().toString()) : refSchema.getDefault().toString();
@@ -428,7 +428,7 @@ public class ParametersGenerator {
         if (isArraySchema(schema)) {
             Schema<?> items = schema.getItems();
             if (!(isArraySchema(items)) && (getOpenAPIType(items) != null || (items.get$ref() != null))) {
-                ArrayTypeDescriptorNode arrayTypeName = TypeHandler.getInstance().getArrayTypeDescriptorNode(openAPI, items);
+                TypeDescriptorNode arrayTypeName = TypeHandler.getInstance().getArrayTypeDescriptorNode(items);
                 return createRequiredParameterNode(annotations, arrayTypeName, parameterName);
             } else if (getOpenAPIType(items) == null) {
                 // Resource function doesn't support query parameters for array types that doesn't have an item type.
@@ -471,7 +471,7 @@ public class ParametersGenerator {
         if (isArraySchema(schema)) {
             Schema<?> items = schema.getItems();
             if (!isArraySchema(items) && (getOpenAPIType(items) != null || (items.get$ref() != null))) {
-                ArrayTypeDescriptorNode arrayTypeName = TypeHandler.getInstance().getArrayTypeDescriptorNode(openAPI, items);
+                TypeDescriptorNode arrayTypeName = TypeHandler.getInstance().getArrayTypeDescriptorNode(items);
                 return createDefaultableParameterNode(annotations, arrayTypeName, parameterName,
                         createToken(SyntaxKind.EQUAL_TOKEN),
                         createSimpleNameReferenceNode(createIdentifierToken(schema.getDefault().toString())));
