@@ -27,7 +27,9 @@ import io.swagger.v3.oas.models.headers.Header;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.openapi.service.mapper.Constants.HTTP;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_CODES;
+import static io.ballerina.openapi.service.mapper.Constants.STATUS_CODE_RESPONSE;
 
 /**
  * This {@link StatusCodeResponseUtils} class provides functionalities for mapping the Ballerina HTTP status code
@@ -41,7 +43,7 @@ public final class StatusCodeResponseUtils extends StatusCodeTypeUtils {
     }
 
     public static boolean isSubTypeOfHttpStatusCodeResponse(TypeSymbol typeSymbol, SemanticModel semanticModel) {
-        return isSubTypeOfBallerinaModuleType("StatusCodeResponse", "http", typeSymbol, semanticModel);
+        return isSubTypeOfBallerinaModuleType(STATUS_CODE_RESPONSE, HTTP, typeSymbol, semanticModel);
     }
 
     public static ResponseInfo extractResponseInfo(TypeSymbol statusCodeResponseType, String defaultStatusCode,
@@ -58,7 +60,7 @@ public final class StatusCodeResponseUtils extends StatusCodeTypeUtils {
 
     private static String getResponseCode(TypeSymbol typeSymbol, String defaultCode, SemanticModel semanticModel) {
         for (Map.Entry<String, String> entry : HTTP_CODES.entrySet()) {
-            if (isSubTypeOfBallerinaModuleType(entry.getKey(), "http", typeSymbol, semanticModel)) {
+            if (isSubTypeOfBallerinaModuleType(entry.getKey(), HTTP, typeSymbol, semanticModel)) {
                 return entry.getValue();
             }
         }

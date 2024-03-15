@@ -1,0 +1,219 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /persons/{id}:
+    get:
+      operationId: getPersonsId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayloadNew'
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+  /persons:
+    get:
+      operationId: getPersons
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Person'
+    post:
+      operationId: postPersons
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Person'
+        required: true
+      responses:
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayloadNew'
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Person'
+        "400":
+          description: BadRequest
+  /person:
+    post:
+      operationId: postPerson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Person'
+        required: true
+      responses:
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayloadNew'
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+components:
+  schemas:
+    Civil:
+      type: object
+      description: |-
+        Time within some region relative to a
+        time scale stipulated by civilian authorities.
+      allOf:
+        - $ref: '#/components/schemas/DateFields'
+        - $ref: '#/components/schemas/TimeOfDayFields'
+        - type: object
+          properties:
+            utcOffset:
+              $ref: '#/components/schemas/ZoneOffset'
+            timeAbbrev:
+              type: string
+            which:
+              $ref: '#/components/schemas/ZERO_OR_ONE'
+            dayOfWeek:
+              $ref: '#/components/schemas/DayOfWeek'
+    DateFields:
+      required:
+        - day
+        - month
+        - year
+      type: object
+      properties:
+        year:
+          type: integer
+          format: int64
+        month:
+          type: integer
+          format: int64
+        day:
+          type: integer
+          format: int64
+      description: Fields of the Date record.
+    DayOfWeek:
+      type: integer
+      description: The day of week according to the US convention.
+      format: int64
+      enum:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+    ErrorPayloadNew:
+      required:
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          $ref: '#/components/schemas/Civil'
+        message:
+          type: string
+          default: something went wrong
+        code:
+          type: integer
+          format: int64
+      additionalProperties: false
+    Person:
+      required:
+        - address
+        - age
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        age:
+          type: integer
+          format: int64
+        address:
+          type: string
+      additionalProperties: false
+    Seconds:
+      type: number
+      description: Holds the seconds as a decimal value.
+      format: double
+    TimeOfDayFields:
+      required:
+        - hour
+        - minute
+      type: object
+      properties:
+        hour:
+          type: integer
+          format: int64
+        minute:
+          type: integer
+          format: int64
+        second:
+          $ref: '#/components/schemas/Seconds'
+      description: Fields of the TimeOfDay record.
+    ZERO_OR_ONE:
+      type: integer
+      description: Represents the type that can be either zero or one.
+      format: int64
+      enum:
+        - 0
+        - 1
+    ZoneOffset:
+      required:
+        - hours
+      type: object
+      properties:
+        hours:
+          type: integer
+          format: int64
+        minutes:
+          type: integer
+          format: int64
+        seconds:
+          type: number
+          description: |-
+            IETF zone files have historical zones that are offset by
+            integer seconds; we use Seconds type so that this is a subtype
+            of Delta
+          format: double
+      additionalProperties: false

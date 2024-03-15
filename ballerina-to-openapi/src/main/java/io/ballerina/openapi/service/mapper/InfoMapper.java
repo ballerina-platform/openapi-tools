@@ -292,9 +292,7 @@ public final class InfoMapper {
         Path openapiPath = Paths.get(openAPIInfo.getContractPath().get().replaceAll("\"", "").trim());
         Path relativePath = null;
         if (openapiPath.toString().isBlank()) {
-            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
-            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
-                    error.getDescription(), location);
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_110, location);
             diagnostics.add(diagnostic);
         } else {
             Path path = Paths.get(openapiPath.toString());
@@ -307,9 +305,8 @@ public final class InfoMapper {
                 try {
                     relativePath = Paths.get(openapiContract.getCanonicalPath());
                 } catch (IOException e) {
-                    DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
-                    ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode()
-                            , error.getDescription(), location, e.toString());
+                    ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_108,
+                            location, e.toString());
                     diagnostics.add(diagnostic);
                 }
             }

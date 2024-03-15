@@ -23,18 +23,15 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
-import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
-import io.ballerina.openapi.service.mapper.parameter.ParameterMapperImpl;
+import io.ballerina.openapi.service.mapper.parameter.ParameterMapperException;
 import io.ballerina.openapi.service.mapper.response.ResponseMapper;
-import io.ballerina.openapi.service.mapper.response.ResponseMapperImpl;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -45,7 +42,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 
 import static io.ballerina.openapi.service.mapper.Constants.DEFAULT;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOperationId;
@@ -61,47 +57,35 @@ public class ResourceMapperImpl implements ResourceMapper {
     private final AdditionalData additionalData;
     private final OpenAPI openAPI;
     private final List<FunctionDefinitionNode> resources;
-    private final boolean treatNilableAsOptional;
+    private final ServiceMapperFactory serviceMapperFactory;
 
     /**
      * Initializes a resource parser for openApi.
      */
     ResourceMapperImpl(OpenAPI openAPI, List<FunctionDefinitionNode> resources, AdditionalData additionalData,
-                       boolean treatNilableAsOptional) {
+                       ServiceMapperFactory serviceMapperFactory) {
         this.openAPI = openAPI;
         this.resources = resources;
         this.additionalData = additionalData;
-        this.treatNilableAsOptional = treatNilableAsOptional;
+        this.serviceMapperFactory = serviceMapperFactory;
     }
 
     public void setOperation() {
-        Components components = openAPI.getComponents();
-        if (components == null) {
-            components = new Components();
-            openAPI.setComponents(components);
-        }
-        if (components.getSchemas() == null) {
-            components.setSchemas(new TreeMap<>());
-        }
         for (FunctionDefinitionNode resource : resources) {
-            addResourceMapping(resource, components);
-        }
-        if (components.getSchemas().isEmpty()) {
-            openAPI.setComponents(null);
+            addResourceMapping(resource);
         }
         openAPI.setPaths(pathObject);
     }
 
-    private void addResourceMapping(FunctionDefinitionNode resource, Components components) {
+    private void addResourceMapping(FunctionDefinitionNode resource) {
         String path = MapperCommonUtils.unescapeIdentifier(generateRelativePath(resource));
         String httpMethod = resource.functionName().toString().trim();
         if (httpMethod.equals(String.format("'%s", DEFAULT)) || httpMethod.equals(DEFAULT)) {
-            DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_100;
-            IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+            ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_100,
                     resource.location());
             additionalData.diagnostics().add(error);
         } else {
-            convertResourceToOperation(resource, httpMethod, path, components).ifPresent(
+            convertResourceToOperation(resource, httpMethod, path).ifPresent(
                     operation -> addPathItem(httpMethod, pathObject, operation.getOperation(), path));
         }
     }
@@ -175,8 +159,7 @@ public class ResourceMapperImpl implements ResourceMapper {
      * @return Operation Adaptor object of given resource
      */
     private Optional<OperationInventory> convertResourceToOperation(FunctionDefinitionNode resourceFunction,
-                                                                    String httpMethod, String generateRelativePath,
-                                                                    Components components) {
+                                                                    String httpMethod, String generateRelativePath) {
         OperationInventory operationInventory = new OperationInventory();
         operationInventory.setHttpOperation(httpMethod);
         operationInventory.setPath(generateRelativePath);
@@ -185,23 +168,16 @@ public class ResourceMapperImpl implements ResourceMapper {
         // Map API documentation
         Map<String, String> apiDocs = listAPIDocumentations(resourceFunction, operationInventory);
         //Add path parameters if in path and query parameters
-        ParameterMapper parameterMapper = new ParameterMapperImpl(resourceFunction, operationInventory, components,
-                apiDocs, additionalData, treatNilableAsOptional);
-        parameterMapper.setParameters();
-        List<OpenAPIMapperDiagnostic> diagnostics = additionalData.diagnostics();
-        if (diagnostics.size() > 1 || (diagnostics.size() == 1 && !diagnostics.get(0).getCode().equals(
-                DiagnosticMessages.OAS_CONVERTOR_113.getCode()))) {
-            boolean isErrorIncluded = diagnostics.stream().anyMatch(diagnostic ->
-                    DiagnosticSeverity.ERROR.equals(diagnostic.getDiagnosticSeverity()));
-            boolean hasRestPathParam = diagnostics.stream().anyMatch(diagnostic ->
-                    DiagnosticMessages.OAS_CONVERTOR_125.getCode().equals(diagnostic.getCode()));
-            if (isErrorIncluded || hasRestPathParam) {
-                return Optional.empty();
-            }
+        ParameterMapper parameterMapper = serviceMapperFactory.getParameterMapper(resourceFunction, apiDocs,
+                operationInventory);
+        try {
+            parameterMapper.setParameters();
+        } catch (ParameterMapperException exception) {
+            additionalData.diagnostics().add(exception.getDiagnostic());
+            return Optional.empty();
         }
 
-        ResponseMapper responseMapper = new ResponseMapperImpl(resourceFunction, operationInventory, components,
-                additionalData);
+        ResponseMapper responseMapper = serviceMapperFactory.getResponseMapper(resourceFunction, operationInventory);
         responseMapper.setApiResponses();
         return Optional.of(operationInventory);
     }
@@ -240,7 +216,12 @@ public class ResourceMapperImpl implements ResourceMapper {
             for (Node node: resource.relativeResourcePath()) {
                 if (node instanceof ResourcePathParameterNode pathNode) {
                     relativePath.append("{");
-                    relativePath.append(pathNode.paramName().get());
+                    Optional<Token> pathParamToken = pathNode.paramName();
+                    if (pathParamToken.isPresent()) {
+                        relativePath.append(pathParamToken.get());
+                    } else {
+                        relativePath.append("unsupported");
+                    }
                     relativePath.append("}");
                 } else if ((resource.relativeResourcePath().size() == 1) && (node.toString().trim().equals("."))) {
                     return relativePath.toString();

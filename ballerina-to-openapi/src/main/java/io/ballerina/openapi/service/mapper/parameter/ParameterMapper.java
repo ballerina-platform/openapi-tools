@@ -24,5 +24,5 @@ package io.ballerina.openapi.service.mapper.parameter;
  */
 public interface ParameterMapper {
 
-    void setParameters();
+    void setParameters() throws ParameterMapperException;
 }

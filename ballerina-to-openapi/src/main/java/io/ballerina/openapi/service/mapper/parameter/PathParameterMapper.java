@@ -21,17 +21,12 @@ import io.ballerina.compiler.api.symbols.PathParameterSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.resourcepath.util.PathSegment;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
-import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.model.AdditionalData;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
-import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
 import io.ballerina.tools.diagnostics.Location;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 
-import java.util.List;
 import java.util.Map;
 
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
@@ -51,28 +46,23 @@ public class PathParameterMapper extends AbstractParameterMapper {
     private final TypeMapper typeMapper;
     private final Location location;
     private final PathSegment.Kind pathSegmentKind;
-    private final List<OpenAPIMapperDiagnostic> diagnostics;
 
-    public PathParameterMapper(PathParameterSymbol pathParameterSymbol, Components components,
-                               Map<String, String> apiDocs, OperationInventory operationInventory,
-                               AdditionalData additionalData) {
+    public PathParameterMapper(PathParameterSymbol pathParameterSymbol, Map<String, String> apiDocs,
+                               OperationInventory operationInventory, TypeMapper typeMapper) {
         super(operationInventory);
         this.location = pathParameterSymbol.getLocation().orElse(null);
         this.pathSegmentKind = pathParameterSymbol.pathSegmentKind();
         this.type = pathParameterSymbol.typeDescriptor();
-        this.typeMapper = new TypeMapperImpl(components, additionalData);
+        this.typeMapper = typeMapper;
         this.name = unescapeIdentifier(pathParameterSymbol.getName().get());
         this.description = apiDocs.get(removeStartingSingleQuote(pathParameterSymbol.getName().get()));
-        this.diagnostics = additionalData.diagnostics();
     }
 
     @Override
-    public PathParameter getParameterSchema() {
+    public PathParameter getParameterSchema() throws ParameterMapperException {
         if (pathSegmentKind.equals(PathSegment.Kind.PATH_REST_PARAMETER)) {
-            DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_125;
-            IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage, location, name);
-            diagnostics.add(error);
-            return null;
+            ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_125, location, name);
+            throw new ParameterMapperException(error);
         }
         PathParameter pathParameter = new PathParameter();
         pathParameter.setName(name);

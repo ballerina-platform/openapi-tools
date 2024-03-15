@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.service.mapper.model;
 
+import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
@@ -35,6 +36,7 @@ public class ModuleMemberVisitor extends NodeVisitor {
 
     Set<TypeDefinitionNode> typeDefinitionNodes = new LinkedHashSet<>();
     Set<ListenerDeclarationNode> listenerDeclarationNodes = new LinkedHashSet<>();
+    Set<ClassDefinitionNode> interceptorServiceClassNodes = new LinkedHashSet<>();
 
     @Override
     public void visit(TypeDefinitionNode typeDefinitionNode) {
@@ -46,6 +48,11 @@ public class ModuleMemberVisitor extends NodeVisitor {
         listenerDeclarationNodes.add(listenerDeclarationNode);
     }
 
+    @Override
+    public void visit(ClassDefinitionNode classDefinitionNode) {
+        interceptorServiceClassNodes.add(classDefinitionNode);
+    }
+
     public Set<ListenerDeclarationNode> getListenerDeclarationNodes() {
         return listenerDeclarationNodes;
     }
@@ -54,6 +61,15 @@ public class ModuleMemberVisitor extends NodeVisitor {
         for (TypeDefinitionNode typeDefinitionNode : typeDefinitionNodes) {
             if (MapperCommonUtils.unescapeIdentifier(typeDefinitionNode.typeName().text()).equals(typeName)) {
                 return Optional.of(typeDefinitionNode);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<ClassDefinitionNode> getInterceptorServiceClassNode(String typeName) {
+        for (ClassDefinitionNode classDefinitionNode : interceptorServiceClassNodes) {
+            if (MapperCommonUtils.unescapeIdentifier(classDefinitionNode.className().text()).equals(typeName)) {
+                return Optional.of(classDefinitionNode);
             }
         }
         return Optional.empty();

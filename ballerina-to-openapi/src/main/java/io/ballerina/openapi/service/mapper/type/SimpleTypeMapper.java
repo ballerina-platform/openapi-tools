@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.service.mapper.type;
 
+import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
@@ -59,7 +60,17 @@ public class SimpleTypeMapper extends AbstractTypeMapper {
     }
 
     public static Schema getTypeSchema(TypeSymbol typeSymbol, AdditionalData additionalData) {
-        switch (typeSymbol.typeKind()) {
+        Schema schema = getSchema(typeSymbol.typeKind());
+        if (Objects.isNull(schema)) {
+            ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_121,
+                    MapperCommonUtils.getTypeName(typeSymbol));
+            additionalData.diagnostics().add(error);
+        }
+        return schema;
+    }
+
+    public static Schema getSchema(TypeDescKind typeKind) {
+        switch (typeKind) {
             case STRING:
             case STRING_CHAR:
                 return new StringSchema();
@@ -95,10 +106,6 @@ public class SimpleTypeMapper extends AbstractTypeMapper {
             case ANYDATA:
                 return new Schema();
             default:
-                DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_121;
-                ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
-                        message.getDescription(), null, MapperCommonUtils.getTypeName(typeSymbol));
-                additionalData.diagnostics().add(error);
                 return null;
         }
     }
