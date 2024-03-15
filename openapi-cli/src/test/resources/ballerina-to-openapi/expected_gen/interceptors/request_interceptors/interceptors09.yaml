@@ -1,0 +1,163 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /hello:
+    get:
+      operationId: getHello
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+  /foo/bar/3:
+    post:
+      operationId: postFooBar3
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Course'
+                  - $ref: '#/components/schemas/Person'
+  /foo/bar:
+    get:
+      operationId: getFooBar
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+  /bar/foo/4/2/2/1:
+    post:
+      operationId: postBarFoo4221
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Course'
+                  - type: integer
+                    format: int64
+  /{path1}/{path2}/{path}/4:
+    post:
+      operationId: postPath1Path2Path4
+      parameters:
+        - name: path1
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - bar
+              - foo
+        - name: path2
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - foo
+              - bar
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            enum:
+              - 1
+              - 2
+              - 3
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        default:
+          description: Any Response
+          content:
+            '*/*':
+              schema:
+                description: Any type of entity body
+        "202":
+          description: Accepted
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    Course:
+      required:
+        - duration
+        - lecturer
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        duration:
+          type: integer
+          format: int64
+        lecturer:
+          type: string
+      additionalProperties: false
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Person:
+      required:
+        - address
+        - age
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        age:
+          type: integer
+          format: int64
+        address:
+          type: string
+      additionalProperties: false

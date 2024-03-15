@@ -248,9 +248,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/Pet'
-                  - $ref: '#/components/schemas/Dog'
+                $ref: '#/components/schemas/ReturnValueRecUnion'
         "400":
           description: BadRequest
           content:
@@ -439,6 +437,10 @@ components:
           format: float
         - type: integer
           format: int64
+    ReturnValueRecUnion:
+      oneOf:
+        - $ref: '#/components/schemas/Pet'
+        - $ref: '#/components/schemas/Dog'
     ReturnValueStr:
       type: string
     ReturnValueXML:

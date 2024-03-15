@@ -36,13 +36,13 @@ import java.util.Objects;
 public abstract class AbstractParameterMapper {
     final OperationInventory operationInventory;
 
-    abstract Parameter getParameterSchema();
+    abstract Parameter getParameterSchema() throws ParameterMapperException;
 
     protected AbstractParameterMapper(OperationInventory operationInventory) {
         this.operationInventory = operationInventory;
     }
 
-    public List<Parameter> getParameterSchemaList() {
+    public List<Parameter> getParameterSchemaList() throws ParameterMapperException {
         Parameter parameter = getParameterSchema();
         if (Objects.nonNull(parameter)) {
             return List.of(parameter);
@@ -50,7 +50,7 @@ public abstract class AbstractParameterMapper {
         return List.of();
     }
 
-    public void setParameter() {
+    public void setParameter() throws ParameterMapperException {
         List<Parameter> parameterList = getParameterSchemaList();
         parameterList.forEach(operationInventory::setParameter);
     }

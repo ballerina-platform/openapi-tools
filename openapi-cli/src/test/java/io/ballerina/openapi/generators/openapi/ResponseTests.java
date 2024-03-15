@@ -160,7 +160,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , true);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario19.yaml");
     }
 
@@ -170,7 +170,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , true);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario20.yaml");
     }
 
@@ -180,7 +180,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/rs_with_url_encode.yaml");
     }
 
@@ -190,7 +190,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/rs_with_payload.yaml");
     }
 
@@ -200,7 +200,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/rs_with_payload_service_config.yaml");
     }
 
@@ -211,7 +211,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath,
                 "response/rs_with_service_and_payload_annotation.yaml");
     }
@@ -222,7 +222,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/response_code.yaml");
     }
 
@@ -232,7 +232,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/no_body_field.yaml");
     }
 
@@ -242,7 +242,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/float.yaml");
     }
 
@@ -252,7 +252,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/decimal.yaml");
     }
 
@@ -262,7 +262,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/byte.yaml");
     }
 
@@ -272,7 +272,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/same_status_code.yaml");
     }
 
@@ -282,7 +282,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/simple_name_ref.yaml");
     }
 
@@ -292,7 +292,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/readonly.yaml");
     }
 
@@ -302,7 +302,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
 
         compareWithGeneratedFile(ballerinaFilePath, "response/deprecated_status_code.yaml");
     }
@@ -313,7 +313,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/service_config_with_cors.yaml");
     }
 
@@ -323,7 +323,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/service_with_error_and_internal_server_error.yaml");
     }
 
@@ -333,7 +333,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/service_with_same_status_code.yaml");
     }
 
@@ -343,7 +343,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"),
                 "response/service_config_with_cors_with_slash.yaml");
         OASContractGenerator openApiConverter = new OASContractGenerator();
@@ -361,7 +361,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"),
                 "response/service_config_with_cors_without_base_path.yaml");
         OASContractGenerator openApiConverter = new OASContractGenerator();
@@ -379,7 +379,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/nil_return_type.yaml");
     }
 
@@ -389,7 +389,7 @@ public class ResponseTests {
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , false);
-        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertTrue(openApiConverterUtils.getDiagnostics().isEmpty());
         compareWithGeneratedFile(ballerinaFilePath, "response/nil_union_return_type.yaml");
     }
 

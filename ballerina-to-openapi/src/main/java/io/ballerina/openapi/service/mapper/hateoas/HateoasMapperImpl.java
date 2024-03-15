@@ -25,6 +25,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.Constants;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.links.Link;
@@ -37,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static io.ballerina.openapi.service.mapper.hateoas.Constants.BALLERINA_LINKEDTO_KEYWORD;
@@ -56,6 +58,9 @@ public class HateoasMapperImpl implements HateoasMapper {
     public void setOpenApiLinks(ServiceDeclarationNode serviceNode, OpenAPI openAPI) {
         Paths paths = openAPI.getPaths();
         Service hateoasService = extractHateoasMetaInfo(serviceNode);
+        if (hateoasService.getHateoasResourceMapping().isEmpty()) {
+            return;
+        }
         for (Node node: serviceNode.members()) {
             if (!node.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
                 continue;
@@ -96,32 +101,21 @@ public class HateoasMapperImpl implements HateoasMapper {
         }
         PathItem openApiResource = paths.get(resourcePath);
         String httpMethod = resource.functionName().toString().trim();
-        ApiResponses responses = null;
-        switch (httpMethod.trim().toUpperCase(Locale.ENGLISH)) {
-            case Constants.GET -> {
-                responses = openApiResource.getGet().getResponses();
-            }
-            case Constants.PUT -> {
-                responses = openApiResource.getPut().getResponses();
-            }
-            case Constants.POST -> {
-                responses = openApiResource.getPost().getResponses();
-            }
-            case Constants.DELETE -> {
-                responses = openApiResource.getDelete().getResponses();
-            }
-            case Constants.OPTIONS -> {
-                responses = openApiResource.getOptions().getResponses();
-            }
-            case Constants.PATCH -> {
-                responses = openApiResource.getPatch().getResponses();
-            }
-            case Constants.HEAD -> {
-                responses = openApiResource.getHead().getResponses();
-            }
-            default -> { }
-        }
-        return Optional.ofNullable(responses);
+        Operation operation = getOperation(httpMethod, openApiResource);
+        return Objects.isNull(operation) ? Optional.empty() : Optional.ofNullable(operation.getResponses());
+    }
+
+    private static Operation getOperation(String httpMethod, PathItem openApiResource) {
+        return switch (httpMethod.trim().toUpperCase(Locale.ENGLISH)) {
+            case Constants.GET -> openApiResource.getGet();
+            case Constants.PUT -> openApiResource.getPut();
+            case Constants.POST -> openApiResource.getPost();
+            case Constants.DELETE -> openApiResource.getDelete();
+            case Constants.OPTIONS -> openApiResource.getOptions();
+            case Constants.PATCH -> openApiResource.getPatch();
+            case Constants.HEAD -> openApiResource.getHead();
+            default -> null;
+        };
     }
 
     private void setOpenApiLinksInApiResponse(Service hateoasService, FunctionDefinitionNode resource,

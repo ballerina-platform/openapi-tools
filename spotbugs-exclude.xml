@@ -19,4 +19,14 @@
     <Match>
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2, MS_EXPOSE_REP"/>
     </Match>
+    <Match>
+        <Class name="io.ballerina.openapi.service.mapper.interceptor.resource.NamedPathSegmentNode" />
+        <Method name="matches"/>
+        <Bug pattern="BC_UNCONFIRMED_CAST" />
+    </Match>
+    <Match>
+        <Class name="io.ballerina.openapi.service.mapper.interceptor.resource.PathParameterSegmentNode" />
+        <Method name="matches"/>
+        <Bug pattern="BC_UNCONFIRMED_CAST" />
+    </Match>
 </FindBugsFilter>

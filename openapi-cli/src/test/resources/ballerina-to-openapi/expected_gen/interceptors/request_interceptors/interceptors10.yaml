@@ -1,0 +1,390 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /foo/{p1}/{p2}/2.0/{p3}/4:
+    get:
+      operationId: getFooP1P220P34
+      parameters:
+        - name: p1
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: p2
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - foo
+              - bar
+        - name: p3
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            enum:
+              - 1
+              - 2
+              - 3
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Course'
+                  - $ref: '#/components/schemas/NewCourse'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /foo/bar/{p2}/2.0/{p3}/4:
+    get:
+      operationId: getFooBarP220P34
+      parameters:
+        - name: p2
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - foo
+              - "no"
+        - name: p3
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            enum:
+              - 1
+              - 2
+              - 3
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewCourse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+    post:
+      operationId: postFooBarP220P34
+      parameters:
+        - name: p2
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - foo
+              - bar
+        - name: p3
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            enum:
+              - 1
+              - 2
+              - 3
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Course'
+                  - $ref: '#/components/schemas/NewCourse'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "501":
+          description: NotImplemented
+          content:
+            application/json:
+              schema:
+                required:
+                  - courses
+                  - message
+                type: object
+                properties:
+                  message:
+                    type: string
+                  courses:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Course'
+                additionalProperties:
+                  oneOf:
+                    - type: integer
+                      format: int64
+                    - type: string
+        "505":
+          description: HttpVersionNotSupported
+          content:
+            application/json:
+              schema:
+                required:
+                  - messgage
+                  - version
+                type: object
+                properties:
+                  messgage:
+                    type: string
+                  version:
+                    type: string
+                additionalProperties: false
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /foo/baz/{p2}/2.2/{p3}/4:
+    get:
+      operationId: getFooBazP222P34
+      parameters:
+        - name: p2
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - foo
+              - bar
+        - name: p3
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            enum:
+              - 1
+              - 2
+              - 3
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewCourse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /foo/{p1}/{p2}/2.0/{p3}/4/bar:
+    get:
+      operationId: getFooP1P220P34Bar
+      parameters:
+        - name: p1
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: p2
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - foo
+              - bar
+        - name: p3
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            enum:
+              - 1
+              - 2
+              - 3
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewCourse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /foo/bar/{p2}/2.0/{p3}/4/5:
+    post:
+      operationId: postFooBarP220P345
+      parameters:
+        - name: p2
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - foo
+              - bar
+        - name: p3
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            enum:
+              - 1
+              - 2
+              - 3
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Course'
+                  - $ref: '#/components/schemas/NewCourse'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /foo/bar/{p2}/2.0/{p3}/7/5:
+    post:
+      operationId: postFooBarP220P375
+      parameters:
+        - name: p2
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - foo
+              - bar
+        - name: p3
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            enum:
+              - 1
+              - 2
+              - 3
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Course'
+                  - $ref: '#/components/schemas/NewCourse'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    Course:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: integer
+          format: int64
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    NewCourse:
+      required:
+        - newId
+        - newName
+      type: object
+      properties:
+        newName:
+          type: string
+        newId:
+          type: integer
+          format: int64
+      additionalProperties: false

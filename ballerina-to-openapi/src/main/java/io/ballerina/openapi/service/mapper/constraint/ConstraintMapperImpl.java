@@ -33,7 +33,6 @@ import io.ballerina.compiler.syntax.tree.TemplateExpressionNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
-import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.swagger.v3.oas.models.Components;
@@ -132,9 +131,8 @@ public class ConstraintMapperImpl implements ConstraintMapper {
                 default -> { }
             }
         } catch (ParseException parseException) {
-            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_114;
-            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
-                    error.getDescription(), null, parseException.getMessage());
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_114,
+                    parseException.getMessage());
             diagnostics.add(diagnostic);
         }
     }
@@ -333,8 +331,7 @@ public class ConstraintMapperImpl implements ConstraintMapper {
                 .filter(annotation -> annotation.annotValue().isPresent())
                 .forEach(annotation -> {
                     if (isDateConstraint(annotation)) {
-                        DiagnosticMessages errorMsg = DiagnosticMessages.OAS_CONVERTOR_120;
-                        IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMsg,
+                        ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_120,
                                 annotation.location(), annotation.toString());
                         diagnostics.add(error);
                         return;
@@ -392,8 +389,7 @@ public class ConstraintMapperImpl implements ConstraintMapper {
                 if (regexContent.matches(REGEX_INTERPOLATION_PATTERN)) {
                     return Optional.of(regexContent);
                 } else {
-                    DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_119;
-                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                    ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_119,
                             exprNode.location(), regexContent);
                     diagnostics.add(error);
                     return Optional.empty();
@@ -406,8 +402,7 @@ public class ConstraintMapperImpl implements ConstraintMapper {
                         .flatMap(node -> ((SpecificFieldNode) node).valueExpr()
                                 .flatMap(this::extractFieldValue));
             default:
-                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_118;
-                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_118,
                         exprNode.location(), exprNode.toString());
                 diagnostics.add(error);
                 return Optional.empty();

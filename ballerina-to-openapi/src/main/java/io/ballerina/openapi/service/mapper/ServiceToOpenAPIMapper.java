@@ -20,10 +20,8 @@ package io.ballerina.openapi.service.mapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -31,13 +29,10 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.service.mapper.constraint.ConstraintMapper;
-import io.ballerina.openapi.service.mapper.constraint.ConstraintMapperImpl;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapper;
-import io.ballerina.openapi.service.mapper.hateoas.HateoasMapperImpl;
-import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
@@ -55,7 +50,6 @@ import java.util.Set;
 
 import static io.ballerina.openapi.service.mapper.Constants.HYPHEN;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.containErrors;
-import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractServiceAnnotationDetails;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpenApiFileName;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.isHttpService;
 
@@ -88,18 +82,15 @@ public final class ServiceToOpenAPIMapper {
         List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
         List<OASResult> outputs = new ArrayList<>();
         if (containErrors(semanticModel.diagnostics())) {
-            DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_106;
-            ExceptionDiagnostic error = new ExceptionDiagnostic(messages.getCode(), messages.getDescription(),
-                    null);
+            ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_106);
             diagnostics.add(error);
         } else {
             ModulePartNode modulePartNode = syntaxTree.rootNode();
             extractServiceNodes(serviceName, availableService, servicesToGenerate, modulePartNode, semanticModel);
             // If there are no services found for a given mapper name.
             if (serviceName != null && servicesToGenerate.isEmpty()) {
-                DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_107;
-                ExceptionDiagnostic error = new ExceptionDiagnostic(messages.getCode(), messages.getDescription(),
-                        null, serviceName, availableService.toString());
+                ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_107, serviceName,
+                        availableService.toString());
                 diagnostics.add(error);
             }
             // Generating openapi specification for selected services
@@ -183,15 +174,15 @@ public final class ServiceToOpenAPIMapper {
      * Provides an instance of {@code OASResult}, which contains the generated contract as well as
      * all the diagnostics information.
      *
-     * @param oasGenerationMetaInfo    Includes the service definition node, endpoints, semantic model, openapi file
-     *                                 name and ballerina file path
+     * @param oasGenerationMetaInfo Includes the service definition node, endpoints, semantic model, openapi file
+     *                              name and ballerina file path
      * @return {@code OASResult}
      */
     public static OASResult generateOAS(OASGenerationMetaInfo oasGenerationMetaInfo) {
         ServiceDeclarationNode serviceDefinition = oasGenerationMetaInfo.getServiceDeclarationNode();
+        SemanticModel semanticModel = oasGenerationMetaInfo.getSemanticModel();
         ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(oasGenerationMetaInfo.getProject());
         Set<ListenerDeclarationNode> listeners = moduleMemberVisitor.getListenerDeclarationNodes();
-        SemanticModel semanticModel = oasGenerationMetaInfo.getSemanticModel();
         String openApiFileName = oasGenerationMetaInfo.getOpenApiFileName();
         Path ballerinaFilePath = oasGenerationMetaInfo.getBallerinaFilePath();
         // 01.Fill the openAPI info section
@@ -201,18 +192,23 @@ public final class ServiceToOpenAPIMapper {
             OpenAPI openapi = oasResult.getOpenAPI().get();
             List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
             if (openapi.getPaths() == null) {
-                // Take base path of service
-                // 02. Filter and set the ServerURLs according to endpoints. Complete the server section in OAS
-                ServersMapper serversMapperImpl = new ServersMapperImpl(openapi, listeners, serviceDefinition);
+                ServiceMapperFactory serviceMapperFactory = new ServiceMapperFactory(openapi, semanticModel,
+                        moduleMemberVisitor, diagnostics, serviceDefinition);
+
+                ServersMapper serversMapperImpl = serviceMapperFactory.getServersMapper(listeners, serviceDefinition);
                 serversMapperImpl.setServers();
-                // 03. Filter path and component sections in OAS.
-                // Generate openApi string for the mentioned service name.
-                convertServiceToOpenAPI(serviceDefinition, openapi, semanticModel, moduleMemberVisitor, diagnostics);
-                ConstraintMapper constraintMapper = new ConstraintMapperImpl(openapi, moduleMemberVisitor,
-                        diagnostics);
+
+                convertServiceToOpenAPI(serviceDefinition, serviceMapperFactory);
+
+                ConstraintMapper constraintMapper = serviceMapperFactory.getConstraintMapper();
                 constraintMapper.setConstraints();
-                HateoasMapper hateoasMapper = new HateoasMapperImpl();
+
+                HateoasMapper hateoasMapper = serviceMapperFactory.getHateoasMapper();
                 hateoasMapper.setOpenApiLinks(serviceDefinition, openapi);
+
+                if (openapi.getComponents().getSchemas().isEmpty()) {
+                    openapi.setComponents(null);
+                }
                 return new OASResult(openapi, diagnostics);
             } else {
                 return new OASResult(openapi, oasResult.getDiagnostics());
@@ -239,9 +235,8 @@ public final class ServiceToOpenAPIMapper {
         return balNodeVisitor;
     }
 
-    private static void convertServiceToOpenAPI(ServiceDeclarationNode serviceNode, OpenAPI openAPI,
-                                                SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
-                                                List<OpenAPIMapperDiagnostic> diagnostics) {
+    private static void convertServiceToOpenAPI(ServiceDeclarationNode serviceNode,
+                                                ServiceMapperFactory serviceMapperFactory) {
         NodeList<Node> functions = serviceNode.members();
         List<FunctionDefinitionNode> resources = new ArrayList<>();
         for (Node function: functions) {
@@ -250,27 +245,7 @@ public final class ServiceToOpenAPIMapper {
                 resources.add((FunctionDefinitionNode) function);
             }
         }
-        AdditionalData additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
-        ResourceMapper resourceMapper = new ResourceMapperImpl(openAPI, resources, additionalData,
-                isTreatNilableAsOptionalParameter(serviceNode));
+        ResourceMapper resourceMapper = serviceMapperFactory.getResourceMapper(resources);
         resourceMapper.setOperation();
-    }
-
-    private static boolean isTreatNilableAsOptionalParameter(ServiceDeclarationNode serviceNode) {
-        if (serviceNode.metadata().isEmpty()) {
-            return true;
-        }
-
-        MetadataNode metadataNode = serviceNode.metadata().get();
-        NodeList<AnnotationNode> annotations = metadataNode.annotations();
-
-        if (!annotations.isEmpty()) {
-            Optional<String> values = extractServiceAnnotationDetails(annotations,
-                    "http:ServiceConfig", "treatNilableAsOptional");
-            if (values.isPresent()) {
-                return values.get().equals(Constants.TRUE);
-            }
-        }
-        return true;
     }
 }

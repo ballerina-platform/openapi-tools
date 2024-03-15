@@ -33,11 +33,12 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.openapi.service.mapper.Constants;
+import io.ballerina.openapi.service.mapper.ServiceMapperFactory;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.mapper.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
-import io.swagger.v3.oas.models.Components;
+import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -60,23 +61,23 @@ import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_SUMMARY;
 public class ParameterMapperImpl implements ParameterMapper {
     private final FunctionDefinitionNode functionDefinitionNode;
     private final OperationInventory operationInventory;
-    private final Map<String, String> apidocs;
+    private final Map<String, String> apiDocs;
     private final AdditionalData additionalData;
-    private final Components components;
     private final boolean treatNilableAsOptional;
+    private final TypeMapper typeMapper;
 
     public ParameterMapperImpl(FunctionDefinitionNode functionDefinitionNode, OperationInventory operationInventory,
-                               Components components, Map<String, String> apiDocs, AdditionalData additionalData,
-                               Boolean treatNilableAsOptional) {
+                               Map<String, String> apiDocs, AdditionalData additionalData,
+                               Boolean treatNilableAsOptional, ServiceMapperFactory serviceMapperFactory) {
         this.functionDefinitionNode = functionDefinitionNode;
         this.operationInventory = operationInventory;
-        this.apidocs = apiDocs;
+        this.apiDocs = apiDocs;
         this.additionalData = additionalData;
-        this.components = components;
         this.treatNilableAsOptional = treatNilableAsOptional;
+        this.typeMapper = serviceMapperFactory.getTypeMapper();
     }
 
-    public void setParameters() {
+    public void setParameters() throws ParameterMapperException {
         NodeList<Node> pathParams = functionDefinitionNode.relativeResourcePath();
         if (!pathParams.isEmpty()) {
             setPathParameters(pathParams);
@@ -91,8 +92,7 @@ public class ParameterMapperImpl implements ParameterMapper {
             }
             if ((parameterType.equals("REQUEST") || parameterType.equals("PAYLOAD")) &&
                     (Constants.GET.equalsIgnoreCase(operationInventory.getHttpOperation()))) {
-                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
-                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_113,
                         parameterNode.location());
                 additionalData.diagnostics().add(error);
                 continue;
@@ -101,16 +101,16 @@ public class ParameterMapperImpl implements ParameterMapper {
         }
     }
 
-    private void setParameter(ParameterNode parameterNode, String parameterType) {
+    private void setParameter(ParameterNode parameterNode, String parameterType) throws ParameterMapperException {
         switch (parameterType) {
             case "QUERY" -> {
-                QueryParameterMapper queryParameterMapper = new QueryParameterMapper(parameterNode, apidocs,
-                        operationInventory, components, treatNilableAsOptional, additionalData);
+                QueryParameterMapper queryParameterMapper = new QueryParameterMapper(parameterNode, apiDocs,
+                        operationInventory, treatNilableAsOptional, additionalData, typeMapper);
                 queryParameterMapper.setParameter();
             }
             case "HEADER" -> {
-                HeaderParameterMapper headerParameterMapper = new HeaderParameterMapper(parameterNode, apidocs,
-                        operationInventory, components, treatNilableAsOptional, additionalData);
+                HeaderParameterMapper headerParameterMapper = new HeaderParameterMapper(parameterNode, apiDocs,
+                        operationInventory, treatNilableAsOptional, additionalData, typeMapper);
                 headerParameterMapper.setParameter();
             }
             case "PAYLOAD" -> {
@@ -120,7 +120,7 @@ public class ParameterMapperImpl implements ParameterMapper {
                 }
                 AnnotationNode annotation = getPayloadAnnotation(parameterNode);
                 RequestBodyMapper requestBodyMapper = new RequestBodyMapper((ParameterSymbol) symbol.get(), annotation,
-                        operationInventory, functionDefinitionNode, components, apidocs, additionalData);
+                        operationInventory, functionDefinitionNode, apiDocs, additionalData, typeMapper);
                 requestBodyMapper.setRequestBody();
             }
             case "REQUEST" -> {
@@ -152,13 +152,13 @@ public class ParameterMapperImpl implements ParameterMapper {
         return null;
     }
 
-    private void setPathParameters(NodeList<Node> pathParams) {
+    private void setPathParameters(NodeList<Node> pathParams) throws ParameterMapperException {
         for (Node param: pathParams) {
             if (param instanceof ResourcePathParameterNode pathParam) {
                 SemanticModel semanticModel = additionalData.semanticModel();
                 PathParameterSymbol pathParameterSymbol = (PathParameterSymbol) semanticModel.symbol(pathParam).get();
-                PathParameterMapper pathParameterMapper = new PathParameterMapper(pathParameterSymbol, components,
-                        apidocs, operationInventory, additionalData);
+                PathParameterMapper pathParameterMapper = new PathParameterMapper(pathParameterSymbol, apiDocs,
+                        operationInventory, typeMapper);
                 pathParameterMapper.setParameter();
             }
         }

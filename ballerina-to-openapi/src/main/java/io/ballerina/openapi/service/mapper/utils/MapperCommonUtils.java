@@ -250,31 +250,25 @@ public class MapperCommonUtils {
         parseOptions.setResolveFully(true);
 
         if (!Files.exists(contractPath)) {
-            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
-            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
-                    error.getDescription(), null);
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_110);
             diagnostics.add(diagnostic);
         }
         if (!(definitionURI.endsWith(Constants.YAML_EXTENSION) || definitionURI.endsWith(Constants.JSON_EXTENSION)
                 || definitionURI.endsWith(Constants.YML_EXTENSION))) {
-            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
-            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
-                    error.getDescription(), null);
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_110);
             diagnostics.add(diagnostic);
         }
         String openAPIFileContent = null;
         try {
             openAPIFileContent = Files.readString(contractPath);
         } catch (IOException e) {
-            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
-            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(), error.getDescription(), null,
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_108,
                     e.toString());
             diagnostics.add(diagnostic);
         }
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
-            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_112;
-            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(), error.getDescription(), null);
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_112);
             diagnostics.add(diagnostic);
             return new OASResult(null, diagnostics);
         }
