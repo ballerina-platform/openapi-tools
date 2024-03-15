@@ -13,6 +13,12 @@ paths:
   /pet:
     post:
       operationId: postPet
+      parameters:
+        - name: annotStr
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/AnnotatedString'
       requestBody:
         content:
           application/json:
@@ -36,6 +42,8 @@ paths:
                 $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
+    AnnotatedString:
+      type: string
     ErrorPayload:
       required:
         - message
@@ -64,13 +72,20 @@ components:
       minLength: 10
       pattern: "^[a-zA-Z0-9_]+$"
       type: string
+    St_Roll_No:
+      minLength: 5
+      allOf:
+        - $ref: '#/components/schemas/St_ID'
     StudentRecord:
       required:
         - id
+        - rollNo
       type: object
       properties:
         id:
           $ref: '#/components/schemas/St_ID'
+        rollNo:
+          $ref: '#/components/schemas/St_Roll_No'
         name:
           pattern: "^[a-zA-Z]+$"
           type: string

@@ -71,6 +71,25 @@ paths:
             text/plain:
               schema:
                 type: string
+  /pet4:
+    post:
+      operationId: postPet4
+      responses:
+        "200":
+          description: Ok
+          headers:
+            header2:
+              required: true
+              schema:
+                type: string
+            header1:
+              required: true
+              schema:
+                type: string
+          content:
+            text/plain:
+              schema:
+                type: string
 components:
   schemas:
     User:

@@ -84,7 +84,7 @@ public class BallerinaCodeGenerator {
     private String licenseHeader = "";
     private boolean includeTestFiles;
 
-    private static final PrintStream outStream = System.err;
+    private static final PrintStream outStream = System.out;
 
     /**
      * Generates ballerina source for provided Open API Definition in {@code definitionPath}.
@@ -108,37 +108,17 @@ public class BallerinaCodeGenerator {
         OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPIPath, !isResource);
         checkOpenAPIVersion(openAPIDef);
         // Generate service
-        String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
-        String srcFile = concatTitle + "_service.bal";
-        io.ballerina.openapi.core.typegenerator.model.Filter filter1 =
-                new io.ballerina.openapi.core.typegenerator.model.Filter();
-        filter1.setOperations(filter.getOperations());
-        filter1.setTags(filter.getTags());
-        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
-                .withOpenAPI(openAPIDef)
-                .withFilters(filter1)
-                .withNullable(nullable)
-                .withGenerateServiceType(generateServiceType)
-                .withGenerateWithoutDataBinding(generateWithoutDataBinding)
-                .build();
-        BallerinaServiceGenerator serviceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
-        String serviceContent = null;
-        try {
-            serviceContent = Formatter.format
-                    (serviceGenerator.generateSyntaxTree()).toSourceCode();
-        } catch (io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException e) {
-            throw new io.ballerina.openapi.core.exception.BallerinaOpenApiException(e.getMessage(), e.getCause());
-        }
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile,
-                (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + serviceContent));
-
-        if (generateServiceType) {
-            BallerinaServiceObjectGenerator ballerinaServiceObjectGenerator = new
-                    BallerinaServiceObjectGenerator(serviceGenerator.getFunctionList());
-            String serviceType = Formatter.format(ballerinaServiceObjectGenerator.generateSyntaxTree()).toSourceCode();
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
-                    "service_type.bal", (licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
-                    licenseHeader) + serviceType));
+        String serviceTitle = serviceName.toLowerCase(Locale.ENGLISH);
+        String srcFile = String.format("%s_service.bal", serviceTitle);
+        List<String> complexPaths = GeneratorUtils.getComplexPaths(openAPIDef);
+        if (!complexPaths.isEmpty()) {
+            isResource = false;
+            outStream.println("WARNING: remote function(s) will be generated for client and the service" +
+                    " generation can not be proceed due to the given openapi definition contains following" +
+                    " complex path(s):");
+            for (String path: complexPaths) {
+                outStream.println(path);
+            }
         }
         // Generate client.
         // Generate ballerina client remote.
@@ -162,28 +142,49 @@ public class BallerinaCodeGenerator {
                     (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + utilContent));
         }
 
-//        //Update type definition list
-//        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
-//                clientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
-//        List<TypeDefinitionNode> typeInclusionRecords = serviceGenerator.getTypeInclusionRecords();
-//        List<TypeDefinitionNode> typeDefinitionNodeList = clientGenerator.getTypeDefinitionNodeList();
-//        preGeneratedTypeDefNodes.addAll(typeInclusionRecords);
-//        preGeneratedTypeDefNodes.addAll(typeDefinitionNodeList);
-//
-//        // Generate ballerina types.
-//        // Generate ballerina records to represent schemas.
-//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
-//                openAPIDef, nullable, preGeneratedTypeDefNodes);
+        //Update type definition list
+        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
+                clientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
+        List<TypeDefinitionNode> typeDefinitionNodeList = clientGenerator.getTypeDefinitionNodeList();
+        preGeneratedTypeDefNodes.addAll(typeDefinitionNodeList);
+        String serviceContent = "";
+        if (complexPaths.isEmpty()) {
+            io.ballerina.openapi.core.typegenerator.model.Filter filter1 =
+                    new io.ballerina.openapi.core.typegenerator.model.Filter();
+            filter1.setOperations(filter.getOperations());
+            filter1.setTags(filter.getTags());
+            OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                    .withOpenAPI(openAPIDef)
+                    .withFilters(filter1)
+                    .withNullable(nullable)
+                    .withGenerateServiceType(generateServiceType)
+                    .withGenerateWithoutDataBinding(generateWithoutDataBinding)
+                    .build();
+            BallerinaServiceGenerator serviceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+            serviceContent = Formatter.format
+                    (serviceGenerator.generateSyntaxTree()).toSourceCode();
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile,
+                    (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + serviceContent));
+
+            if (generateServiceType) {
+                BallerinaServiceObjectGenerator ballerinaServiceObjectGenerator = new
+                        BallerinaServiceObjectGenerator(serviceGenerator.getFunctionList());
+                String serviceType = Formatter.format(ballerinaServiceObjectGenerator.generateSyntaxTree()).
+                        toSourceCode();
+                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
+                        "service_type.bal", (licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
+                        licenseHeader) + serviceType));
+            }
+        }
 
         TypeHandler typeHandler = TypeHandler.getInstance();
         SyntaxTree schemaSyntaxTree = typeHandler.generateTypeSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
 
-        if (filter.getTags().size() > 0) {
-            // Remove unused records and enums when generating the client by the tags given.
-            schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, clientContent, schemaContent,
-                    serviceContent);
-        }
+        // Remove unused records and enums when generating the client and service.
+        schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, clientContent, schemaContent,
+                serviceContent);
+
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
                     (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaContent));
@@ -235,9 +236,10 @@ public class BallerinaCodeGenerator {
             io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
-        List<GenSrcFile> genFiles;
-        genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource);
-        writeGeneratedSources(genFiles, srcPath, implPath, GEN_CLIENT);
+        List<GenSrcFile> genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource);
+        if (!genFiles.isEmpty()) {
+            writeGeneratedSources(genFiles, srcPath, implPath, GEN_CLIENT);
+        }
     }
 
     /**
@@ -254,16 +256,13 @@ public class BallerinaCodeGenerator {
      */
     public void generateService(String definitionPath, String serviceName, String outPath, Filter filter,
                                 boolean nullable, boolean generateServiceType, boolean generateWithoutDataBinding)
-            throws IOException, FormatterException, io.ballerina.openapi.core.exception.BallerinaOpenApiException,
-            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
+            throws IOException, BallerinaOpenApiException, FormatterException {
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
-        List<GenSrcFile> genFiles = null;
-        try {
-            genFiles = generateBallerinaService(Paths.get(definitionPath), serviceName,
-                    filter, nullable, generateServiceType, generateWithoutDataBinding);
-        } catch (BallerinaOpenApiException e) {
-            throw new io.ballerina.openapi.core.exception.BallerinaOpenApiException(e.getMessage(), e.getCause());
+        List<GenSrcFile> genFiles = generateBallerinaService(Paths.get(definitionPath), serviceName,
+                filter, nullable, generateServiceType, generateWithoutDataBinding);
+        if (genFiles.isEmpty()) {
+            return;
         }
         writeGeneratedSources(genFiles, srcPath, implPath, GEN_SERVICE);
     }
@@ -352,8 +351,7 @@ public class BallerinaCodeGenerator {
      * @throws IOException when code generation with specified templates fails
      */
     private List<GenSrcFile> generateClientFiles(Path openAPI, Filter filter, boolean nullable, boolean isResource)
-            throws IOException, FormatterException, io.ballerina.openapi.core.exception.BallerinaOpenApiException,
-            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
+            throws IOException, BallerinaOpenApiException, FormatterException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_CLIENT_PKG;
         }
@@ -361,6 +359,16 @@ public class BallerinaCodeGenerator {
         // Normalize OpenAPI definition
         OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, !isResource);
         checkOpenAPIVersion(openAPIDef);
+        // Validate the service generation
+        List<String> complexPaths = GeneratorUtils.getComplexPaths(openAPIDef);
+        if (!complexPaths.isEmpty()) {
+            outStream.println("WARNING: remote function(s) will be generated for client due to the given openapi " +
+                    "definition contains following complex path(s):");
+            for (String path: complexPaths) {
+                outStream.println(path);
+            }
+            isResource = false;
+        }
         // Generate ballerina service and resources.
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -420,10 +428,9 @@ public class BallerinaCodeGenerator {
 
 
     public List<GenSrcFile> generateBallerinaService(Path openAPI, String serviceName,
-                                                     Filter filter, boolean nullable, boolean generateServiceType,
+                                                      Filter filter, boolean nullable, boolean generateServiceType,
                                                      boolean generateWithoutDataBinding)
-            throws IOException, FormatterException, io.ballerina.openapi.core.exception.BallerinaOpenApiException,
-            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
+            throws IOException, FormatterException, BallerinaOpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_MOCK_PKG;
         }
@@ -440,7 +447,16 @@ public class BallerinaCodeGenerator {
         } else {
             openAPIDef.getInfo().setTitle(serviceName);
         }
-
+        // Validate the service generation
+        List<String> complexPaths = GeneratorUtils.getComplexPaths(openAPIDef);
+        if (!complexPaths.isEmpty()) {
+            outStream.println("service generation can not be done due to the given openapi definition contains" +
+                    " following complex path(s):");
+            for (String path: complexPaths) {
+                outStream.println(path);
+            }
+            return new ArrayList<>();
+        }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         String concatTitle = serviceName == null ?
                 openAPIDef.getInfo().getTitle().toLowerCase(Locale.ENGLISH) :
@@ -468,25 +484,20 @@ public class BallerinaCodeGenerator {
         }
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile,
                 (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + mainContent));
-
 //        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
 //                ballerinaServiceGenerator.getTypeInclusionRecords());
 //        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
 //                openAPIDef, nullable, preGeneratedTypeDefNodes);
-//        String schemaContent = Formatter.format(
-//                ballerinaSchemaGenerator.generateSyntaxTree()).toSourceCode();
-//        if (!schemaContent.isBlank() && !generateWithoutDataBinding) {
-//            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME,
-//                    (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaContent));
-//        }
-
+//        SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+//        String schemaContent = Formatter.format(schemaSyntaxTree).toString();
+//        schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent,
+//                null);
         TypeHandler typeHandler = TypeHandler.getInstance();
         String schemaSyntaxTree = Formatter.format(typeHandler.generateTypeSyntaxTree()).toSourceCode();
         if (!schemaSyntaxTree.isBlank() && !generateWithoutDataBinding) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME,
                     (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaSyntaxTree));
         }
-
         if (generateServiceType) {
             BallerinaServiceObjectGenerator ballerinaServiceObjectGenerator = new
                     BallerinaServiceObjectGenerator(ballerinaServiceGenerator.getFunctionList());

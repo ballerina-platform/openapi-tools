@@ -21,6 +21,7 @@ module io.ballerina.openapi {
     requires io.ballerina.parser;
     requires io.ballerina.stdlib.http;
     requires io.ballerina.cli;
+    requires io.ballerina.toml;
     requires io.ballerina.tools.api;
     requires io.ballerina.formatter.core;
     requires io.ballerina.openapi.core;

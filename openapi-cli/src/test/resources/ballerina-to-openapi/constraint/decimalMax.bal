@@ -23,8 +23,15 @@ import ballerina/constraint;
 }
 public type Marks decimal;
 
+@constraint:Number {
+    minValue: 3,
+    maxValue: 6
+}
+public type AdjustedMarks Marks;
+
 public type School record {
     Marks marks;
+    AdjustedMarks adjustedMarks;
 };
 
 service /payloadV on new http:Listener(9090) {

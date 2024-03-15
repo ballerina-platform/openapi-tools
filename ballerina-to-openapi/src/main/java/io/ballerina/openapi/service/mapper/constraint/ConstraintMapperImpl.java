@@ -96,10 +96,12 @@ public class ConstraintMapperImpl implements ConstraintMapper {
         }
         Map<String, Schema> schemas = components.getSchemas();
         for (Map.Entry<String, Schema> schemaEntry : schemas.entrySet()) {
-            TypeDefinitionNode typeDefinitionNode = moduleMemberVisitor.getTypeDefinitionNode(schemaEntry.getKey());
-            if (Objects.isNull(typeDefinitionNode)) {
+            Optional<TypeDefinitionNode> typeDefNodeOpt = moduleMemberVisitor.getTypeDefinitionNode(
+                    schemaEntry.getKey());
+            if (typeDefNodeOpt.isEmpty()) {
                 continue;
             }
+            TypeDefinitionNode typeDefinitionNode = typeDefNodeOpt.get();
             if (typeDefinitionNode.metadata().isPresent()) {
                 ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder =
                         new ConstraintAnnotation.ConstraintAnnotationBuilder();

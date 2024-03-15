@@ -146,10 +146,10 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                 recordFieldSchema = recordFieldSchema.description(recordFieldDescription);
             }
             if (recordFieldSymbol.hasDefaultValue()) {
-                Object recordFieldDefaultValue = getRecordFieldDefaultValue(recordName, recordFieldName,
+                Optional<Object> recordFieldDefaultValueOpt = getRecordFieldDefaultValue(recordName, recordFieldName,
                         additionalData.moduleMemberVisitor());
-                if (Objects.nonNull(recordFieldDefaultValue)) {
-                    TypeMapper.setDefaultValue(recordFieldSchema, recordFieldDefaultValue);
+                if (recordFieldDefaultValueOpt.isPresent()) {
+                    TypeMapper.setDefaultValue(recordFieldSchema, recordFieldDefaultValueOpt.get());
                 } else {
                     DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_124;
                     IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(message,
@@ -162,29 +162,32 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         return properties;
     }
 
-    public static Object getRecordFieldDefaultValue(String recordName, String fieldName,
+    public static Optional<Object> getRecordFieldDefaultValue(String recordName, String fieldName,
                                                     ModuleMemberVisitor moduleMemberVisitor) {
-        TypeDefinitionNode recordDefNode = moduleMemberVisitor.getTypeDefinitionNode(recordName);
-        if (Objects.isNull(recordDefNode) || !(recordDefNode.typeDescriptor() instanceof RecordTypeDescriptorNode)) {
-            return null;
+        Optional<TypeDefinitionNode> recordDefNodeOpt = moduleMemberVisitor.getTypeDefinitionNode(recordName);
+        if (recordDefNodeOpt.isPresent() &&
+                recordDefNodeOpt.get().typeDescriptor() instanceof RecordTypeDescriptorNode recordDefNode) {
+            return getRecordFieldDefaultValue(fieldName, recordDefNode);
         }
-        return getRecordFieldDefaultValue(fieldName, (RecordTypeDescriptorNode) recordDefNode.typeDescriptor());
+        return Optional.empty();
     }
 
-    private static Object getRecordFieldDefaultValue(String fieldName, RecordTypeDescriptorNode recordDefNode) {
+    private static Optional<Object> getRecordFieldDefaultValue(String fieldName,
+                                                               RecordTypeDescriptorNode recordDefNode) {
         NodeList<Node> recordFields = recordDefNode.fields();
         RecordFieldWithDefaultValueNode defaultValueNode = recordFields.stream()
                 .filter(field -> field instanceof RecordFieldWithDefaultValueNode)
                 .map(field -> (RecordFieldWithDefaultValueNode) field)
-                .filter(field -> field.fieldName().toString().trim().equals(fieldName)).findFirst().orElse(null);
+                .filter(field -> MapperCommonUtils.unescapeIdentifier(field.fieldName().toString().trim()).
+                        equals(fieldName)).findFirst().orElse(null);
         if (Objects.isNull(defaultValueNode)) {
-            return null;
+            return Optional.empty();
         }
         ExpressionNode defaultValueExpression = defaultValueNode.expression();
         if (MapperCommonUtils.isNotSimpleValueLiteralKind(defaultValueExpression.kind())) {
-            return null;
+            return Optional.empty();
         }
-        return MapperCommonUtils.parseBalSimpleLiteral(defaultValueExpression.toString().trim());
+        return Optional.of(MapperCommonUtils.parseBalSimpleLiteral(defaultValueExpression.toString().trim()));
     }
 
     public static RecordTypeInfo getDirectRecordType(TypeSymbol typeSymbol, String recordName) {

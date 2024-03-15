@@ -1,0 +1,71 @@
+NAME
+       bal openapi add - Update the `Ballerina.toml` file with the OpenAPI tool configuration details for generating a Ballerina service or client.
+
+SYNOPSIS
+       bal openapi add [-i | --input] <openapi-contract-file-path>
+                       [-p | --package] <package-location>
+                       [--id] <service/client id>
+                       [--module] <module-name-for-generated-service/client>
+                       [--mode] <mode-type>
+                       [--tags] <tag-names>
+                       [--operations] <operation-names>
+                       [-n | --nullable]
+                       [--license] <license-file-path>
+                       [--client-methods] <resource|remote>
+
+DESCRIPTION
+       Update the `Ballerina.toml` file with the OpenAPI tool configuration details for generating a Ballerina source
+       (either a mock service or a client stub) from the given OpenAPI definition file and other command options.
+
+OPTIONS
+       -i, --input <openapi-contract-file-path>
+            This is a mandatory input. The given OpenAPI contract will
+            generate a Ballerina service and the client stub files for the given
+            OpenAPI contract. The OpenAPI contract can be either a YAML or a JSON.
+
+       --id <service/client id>
+            This is a mandatory input. The given service/client ID will be used
+            to identify the generated service/client in the `Ballerina.toml` file.
+            This ID will be used to generate the Ballerina service/client
+            sources cache in the target.
+
+       --module <module-name-for-generated-service/client>
+            This is a mandatory input. The given module name will be used to
+            generate the Ballerina service/client sources in the given module
+            directory.
+
+       -p, --package <package-location>
+            This is an optional input. The given package location will be used
+            to update the `Ballerina.toml` file in the given
+            package directory.
+
+       --mode <mode-type>
+            Mode type can be 'service' or 'client'. The Ballerina service and
+            client will be generated according to the specified mode. The default option is `client`.
+
+       -n, --nullable
+            Optional. The JSON schema properties that are not marked as `nullable:true` may
+            return as null in some responses. It will result in a JSON schema to
+            Ballerina record data binding error. This is a safe option to
+            generate all data types in the record with Ballerina nil support.
+
+        --license <license-file-path>
+            Optional. The `.bal` files will generate with the given copyright or
+            license header.
+
+        --tags <tag-names>
+            Optional. These tags are used to filter the operations tags that are needed to
+            generate services.
+
+        --operations <operation-names>
+            Optional. List of operations to generate the Ballerina service or client.
+
+        --client-methods <resource|remote>
+            Optional. This option can be used in client generation to select the client method type, which can be `resource` or `remote`. The default option is `resource`.
+
+EXAMPLES
+       Update the `Ballerina.toml` file for generating a Ballerina client using a `hello.yaml` OpenAPI contract to generate a directory named `hello`.
+           $ bal openapi add -i hello.yaml --id hello_client --mode client --module hello
+
+       Update the `Ballerina.toml` file for generating a Ballerina client using a `hello.yaml` OpenAPI contract with the tags filter.
+           $ bal openapi add -i hello.yaml --id hello_client --mode client --module hello --tags tag_ID

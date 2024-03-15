@@ -1,0 +1,171 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /statusCodeError:
+    get:
+      operationId: getStatuscodeerror
+      parameters:
+        - name: statusCode
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "451":
+          description: UnavailableDueToLegalReasons
+        "431":
+          description: RequestHeaderFieldsTooLarge
+        default:
+          description: Default response
+        "410":
+          description: Gone
+        "411":
+          description: LengthRequired
+        "510":
+          description: NotExtended
+        "412":
+          description: PreconditionFailed
+        "511":
+          description: NetworkAuthenticationRequired
+        "413":
+          description: PayloadTooLarge
+        "414":
+          description: UriTooLong
+        "415":
+          description: UnsupportedMediaType
+        "416":
+          description: RangeNotSatisfiable
+        "417":
+          description: ExpectationFailed
+        "421":
+          description: MisdirectedRequest
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "422":
+          description: UnprocessableEntity
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+        "423":
+          description: Locked
+        "402":
+          description: PaymentRequired
+        "424":
+          description: FailedDependency
+        "501":
+          description: NotImplemented
+        "403":
+          description: Forbidden
+        "502":
+          description: BadGateway
+        "404":
+          description: NotFound
+        "426":
+          description: UpgradeRequired
+        "503":
+          description: ServiceUnavailable
+        "405":
+          description: MethodNotAllowed
+        "504":
+          description: GatewayTimeout
+        "406":
+          description: NotAcceptable
+        "428":
+          description: PreconditionRequired
+        "505":
+          description: HttpVersionNotSupported
+        "407":
+          description: ProxyAuthenticationRequired
+        "429":
+          description: TooManyRequests
+        "506":
+          description: VariantAlsoNegotiates
+        "507":
+          description: InsufficientStorage
+        "409":
+          description: Conflict
+        "508":
+          description: LoopDetected
+    post:
+      operationId: postStatuscodeerror
+      parameters:
+        - name: statusCode
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: header2
+          in: header
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: header1
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+        required: true
+      responses:
+        default:
+          description: Default response
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorPayload'
+                  - {}
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

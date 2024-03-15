@@ -180,6 +180,51 @@ public final class Constants {
         // TODO: remove this after fixing https://github.com/ballerina-platform/ballerina-standard-library/issues/4245
         HTTP_CODES = Collections.unmodifiableMap(httpCodeMap);
     }
+    public static final Map<String, String> HTTP_STATUS_CODE_ERRORS;
+    static {
+        Map<String, String> httpErrorCodeMap = new HashMap<>();
+        httpErrorCodeMap.put("DefaultStatusCodeError", "default");
+        httpErrorCodeMap.put("BadRequestError", "400");
+        httpErrorCodeMap.put("UnauthorizedError", "401");
+        httpErrorCodeMap.put("PaymentRequiredError", "402");
+        httpErrorCodeMap.put("ForbiddenError", "403");
+        httpErrorCodeMap.put("NotFoundError", "404");
+        httpErrorCodeMap.put("MethodNotAllowedError", "405");
+        httpErrorCodeMap.put("NotAcceptableError", "406");
+        httpErrorCodeMap.put("ProxyAuthenticationRequiredError", "407");
+        httpErrorCodeMap.put("RequestTimeOutError", "408");
+        httpErrorCodeMap.put("ConflictError", "409");
+        httpErrorCodeMap.put("GoneError", "410");
+        httpErrorCodeMap.put("LengthRequiredError", "411");
+        httpErrorCodeMap.put("PreconditionFailedError", "412");
+        httpErrorCodeMap.put("PayloadTooLargeError", "413");
+        httpErrorCodeMap.put("URITooLongError", "414");
+        httpErrorCodeMap.put("UnsupportedMediaTypeError", "415");
+        httpErrorCodeMap.put("RangeNotSatisfiableError", "416");
+        httpErrorCodeMap.put("ExpectationFailedError", "417");
+        httpErrorCodeMap.put("MisdirectedRequestError", "421");
+        httpErrorCodeMap.put("UnprocessableEntityError", "422");
+        httpErrorCodeMap.put("LockedError", "423");
+        httpErrorCodeMap.put("FailedDependencyError", "424");
+        httpErrorCodeMap.put("TooEarlyError", "425");
+        httpErrorCodeMap.put("UpgradeRequiredError", "426");
+        httpErrorCodeMap.put("PreconditionRequiredError", "428");
+        httpErrorCodeMap.put("TooManyRequestsError", "429");
+        httpErrorCodeMap.put("RequestHeaderFieldsTooLargeError", "431");
+        httpErrorCodeMap.put("UnavailableDueToLegalReasonsError", "451");
+        httpErrorCodeMap.put("InternalServerErrorError", "500");
+        httpErrorCodeMap.put("NotImplementedError", "501");
+        httpErrorCodeMap.put("BadGatewayError", "502");
+        httpErrorCodeMap.put("ServiceUnavailableError", "503");
+        httpErrorCodeMap.put("GatewayTimeoutError", "504");
+        httpErrorCodeMap.put("HTTPVersionNotSupportedError", "505");
+        httpErrorCodeMap.put("VariantAlsoNegotiatesError", "506");
+        httpErrorCodeMap.put("InsufficientStorageError", "507");
+        httpErrorCodeMap.put("LoopDetectedError", "508");
+        httpErrorCodeMap.put("NotExtendedError", "510");
+        httpErrorCodeMap.put("NetworkAuthenticationRequiredError", "511");
+        HTTP_STATUS_CODE_ERRORS = Collections.unmodifiableMap(httpErrorCodeMap);
+    }
     public static final Map<String, String> HTTP_CODE_DESCRIPTIONS;
     static {
         Map<String, String> httpCodeDescriptionMap = new HashMap<>();

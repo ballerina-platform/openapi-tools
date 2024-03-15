@@ -38,11 +38,14 @@ components:
   schemas:
     Child:
       required:
+        - newPosition
         - position
       type: object
       properties:
         position:
           $ref: '#/components/schemas/Position'
+        newPosition:
+          $ref: '#/components/schemas/NewPosition'
     ErrorPayload:
       required:
         - message
@@ -66,6 +69,11 @@ components:
           type: string
         method:
           type: string
+    NewPosition:
+      maximum: 100
+      minimum: 50
+      allOf:
+        - $ref: '#/components/schemas/Position'
     Position:
       maximum: 50
       minimum: 0

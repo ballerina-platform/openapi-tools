@@ -78,8 +78,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -133,8 +132,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException| FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -389,8 +387,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -416,8 +413,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -465,8 +461,7 @@ public class CodeGeneratorTest {
                         (expectedContent.trim()).replaceAll("\\s+", ""),
                         "expected content and actual generated content is mismatched for: " + yamlFile);
             }
-        } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the ballerina content for the openapi definition: "
                     + yamlFile + " " + e.getMessage());
         }
@@ -491,8 +486,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException| FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -522,8 +516,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -554,8 +547,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -573,8 +565,7 @@ public class CodeGeneratorTest {
             boolean hasTypeFileGenerated = Files.exists(resourcePath.resolve("no_schema_service.bal")) &&
                     Files.notExists(resourcePath.resolve("types.bal"));
             Assert.assertTrue(hasTypeFileGenerated, "Empty types.bal file has been generated");
-        } catch (IOException | FormatterException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException e) {
+        } catch (IOException | FormatterException | BallerinaOpenApiException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("no_schema_service.bal");
@@ -603,8 +594,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -623,8 +613,7 @@ public class CodeGeneratorTest {
             boolean hasTypeFileGenerated = Files.exists(resourcePath.resolve("no_schema_service.bal")) &&
                     Files.exists(resourcePath.resolve("types.bal"));
             Assert.assertTrue(hasTypeFileGenerated, "types.bal file has not been generated");
-        } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("no_schema_service.bal");
@@ -661,8 +650,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");

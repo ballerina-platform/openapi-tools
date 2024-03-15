@@ -18,18 +18,22 @@ paths:
           description: Ok
           headers:
             x-rate-limit-enable:
+              required: true
               schema:
                 type: boolean
             x-rate-limit-remaining:
+              required: true
               schema:
                 type: integer
                 format: int64
             x-rate-limit-types:
+              required: true
               schema:
                 type: array
                 items:
                   type: string
             x-rate-limit-id:
+              required: true
               schema:
                 type: string
           content:
