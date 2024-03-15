@@ -3,10 +3,12 @@ package io.ballerina.openapi.core.generators.client.parameter;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.core.typegenerator.TypeHandler;
+import io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -26,8 +28,8 @@ public class PathParameterGenerator implements ParameterGenerator {
     OpenAPI openAPI;
     Parameter parameter;
 
-    List<ClientDiagnostic> diagnostics;
-    public PathParameterGenerator(Parameter parameter, OpenAPI openAPI) {
+    List<ClientDiagnostic> diagnostics;;
+    public PathParameterGenerator(Parameter parameter, OpenAPI openAPI){
         this.parameter = parameter;
         this.openAPI = openAPI;
     }
@@ -38,20 +40,17 @@ public class PathParameterGenerator implements ParameterGenerator {
         IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName(), false));
         // type should be a any type node.
         Schema parameterSchema = parameter.getSchema();
+//        TypeDescriptorNode typeNode = ;
+        // Reference type resolve
         if (parameterSchema.get$ref() != null) {
-            String type = "";
             try {
-                type = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
+                SimpleNameReferenceNode typeNode = TypeHandler.getSimpleNameReferenceNode(parameterSchema);
             } catch (BallerinaOpenApiException e) {
-                DiagnosticMessages diagnostic = OAS_CLIENT_100;
-                ClientDiagnosticImp clientDiagnostic = new ClientDiagnosticImp(diagnostic.getCode(),
-                        diagnostic.getDescription(), parameterSchema.get$ref());
-                diagnostics.add(clientDiagnostic);
+                throw new RuntimeException(e);
             }
             //todo 1. call type handler get type node
 
-            Schema<?> schema = openAPI.getComponents().getSchemas().get(type.trim());
-//            TypeDefinitionNode typeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
+//              TypeDefinitionNode typeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
 //                    (schema, type, new ArrayList<>());
 //            if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
 //                throw new BallerinaOpenApiException(String.format(
