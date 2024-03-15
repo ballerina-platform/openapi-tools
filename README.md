@@ -1,8 +1,8 @@
 # Ballerina-OpenAPI
- [![Build master](https://github.com/ballerina-platform/openapi-tools/actions/workflows/build-timestamped-master.yml/badge.svg)](https://github.com/ballerina-platform/openapi-tools/actions/workflows/build-timestamped-master.yml)
- [![Daily build](https://github.com/ballerina-platform/openapi-tools/workflows/Daily%20build/badge.svg)](https://github.com/ballerina-platform/openapi-tools/actions?query=workflow%3A%22Daily+build%22)
- [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/openapi-tools.svg)](https://github.com/ballerina-platform/openapi-tools/commits/master)
+ [![Build](https://github.com/ballerina-platform/openapi-tools/actions/workflows/build-timestamped-master.yml/badge.svg)](https://github.com/ballerina-platform/openapi-tools/actions/workflows/build-timestamped-master.yml)
  [![codecov](https://codecov.io/gh/ballerina-platform/openapi-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/openapi-tools)
+ [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/openapi-tools.svg)](https://github.com/ballerina-platform/openapi-tools/commits/master)
+ [![GitHub issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/openapi-tools.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-library/labels/module%2Fopenapi-tools)
  
 The OpenAPI Specification is a specification, which creates a RESTFUL contract for APIs detailing all of its resources 
 and operations in both human and machine-readable format for easy development, discovery, and integration. Ballerina
