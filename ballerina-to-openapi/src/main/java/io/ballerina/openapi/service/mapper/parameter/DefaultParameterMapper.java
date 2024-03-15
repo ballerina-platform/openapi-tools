@@ -31,7 +31,6 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.openapi.service.mapper.Constants;
 import io.ballerina.openapi.service.mapper.ServiceMapperFactory;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
@@ -53,12 +52,12 @@ import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_CONTENT_KE
 import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_SUMMARY;
 
 /**
- * The {@link ParameterMapperImpl} class is the implementation class for the {@link ParameterMapper}.
+ * The {@link DefaultParameterMapper} class is the implementation class for the {@link ParameterMapper}.
  * This class provides functionalities to map the Ballerina resource parameters to OpenAPI operation parameters.
  *
  * @since 1.9.0
  */
-public class ParameterMapperImpl implements ParameterMapper {
+public class DefaultParameterMapper implements ParameterMapper {
     private final FunctionDefinitionNode functionDefinitionNode;
     private final OperationInventory operationInventory;
     private final Map<String, String> apiDocs;
@@ -66,9 +65,9 @@ public class ParameterMapperImpl implements ParameterMapper {
     private final boolean treatNilableAsOptional;
     private final TypeMapper typeMapper;
 
-    public ParameterMapperImpl(FunctionDefinitionNode functionDefinitionNode, OperationInventory operationInventory,
-                               Map<String, String> apiDocs, AdditionalData additionalData,
-                               Boolean treatNilableAsOptional, ServiceMapperFactory serviceMapperFactory) {
+    public DefaultParameterMapper(FunctionDefinitionNode functionDefinitionNode, OperationInventory operationInventory,
+                                  Map<String, String> apiDocs, AdditionalData additionalData,
+                                  Boolean treatNilableAsOptional, ServiceMapperFactory serviceMapperFactory) {
         this.functionDefinitionNode = functionDefinitionNode;
         this.operationInventory = operationInventory;
         this.apiDocs = apiDocs;
@@ -83,8 +82,7 @@ public class ParameterMapperImpl implements ParameterMapper {
             setPathParameters(pathParams);
         }
 
-        FunctionSignatureNode functionSignature = functionDefinitionNode.functionSignature();
-        SeparatedNodeList<ParameterNode> parameterList = functionSignature.parameters();
+        Iterable<ParameterNode> parameterList = getParameterNodes();
         for (ParameterNode parameterNode : parameterList) {
             String parameterType = getParameterType(parameterNode);
             if (Objects.isNull(parameterType)) {
@@ -99,6 +97,11 @@ public class ParameterMapperImpl implements ParameterMapper {
             }
             setParameter(parameterNode, parameterType);
         }
+    }
+
+    protected Iterable<ParameterNode> getParameterNodes() {
+        FunctionSignatureNode functionSignature = functionDefinitionNode.functionSignature();
+        return functionSignature.parameters();
     }
 
     private void setParameter(ParameterNode parameterNode, String parameterType) throws ParameterMapperException {
