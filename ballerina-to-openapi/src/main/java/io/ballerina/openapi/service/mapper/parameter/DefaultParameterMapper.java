@@ -58,6 +58,9 @@ import static io.ballerina.openapi.service.mapper.Constants.WILD_CARD_SUMMARY;
  * @since 1.9.0
  */
 public class DefaultParameterMapper implements ParameterMapper {
+    public enum ParameterType {
+        PAYLOAD, REQUEST, QUERY, HEADER, OTHER
+    }
     private final FunctionDefinitionNode functionDefinitionNode;
     private final OperationInventory operationInventory;
     private final Map<String, String> apiDocs;
@@ -84,19 +87,23 @@ public class DefaultParameterMapper implements ParameterMapper {
 
         Iterable<ParameterNode> parameterList = getParameterNodes();
         for (ParameterNode parameterNode : parameterList) {
-            String parameterType = getParameterType(parameterNode);
-            if (Objects.isNull(parameterType)) {
-                continue;
-            }
-            if ((parameterType.equals("REQUEST") || parameterType.equals("PAYLOAD")) &&
-                    (Constants.GET.equalsIgnoreCase(operationInventory.getHttpOperation()))) {
-                ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_113,
-                        parameterNode.location());
-                additionalData.diagnostics().add(error);
-                continue;
-            }
-            setParameter(parameterNode, parameterType);
+            setParameter(parameterNode);
         }
+    }
+
+    private void setParameter(ParameterNode parameterNode) throws ParameterMapperException {
+        ParameterType parameterType = getParameterType(parameterNode);
+        if (parameterType.equals(ParameterType.OTHER)) {
+            return;
+        }
+        if ((parameterType.equals(ParameterType.REQUEST) || parameterType.equals(ParameterType.PAYLOAD)) &&
+                (Constants.GET.equalsIgnoreCase(operationInventory.getHttpOperation()))) {
+            ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_113,
+                    parameterNode.location());
+            additionalData.diagnostics().add(error);
+            return;
+        }
+        setParameter(parameterNode, parameterType);
     }
 
     protected Iterable<ParameterNode> getParameterNodes() {
@@ -104,19 +111,20 @@ public class DefaultParameterMapper implements ParameterMapper {
         return functionSignature.parameters();
     }
 
-    private void setParameter(ParameterNode parameterNode, String parameterType) throws ParameterMapperException {
+    private void setParameter(ParameterNode parameterNode, ParameterType parameterType)
+            throws ParameterMapperException {
         switch (parameterType) {
-            case "QUERY" -> {
+            case QUERY -> {
                 QueryParameterMapper queryParameterMapper = new QueryParameterMapper(parameterNode, apiDocs,
                         operationInventory, treatNilableAsOptional, additionalData, typeMapper);
                 queryParameterMapper.setParameter();
             }
-            case "HEADER" -> {
+            case HEADER -> {
                 HeaderParameterMapper headerParameterMapper = new HeaderParameterMapper(parameterNode, apiDocs,
                         operationInventory, treatNilableAsOptional, additionalData, typeMapper);
                 headerParameterMapper.setParameter();
             }
-            case "PAYLOAD" -> {
+            case PAYLOAD -> {
                 Optional<Symbol> symbol = additionalData.semanticModel().symbol(parameterNode);
                 if (symbol.isEmpty() || !(symbol.get() instanceof ParameterSymbol)) {
                     return;
@@ -126,7 +134,7 @@ public class DefaultParameterMapper implements ParameterMapper {
                         operationInventory, functionDefinitionNode, apiDocs, additionalData, typeMapper);
                 requestBodyMapper.setRequestBody();
             }
-            case "REQUEST" -> {
+            case REQUEST -> {
                 RequestBody requestBody = new RequestBody();
                 MediaType mediaType = new MediaType();
                 mediaType.setSchema(new Schema<>().description(WILD_CARD_SUMMARY));
@@ -134,8 +142,8 @@ public class DefaultParameterMapper implements ParameterMapper {
                 // The following method will only add the request body if it is not already set.
                 operationInventory.setRequestBody(requestBody);
             }
-            default -> {
-
+            case OTHER -> {
+                // Do nothing
             }
         }
     }
@@ -167,38 +175,62 @@ public class DefaultParameterMapper implements ParameterMapper {
         }
     }
 
-    private String getParameterType(ParameterNode parameterNode) {
+    private ParameterType getParameterType(ParameterNode parameterNode) {
+        ParameterType parameterType = getObjectParameterType(parameterNode);
+        if (Objects.nonNull(parameterType)) {
+            return parameterType;
+        }
+
+        NodeList<AnnotationNode> annotationNodes = getAnnotationNodes(parameterNode);
+        if (Objects.isNull(annotationNodes) || annotationNodes.isEmpty()) {
+            return ParameterType.QUERY;
+        }
+
+        return getParameterTypeFromAnnotation(annotationNodes);
+    }
+
+    private ParameterType getObjectParameterType(ParameterNode parameterNode) {
+        ParameterType parameterType = null;
+        if (parameterNode instanceof RequiredParameterNode requiredParameterNode) {
+            String parameterTypeName = requiredParameterNode.typeName().toString().trim();
+            parameterType = parameterTypeName.equals(HTTP_REQUEST) ? ParameterType.REQUEST :
+                    getOtherParameterType(requiredParameterNode);
+        }
+        return parameterType;
+    }
+
+    private ParameterType getOtherParameterType(RequiredParameterNode requiredParameterNode) {
+        SemanticModel semanticModel = additionalData.semanticModel();
+        Symbol parameterSymbol = semanticModel.symbol(requiredParameterNode).orElse(null);
+        if (Objects.isNull(parameterSymbol) || !(parameterSymbol instanceof ParameterSymbol)) {
+            return ParameterType.OTHER;
+        }
+        TypeSymbol parameterTypeSymbol = ((ParameterSymbol) parameterSymbol).typeDescriptor();
+        if (!parameterTypeSymbol.subtypeOf(semanticModel.types().ANYDATA)) {
+            return ParameterType.OTHER;
+        }
+        return null;
+    }
+
+    private static ParameterType getParameterTypeFromAnnotation(NodeList<AnnotationNode> annotationNodes) {
+        for (AnnotationNode annotationNode: annotationNodes) {
+            String annotationTypeName = annotationNode.annotReference().toString().trim();
+            if (annotationTypeName.equals(Constants.HTTP_HEADER)) {
+                return ParameterType.HEADER;
+            } else if (annotationTypeName.equals(Constants.HTTP_PAYLOAD)) {
+                return ParameterType.PAYLOAD;
+            }
+        }
+        return ParameterType.QUERY;
+    }
+
+    private static NodeList<AnnotationNode> getAnnotationNodes(ParameterNode parameterNode) {
         NodeList<AnnotationNode> annotationNodes = null;
         if (parameterNode instanceof DefaultableParameterNode defaultableParameterNode) {
             annotationNodes = defaultableParameterNode.annotations();
         } else if (parameterNode instanceof RequiredParameterNode requiredParameterNode) {
-            String parameterTypeName = requiredParameterNode.typeName().toString().trim();
-            if (parameterTypeName.equals(HTTP_REQUEST)) {
-                return "REQUEST";
-            } else {
-                SemanticModel semanticModel = additionalData.semanticModel();
-                Symbol parameterSymbol = semanticModel.symbol(requiredParameterNode).orElse(null);
-                if (Objects.isNull(parameterSymbol) || !(parameterSymbol instanceof ParameterSymbol)) {
-                    return null;
-                }
-                TypeSymbol parameterTypeSymbol = ((ParameterSymbol) parameterSymbol).typeDescriptor();
-                if (!parameterTypeSymbol.subtypeOf(semanticModel.types().ANYDATA)) {
-                    return null;
-                }
-            }
             annotationNodes = requiredParameterNode.annotations();
         }
-        if (Objects.isNull(annotationNodes) || annotationNodes.isEmpty()) {
-            return "QUERY";
-        }
-        for (AnnotationNode annotationNode: annotationNodes) {
-            String annotationTypeName = annotationNode.annotReference().toString().trim();
-            if (annotationTypeName.equals(Constants.HTTP_HEADER)) {
-                return "HEADER";
-            } else if (annotationTypeName.equals(Constants.HTTP_PAYLOAD)) {
-                return "PAYLOAD";
-            }
-        }
-        return "QUERY";
+        return annotationNodes;
     }
 }

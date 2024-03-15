@@ -106,7 +106,7 @@ public class ServiceMapperFactory {
                                               OperationInventory opInventory) {
         if (Objects.nonNull(interceptorPipeline)) {
             RequestParameterInfo reqParamInfoFromInterceptors = getRequestParameterInfoFromInterceptors(resourceNode,
-                    opInventory, additionalData, interceptorPipeline);
+                    additionalData, interceptorPipeline);
             return new ParameterMapperWithInterceptors(resourceNode, opInventory, apiDocs, additionalData,
                     treatNilableAsOptional, reqParamInfoFromInterceptors, this);
         }
@@ -120,7 +120,7 @@ public class ServiceMapperFactory {
 
     public ResponseMapper getResponseMapper(FunctionDefinitionNode resourceNode, OperationInventory opInventory) {
         if (Objects.nonNull(interceptorPipeline)) {
-            ResponseInfo responseInfoFromInterceptors = getResponseInfoFromInterceptors(resourceNode, opInventory,
+            ResponseInfo responseInfoFromInterceptors = getResponseInfoFromInterceptors(resourceNode,
                     additionalData, interceptorPipeline);
             return new ResponseMapperWithInterceptors(resourceNode, opInventory, additionalData,
                     responseInfoFromInterceptors, this);
@@ -129,7 +129,6 @@ public class ServiceMapperFactory {
     }
 
     private ResponseInfo getResponseInfoFromInterceptors(FunctionDefinitionNode resourceNode,
-                                                         OperationInventory operationInventory,
                                                          AdditionalData additionalData,
                                                          InterceptorPipeline interceptorPipeline) {
         final ResponseInfo responseInfoFromInterceptors;
@@ -143,7 +142,6 @@ public class ServiceMapperFactory {
     }
 
     private RequestParameterInfo getRequestParameterInfoFromInterceptors(FunctionDefinitionNode resourceNode,
-                                                                         OperationInventory operationInventory,
                                                                          AdditionalData additionalData,
                                                                          InterceptorPipeline interceptorPipeline) {
         final RequestParameterInfo requestParameterInfoFromInterceptors;
