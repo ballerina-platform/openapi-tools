@@ -39,7 +39,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
-import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Package;
@@ -101,17 +101,17 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
-import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA;
-import static io.ballerina.openapi.core.GeneratorConstants.DEEP_OBJECT;
-import static io.ballerina.openapi.core.GeneratorConstants.ENCODING;
-import static io.ballerina.openapi.core.GeneratorConstants.ENCODING_STYLE;
-import static io.ballerina.openapi.core.GeneratorConstants.EXPLODE;
-import static io.ballerina.openapi.core.GeneratorConstants.FORM;
-import static io.ballerina.openapi.core.GeneratorConstants.MIME;
-import static io.ballerina.openapi.core.GeneratorConstants.PIPE_DELIMITED;
-import static io.ballerina.openapi.core.GeneratorConstants.SPACE_DELIMITED;
-import static io.ballerina.openapi.core.GeneratorConstants.STYLE;
-import static io.ballerina.openapi.core.GeneratorConstants.URL;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BALLERINA;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEEP_OBJECT;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ENCODING;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ENCODING_STYLE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.EXPLODE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.FORM;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.MIME;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PIPE_DELIMITED;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SPACE_DELIMITED;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STYLE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.URL;
 
 /**
  * This class is used to generate util file syntax tree according to the generated client.

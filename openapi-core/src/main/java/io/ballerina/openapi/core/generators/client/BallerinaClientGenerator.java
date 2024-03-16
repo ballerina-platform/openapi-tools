@@ -48,13 +48,13 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.openapi.core.GeneratorConstants;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.GeneratorConstants;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
-import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.openapi.core.generators.schemaOld.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -115,10 +115,10 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RESOURCE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURN_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_API_KEY_DESC;
-import static io.ballerina.openapi.core.GeneratorConstants.HTTP;
-import static io.ballerina.openapi.core.GeneratorConstants.SELF;
-import static io.ballerina.openapi.core.GeneratorConstants.X_BALLERINA_INIT_DESCRIPTION;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_API_KEY_DESC;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SELF;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.X_BALLERINA_INIT_DESCRIPTION;
 
 /**
  * This class is used to generate ballerina client file according to given yaml file.

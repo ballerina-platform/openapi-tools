@@ -17,10 +17,10 @@
  */
 package io.ballerina.openapi.core.generators.client.model;
 
-import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 
-import static io.ballerina.openapi.core.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
 
 /**
  * This class stores metadata that related to client code generations.

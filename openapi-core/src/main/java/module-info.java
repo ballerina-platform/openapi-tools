@@ -39,17 +39,18 @@ module io.ballerina.openapi.core {
     requires org.apache.commons.lang3;
 
 //    exports io.ballerina.openapi.core.generators.service;
-    exports io.ballerina.openapi.core.model;
-    exports io.ballerina.openapi.core.exception;
+    exports io.ballerina.openapi.core.generators.common.model;
+    exports io.ballerina.openapi.core.generators.common.exception;
     exports io.ballerina.openapi.core.generators.client;
-    exports io.ballerina.openapi.core.generators.schema;
+    exports io.ballerina.openapi.core.generators.schemaOld;
     exports io.ballerina.openapi.core;
     exports io.ballerina.openapi.core.generators.client.model;
     exports io.ballerina.openapi.core.service;
     exports io.ballerina.openapi.core.service.model;
 
-    exports io.ballerina.openapi.core.typegenerator;
-    exports io.ballerina.openapi.core.typegenerator.generators;
-    exports io.ballerina.openapi.core.typegenerator.model;
-    exports io.ballerina.openapi.core.typegenerator.exception;
+    exports io.ballerina.openapi.core.generators.type;
+    exports io.ballerina.openapi.core.generators.type.generators;
+    exports io.ballerina.openapi.core.generators.type.model;
+    exports io.ballerina.openapi.core.generators.type.exception;
+    exports io.ballerina.openapi.core.generators.common;
 }

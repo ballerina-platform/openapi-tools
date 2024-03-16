@@ -19,10 +19,11 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.openapi.core.generators.common.model.Filter;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -58,7 +59,7 @@ public class BallerinaDiagnosticTests {
     @Test(description = "Test openAPI definition to ballerina client source code generation with remote functions",
             dataProvider = "singleFileProviderForDiagnosticCheck")
     public void checkDiagnosticIssuesWithRemoteFunctions(String yamlFile) throws IOException, BallerinaOpenApiException,
-            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
+            OASTypeGenException,
             FormatterException {
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = normalizeOpenAPI(definitionPath, true, SpecVersion.V30);
@@ -79,7 +80,7 @@ public class BallerinaDiagnosticTests {
     @Test(description = "Test openAPI definition to ballerina client source code generation with resource functions",
             dataProvider = "singleFileProviderForDiagnosticCheck")
     public void checkDiagnosticIssuesWithResourceFunctions(String yamlFile) throws IOException,
-            BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
+            BallerinaOpenApiException, OASTypeGenException,
             FormatterException {
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = normalizeOpenAPI(definitionPath, true, SpecVersion.V30);
@@ -100,7 +101,7 @@ public class BallerinaDiagnosticTests {
     @Test(description = "Test OpenAPI 3.1 definition to ballerina client source code generation with remote functions",
             dataProvider = "fileProviderForOpenAPI31DiagnosticCheck")
     public void checkDiagnosticIssuesWithRemoteFunctionsOpenAPIV31(String yamlFile) throws IOException,
-            BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException
+            BallerinaOpenApiException, OASTypeGenException
             , FormatterException {
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = normalizeOpenAPI(definitionPath, true, SpecVersion.V31);
@@ -122,7 +123,7 @@ public class BallerinaDiagnosticTests {
             "with resource functions",
             dataProvider = "fileProviderForOpenAPI31DiagnosticCheck")
     public void checkDiagnosticIssuesWithResourceFunctionsOpenAPIV31(String yamlFile) throws IOException,
-            BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException
+            BallerinaOpenApiException, OASTypeGenException
             , FormatterException {
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = normalizeOpenAPI(definitionPath, true, SpecVersion.V31);

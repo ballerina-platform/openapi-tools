@@ -16,12 +16,13 @@
 package io.ballerina.openapi;
 
 import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
-import io.ballerina.openapi.core.GeneratorConstants;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.service.ServiceGenerationUtils;
-import io.ballerina.openapi.core.model.Filter;
-import io.ballerina.openapi.core.model.GenSrcFile;
+import io.ballerina.openapi.core.generators.common.GeneratorConstants;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.serviceOld.ServiceGenerationUtils;
+import io.ballerina.openapi.core.generators.common.model.Filter;
+import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.generators.common.TestUtils;
 import org.apache.commons.io.FileUtils;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -41,12 +42,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.CONFIG_FILE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.TEST_FILE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.TYPE_FILE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.UTIL_FILE_NAME;
-import static io.ballerina.openapi.core.model.GenSrcFile.GenFileType.GEN_SRC;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLIENT_FILE_NAME;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CONFIG_FILE_NAME;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TEST_FILE_NAME;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TYPE_FILE_NAME;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UTIL_FILE_NAME;
+import static io.ballerina.openapi.core.generators.common.model.GenSrcFile.GenFileType.GEN_SRC;
 
 /**
  * Unit tests for {@link BallerinaCodeGenerator}.
@@ -102,7 +103,7 @@ public class CodeGeneratorTest {
                 Assert.fail("Client was not generated");
             }
         } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+                 OASTypeGenException | FormatterException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("client.bal");
@@ -156,7 +157,7 @@ public class CodeGeneratorTest {
                 Assert.fail("Client was not generated");
             }
         } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+                 OASTypeGenException | FormatterException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("client.bal");
@@ -209,7 +210,7 @@ public class CodeGeneratorTest {
                 Assert.fail("Client was not generated");
             }
         } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+                 OASTypeGenException | FormatterException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("client.bal");
@@ -233,7 +234,7 @@ public class CodeGeneratorTest {
                 Assert.fail("Types were not generated");
             }
         } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+                 OASTypeGenException | FormatterException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("client.bal");
@@ -257,7 +258,7 @@ public class CodeGeneratorTest {
                 Assert.fail("Types were not generated");
             }
         } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+                 OASTypeGenException | FormatterException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("client.bal");
@@ -281,7 +282,7 @@ public class CodeGeneratorTest {
                 Assert.fail("Utils were not generated");
             }
         } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+                 OASTypeGenException | FormatterException e) {
             Assert.fail("Error while generating the connector. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("client.bal");
@@ -306,7 +307,7 @@ public class CodeGeneratorTest {
                 Assert.fail("Config.toml was not generated");
             }
         } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+                 OASTypeGenException | FormatterException e) {
             Assert.fail("Error while generating the connector. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("client.bal");
@@ -336,7 +337,7 @@ public class CodeGeneratorTest {
                 Assert.fail("Client was not generated");
             }
         } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+                 OASTypeGenException | FormatterException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("client.bal");
@@ -361,7 +362,7 @@ public class CodeGeneratorTest {
                 Assert.fail("Client was not generated");
             }
         } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+                 OASTypeGenException | FormatterException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_client.bal");
@@ -437,7 +438,7 @@ public class CodeGeneratorTest {
                 Assert.fail("Client was not generated");
             }
         } catch (IOException | BallerinaOpenApiException |
-                 io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException | FormatterException e) {
+                 OASTypeGenException | FormatterException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("client.bal");
@@ -660,7 +661,7 @@ public class CodeGeneratorTest {
     @Test(description = "Functionality tests when invalid OpenAPI definition is given",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OpenAPI definition has errors: .*")
-    public void testForInvalidDefinition() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
+    public void testForInvalidDefinition() throws IOException, BallerinaOpenApiException, OASTypeGenException,
     FormatterException {
         String definitionPath = RES_DIR.resolve("invalid_petstore.yaml").toString();
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
@@ -671,7 +672,7 @@ public class CodeGeneratorTest {
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Provided OpenAPI contract version is not supported in the tool. " +
                     "Use OpenAPI specification version 2 or higher")
-    public void testGenerationForUnsupportedOpenAPIVersion() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
+    public void testGenerationForUnsupportedOpenAPIVersion() throws IOException, BallerinaOpenApiException, OASTypeGenException,
     FormatterException {
         String definitionPath = RES_DIR.resolve("petstore_swagger_1.2.json").toString();
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();

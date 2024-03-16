@@ -29,9 +29,9 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.openapi.core.typegenerator.GeneratorUtils;
-import io.ballerina.openapi.core.typegenerator.TypeHandler;
-import io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.type.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -89,7 +89,7 @@ public class ReturnTypeGenerator {
      */
     public ReturnTypeDescriptorNode getReturnTypeDescriptorNode(Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                                 NodeList<AnnotationNode> annotations, String path)
-            throws BallerinaOpenApiException {
+            throws OASTypeGenException {
         ReturnTypeDescriptorNode returnNode;
         List<String> returnDescriptions = new ArrayList<>();
         httpMethod = operation.getKey().name().toLowerCase(Locale.ENGLISH);
@@ -136,7 +136,7 @@ public class ReturnTypeGenerator {
      * Generate union type node when operation has multiple responses.
      */
     public static TypeDescriptorNode handleMultipleResponse(ApiResponses responses, List<String> returnDescription, String httpMethod, OpenAPI openAPI, String pathRecord)
-            throws BallerinaOpenApiException {
+            throws OASTypeGenException {
 
         Set<String> qualifiedNodes = new LinkedHashSet<>();
 
@@ -148,7 +148,7 @@ public class ReturnTypeGenerator {
             String typeName = null;
 
             if (code == null && !responseCode.equals(GeneratorConstants.DEFAULT)) {
-                throw new BallerinaOpenApiException(String.format(ServiceDiagnosticMessages.OAS_SERVICE_107.getDescription(), responseCode));
+                throw new OASTypeGenException(String.format(ServiceDiagnosticMessages.OAS_SERVICE_107.getDescription(), responseCode));
             }
             if (responseValue != null && responseValue.get$ref() != null) {
                 String[] splits = responseValue.get$ref().split("/");
@@ -197,7 +197,7 @@ public class ReturnTypeGenerator {
      * Generate union type node when response has multiple content types.
      */
     public static TypeDescriptorNode handleMultipleContents(Set<Map.Entry<String, MediaType>> contentEntries, String pathRecord)
-            throws BallerinaOpenApiException {
+            throws OASTypeGenException {
         Set<String> qualifiedNodes = new LinkedHashSet<>();
         for (Map.Entry<String, MediaType> contentType : contentEntries) {
             String recordName = getNewRecordName(pathRecord);
@@ -230,7 +230,7 @@ public class ReturnTypeGenerator {
      */
     public ReturnTypeDescriptorNode handleSingleResponse(NodeList<AnnotationNode> annotations,
                                                          Map.Entry<String, ApiResponse> response, String pathRecord, String httpMethod)
-            throws BallerinaOpenApiException {
+            throws OASTypeGenException {
 
         ReturnTypeDescriptorNode returnNode = null;
         Token returnKeyWord = createToken(RETURNS_KEYWORD);
@@ -309,7 +309,7 @@ public class ReturnTypeGenerator {
      * objects.
      */
     public static TypeDescriptorNode generateTypeDescriptorForMediaTypes(
-            Map.Entry<String, MediaType> mediaType, String recordName) throws BallerinaOpenApiException {
+            Map.Entry<String, MediaType> mediaType, String recordName) throws OASTypeGenException {
         String mediaTypeContent = selectMediaType(mediaType.getKey().trim());
         Schema<?> schema = mediaType.getValue().getSchema();
         switch (mediaTypeContent) {
@@ -334,7 +334,7 @@ public class ReturnTypeGenerator {
     }
 
     public TypeDescriptorNode getReturnNodeForSchemaType(Map.Entry<String, MediaType> contentEntry, String recordName)
-            throws BallerinaOpenApiException {
+            throws OASTypeGenException {
         TypeDescriptorNode returnNode;
         TypeDescriptorNode mediaTypeToken = generateTypeDescriptorForMediaTypes(contentEntry, recordName);
         if (mediaTypeToken == null) {

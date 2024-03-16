@@ -43,11 +43,10 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.typegenerator.GeneratorUtils;
-import io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.typegenerator.model.Filter;
-import io.ballerina.openapi.core.typegenerator.model.GeneratorMetaData;
+import io.ballerina.openapi.core.generators.type.GeneratorUtils;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.type.model.Filter;
+import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -59,7 +58,6 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -82,7 +80,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDesc
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
-import static io.ballerina.openapi.core.typegenerator.GeneratorUtils.escapeIdentifier;
+import static io.ballerina.openapi.core.generators.type.GeneratorUtils.escapeIdentifier;
 
 /**
  * This Util class use for generating ballerina service file according to given yaml file.
@@ -117,7 +115,7 @@ public class BallerinaServiceGenerator {
         this.functionList = functionList;
     }
 
-    public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
+    public SyntaxTree generateSyntaxTree() throws OASTypeGenException {
         // Create imports http and openapi
         NodeList<ImportDeclarationNode> imports = ServiceGenerationUtils.createImportDeclarationNodes();
         // Need to Generate Base path
@@ -164,7 +162,7 @@ public class BallerinaServiceGenerator {
         return syntaxTree.modifyWith(modulePartNode);
     }
 
-    private List<Node> createResourceFunctions(OpenAPI openApi, Filter filter) throws BallerinaOpenApiException {
+    private List<Node> createResourceFunctions(OpenAPI openApi, Filter filter) throws OASTypeGenException {
 
         List<Node> functions = new ArrayList<>();
         if (!openApi.getPaths().isEmpty()) {
@@ -195,7 +193,7 @@ public class BallerinaServiceGenerator {
 
     private List<Node> applyFiltersForOperations(Filter filter, String path,
                                                  Map<PathItem.HttpMethod, Operation> operationMap)
-            throws BallerinaOpenApiException {
+            throws OASTypeGenException {
         List<Node> functions = new ArrayList<>();
         for (Map.Entry<PathItem.HttpMethod, Operation> operation : operationMap.entrySet()) {
             //Add filter availability
@@ -291,11 +289,11 @@ public class BallerinaServiceGenerator {
      * @param operation -  OAS operation
      * @param pathNodes -  Relative path nodes
      * @return - {@link FunctionDefinitionNode} relevant resource
-     * @throws BallerinaOpenApiException when the process failure occur
+     * @throws OASTypeGenException when the process failure occur
      */
     private FunctionDefinitionNode getResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                        List<Node> pathNodes, String path)
-            throws BallerinaOpenApiException {
+            throws OASTypeGenException {
 
         NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(GeneratorConstants.RESOURCE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
@@ -361,7 +359,7 @@ public class BallerinaServiceGenerator {
     /**
      * Resolve requestBody reference.
      */
-    private RequestBody resolveRequestBodyReference(RequestBody requestBody) throws BallerinaOpenApiException {
+    private RequestBody resolveRequestBodyReference(RequestBody requestBody) throws OASTypeGenException {
 
         if (requestBody.get$ref() != null) {
             String requestBodyName = GeneratorUtils.extractReferenceType(requestBody.get$ref());

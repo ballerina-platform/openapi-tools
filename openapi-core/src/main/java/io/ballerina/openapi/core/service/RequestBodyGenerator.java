@@ -24,10 +24,10 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.openapi.core.typegenerator.GeneratorUtils;
-import io.ballerina.openapi.core.typegenerator.TypeHandler;
-import io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.typegenerator.model.GeneratorMetaData;
+import io.ballerina.openapi.core.generators.type.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
@@ -39,7 +39,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyN
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.openapi.core.typegenerator.GeneratorUtils.extractReferenceType;
+import static io.ballerina.openapi.core.generators.type.GeneratorUtils.extractReferenceType;
 
 /**
  * This class for generating request body payload for OAS requestBody section.
@@ -56,7 +56,7 @@ public class RequestBodyGenerator {
     /**
      * This for creating request Body for given request object.
      */
-    public RequiredParameterNode createNodeForRequestBody() throws BallerinaOpenApiException {
+    public RequiredParameterNode createNodeForRequestBody() throws OASTypeGenException {
         // type CustomRecord record {| anydata...; |};
         // public type PayloadType string|json|xml|byte[]|CustomRecord|CustomRecord[];
         Optional<TypeDescriptorNode> typeName;
@@ -95,7 +95,7 @@ public class RequestBodyGenerator {
      * This util function is for generating type node for request payload in resource function.
      */
     public Optional<TypeDescriptorNode> getNodeForPayloadType(Map.Entry<String, MediaType> mediaType)
-            throws BallerinaOpenApiException {
+            throws OASTypeGenException {
         Optional<TypeDescriptorNode> typeName;
         if (mediaType.getValue() != null && mediaType.getValue().getSchema() != null &&
                 mediaType.getValue().getSchema().get$ref() != null) {
@@ -134,15 +134,15 @@ public class RequestBodyGenerator {
      */
     private String selectMediaType(String mediaTypeContent) {
         if (mediaTypeContent.matches("application/.*\\+json") || mediaTypeContent.matches(".*/json")) {
-            mediaTypeContent = io.ballerina.openapi.core.typegenerator.GeneratorConstants.APPLICATION_JSON;
+            mediaTypeContent = io.ballerina.openapi.core.generators.type.GeneratorConstants.APPLICATION_JSON;
         } else if (mediaTypeContent.matches("application/.*\\+xml") || mediaTypeContent.matches(".*/xml")) {
-            mediaTypeContent = io.ballerina.openapi.core.typegenerator.GeneratorConstants.APPLICATION_XML;
+            mediaTypeContent = io.ballerina.openapi.core.generators.type.GeneratorConstants.APPLICATION_XML;
         } else if (mediaTypeContent.matches("text/.*")) {
-            mediaTypeContent = io.ballerina.openapi.core.typegenerator.GeneratorConstants.TEXT;
+            mediaTypeContent = io.ballerina.openapi.core.generators.type.GeneratorConstants.TEXT;
         }  else if (mediaTypeContent.matches("application/.*\\+octet-stream")) {
-            mediaTypeContent = io.ballerina.openapi.core.typegenerator.GeneratorConstants.APPLICATION_OCTET_STREAM;
+            mediaTypeContent = io.ballerina.openapi.core.generators.type.GeneratorConstants.APPLICATION_OCTET_STREAM;
         } else if (mediaTypeContent.matches("application/.*\\+x-www-form-urlencoded")) {
-            mediaTypeContent = io.ballerina.openapi.core.typegenerator.GeneratorConstants.APPLICATION_URL_ENCODE;
+            mediaTypeContent = io.ballerina.openapi.core.generators.type.GeneratorConstants.APPLICATION_URL_ENCODE;
         }
         return mediaTypeContent;
     }

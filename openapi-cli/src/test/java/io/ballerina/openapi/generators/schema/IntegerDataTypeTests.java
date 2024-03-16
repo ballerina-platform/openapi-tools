@@ -19,9 +19,10 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.DataProvider;
@@ -50,7 +51,7 @@ public class IntegerDataTypeTests {
 
     @Test(dataProvider = "intTestData", description = "Tests valid schema integer value formats")
     public void testIntegerFormatTypeSchema(final String swaggerPath, final String balPath)
-            throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
+            throws IOException, BallerinaOpenApiException, OASTypeGenException {
 
         final Path definitionPath = RES_DIR.resolve(swaggerPath);
         final OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);

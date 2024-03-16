@@ -18,9 +18,10 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -53,7 +54,7 @@ public class ConstraintTests {
 
     @Test(description = "Tests with record field has constraint and record field type can be user defined datatype " +
             "with constraint.")
-    public void testRecordFiledConstraint() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException, FormatterException {
+    public void testRecordFiledConstraint() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/record_field.yaml"),
                 true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -71,7 +72,7 @@ public class ConstraintTests {
             "Use case 03 : Reference array" +
             "Use case 04 : Array items have constrained with number format" +
             "Use case 05 : Only array items have constrained with number format")
-    public void testForArray() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException, FormatterException {
+    public void testForArray() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/array.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
@@ -85,7 +86,7 @@ public class ConstraintTests {
             "Use case 01 : Annotations on a record field" +
             "Use case 02 : Annotations on a type" +
             "Use case 03 : Annotations on a type used as a record field")
-    public void testForReference() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException, FormatterException {
+    public void testForReference() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/type_def_node.yaml"),
                 true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -98,7 +99,7 @@ public class ConstraintTests {
 
 
     @Test(description = "Tests with record field has constraint value with zero.")
-    public void testRecordFiledConstraintWithZeroValue() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
+    public void testRecordFiledConstraintWithZeroValue() throws IOException, BallerinaOpenApiException, OASTypeGenException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/record_field_02.yaml"),
                 true);
@@ -112,7 +113,7 @@ public class ConstraintTests {
     }
 
     @Test(description = "Tests with nested array field has constraint.")
-    public void testNestedArrayWithConstraint() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
+    public void testNestedArrayWithConstraint() throws IOException, BallerinaOpenApiException, OASTypeGenException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                         "/nested_array_with_constraint.yaml"), true);
@@ -127,7 +128,7 @@ public class ConstraintTests {
     }
 
     @Test(description = "Tests with additional properties field has constraint.")
-    public void testAdditionalPropertiesWithConstraint() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
+    public void testAdditionalPropertiesWithConstraint() throws IOException, BallerinaOpenApiException, OASTypeGenException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/additional_properties_with_constraint.yaml"), true);
@@ -144,7 +145,7 @@ public class ConstraintTests {
     // generation available in tool.
 
     @Test(description = "Test for invalid constraint value")
-    public void testInvalidConstraintUses() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException, FormatterException {
+    public void testInvalidConstraintUses() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/invalidConstraintFieldWithDataType.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -158,7 +159,7 @@ public class ConstraintTests {
     }
 
     @Test(description = "Test for invalid constraint value with valid constraint value")
-    public void testInvalidAndValidBothConstraintUses() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
+    public void testInvalidAndValidBothConstraintUses() throws IOException, BallerinaOpenApiException, OASTypeGenException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/invalidAndValidConstraintFieldWithDataType.yaml"), true);
@@ -173,7 +174,7 @@ public class ConstraintTests {
     }
 
     @Test(description = "Test for allowing zero value for number and integer type")
-    public void testAllowedZeroValuesForNumber() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException, FormatterException {
+    public void testAllowedZeroValuesForNumber() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/allow_zero_values_for_number_constraint.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -187,7 +188,7 @@ public class ConstraintTests {
     }
 
     @Test(description = "Tests for nullable reference types with constraint.")
-    public void testNullableRefTypesWithConstraint() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
+    public void testNullableRefTypesWithConstraint() throws IOException, BallerinaOpenApiException, OASTypeGenException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/constraint_with_nullable.yaml"), true);
@@ -202,7 +203,7 @@ public class ConstraintTests {
     }
 
     @Test(description = "Test for schema properties having pattern constraint.")
-    public void testStringSchemaPropertyWithPattern() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
+    public void testStringSchemaPropertyWithPattern() throws IOException, BallerinaOpenApiException, OASTypeGenException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/pattern_string.yaml"), true);
@@ -217,7 +218,7 @@ public class ConstraintTests {
     }
 
     @Test(description = "Test for exclusiveMin and exclusiveMax property changes in OpenAPI 3.1")
-    public void testExclusiveMinMaxInV31() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException,
+    public void testExclusiveMinMaxInV31() throws IOException, BallerinaOpenApiException, OASTypeGenException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/exclusive_min_max_3_1.yaml"), true);
@@ -232,7 +233,7 @@ public class ConstraintTests {
     }
 
     @Test(description = "Test for schema properties containing data types with format constraints.")
-    public void testDataTypeHasFormatWithConstraint() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
+    public void testDataTypeHasFormatWithConstraint() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/format_types_v3_0.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);

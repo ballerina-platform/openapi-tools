@@ -21,9 +21,9 @@ package io.ballerina.openapi.generators.service;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.typegenerator.GeneratorUtils;
-import io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.typegenerator.model.Filter;
+import io.ballerina.openapi.core.generators.type.GeneratorUtils;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.type.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
 
@@ -45,7 +45,7 @@ public class RequestBodyTests {
     SyntaxTree syntaxTree;
 
     @Test(description = "Scenario 01 - Request Body has single content type(application/json)")
-    public void generateJsonPayload() throws IOException, BallerinaOpenApiException {
+    public void generateJsonPayload() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario01_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -59,7 +59,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Scenario 01.02 - Request Body has single content type(application/octet-stream)")
-    public void generateOtherPayload() throws IOException, BallerinaOpenApiException {
+    public void generateOtherPayload() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario01_02_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -73,7 +73,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Scenario 02 - Request Body has multiple content types with Same dataBind schema type.\n")
-    public void generateRBsameDataBindingPayload() throws IOException, BallerinaOpenApiException {
+    public void generateRBsameDataBindingPayload() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario02_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -87,7 +87,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Scenario 03 - Request Body has multiple content types with Different dataBind schema types.")
-    public void generateMultipleContent() throws IOException, BallerinaOpenApiException {
+    public void generateMultipleContent() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/multiple_content.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -101,7 +101,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Scenario 04 - Request Body has record name with special characters.")
-    public void generateRecordName() throws IOException, BallerinaOpenApiException {
+    public void generateRecordName() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/record_name_refactor.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -115,7 +115,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Scenario 05 - Request Body has text/* mediatype.")
-    public void generateForMediaType() throws IOException, BallerinaOpenApiException {
+    public void generateForMediaType() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario04_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -150,7 +150,7 @@ public class RequestBodyTests {
 //    }
 
     @Test(description = "RequestBody has url encode media type  scenarios")
-    public void uRLEncode() throws IOException, BallerinaOpenApiException {
+    public void uRLEncode() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/url_form_encode.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -164,7 +164,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "RequestBody has reference to component requestBody sections")
-    public void referenceRequestBody() throws IOException, BallerinaOpenApiException {
+    public void referenceRequestBody() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/reference_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -179,7 +179,7 @@ public class RequestBodyTests {
 
     @Test
     public void testForRequestBodyHasMultipartFormDataPayload()
-            throws IOException, BallerinaOpenApiException {
+            throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/multipart_form_data.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -194,7 +194,7 @@ public class RequestBodyTests {
 
 
     @Test(description = "RequestBody has unhandled media type ex: application/zip")
-    public void testForUnhandledMediaType() throws IOException, BallerinaOpenApiException {
+    public void testForUnhandledMediaType() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/unhandled_media_type.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -208,7 +208,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "RequestBody has anyOf type")
-    public void testForAnyOf() throws IOException, BallerinaOpenApiException {
+    public void testForAnyOf() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/any_of.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

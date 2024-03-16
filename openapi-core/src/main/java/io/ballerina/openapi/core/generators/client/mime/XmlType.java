@@ -21,14 +21,14 @@ package io.ballerina.openapi.core.generators.client.mime;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.swagger.v3.oas.models.media.MediaType;
 
 import java.util.List;
 import java.util.Map;
 
-import static io.ballerina.openapi.core.GeneratorConstants.XML_DATA;
-import static io.ballerina.openapi.core.GeneratorUtils.addImport;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.XML_DATA;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.addImport;
 
 /**
  * Defines the payload structure of xml mime type.

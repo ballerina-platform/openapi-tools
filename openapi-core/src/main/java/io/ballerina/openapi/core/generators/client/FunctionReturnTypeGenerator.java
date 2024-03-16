@@ -20,10 +20,10 @@ package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
-import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.schemaOld.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Content;
@@ -46,19 +46,19 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameRefe
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_RETURN;
-import static io.ballerina.openapi.core.GeneratorConstants.ERROR;
-import static io.ballerina.openapi.core.GeneratorConstants.OPTIONAL_ERROR;
-import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
-import static io.ballerina.openapi.core.GeneratorUtils.convertOpenAPITypeToBallerina;
-import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
-import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIType;
-import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.core.GeneratorUtils.isValidSchemaName;
-import static io.ballerina.openapi.core.GeneratorUtils.isArraySchema;
-import static io.ballerina.openapi.core.GeneratorUtils.isComposedSchema;
-import static io.ballerina.openapi.core.GeneratorUtils.isMapSchema;
-import static io.ballerina.openapi.core.GeneratorUtils.isObjectSchema;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_RETURN;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ERROR;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPTIONAL_ERROR;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isValidSchemaName;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isArraySchema;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isComposedSchema;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isMapSchema;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isObjectSchema;
 
 /**
  * This util class for maintain the operation response with ballerina return type.

@@ -22,13 +22,14 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.cmd.CmdUtils;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.constraintgenerator.ConstraintGenerator;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.constraint.ConstraintGenerator;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.BallerinaServiceGenerator;
-import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.typegenerator.TypeHandler;
+import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
@@ -62,7 +63,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIFromOpenAPIV3Parser;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIFromOpenAPIV3Parser;
 
 /**
  * This util class for keeping all the common functions that use to tests.
@@ -80,7 +81,7 @@ public class TestUtils {
     public static List<Diagnostic> getDiagnostics(SyntaxTree syntaxTree, OpenAPI openAPI,
                                                   BallerinaClientGenerator ballerinaClientGenerator)
             throws FormatterException, IOException,
-            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
+            OASTypeGenException {
         List<TypeDefinitionNode> preGeneratedTypeDefinitionNodes = new LinkedList<>();
         preGeneratedTypeDefinitionNodes.addAll(ballerinaClientGenerator.
                 getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
@@ -107,7 +108,7 @@ public class TestUtils {
     public static List<Diagnostic> getDiagnosticsForService(SyntaxTree serviceSyntaxTree, OpenAPI openAPI,
                                                             BallerinaServiceGenerator ballerinaServiceGenerator, String yamlFile)
             throws FormatterException, IOException,
-            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
+            OASTypeGenException {
 //        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
 //                ballerinaServiceGenerator.getTypeInclusionRecords());
 //        preGeneratedTypeDefNodes.addAll(BallerinaTypesGenerator.getTypeInclusionRecords().values());

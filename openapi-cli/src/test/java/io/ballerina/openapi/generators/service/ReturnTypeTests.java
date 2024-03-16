@@ -21,9 +21,9 @@ package io.ballerina.openapi.generators.service;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.typegenerator.GeneratorUtils;
-import io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.typegenerator.model.Filter;
+import io.ballerina.openapi.core.generators.type.GeneratorUtils;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.type.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
 
@@ -46,7 +46,7 @@ public class ReturnTypeTests {
 
     // Response scenarios
     @Test(description = "Scenario 01 - Response has single response without content type")
-    public void generateResponseScenario01() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario01() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_01_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -59,7 +59,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 02 - Single response with content type")
-    public void generateResponseScenario02() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario02() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_02_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -72,7 +72,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 03 - Single response with content type application/json")
-    public void generateResponseScenario03() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario03() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_03_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -85,7 +85,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 04 - Response has multiple responses without content type")
-    public void generateResponseScenario04() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario04() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_04_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -98,7 +98,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 05 - Error response with a schema")
-    public void generateResponseScenario05() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario05() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_05_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -111,7 +111,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 06 - Error response with a schema with application/json")
-    public void generateResponseScenario06() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario06() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_06_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -124,7 +124,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 07 - Single response has multiple content types")
-    public void generateResponseScenario07() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario07() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_07_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -137,7 +137,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 08 - Single response has inline record for dataType")
-    public void generateResponseScenario08() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario08() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_08_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -150,7 +150,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 09 - Single response has inline record for dataType with different status code")
-    public void generateResponseScenario09() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario09() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_09_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -163,7 +163,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 10 - Response with a custom media type")
-    public void generateResponseScenario10() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario10() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_10_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -176,7 +176,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 11 - Response has OneOf and AnyOf type 200 ok")
-    public void generateResponseScenario11() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario11() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_11_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -189,7 +189,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 12 - Response has OneOf and AnyOf type for error status code")
-    public void generateResponseScenario12() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario12() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_12_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -202,7 +202,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 13 - Single response has multiple content types with different error code")
-    public void generateResponseScenario13() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario13() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_13_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -215,7 +215,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 14 - Multiple response with same mediaType")
-    public void generateResponseScenario14() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario14() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_14_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -228,7 +228,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 15 - Response has array type data Binding")
-    public void generateResponseScenario15() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario15() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_15_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -241,7 +241,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 16 - Response has array type data Binding with error code")
-    public void generateResponseScenario16() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario16() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_16_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -254,7 +254,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 19 - Multiple response with different mediaType")
-    public void generateResponseScenario19() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario19() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_19_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -267,7 +267,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 20 - MediaType has text/html")
-    public void generateResponseScenario20() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario20() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_20_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -280,7 +280,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 21 - MediaType has text/csv")
-    public void generateResponseScenario21() throws IOException, BallerinaOpenApiException {
+    public void generateResponseScenario21() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_21_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -293,7 +293,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Default response handling")
-    public void generateResponseDefault() throws IOException, BallerinaOpenApiException {
+    public void generateResponseDefault() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/petstore_default.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -307,7 +307,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Path with special characters ")
-    public void testWithSpecialCharacters() throws IOException, BallerinaOpenApiException {
+    public void testWithSpecialCharacters() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/path_with_special_characters.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -321,7 +321,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Response has different status code except 200")
-    public void testWithDifferentStatusCode() throws IOException, BallerinaOpenApiException {
+    public void testWithDifferentStatusCode() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/different_status_code.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -335,7 +335,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Response has unsupported http status code")
-    public void testForNotSupportedStatusCode() throws IOException, BallerinaOpenApiException {
+    public void testForNotSupportedStatusCode() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/real_apis/box.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -348,7 +348,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Response and Request body have inline object schema")
-    public void testWithInlineObjectSchema() throws IOException, BallerinaOpenApiException {
+    public void testWithInlineObjectSchema() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/inline_record_type_request_response.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -362,7 +362,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Return for all status code")
-    public void toAllResponseCode() throws IOException, BallerinaOpenApiException {
+    public void toAllResponseCode() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/response_codes.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -376,7 +376,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Single response without content type.")
-    public void singleResponseWithOutContent() throws IOException, BallerinaOpenApiException {
+    public void singleResponseWithOutContent() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/content_null.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -389,7 +389,7 @@ public class ReturnTypeTests {
     }
 
     @Test
-    public void testForUnsupportedReturnPayload() throws IOException, BallerinaOpenApiException {
+    public void testForUnsupportedReturnPayload() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/unsupportedPayloadType.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -403,7 +403,7 @@ public class ReturnTypeTests {
     }
 
     @Test
-    public void testForResponseHasReference() throws IOException, BallerinaOpenApiException {
+    public void testForResponseHasReference() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/reference_response.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -417,7 +417,7 @@ public class ReturnTypeTests {
     }
 
     @Test
-    public void testForAdditionalProReturnPayload() throws IOException, BallerinaOpenApiException {
+    public void testForAdditionalProReturnPayload() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/response_has_additional_properties.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -432,7 +432,7 @@ public class ReturnTypeTests {
 
     @Test(description = "Test for the POST method resource return generation. If 201 with schema type, then it " +
             "generates only schema type without status code")
-    public void testForPostMethod() throws IOException, BallerinaOpenApiException {
+    public void testForPostMethod() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/post_method.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -445,7 +445,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Test for the resource function return generation when the response is empty")
-    public void testForEmptyResponse() throws IOException, BallerinaOpenApiException {
+    public void testForEmptyResponse() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/empty_response.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -458,7 +458,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Test for the resource function return generation when the response is empty")
-    public void testForMultilineReturnDescription() throws IOException, BallerinaOpenApiException {
+    public void testForMultilineReturnDescription() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/response/multiline_return_description.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
