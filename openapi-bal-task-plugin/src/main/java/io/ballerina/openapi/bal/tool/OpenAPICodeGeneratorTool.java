@@ -18,14 +18,12 @@
 package io.ballerina.openapi.bal.tool;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.generators.common.GeneratorUtils;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.generators.common.model.Filter;
-import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.model.Filter;
+import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.buildtools.CodeGeneratorTool;
 import io.ballerina.projects.buildtools.ToolContext;
@@ -334,7 +332,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         List<GenSrcFile> sourceFiles = new ArrayList<>();
 
         // Generate ballerina client files.
-        TypeHandler.createInstance(oasClientConfig.getOpenAPI(), oasClientConfig.isNullable(), false);
+        TypeHandler.createInstance(oasClientConfig.getOpenAPI(), oasClientConfig.isNullable());
         String licenseContent = oasClientConfig.getLicense();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();

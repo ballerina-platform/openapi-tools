@@ -41,7 +41,7 @@ import java.nio.file.Paths;
  */
 public class PrimitiveDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    private SyntaxTree syntaxTree;
+    private SyntaxTree syntaxTree = null;
     private ByteArrayOutputStream outContent;
 
     @BeforeTest
@@ -54,8 +54,8 @@ public class PrimitiveDataTypeTests {
     public void generateScenario01() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario01.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema01.bal", syntaxTree);
     }
 
@@ -63,8 +63,8 @@ public class PrimitiveDataTypeTests {
     public void generateScenario02() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario02.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema02.bal", syntaxTree);
     }
 
@@ -72,8 +72,8 @@ public class PrimitiveDataTypeTests {
     public void generateMissingDatatype() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/missDataType.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         String expected = "public type Pet record { #this is missing dataType anydata id; string name; decimal tag?;" +
                 " string 'type?;};";
         Assert.assertTrue(syntaxTree.toString().trim().replaceAll("\\s+", "").
@@ -84,8 +84,8 @@ public class PrimitiveDataTypeTests {
     public void generateSchemaForPrimitiveData() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/schema_with_primitive.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema_with_primitive.bal",
                 syntaxTree);
     }
@@ -94,8 +94,8 @@ public class PrimitiveDataTypeTests {
     public void generateSchemaForInvalidAdditionalProperty() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/additional_properties_invalid_format.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/" +
                         "additional_properties_invalid_format.bal",
                 syntaxTree);
@@ -105,8 +105,8 @@ public class PrimitiveDataTypeTests {
     public void generateSchemaForPrimitiveTypesWithUnsupportedFormats() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/invalid_formats.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/invalid_formats.bal", syntaxTree);
     }

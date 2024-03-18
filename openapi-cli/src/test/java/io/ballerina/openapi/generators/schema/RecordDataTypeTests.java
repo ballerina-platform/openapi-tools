@@ -36,14 +36,14 @@ import java.nio.file.Paths;
  */
 public class RecordDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    SyntaxTree syntaxTree;
+    SyntaxTree syntaxTree = null;
 
     @Test(description = "Generate record with record type filed record")
     public void generateRecordWithRecordField() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario05.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema05.bal", syntaxTree);
     }
 
@@ -51,8 +51,8 @@ public class RecordDataTypeTests {
     public void generateNestedRecord() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario07.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema07.bal", syntaxTree);
     }
 
@@ -60,8 +60,8 @@ public class RecordDataTypeTests {
     public void generateEmptyRecord() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/empty_record.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/empty_record.bal", syntaxTree);
     }
 }

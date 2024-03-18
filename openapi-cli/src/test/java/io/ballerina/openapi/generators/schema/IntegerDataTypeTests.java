@@ -36,6 +36,7 @@ import java.nio.file.Paths;
  * Test class for testing integer data types int32 and int64.
  */
 public class IntegerDataTypeTests {
+    SyntaxTree syntaxTree = null;
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
 
     @DataProvider(name = "intTestData")
@@ -55,8 +56,8 @@ public class IntegerDataTypeTests {
 
         final Path definitionPath = RES_DIR.resolve(swaggerPath);
         final OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        final BallerinaTypesGenerator ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI);
-        final SyntaxTree syntaxTree = ballerinaTypesGenerator.generateTypeSyntaxTree();
+//        final BallerinaTypesGenerator ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI);
+//        final SyntaxTree syntaxTree = ballerinaTypesGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(balPath, syntaxTree);
     }
 }

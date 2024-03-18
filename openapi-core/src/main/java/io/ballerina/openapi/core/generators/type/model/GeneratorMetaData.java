@@ -29,17 +29,15 @@ public class GeneratorMetaData {
 
     private final OpenAPI openAPI;
     private final boolean nullable;
-    private final boolean generateServiceType;
     private static GeneratorMetaData generatorMetaData = null;
 
-    private GeneratorMetaData(OpenAPI openAPI, boolean nullable, boolean generateServiceType) {
+    private GeneratorMetaData(OpenAPI openAPI, boolean nullable) {
         this.openAPI = openAPI;
         this.nullable = nullable;
-        this.generateServiceType = generateServiceType;
     }
 
-    public static void createInstance(OpenAPI openAPI, boolean nullable, boolean generateServiceType) {
-        generatorMetaData = new GeneratorMetaData(openAPI, nullable, generateServiceType);
+    public static void createInstance(OpenAPI openAPI, boolean nullable) {
+        generatorMetaData = new GeneratorMetaData(openAPI, nullable);
     }
 
     public static GeneratorMetaData getInstance() {
@@ -54,7 +52,4 @@ public class GeneratorMetaData {
         return nullable;
     }
 
-    public boolean isServiceTypeRequired() {
-        return generateServiceType;
-    }
 }

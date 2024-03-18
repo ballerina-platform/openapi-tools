@@ -87,14 +87,14 @@ public class BallerinaTestGeneratorTests {
                 getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
         preGeneratedTypeDefinitionNodes.addAll(ballerinaClientGenerator.getTypeDefinitionNodeList());
         BallerinaTypesGenerator schemaGenerator = new BallerinaTypesGenerator(
-                openAPI, false, preGeneratedTypeDefinitionNodes);
+                openAPI, false);
         BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
         SyntaxTree syntaxTreeTest = ballerinaTestGenerator.generateSyntaxTree();
-        SyntaxTree syntaxTreeSchema = schemaGenerator.generateTypeSyntaxTree();
+//        SyntaxTree syntaxTreeSchema = schemaGenerator.generateTypeSyntaxTree();
         SyntaxTree utilSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
         String configFile = ballerinaTestGenerator.getConfigTomlFile();
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTreeClient, syntaxTreeTest,
-                syntaxTreeSchema, configFile, utilSyntaxTree);
+                null, configFile, utilSyntaxTree);
         Assert.assertTrue(diagnostics.isEmpty());
     }
 

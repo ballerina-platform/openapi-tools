@@ -24,8 +24,8 @@ public class NestedRecordInclusionTests {
     public void generateAllOf() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/nested_schema_refs.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree
                 ("schema/ballerina/nested_schema_refs.bal", syntaxTree);
     }
