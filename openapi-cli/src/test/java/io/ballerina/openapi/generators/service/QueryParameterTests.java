@@ -21,10 +21,10 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CmdUtils;
 import io.ballerina.openapi.core.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.typegenerator.GeneratorUtils;
-import io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.typegenerator.model.Filter;
+import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.type.GeneratorUtils;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.type.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
@@ -47,7 +47,7 @@ public class QueryParameterTests {
     SyntaxTree syntaxTree;
 
     @Test(description = "01. Required query parameter has primitive data type")
-    public void requiredQueryParameterPrimitive() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void requiredQueryParameterPrimitive() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_01.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -60,7 +60,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "02. Required query parameter has array data type")
-    public void requiredQueryParameterPrimitiveArray() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void requiredQueryParameterPrimitiveArray() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_02.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -73,10 +73,10 @@ public class QueryParameterTests {
     }
 
     @Test(description = "03. Required query parameter has nested array data type",
-            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptions = OASTypeGenException.class,
             expectedExceptionsMessageRegExp = "Query parameters with nested array types are not supported in.*")
     public void requiredQueryParameterPrimitiveNestedArray()
-            throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+            throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_03.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -89,9 +89,9 @@ public class QueryParameterTests {
     }
 
     @Test(description = "04. Required query parameter has array data type with no item types",
-            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptions = OASTypeGenException.class,
             expectedExceptionsMessageRegExp = "Query parameters with no array item type can not be mapped to.*")
-    public void requiredQueryParameterArrayHasNoItemType() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void requiredQueryParameterArrayHasNoItemType() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_04.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -113,7 +113,7 @@ public class QueryParameterTests {
             nullable: true
      */
     @Test(description = "05. Nullable optional query parameter")
-    public void nullableQueryParameter() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void nullableQueryParameter() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_05.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -126,7 +126,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "06. Nullable query parameter with array")
-    public void nullableQueryParameterWithArray() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void nullableQueryParameterWithArray() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_06.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -139,10 +139,10 @@ public class QueryParameterTests {
     }
 
     @Test(description = "07. Optional query parameter has nested array data type",
-            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptions = OASTypeGenException.class,
             expectedExceptionsMessageRegExp = "Query parameters with nested array types are not supported in.*")
     public void optionalQueryParameterPrimitiveNestedArray()
-            throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+            throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_07.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -155,9 +155,9 @@ public class QueryParameterTests {
     }
 
     @Test(description = "08. Optional query parameter has array data type with no item types",
-            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptions = OASTypeGenException.class,
             expectedExceptionsMessageRegExp = "Query parameters with no array item type can not be mapped to .*")
-    public void optionalQueryParameterArrayHasNoItemType() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void optionalQueryParameterArrayHasNoItemType() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_08.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -181,7 +181,7 @@ public class QueryParameterTests {
      */
     @Test(description = "09. Default query parameter has primitive data type and array")
     public void defaultQueryParameter()
-            throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+            throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_09.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -194,10 +194,10 @@ public class QueryParameterTests {
     }
 
     @Test(description = "10. Optional query parameter has array data type with no item types",
-            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptions = OASTypeGenException.class,
             expectedExceptionsMessageRegExp = "Query parameters with no array item type can not be mapped to" +
                     " Ballerina resource query .*")
-    public void defaultQueryParameterArrayHasNoItemType() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void defaultQueryParameterArrayHasNoItemType() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_10.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -210,7 +210,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "11. Required query parameter has nullable true")
-    public void requiredNullableQueryParameter() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void requiredNullableQueryParameter() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_11.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -223,7 +223,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "12. Required query parameter has map<json> type")
-    public void mapJsonQueryParameter() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void mapJsonQueryParameter() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_12.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -236,7 +236,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "13. Default query parameter has string type")
-    public void stringDefaultQueryParameter() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void stringDefaultQueryParameter() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_13.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -249,7 +249,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "14. Fix the query parameter order")
-    public void queryParameterOrder() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void queryParameterOrder() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_14.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -262,7 +262,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "15. Optional query parameter")
-    public void optionalQueryParameter() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void optionalQueryParameter() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_15.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -275,7 +275,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "16. Query parameter(s) having a referenced schema")
-    public void generateParamsWithRefSchema() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void generateParamsWithRefSchema() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_ref_schema.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, false);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -289,11 +289,11 @@ public class QueryParameterTests {
     }
 
     @Test(description = "17. Query parameter(s) having a referenced schema of unsupported type",
-            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptions = OASTypeGenException.class,
             expectedExceptionsMessageRegExp = "Type 'xml' is not a valid query parameter type in Ballerina. " +
                     "The supported types are string, int, float, boolean, decimal, array types of the aforementioned " +
                     "types and map<json>.")
-    public void generateParamsWithInvalidRefSchema() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void generateParamsWithInvalidRefSchema() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_invalid_ref_schema.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -305,10 +305,10 @@ public class QueryParameterTests {
     }
 
     @Test(description = "18. Query parameter(s) having a referenced schema of array of unsupported type",
-            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptions = OASTypeGenException.class,
             expectedExceptionsMessageRegExp = "OpenAPI definition has errors: \n" +
                     "attribute components.schemas.Room.content is unexpected.*")
-    public void generateParamsWithInvalidArrayRefSchema() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void generateParamsWithInvalidArrayRefSchema() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameter_with_ref_array_invalid_schema.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -320,7 +320,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "19. Query parameter(s) having a referenced schema type")
-    public void generateParamsWithObjectRefSchema() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateParamsWithObjectRefSchema() throws IOException, OASTypeGenException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_object_ref_schema.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -334,7 +334,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "20. Query parameter(s) having a referenced schema of array type")
-    public void generateParamsWithObjectArrayRefSchema() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void generateParamsWithObjectArrayRefSchema() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameter_with_ref_array_object_schema.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -348,7 +348,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "21. Query parameter(s) having a object schema")
-    public void generateParamsWithObjectType() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.exception.BallerinaOpenApiException {
+    public void generateParamsWithObjectType() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/object_query.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, false);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

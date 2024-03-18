@@ -19,7 +19,7 @@ package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.launcher.BLauncherException;
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.apache.commons.io.FileUtils;

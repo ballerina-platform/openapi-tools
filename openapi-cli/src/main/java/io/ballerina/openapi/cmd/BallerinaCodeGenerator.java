@@ -20,18 +20,19 @@ package io.ballerina.openapi.cmd;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.model.Filter;
-import io.ballerina.openapi.core.model.GenSrcFile;
+import io.ballerina.openapi.core.generators.common.model.Filter;
+import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.core.service.BallerinaServiceObjectGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.typegenerator.TypeHandler;
+import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -71,8 +72,8 @@ import static io.ballerina.openapi.cmd.CmdConstants.TYPE_FILE_NAME;
 import static io.ballerina.openapi.cmd.CmdConstants.UNTITLED_SERVICE;
 import static io.ballerina.openapi.cmd.CmdConstants.UTIL_FILE_NAME;
 import static io.ballerina.openapi.cmd.CmdUtils.setGeneratedFileName;
-import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_FILE_HEADER;
-import static io.ballerina.openapi.core.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_FILE_HEADER;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
 
 /**
  * This class generates Ballerina Services/Clients for a provided OAS definition.
@@ -95,8 +96,8 @@ public class BallerinaCodeGenerator {
                                          String outPath, Filter filter, boolean nullable,
                                          boolean isResource, boolean generateServiceType,
                                          boolean generateWithoutDataBinding)
-            throws IOException, FormatterException, io.ballerina.openapi.core.exception.BallerinaOpenApiException,
-            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
+            throws IOException, FormatterException, BallerinaOpenApiException,
+            OASTypeGenException {
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
 
@@ -149,8 +150,8 @@ public class BallerinaCodeGenerator {
         preGeneratedTypeDefNodes.addAll(typeDefinitionNodeList);
         String serviceContent = "";
         if (complexPaths.isEmpty()) {
-            io.ballerina.openapi.core.typegenerator.model.Filter filter1 =
-                    new io.ballerina.openapi.core.typegenerator.model.Filter();
+            io.ballerina.openapi.core.generators.type.model.Filter filter1 =
+                    new io.ballerina.openapi.core.generators.type.model.Filter();
             filter1.setOperations(filter.getOperations());
             filter1.setTags(filter.getTags());
             OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -233,7 +234,7 @@ public class BallerinaCodeGenerator {
     public void generateClient(String definitionPath, String outPath, Filter filter, boolean nullable,
                                boolean isResource)
             throws IOException, FormatterException, BallerinaOpenApiException,
-            io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
+            OASTypeGenException {
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource);
@@ -351,7 +352,7 @@ public class BallerinaCodeGenerator {
      * @throws IOException when code generation with specified templates fails
      */
     private List<GenSrcFile> generateClientFiles(Path openAPI, Filter filter, boolean nullable, boolean isResource)
-            throws IOException, BallerinaOpenApiException, FormatterException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException {
+            throws IOException, BallerinaOpenApiException, FormatterException, OASTypeGenException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_CLIENT_PKG;
         }
@@ -462,8 +463,8 @@ public class BallerinaCodeGenerator {
                 openAPIDef.getInfo().getTitle().toLowerCase(Locale.ENGLISH) :
                 serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
-        io.ballerina.openapi.core.typegenerator.model.Filter filter1 =
-                new io.ballerina.openapi.core.typegenerator.model.Filter();
+        io.ballerina.openapi.core.generators.type.model.Filter filter1 =
+                new io.ballerina.openapi.core.generators.type.model.Filter();
         filter1.setOperations(filter.getOperations());
         filter1.setTags(filter.getTags());
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -479,8 +480,8 @@ public class BallerinaCodeGenerator {
         String mainContent;
         try {
             mainContent = Formatter.format(ballerinaServiceGenerator.generateSyntaxTree()).toSourceCode();
-        } catch (io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException e) {
-                throw new io.ballerina.openapi.core.exception.BallerinaOpenApiException(e.getMessage(), e.getCause());
+        } catch (OASTypeGenException e) {
+                throw new BallerinaOpenApiException(e.getMessage(), e.getCause());
         }
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile,
                 (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + mainContent));

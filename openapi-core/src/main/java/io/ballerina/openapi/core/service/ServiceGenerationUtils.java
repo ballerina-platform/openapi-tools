@@ -30,8 +30,8 @@ import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
-import io.ballerina.openapi.core.typegenerator.GeneratorUtils;
-import io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.type.GeneratorUtils;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,16 +64,16 @@ public class ServiceGenerationUtils {
      *
      * @param referenceVariable - Reference String
      * @return Reference variable name
-     * @throws BallerinaOpenApiException - Throws an exception if the reference string is incompatible.
+     * @throws OASTypeGenException - Throws an exception if the reference string is incompatible.
      *                                   Note : Current implementation will not support external links a references.
      */
-    public static String extractReferenceType(String referenceVariable) throws BallerinaOpenApiException {
+    public static String extractReferenceType(String referenceVariable) throws OASTypeGenException {
 
         if (referenceVariable.startsWith("#") && referenceVariable.contains("/")) {
             String[] refArray = referenceVariable.split("/");
             return GeneratorUtils.escapeIdentifier(refArray[refArray.length - 1]);
         } else {
-            throw new BallerinaOpenApiException("Invalid reference value : " + referenceVariable
+            throw new OASTypeGenException("Invalid reference value : " + referenceVariable
                     + "\nBallerina only supports local reference values.");
         }
     }

@@ -33,7 +33,7 @@ import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.Encoding;
@@ -63,10 +63,10 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.openapi.core.GeneratorConstants.MIME;
-import static io.ballerina.openapi.core.GeneratorUtils.addImport;
-import static io.ballerina.openapi.core.GeneratorUtils.escapeIdentifier;
-import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.MIME;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.addImport;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 /**
  * Defines the payload structure of multipart form-data mime type.

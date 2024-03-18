@@ -19,9 +19,10 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.typegenerator.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -56,7 +57,7 @@ public class EnumGenerationTests {
             "Use case 02 : Enums in schema properties" +
             "Use case 03 : Enum with null value" +
             "Use case 04 : Enum as array items")
-    public void testForEnums() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException, FormatterException {
+    public void testForEnums() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/schema_with_enums.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
@@ -72,7 +73,7 @@ public class EnumGenerationTests {
             "Use case 03 : Nullable boolean enum" +
             "Use case 04 : Nullable float enum" +
             "Use case 05 : Nullable enum in arrays")
-    public void testForNullableEnums() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException, FormatterException {
+    public void testForNullableEnums() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve(
                 "swagger/schema_with_nullable_enums.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -84,7 +85,7 @@ public class EnumGenerationTests {
     }
 
     @Test(description = "Test enum with no values")
-    public void testForEmptyEnums() throws IOException, BallerinaOpenApiException, io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException, FormatterException {
+    public void testForEmptyEnums() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve(
                 "swagger/empty_enum.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);

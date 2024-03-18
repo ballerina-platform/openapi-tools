@@ -18,16 +18,14 @@
 package io.ballerina.openapi.bal.tool;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.model.Filter;
-import io.ballerina.openapi.core.model.GenSrcFile;
-import io.ballerina.openapi.core.typegenerator.TypeHandler;
+import io.ballerina.openapi.core.generators.common.model.Filter;
+import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.buildtools.CodeGeneratorTool;
 import io.ballerina.projects.buildtools.ToolContext;
@@ -49,7 +47,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -64,15 +61,15 @@ import static io.ballerina.openapi.bal.tool.Constants.NULLABLE;
 import static io.ballerina.openapi.bal.tool.Constants.OPERATIONS;
 import static io.ballerina.openapi.bal.tool.Constants.TAGS;
 import static io.ballerina.openapi.bal.tool.Constants.TRUE;
-import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
-import static io.ballerina.openapi.core.GeneratorConstants.JSON_EXTENSION;
-import static io.ballerina.openapi.core.GeneratorConstants.RESOURCE;
-import static io.ballerina.openapi.core.GeneratorConstants.TYPE_FILE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.UTIL_FILE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.YAML_EXTENSION;
-import static io.ballerina.openapi.core.GeneratorConstants.YML_EXTENSION;
-import static io.ballerina.openapi.core.GeneratorUtils.normalizeOpenAPI;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLIENT_FILE_NAME;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.JSON_EXTENSION;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RESOURCE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TYPE_FILE_NAME;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UTIL_FILE_NAME;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YAML_EXTENSION;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YML_EXTENSION;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.normalizeOpenAPI;
 
 /**
  * This class includes the implementation of the {@code BuildToolRunner} for the OpenAPI tool.
@@ -113,8 +110,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 Filter filter = new Filter();
                 OASClientConfig clientConfig = new OASClientConfig.Builder()
                         .withFilters(filter).withOpenAPI(openAPI.get()).build();
-                io.ballerina.openapi.core.typegenerator.model.Filter filter1 =
-                        new io.ballerina.openapi.core.typegenerator.model.Filter();
+                io.ballerina.openapi.core.generators.type.model.Filter filter1 =
+                        new io.ballerina.openapi.core.generators.type.model.Filter();
                 filter1.setOperations(filter.getOperations());
                 filter1.setTags(filter.getTags());
                 OASServiceMetadata serviceMetaData = new OASServiceMetadata.Builder()
@@ -268,8 +265,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
             }
         }
         clientMetaDataBuilder.withFilters(filter);
-        io.ballerina.openapi.core.typegenerator.model.Filter filter1 =
-                new io.ballerina.openapi.core.typegenerator.model.Filter();
+        io.ballerina.openapi.core.generators.type.model.Filter filter1 =
+                new io.ballerina.openapi.core.generators.type.model.Filter();
         filter1.setOperations(filter.getOperations());
         filter1.setTags(filter.getTags());
         serviceMetaDataBuilder.withFilters(filter1);

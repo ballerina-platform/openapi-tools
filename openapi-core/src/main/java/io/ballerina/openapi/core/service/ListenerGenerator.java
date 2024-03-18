@@ -35,8 +35,8 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
-import io.ballerina.openapi.core.typegenerator.GeneratorUtils;
-import io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.type.GeneratorUtils;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 
@@ -66,9 +66,9 @@ public class ListenerGenerator {
      *
      * @param servers OAS server details
      * @return {@link ListenerDeclarationNode} for server.
-     * @throws BallerinaOpenApiException when process break with exception
+     * @throws OASTypeGenException when process break with exception
      */
-    public ListenerDeclarationNode getListenerDeclarationNodes(List<Server> servers) throws BallerinaOpenApiException {
+    public ListenerDeclarationNode getListenerDeclarationNodes(List<Server> servers) throws OASTypeGenException {
         // Assign host port value to listeners
         String host;
         int port;
@@ -89,7 +89,7 @@ public class ListenerGenerator {
                     port = isHttps ? HTTPS_PORT : HTTP_PORT;
                 }
             } catch (MalformedURLException e) {
-                throw new BallerinaOpenApiException("Failed to read endpoint details of the server: " +
+                throw new OASTypeGenException("Failed to read endpoint details of the server: " +
                         server.getUrl(), e);
             }
         } else {

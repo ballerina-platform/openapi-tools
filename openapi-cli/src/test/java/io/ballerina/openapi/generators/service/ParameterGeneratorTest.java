@@ -21,9 +21,9 @@ package io.ballerina.openapi.generators.service;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.typegenerator.GeneratorUtils;
-import io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.typegenerator.model.Filter;
+import io.ballerina.openapi.core.generators.type.GeneratorUtils;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.type.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
@@ -46,7 +46,7 @@ public class ParameterGeneratorTest {
     SyntaxTree syntaxTree;
 
     @Test(description = "Generate serviceDeclaration")
-    public void generateService() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateService() throws IOException, OASTypeGenException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_service.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -59,7 +59,7 @@ public class ParameterGeneratorTest {
     }
 
     @Test(description = "Generate service with path having special characters")
-    public void generateServiceWithPathSpecialCharacters() throws IOException, BallerinaOpenApiException {
+    public void generateServiceWithPathSpecialCharacters() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_service_with_special_characters.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -73,7 +73,7 @@ public class ParameterGeneratorTest {
     }
 
     @Test(description = "Generate functionDefinitionNode for multiple operations")
-    public void generateMultipleOperations() throws IOException, BallerinaOpenApiException {
+    public void generateMultipleOperations() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/multiOperations.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -86,7 +86,7 @@ public class ParameterGeneratorTest {
     }
 
     @Test(description = "Generate functionDefinitionNode for multiple paths")
-    public void generateMultiplePath() throws IOException, BallerinaOpenApiException {
+    public void generateMultiplePath() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/multiPaths.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -100,7 +100,7 @@ public class ParameterGeneratorTest {
 
     //Scenario 01 - Path parameters.
     @Test(description = "Generate functionDefinitionNode for Path parameters")
-    public void generatePathParameter() throws IOException, BallerinaOpenApiException {
+    public void generatePathParameter() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/multiPathParam.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -114,7 +114,7 @@ public class ParameterGeneratorTest {
 
     //Scenario 02 - Path parameters.
     @Test(description = "Generate functionDefinitionNode for only Path parameters")
-    public void generatePathParameter02() throws IOException, BallerinaOpenApiException {
+    public void generatePathParameter02() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/multiPathParam02.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -127,7 +127,7 @@ public class ParameterGeneratorTest {
     }
 
     @Test(description = "Tests when path parameter(s) having a keyword as the parameter name")
-    public void generatePathParameter03() throws IOException, BallerinaOpenApiException {
+    public void generatePathParameter03() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/multiPathParam03.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -141,9 +141,9 @@ public class ParameterGeneratorTest {
 
     //Scenario 02 - Query parameters.
     @Test(description = "Generate functionDefinitionNode for Query parameters",
-            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptions = OASTypeGenException.class,
             expectedExceptionsMessageRegExp = "Query parameters with nested array types are not supported in.*")
-    public void generateQueryParameter() throws IOException, BallerinaOpenApiException {
+    public void generateQueryParameter() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/multiQueryParam.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -157,11 +157,11 @@ public class ParameterGeneratorTest {
     }
 
     @Test(description = "Generate functionDefinitionNode for paramter for content instead of schema",
-            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptions = OASTypeGenException.class,
             expectedExceptionsMessageRegExp = "Type 'json' is not a valid query parameter type in Ballerina. " +
                     "The supported types are string, int, float, boolean, decimal, " +
                     "array types of the aforementioned types and map<json>.")
-    public void generateParameterHasContent() throws IOException, BallerinaOpenApiException {
+    public void generateParameterHasContent() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/parameterTypehasContent.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -174,7 +174,7 @@ public class ParameterGeneratorTest {
     }
 
     @Test(description = "Tests when query parameter(s) having a keyword as the parameter name")
-    public void withKeyWords() throws IOException, BallerinaOpenApiException {
+    public void withKeyWords() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/keywords.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -192,7 +192,7 @@ public class ParameterGeneratorTest {
             "Use case 03 : Enum in header parameter" +
             "Use case 04 : Enum in reusable parameter" +
             "Use case 05 : Enum in parameter with referenced schema")
-    public void generateParametersWithEnums() throws IOException, BallerinaOpenApiException {
+    public void generateParametersWithEnums() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_enum.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -209,7 +209,7 @@ public class ParameterGeneratorTest {
             "Use case 02 : Nullable enum in header parameter" +
             "Use case 03 : Nullable enum in reusable parameter" +
             "Use case 04 : Nullable enum in parameter with referenced schema")
-    public void generateParametersWithNullableEnums() throws IOException, BallerinaOpenApiException {
+    public void generateParametersWithNullableEnums() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_nullable_enums.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -223,9 +223,9 @@ public class ParameterGeneratorTest {
     }
 
     @Test(description = "Test unsupported nullable path parameter with enums",
-            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptions = OASTypeGenException.class,
             expectedExceptionsMessageRegExp = "Path parameter value cannot be null.")
-    public void testNullablePathParamWithEnum() throws IOException, BallerinaOpenApiException {
+    public void testNullablePathParamWithEnum() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/path_param_nullable.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -237,7 +237,7 @@ public class ParameterGeneratorTest {
     }
 
     @Test(description = "Tests int32, int64, and invalid integer path parameters")
-    public void testsIntegerPathParameters() throws IOException, BallerinaOpenApiException {
+    public void testsIntegerPathParameters() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/intPathParam.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -250,7 +250,7 @@ public class ParameterGeneratorTest {
     }
 
     @Test(description = "Tests for referenced parameters in OpenAPI 3.1 version specs")
-    public void testsRefParamsInOpenAPIV31() throws IOException, BallerinaOpenApiException {
+    public void testsRefParamsInOpenAPIV31() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/parameter_with_ref_v31.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -264,7 +264,7 @@ public class ParameterGeneratorTest {
     }
 
     @Test(description = "Tests for path segments has parameters with extension")
-    public void testsForPathSegmentHasExtensionType() throws IOException, BallerinaOpenApiException {
+    public void testsForPathSegmentHasExtensionType() throws IOException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/multiPathParamWithExtensionType.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
