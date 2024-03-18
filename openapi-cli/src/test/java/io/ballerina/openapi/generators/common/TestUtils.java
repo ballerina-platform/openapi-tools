@@ -87,8 +87,9 @@ public class TestUtils {
                 getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
         preGeneratedTypeDefinitionNodes.addAll(ballerinaClientGenerator.getTypeDefinitionNodeList());
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
-                openAPI, false, preGeneratedTypeDefinitionNodes);
-        SyntaxTree schemaSyntax = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+                openAPI, false);
+        TypeHandler.createInstance(openAPI, false);
+        SyntaxTree schemaSyntax = TypeHandler.getInstance().generateTypeSyntaxTree();
         SyntaxTree utilSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
         writeFile(clientPath, Formatter.format(syntaxTree).toSourceCode());
         writeFile(schemaPath, Formatter.format(schemaSyntax).toSourceCode());
