@@ -8,7 +8,7 @@ import java.util.List;
 
 public class HeaderParameterGenerator implements ParameterGenerator {
     @Override
-    public ParameterNode generateParameter() {
+    public ParameterNode generateParameterNode() {
         return null;
     }
 

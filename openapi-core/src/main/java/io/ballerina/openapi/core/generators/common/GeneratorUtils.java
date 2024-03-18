@@ -473,7 +473,7 @@ public class GeneratorUtils {
      * @throws BallerinaOpenApiException - Throws an exception if the reference string is incompatible.
      *                                   Note : Current implementation will not support external links a references.
      */
-    public static String extractReferenceType(String referenceVariable, list ) throws BallerinaOpenApiException {
+    public static String extractReferenceType(String referenceVariable) throws BallerinaOpenApiException {
 
         if (referenceVariable.startsWith("#") && referenceVariable.contains("/")) {
             String[] refArray = referenceVariable.split("/");

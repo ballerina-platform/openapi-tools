@@ -36,7 +36,7 @@ public class PathParameterGenerator implements ParameterGenerator {
 
 
     @Override
-    public ParameterNode generateParameter() {
+    public ParameterNode generateParameterNode() {
         IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName(), false));
         // type should be a any type node.
         Schema parameterSchema = parameter.getSchema();

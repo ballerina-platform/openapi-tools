@@ -311,12 +311,12 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 .append(clientConfig.isResourceMode())
                 .append(clientConfig.getLicense())
                 .append(clientConfig.isNullable());
-        List<String> tags = clientConfig.getFilters().getTags();
+        List<String> tags = clientConfig.getFilter().getTags();
         tags.sort(String.CASE_INSENSITIVE_ORDER);
         for (String str : tags) {
             summaryOfCodegen.append(str);
         }
-        List<String> operations = clientConfig.getFilters().getOperations();
+        List<String> operations = clientConfig.getFilter().getOperations();
         operations.sort(String.CASE_INSENSITIVE_ORDER);
         for (String str : operations) {
             summaryOfCodegen.append(str);

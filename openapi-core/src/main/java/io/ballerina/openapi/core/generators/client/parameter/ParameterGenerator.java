@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ParameterGenerator {
     //type handler attribute
-    ParameterNode generateParameter();
+    ParameterNode generateParameterNode();
     List<ClientDiagnostic> getDiagnostics();
 
 }

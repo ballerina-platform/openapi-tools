@@ -7,7 +7,7 @@ import java.util.List;
 
 public class RequestBodyGenerator implements ParameterGenerator {
     @Override
-    public ParameterNode generateParameter() {
+    public ParameterNode generateParameterNode() {
         return null;
     }
 

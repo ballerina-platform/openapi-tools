@@ -5,10 +5,11 @@ import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.NilLiteralNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -26,17 +27,10 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParame
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
-import static io.ballerina.openapi.core.GeneratorConstants.ARRAY;
-import static io.ballerina.openapi.core.GeneratorConstants.BOOLEAN;
-import static io.ballerina.openapi.core.GeneratorConstants.INTEGER;
-import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
-import static io.ballerina.openapi.core.GeneratorConstants.NUMBER;
-import static io.ballerina.openapi.core.GeneratorConstants.SQUARE_BRACKETS;
-import static io.ballerina.openapi.core.GeneratorConstants.STRING;
-import static io.ballerina.openapi.core.GeneratorUtils.convertOpenAPITypeToBallerina;
-import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
-import static io.ballerina.openapi.core.GeneratorUtils.getOpenAPIType;
-import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 public class QueryParameterGenerator implements ParameterGenerator {
     OpenAPI openAPI;
@@ -48,17 +42,30 @@ public class QueryParameterGenerator implements ParameterGenerator {
         this.openAPI = openAPI;
     }
     @Override
-    public ParameterNode generateParameter() {
+    public ParameterNode generateParameterNode() {
 
         TypeDescriptorNode typeName;
 
-        Schema parameterSchema = parameter.getSchema();
+        Schema<?> parameterSchema = parameter.getSchema();
+        // parameter type is  typedescriptor node
         String paramType = "";
         if (parameterSchema.get$ref() != null) {
-            //todo: handle diagnostic message within extractReferenceType function
-            paramType = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
+            try {
+                paramType = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
+            } catch (BallerinaOpenApiException e) {
+                DiagnosticMessages diagMessages = DiagnosticMessages.OAS_CLIENT_100;
+                ClientDiagnostic diagnostic = new ClientDiagnosticImp(diagMessages.getCode(),
+                        diagMessages.getDescription(), parameter.getName());
+                diagnostics.add(diagnostic);
+            }
             parameterSchema = openAPI.getComponents().getSchemas().get(paramType.trim());
+            //handle the reference type
+
         } else {
+            //supported type: type BasicType boolean|int|float|decimal|string|map<anydata>|enum;
+            //public type QueryParamType ()|BasicType|BasicType[];
+
+            // unsupported content type in query parameter
             // generate type node from type handler
 //            paramType = convertOpenAPITypeToBallerina(parameterSchema);
 //            if (getOpenAPIType(parameterSchema).equals(ARRAY)) {
@@ -91,6 +98,7 @@ public class QueryParameterGenerator implements ParameterGenerator {
 //                }
 //            }
         }
+
         // todo handle required parameter
         if (parameter.getRequired()) {
             // todo type handler node
@@ -135,6 +143,11 @@ public class QueryParameterGenerator implements ParameterGenerator {
 
     @Override
     public List<ClientDiagnostic> getDiagnostics() {
-        return null;
+        return diagnostics;
+    }
+
+    private boolean isQueryParamTypeSupported(String type) {
+        return type.equals("boolean") || type.equals("int") || type.equals("float") || type.equals("decimal") ||
+                type.equals("string") || type.equals("map<anydata>") || type.equals("enum");
     }
 }
