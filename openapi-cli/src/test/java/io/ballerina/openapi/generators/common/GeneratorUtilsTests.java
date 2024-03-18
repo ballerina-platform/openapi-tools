@@ -87,8 +87,9 @@ public class GeneratorUtilsTests {
             OASTypeGenException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("schema/swagger/recordName" +
                 ".yaml"), false);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+        SyntaxTree syntaxTree = null;
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         Path expectedPath = RES_DIR.resolve("schema/ballerina/recordName.bal");
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }

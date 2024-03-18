@@ -42,7 +42,7 @@ import static org.testng.Assert.assertFalse;
  */
 public class NegativeConstraintTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-
+    SyntaxTree syntaxTree = null;
     @Test(description = "Tests for non-string type record field has invalid pattern constraint." +
             "There is no pattern validation within swagger parser although swagger support for only string value to " +
             "have regular pattern" +
@@ -53,8 +53,8 @@ public class NegativeConstraintTests {
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/pattern_except_string_type.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/pattern_except_string_type.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);

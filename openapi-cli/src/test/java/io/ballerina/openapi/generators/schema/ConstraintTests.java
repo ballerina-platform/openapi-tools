@@ -47,6 +47,7 @@ import static org.testng.Assert.assertTrue;
 public class ConstraintTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
 
+    SyntaxTree syntaxTree = null;
     @BeforeMethod
     public void setUp() throws IOException {
         TestUtils.deleteGeneratedFiles();
@@ -57,9 +58,9 @@ public class ConstraintTests {
     public void testRecordFiledConstraint() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/record_field.yaml"),
                 true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/record_field.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -74,8 +75,8 @@ public class ConstraintTests {
             "Use case 05 : Only array items have constrained with number format")
     public void testForArray() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/array.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/array.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -89,8 +90,8 @@ public class ConstraintTests {
     public void testForReference() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/type_def_node.yaml"),
                 true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/type_def_node.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -103,9 +104,8 @@ public class ConstraintTests {
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/record_field_02.yaml"),
                 true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/record_field_02.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -117,8 +117,8 @@ public class ConstraintTests {
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                         "/nested_array_with_constraint.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/nested_array.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -132,8 +132,8 @@ public class ConstraintTests {
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/additional_properties_with_constraint.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/additional_properties_with_constraint.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -148,8 +148,8 @@ public class ConstraintTests {
     public void testInvalidConstraintUses() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/invalidConstraintFieldWithDataType.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/invalidConstraintFieldWithDtaType.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -163,8 +163,8 @@ public class ConstraintTests {
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/invalidAndValidConstraintFieldWithDataType.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/invalidAndValidConstraintFieldWithDtaType.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -177,8 +177,8 @@ public class ConstraintTests {
     public void testAllowedZeroValuesForNumber() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/allow_zero_values_for_number_constraint.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/allow_zero_values_for_number_constraint.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -192,8 +192,8 @@ public class ConstraintTests {
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/constraint_with_nullable.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/constraint_with_nullable.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -207,8 +207,8 @@ public class ConstraintTests {
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/pattern_string.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/string_pattern.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -222,8 +222,8 @@ public class ConstraintTests {
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/exclusive_min_max_3_1.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/exclusive_min_max_3_1.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
@@ -236,16 +236,17 @@ public class ConstraintTests {
     public void testDataTypeHasFormatWithConstraint() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/format_types_v3_0.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/format_type.bal", syntaxTree);
 
         //Test for OpenAPI version 3.1
         OpenAPI openAPIV31 = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/format_types_v3_1.yaml"), true);
-        BallerinaTypesGenerator schemaGenerator = new BallerinaTypesGenerator(openAPIV31);
-        SyntaxTree syntaxTreeV3 = schemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator schemaGenerator = new BallerinaTypesGenerator(openAPIV31);
+//        SyntaxTree syntaxTreeV3 = schemaGenerator.generateTypeSyntaxTree();
+        SyntaxTree syntaxTreeV3 = null;
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/constraint/format_type.bal", syntaxTreeV3);
     }

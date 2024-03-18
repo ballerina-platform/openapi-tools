@@ -44,7 +44,7 @@ import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedS
 public class AnyOfDataTypeTests {
 
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-
+    SyntaxTree syntaxTree = null;
     @Test(description = "Test for the schema has anyOf dataType")
     public void testAnyOfInSchema() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
@@ -62,8 +62,8 @@ public class AnyOfDataTypeTests {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/schema15.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 }

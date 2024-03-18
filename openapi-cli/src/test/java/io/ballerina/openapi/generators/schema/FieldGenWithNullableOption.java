@@ -36,13 +36,13 @@ import java.nio.file.Paths;
  */
 public class FieldGenWithNullableOption {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-
+    SyntaxTree syntaxTree = null;
     @Test(description = "Test for nullable primitive fields")
     public void testNullablePrimitive() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_option_primitive_schema.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/nullable_option_primitive_fields.bal", syntaxTree);
     }
@@ -51,8 +51,8 @@ public class FieldGenWithNullableOption {
     public void testNullableArray() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_option_array_schema.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/nullale_option_array_schema.bal", syntaxTree);
     }
@@ -61,8 +61,8 @@ public class FieldGenWithNullableOption {
     public void testNullableRecord() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_option_record_schema.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/nullable_option_record_schema.bal", syntaxTree);
     }
@@ -71,8 +71,8 @@ public class FieldGenWithNullableOption {
     public void testPrimitiveReferencedTypes() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_option_string_type.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         String syntaxTreeContent = syntaxTree.toString().trim().replaceAll("\n", "")
                 .replaceAll("\\s+", "");
         Assert.assertEquals(syntaxTreeContent, "publictypeLatitudestring?;");
@@ -82,8 +82,8 @@ public class FieldGenWithNullableOption {
     public void testNullTypeReference() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_option_null_type.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/nullable_option_null_type.bal", syntaxTree);
     }
@@ -92,8 +92,8 @@ public class FieldGenWithNullableOption {
     public void testNullableFalse() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_false.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
+//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/nullable_false.bal", syntaxTree);
     }

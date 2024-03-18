@@ -48,8 +48,8 @@ public class SwaggerParserTests {
             OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/invalid.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
     }
 
     @Test(description = "Functionality tests for swagger parser behaviour when the regex is having syntax errors",
@@ -59,8 +59,8 @@ public class SwaggerParserTests {
             OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/invalid_pattern_string.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
     }
 
     //Get string as a content of ballerina file

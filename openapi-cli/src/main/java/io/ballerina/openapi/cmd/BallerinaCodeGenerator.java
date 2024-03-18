@@ -20,19 +20,19 @@ package io.ballerina.openapi.cmd;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.openapi.core.generators.common.GeneratorUtils;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
+import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.core.service.BallerinaServiceObjectGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -381,6 +381,7 @@ public class BallerinaCodeGenerator {
                 .build();
         //Take default DO NOT modify
         licenseHeader = licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER : licenseHeader;
+        TypeHandler.createInstance(openAPIDef, nullable);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toSourceCode();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME,
@@ -397,9 +398,10 @@ public class BallerinaCodeGenerator {
         preGeneratedTypeDefNodes.addAll(ballerinaClientGenerator.getTypeDefinitionNodeList());
         // Generate ballerina records to represent schemas.
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
-                openAPIDef, nullable, preGeneratedTypeDefNodes);
+                openAPIDef, nullable);
 
-        SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+        SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+
         String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
         if (filter.getTags().size() > 0) {
             // Remove unused records and enums when generating the client by the tags given.
@@ -476,7 +478,7 @@ public class BallerinaCodeGenerator {
                 .build();
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         // Initialize ballerina types generator
-        TypeHandler.createInstance(openAPIDef, nullable, generateServiceType);
+        TypeHandler.createInstance(openAPIDef, nullable);
         String mainContent;
         try {
             mainContent = Formatter.format(ballerinaServiceGenerator.generateSyntaxTree()).toSourceCode();

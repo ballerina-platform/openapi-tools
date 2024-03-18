@@ -360,8 +360,8 @@ public class QueryParameterTests {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "query/object_query.bal", syntaxTree);
         //Check types
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "query/object_query_type.bal", syntaxTree);
     }

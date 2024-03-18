@@ -53,13 +53,13 @@ public class TypeHandler {
     public final Map<String, TypeDefinitionNode> typeDefinitionNodes = new HashMap<>();
     private final Set<String> imports = new LinkedHashSet<>();
 
-    private TypeHandler(OpenAPI openAPI, boolean isNullable, boolean generateServiceType) {
-        GeneratorMetaData.createInstance(openAPI, isNullable, generateServiceType);
+    private TypeHandler(OpenAPI openAPI, boolean isNullable) {
+        GeneratorMetaData.createInstance(openAPI, isNullable);
     }
 
-    public static void createInstance(OpenAPI openAPI, boolean isNullable, boolean generateServiceType) {
-        typeHandlerInstance = new TypeHandler(openAPI, isNullable, generateServiceType);
-        ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI, isNullable, generateServiceType);
+    public static void createInstance(OpenAPI openAPI, boolean isNullable) {
+        typeHandlerInstance = new TypeHandler(openAPI, isNullable);
+        ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI, isNullable);
     }
 
     public static TypeHandler getInstance() {
@@ -132,7 +132,7 @@ public class TypeHandler {
 
     public SimpleNameReferenceNode createStatusCodeTypeInclusionRecord(String statusCode, TypeDescriptorNode type) {
         NameReferenceNodeReturnType returnType = ballerinaTypesGenerator
-                .createStatusCodeTypeInclusionRecord(statusCode, type);
+                .createTypeInclusionRecord(statusCode, type);
         handleSubtypes(returnType.subtypeDefinitions());
         return returnType.nameReferenceNode().get();
     }

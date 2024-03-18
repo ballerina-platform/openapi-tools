@@ -103,8 +103,7 @@ public class BallerinaServiceGenerator {
         this.isNullableRequired = false;
         this.isServiceTypeRequired = oasServiceMetadata.isServiceTypeRequired();
         this.generateWithoutDataBinding = oasServiceMetadata.generateWithoutDataBinding();
-        GeneratorMetaData.createInstance(openAPI, oasServiceMetadata.isNullable(),
-                oasServiceMetadata.isServiceTypeRequired());
+        GeneratorMetaData.createInstance(openAPI, oasServiceMetadata.isNullable());
     }
 
     public List<Node> getFunctionList() {

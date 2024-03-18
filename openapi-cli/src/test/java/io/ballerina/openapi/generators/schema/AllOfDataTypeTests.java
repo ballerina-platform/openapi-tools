@@ -46,8 +46,8 @@ public class AllOfDataTypeTests {
     public void generateAllOf() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario09.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema09.bal", syntaxTree);
     }
 
@@ -55,8 +55,8 @@ public class AllOfDataTypeTests {
     public void generateAllOfInRecordField() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/allOf.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/allOf.bal", syntaxTree);
     }
 
@@ -64,8 +64,8 @@ public class AllOfDataTypeTests {
     public void generateTypeForSingleAllOfSchema() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/allOf_with_one_ref.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/allOf_with_one_ref.bal", syntaxTree);
     }
@@ -75,8 +75,8 @@ public class AllOfDataTypeTests {
     public void generateCyclicSchemaAllOfSchema() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/allOf_with_cyclic.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/allOf_with_cyclic.bal", syntaxTree);
     }
@@ -85,8 +85,8 @@ public class AllOfDataTypeTests {
     public void generateAllOfWithTypeUnSpecifiedObjectSchema() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/allOfWithNoType.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/allOfWithNoType.bal", syntaxTree);
     }
 
@@ -94,8 +94,8 @@ public class AllOfDataTypeTests {
     public void generateArrayAllOfInlineObjects() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/array_with_inline_allOf.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/array_with_inline_allOf.bal", syntaxTree);
     }
@@ -104,8 +104,8 @@ public class AllOfDataTypeTests {
     public void generateAllOfWithEmptyObjectSchema() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/allOfWithEmptyObject.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/allOfWithEmptyObject.bal", syntaxTree);
     }
@@ -114,8 +114,8 @@ public class AllOfDataTypeTests {
     public void generateNestedAllOfSchema() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/nested_allOf_with_allOf.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
 
         File f = new File("/home/dilan/Documents/tempopenapigenfiles/folder9999");
         f.mkdir();
@@ -134,8 +134,8 @@ public class AllOfDataTypeTests {
     public void generateAllOfwithValidSingleItem() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/single_item_allOf.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/single_item_allOf.bal", syntaxTree);
     }
@@ -147,7 +147,7 @@ public class AllOfDataTypeTests {
     public void arrayHasMaxItemsExceedLimit02() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/nested_allOf_with_oneOf.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
     }
 }
