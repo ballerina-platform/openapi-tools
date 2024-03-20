@@ -29,6 +29,7 @@ import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.core.model.GenSrcFile;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.buildtools.CodeGeneratorTool;
+import io.ballerina.projects.buildtools.ToolConfig;
 import io.ballerina.projects.buildtools.ToolContext;
 import io.ballerina.toml.semantic.diagnostics.TomlNodeLocation;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
@@ -78,13 +79,10 @@ import static io.ballerina.openapi.core.GeneratorUtils.normalizeOpenAPI;
  *
  * @since 1.9.0
  */
+
+@ToolConfig(name = "openapi")
 public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     static String hashOpenAPI;
-
-    @Override
-    public String toolName() {
-        return "openapi";
-    }
 
     @Override
     public void execute(ToolContext toolContext) {
