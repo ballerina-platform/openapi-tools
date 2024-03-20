@@ -332,4 +332,12 @@ public class BallerinaTypesGenerator {
     public ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(TypeDescriptorNode typeDescriptorNode) {
         return ArrayTypeGenerator.getArrayTypeDescriptorNodeFromTypeDescriptorNode(typeDescriptorNode);
     }
+
+
+
+    //Factory method for creating a new instance of the class
+    public TypeDescriptorNode generateTypeDescriptorNode(Schema<?> schemaValue) throws OASTypeGenException {
+        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schemaValue, null, null, null, null);
+        return typeGenerator.generateTypeDescriptorNode();
+    }
 }

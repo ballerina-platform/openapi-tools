@@ -14,6 +14,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.List;
+import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
@@ -22,7 +23,6 @@ import static io.ballerina.openapi.core.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages.OAS_CLIENT_100;
 
 public class PathParameterGenerator implements ParameterGenerator {
     OpenAPI openAPI;
@@ -36,7 +36,7 @@ public class PathParameterGenerator implements ParameterGenerator {
 
 
     @Override
-    public ParameterNode generateParameterNode() {
+    public Optional<ParameterNode> generateParameterNode() {
         IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName(), false));
         // type should be a any type node.
         Schema parameterSchema = parameter.getSchema();

@@ -4,17 +4,20 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.NilLiteralNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.List;
+import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -27,7 +30,9 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParame
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
@@ -42,9 +47,9 @@ public class QueryParameterGenerator implements ParameterGenerator {
         this.openAPI = openAPI;
     }
     @Override
-    public ParameterNode generateParameterNode() {
+    public Optional<ParameterNode> generateParameterNode() {
 
-        TypeDescriptorNode typeName;
+        TypeDescriptorNode typeNode = null;
 
         Schema<?> parameterSchema = parameter.getSchema();
         // parameter type is  typedescriptor node
@@ -64,9 +69,35 @@ public class QueryParameterGenerator implements ParameterGenerator {
         } else {
             //supported type: type BasicType boolean|int|float|decimal|string|map<anydata>|enum;
             //public type QueryParamType ()|BasicType|BasicType[];
+            try {
+                typeNode = TypeHandler.getInstance().getTypeNodeForQueryParam(parameterSchema);
+                SyntaxKind kind = typeNode.kind();
+                if (!isQueryParamTypeSupported(kind.stringValue())) {
+                    //TODO diagnostic message unsupported and early return
+                    DiagnosticMessages unsupportedType = DiagnosticMessages.OAS_CLIENT_102;
+                    ClientDiagnostic diagnostic = new ClientDiagnosticImp(unsupportedType.getCode(),
+                            unsupportedType.getDescription(), parameter.getName());
+                    diagnostics.add(diagnostic);
+                    return Optional.empty();
+                } else if () {
+                    //handle
+                }
+
+            } catch (OASTypeGenException e) {
+                //todo diagnostic message with error occurred
+                DiagnosticMessages diagMessages = DiagnosticMessages.OAS_CLIENT_104;
+                ClientDiagnostic diagnostic = new ClientDiagnosticImp(diagMessages.getCode(),
+                        diagMessages.getDescription());
+                diagnostics.add(diagnostic);
+            }
+
+            // required parameter- done
+            // default parameter- done
+            // nullable parameter - done
 
             // unsupported content type in query parameter
             // generate type node from type handler
+
 //            paramType = convertOpenAPITypeToBallerina(parameterSchema);
 //            if (getOpenAPIType(parameterSchema).equals(ARRAY)) {
 //                if (getOpenAPIType(parameterSchema.getItems()) != null) {
@@ -102,17 +133,16 @@ public class QueryParameterGenerator implements ParameterGenerator {
         // todo handle required parameter
         if (parameter.getRequired()) {
             // todo type handler node
-            typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(paramType));
+//            typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(paramType));
             IdentifierToken paramName =
                     createIdentifierToken(getValidName(parameter.getName().trim(), false));
             //todo doc comments separate handle
-            return createRequiredParameterNode(parameterAnnotationNodeList, typeName, paramName);
+            return Optional.of(createRequiredParameterNode(null, typeNode, paramName));
         } else {
             IdentifierToken paramName =
                     createIdentifierToken(getValidName(parameter.getName().trim(), false));
             // Handle given default values in query parameter.
             if (parameterSchema.getDefault() != null) {
-                typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(paramType));
                 LiteralValueToken literalValueToken;
                 if (getOpenAPIType(parameterSchema).equals(STRING)) {
                     literalValueToken = createLiteralValueToken(null,
@@ -125,20 +155,19 @@ public class QueryParameterGenerator implements ParameterGenerator {
                                     createEmptyMinutiaeList());
 
                 }
-                return createDefaultableParameterNode(parameterAnnotationNodeList, typeName, paramName,
-                        createToken(EQUAL_TOKEN), literalValueToken);
+                return Optional.of(createDefaultableParameterNode(null, typeNode, paramName,
+                        createToken(EQUAL_TOKEN), literalValueToken));
             } else {
-                paramType = paramType.endsWith(NILLABLE) ? paramType : paramType + NILLABLE;
-                typeName = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(paramType));
+//                paramType = paramType.endsWith(NILLABLE) ? paramType : paramType + NILLABLE;
+//                typeName = createBuiltinSimpleNameReferenceNode(null,
+//                        createIdentifierToken(paramType));
+//
                 NilLiteralNode nilLiteralNode =
                         createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
-                return createDefaultableParameterNode(parameterAnnotationNodeList, typeName, paramName,
-                        createToken(EQUAL_TOKEN), nilLiteralNode);
+                return Optional.of(createDefaultableParameterNode(null, typeNode, paramName,
+                        createToken(EQUAL_TOKEN), nilLiteralNode));
             }
         }
-        ///---------------
-        return null;
     }
 
     @Override

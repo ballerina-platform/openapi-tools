@@ -5,10 +5,11 @@ import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.parameter.ParameterGenerator;
 
 import java.util.List;
+import java.util.Optional;
 
 public class HeaderParameterGenerator implements ParameterGenerator {
     @Override
-    public ParameterNode generateParameterNode() {
+    public Optional<ParameterNode> generateParameterNode() {
         return null;
     }
 

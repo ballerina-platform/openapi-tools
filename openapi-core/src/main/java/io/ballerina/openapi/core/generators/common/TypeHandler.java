@@ -203,4 +203,8 @@ public class TypeHandler {
             });
         }
     }
+
+    public TypeDescriptorNode getTypeNodeForQueryParam(Schema<?> schema) throws OASTypeGenException {
+        return ballerinaTypesGenerator.generateTypeDescriptorNode(schema);
+    }
 }
