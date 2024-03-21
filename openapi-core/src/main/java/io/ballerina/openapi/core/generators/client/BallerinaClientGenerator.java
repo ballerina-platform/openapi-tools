@@ -106,11 +106,13 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.ERROR_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FINAL_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FUNCTION_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ISOLATED_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OBJECT_METHOD_DEFINITION;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.REMOTE_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.RESOURCE_ACCESSOR_DEFINITION;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RESOURCE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURN_KEYWORD;
@@ -323,8 +325,9 @@ public class BallerinaClientGenerator {
         FunctionBodyNode functionBodyNode = getInitFunctionBodyNode();
         NodeList<Token> qualifierList = createNodeList(createToken(PUBLIC_KEYWORD), createToken(ISOLATED_KEYWORD));
         IdentifierToken functionName = createIdentifierToken("init");
-        return createFunctionDefinitionNode(null, getInitDocComment(), qualifierList, createToken(FUNCTION_KEYWORD),
-                functionName, createEmptyNodeList(), functionSignatureNode, functionBodyNode);
+        return createFunctionDefinitionNode(OBJECT_METHOD_DEFINITION, getInitDocComment(), qualifierList,
+                createToken(FUNCTION_KEYWORD), functionName, createEmptyNodeList(), functionSignatureNode,
+                functionBodyNode);
     }
 
     /**
@@ -588,7 +591,8 @@ public class BallerinaClientGenerator {
                 createNodeList(GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
                         null, openAPI.getComponents(), false)) :
                 createEmptyNodeList();
-        return createFunctionDefinitionNode(null,
+        SyntaxKind kind = resourceMode ? RESOURCE_ACCESSOR_DEFINITION : OBJECT_METHOD_DEFINITION;
+        return createFunctionDefinitionNode(kind,
                 metadataNode, qualifierList, functionKeyWord, functionName, relativeResourcePath,
                 functionSignatureNode, functionBodyNode);
     }
