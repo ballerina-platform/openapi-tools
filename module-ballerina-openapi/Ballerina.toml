@@ -3,6 +3,9 @@ org= "ballerina"
 name= "openapi"
 version= "@toml.version@"
 
+[platform.java17]
+graalvmCompatible = true
+
 [[platform.java17.dependency]]
 path = "../openapi-validator/build/libs/openapi-validator-@project.version@.jar"
 groupId = "ballerina"

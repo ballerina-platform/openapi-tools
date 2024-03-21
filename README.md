@@ -22,9 +22,12 @@ For more information on the supported operations, go to [Using the OpenAPI Tools
 
 ### Setting Up the Prerequisites
 
-1. OpenJDK 11 ([Adopt OpenJDK](https://adoptopenjdk.net/) or any other OpenJDK distribution)
+1. Download and install Java SE Development Kit (JDK) version 17 (from one of the following locations).
 
-    >**Info:** You can also use [Oracle JDK](https://www.oracle.com/java/technologies/javase-downloads.html). Set the JAVA_HOME environment variable to the pathname of the directory into which you installed JDK.
+    * [Oracle](https://www.oracle.com/java/technologies/downloads/)
+    * [OpenJDK](https://adoptium.net/)
+
+      > **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
    
 2. Export GitHub Personal access token with read package permissions as follows,
    ```
