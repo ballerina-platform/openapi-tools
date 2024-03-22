@@ -49,14 +49,14 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 public abstract class TypeGenerator {
 
     Schema schema;
-    String typeName;
+//    String typeName;
     final LinkedHashSet<String> imports = new LinkedHashSet<>();
     final HashMap<String, TypeDefinitionNode> subTypesMap;
     final HashMap<String, NameReferenceNode> pregeneratedTypeMap;
 
-    public TypeGenerator(Schema schema, String typeName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
+    public TypeGenerator(Schema schema, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
         this.schema = schema;
-        this.typeName = typeName;
+//        this.typeName = typeName;
         this.subTypesMap = subTypesMap;
         this.pregeneratedTypeMap = pregeneratedTypeMap;
     }
