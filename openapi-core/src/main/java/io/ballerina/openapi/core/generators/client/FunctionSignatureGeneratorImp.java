@@ -81,6 +81,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.openapi.core.generators.common.ErrorMessages.invalidPathParamType;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_OCTET_STREAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.EMPTY_RECORD;
@@ -522,7 +523,7 @@ public class FunctionSignatureGeneratorImp {
             String paramType = "";
             //Take payload type
             if (schema != null && GeneratorUtils.isSupportedMediaType(mediaTypeEntry)) {
-                String mediaTypeEntryKey = mediaTypeEntry.getKey();
+                 String mediaTypeEntryKey = mediaTypeEntry.getKey();
                 if (mediaTypeEntryKey.equals(APPLICATION_OCTET_STREAM) ||
                         mediaTypeEntryKey.matches("application/.*\\+octet-stream")) {
                      paramType = getBallerinaMediaType(mediaTypeEntryKey, true);
