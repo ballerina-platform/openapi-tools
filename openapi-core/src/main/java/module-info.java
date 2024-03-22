@@ -55,4 +55,5 @@ module io.ballerina.openapi.core {
     exports io.ballerina.openapi.core.generators.type.model;
     exports io.ballerina.openapi.core.generators.type.exception;
     exports io.ballerina.openapi.core.generators.common;
+    exports io.ballerina.openapi.core.generators.client.exception;
 }

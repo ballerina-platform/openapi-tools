@@ -35,9 +35,11 @@ import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.generators.AllOfRecordTypeGenerator;
+import io.ballerina.openapi.core.generators.type.generators.AnyDataTypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.ArrayTypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.PrimitiveTypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.RecordTypeGenerator;
+import io.ballerina.openapi.core.generators.type.generators.ReferencedTypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.TypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.UnionTypeGenerator;
 import io.ballerina.openapi.core.generators.type.model.TypeDescriptorReturnType;
@@ -76,7 +78,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
  * @since 1.3.0
  */
 public class BallerinaTypesGenerator {
-
     /**
      * This public constructor is used to generate record and other relevant data type when the nullable flag is
      * enabled in the openapi command.
@@ -340,4 +341,36 @@ public class BallerinaTypesGenerator {
         TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schemaValue, null, null, null, null);
         return typeGenerator.generateTypeDescriptorNode();
     }
+
+    /**
+     * Get SchemaType object relevant to the schema given.
+     *
+     * @param schemaValue Schema object
+     * @param typeName    parameter name
+     * @return Relevant SchemaType object
+     */
+    public static TypeGenerator getTypeGenerator(Schema<?> schemaValue, String typeName, String parentName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
+        if (schemaValue.get$ref() != null) {
+            return new ReferencedTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
+        } else if (GeneratorUtils.isComposedSchema(schemaValue)) {
+            if (schemaValue.getAllOf() != null) {
+                return new AllOfRecordTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
+            } else {
+                return new UnionTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
+            }
+        } else if ((GeneratorUtils.getOpenAPIType(schemaValue) != null &&
+                GeneratorUtils.getOpenAPIType(schemaValue).equals(GeneratorConstants.OBJECT)) ||
+                GeneratorUtils.isObjectSchema(schemaValue) || schemaValue.getProperties() != null ||
+                GeneratorUtils.isMapSchema(schemaValue)) {
+            return new RecordTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
+        } else if (GeneratorUtils.isArraySchema(schemaValue)) {
+            return new ArrayTypeGenerator(schemaValue, typeName, parentName, subTypesMap, pregeneratedTypeMap);
+        } else if (GeneratorUtils.getOpenAPIType(schemaValue) != null &&
+                PRIMITIVE_TYPE_LIST.contains(GeneratorUtils.getOpenAPIType(schemaValue))) {
+            return new PrimitiveTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
+        } else { // when schemaValue.type == null
+            return new AnyDataTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
+        }
+    }
+
 }

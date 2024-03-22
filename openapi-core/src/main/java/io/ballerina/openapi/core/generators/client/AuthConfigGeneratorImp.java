@@ -62,8 +62,9 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.openapi.core.GeneratorConstants;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.common.GeneratorConstants;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -156,49 +157,48 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TRUE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
-import static io.ballerina.openapi.core.GeneratorConstants.API_KEY;
-import static io.ballerina.openapi.core.GeneratorConstants.API_KEYS_CONFIG;
-import static io.ballerina.openapi.core.GeneratorConstants.API_KEY_CONFIG_PARAM;
-import static io.ballerina.openapi.core.GeneratorConstants.AUTH;
-import static io.ballerina.openapi.core.GeneratorConstants.AuthConfigTypes;
-import static io.ballerina.openapi.core.GeneratorConstants.BASIC;
-import static io.ballerina.openapi.core.GeneratorConstants.BEARER;
-import static io.ballerina.openapi.core.GeneratorConstants.BOOLEAN;
-import static io.ballerina.openapi.core.GeneratorConstants.CACHE_CONFIG;
-import static io.ballerina.openapi.core.GeneratorConstants.CACHE_CONFIG_FIELD;
-import static io.ballerina.openapi.core.GeneratorConstants.CHUNKING;
-import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_CRED;
-import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_HTTP1_SETTINGS;
-import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_HTTP1_SETTINGS_FIELD;
-import static io.ballerina.openapi.core.GeneratorConstants.CONFIG;
-import static io.ballerina.openapi.core.GeneratorConstants.CONNECTION_CONFIG;
-import static io.ballerina.openapi.core.GeneratorConstants.DEFAULT_HTTP_VERSION;
-import static io.ballerina.openapi.core.GeneratorConstants.ENSURE_TYPE;
-import static io.ballerina.openapi.core.GeneratorConstants.HTTP;
-import static io.ballerina.openapi.core.GeneratorConstants.HTTP2_SETTINGS;
-import static io.ballerina.openapi.core.GeneratorConstants.HTTP2_SETTINGS_FIELD;
-import static io.ballerina.openapi.core.GeneratorConstants.HTTP_CLIENT_CONFIG;
-import static io.ballerina.openapi.core.GeneratorConstants.HTTP_VERIONS_EXT;
-import static io.ballerina.openapi.core.GeneratorConstants.HTTP_VERSION;
-import static io.ballerina.openapi.core.GeneratorConstants.HTTP_VERSION_MAP;
-import static io.ballerina.openapi.core.GeneratorConstants.KEEP_ALIVE;
-import static io.ballerina.openapi.core.GeneratorConstants.OAUTH2;
-import static io.ballerina.openapi.core.GeneratorConstants.PASSWORD;
-import static io.ballerina.openapi.core.GeneratorConstants.PROXY;
-import static io.ballerina.openapi.core.GeneratorConstants.PROXY_CONFIG;
-import static io.ballerina.openapi.core.GeneratorConstants.REFRESH_TOKEN;
-import static io.ballerina.openapi.core.GeneratorConstants.RESPONSE_LIMIT;
-import static io.ballerina.openapi.core.GeneratorConstants.RESPONSE_LIMIT_FIELD;
-import static io.ballerina.openapi.core.GeneratorConstants.SECURE_SOCKET;
-import static io.ballerina.openapi.core.GeneratorConstants.SECURE_SOCKET_FIELD;
-import static io.ballerina.openapi.core.GeneratorConstants.SELF;
-import static io.ballerina.openapi.core.GeneratorConstants.SETTINGS;
-import static io.ballerina.openapi.core.GeneratorConstants.SSL_FIELD_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.STRING;
-import static io.ballerina.openapi.core.GeneratorConstants.VALIDATION;
-import static io.ballerina.openapi.core.GeneratorConstants.X_BALLERINA_HTTP_CONFIGURATIONS;
-import static io.ballerina.openapi.core.GeneratorUtils.escapeIdentifier;
-import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.API_KEY;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.API_KEYS_CONFIG;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.API_KEY_CONFIG_PARAM;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.AUTH;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BASIC;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BEARER;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BOOLEAN;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CACHE_CONFIG;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CACHE_CONFIG_FIELD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CHUNKING;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLIENT_CRED;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLIENT_HTTP1_SETTINGS;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLIENT_HTTP1_SETTINGS_FIELD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CONFIG;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CONNECTION_CONFIG;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_HTTP_VERSION;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ENSURE_TYPE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP2_SETTINGS;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP2_SETTINGS_FIELD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_CLIENT_CONFIG;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_VERIONS_EXT;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_VERSION;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.KEEP_ALIVE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OAUTH2;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PASSWORD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PROXY;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PROXY_CONFIG;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REFRESH_TOKEN;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RESPONSE_LIMIT;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RESPONSE_LIMIT_FIELD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SECURE_SOCKET;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SECURE_SOCKET_FIELD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SELF;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SETTINGS;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SSL_FIELD_NAME;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.VALIDATION;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.X_BALLERINA_HTTP_CONFIGURATIONS;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
+import static io.ballerina.openapi.core.generators.type.GeneratorConstants.HTTP_VERSION_MAP;
+import static io.ballerina.openapi.core.generators.type.GeneratorUtils.getValidName;
 
 /**
  * This class is used to generate authentication related nodes of the ballerina connector client syntax tree.
@@ -282,8 +282,7 @@ public class AuthConfigGeneratorImp {
      * @param openAPI OpenAPI object received from swagger open-api parser
      * @throws BallerinaOpenApiException When function fails
      */
-    public void addAuthRelatedRecords(OpenAPI openAPI) throws
-            BallerinaOpenApiException {
+    public void addAuthRelatedRecords(OpenAPI openAPI) throws ClientException {
         List<TypeDefinitionNode> nodes = new ArrayList<>();
         if (openAPI.getComponents() != null) {
             // set auth types
@@ -452,7 +451,7 @@ public class AuthConfigGeneratorImp {
      * @return {@link TypeDefinitionNode}   Custom `OAuth2ClientCredentialsGrantConfig` record with default tokenUrl
      */
     private TypeDefinitionNode getOAuth2ClientCredsGrantConfigRecord() {
-        Token typeName = AbstractNodeFactory.createIdentifierToken(AuthConfigTypes.CUSTOM_CLIENT_CREDENTIAL.getValue());
+        Token typeName = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.AuthConfigTypes.CUSTOM_CLIENT_CREDENTIAL.getValue());
         NodeList<Node> recordFieldList = createNodeList(getClientCredsGrantConfigFields());
         MetadataNode configRecordMetadataNode = getMetadataNode("OAuth2 Client Credentials Grant Configs");
         RecordTypeDescriptorNode recordTypeDescriptorNode =
@@ -511,7 +510,7 @@ public class AuthConfigGeneratorImp {
      * @return {@link TypeDefinitionNode}   Custom `OAuth2PasswordGrantConfig` record with default tokenUrl
      */
     private TypeDefinitionNode getOAuth2PasswordGrantConfigRecord() {
-        Token typeName = AbstractNodeFactory.createIdentifierToken(AuthConfigTypes.CUSTOM_PASSWORD.getValue());
+        Token typeName = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.AuthConfigTypes.CUSTOM_PASSWORD.getValue());
         NodeList<Node> recordFieldList = createNodeList(getPasswordGrantConfigFields());
         MetadataNode configRecordMetadataNode = getMetadataNode("OAuth2 Password Grant Configs");
         RecordTypeDescriptorNode recordTypeDescriptorNode =
@@ -571,7 +570,7 @@ public class AuthConfigGeneratorImp {
      * @return {@link TypeDefinitionNode}   Custom `OAuth2RefreshTokenGrantConfig` record with default refreshUrl
      */
     private TypeDefinitionNode getOAuth2RefreshTokenGrantConfigRecord() {
-        Token typeName = AbstractNodeFactory.createIdentifierToken(AuthConfigTypes.CUSTOM_REFRESH_TOKEN.getValue());
+        Token typeName = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.AuthConfigTypes.CUSTOM_REFRESH_TOKEN.getValue());
         NodeList<Node> recordFieldList = createNodeList(getRefreshTokenGrantConfigFields());
         MetadataNode configRecordMetadataNode = getMetadataNode("OAuth2 Refresh Token Grant Configs");
         RecordTypeDescriptorNode recordTypeDescriptorNode =
@@ -1557,8 +1556,7 @@ public class AuthConfigGeneratorImp {
      *
      * @param securitySchemeMap Map of security schemas of the given open api spec
      */
-    public void setAuthTypes(Map<String, SecurityScheme> securitySchemeMap) throws
-            BallerinaOpenApiException {
+    public void setAuthTypes(Map<String, SecurityScheme> securitySchemeMap) throws ClientException {
 
         for (Map.Entry<String, SecurityScheme> securitySchemeEntry : securitySchemeMap.entrySet()) {
             SecurityScheme schemaValue = securitySchemeEntry.getValue();
@@ -1618,7 +1616,7 @@ public class AuthConfigGeneratorImp {
             }
         }
         if (!(apiKey || httpOROAuth)) {
-            throw new BallerinaOpenApiException("Unsupported type of security schema");
+            throw new ClientException("Unsupported type of security schema");
         }
     }
 

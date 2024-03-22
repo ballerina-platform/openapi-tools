@@ -7,8 +7,7 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.core.typegenerator.TypeHandler;
-import io.ballerina.openapi.core.typegenerator.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -19,10 +18,7 @@ import java.util.Optional;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
-import static io.ballerina.openapi.core.GeneratorConstants.SQUARE_BRACKETS;
-import static io.ballerina.openapi.core.GeneratorUtils.convertOpenAPITypeToBallerina;
-import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
-import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 public class PathParameterGenerator implements ParameterGenerator {
     OpenAPI openAPI;

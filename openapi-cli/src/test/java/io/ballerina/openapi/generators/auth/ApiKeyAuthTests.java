@@ -21,9 +21,10 @@ package io.ballerina.openapi.generators.auth;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.BallerinaAuthConfigGenerator;
 import io.ballerina.openapi.generators.common.TestConstants;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityScheme;
@@ -50,7 +51,7 @@ public class ApiKeyAuthTests {
 
     @Test(description = "Generate ConnectionConfig record for openweathermap api",
             dataProvider = "apiKeyAuthIOProvider")
-    public void testGetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException {
+    public void testGetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/" + yamlFile);
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI);
@@ -72,7 +73,7 @@ public class ApiKeyAuthTests {
 
     @Test(description = "Generate ConnectionConfig record for openweathermap api",
             dataProvider = "apiKeyAuthIOProvider")
-    public void testGetApiKeysConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException {
+    public void testGetApiKeysConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/" + yamlFile);
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI);
@@ -120,7 +121,7 @@ public class ApiKeyAuthTests {
     }
 
     @Test(description = "Test the generation of api key documentation comment when multiple api keys defined")
-    public void testGetApiKeyDescriptionForMultipleApiKeys () throws IOException, BallerinaOpenApiException {
+    public void testGetApiKeyDescriptionForMultipleApiKeys () throws IOException, BallerinaOpenApiException, ClientException {
         AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
                 true, false, new ArrayList<>());
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/multiple_apikey_descriptions.yaml");
@@ -136,7 +137,7 @@ public class ApiKeyAuthTests {
     }
 
     @Test(description = "Test ApiKeysConfig record generation for multiple api keys")
-    public void testConfigRecordGenForAPIKeyAuth() throws IOException, BallerinaOpenApiException {
+    public void testConfigRecordGenForAPIKeyAuth() throws IOException, BallerinaOpenApiException, ClientException {
         // generate ApiKeysConfig record
         AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
                 true, false, new ArrayList<>());
@@ -154,7 +155,7 @@ public class ApiKeyAuthTests {
     }
 
     @Test(description = "Test ApiKeysConfig record documentation generation for multiline descriptions")
-    public void testConfigRecordDocumentationGen() throws IOException, BallerinaOpenApiException {
+    public void testConfigRecordDocumentationGen() throws IOException, BallerinaOpenApiException, ClientException {
         // generate ApiKeysConfig record
         AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
                 true, false, new ArrayList<>());

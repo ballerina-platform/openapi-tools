@@ -21,9 +21,10 @@ package io.ballerina.openapi.generators.auth;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.BallerinaAuthConfigGenerator;
 import io.ballerina.openapi.generators.common.TestConstants;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -47,7 +48,7 @@ public class MixedApiKeyAndHTTPAuthTests {
     AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(true, true, diagnostics);
 
     @Test(description = "Generate ApiKeysConfig record", dataProvider = "apiKeyAuthIOProvider")
-    public void testGetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException {
+    public void testGetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/" + yamlFile);
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI);

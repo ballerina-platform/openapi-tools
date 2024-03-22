@@ -1,17 +1,18 @@
 package io.ballerina.openapi.core.generators.client;
 
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
-import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
-import io.ballerina.tools.diagnostics.Diagnostic;
-import io.ballerina.tools.diagnostics.DiagnosticInfo;
+import io.ballerina.openapi.core.generators.client.exception.FunctionSignatureGeneratorException;
+import io.ballerina.openapi.core.generators.client.parameter.HeaderParameterGenerator;
+import io.ballerina.openapi.core.generators.client.parameter.PathParameterGenerator;
+import io.ballerina.openapi.core.generators.client.parameter.QueryParameterGenerator;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -19,13 +20,12 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
-import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
-import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages.OAS_CLIENT_100;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 
 public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenerator {
     OpenAPI openAPI;
@@ -38,26 +38,15 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
     }
 
     @Override
-    public FunctionSignatureNode generateFunctionSignature() {
+    public FunctionSignatureNode generateFunctionSignature() throws FunctionSignatureGeneratorException {
 
         // 1. parameters - path , query, requestBody, headers
         List<Node> parameterList = new ArrayList<>();
         List<Parameter> parameters = operation.getParameters();
         List<Node> defaultable = new ArrayList<>();
-//        List<Node> deprecatedParamDocComments = new ArrayList<>();
+        Token comma = createToken(COMMA_TOKEN);
         if (parameters != null) {
             for (Parameter parameter : parameters) {
-//                Doc
-//                if (parameter.getDescription() != null && !parameter.getDescription().isBlank()) {
-//                    MarkdownDocumentationNode paramAPIDoc =
-//                            DocCommentsGenerator.createAPIParamDocFromSring(getValidName(
-//                                    parameter.getName(), false), parameter.getDescription());
-//                    remoteFunctionDoc.add(paramAPIDoc);
-//                }
-
-                //Deprecated annotation
-//                List<AnnotationNode> parameterAnnotationNodeList =
-//                        getParameterAnnotationNodeList(parameter, deprecatedParamDocComments);
                 if (parameter.get$ref() != null) {
                     String paramType = null;
                     try {
@@ -73,31 +62,42 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
 
                 String in = parameter.getIn();
 
-
                 switch (in) {
                     case "path":
-                        Node param = getPathParameters(parameter, createNodeList(parameterAnnotationNodeList));
+                        PathParameterGenerator paramGenerator = new PathParameterGenerator(parameter, openAPI);
+                        Optional<ParameterNode> param = paramGenerator.generateParameterNode();
+                        if (param.isEmpty()) {
+                            throw new FunctionSignatureGeneratorException("Error while generating path parameter node");
+                        }
                         // Path parameters are always required.
-                        parameterList.add(param);
-                        parameterList.add(createToken(COMMA_TOKEN));
+                        parameterList.add(param.get());
+                        parameterList.add(comma);
                         break;
                     case "query":
-                        Node paramq = getQueryParameters(parameter, createNodeList(parameterAnnotationNodeList));
-                        if (paramq instanceof RequiredParameterNode) {
-                            parameterList.add(paramq);
+                        QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(parameter, openAPI);
+                        Optional<ParameterNode> queryParam = queryParameterGenerator.generateParameterNode();
+                        if (queryParam.isEmpty()) {
+                            throw new FunctionSignatureGeneratorException("Error while generating query parameter node");
+                        }
+                        if (queryParam.get() instanceof RequiredParameterNode requiredParameterNode) {
+                            parameterList.add(requiredParameterNode);
                             parameterList.add(comma);
                         } else {
-                            defaultable.add(paramq);
+                            defaultable.add(queryParam.get());
                             defaultable.add(comma);
                         }
                         break;
                     case "header":
-                        Node paramh = getHeaderParameter(parameter, createNodeList(parameterAnnotationNodeList));
-                        if (paramh instanceof RequiredParameterNode) {
-                            parameterList.add(paramh);
+                        HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator(parameter, openAPI);
+                        Optional<ParameterNode> headerParam = headerParameterGenerator.generateParameterNode();
+                        if (headerParam.isEmpty()) {
+                            throw new FunctionSignatureGeneratorException("Error while generating header parameter node");
+                        }
+                        if (headerParam.get() instanceof RequiredParameterNode headerNode) {
+                            parameterList.add(headerNode);
                             parameterList.add(comma);
                         } else {
-                            defaultable.add(paramh);
+                            defaultable.add(headerParam.get());
                             defaultable.add(comma);
                         }
                         break;
@@ -106,11 +106,15 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                 }
             }
         }
-        // 2. return statements
+        // 2. requestBody
+
+        // 3. return statements
+
+        //create functionsignature node
         return null;
     }
 
-    public List<Diagnostic> getDiagnostics() {
+    public List<ClientDiagnostic> getDiagnostics() {
         return diagnostics;
     }
 }

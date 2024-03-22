@@ -12,6 +12,7 @@ import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.type.model.TypeDescriptorReturnType;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -53,87 +54,31 @@ public class QueryParameterGenerator implements ParameterGenerator {
 
         Schema<?> parameterSchema = parameter.getSchema();
         // parameter type is  typedescriptor node
-        String paramType = "";
-        if (parameterSchema.get$ref() != null) {
-            try {
-                paramType = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
-            } catch (BallerinaOpenApiException e) {
-                DiagnosticMessages diagMessages = DiagnosticMessages.OAS_CLIENT_100;
-                ClientDiagnostic diagnostic = new ClientDiagnosticImp(diagMessages.getCode(),
-                        diagMessages.getDescription(), parameter.getName());
-                diagnostics.add(diagnostic);
-            }
-            parameterSchema = openAPI.getComponents().getSchemas().get(paramType.trim());
-            //handle the reference type
 
-        } else {
-            //supported type: type BasicType boolean|int|float|decimal|string|map<anydata>|enum;
-            //public type QueryParamType ()|BasicType|BasicType[];
-            try {
-                typeNode = TypeHandler.getInstance().getTypeNodeForQueryParam(parameterSchema);
-                SyntaxKind kind = typeNode.kind();
-                if (!isQueryParamTypeSupported(kind.stringValue())) {
-                    //TODO diagnostic message unsupported and early return
-                    DiagnosticMessages unsupportedType = DiagnosticMessages.OAS_CLIENT_102;
-                    ClientDiagnostic diagnostic = new ClientDiagnosticImp(unsupportedType.getCode(),
-                            unsupportedType.getDescription(), parameter.getName());
-                    diagnostics.add(diagnostic);
-                    return Optional.empty();
-                } else if () {
-                    //handle
-                }
-
-            } catch (OASTypeGenException e) {
-                //todo diagnostic message with error occurred
-                DiagnosticMessages diagMessages = DiagnosticMessages.OAS_CLIENT_104;
-                ClientDiagnostic diagnostic = new ClientDiagnosticImp(diagMessages.getCode(),
-                        diagMessages.getDescription());
-                diagnostics.add(diagnostic);
-            }
-
-            // required parameter- done
-            // default parameter- done
-            // nullable parameter - done
-
-            // unsupported content type in query parameter
-            // generate type node from type handler
-
-//            paramType = convertOpenAPITypeToBallerina(parameterSchema);
-//            if (getOpenAPIType(parameterSchema).equals(ARRAY)) {
-//                if (getOpenAPIType(parameterSchema.getItems()) != null) {
-//                    String itemType = getOpenAPIType(parameterSchema.getItems());
-//                    if (itemType.equals(STRING) || itemType.equals(INTEGER) || itemType.equals(BOOLEAN) ||
-//                            itemType.equals(NUMBER)) {
-//                        if (parameterSchema.getItems().getEnum() != null &&
-//                                !parameterSchema.getItems().getEnum().isEmpty()) {
-//                            paramType = OPEN_PAREN_TOKEN.stringValue() +
-//                                    convertOpenAPITypeToBallerina(parameterSchema.getItems()) +
-//                                    CLOSE_PAREN_TOKEN.stringValue() + SQUARE_BRACKETS;
-//                        } else {
-//                            paramType = convertOpenAPITypeToBallerina(parameterSchema.getItems()) + SQUARE_BRACKETS;
-//                        }
-//                    } else {
-//                        //unsupported query parameter type
-//                        DiagnosticMessages diagMessages = DiagnosticMessages.OAS_CLIENT_102;
-//                        ClientDiagnosticImp diagnostic = new ClientDiagnosticImp(diagMessages.getCode(),
-//                                diagMessages.getDescription(), parameter.getName());
-//                        diagnostics.add(diagnostic);
-//                    }
-//                } else if (parameterSchema.getItems().get$ref() != null) {
-//                    paramType = getValidName(extractReferenceType(
-//                            parameterSchema.getItems().get$ref().trim()), true) + SQUARE_BRACKETS;
-//                } else {
-//                    //OAS_CLIENT_103 diagnostic message
-//                    throw new BallerinaOpenApiException("Please define the array item type of the parameter : " +
-//                            parameter.getName());
-//                }
-//            }
+        //supported type: type BasicType boolean|int|float|decimal|string|map<anydata>|enum;
+        //public type QueryParamType ()|BasicType|BasicType[];
+        TypeDescriptorReturnType result = TypeHandler.getInstance().generateTypeDescriptorNodeForOASSchema(parameterSchema);
+        typeNode = result.typeDescriptorNode().get();
+        SyntaxKind kind = typeNode.kind();
+        if (!isQueryParamTypeSupported(kind.stringValue())) {
+            //TODO diagnostic message unsupported and early return
+            DiagnosticMessages unsupportedType = DiagnosticMessages.OAS_CLIENT_102;
+            ClientDiagnostic diagnostic = new ClientDiagnosticImp(unsupportedType.getCode(),
+                    unsupportedType.getDescription(), parameter.getName());
+            diagnostics.add(diagnostic);
+            return Optional.empty();
         }
+
+        // required parameter- done
+        // default parameter- done
+        // nullable parameter - done
+
+        // unsupported content type in query parameter
+        // generate type node from type handler
 
         // todo handle required parameter
         if (parameter.getRequired()) {
             // todo type handler node
-//            typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(paramType));
             IdentifierToken paramName =
                     createIdentifierToken(getValidName(parameter.getName().trim(), false));
             //todo doc comments separate handle
@@ -177,6 +122,6 @@ public class QueryParameterGenerator implements ParameterGenerator {
 
     private boolean isQueryParamTypeSupported(String type) {
         return type.equals("boolean") || type.equals("int") || type.equals("float") || type.equals("decimal") ||
-                type.equals("string") || type.equals("map<anydata>") || type.equals("enum");
+                type.equals("string") || type.equals("map<anydata>") || type.equals("enum") || type.equals("array");
     }
 }

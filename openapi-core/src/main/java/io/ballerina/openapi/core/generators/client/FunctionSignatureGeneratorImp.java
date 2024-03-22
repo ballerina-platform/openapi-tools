@@ -375,13 +375,13 @@ public class FunctionSignatureGeneratorImp {
         if (parameterSchema.get$ref() != null) {
             type = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
             Schema schema = openAPI.getComponents().getSchemas().get(type.trim());
-            TypeDefinitionNode typeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
-                    (schema, type, new ArrayList<>());
-            if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
-                throw new BallerinaOpenApiException(String.format(
-                        "Path parameter: '%s' is invalid. Ballerina does not support object type path parameters.",
-                        parameter.getName()));
-            }
+//            TypeDefinitionNode typeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
+//                    (schema, type, new ArrayList<>());
+//            if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
+//                throw new BallerinaOpenApiException(String.format(
+//                        "Path parameter: '%s' is invalid. Ballerina does not support object type path parameters.",
+//                        parameter.getName()));
+//            }
         } else {
             type = convertOpenAPITypeToBallerina(parameter.getSchema());
             if (type.equals("anydata") || type.equals(SQUARE_BRACKETS) || type.equals("record {}")) {

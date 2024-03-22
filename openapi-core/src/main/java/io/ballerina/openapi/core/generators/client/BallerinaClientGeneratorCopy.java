@@ -51,12 +51,12 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.common.model.Filter;
+import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.text.TextDocument;
@@ -128,16 +128,17 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.X_B
  *
  * @since 1.3.0
  */
-public class BallerinaClientGenerator {
+public class BallerinaClientGeneratorCopy {
 
     private final Filter filter;
     private List<ImportDeclarationNode> imports;
     private List<TypeDefinitionNode> typeDefinitionNodeList;
     private List<String> apiKeyNameList = new ArrayList<>();
     private final OpenAPI openAPI;
-    private final io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator balTypeGenerator;
+    private final BallerinaTypesGenerator balTypeGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final List<String> remoteFunctionNameList;
+//    private String serverURL;
     private final AuthConfigGeneratorImp authConfigGeneratorImp;
     private final boolean resourceMode;
     private final List<Diagnostic> diagnostics = new ArrayList<>();
@@ -149,6 +150,13 @@ public class BallerinaClientGenerator {
         return diagnostics;
     }
 
+    /**
+     * Returns a list of type definition nodes.
+     */
+    public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
+
+        return typeDefinitionNodeList;
+    }
 
     /**
      * Returns ballerinaAuthConfigGenerator.
@@ -180,7 +188,7 @@ public class BallerinaClientGenerator {
         return "serverURL";
     }
 
-    public BallerinaClientGenerator(OASClientConfig oasClientConfig) {
+    public BallerinaClientGeneratorCopy(OASClientConfig oasClientConfig) {
 
         this.filter = oasClientConfig.getFilter();
         this.imports = new ArrayList<>();
@@ -189,6 +197,7 @@ public class BallerinaClientGenerator {
         this.balTypeGenerator = new BallerinaTypesGenerator(openAPI, oasClientConfig.isNullable());
         this.ballerinaUtilGenerator = new BallerinaUtilGenerator();
         this.remoteFunctionNameList = new ArrayList<>();
+//        this.serverURL = "/";
         this.authConfigGeneratorImp = new AuthConfigGeneratorImp(false, false, diagnostics);
         this.resourceMode = oasClientConfig.isResourceMode();
     }
@@ -256,11 +265,6 @@ public class BallerinaClientGenerator {
         Map<String, Operation> filteredOperations = filterOperations();
         //switch resource remote
         List<FunctionDefinitionNode> functionDefinitionNodeList = new ArrayList<>();
-        if (resourceMode) {
-            functionDefinitionNodeList.addAll(createResourceFunctions(filteredOperations));
-        } else {
-            functionDefinitionNodeList.addAll(createRemoteFunctions(filteredOperations));
-        }
 
         memberNodeList.addAll(createRemoteFunctions(openAPI.getPaths(), filter));
         // Generate the class combining members
@@ -597,10 +601,6 @@ public class BallerinaClientGenerator {
 
 
     private List<FunctionDefinitionNode> createResourceFunctions(Map<String, Operation> filteredOperations) {
-        //call resourcefunctionSingatureGenerator
-
-        //call return type generator
-        //call resourceFunctionBodyGenerator
         return null;
     }
 
@@ -683,6 +683,40 @@ public class BallerinaClientGenerator {
                 metadataNode, qualifierList, functionKeyWord, functionName, relativeResourcePath,
                 functionSignatureNode, functionBodyNode);
     }
+
+//    /**
+//     * Generate serverUrl for client default value.
+//     */
+//    private String getServerURL(List<Server> servers) throws BallerinaOpenApiException {
+//
+//        String serverURL;
+//        Server selectedServer = servers.get(0);
+//        if (!selectedServer.getUrl().startsWith("https:") && servers.size() > 1) {
+//            for (Server server : servers) {
+//                if (server.getUrl().startsWith("https:")) {
+//                    selectedServer = server;
+//                    break;
+//                }
+//            }
+//        }
+//        if (selectedServer.getUrl() == null) {
+//            serverURL = "http://localhost:9090/v1";
+//        } else if (selectedServer.getVariables() != null) {
+//            ServerVariables variables = selectedServer.getVariables();
+//            URL url;
+//            String resolvedUrl = GeneratorUtils.buildUrl(selectedServer.getUrl(), variables);
+//            try {
+//                url = new URL(resolvedUrl);
+//                serverURL = url.toString();
+//            } catch (MalformedURLException e) {
+//                throw new BallerinaOpenApiException("Failed to read endpoint details of the server: " +
+//                        selectedServer.getUrl(), e);
+//            }
+//        } else {
+//            serverURL = selectedServer.getUrl();
+//        }
+//        return serverURL;
+//    }
 
     /**
      * Return auth type to generate test file.

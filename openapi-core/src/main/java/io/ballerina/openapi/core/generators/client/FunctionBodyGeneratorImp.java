@@ -44,7 +44,7 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.mime.MimeType;
-import io.ballerina.openapi.core.generators.schemaOld.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -140,7 +140,7 @@ public class FunctionBodyGeneratorImp {
     private boolean isHeader;
     private final List<TypeDefinitionNode> typeDefinitionNodeList;
     private final OpenAPI openAPI;
-    private final BallerinaTypesGenerator ballerinaSchemaGenerator;
+    private final io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp;
     private final boolean resourceMode;

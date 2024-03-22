@@ -18,6 +18,7 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
@@ -45,7 +46,7 @@ public class QueryParameterTests {
     SyntaxTree syntaxTree;
 
     @Test(description = "Generate Client for query parameter has default value")
-    public void generateQueryParamWithDefault() throws IOException, BallerinaOpenApiException {
+    public void generateQueryParamWithDefault() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/query_param_with_default_value.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_with_default_value.bal");
 
@@ -61,7 +62,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "Generate Client for query parameter without default value")
-    public void generateQueryParamWithOutDefault() throws IOException, BallerinaOpenApiException {
+    public void generateQueryParamWithOutDefault() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/query_param_without_default_value.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_without_default_value.bal");
 
@@ -77,7 +78,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "Generate Client for query parameter with referenced schema")
-    public void generateQueryParamWithReferencedSchema() throws IOException, BallerinaOpenApiException {
+    public void generateQueryParamWithReferencedSchema() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/query_param_with_ref_schema.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_with_ref_schema.bal");
 
@@ -93,7 +94,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "Generate query parameters when both apikeys and http/OAuth is supported")
-    public void genQueryParamsForCombinationOfApiKeyAndHTTPOrOAuth() throws IOException, BallerinaOpenApiException {
+    public void genQueryParamsForCombinationOfApiKeyAndHTTPOrOAuth() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/combination_of_apikey_and_http_oauth.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/combination_of_apikey_and_http_oauth.bal");
 
@@ -109,7 +110,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "Generate encoding map for query parameters")
-    public void genQueryParamEncodingMap() throws IOException, BallerinaOpenApiException {
+    public void genQueryParamEncodingMap() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/queryparam_encoding_map_gen.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/queryparam_encoding_map_gen.bal");
 
@@ -125,7 +126,7 @@ public class QueryParameterTests {
     }
 
     @Test(description = "Generate Client for query parameter has integer values")
-    public void testValidIntegerQueryParam() throws IOException, BallerinaOpenApiException {
+    public void testValidIntegerQueryParam() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/query_param_with_integer_value.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_with_integer_value.bal");
 

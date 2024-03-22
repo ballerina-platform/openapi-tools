@@ -22,9 +22,8 @@ import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
-import io.ballerina.openapi.core.generators.client.FunctionBodyGenerator;
-import io.ballerina.openapi.core.generators.schemaOld.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.client.FunctionBodyGeneratorImp;
+import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -63,7 +62,7 @@ public class FunctionBodyNodeTests {
                 display.getPaths().get(path).readOperationsMap().entrySet();
         Iterator<Map.Entry<PathItem.HttpMethod, Operation>> iterator = operation.iterator();
         FunctionBodyGeneratorImp functionBodyGeneratorImp = new FunctionBodyGeneratorImp(new ArrayList<>(),
-                new ArrayList<>(), display, new BallerinaTypesGenerator(display),
+                new ArrayList<>(), display, new BallerinaTypesGenerator(display, false),
                 new AuthConfigGeneratorImp(false, false, new ArrayList<>()), new BallerinaUtilGenerator(),
                 false);
         FunctionBodyNode bodyNode = functionBodyGeneratorImp.getFunctionBodyNode(path, iterator.next());

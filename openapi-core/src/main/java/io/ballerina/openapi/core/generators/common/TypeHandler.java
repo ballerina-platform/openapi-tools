@@ -207,4 +207,10 @@ public class TypeHandler {
     public TypeDescriptorNode getTypeNodeForQueryParam(Schema<?> schema) throws OASTypeGenException {
         return ballerinaTypesGenerator.generateTypeDescriptorNode(schema);
     }
+
+
+    public TypeDescriptorReturnType generateTypeDescriptorNodeForOASSchema(Schema<?> schema) {
+        //mock function
+        return new TypeDescriptorReturnType(null, null);
+    }
 }
