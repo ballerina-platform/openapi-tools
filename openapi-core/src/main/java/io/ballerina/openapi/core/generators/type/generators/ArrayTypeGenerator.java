@@ -38,7 +38,7 @@ import io.ballerina.openapi.core.generators.type.TypeGenerationDiagnosticMessage
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
-import io.ballerina.openapi.core.generators.type.model.TypeDescriptorReturnType;
+import io.ballerina.openapi.core.generators.type.model.TypeGeneratorResult;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -194,11 +194,11 @@ public class ArrayTypeGenerator extends TypeGenerator {
         return Optional.ofNullable(getArrayTypeDescriptorNodeFromTypeDescriptorNode(member));
     }
 
-    public static TypeDescriptorReturnType getArrayTypeDescriptorNode(Schema<?> items) throws OASTypeGenException {
+    public static TypeGeneratorResult getArrayTypeDescriptorNode(Schema<?> items) throws OASTypeGenException {
         HashMap<String, TypeDefinitionNode> subtypesMap = new HashMap<>();
         ArrayTypeDescriptorNode typeDescriptorNode =
                 getArrayTypeDescriptorNode(GeneratorMetaData.getInstance().getOpenAPI(), items, subtypesMap, new HashMap<>());
-        return new TypeDescriptorReturnType(Optional.of(typeDescriptorNode), subtypesMap);
+        return new TypeGeneratorResult(Optional.of(typeDescriptorNode), subtypesMap);
     }
 
     private static ArrayTypeDescriptorNode getArrayTypeDescriptorNode(OpenAPI openAPI, Schema<?> items, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) throws OASTypeGenException {

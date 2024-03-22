@@ -24,17 +24,19 @@ import io.ballerina.openapi.core.generators.type.GeneratorConstants;
 import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.generators.ArrayTypeGenerator;
-import io.ballerina.openapi.core.generators.type.model.TypeDescriptorReturnType;
+import io.ballerina.openapi.core.generators.type.model.TypeGeneratorResult;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
-import io.ballerina.openapi.core.generators.type.model.NameReferenceNodeReturnType;
 import io.ballerina.openapi.core.generators.type.model.TokenReturnType;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -49,7 +51,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleN
 public class TypeHandler {
     private static TypeHandler typeHandlerInstance;
     private static BallerinaTypesGenerator ballerinaTypesGenerator;
-
     public final Map<String, TypeDefinitionNode> typeDefinitionNodes = new HashMap<>();
     private final Set<String> imports = new LinkedHashSet<>();
 
@@ -130,69 +131,75 @@ public class TypeHandler {
         }
     }
 
-    public SimpleNameReferenceNode createStatusCodeTypeInclusionRecord(String statusCode, TypeDescriptorNode type) {
-        NameReferenceNodeReturnType returnType = ballerinaTypesGenerator
-                .createTypeInclusionRecord(statusCode, type);
-        handleSubtypes(returnType.subtypeDefinitions());
-        return returnType.nameReferenceNode().get();
+    public Optional<TypeDescriptorNode> getTypeNodeFromOASSchema(Schema schema) {
+        TypeGeneratorResult typeGeneratorResult = ballerinaTypesGenerator.generateTypeDescriptorNodeForOASSchema(schema);
+        handleSubtypes(typeGeneratorResult.subtypeDefinitions());
+        return typeGeneratorResult.typeDescriptorNode();
     }
 
-    public Optional<TypeDescriptorNode> generateTypeDescriptorForOASSchema(Schema<?> schema, String recordName) throws OASTypeGenException {
-        TypeDescriptorReturnType returnType = ballerinaTypesGenerator.generateTypeDescriptorNodeForOASSchema(schema, recordName);
-        handleSubtypes(returnType.subtypeDefinitions());
-        return returnType.typeDescriptorNode();
-    }
-
-    public TypeDescriptorNode getArrayTypeDescriptorNode(Schema<?> items) throws OASTypeGenException {
-        TypeDescriptorReturnType returnType = ArrayTypeGenerator.getArrayTypeDescriptorNode(items);
-        handleSubtypes(returnType.subtypeDefinitions());
-        return returnType.typeDescriptorNode().get();
-    }
-
-    public Token getQueryParamTypeToken(Schema<?> schema) throws OASTypeGenException {
-        TokenReturnType returnType = ballerinaTypesGenerator.getQueryParamTypeToken(schema);
-        handleSubtypes(returnType.subtypeDefinitions());
-        return returnType.token().get();
-    }
-
-    public TypeDescriptorNode getReferencedQueryParameterTypeFromSchema(Schema<?> schema, String typeName) throws OASTypeGenException {
-        TypeDescriptorReturnType returnType = ballerinaTypesGenerator.getReferencedQueryParamTypeFromSchema(schema, typeName);
-        handleSubtypes(returnType.subtypeDefinitions());
-        return returnType.typeDescriptorNode().get();
-    }
-
-    public ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(
-            TypeDescriptorNode typeDescriptorNode) {
-        return ballerinaTypesGenerator.getArrayTypeDescriptorNodeFromTypeDescriptorNode(typeDescriptorNode);
-    }
-
-    public TypeDescriptorNode generateTypeDescriptorForJsonContent(Schema<?> schema, String recordName) throws
-            OASTypeGenException {
-        TypeDescriptorReturnType returnType = ballerinaTypesGenerator.generateTypeDescriptorForJsonContent(schema, recordName);
-        handleSubtypes(returnType.subtypeDefinitions());
-        return returnType.typeDescriptorNode().get();
-    }
-
-    public TypeDescriptorNode generateTypeDescriptorForXMLContent() {
-        return ballerinaTypesGenerator.getSimpleNameReferenceNode(io.ballerina.openapi.core.generators.type.GeneratorConstants.XML);
-    }
-
-    public TypeDescriptorNode generateTypeDescriptorForMapStringContent() {
-        return ballerinaTypesGenerator.getSimpleNameReferenceNode(io.ballerina.openapi.core.generators.type.GeneratorConstants.MAP_STRING);
-    }
-
-    public TypeDescriptorNode generateTypeDescriptorForTextContent(String typeName) {
-        return ballerinaTypesGenerator.getSimpleNameReferenceNode(typeName);
-    }
-
-    public TypeDescriptorNode generateTypeDescriptorForOctetStreamContent() {
-        ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
-                createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
-                createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-        return createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
-                                createIdentifierToken(GeneratorConstants.BYTE)),
-                NodeFactory.createNodeList(dimensionNode));
-    }
+//    public SimpleNameReferenceNode createStatusCodeTypeInclusionRecord(String includedType, TypeDescriptorNode type) {
+//        TypeGeneratorResult returnType = ballerinaTypesGenerator
+//                .createTypeInclusionRecord(statusCode, type);
+//        handleSubtypes(returnType.subtypeDefinitions());
+//        return returnType.nameReferenceNode().get();
+//    }
+//
+//    public Optional<TypeDescriptorNode> generateTypeDescriptorForOASSchema(Schema<?> schema, String recordName) throws OASTypeGenException {
+//        TypeGeneratorResult returnType = ballerinaTypesGenerator.generateTypeDescriptorNodeForOASSchema(schema, recordName);
+//        handleSubtypes(returnType.subtypeDefinitions());
+//        return returnType.typeDescriptorNode();
+//    }
+//
+//    public TypeDescriptorNode getArrayTypeDescriptorNode(Schema<?> items) throws OASTypeGenException {
+//        TypeGeneratorResult returnType = ArrayTypeGenerator.getArrayTypeDescriptorNode(items);
+//        handleSubtypes(returnType.subtypeDefinitions());
+//        return returnType.typeDescriptorNode().get();
+//    }
+//
+//    public Token getQueryParamTypeToken(Schema<?> schema) throws OASTypeGenException {
+//        TokenReturnType returnType = ballerinaTypesGenerator.getQueryParamTypeToken(schema);
+//        handleSubtypes(returnType.subtypeDefinitions());
+//        return returnType.token().get();
+//    }
+//
+//    public TypeDescriptorNode getReferencedQueryParameterTypeFromSchema(Schema<?> schema, String typeName) throws OASTypeGenException {
+//        TypeGeneratorResult returnType = ballerinaTypesGenerator.getReferencedQueryParamTypeFromSchema(schema, typeName);
+//        handleSubtypes(returnType.subtypeDefinitions());
+//        return returnType.typeDescriptorNode().get();
+//    }
+//
+//    public ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(
+//            TypeDescriptorNode typeDescriptorNode) {
+//        return ballerinaTypesGenerator.getArrayTypeDescriptorNodeFromTypeDescriptorNode(typeDescriptorNode);
+//    }
+//
+//    public TypeDescriptorNode generateTypeDescriptorForJsonContent(Schema<?> schema, String recordName) throws
+//            OASTypeGenException {
+//        TypeGeneratorResult returnType = ballerinaTypesGenerator.generateTypeDescriptorForJsonContent(schema, recordName);
+//        handleSubtypes(returnType.subtypeDefinitions());
+//        return returnType.typeDescriptorNode().get();
+//    }
+//
+//    public TypeDescriptorNode generateTypeDescriptorForXMLContent() {
+//        return ballerinaTypesGenerator.getSimpleNameReferenceNode(io.ballerina.openapi.core.generators.type.GeneratorConstants.XML);
+//    }
+//
+//    public TypeDescriptorNode generateTypeDescriptorForMapStringContent() {
+//        return ballerinaTypesGenerator.getSimpleNameReferenceNode(io.ballerina.openapi.core.generators.type.GeneratorConstants.MAP_STRING);
+//    }
+//
+//    public TypeDescriptorNode generateTypeDescriptorForTextContent(String typeName) {
+//        return ballerinaTypesGenerator.getSimpleNameReferenceNode(typeName);
+//    }
+//
+//    public TypeDescriptorNode generateTypeDescriptorForOctetStreamContent() {
+//        ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
+//                createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
+//                createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+//        return createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
+//                                createIdentifierToken(GeneratorConstants.BYTE)),
+//                NodeFactory.createNodeList(dimensionNode));
+//    }
 
     private void handleSubtypes(HashMap<String, TypeDefinitionNode> subTypesMap) {
         if (!subTypesMap.isEmpty()) {
