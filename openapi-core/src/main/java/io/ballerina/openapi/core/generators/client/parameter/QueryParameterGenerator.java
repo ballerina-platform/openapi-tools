@@ -12,7 +12,6 @@ import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.core.generators.type.model.TypeDescriptorReturnType;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -57,8 +56,8 @@ public class QueryParameterGenerator implements ParameterGenerator {
 
         //supported type: type BasicType boolean|int|float|decimal|string|map<anydata>|enum;
         //public type QueryParamType ()|BasicType|BasicType[];
-        TypeDescriptorReturnType result = TypeHandler.getInstance().generateTypeDescriptorNodeForOASSchema(parameterSchema);
-        typeNode = result.typeDescriptorNode().get();
+        Optional<TypeDescriptorNode> result = TypeHandler.getInstance().getTypeNodeFromOASSchema(parameterSchema);
+        typeNode = result.get();
         SyntaxKind kind = typeNode.kind();
         if (!isQueryParamTypeSupported(kind.stringValue())) {
             //TODO diagnostic message unsupported and early return

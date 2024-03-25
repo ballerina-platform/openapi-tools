@@ -4,10 +4,14 @@ import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.type.model.TypeGeneratorResult;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -18,6 +22,7 @@ import java.util.Optional;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 public class PathParameterGenerator implements ParameterGenerator {
@@ -36,38 +41,21 @@ public class PathParameterGenerator implements ParameterGenerator {
         IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName(), false));
         // type should be a any type node.
         Schema parameterSchema = parameter.getSchema();
-//        TypeDescriptorNode typeNode = ;
         // Reference type resolve
-        if (parameterSchema.get$ref() != null) {
-            try {
-                SimpleNameReferenceNode typeNode = TypeHandler.getSimpleNameReferenceNode(parameterSchema);
-            } catch (BallerinaOpenApiException e) {
-                throw new RuntimeException(e);
-            }
-            //todo 1. call type handler get type node
-
-//              TypeDefinitionNode typeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
-//                    (schema, type, new ArrayList<>());
-//            if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
-//                throw new BallerinaOpenApiException(String.format(
-//                        "Path parameter: '%s' is invalid. Ballerina does not support object type path parameters.",
-//                        parameter.getName()));
-//            }
-        } else {
-            String type = convertOpenAPITypeToBallerina(parameter.getSchema());
-            if (type.equals("anydata") || type.equals(SQUARE_BRACKETS) || type.equals("record {}")) {
-                DiagnosticMessages diagMessages = DiagnosticMessages.OAS_CLIENT_101;
-                ClientDiagnosticImp diagnostic = new ClientDiagnosticImp(diagMessages.getCode(),
-                        diagMessages.getDescription(), parameter.getName());
-                diagnostics.add(diagnostic);
-//                throw new BallerinaOpenApiException(invalidPathParamType(parameter.getName().trim()));
-            }
+        Optional<TypeDescriptorNode> typeNode = TypeHandler.getInstance().getTypeNodeFromOASSchema(parameterSchema);
+        if (typeNode.isEmpty()) {
+            throw new BallerinaOpenApiException("Error while generating type descriptor node for path parameter");
+        }
+        TypeDescriptorNode typeDescNode = typeNode.get();
+        if (typeDescNode.kind().equals(SyntaxKind.ARRAY_TYPE_DESC)|| typeDescNode.kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
+            DiagnosticMessages diagMessages = DiagnosticMessages.OAS_CLIENT_101;
+            ClientDiagnosticImp diagnostic = new ClientDiagnosticImp(diagMessages.getCode(),
+                    diagMessages.getDescription(), parameter.getName());
+            diagnostics.add(diagnostic);
+            return Optional.empty();
         }
 
-        BuiltinSimpleNameReferenceNode typeNode = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken(type));
-        // remove annotation
-        return createRequiredParameterNode(null, typeNode, paramName);
+        return Optional.of(createRequiredParameterNode(null, typeDescNode, paramName));
     }
 
     @Override

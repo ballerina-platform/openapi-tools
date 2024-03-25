@@ -2,8 +2,11 @@ package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
@@ -12,6 +15,7 @@ import io.ballerina.openapi.core.generators.client.exception.FunctionSignatureGe
 import io.ballerina.openapi.core.generators.client.parameter.HeaderParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.PathParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.QueryParameterGenerator;
+import io.ballerina.openapi.core.generators.client.parameter.RequestBodyGenerator;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -22,8 +26,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages.OAS_CLIENT_100;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 
@@ -32,7 +39,7 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
     Operation operation;
     List<ClientDiagnostic> diagnostics;
     Map<String, Parameter> parameters;
-    public  RemoteFunctionSignatureGenerator(Operation operation, Map<String, Parameter> parameters) {
+    public RemoteFunctionSignatureGenerator(Operation operation, Map<String, Parameter> parameters) {
         this.operation = operation;
         this.parameters = parameters;
     }
@@ -107,11 +114,32 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
             }
         }
         // 2. requestBody
+        RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(operation.getRequestBody(), openAPI);
+        Optional<ParameterNode> requestBody = requestBodyGenerator.generateParameterNode();
+        if (requestBody.isEmpty()) {
+            throw new FunctionSignatureGeneratorException("Error while generating request body node");
+        }
+        parameterList.add(requestBody.get());
+        parameterList.add(comma);
+
+        //filter defaultable parameters
+        if (!defaultable.isEmpty()) {
+            parameterList.addAll(defaultable);
+        }
+        // Remove the last comma
+        //check array out of bound error if parameter size is empty
+        parameterList.remove(parameterList.size() - 1);
+        SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(parameterList);
 
         // 3. return statements
-
-        //create functionsignature node
-        return null;
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation, openAPI);
+        Optional<ReturnTypeDescriptorNode> returnType = functionReturnType.getReturnType(operation, true);
+        if (returnType.isEmpty()) {
+            throw new FunctionSignatureGeneratorException("Return type is not found for the operation : " +
+                    operation.getOperationId());
+        }
+        //create function signature node
+        return NodeFactory.createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),parameterNodes, createToken(CLOSE_PAREN_TOKEN), returnType.get());
     }
 
     public List<ClientDiagnostic> getDiagnostics() {

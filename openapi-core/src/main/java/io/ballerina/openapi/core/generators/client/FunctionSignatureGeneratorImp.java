@@ -58,6 +58,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
@@ -113,27 +114,12 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isObjec
  */
 public class FunctionSignatureGeneratorImp {
     private final OpenAPI openAPI;
-    private final BallerinaTypesGenerator ballerinaSchemaGenerator;
-    private final List<TypeDefinitionNode> typeDefinitionNodeList;
-    private FunctionReturnTypeGeneratorImp functionReturnType;
+    private final Operation operation;
     private boolean deprecatedParamFound = false;
-    private boolean isResource;
 
-    public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
-        return typeDefinitionNodeList;
-    }
-
-    public FunctionSignatureGeneratorImp(OpenAPI openAPI,
-                                         BallerinaTypesGenerator ballerinaSchemaGenerator,
-                                         List<TypeDefinitionNode> typeDefinitionNodeList, boolean isResource) {
-
+    public FunctionSignatureGeneratorImp(Operation operation, OpenAPI openAPI) {
+        this.operation = operation;
         this.openAPI = openAPI;
-        this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
-        this.typeDefinitionNodeList = typeDefinitionNodeList;
-        this.functionReturnType = new FunctionReturnTypeGeneratorImp
-                (openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
-        this.isResource = isResource;
-
     }
 
     /**
@@ -149,34 +135,37 @@ public class FunctionSignatureGeneratorImp {
         List<Node> parameterList = new ArrayList<>();
 
         setFunctionParameters(operation, parameterList, createToken(COMMA_TOKEN), remoteFunctionDoc);
-        functionReturnType = new FunctionReturnTypeGeneratorImp
-                (openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
+        functionReturnType = new FunctionReturnTypeGeneratorImp(operation, openAPI);
 
         if (parameterList.size() >= 2) {
             parameterList.remove(parameterList.size() - 1);
         }
         SeparatedNodeList<ParameterNode> parameters = createSeparatedNodeList(parameterList);
         //Create Return type - function with response
-        String returnType = functionReturnType.getReturnType(operation, true);
-        ApiResponses responses = operation.getResponses();
-        Collection<ApiResponse> values = responses.values();
-        Iterator<ApiResponse> iteratorRes = values.iterator();
-        if (iteratorRes.hasNext()) {
-            ApiResponse response = iteratorRes.next();
-            if (response.getDescription() != null && !response.getDescription().isBlank()) {
-                MarkdownParameterDocumentationLineNode returnDoc =
-                        DocCommentsGenerator.createAPIParamDoc("return",
-                        response.getDescription());
-                remoteFunctionDoc.add(returnDoc);
-            }
+        Optional<ReturnTypeDescriptorNode> returnType = functionReturnType.getReturnType(operation, true);
+        if (returnType.isEmpty()) {
+            throw new BallerinaOpenApiException("Return type is not found for the operation : " +
+                    operation.getOperationId());
         }
-
-        // Return Type
-        ReturnTypeDescriptorNode returnTypeDescriptorNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD),
-                createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(returnType)));
+//        ApiResponses responses = operation.getResponses();
+//        Collection<ApiResponse> values = responses.values();
+//        Iterator<ApiResponse> iteratorRes = values.iterator();
+//        if (iteratorRes.hasNext()) {
+//            ApiResponse response = iteratorRes.next();
+//            if (response.getDescription() != null && !response.getDescription().isBlank()) {
+//                MarkdownParameterDocumentationLineNode returnDoc =
+//                        DocCommentsGenerator.createAPIParamDoc("return",
+//                        response.getDescription());
+//                remoteFunctionDoc.add(returnDoc);
+//            }
+//        }
+//
+//        // Return Type
+//        ReturnTypeDescriptorNode returnTypeDescriptorNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD),
+//                createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(null,
+//                        createIdentifierToken(returnType)));
         return createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN), parameters, createToken(CLOSE_PAREN_TOKEN),
-                returnTypeDescriptorNode);
+                returnType.get());
     }
 
     /**
