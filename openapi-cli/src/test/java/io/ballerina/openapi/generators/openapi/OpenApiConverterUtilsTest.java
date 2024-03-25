@@ -181,10 +181,7 @@ public class OpenApiConverterUtilsTest {
         Assert.assertTrue(!Files.exists(tempDir.resolve("query_openapi.yaml")));
     }
 
-    // Disabling this test case because of a breaking change in ballerina lang:
-    // Lang change: https://github.com/ballerina-platform/ballerina-lang/pull/42342
-    // Tracking issue: https://github.com/ballerina-platform/ballerina-library/issues/6217
-    @Test(description = "Given ballerina service has escape character", enabled = false)
+    @Test(description = "Given ballerina service has escape character")
     public void testForRemovingEscapeIdentifier() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("escape_identifier.bal");
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
