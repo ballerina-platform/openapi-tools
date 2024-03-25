@@ -107,6 +107,10 @@ public class DefaultResponseMapper implements ResponseMapper {
         String defaultStatusCode = operationInventory.getHttpOperation().equalsIgnoreCase(POST) ? HTTP_201 : HTTP_200;
         TypeSymbol returnTypeSymbol = getReturnTypeSymbol(resourceNode);
         createResponseMapping(returnTypeSymbol, defaultStatusCode);
+        checkForDataBindingFailures(operationInventory);
+    }
+
+    protected void checkForDataBindingFailures(OperationInventory operationInventory) {
         if (operationInventory.hasDataBinding()) {
             addResponseMappingForDataBindingFailures();
         }
@@ -310,7 +314,7 @@ public class DefaultResponseMapper implements ResponseMapper {
         addApiResponse(apiResponse, HTTP_202);
     }
 
-    protected void addResponseMappingForDataBindingFailures() {
+    void addResponseMappingForDataBindingFailures() {
         ApiResponse apiResponse = getApiResponse(HTTP_400);
         TypeSymbol errorType = semanticModel.types().ERROR;
         addResponseContent(errorType, apiResponse, "application/json");

@@ -17,17 +17,12 @@
  */
 package io.ballerina.openapi.service.mapper.response;
 
-import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
-import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.openapi.service.mapper.ServiceMapperFactory;
-import io.ballerina.openapi.service.mapper.interceptor.InfoFromInterceptors;
-import io.ballerina.openapi.service.mapper.interceptor.InterceptorPipeline;
+import io.ballerina.openapi.service.mapper.interceptor.model.ResponseInfo;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
-
-import java.util.Optional;
 
 /**
  * This {@link ResponseMapperWithInterceptors} class is the implementation of the {@link ResponseMapper} interface.
@@ -38,38 +33,32 @@ import java.util.Optional;
  */
 public class ResponseMapperWithInterceptors extends DefaultResponseMapper {
 
-    private final InfoFromInterceptors infoFromInterceptors;
+    private final ResponseInfo responseInfo;
 
     public ResponseMapperWithInterceptors(FunctionDefinitionNode resourceNode, OperationInventory operationInventory,
-                                          AdditionalData additionalData, InterceptorPipeline interceptorPipeline,
+                                          AdditionalData additionalData, ResponseInfo responseInfo,
                                           ServiceMapperFactory serviceMapperFactory) {
         super(resourceNode, operationInventory, additionalData, serviceMapperFactory);
-        Optional<Symbol> symbol = additionalData.semanticModel().symbol(resourceNode);
-        if (symbol.isPresent() && symbol.get() instanceof ResourceMethodSymbol resourceMethodSymbol) {
-            infoFromInterceptors = interceptorPipeline.getEffectiveReturnType(resourceMethodSymbol,
-                    operationInventory.hasDataBinding());
-        } else {
-            infoFromInterceptors = new InfoFromInterceptors();
-        }
+        this.responseInfo = responseInfo;
     }
 
     @Override
     protected TypeSymbol getReturnTypeSymbol(FunctionDefinitionNode resourceNode) {
-        return infoFromInterceptors.getReturnTypesFromTargetResource(semanticModel);
+        return responseInfo.getReturnTypesFromTargetResource(semanticModel);
     }
 
     @Override
     protected void createResponseMapping(TypeSymbol returnType, String defaultStatusCode) {
-        if (infoFromInterceptors.hasReturnTypesFromInterceptors()) {
-            super.createResponseMapping(infoFromInterceptors.getReturnTypesFromInterceptors(semanticModel),
+        if (responseInfo.hasReturnTypesFromInterceptors()) {
+            super.createResponseMapping(responseInfo.getReturnTypesFromInterceptors(semanticModel),
                     defaultStatusCode);
         }
         super.createResponseMapping(returnType, defaultStatusCode);
     }
 
     @Override
-    protected void addResponseMappingForDataBindingFailures() {
-        if (!infoFromInterceptors.isErrorsHandledByInterceptors()) {
+    protected void checkForDataBindingFailures(OperationInventory operationInventory) {
+        if (responseInfo.hasUnhandledDataBindingErrors()) {
             super.addResponseMappingForDataBindingFailures();
         }
     }

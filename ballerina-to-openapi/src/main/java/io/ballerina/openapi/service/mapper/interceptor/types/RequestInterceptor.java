@@ -15,13 +15,16 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.mapper.interceptor;
+package io.ballerina.openapi.service.mapper.interceptor.types;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.MethodSymbol;
 import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.openapi.service.mapper.interceptor.InterceptorMapperException;
 import io.ballerina.openapi.service.mapper.interceptor.resource.ResourceMatcher;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 
@@ -64,5 +67,12 @@ public class RequestInterceptor extends Interceptor {
     @Override
     public boolean isInvokable(TargetResource targetResource) {
         return ResourceMatcher.match(resourceMethod, targetResource.getResourceMethodSymbol(), semanticModel);
+    }
+
+    @Override
+    protected FunctionDefinitionNode getFunctionDefinitionNode() {
+        return (FunctionDefinitionNode) serviceClassNode.members().stream().filter(
+                node -> node.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)
+        ).findFirst().orElse(null);
     }
 }

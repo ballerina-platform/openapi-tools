@@ -118,26 +118,26 @@ public class InterceptorTests {
         List<OpenAPIMapperDiagnostic> errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
                 ballerinaFilePath, "interceptors/negative/interceptors00.yaml");
         Assert.assertEquals(errors.get(0).getMessage(), "Generated OpenAPI definition does not contain the" +
-                " response information from the interceptor pipeline. Cause: the return type of `createInterceptors`" +
-                " function should be defined as a tuple with specific interceptor types as members. For example: " +
-                "`[ResponseInterceptor_, RequestInterceptor_, RequestErrorInterceptor_]`");
+                " response/request parameter information from the interceptor pipeline. Cause: the return type of" +
+                " `createInterceptors` function should be defined as a tuple with specific interceptor types as " +
+                "members. For example: `[ResponseInterceptor_, RequestInterceptor_, RequestErrorInterceptor_]`");
 
         ballerinaFilePath = INTERCEPTOR_DIR.resolve("negative/interceptors01.bal");
         errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
                 ballerinaFilePath, "interceptors/negative/interceptors00.yaml");
         Assert.assertEquals(errors.get(0).getMessage(), "Generated OpenAPI definition does not contain the" +
-                " response information from the interceptor pipeline. Cause: no class definition found for the " +
-                "interceptor: Interceptor within the package. Make sure that the interceptor return type is defined" +
-                " with the specific interceptor class type rather than the generic `http:Interceptor` type and the " +
-                "specific interceptor class is defined within the package");
+                " response/request parameter information from the interceptor pipeline. Cause: no class definition " +
+                "found for the interceptor: Interceptor within the package. Make sure that the interceptor return " +
+                "type is defined with the specific interceptor class type rather than the generic `http:Interceptor`" +
+                " type and the specific interceptor class is defined within the package");
 
         ballerinaFilePath = INTERCEPTOR_DIR.resolve("negative/interceptors02.bal");
         errors = TestUtils.compareWithGeneratedFile(new OASContractGenerator(),
                 ballerinaFilePath, "interceptors/negative/interceptors00.yaml");
         Assert.assertEquals(errors.get(0).getMessage(), "Generated OpenAPI definition does not contain the" +
-                " response information from the interceptor pipeline. Cause: no class definition found for the " +
-                "interceptor: RequestInterceptor. Make sure that the interceptor return type is defined" +
-                " with the specific interceptor class type rather than the generic `http:Interceptor` type");
+                " response/request parameter information from the interceptor pipeline. Cause: no class definition " +
+                "found for the interceptor: RequestInterceptor. Make sure that the interceptor return type is " +
+                "defined with the specific interceptor class type rather than the generic `http:Interceptor` type");
     }
 
     @AfterMethod

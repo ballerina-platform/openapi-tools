@@ -15,12 +15,17 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.mapper.interceptor;
+package io.ballerina.openapi.service.mapper.interceptor.types;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.PathParameterSymbol;
 import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.resourcepath.PathSegmentList;
+import io.ballerina.compiler.api.symbols.resourcepath.ResourcePath;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -28,17 +33,13 @@ import java.util.Optional;
  *
  * @since 1.9.0
  */
-public class TargetResource extends Service {
+public class TargetResource extends Resource {
 
     private final TypeSymbol effectiveReturnType;
-    private final boolean hasDataBinding;
-    private final ResourceMethodSymbol resourceMethodSymbol;
 
-    public TargetResource(ResourceMethodSymbol resourceMethodSymbol, boolean hasDataBinding,
-                          SemanticModel semanticModel) {
+    public TargetResource(ResourceMethodSymbol resourceMethodSymbol, SemanticModel semanticModel) {
         super(semanticModel);
-        this.hasDataBinding = hasDataBinding;
-        this.resourceMethodSymbol = resourceMethodSymbol;
+        this.resourceMethod = resourceMethodSymbol;
         Optional<TypeSymbol> optReturnType = resourceMethodSymbol.typeDescriptor().returnTypeDescriptor();
         if (optReturnType.isEmpty()) {
             effectiveReturnType = semanticModel.types().NIL;
@@ -52,12 +53,22 @@ public class TargetResource extends Service {
         return effectiveReturnType;
     }
 
-    @Override
-    public boolean hasErrorReturn() {
-        return hasDataBinding || super.hasErrorReturn();
+    public ResourceMethodSymbol getResourceMethodSymbol() {
+        return resourceMethod;
     }
 
-    public ResourceMethodSymbol getResourceMethodSymbol() {
-        return resourceMethodSymbol;
+    @Override
+    public boolean hasDataBinding() {
+        return super.hasDataBinding() || hasPathParameter(resourceMethod.resourcePath());
+    }
+
+    private boolean hasPathParameter(ResourcePath path) {
+        return switch (path.kind()) {
+            case DOT_RESOURCE_PATH, PATH_REST_PARAM -> false;
+            case PATH_SEGMENT_LIST -> {
+                List<PathParameterSymbol> pathParams = ((PathSegmentList) path).pathParameters();;
+                yield Objects.nonNull(pathParams) && !pathParams.isEmpty();
+            }
+        };
     }
 }

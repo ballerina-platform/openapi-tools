@@ -15,17 +15,20 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.mapper.interceptor;
+package io.ballerina.openapi.service.mapper.interceptor.types;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ClassSymbol;
-import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.openapi.service.mapper.interceptor.InterceptorMapperException;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.utils.MediaTypeUtils;
 
@@ -43,15 +46,14 @@ import static io.ballerina.openapi.service.mapper.Constants.NEXT_SERVICE;
  *
  * @since 1.9.0
  */
-public abstract class Interceptor extends Service {
+public abstract class Interceptor extends Resource {
 
     public enum InterceptorType {
         REQUEST, REQUEST_ERROR, RESPONSE, RESPONSE_ERROR
     }
 
     protected final ClassSymbol serviceClass;
-    private final ClassDefinitionNode serviceClassNode;
-    protected ResourceMethodSymbol resourceMethod = null;
+    protected final ClassDefinitionNode serviceClassNode;
     protected boolean continueExecution = false;
     protected boolean hasNilReturn = false;
     private Interceptor nextInReqPath = null;
@@ -152,14 +154,21 @@ public abstract class Interceptor extends Service {
         return typeSymbol;
     }
 
+    protected abstract FunctionDefinitionNode getFunctionDefinitionNode();
+
+    public Iterable<ParameterNode> getParameterNodes() {
+        FunctionDefinitionNode functionDefinitionNode = getFunctionDefinitionNode();
+        if (Objects.isNull(functionDefinitionNode)) {
+            return List.of();
+        }
+        FunctionSignatureNode functionSignature = functionDefinitionNode.functionSignature();
+        return functionSignature.parameters();
+    }
+
     public abstract InterceptorType getType();
 
     public boolean isContinueExecution() {
         return continueExecution;
-    }
-
-    public ClassDefinitionNode getServiceClassNode() {
-        return serviceClassNode;
     }
 
     public void setNextInReqPath(Interceptor nextInReqPath) {
