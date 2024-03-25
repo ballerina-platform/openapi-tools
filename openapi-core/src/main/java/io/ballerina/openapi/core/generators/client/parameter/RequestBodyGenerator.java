@@ -1,5 +1,6 @@
 package io.ballerina.openapi.core.generators.client.parameter;
 
+import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
@@ -19,6 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createStreamTypeDescriptorNode;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_OCTET_STREAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.EMPTY_RECORD;
@@ -38,7 +43,7 @@ public class RequestBodyGenerator implements ParameterGenerator {
     RequestBody requestBody;
     List<ClientDiagnostic> diagnostics;
 
-    RequestBodyGenerator(RequestBody requestBody, OpenAPI openAPI) {
+    public RequestBodyGenerator(RequestBody requestBody, OpenAPI openAPI) {
         this.requestBody = requestBody;
         this.openAPI = openAPI;
     }
@@ -46,6 +51,7 @@ public class RequestBodyGenerator implements ParameterGenerator {
     public Optional<ParameterNode> generateParameterNode() {
         Content requestBodyContent;
         String referencedRequestBodyName = "";
+        TypeDescriptorNode typeDescNode = null;
         if (requestBody.get$ref() != null) {
             try {
                 referencedRequestBodyName = extractReferenceType(requestBody.get$ref()).trim();
@@ -74,69 +80,66 @@ public class RequestBodyGenerator implements ParameterGenerator {
                 if (mediaTypeEntryKey.equals(APPLICATION_OCTET_STREAM) ||
                         mediaTypeEntryKey.matches("application/.*\\+octet-stream")) {
                     paramType = getBallerinaMediaType(mediaTypeEntryKey, true);
+                    typeDescNode = createSimpleNameReferenceNode(createIdentifierToken(paramType));
                 } else {
                     if (schema.get$ref() != null) {
-                        try {
-                            paramType = getValidName(extractReferenceType(schema.get$ref().trim()), true);
-                        } catch (BallerinaOpenApiException e) {
-                            //todo diagnostic
-                        }
+                        Optional<TypeDescriptorNode> node = TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
                     } else if (getOpenAPIType(schema) != null && !getOpenAPIType(schema).equals(ARRAY) &&
-                            !getOpenAPIType(schema).equals(
-                                    OBJECT)) {
-                        paramType = TypeHandler.getInstance.(schema);
-                    } else if (isArraySchema(schema)) {
-                        //TODO: handle nested array - this is impossible to handle
-                        paramType = getRequestBodyParameterForArraySchema(operationId, mediaTypeEntry, schema);
-                    } else if (isObjectSchema(schema) || schema.getProperties() != null) {
-                        paramType = getRequestBodyParameterForObjectSchema(referencedRequestBodyName, schema);
-                    } else { // composed and object schemas are handled by the flatten
+                            !getOpenAPIType(schema).equals(OBJECT)) {
+                        Optional<TypeDescriptorNode> resultNode = TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
+                        if (resultNode.isEmpty()) {
+                            return Optional.empty();
+                        }
+                        typeDescNode = resultNode.get();
+
+                    } else {
                         paramType = getBallerinaMediaType(mediaTypeEntryKey, true);
                     }
                 }
             } else {
-                paramType = getBallerinaMediaType(mediaTypeEntry.getKey(), true);
+//                paramType = getBallerinaMediaType(mediaTypeEntry.getKey(), true);
+                return Optional.empty();
             }
         }
-        return null;
+        return Optional.of(createRequiredParameterNode(null, typeDescNode, createIdentifierToken("payload")));
     }
 
-    /**
-     * Generate RequestBody for array type schema.
-     */
-    private String getRequestBodyParameterForArraySchema(String operationId, Map.Entry<String, MediaType> next,
-                                                         Schema<?> arraySchema) throws BallerinaOpenApiException {
+//    /**
+//     * Generate RequestBody for array type schema.
+//     */
+//    private String getRequestBodyParameterForArraySchema(String operationId, Map.Entry<String, MediaType> next,
+//                                                         Schema<?> arraySchema) throws BallerinaOpenApiException {
+//
+//        String paramType;
+//        Schema<?> arrayItems = arraySchema.getItems();
+//        if (getOpenAPIType(arrayItems) != null) {
+//            paramType = convertOpenAPITypeToBallerina(arrayItems) + SQUARE_BRACKETS;
+//        } else if (arrayItems.get$ref() != null) {
+//            paramType = getValidName(extractReferenceType(arrayItems.get$ref()), true) + SQUARE_BRACKETS;
+//        } else if (isComposedSchema(arrayItems)) {
+//            paramType = "CompoundArrayItem" + getValidName(operationId, true) + "Request";
+//            // TODO - Add API doc by checking requestBody
+//            TypeDefinitionNode arrayTypeNode =
+//                    ballerinaSchemaGenerator.getTypeDefinitionNode(arraySchema, paramType, new ArrayList<>());
+//            GeneratorUtils.updateTypeDefNodeList(paramType, arrayTypeNode, typeDefinitionNodeList);
+//        } else {
+//            paramType = getBallerinaMediaType(next.getKey().trim(), true) + SQUARE_BRACKETS;
+//        }
+//        return paramType;
+//    }
 
-        String paramType;
-        Schema<?> arrayItems = arraySchema.getItems();
-        if (getOpenAPIType(arrayItems) != null) {
-            paramType = convertOpenAPITypeToBallerina(arrayItems) + SQUARE_BRACKETS;
-        } else if (arrayItems.get$ref() != null) {
-            paramType = getValidName(extractReferenceType(arrayItems.get$ref()), true) + SQUARE_BRACKETS;
-        } else if (isComposedSchema(arrayItems)) {
-            paramType = "CompoundArrayItem" + getValidName(operationId, true) + "Request";
-            // TODO - Add API doc by checking requestBody
-            TypeDefinitionNode arrayTypeNode =
-                    ballerinaSchemaGenerator.getTypeDefinitionNode(arraySchema, paramType, new ArrayList<>());
-            GeneratorUtils.updateTypeDefNodeList(paramType, arrayTypeNode, typeDefinitionNodeList);
-        } else {
-            paramType = getBallerinaMediaType(next.getKey().trim(), true) + SQUARE_BRACKETS;
-        }
-        return paramType;
-    }
 
-
-    private String getRequestBodyParameterForObjectSchema (String recordName, Schema objectSchema)
-            throws BallerinaOpenApiException {
-        recordName = getValidName(recordName + "_RequestBody", true);
-        if (objectSchema.getProperties() == null || objectSchema.getProperties().isEmpty()) {
-            return EMPTY_RECORD;
-        }
-        TypeDefinitionNode record =
-                ballerinaSchemaGenerator.getTypeDefinitionNode(objectSchema, recordName, new ArrayList<>());
-        GeneratorUtils.updateTypeDefNodeList(recordName, record, typeDefinitionNodeList);
-        return recordName;
-    }
+//    private String getRequestBodyParameterForObjectSchema (String recordName, Schema objectSchema)
+//            throws BallerinaOpenApiException {
+//        recordName = getValidName(recordName + "_RequestBody", true);
+//        if (objectSchema.getProperties() == null || objectSchema.getProperties().isEmpty()) {
+//            return EMPTY_RECORD;
+//        }
+//        TypeDefinitionNode record =
+//                ballerinaSchemaGenerator.getTypeDefinitionNode(objectSchema, recordName, new ArrayList<>());
+//        GeneratorUtils.updateTypeDefNodeList(recordName, record, typeDefinitionNodeList);
+//        return recordName;
+//    }
 
     @Override
     public List<ClientDiagnostic> getDiagnostics() {
