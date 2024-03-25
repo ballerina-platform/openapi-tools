@@ -51,7 +51,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
-import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 /**
@@ -80,7 +79,7 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
             String paramName = unescapeIdentifier(parameterSymbol.getName().get());
             this.name = getHeaderName(parameterNode, paramName);
             this.isRequired = headerParameter.paramKind().equals(ParameterKind.REQUIRED);
-            this.description = apiDocs.get(removeStartingSingleQuote(headerParameter.getName().get()));
+            this.description = apiDocs.get(headerParameter.getName().get());
             this.treatNilableAsOptional = treatNilableAsOptional;
             if (parameterNode instanceof DefaultableParameterNode defaultableHeaderParam) {
                 this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableHeaderParam);

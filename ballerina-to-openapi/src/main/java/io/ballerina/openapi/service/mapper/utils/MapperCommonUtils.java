@@ -398,10 +398,6 @@ public class MapperCommonUtils {
         return unescapedParamName.replaceAll("\\\\", "").replaceAll("'", "");
     }
 
-    public static String removeStartingSingleQuote(String parameterName) {
-        return parameterName.replaceAll("^'", "");
-    }
-
     public static String getTypeDescription(TypeReferenceTypeSymbol typeSymbol) {
         Symbol definition = typeSymbol.definition();
         if (definition instanceof Documentable) {
