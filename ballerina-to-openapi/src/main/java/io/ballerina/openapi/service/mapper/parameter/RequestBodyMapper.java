@@ -42,7 +42,6 @@ import java.util.Objects;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_PAYLOAD;
 import static io.ballerina.openapi.service.mapper.Constants.MEDIA_TYPE;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractAnnotationFieldDetails;
-import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
 
 /**
  * This {@link RequestBodyMapper} class represents the request body mapper.
@@ -65,7 +64,7 @@ public class RequestBodyMapper {
         this.semanticModel = additionalData.semanticModel();
         this.operationInventory = operationInventory;
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
-        requestBody.description(apiDocs.get(removeStartingSingleQuote(reqParameter.getName().get())));
+        requestBody.description(apiDocs.get(reqParameter.getName().get()));
         extractAnnotationDetails(annotation);
         createReqBodyMapping(reqParameter.typeDescriptor());
     }
