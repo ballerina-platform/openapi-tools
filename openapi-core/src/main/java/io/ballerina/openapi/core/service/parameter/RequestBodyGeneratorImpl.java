@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.core.service;
+package io.ballerina.openapi.core.service.parameter;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
@@ -28,6 +28,8 @@ import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
+import io.ballerina.openapi.core.service.GeneratorConstants;
+import io.ballerina.openapi.core.service.ServiceGenerationUtils;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
@@ -46,17 +48,17 @@ import static io.ballerina.openapi.core.generators.type.GeneratorUtils.extractRe
  *
  * @since 1.3.0
  */
-public class RequestBodyGenerator {
+public class RequestBodyGeneratorImpl implements RequestBodyGenerator {
     private final RequestBody requestBody;
 
-    public RequestBodyGenerator(RequestBody requestBody) {
+    public RequestBodyGeneratorImpl(RequestBody requestBody) {
         this.requestBody = requestBody;
     }
 
     /**
      * This for creating request Body for given request object.
      */
-    public RequiredParameterNode createNodeForRequestBody() throws OASTypeGenException {
+    public RequiredParameterNode createRequestBodyNode() throws OASTypeGenException {
         // type CustomRecord record {| anydata...; |};
         // public type PayloadType string|json|xml|byte[]|CustomRecord|CustomRecord[];
         Optional<TypeDescriptorNode> typeName;
@@ -94,7 +96,7 @@ public class RequestBodyGenerator {
     /**
      * This util function is for generating type node for request payload in resource function.
      */
-    public Optional<TypeDescriptorNode> getNodeForPayloadType(Map.Entry<String, MediaType> mediaType)
+    private Optional<TypeDescriptorNode> getNodeForPayloadType(Map.Entry<String, MediaType> mediaType)
             throws OASTypeGenException {
         Optional<TypeDescriptorNode> typeName;
         if (mediaType.getValue() != null && mediaType.getValue().getSchema() != null &&
@@ -123,7 +125,7 @@ public class RequestBodyGenerator {
                     typeName = Optional.of(createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_REQUEST)));
             }
         } else {
-            typeName = Optional.of(ReturnTypeGenerator.generateTypeDescriptorForMediaTypes(mediaType, null));
+            typeName = Optional.of(ServiceGenerationUtils.generateTypeDescriptorForMediaTypes(mediaType, null));
         }
         return typeName;
     }

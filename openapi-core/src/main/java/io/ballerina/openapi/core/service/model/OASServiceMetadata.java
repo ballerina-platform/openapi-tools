@@ -32,6 +32,10 @@ public class OASServiceMetadata {
     private final boolean nullable;
     private final boolean generateServiceType;
     private final boolean generateWithoutDataBinding;
+    private final boolean generateOnlyServiceType;
+    private final String licenseHeader;
+    private final String srcPackage;
+    private final String srcFile;
 
     private OASServiceMetadata(Builder serviceMetadataBuilder) {
         this.openAPI = serviceMetadataBuilder.openAPI;
@@ -39,6 +43,10 @@ public class OASServiceMetadata {
         this.nullable = serviceMetadataBuilder.nullable;
         this.generateServiceType = serviceMetadataBuilder.generateServiceType;
         this.generateWithoutDataBinding = serviceMetadataBuilder.generateWithoutDataBinding;
+        this.generateOnlyServiceType = false;
+        this.licenseHeader = serviceMetadataBuilder.licenseHeader;
+        this.srcPackage = serviceMetadataBuilder.srcPackage;
+        this.srcFile = serviceMetadataBuilder.srcFile;
     }
 
     public OpenAPI getOpenAPI() {
@@ -61,6 +69,22 @@ public class OASServiceMetadata {
         return generateWithoutDataBinding;
     }
 
+    public boolean isGenerateOnlyServiceType() {
+        return generateOnlyServiceType;
+    }
+
+    public String getLicenseHeader() {
+        return licenseHeader;
+    }
+
+    public String getSrcPackage() {
+        return srcPackage;
+    }
+
+    public String getSrcFile() {
+        return srcFile;
+    }
+
     /**
      * Service generation meta data builder class.
      */
@@ -73,6 +97,9 @@ public class OASServiceMetadata {
         private boolean generateServiceType = false;
 
         private boolean generateWithoutDataBinding = false;
+        private String licenseHeader = "";
+        private String srcPackage = "";
+        private String srcFile = "";
 
         public Builder withOpenAPI(OpenAPI openAPI) {
             this.openAPI = openAPI;
@@ -96,6 +123,21 @@ public class OASServiceMetadata {
 
         public Builder withGenerateWithoutDataBinding(boolean generateWithoutDataBinding) {
             this.generateWithoutDataBinding = generateWithoutDataBinding;
+            return this;
+        }
+
+        public Builder withLicenseHeader(String licenseHeader) {
+            this.licenseHeader = licenseHeader;
+            return this;
+        }
+
+        public Builder withSrcPackage(String srcPackage) {
+            this.srcPackage = srcPackage;
+            return this;
+        }
+
+        public Builder withSrcFile(String srcFile) {
+            this.srcFile = srcFile;
             return this;
         }
 

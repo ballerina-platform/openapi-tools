@@ -21,7 +21,7 @@ package io.ballerina.openapi.generators.service;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.core.service.BallerinaServiceGenerator;
+import io.ballerina.openapi.core.service.ServiceGeneratorImpl;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
@@ -71,7 +71,7 @@ public class ServiceDiagnosticTests {
                 .withGenerateWithoutDataBinding(false)
                 .build();
         TypeHandler.createInstance(openAPI, false);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);
         boolean hasErrors = diagnostics.stream()
@@ -93,7 +93,7 @@ public class ServiceDiagnosticTests {
                 .withGenerateWithoutDataBinding(true)
                 .build();
         TypeHandler.createInstance(openAPI, false);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);
         boolean hasErrors = diagnostics.stream()
@@ -117,7 +117,7 @@ public class ServiceDiagnosticTests {
                 .build();
         // Initialize ballerina types generator
         TypeHandler.createInstance(openAPI, false);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);
         boolean hasErrors = diagnostics.stream()

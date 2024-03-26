@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.core.service;
+package io.ballerina.openapi.core.service.diagnostic;
 
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 

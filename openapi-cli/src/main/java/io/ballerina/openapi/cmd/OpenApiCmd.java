@@ -366,7 +366,7 @@ public class OpenApiCmd implements BLauncherCmd {
             assert resourcePath != null;
             generator.generateService(resourcePath.toString(), serviceName, targetOutputPath.toString(), filter,
                     baseCmd.nullable, generateServiceType, generateWithoutDataBinding);
-        } catch (IOException | FormatterException | BallerinaOpenApiException e) {
+        } catch (IOException | FormatterException | BallerinaOpenApiException | OASTypeGenException e) {
             outStream.println("Error occurred when generating service for OpenAPI contract at " + argList.get(0) +
                     ". " + e.getMessage() + ".");
             exitError(this.exitWhenFinish);

@@ -31,6 +31,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
+import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 
@@ -57,13 +58,12 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 /**
  * This class is used to generate the ballerina service object for the given openapi contract.
  */
-public class BallerinaServiceObjectGenerator {
-    private final List<Node> resourceFunctionList;
-
-    public BallerinaServiceObjectGenerator(List<Node> resourceFunctionList) {
-        this.resourceFunctionList = resourceFunctionList;
+public class ServiceObjectGenerator extends ServiceGenerator {
+    public ServiceObjectGenerator(OASServiceMetadata oasServiceMetadata) {
+        super(oasServiceMetadata);
     }
 
+    @Override
     public SyntaxTree generateSyntaxTree() {
         // TODO: Check the possibility of having imports other than `ballerina/http`
         NodeList<ImportDeclarationNode> imports = ServiceGenerationUtils.createImportDeclarationNodes();
@@ -76,12 +76,13 @@ public class BallerinaServiceObjectGenerator {
         return syntaxTree.modifyWith(modulePartNode);
     }
 
-    public TypeDefinitionNode generateServiceObject() {
+    private TypeDefinitionNode generateServiceObject() {
         List<Node> serviceObjectMemberNodes = new ArrayList<>();
         TypeReferenceNode httpServiceTypeRefNode = createTypeReferenceNode(createToken(ASTERISK_TOKEN),
                 createIdentifierToken("http:Service"), createToken(SEMICOLON_TOKEN));
         serviceObjectMemberNodes.add(httpServiceTypeRefNode);
-        for (Node functionNode : resourceFunctionList) {
+        List<Node> functions = createResourceFunctions(oasServiceMetadata.getOpenAPI(), oasServiceMetadata.getFilters());
+        for (Node functionNode : functions) {
             NodeList<Token> methodQualifierList = createNodeList(createToken(RESOURCE_KEYWORD));
             if (functionNode instanceof FunctionDefinitionNode &&
                     ((FunctionDefinitionNode) functionNode).qualifierList()
@@ -109,6 +110,7 @@ public class BallerinaServiceObjectGenerator {
                 createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
         return createTypeDefinitionNode(null, null, createToken(TYPE_KEYWORD),
-                createIdentifierToken(GeneratorConstants.SERVICE_TYPE_NAME), objectTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
+                createIdentifierToken(GeneratorConstants.SERVICE_TYPE_NAME), objectTypeDescriptorNode,
+                createToken(SEMICOLON_TOKEN));
     }
 }

@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.ballerina.openapi.core.service;
+package io.ballerina.openapi.core.service.parameter;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
@@ -33,6 +33,9 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.service.GeneratorConstants;
+import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages;
+import io.ballerina.openapi.core.service.ServiceGenerationUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -59,10 +62,10 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameRefe
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.core.service.GeneratorConstants.NILLABLE;
-import static io.ballerina.openapi.core.service.ServiceDiagnosticMessages.OAS_SERVICE_103;
-import static io.ballerina.openapi.core.service.ServiceDiagnosticMessages.OAS_SERVICE_104;
-import static io.ballerina.openapi.core.service.ServiceDiagnosticMessages.OAS_SERVICE_105;
-import static io.ballerina.openapi.core.service.ServiceDiagnosticMessages.OAS_SERVICE_106;
+import static io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages.OAS_SERVICE_103;
+import static io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages.OAS_SERVICE_104;
+import static io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages.OAS_SERVICE_105;
+import static io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages.OAS_SERVICE_106;
 import static io.ballerina.openapi.core.generators.type.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.generators.type.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.generators.type.GeneratorUtils.getValidName;
@@ -75,22 +78,25 @@ import static io.ballerina.openapi.core.generators.type.GeneratorUtils.isObjectS
  *
  * @since 1.3.0
  */
-public class ParametersGenerator {
+public class ParametersGeneratorImpl extends ParameterGenerator {
 
-    private boolean isNullableRequired;
     private final List<Node> requiredParams;
     private final List<Node> defaultableParams;
-    private final OpenAPI openAPI;
 
     private static final List<String> paramSupportedTypes =
             new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
                     GeneratorConstants.STRING, GeneratorConstants.BOOLEAN));
 
-    public ParametersGenerator(boolean isNullableRequired, OpenAPI openAPI) {
+    public ParametersGeneratorImpl(boolean isNullableRequired, OpenAPI openAPI) {
         this.isNullableRequired = isNullableRequired;
         this.openAPI = openAPI;
         this.requiredParams = new ArrayList<>();
         this.defaultableParams = new ArrayList<>();
+    }
+
+    @Override
+    ParameterNode generateParameterNode(Map.Entry<PathItem.HttpMethod, Operation> operation) {
+        return null;
     }
 
     public List<Node> getRequiredParams() {
