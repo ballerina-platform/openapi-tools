@@ -59,8 +59,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
  */
 public class ReferencedTypeGenerator extends TypeGenerator {
 
-    public ReferencedTypeGenerator(Schema schema, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
-        super(schema, subTypesMap, pregeneratedTypeMap);
+    public ReferencedTypeGenerator(Schema schema, String typeName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
+        super(schema, typeName, subTypesMap, pregeneratedTypeMap);
     }
 
     /**
@@ -75,7 +75,7 @@ public class ReferencedTypeGenerator extends TypeGenerator {
         refSchema = refSchema == null ?
                 GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(extractName) : refSchema;
         SimpleNameReferenceNode nameReferenceNode = createSimpleNameReferenceNode(createIdentifierToken(typeName));
-        TypeGenerator reffredTypeGenerator = TypeGeneratorUtils.getTypeGenerator(refSchema, extractName, subTypesMap, pregeneratedTypeMap);
+        TypeGenerator reffredTypeGenerator = TypeGeneratorUtils.getTypeGenerator(refSchema, extractName, null,  subTypesMap, pregeneratedTypeMap);
         if (!pregeneratedTypeMap.containsKey(typeName)) {
             pregeneratedTypeMap.put(typeName, createSimpleNameReferenceNode(createIdentifierToken(typeName)));
             TypeDescriptorNode typeDescriptorNode = reffredTypeGenerator.generateTypeDescriptorNode();

@@ -215,7 +215,7 @@ public class GeneratorUtils {
                     paramType = resolveReferenceType(parameter.getSchema(), components, isWithoutDataBinding,
                             pathParam);
                     Schema<?> schema = GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(paramType);
-                    TypeHandler.getInstance().generateTypeDescriptorForOASSchema(schema, paramType);
+                    TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
                 } else {
                     paramType = getPathParameterType(parameter.getSchema(), pathParam);
                     if (paramType.endsWith(GeneratorConstants.NILLABLE)) {

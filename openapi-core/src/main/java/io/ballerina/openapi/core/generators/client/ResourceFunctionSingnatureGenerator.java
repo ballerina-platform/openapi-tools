@@ -23,7 +23,6 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
@@ -34,12 +33,11 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages.OAS_CLIENT_100;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 
-public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenerator {
-    OpenAPI openAPI;
-    Operation operation;
-    List<ClientDiagnostic> diagnostics;
-
-    public RemoteFunctionSignatureGenerator(Operation operation, OpenAPI openAPI) {
+public class ResourceFunctionSingnatureGenerator implements FunctionSignatureGenerator {
+    private final Operation operation;
+    private final OpenAPI openAPI;
+    private final List<ClientDiagnostic> diagnostics = new ArrayList<>();
+    public ResourceFunctionSingnatureGenerator(Operation operation, OpenAPI openAPI) {
         this.operation = operation;
         this.openAPI = openAPI;
     }
@@ -69,16 +67,6 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                 String in = parameter.getIn();
 
                 switch (in) {
-                    case "path":
-                        PathParameterGenerator paramGenerator = new PathParameterGenerator(parameter, openAPI);
-                        Optional<ParameterNode> param = paramGenerator.generateParameterNode();
-                        if (param.isEmpty()) {
-                            throw new FunctionSignatureGeneratorException("Error while generating path parameter node");
-                        }
-                        // Path parameters are always required.
-                        parameterList.add(param.get());
-                        parameterList.add(comma);
-                        break;
                     case "query":
                         QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(parameter, openAPI);
                         Optional<ParameterNode> queryParam = queryParameterGenerator.generateParameterNode();
@@ -141,7 +129,8 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
         return NodeFactory.createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),parameterNodes, createToken(CLOSE_PAREN_TOKEN), returnType.get());
     }
 
+    @Override
     public List<ClientDiagnostic> getDiagnostics() {
-        return diagnostics;
+        return null;
     }
 }

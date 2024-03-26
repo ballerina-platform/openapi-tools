@@ -136,60 +136,49 @@ import static io.ballerina.openapi.core.generators.serviceOld.ServiceGenerationU
  */
 public class FunctionBodyGeneratorImp {
 
-    private List<ImportDeclarationNode> imports;
+    private List<ImportDeclarationNode> imports = new ArrayList<>();
     private boolean isHeader;
-    private final List<TypeDefinitionNode> typeDefinitionNodeList;
+    private final String path;
+    private final Map.Entry<PathItem.HttpMethod, Operation> operation;
     private final OpenAPI openAPI;
-    private final io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp;
-    private final boolean resourceMode;
 
     public List<ImportDeclarationNode> getImports() {
         return imports;
     }
 
-    public void setImports(List<ImportDeclarationNode> imports) {
-        this.imports = imports;
-    }
 
-    public FunctionBodyGeneratorImp(List<ImportDeclarationNode> imports, List<TypeDefinitionNode> typeDefinitionNodeList,
-                                    OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
+    public FunctionBodyGeneratorImp(String path, Map.Entry<PathItem.HttpMethod, Operation> operation, OpenAPI openAPI,
                                     AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp,
-                                    BallerinaUtilGenerator ballerinaUtilGenerator, boolean resourceMode) {
+                                    BallerinaUtilGenerator ballerinaUtilGenerator) {
 
-        this.imports = imports;
+        this.path = path;
+        this.operation = operation;
         this.isHeader = false;
-        this.typeDefinitionNodeList = typeDefinitionNodeList;
         this.openAPI = openAPI;
-        this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.ballerinaUtilGenerator = ballerinaUtilGenerator;
         this.ballerinaAuthConfigGeneratorImp = ballerinaAuthConfigGeneratorImp;
-        this.resourceMode = resourceMode;
     }
 
     /**
      * Generate function body node for the remote function.
      *
-     * @param path      - remote function path
-     * @param operation - opneapi operation
      * @return - {@link FunctionBodyNode}
      * @throws BallerinaOpenApiException - throws exception if generating FunctionBodyNode fails.
      */
-    public FunctionBodyNode getFunctionBodyNode(String path, Map.Entry<PathItem.HttpMethod, Operation> operation)
-            throws BallerinaOpenApiException {
+    public FunctionBodyNode getFunctionBodyNode() throws BallerinaOpenApiException {
 
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
-                openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation.getValue(), openAPI);
         isHeader = false;
         // Create statements
         List<StatementNode> statementsList = new ArrayList<>();
         // Check whether given path is complex path , if complex it will handle adding these two statement
-        if (resourceMode && isComplexURL(path)) {
-            List<StatementNode> bodyStatements = generateBodyStatementForComplexUrl(path);
-            statementsList.addAll(bodyStatements);
-        }
+//        if (resourceMode && isComplexURL(path)) {
+//            List<StatementNode> bodyStatements = generateBodyStatementForComplexUrl(path);
+//            statementsList.addAll(bodyStatements);
+//        }
         //string path - common for every remote functions
         VariableDeclarationNode pathInt = getPathStatement(path, annotationNodes);
         statementsList.add(pathInt);
@@ -199,7 +188,7 @@ public class FunctionBodyGeneratorImp {
 
         String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
         // This return type for target data type binding.
-        String rType = functionReturnType.getReturnType(operation.getValue(), true);
+        String rType = functionReturnType.getReturnType(operation.getValue(), true).toString();
         String returnType = returnTypeForTargetTypeField(rType);
         // Statement Generator for requestBody
         if (operation.getValue().getRequestBody() != null) {

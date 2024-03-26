@@ -59,6 +59,7 @@ import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -73,6 +74,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
@@ -221,7 +223,6 @@ public class BallerinaClientGenerator {
     }
 
     public BallerinaUtilGenerator getBallerinaUtilGenerator() {
-
         return ballerinaUtilGenerator;
     }
 
@@ -253,7 +254,7 @@ public class BallerinaClientGenerator {
         memberNodeList.add(createInitFunction());
         // todo: Generate remote function Nodes
         // todo: filter tags and the operations
-        Map<String, Operation> filteredOperations = filterOperations();
+        Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations = filterOperations();
         //switch resource remote
         List<FunctionDefinitionNode> functionDefinitionNodeList = new ArrayList<>();
         if (resourceMode) {
@@ -276,13 +277,14 @@ public class BallerinaClientGenerator {
     /**
      * This function is to filter the operations based on the user given tags and operations
      */
-    private Map<String, Operation> filterOperations() {
+    private Map<String, Map<PathItem.HttpMethod, Operation>> filterOperations() {
         //todo refactor code
-        Map<String, Operation> filteredOperation = new HashMap<>();
+        Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperation = new HashMap<>();
         List<String> filterTags = filter.getTags();
         List<String> filterOperations = filter.getOperations();
         Set<Map.Entry<String, PathItem>> pathsItems = openAPI.getPaths().entrySet();
         for (Map.Entry<String, PathItem> path : pathsItems) {
+            Map<PathItem.HttpMethod, Operation> operations = new HashMap<>();
             if (!path.getValue().readOperationsMap().isEmpty()) {
                 Map<PathItem.HttpMethod, Operation> operationMap = path.getValue().readOperationsMap();
                 for (Map.Entry<PathItem.HttpMethod, Operation> operation : operationMap.entrySet()) {
@@ -292,12 +294,15 @@ public class BallerinaClientGenerator {
                         // Generate remote function only if it is available in tag filter or operation filter or both
                         if (operationTags != null || ((!filterOperations.isEmpty()) && (operationId != null))) {
                             if (isaFilteredOperation(filterTags, filterOperations, operationTags, operationId)) {
-                                filteredOperation.put(path.getKey(), operation.getValue());
+                                operations.put(operation.getKey(), operation.getValue());
                             }
                         }
                     } else {
-                        filteredOperation.put(path.getKey(), operation.getValue());
+                        operations.put(operation.getKey(), operation.getValue());
                     }
+                }
+                if (!operations.isEmpty()) {
+                    filteredOperation.put(path.getKey(), operations);
                 }
             }
         }
@@ -590,18 +595,35 @@ public class BallerinaClientGenerator {
                 ((operationId != null) && filterOperations.contains(operationId.trim()));
     }
 
-    private List<FunctionDefinitionNode> createRemoteFunctions(Map<String, Operation> filteredOperations) {
-
-        return null;
+    private List<FunctionDefinitionNode> createRemoteFunctions(Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations) {
+        //call remoteFunctionSignatureGenerator
+        List<FunctionDefinitionNode> remoteFunctionNodes = new ArrayList<>();
+        for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {
+            for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : operation.getValue().entrySet()) {
+                RemoteFunctionGenerator remoteFunctionGenerator = new RemoteFunctionGenerator(operation.getKey(), operationEntry, openAPI, authConfigGeneratorImp, ballerinaUtilGenerator);
+                Optional<FunctionDefinitionNode> remotefunction = remoteFunctionGenerator.generateFunction();
+                if (remotefunction.isPresent()) {
+                    remoteFunctionNodes.add(remotefunction.get());
+                }
+            }
+        }
+        return remoteFunctionNodes;
     }
 
 
-    private List<FunctionDefinitionNode> createResourceFunctions(Map<String, Operation> filteredOperations) {
-        //call resourcefunctionSingatureGenerator
-
-        //call return type generator
-        //call resourceFunctionBodyGenerator
-        return null;
+    private List<FunctionDefinitionNode> createResourceFunctions(Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations) {
+        List<FunctionDefinitionNode> resourceFunctionNodes = new ArrayList<>();
+        for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {
+            for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : operation.getValue().entrySet()) {
+                ResourceFunctionGenerator resourceFunctionGenerator = new ResourceFunctionGenerator(operationEntry,
+                        operation.getKey(), openAPI, authConfigGeneratorImp, ballerinaUtilGenerator);
+                Optional<FunctionDefinitionNode> resourceFunction = resourceFunctionGenerator.generateFunction();
+                if (resourceFunction.isPresent()) {
+                    resourceFunctionNodes.add(resourceFunction.get());
+                }
+            }
+        }
+        return resourceFunctionNodes;
     }
 
     /**
@@ -653,12 +675,12 @@ public class BallerinaClientGenerator {
 
         remoteFunctionNameList.add(operation.getValue().getOperationId());
 
-        FunctionSignatureGeneratorImp functionSignatureGenerator = new FunctionSignatureGeneratorImp(openAPI,
-                balTypeGenerator, typeDefinitionNodeList, resourceMode);
-        FunctionSignatureNode functionSignatureNode =
-                functionSignatureGenerator.getFunctionSignatureNode(operation.getValue(),
-                        remoteFunctionDocs);
-        typeDefinitionNodeList = functionSignatureGenerator.getTypeDefinitionNodeList();
+//        FunctionSignatureGeneratorImp functionSignatureGenerator = new FunctionSignatureGeneratorImp(openAPI,
+//                balTypeGenerator, typeDefinitionNodeList, resourceMode);
+//        FunctionSignatureNode functionSignatureNode =
+//                functionSignatureGenerator.getFunctionSignatureNode(operation.getValue(),
+//                        remoteFunctionDocs);
+//        typeDefinitionNodeList = functionSignatureGenerator.getTypeDefinitionNodeList();
         // Create `Deprecated` annotation if an operation has mentioned as `deprecated:true`
         if (operation.getValue().getDeprecated() != null && operation.getValue().getDeprecated()) {
             DocCommentsGenerator.extractDeprecatedAnnotation(operation.getValue().getExtensions(),
