@@ -59,8 +59,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
  */
 public class ReferencedTypeGenerator extends TypeGenerator {
 
-    public ReferencedTypeGenerator(Schema schema, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
-        super(schema, subTypesMap, pregeneratedTypeMap);
+    public ReferencedTypeGenerator(Schema schema, String typeName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
+        super(schema, typeName, subTypesMap, pregeneratedTypeMap);
     }
 
     /**
