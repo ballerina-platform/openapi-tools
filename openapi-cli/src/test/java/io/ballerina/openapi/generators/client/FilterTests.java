@@ -19,6 +19,7 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
@@ -46,7 +47,7 @@ public class FilterTests {
 
 
     @Test(description = "With tag filter")
-    public void testWithTag() throws IOException, BallerinaOpenApiException {
+    public void testWithTag() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/tag.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/tag.bal");
         list1.clear();
@@ -65,7 +66,7 @@ public class FilterTests {
     }
 
     @Test(description = "With Operation filter")
-    public void testWithOperation() throws IOException, BallerinaOpenApiException {
+    public void testWithOperation() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/operation.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/operation.bal");
         list1.clear();

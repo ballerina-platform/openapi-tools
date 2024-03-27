@@ -29,8 +29,8 @@ import io.ballerina.openapi.core.generators.type.generators.RecordTypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.ReferencedTypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.TypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.UnionTypeGenerator;
-import io.swagger.v3.oas.models.media.Schema;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
+import io.swagger.v3.oas.models.media.Schema;
 
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -38,8 +38,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
@@ -68,7 +66,7 @@ public class TypeGeneratorUtils {
                                                  HashMap<String, TypeDefinitionNode> subTypesMap,
                                                  HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
         if (schemaValue.get$ref() != null) {
-            return new ReferencedTypeGenerator(schemaValue, subTypesMap, pregeneratedTypeMap);
+            return new ReferencedTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
         } else if (GeneratorUtils.isComposedSchema(schemaValue)) {
             if (schemaValue.getAllOf() != null) {
                 return new AllOfRecordTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
