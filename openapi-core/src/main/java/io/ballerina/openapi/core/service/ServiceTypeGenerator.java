@@ -58,8 +58,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 /**
  * This class is used to generate the ballerina service object for the given openapi contract.
  */
-public class ServiceObjectGenerator extends ServiceGenerator {
-    public ServiceObjectGenerator(OASServiceMetadata oasServiceMetadata) {
+public class ServiceTypeGenerator extends ServiceGenerator {
+    public ServiceTypeGenerator(OASServiceMetadata oasServiceMetadata) {
         super(oasServiceMetadata);
     }
 

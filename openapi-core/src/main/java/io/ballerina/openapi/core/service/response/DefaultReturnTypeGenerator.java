@@ -35,6 +35,7 @@ import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.GeneratorConstants;
 import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages;
 import io.ballerina.openapi.core.service.ServiceGenerationUtils;
+import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -68,13 +69,12 @@ import static io.ballerina.openapi.core.service.GeneratorConstants.RETURNS;
  *
  * @since 1.3.0
  */
-public class ReturnTypeGeneratorImpl extends ReturnTypeGenerator {
+public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
 
     private static int countForRecord = 0;
 
-    public ReturnTypeGeneratorImpl(String pathRecord, OpenAPI openAPI) {
-        this.pathRecord = pathRecord;
-        this.openAPI = openAPI;
+    public DefaultReturnTypeGenerator(OASServiceMetadata oasServiceMetadata, String pathRecord) {
+        super(oasServiceMetadata, pathRecord);
     }
 
     /**
@@ -82,11 +82,10 @@ public class ReturnTypeGeneratorImpl extends ReturnTypeGenerator {
      * Payload media type will not be added to the annotation.
      *
      * @param operation   OpenApi operation
-     * @param annotations Annotation node list
      * @return return returnNode
      */
     public ReturnTypeDescriptorNode getReturnTypeDescriptorNode(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                                NodeList<AnnotationNode> annotations, String path)
+                                                                String path)
             throws OASTypeGenException {
         ReturnTypeDescriptorNode returnNode;
         List<String> returnDescriptions = new ArrayList<>();
@@ -95,14 +94,14 @@ public class ReturnTypeGeneratorImpl extends ReturnTypeGenerator {
             ApiResponses responses = operation.getValue().getResponses();
             if (responses.size() > 1) {
                 //handle multiple response scenarios ex: status code 200, 400, 500
-                TypeDescriptorNode type = handleMultipleResponse(responses, returnDescriptions, httpMethod, openAPI,
-                        pathRecord);
-                returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), annotations, type);
+                TypeDescriptorNode type = handleMultipleResponse(responses, returnDescriptions, httpMethod,
+                        oasServiceMetadata.getOpenAPI(), pathRecord);
+                returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), null, type);
             } else if (responses.size() == 1) {
                 //handle single response
                 Iterator<Map.Entry<String, ApiResponse>> responseIterator = responses.entrySet().iterator();
                 Map.Entry<String, ApiResponse> response = responseIterator.next();
-                returnNode = handleSingleResponse(annotations, response, pathRecord, httpMethod);
+                returnNode = handleSingleResponse(response, pathRecord, httpMethod);
                 // checks `ifEmpty` not `ifBlank` because user can intentionally set the description to empty string
                 if (response.getValue().getDescription() != null && !response.getValue().getDescription().isEmpty()) {
                     returnDescriptions.add(response.getValue().getDescription());
@@ -112,7 +111,7 @@ public class ReturnTypeGeneratorImpl extends ReturnTypeGenerator {
                 }
             } else {
                 TypeDescriptorNode defaultType = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
-                returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), annotations, defaultType);
+                returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(), defaultType);
                 returnDescriptions.add(HTTP_RESPONSE);
             }
         } else {
@@ -177,8 +176,10 @@ public class ReturnTypeGeneratorImpl extends ReturnTypeGenerator {
                 if (isWithOutStatusCode) {
                     typeName = bodyType.toSourceCode();
                 } else {
-                    SimpleNameReferenceNode node = TypeHandler.getInstance()
-                            .createStatusCodeTypeInclusionRecord(code, bodyType);
+                    // todo : update this part
+                    SimpleNameReferenceNode node = null;
+//                    SimpleNameReferenceNode node = TypeHandler.getInstance()
+//                            .createStatusCodeTypeInclusionRecord(code, bodyType);
                     typeName = node.name().text();
                 }
             }
@@ -234,8 +235,7 @@ public class ReturnTypeGeneratorImpl extends ReturnTypeGenerator {
     /**
      * This util is to generate return node when the operation has one response.
      */
-    private ReturnTypeDescriptorNode handleSingleResponse(NodeList<AnnotationNode> annotations,
-                                                         Map.Entry<String, ApiResponse> response, String pathRecord,
+    private ReturnTypeDescriptorNode handleSingleResponse(Map.Entry<String, ApiResponse> response, String pathRecord,
                                                           String httpMethod)
             throws OASTypeGenException {
 
@@ -254,7 +254,7 @@ public class ReturnTypeGeneratorImpl extends ReturnTypeGenerator {
             } else {
                 statues = ServiceGenerationUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
             }
-            returnNode = createReturnTypeDescriptorNode(returnKeyWord, annotations, statues);
+            returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), statues);
         } else if (responseContent != null) {
             // when the response has content values
             String responseCode = response.getKey().trim();
@@ -272,7 +272,7 @@ public class ReturnTypeGeneratorImpl extends ReturnTypeGenerator {
                     returnType = getReturnNodeForSchemaType(contentEntries.iterator().next(),
                             getNewRecordName(pathRecord));
                 }
-                returnNode = createReturnTypeDescriptorNode(returnKeyWord, annotations, returnType);
+                returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), returnType);
             } else if (response.getKey().trim().equals(GeneratorConstants.DEFAULT)) {
                 // handle status code with `default`, this maps to `http:Response`
                 BuiltinSimpleNameReferenceNode type = createBuiltinSimpleNameReferenceNode(null,
@@ -301,8 +301,10 @@ public class ReturnTypeGeneratorImpl extends ReturnTypeGenerator {
                     }
                 }
                 if (!type.toString().equals(HTTP_RESPONSE)) {
-                    SimpleNameReferenceNode recordType = TypeHandler.getInstance()
-                            .createStatusCodeTypeInclusionRecord(code, type);
+                    // todo : update this part
+                    SimpleNameReferenceNode recordType = null;
+//                    SimpleNameReferenceNode recordType = TypeHandler.getInstance()
+//                            .createStatusCodeTypeInclusionRecord(code, type);
                     NodeList<AnnotationNode> annotation = createEmptyNodeList();
                     returnNode = createReturnTypeDescriptorNode(returnKeyWord, annotation, recordType);
                 }

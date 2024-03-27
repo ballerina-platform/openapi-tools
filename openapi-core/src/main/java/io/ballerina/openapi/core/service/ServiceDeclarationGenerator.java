@@ -18,12 +18,7 @@
 
 package io.ballerina.openapi.core.service;
 
-import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
-import io.ballerina.compiler.syntax.tree.FunctionBodyBlockNode;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
-import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
@@ -31,13 +26,9 @@ import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
@@ -45,28 +36,12 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.core.generators.type.model.Filter;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
-import io.ballerina.openapi.core.service.parameter.ParametersGeneratorImpl;
-import io.ballerina.openapi.core.service.parameter.RequestBodyGeneratorImpl;
-import io.ballerina.openapi.core.service.response.ReturnTypeGenerator;
-import io.ballerina.openapi.core.service.response.ReturnTypeGeneratorFactory;
-import io.ballerina.openapi.core.service.response.ReturnTypeGeneratorImpl;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
-import io.swagger.v3.oas.models.parameters.RequestBody;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
@@ -74,16 +49,9 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionBodyBlockNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionDefinitionNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionSignatureNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.openapi.core.generators.type.GeneratorUtils.escapeIdentifier;
 
 /**
@@ -91,9 +59,9 @@ import static io.ballerina.openapi.core.generators.type.GeneratorUtils.escapeIde
  *
  * @since 1.3.0
  */
-public class ServiceGeneratorImpl extends ServiceGenerator {
+public class ServiceDeclarationGenerator extends ServiceGenerator {
 
-    public ServiceGeneratorImpl(OASServiceMetadata oasServiceMetadata) {
+    public ServiceDeclarationGenerator(OASServiceMetadata oasServiceMetadata) {
         super(oasServiceMetadata);
         GeneratorMetaData.createInstance(oasServiceMetadata.getOpenAPI(), oasServiceMetadata.isNullable());
     }
@@ -104,7 +72,7 @@ public class ServiceGeneratorImpl extends ServiceGenerator {
             // Create imports http and openapi
             NodeList<ImportDeclarationNode> imports = ServiceGenerationUtils.createImportDeclarationNodes();
             // Need to Generate Base path
-            ListenerGeneratorImpl listener = new ListenerGeneratorImpl();
+            ListenerGenerator listener = new ListenerGeneratorImpl();
             ListenerDeclarationNode listenerDeclarationNode = listener.getListenerDeclarationNodes(oasServiceMetadata.getOpenAPI().getServers());
             NodeList<Node> absoluteResourcePath = createBasePathNodeList(listener);
 
@@ -148,7 +116,7 @@ public class ServiceGeneratorImpl extends ServiceGenerator {
         }
     }
 
-    private NodeList<Node> createBasePathNodeList(ListenerGeneratorImpl listener) {
+    private NodeList<Node> createBasePathNodeList(ListenerGenerator listener) {
 
         if (GeneratorConstants.OAS_PATH_SEPARATOR.equals(listener.getBasePath())) {
             return createNodeList(createIdentifierToken(listener.getBasePath()));

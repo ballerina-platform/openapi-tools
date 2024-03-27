@@ -1,33 +1,20 @@
 package io.ballerina.openapi.core.service;
 
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.FunctionBodyBlockNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
-import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
-import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.compiler.syntax.tree.Token;
-import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.model.Filter;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.service.parameter.ParametersGeneratorImpl;
-import io.ballerina.openapi.core.service.parameter.RequestBodyGeneratorImpl;
-import io.ballerina.openapi.core.service.response.ReturnTypeGenerator;
-import io.ballerina.openapi.core.service.response.ReturnTypeGeneratorFactory;
+import io.ballerina.openapi.core.service.resource.ResourceGenerator;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -35,34 +22,23 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import io.swagger.v3.oas.models.parameters.RequestBody;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionBodyBlockNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionDefinitionNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionSignatureNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createResourcePathParameterNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SLASH_TOKEN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_FILE_HEADER;
@@ -86,21 +62,21 @@ public abstract class ServiceGenerator {
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         String mainContent;
         if (oasServiceMetadata.isGenerateOnlyServiceType()) {
-            ServiceObjectGenerator serviceObjectGenerator = new ServiceObjectGenerator(oasServiceMetadata);
-            serviceObjectGenerator.generateSyntaxTree();
-            String serviceType = Formatter.format(serviceObjectGenerator.generateSyntaxTree()).toSourceCode();
+            ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata);
+            serviceTypeGenerator.generateSyntaxTree();
+            String serviceType = Formatter.format(serviceTypeGenerator.generateSyntaxTree()).toSourceCode();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
                     "service_type.bal",
                     (oasServiceMetadata.getLicenseHeader().isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
                             oasServiceMetadata.getLicenseHeader()) + serviceType));
         } else {
-            ServiceObjectGenerator serviceObjectGenerator = new ServiceObjectGenerator(oasServiceMetadata);
-            String serviceType = Formatter.format(serviceObjectGenerator.generateSyntaxTree()).toSourceCode();
+            ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata);
+            String serviceType = Formatter.format(serviceTypeGenerator.generateSyntaxTree()).toSourceCode();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
                     "service_type.bal",
                     (oasServiceMetadata.getLicenseHeader().isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
                             oasServiceMetadata.getLicenseHeader()) + serviceType));
-            ServiceGeneratorImpl serviceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+            ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
             mainContent = Formatter.format(serviceGenerator.generateSyntaxTree()).toSourceCode();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
                     oasServiceMetadata.getSrcFile(),
@@ -138,6 +114,7 @@ public abstract class ServiceGenerator {
             List<String> filterTags = filter.getTags();
             List<String> operationTags = operation.getValue().getTags();
             List<String> filterOperations = filter.getOperations();
+            ResourceGenerator resourceGenerator = ResourceGenerator.createResourceGenerator(oasServiceMetadata);
             if (!filterTags.isEmpty() || !filterOperations.isEmpty()) {
                 if (operationTags != null || ((!filterOperations.isEmpty())
                         && (operation.getValue().getOperationId() != null))) {
@@ -148,177 +125,21 @@ public abstract class ServiceGenerator {
                         List<Node> functionRelativeResourcePath = getRelativeResourcePath(path,
                                 operation.getValue(), oasServiceMetadata.getOpenAPI().getComponents(),
                                 oasServiceMetadata.generateWithoutDataBinding());
-                        // function call
-
-                        FunctionDefinitionNode functionDefinitionNode = oasServiceMetadata.generateWithoutDataBinding() ?
-                                generateGenericResourceFunctions(operation, functionRelativeResourcePath, path) :
-                                getResourceFunction(operation, functionRelativeResourcePath, path);
-                        functions.add(functionDefinitionNode);
+                        FunctionDefinitionNode resourceFunction = resourceGenerator
+                                .generateResourceFunction(operation, functionRelativeResourcePath, path);
+                        functions.add(resourceFunction);
                     }
                 }
             } else {
                 // getRelative resource path
                 List<Node> relativeResourcePath = getRelativeResourcePath(path, operation.getValue(),
                         oasServiceMetadata.getOpenAPI().getComponents(), oasServiceMetadata.generateWithoutDataBinding());
-                // function call
-                FunctionDefinitionNode resourceFunction = oasServiceMetadata.generateWithoutDataBinding() ?
-                        generateGenericResourceFunctions(operation,
-                                relativeResourcePath, path) : getResourceFunction(operation,
-                        relativeResourcePath, path);
+                FunctionDefinitionNode resourceFunction = resourceGenerator
+                        .generateResourceFunction(operation, relativeResourcePath, path);
                 functions.add(resourceFunction);
             }
         }
         return functions;
-    }
-
-    private FunctionDefinitionNode generateGenericResourceFunctions(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                                    List<Node> pathNodes, String path) {
-        NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(GeneratorConstants.RESOURCE,
-                GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
-        Token functionKeyWord = createIdentifierToken(GeneratorConstants.FUNCTION, GeneratorUtils.SINGLE_WS_MINUTIAE,
-                GeneratorUtils.SINGLE_WS_MINUTIAE);
-        IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
-                .toLowerCase(Locale.ENGLISH), GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
-        NodeList<Node> relativeResourcePath = createNodeList(pathNodes);
-        List<Node> parameters = new ArrayList<>();
-        // create parameter `http:Caller caller`
-        BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken(GeneratorConstants.HTTP_CALLER));
-        IdentifierToken paramName = createIdentifierToken(GeneratorConstants.CALLER);
-        RequiredParameterNode httpCaller = createRequiredParameterNode(createEmptyNodeList(), typeName, paramName);
-        parameters.add(httpCaller);
-        // create parameter `http:Request request`
-        parameters.add(createToken(COMMA_TOKEN));
-        BuiltinSimpleNameReferenceNode typeNameRequest = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken(GeneratorConstants.HTTP_REQUEST));
-        IdentifierToken paramNameRequest = createIdentifierToken(GeneratorConstants.REQUEST);
-        RequiredParameterNode httpRequest = createRequiredParameterNode(createEmptyNodeList(), typeNameRequest,
-                paramNameRequest);
-        parameters.add(httpRequest);
-
-        SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(parameters);
-
-        ReturnTypeDescriptorNode returnTypeDescriptorNode =
-                createReturnTypeDescriptorNode(createToken(SyntaxKind.RETURNS_KEYWORD), createEmptyNodeList(),
-                        createSimpleNameReferenceNode(createIdentifierToken("error?")));
-
-        // create function signature
-        FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(createToken(
-                        SyntaxKind.OPEN_PAREN_TOKEN), parameterList, createToken(SyntaxKind.CLOSE_PAREN_TOKEN),
-                returnTypeDescriptorNode);
-        // create function body
-        FunctionBodyBlockNode functionBodyBlockNode = createFunctionBodyBlockNode(
-                createToken(SyntaxKind.OPEN_BRACE_TOKEN),
-                null, createEmptyNodeList(),
-                createToken(SyntaxKind.CLOSE_BRACE_TOKEN), null);
-
-        return createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, null,
-                qualifiersList, functionKeyWord, functionName, relativeResourcePath, functionSignatureNode,
-                functionBodyBlockNode);
-
-    }
-
-    /**
-     * Generate resource function for given operation.
-     *
-     * @param operation -  OAS operation
-     * @param pathNodes -  Relative path nodes
-     * @return - {@link FunctionDefinitionNode} relevant resource
-     * @throws OASTypeGenException when the process failure occur
-     */
-    private FunctionDefinitionNode getResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                       List<Node> pathNodes, String path) {
-
-        NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(GeneratorConstants.RESOURCE,
-                GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
-        Token functionKeyWord = createIdentifierToken(GeneratorConstants.FUNCTION, GeneratorUtils.SINGLE_WS_MINUTIAE,
-                GeneratorUtils.SINGLE_WS_MINUTIAE);
-        IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
-                .toLowerCase(Locale.ENGLISH), GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
-        NodeList<Node> relativeResourcePath = createNodeList(pathNodes);
-        ParametersGeneratorImpl parametersGenerator = new ParametersGeneratorImpl(false,
-                oasServiceMetadata.getOpenAPI());
-        try {
-            parametersGenerator.generateResourcesInputs(operation);
-        } catch (OASTypeGenException e) {
-            throw new RuntimeException();
-        }
-        List<Node> params = new ArrayList<>(parametersGenerator.getRequiredParams());
-
-        // Handle request Body (Payload)
-        if (operation.getValue().getRequestBody() != null) {
-            RequestBody requestBody = operation.getValue().getRequestBody();
-            requestBody = resolveRequestBodyReference(requestBody);
-            RequiredParameterNode nodeForRequestBody = null;
-            if (requestBody.getContent() != null) {
-                RequestBodyGeneratorImpl requestBodyGen = new RequestBodyGeneratorImpl(requestBody);
-                try {
-                    nodeForRequestBody = requestBodyGen.createRequestBodyNode();
-                } catch (OASTypeGenException e) {
-                    throw new RuntimeException(e);
-                }
-                params.add(nodeForRequestBody);
-                params.add(createToken(SyntaxKind.COMMA_TOKEN));
-            }
-        }
-
-        // For creating the order of the parameters in the function
-        if (!parametersGenerator.getDefaultableParams().isEmpty()) {
-            params.addAll(parametersGenerator.getDefaultableParams());
-        }
-        if (params.size() > 1) {
-            params.remove(params.size() - 1);
-        }
-
-//        if (!oasServiceMetadata.isNullable()) {
-//            isNullableRequired = parametersGenerator.isNullableRequired();
-//        }
-        SeparatedNodeList<ParameterNode> parameters = createSeparatedNodeList(params);
-        String pathForRecord = Objects.equals(path, GeneratorConstants.SLASH) || Objects.equals(path, GeneratorConstants.CATCH_ALL_PATH) ? "" :
-                getValidName(path, true);
-        ReturnTypeGenerator returnTypeGenerator = ReturnTypeGeneratorFactory.getReturnTypeGenerator(false,
-                pathForRecord, oasServiceMetadata.getOpenAPI());
-        ReturnTypeDescriptorNode returnNode = null;
-        try {
-            returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation,
-                    createEmptyNodeList(), path);
-        } catch (OASTypeGenException e) {
-            throw new RuntimeException(e);
-        }
-
-        FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(
-                createToken(SyntaxKind.OPEN_PAREN_TOKEN),
-                parameters, createToken(SyntaxKind.CLOSE_PAREN_TOKEN), returnNode);
-
-        // Function Body Node
-        // If path parameter has some special characters, extra body statements are added to handle the complexity.
-        List<StatementNode> bodyStatements = GeneratorUtils.generateBodyStatementForComplexUrl(path);
-        FunctionBodyBlockNode functionBodyBlockNode = createFunctionBodyBlockNode(
-                createToken(SyntaxKind.OPEN_BRACE_TOKEN),
-                null,
-                bodyStatements.isEmpty() ?
-                        createEmptyNodeList() :
-                        createNodeList(bodyStatements),
-                createToken(SyntaxKind.CLOSE_BRACE_TOKEN), null);
-        return createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, null,
-                qualifiersList, functionKeyWord, functionName, relativeResourcePath, functionSignatureNode,
-                functionBodyBlockNode);
-    }
-
-    /**
-     * Resolve requestBody reference.
-     */
-    private RequestBody resolveRequestBodyReference(RequestBody requestBody) {
-        if (requestBody.get$ref() != null) {
-            try {
-                String requestBodyName = GeneratorUtils.extractReferenceType(requestBody.get$ref());
-                requestBody = resolveRequestBodyReference(oasServiceMetadata.getOpenAPI().getComponents()
-                        .getRequestBodies().get(requestBodyName.trim()));
-            } catch (OASTypeGenException e) {
-                throw new RuntimeException();
-            }
-        }
-        return requestBody;
     }
 
     /**
@@ -401,11 +222,12 @@ public abstract class ServiceGenerator {
                         throw new RuntimeException(e);
                     }
                     Schema<?> schema = GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(paramType);
-                    try {
-                        TypeHandler.getInstance().generateTypeDescriptorForOASSchema(schema, paramType);
-                    } catch (OASTypeGenException e) {
-                        throw new RuntimeException(e);
-                    }
+                    // todo : update this part
+//                    try {
+//                        TypeHandler.getInstance().generateTypeDescriptorForOASSchema(schema, paramType);
+//                    } catch (OASTypeGenException e) {
+//                        throw new RuntimeException(e);
+//                    }
                 } else {
                     paramType = getPathParameterType(parameter.getSchema(), pathParam);
                     if (paramType.endsWith(GeneratorConstants.NILLABLE)) {

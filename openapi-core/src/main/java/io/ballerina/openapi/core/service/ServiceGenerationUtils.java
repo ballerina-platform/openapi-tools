@@ -148,25 +148,27 @@ public class ServiceGenerationUtils {
             Map.Entry<String, MediaType> mediaType, String recordName) throws OASTypeGenException {
         String mediaTypeContent = selectMediaType(mediaType.getKey().trim());
         Schema<?> schema = mediaType.getValue().getSchema();
-        switch (mediaTypeContent) {
-            case GeneratorConstants.APPLICATION_JSON:
-                TypeDescriptorNode typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForJsonContent(schema, recordName);
-                return typeDescriptorNode;
-            case GeneratorConstants.APPLICATION_XML:
-                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForXMLContent();
-                return typeDescriptorNode;
-            case GeneratorConstants.APPLICATION_URL_ENCODE:
-                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForMapStringContent();
-                return typeDescriptorNode;
-            case GeneratorConstants.TEXT:
-                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForTextContent(GeneratorConstants.STRING);
-                return typeDescriptorNode;
-            case GeneratorConstants.APPLICATION_OCTET_STREAM:
-                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForOctetStreamContent();
-                return typeDescriptorNode;
-            default:
-                return null;
-        }
+        // todo : update this part
+        return null;
+//        switch (mediaTypeContent) {
+//            case GeneratorConstants.APPLICATION_JSON:
+//                TypeDescriptorNode typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForJsonContent(schema, recordName);
+//                return typeDescriptorNode;
+//            case GeneratorConstants.APPLICATION_XML:
+//                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForXMLContent();
+//                return typeDescriptorNode;
+//            case GeneratorConstants.APPLICATION_URL_ENCODE:
+//                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForMapStringContent();
+//                return typeDescriptorNode;
+//            case GeneratorConstants.TEXT:
+//                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForTextContent(GeneratorConstants.STRING);
+//                return typeDescriptorNode;
+//            case GeneratorConstants.APPLICATION_OCTET_STREAM:
+//                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForOctetStreamContent();
+//                return typeDescriptorNode;
+//            default:
+//                return null;
+//        }
     }
 
     /**

@@ -31,8 +31,8 @@ import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.ServiceGenerator;
-import io.ballerina.openapi.core.service.ServiceGeneratorImpl;
-import io.ballerina.openapi.core.service.ServiceObjectGenerator;
+import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
+import io.ballerina.openapi.core.service.ServiceTypeGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
@@ -162,16 +162,16 @@ public class BallerinaCodeGenerator {
                     .withGenerateServiceType(generateServiceType)
                     .withGenerateWithoutDataBinding(generateWithoutDataBinding)
                     .build();
-            ServiceGeneratorImpl serviceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+            ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
             serviceContent = Formatter.format
                     (serviceGenerator.generateSyntaxTree()).toSourceCode();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile,
                     (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + serviceContent));
 
             if (generateServiceType) {
-                ServiceObjectGenerator ballerinaServiceObjectGenerator = new
-                        ServiceObjectGenerator(oasServiceMetadata);
-                String serviceType = Formatter.format(ballerinaServiceObjectGenerator.generateSyntaxTree()).
+                ServiceTypeGenerator ballerinaServiceTypeGenerator = new
+                        ServiceTypeGenerator(oasServiceMetadata);
+                String serviceType = Formatter.format(ballerinaServiceTypeGenerator.generateSyntaxTree()).
                         toSourceCode();
                 sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
                         "service_type.bal", (licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER :

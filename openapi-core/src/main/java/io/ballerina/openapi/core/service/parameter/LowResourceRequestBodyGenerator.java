@@ -24,8 +24,8 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.openapi.core.service.GeneratorConstants;
@@ -48,10 +48,10 @@ import static io.ballerina.openapi.core.generators.type.GeneratorUtils.extractRe
  *
  * @since 1.3.0
  */
-public class RequestBodyGeneratorImpl implements RequestBodyGenerator {
+public class LowResourceRequestBodyGenerator implements RequestBodyGenerator {
     private final RequestBody requestBody;
 
-    public RequestBodyGeneratorImpl(RequestBody requestBody) {
+    public LowResourceRequestBodyGenerator(RequestBody requestBody) {
         this.requestBody = requestBody;
     }
 
@@ -104,26 +104,29 @@ public class RequestBodyGeneratorImpl implements RequestBodyGenerator {
             String reference = mediaType.getValue().getSchema().get$ref();
             String schemaName = GeneratorUtils.getValidName(extractReferenceType(reference), true);
             String mediaTypeContent = selectMediaType(mediaType.getKey().trim());
-            switch (mediaTypeContent) {
-                case GeneratorConstants.APPLICATION_XML:
-                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForXMLContent());
-                    break;
-                case GeneratorConstants.TEXT:
-                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForTextContent(schemaName));
-                    break;
-                case GeneratorConstants.APPLICATION_OCTET_STREAM:
-                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForOctetStreamContent());
-                    break;
-                case GeneratorConstants.APPLICATION_JSON:
-                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForJsonContent(GeneratorMetaData.getInstance()
-                            .getOpenAPI().getComponents().getSchemas().get(schemaName), schemaName));
-                    break;
-                case GeneratorConstants.APPLICATION_URL_ENCODE:
-                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForMapStringContent());
-                    break;
-                default:
-                    typeName = Optional.of(createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_REQUEST)));
-            }
+
+            // todo : update this part
+            typeName = null;
+//            switch (mediaTypeContent) {
+//                case GeneratorConstants.APPLICATION_XML:
+//                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForXMLContent());
+//                    break;
+//                case GeneratorConstants.TEXT:
+//                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForTextContent(schemaName));
+//                    break;
+//                case GeneratorConstants.APPLICATION_OCTET_STREAM:
+//                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForOctetStreamContent());
+//                    break;
+//                case GeneratorConstants.APPLICATION_JSON:
+//                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForJsonContent(GeneratorMetaData.getInstance()
+//                            .getOpenAPI().getComponents().getSchemas().get(schemaName), schemaName));
+//                    break;
+//                case GeneratorConstants.APPLICATION_URL_ENCODE:
+//                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForMapStringContent());
+//                    break;
+//                default:
+//                    typeName = Optional.of(createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_REQUEST)));
+//            }
         } else {
             typeName = Optional.of(ServiceGenerationUtils.generateTypeDescriptorForMediaTypes(mediaType, null));
         }

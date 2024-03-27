@@ -18,7 +18,7 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.service.ServiceGeneratorImpl;
+import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
@@ -65,7 +65,7 @@ public class HeaderTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         final SyntaxTree syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(balPath, syntaxTree);
     }

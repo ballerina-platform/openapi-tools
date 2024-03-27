@@ -18,7 +18,7 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.service.ServiceGeneratorImpl;
+import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
@@ -50,7 +50,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_01.bal", syntaxTree);
     }
@@ -65,7 +65,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header.bal", syntaxTree);
     }
@@ -78,7 +78,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_03.bal", syntaxTree);
     }
@@ -94,7 +94,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header.bal", syntaxTree);
     }
@@ -107,7 +107,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_05.bal", syntaxTree);
     }
@@ -120,7 +120,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_06.bal", syntaxTree);
     }
@@ -133,7 +133,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_07.bal", syntaxTree);
     }
@@ -146,7 +146,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_08.bal", syntaxTree);
     }
@@ -159,7 +159,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_09.bal", syntaxTree);
     }
@@ -172,7 +172,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_10.bal", syntaxTree);
     }
@@ -185,7 +185,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_11.bal", syntaxTree);
     }
@@ -198,7 +198,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_12.bal", syntaxTree);
     }
@@ -211,7 +211,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "headers/header_with_reference.bal", syntaxTree);
@@ -228,7 +228,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
     }
 
@@ -243,7 +243,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
     }
 
@@ -258,7 +258,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
     }
 
@@ -273,7 +273,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
     }
 
@@ -288,7 +288,7 @@ public class HeaderParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        ServiceGeneratorImpl ballerinaServiceGenerator = new ServiceGeneratorImpl(oasServiceMetadata);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
     }
 }

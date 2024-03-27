@@ -78,7 +78,7 @@ public class ListenerGeneratorImpl implements ListenerGenerator {
             ServerVariables variables = server.getVariables();
             URL url;
             try {
-                String resolvedUrl = buildUrl(server.getUrl(), variables);
+                String resolvedUrl = io.ballerina.openapi.core.generators.common.GeneratorUtils.buildUrl(server.getUrl(), variables);
                 url = new URL(resolvedUrl);
                 host = url.getHost();
                 if (!url.getPath().isBlank()) {
@@ -100,7 +100,7 @@ public class ListenerGeneratorImpl implements ListenerGenerator {
         return getListenerDeclarationNode(port, host, "ep0");
     }
 
-    private static ListenerDeclarationNode getListenerDeclarationNode(Integer port, String host, String ep) {
+    private ListenerDeclarationNode getListenerDeclarationNode(Integer port, String host, String ep) {
         // Take first server to Map
         Token listenerKeyword = AbstractNodeFactory.createIdentifierToken("listener", GeneratorUtils.SINGLE_WS_MINUTIAE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
@@ -154,25 +154,5 @@ public class ListenerGeneratorImpl implements ListenerGenerator {
         return NodeFactory.createListenerDeclarationNode(null, null, listenerKeyword,
                 typeDescriptor, variableName, AbstractNodeFactory.createToken(SyntaxKind.EQUAL_TOKEN), initializer,
                 AbstractNodeFactory.createToken(SyntaxKind.SEMICOLON_TOKEN));
-    }
-
-    /**
-     * If there are template values in the {@code absUrl} derive resolved url using {@code variables}.
-     *
-     * @param absUrl    abstract url with template values
-     * @param variables variable values to populate the url template
-     * @return resolved url
-     */
-    private String buildUrl(String absUrl, ServerVariables variables) {
-
-        String url = absUrl;
-        if (variables != null) {
-            for (Map.Entry<String, ServerVariable> entry : variables.entrySet()) {
-                // According to the oas spec, default value must be specified
-                String replaceKey = "\\{" + entry.getKey() + '}';
-                url = url.replaceAll(replaceKey, entry.getValue().getDefault());
-            }
-        }
-        return url;
     }
 }
