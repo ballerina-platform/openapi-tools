@@ -30,11 +30,16 @@ import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -129,5 +134,59 @@ public class ServiceGenerationUtils {
         Token colon = AbstractNodeFactory.createIdentifierToken(":");
         IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier);
         return NodeFactory.createQualifiedNameReferenceNode(modulePrefixToken, colon, identifierToken);
+    }
+
+    /**
+     * Generate TypeDescriptor for all the mediaTypes.
+     *
+     * Here return the @code{ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode>} for return type.
+     * Left node(key) of the return tuple represents the return type node for given mediaType details, Right Node
+     * (Value) of the return tuple represents the newly generated TypeDefinitionNode for return type if it has inline
+     * objects.
+     */
+    public static TypeDescriptorNode generateTypeDescriptorForMediaTypes(
+            Map.Entry<String, MediaType> mediaType, String recordName) throws OASTypeGenException {
+        String mediaTypeContent = selectMediaType(mediaType.getKey().trim());
+        Schema<?> schema = mediaType.getValue().getSchema();
+        // todo : update this part
+        return null;
+//        switch (mediaTypeContent) {
+//            case GeneratorConstants.APPLICATION_JSON:
+//                TypeDescriptorNode typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForJsonContent(schema, recordName);
+//                return typeDescriptorNode;
+//            case GeneratorConstants.APPLICATION_XML:
+//                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForXMLContent();
+//                return typeDescriptorNode;
+//            case GeneratorConstants.APPLICATION_URL_ENCODE:
+//                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForMapStringContent();
+//                return typeDescriptorNode;
+//            case GeneratorConstants.TEXT:
+//                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForTextContent(GeneratorConstants.STRING);
+//                return typeDescriptorNode;
+//            case GeneratorConstants.APPLICATION_OCTET_STREAM:
+//                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForOctetStreamContent();
+//                return typeDescriptorNode;
+//            default:
+//                return null;
+//        }
+    }
+
+    /**
+     *
+     * This util is used for selecting standard media type by looking at the user defined media type.
+     */
+    private static String selectMediaType(String mediaTypeContent) {
+        if (mediaTypeContent.matches("application/.*\\+json") || mediaTypeContent.matches(".*/json")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_JSON;
+        } else if (mediaTypeContent.matches("application/.*\\+xml") || mediaTypeContent.matches(".*/xml")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_XML;
+        } else if (mediaTypeContent.matches("text/.*")) {
+            mediaTypeContent = GeneratorConstants.TEXT;
+        }  else if (mediaTypeContent.matches("application/.*\\+octet-stream")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_OCTET_STREAM;
+        } else if (mediaTypeContent.matches("application/.*\\+x-www-form-urlencoded")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_URL_ENCODE;
+        }
+        return mediaTypeContent;
     }
 }

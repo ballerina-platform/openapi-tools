@@ -847,8 +847,7 @@ public class GeneratorUtils {
         return type;
     }
 
-    private static String getPathParameterType(Schema<?> typeSchema, String pathParam)
-            throws OASTypeGenException {
+    public static String getPathParameterType(Schema<?> typeSchema, String pathParam) {
         String type;
         if (!(isStringSchema(typeSchema) || isNumberSchema(typeSchema) || isBooleanSchema(typeSchema)
                 || isIntegerSchema(typeSchema))) {
@@ -856,7 +855,11 @@ public class GeneratorUtils {
             LOGGER.warn("unsupported path parameter type found in the parameter `" + pathParam + "`. hence the " +
                     "parameter type is set to string.");
         } else {
-            type = GeneratorUtils.convertOpenAPITypeToBallerina(typeSchema);
+            try {
+                type = GeneratorUtils.convertOpenAPITypeToBallerina(typeSchema);
+            } catch (OASTypeGenException e) {
+                throw new RuntimeException();
+            }
         }
         return type;
     }

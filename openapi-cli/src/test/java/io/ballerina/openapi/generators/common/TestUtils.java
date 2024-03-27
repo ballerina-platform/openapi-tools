@@ -27,7 +27,7 @@ import io.ballerina.openapi.core.generators.constraint.ConstraintGenerator;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.core.service.BallerinaServiceGenerator;
+import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.projects.DocumentId;
@@ -107,7 +107,8 @@ public class TestUtils {
     static int i = 0;
 
     public static List<Diagnostic> getDiagnosticsForService(SyntaxTree serviceSyntaxTree, OpenAPI openAPI,
-                                                            BallerinaServiceGenerator ballerinaServiceGenerator, String yamlFile)
+                                                            ServiceDeclarationGenerator ballerinaServiceGenerator,
+                                                            String yamlFile)
             throws FormatterException, IOException,
             OASTypeGenException {
 //        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(

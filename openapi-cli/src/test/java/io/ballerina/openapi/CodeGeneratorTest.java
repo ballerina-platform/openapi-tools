@@ -19,9 +19,9 @@ import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.serviceOld.ServiceGenerationUtils;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
+import io.ballerina.openapi.core.generators.serviceOld.ServiceGenerationUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.generators.common.TestUtils;
 import org.apache.commons.io.FileUtils;
@@ -133,7 +133,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException| FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -487,7 +487,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException| FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -672,7 +672,8 @@ public class CodeGeneratorTest {
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Provided OpenAPI contract version is not supported in the tool. " +
                     "Use OpenAPI specification version 2 or higher")
-    public void testGenerationForUnsupportedOpenAPIVersion() throws IOException, BallerinaOpenApiException, OASTypeGenException,
+    public void testGenerationForUnsupportedOpenAPIVersion() throws IOException, BallerinaOpenApiException,
+            OASTypeGenException,
     FormatterException {
         String definitionPath = RES_DIR.resolve("petstore_swagger_1.2.json").toString();
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
