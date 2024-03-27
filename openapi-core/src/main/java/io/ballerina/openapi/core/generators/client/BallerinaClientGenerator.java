@@ -262,8 +262,7 @@ public class BallerinaClientGenerator {
         } else {
             functionDefinitionNodeList.addAll(createRemoteFunctions(filteredOperations));
         }
-
-        memberNodeList.addAll(createRemoteFunctions(openAPI.getPaths(), filter));
+        memberNodeList.addAll(functionDefinitionNodeList);
         // Generate the class combining members
         MetadataNode metadataNode = getClassMetadataNode();
         IdentifierToken className = createIdentifierToken(GeneratorConstants.CLIENT_CLASS);
@@ -427,7 +426,7 @@ public class BallerinaClientGenerator {
      * @return {@link FunctionSignatureNode}
      * @throws BallerinaOpenApiException When invalid server URL is provided
      */
-    private FunctionSignatureNode getInitFunctionSignatureNode() throws BallerinaOpenApiException {
+    private FunctionSignatureNode getInitFunctionSignatureNode() {
         List<ParameterNode> parameterNodes  = new ArrayList<>();
         ServerURLGeneratorImp serverURLGeneratorImp = new ServerURLGeneratorImp(openAPI.getServers(), diagnostics);
         ParameterNode serverURLNode = serverURLGeneratorImp.generateServerURL();
@@ -539,56 +538,6 @@ public class BallerinaClientGenerator {
         return fieldNodeList;
     }
 
-    /**
-     * Generate remote functions for OpenAPI operations.
-     *
-     * @param paths  openAPI Paths
-     * @param filter user given tags and operations
-     * @return FunctionDefinitionNodes list
-     * @throws BallerinaOpenApiException - throws when creating remote functions fails
-     */
-    private List<FunctionDefinitionNode> createRemoteFunctions(Paths paths, Filter filter)
-            throws BallerinaOpenApiException {
-
-        List<String> filterTags = filter.getTags();
-        List<String> filterOperations = filter.getOperations();
-        List<FunctionDefinitionNode> functionDefinitionNodeList = new ArrayList<>();
-        Set<Map.Entry<String, PathItem>> pathsItems = paths.entrySet();
-        for (Map.Entry<String, PathItem> path : pathsItems) {
-            if (!path.getValue().readOperationsMap().isEmpty()) {
-                Map<PathItem.HttpMethod, Operation> operationMap = path.getValue().readOperationsMap();
-                for (Map.Entry<PathItem.HttpMethod, Operation> operation : operationMap.entrySet()) {
-                    // create display annotation of the operation
-                    List<AnnotationNode> functionLevelAnnotationNodes = new ArrayList<>();
-                    if (operation.getValue().getExtensions() != null) {
-                        Map<String, Object> extensions = operation.getValue().getExtensions();
-                        DocCommentsGenerator.extractDisplayAnnotation(extensions, functionLevelAnnotationNodes);
-                    }
-                    List<String> operationTags = operation.getValue().getTags();
-                    String operationId = operation.getValue().getOperationId();
-                    if (!filterTags.isEmpty() || !filterOperations.isEmpty()) {
-                        // Generate remote function only if it is available in tag filter or operation filter or both
-                        if (operationTags != null || ((!filterOperations.isEmpty()) && (operationId != null))) {
-                            if (isaFilteredOperation(filterTags, filterOperations, operationTags, operationId)) {
-                                // Generate remote function
-                                FunctionDefinitionNode functionDefinitionNode =
-                                        getClientMethodFunctionDefinitionNode(
-                                                functionLevelAnnotationNodes, path.getKey(), operation);
-                                functionDefinitionNodeList.add(functionDefinitionNode);
-                            }
-                        }
-                    } else {
-                        // Generate remote function
-                        FunctionDefinitionNode functionDefinitionNode = getClientMethodFunctionDefinitionNode(
-                                functionLevelAnnotationNodes, path.getKey(), operation);
-                        functionDefinitionNodeList.add(functionDefinitionNode);
-                    }
-                }
-            }
-        }
-        return functionDefinitionNodeList;
-    }
-
     private static boolean isaFilteredOperation(List<String> filterTags, List<String> filterOperations,
                                                 List<String> operationTags, String operationId) {
         return (operationTags != null && GeneratorUtils.hasTags(operationTags, filterTags)) ||
@@ -626,85 +575,7 @@ public class BallerinaClientGenerator {
         return resourceFunctionNodes;
     }
 
-    /**
-     * Generate function definition node.
-     * <pre>
-     *     remote isolated function pathParameter(int 'version, string name) returns string|error {
-     *          string  path = string `/v1/${'version}/v2/${name}`;
-     *          string response = check self.clientEp-> get(path);
-     *          return response;
-     *    }
-     *    or
-     *     resource isolated function get v1/[string 'version]/v2/[sting name]() returns string|error {
-     *         string  path = string `/v1/${'version}/v2/${name}`;
-     *         string response = check self.clientEp-> get(path);
-     *         return response;
-     *     }
-     * </pre>
-     */
-    private FunctionDefinitionNode getClientMethodFunctionDefinitionNode(List<AnnotationNode> annotationNodes,
-                                                                         String path,
-                                                                         Map.Entry<PathItem.HttpMethod, Operation>
-                                                                                 operation)
-            throws BallerinaOpenApiException {
-        // Create api doc for function
-        List<Node> remoteFunctionDocs = new ArrayList<>();
-        if (operation.getValue().getSummary() != null) {
-            remoteFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
-                    operation.getValue().getSummary(), true));
-        } else if (operation.getValue().getDescription() != null && !operation.getValue().getDescription().isBlank()) {
-            remoteFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
-                    operation.getValue().getDescription(), true));
-        } else {
-            MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(null,
-                    createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
-            remoteFunctionDocs.add(newLine);
-        }
 
-        //Create qualifier list
-        NodeList<Token> qualifierList = createNodeList(createToken(
-                        resourceMode ?
-                                RESOURCE_KEYWORD :
-                                REMOTE_KEYWORD),
-                createToken(ISOLATED_KEYWORD));
-        Token functionKeyWord = createToken(FUNCTION_KEYWORD);
-        IdentifierToken functionName = createIdentifierToken(
-                resourceMode ?
-                        operation.getKey().name().toLowerCase(Locale.ENGLISH) :
-                        operation.getValue().getOperationId());
-
-        remoteFunctionNameList.add(operation.getValue().getOperationId());
-
-//        FunctionSignatureGeneratorImp functionSignatureGenerator = new FunctionSignatureGeneratorImp(openAPI,
-//                balTypeGenerator, typeDefinitionNodeList, resourceMode);
-//        FunctionSignatureNode functionSignatureNode =
-//                functionSignatureGenerator.getFunctionSignatureNode(operation.getValue(),
-//                        remoteFunctionDocs);
-//        typeDefinitionNodeList = functionSignatureGenerator.getTypeDefinitionNodeList();
-        // Create `Deprecated` annotation if an operation has mentioned as `deprecated:true`
-        if (operation.getValue().getDeprecated() != null && operation.getValue().getDeprecated()) {
-            DocCommentsGenerator.extractDeprecatedAnnotation(operation.getValue().getExtensions(),
-                    remoteFunctionDocs, annotationNodes);
-        }
-        // Create metadataNode add documentation string
-        MetadataNode metadataNode = createMetadataNode(createMarkdownDocumentationNode(
-                createNodeList(remoteFunctionDocs)), createNodeList(annotationNodes));
-
-        // Create Function Body
-        FunctionBodyGeneratorImp functionBodyGeneratorImp = new FunctionBodyGeneratorImp(imports, typeDefinitionNodeList,
-                openAPI, balTypeGenerator, authConfigGeneratorImp, ballerinaUtilGenerator, resourceMode);
-        FunctionBodyNode functionBodyNode = functionBodyGeneratorImp.getFunctionBodyNode(path, operation);
-        imports = functionBodyGeneratorImp.getImports();
-
-        //Generate relative path
-        NodeList<Node> relativeResourcePath = resourceMode ?
-                createNodeList(GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
-                        null, openAPI.getComponents(), false)) :
-                createEmptyNodeList();
-        return createFunctionDefinitionNode(null,
-                metadataNode, qualifierList, functionKeyWord, functionName, relativeResourcePath,
-                functionSignatureNode, functionBodyNode);
-    }
 
     /**
      * Return auth type to generate test file.

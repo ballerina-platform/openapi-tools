@@ -188,7 +188,7 @@ public class FunctionBodyGeneratorImp {
 
         String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
         // This return type for target data type binding.
-        String rType = functionReturnType.getReturnType(operation.getValue(), true).toString();
+        String rType = functionReturnType.getReturnType().toString();
         String returnType = returnTypeForTargetTypeField(rType);
         // Statement Generator for requestBody
         if (operation.getValue().getRequestBody() != null) {
