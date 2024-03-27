@@ -51,4 +51,8 @@ public class BaseCmd {
             " with provided type . Only \"resource\"(default) and \"remote\" options are supported.")
     public String generateClientMethods;
 
+
+    @CommandLine.Option(names = {"--with-status-code-binding"}, description = "Generate the client methods with " +
+            "status code responsebinding")
+    public boolean statusCodeBinding;
 }

@@ -181,7 +181,8 @@ public class Add implements BLauncherCmd {
                 .withNullable(baseCmd.nullable)
                 .withOperations(getOperations())
                 .withTags(getTags())
-                .withLicensePath(baseCmd.licenseFilePath).build();
+                .withLicensePath(baseCmd.licenseFilePath)
+                .withStatusCodeBinding(baseCmd.statusCodeBinding).build();
     }
 
     /**
