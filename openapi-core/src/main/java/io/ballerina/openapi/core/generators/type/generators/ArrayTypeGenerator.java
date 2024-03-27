@@ -198,7 +198,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         HashMap<String, TypeDefinitionNode> subtypesMap = new HashMap<>();
         ArrayTypeDescriptorNode typeDescriptorNode =
                 getArrayTypeDescriptorNode(GeneratorMetaData.getInstance().getOpenAPI(), items, subtypesMap, new HashMap<>());
-        return new TypeGeneratorResult(Optional.of(typeDescriptorNode), subtypesMap);
+        return new TypeGeneratorResult(Optional.of(typeDescriptorNode), subtypesMap, new ArrayList<>());
     }
 
     private static ArrayTypeDescriptorNode getArrayTypeDescriptorNode(OpenAPI openAPI, Schema<?> items, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) throws OASTypeGenException {

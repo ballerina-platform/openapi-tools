@@ -21,6 +21,8 @@ package io.ballerina.openapi.generators.client;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.FunctionReturnTypeGenerator;
 import io.ballerina.openapi.core.generators.schemaOld.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.client.FunctionReturnTypeGeneratorImp;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -43,7 +45,7 @@ public class OneOfResponsesTests {
     public void getReturnTypeOneOfArray() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/inline_oneOf_response.yaml"));
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
-        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(response,
                 ballerinaSchemaGenerator,  new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/pet").getGet(),
                 true), "Inline_response_2XX|error");
@@ -53,7 +55,7 @@ public class OneOfResponsesTests {
     public void getReturnTypeOneOfArrayInTargetType() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/inline_oneOf_response.yaml"));
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
-        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(response,
                 ballerinaSchemaGenerator, new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/pet").getGet(),
                 false), "Inline_response_2XX|error");

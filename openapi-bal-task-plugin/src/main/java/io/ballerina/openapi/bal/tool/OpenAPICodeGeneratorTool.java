@@ -19,10 +19,12 @@ package io.ballerina.openapi.bal.tool;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
+import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.buildtools.CodeGeneratorTool;
@@ -309,12 +311,12 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 .append(clientConfig.isResourceMode())
                 .append(clientConfig.getLicense())
                 .append(clientConfig.isNullable());
-        List<String> tags = clientConfig.getFilters().getTags();
+        List<String> tags = clientConfig.getFilter().getTags();
         tags.sort(String.CASE_INSENSITIVE_ORDER);
         for (String str : tags) {
             summaryOfCodegen.append(str);
         }
-        List<String> operations = clientConfig.getFilters().getOperations();
+        List<String> operations = clientConfig.getFilter().getOperations();
         operations.sort(String.CASE_INSENSITIVE_ORDER);
         for (String str : operations) {
             summaryOfCodegen.append(str);
@@ -351,7 +353,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
 
-        if (oasClientConfig.getFilters().getTags().isEmpty()) {
+        if (oasClientConfig.getFilter().getTags().isEmpty()) {
             // Remove unused records and enums when generating the client by the tags given.
             schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent,
                     null);

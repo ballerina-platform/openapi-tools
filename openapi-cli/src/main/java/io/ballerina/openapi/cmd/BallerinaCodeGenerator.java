@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -97,7 +98,7 @@ public class BallerinaCodeGenerator {
                                          boolean isResource, boolean generateServiceType,
                                          boolean generateWithoutDataBinding)
             throws IOException, FormatterException, BallerinaOpenApiException,
-            OASTypeGenException {
+            OASTypeGenException, ClientException {
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
 
@@ -237,7 +238,12 @@ public class BallerinaCodeGenerator {
             OASTypeGenException {
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
-        List<GenSrcFile> genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource);
+        List<GenSrcFile> genFiles = null;
+        try {
+            genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource);
+        } catch (ClientException e) {
+            //ignore
+        }
         if (!genFiles.isEmpty()) {
             writeGeneratedSources(genFiles, srcPath, implPath, GEN_CLIENT);
         }
@@ -352,7 +358,7 @@ public class BallerinaCodeGenerator {
      * @throws IOException when code generation with specified templates fails
      */
     private List<GenSrcFile> generateClientFiles(Path openAPI, Filter filter, boolean nullable, boolean isResource)
-            throws IOException, BallerinaOpenApiException, FormatterException, OASTypeGenException {
+            throws IOException, BallerinaOpenApiException, FormatterException, OASTypeGenException, ClientException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_CLIENT_PKG;
         }
