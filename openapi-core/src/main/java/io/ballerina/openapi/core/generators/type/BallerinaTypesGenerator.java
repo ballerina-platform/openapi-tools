@@ -114,13 +114,14 @@ public class BallerinaTypesGenerator {
         }
 
         if (schema.get$ref() != null) {
-            String schemaName = GeneratorUtils.getValidName(GeneratorUtils.extractReferenceType(schema.get$ref()), true);
-            String typeName = GeneratorUtils.escapeIdentifier(schemaName);
+            String schemaName = GeneratorUtils.extractReferenceType(schema.get$ref());
+            String recordName = GeneratorUtils.getValidName(schemaName, true);
+            String typeName = GeneratorUtils.escapeIdentifier(recordName);
             if (!pregeneratedTypeMap.containsKey(typeName)) {
                 pregeneratedTypeMap.put(typeName, getSimpleNameReferenceNode(typeName));
                 TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(GeneratorMetaData.getInstance()
                         .getOpenAPI().getComponents().getSchemas().get(schemaName), GeneratorUtils.getValidName(
-                        schemaName.trim(), true), null, subTypesMap, pregeneratedTypeMap);
+                        recordName.trim(), true), null, subTypesMap, pregeneratedTypeMap);
                 TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
                 TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
                         createToken(PUBLIC_KEYWORD),
@@ -151,6 +152,10 @@ public class BallerinaTypesGenerator {
 //                        GeneratorUtils.convertOpenAPITypeToBallerina(schema),
 //                        AbstractNodeFactory.createEmptyMinutiaeList(), GeneratorUtils.SINGLE_WS_MINUTIAE);
 //                return Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
+            } else if (schemaType.equals(GeneratorConstants.OBJECT) || GeneratorUtils.isObjectSchema(schema)) {
+                RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null,
+                        subTypesMap, pregeneratedTypeMap);
+                return Optional.ofNullable(recordTypeGenerator.generateTypeDescriptorNode());
             } else {
                 return Optional.empty();
             }

@@ -19,7 +19,9 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
@@ -61,10 +63,11 @@ public class EnumGenerationTests {
             "Use case 04 : Enum in reusable parameter" +
             "Use case 05 : Enum in parameter with referenced schema")
     public void generateRemoteParametersWithEnums() throws IOException, BallerinaOpenApiException, OASTypeGenException,
-            FormatterException {
+            FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_enum.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/parameters_with_enum.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
@@ -84,7 +87,7 @@ public class EnumGenerationTests {
             "Use case 04 : Nullable enum in reusable parameter" +
             "Use case 05 : Nullable enum in parameter with referenced schema")
     public void generateRemoteParametersWithNullableEnums() throws IOException, BallerinaOpenApiException, OASTypeGenException,
-            FormatterException {
+            FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_nullable_enums.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/parameters_with_nullable_enums.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -107,7 +110,7 @@ public class EnumGenerationTests {
             "Use case 04 : Enum in reusable parameter" +
             "Use case 05 : Enum in parameter with referenced schema")
     public void generateResourceParametersWithEnums() throws IOException, BallerinaOpenApiException, OASTypeGenException,
-            FormatterException {
+            FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_enum.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/paramters_with_enum_resource.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -130,7 +133,7 @@ public class EnumGenerationTests {
             "Use case 04 : Nullable enum in reusable parameter" +
             "Use case 05 : Nullable enum in parameter with referenced schema")
     public void generateResourceParametersWithNullableEnums() throws IOException, BallerinaOpenApiException, OASTypeGenException,
-            FormatterException {
+            FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_nullable_enums.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/parameters_with_nullable_enums_resource.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -149,7 +152,7 @@ public class EnumGenerationTests {
     @Test(description = "Test unsupported nullable path parameter with enums",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Path parameter value cannot be null.")
-    public void testNullablePathParamWithEnum() throws IOException, BallerinaOpenApiException {
+    public void testNullablePathParamWithEnum() throws IOException, BallerinaOpenApiException, ClientException {
         OpenAPI openAPI = getOpenAPI(RES_DIR.resolve("swagger/path_param_nullable_enum.yaml"));
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder

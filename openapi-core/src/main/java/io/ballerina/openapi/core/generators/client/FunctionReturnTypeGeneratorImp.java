@@ -77,12 +77,12 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isValid
  */
 public class FunctionReturnTypeGeneratorImp {
     private OpenAPI openAPI;
-    private Operation responses;
+    private Operation operation;
     List<ClientDiagnostic> diagnostics = new ArrayList<>();
 
     public FunctionReturnTypeGeneratorImp(Operation operation, OpenAPI openAPI) {
         this.openAPI = openAPI;
-        this.responses = operation;
+        this.operation = operation;
     }
 
 //    public FunctionReturnTypeGeneratorImp(OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
@@ -101,7 +101,7 @@ public class FunctionReturnTypeGeneratorImp {
      * @return string with return type.
      * @throws BallerinaOpenApiException - throws exception if creating return type fails.
      */
-    public Optional<ReturnTypeDescriptorNode> getReturnType(Operation operation, boolean isSignature) {
+    public Optional<ReturnTypeDescriptorNode> getReturnType() {
         //TODO: Handle multiple media-type
         List<TypeDescriptorNode> returnTypes = new ArrayList<>();
         boolean noContentResponseFound = false;

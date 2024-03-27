@@ -21,15 +21,15 @@ package io.ballerina.openapi.generators.auth;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.BallerinaAuthConfigGenerator;
 import io.ballerina.openapi.generators.common.TestConstants;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -48,7 +48,7 @@ public class HttpAuthTests {
 
     @Test(description = "Generate config record for http basic auth", dataProvider = "httpAuthIOProvider")
     public void testGetConfigRecord(String yamlFile, String configRecord) throws IOException,
-            BallerinaOpenApiException {
+            BallerinaOpenApiException, ClientException {
         AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
                 false, true, new ArrayList<>());
         Path definitionPath = RES_DIR.resolve("scenarios/http/" + yamlFile);

@@ -24,6 +24,7 @@ import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -148,8 +149,8 @@ public class BallerinaCodeGenerator {
         //Update type definition list
         List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
                 clientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
-        List<TypeDefinitionNode> typeDefinitionNodeList = clientGenerator.getTypeDefinitionNodeList();
-        preGeneratedTypeDefNodes.addAll(typeDefinitionNodeList);
+//        List<TypeDefinitionNode> typeDefinitionNodeList = clientGenerator.getTypeDefinitionNodeList();
+//        preGeneratedTypeDefNodes.addAll(typeDefinitionNodeList);
         String serviceContent = "";
         if (complexPaths.isEmpty()) {
             io.ballerina.openapi.core.generators.type.model.Filter filter1 =
@@ -402,7 +403,7 @@ public class BallerinaCodeGenerator {
 
         List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
                 ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
-        preGeneratedTypeDefNodes.addAll(ballerinaClientGenerator.getTypeDefinitionNodeList());
+//        preGeneratedTypeDefNodes.addAll(ballerinaClientGenerator.getTypeDefinitionNodeList());
         // Generate ballerina records to represent schemas.
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
                 openAPIDef, nullable);
@@ -475,6 +476,9 @@ public class BallerinaCodeGenerator {
                 new io.ballerina.openapi.core.generators.type.model.Filter();
         filter1.setOperations(filter.getOperations());
         filter1.setTags(filter.getTags());
+
+        TypeHandler typeHandler = TypeHandler.getInstance();
+        String schemaSyntaxTree = Formatter.format(typeHandler.generateTypeSyntaxTree()).toSourceCode();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPIDef)
                 .withFilters(filter1)
