@@ -48,7 +48,7 @@ import static io.ballerina.openapi.core.generators.type.GeneratorUtils.extractRe
  *
  * @since 1.3.0
  */
-public class DefaultRequestBodyGenerator implements RequestBodyGenerator {
+public class DefaultRequestBodyGenerator extends RequestBodyGenerator {
     private final RequestBody requestBody;
 
     public DefaultRequestBodyGenerator(RequestBody requestBody) {
