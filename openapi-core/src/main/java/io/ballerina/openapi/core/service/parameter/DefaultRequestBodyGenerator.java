@@ -128,7 +128,7 @@ public class DefaultRequestBodyGenerator implements RequestBodyGenerator {
 //                    typeName = Optional.of(createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_REQUEST)));
 //            }
         } else {
-            typeName = Optional.of(ServiceGenerationUtils.generateTypeDescriptorForMediaTypes(mediaType, null));
+            typeName = Optional.of(ServiceGenerationUtils.generateTypeDescriptorForMediaTypes(mediaType));
         }
         return typeName;
     }
