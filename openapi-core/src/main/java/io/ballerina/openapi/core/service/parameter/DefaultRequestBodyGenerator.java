@@ -24,10 +24,9 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.openapi.core.service.GeneratorConstants;
 import io.ballerina.openapi.core.service.ServiceGenerationUtils;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -80,13 +79,16 @@ public class DefaultRequestBodyGenerator extends RequestBodyGenerator {
         } else {
             typeName = Optional.of(NodeParser.parseTypeDescriptor(types.iterator().next()));
         }
-        AnnotationNode annotationNode = ServiceGenerationUtils.getAnnotationNode(GeneratorConstants.PAYLOAD_KEYWORD, null);
+        AnnotationNode annotationNode = ServiceGenerationUtils.getAnnotationNode(GeneratorConstants.PAYLOAD_KEYWORD,
+                null);
         NodeList<AnnotationNode> annotation = NodeFactory.createNodeList(annotationNode);
-        String paramName = typeName.get().toString().equals(GeneratorConstants.HTTP_REQUEST) ? GeneratorConstants.REQUEST : GeneratorConstants.PAYLOAD;
+        String paramName = typeName.get().toString().equals(GeneratorConstants.HTTP_REQUEST) ?
+                GeneratorConstants.REQUEST : GeneratorConstants.PAYLOAD;
 
         if (typeName.get().toString().equals(GeneratorConstants.HTTP_REQUEST)) {
             return createRequiredParameterNode(createEmptyNodeList(),
-                    createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_REQUEST)), createIdentifierToken(GeneratorConstants.REQUEST));
+                    createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_REQUEST)),
+                    createIdentifierToken(GeneratorConstants.REQUEST));
         }
         return createRequiredParameterNode(annotation, typeName.get(), createIdentifierToken(paramName,
                 GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
@@ -98,15 +100,15 @@ public class DefaultRequestBodyGenerator extends RequestBodyGenerator {
      */
     private Optional<TypeDescriptorNode> getNodeForPayloadType(Map.Entry<String, MediaType> mediaType)
             throws OASTypeGenException {
-        Optional<TypeDescriptorNode> typeName;
-        if (mediaType.getValue() != null && mediaType.getValue().getSchema() != null &&
-                mediaType.getValue().getSchema().get$ref() != null) {
-            String reference = mediaType.getValue().getSchema().get$ref();
-            String schemaName = GeneratorUtils.getValidName(extractReferenceType(reference), true);
-            String mediaTypeContent = selectMediaType(mediaType.getKey().trim());
-
-            // Todo : update this part
-            typeName = null;
+        Optional<TypeDescriptorNode> typeName = TypeHandler.getInstance().getTypeNodeFromOASSchema(mediaType
+                .getValue().getSchema());
+        // Todo : double check this part
+//        if (mediaType.getValue() != null && mediaType.getValue().getSchema() != null &&
+//                mediaType.getValue().getSchema().get$ref() != null) {
+//            String reference = mediaType.getValue().getSchema().get$ref();
+//            String schemaName = GeneratorUtils.getValidName(extractReferenceType(reference), true);
+//            String mediaTypeContent = selectMediaType(mediaType.getKey().trim());
+//            typeName = null;
 //            switch (mediaTypeContent) {
 //                case GeneratorConstants.APPLICATION_XML:
 //                    typeName = Optional.of(TypeHandler.getInstance().generateTypeDescriptorForXMLContent());
@@ -127,28 +129,9 @@ public class DefaultRequestBodyGenerator extends RequestBodyGenerator {
 //                default:
 //                    typeName = Optional.of(createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_REQUEST)));
 //            }
-        } else {
-            typeName = Optional.of(ServiceGenerationUtils.generateTypeDescriptorForMediaTypes(mediaType));
-        }
+//        } else {
+//            typeName = Optional.of(ServiceGenerationUtils.generateTypeDescriptorForMediaTypes(mediaType));
+//        }
         return typeName;
-    }
-
-    /**
-     *
-     * This util is used for selecting standard media type by looking at the user defined media type.
-     */
-    private String selectMediaType(String mediaTypeContent) {
-        if (mediaTypeContent.matches("application/.*\\+json") || mediaTypeContent.matches(".*/json")) {
-            mediaTypeContent = io.ballerina.openapi.core.generators.type.GeneratorConstants.APPLICATION_JSON;
-        } else if (mediaTypeContent.matches("application/.*\\+xml") || mediaTypeContent.matches(".*/xml")) {
-            mediaTypeContent = io.ballerina.openapi.core.generators.type.GeneratorConstants.APPLICATION_XML;
-        } else if (mediaTypeContent.matches("text/.*")) {
-            mediaTypeContent = io.ballerina.openapi.core.generators.type.GeneratorConstants.TEXT;
-        }  else if (mediaTypeContent.matches("application/.*\\+octet-stream")) {
-            mediaTypeContent = io.ballerina.openapi.core.generators.type.GeneratorConstants.APPLICATION_OCTET_STREAM;
-        } else if (mediaTypeContent.matches("application/.*\\+x-www-form-urlencoded")) {
-            mediaTypeContent = io.ballerina.openapi.core.generators.type.GeneratorConstants.APPLICATION_URL_ENCODE;
-        }
-        return mediaTypeContent;
     }
 }
