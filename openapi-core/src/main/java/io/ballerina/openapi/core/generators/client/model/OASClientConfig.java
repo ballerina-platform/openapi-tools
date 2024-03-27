@@ -29,7 +29,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DO_
  */
 public class OASClientConfig {
     private final OpenAPI openAPI;
-    private final Filter filters;
+    private final Filter filter;
     private final boolean nullable;
     private final boolean resourceMode;
     private final boolean isPlugin;
@@ -38,7 +38,7 @@ public class OASClientConfig {
 
     private OASClientConfig(Builder clientConfigBuilder) {
         this.openAPI = clientConfigBuilder.openAPI;
-        this.filters = clientConfigBuilder.filters;
+        this.filter = clientConfigBuilder.filter;
         this.nullable = clientConfigBuilder.nullable;
         this.isPlugin = clientConfigBuilder.isPlugin;
         this.resourceMode = clientConfigBuilder.resourceMode;
@@ -49,8 +49,8 @@ public class OASClientConfig {
         return openAPI;
     }
 
-    public Filter getFilters() {
-        return filters;
+    public Filter getFilter() {
+        return filter;
     }
 
     public boolean isNullable() {
@@ -73,7 +73,7 @@ public class OASClientConfig {
      */
     public static class Builder {
         private OpenAPI openAPI;
-        private Filter filters;
+        private Filter filter;
         private boolean nullable = false;
         private boolean resourceMode = true;
         private boolean isPlugin = false;
@@ -84,8 +84,8 @@ public class OASClientConfig {
             return this;
         }
 
-        public Builder withFilters(Filter filters) {
-            this.filters = filters;
+        public Builder withFilters(Filter filter) {
+            this.filter = filter;
             return this;
         }
 

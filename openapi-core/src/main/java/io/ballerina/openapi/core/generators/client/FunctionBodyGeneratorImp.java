@@ -44,7 +44,7 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.mime.MimeType;
-import io.ballerina.openapi.core.generators.schemaOld.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -134,62 +134,51 @@ import static io.ballerina.openapi.core.generators.serviceOld.ServiceGenerationU
  *
  * @since 1.3.0
  */
-public class FunctionBodyGenerator {
+public class FunctionBodyGeneratorImp {
 
-    private List<ImportDeclarationNode> imports;
+    private List<ImportDeclarationNode> imports = new ArrayList<>();
     private boolean isHeader;
-    private final List<TypeDefinitionNode> typeDefinitionNodeList;
+    private final String path;
+    private final Map.Entry<PathItem.HttpMethod, Operation> operation;
     private final OpenAPI openAPI;
-    private final BallerinaTypesGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
-    private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
-    private final boolean resourceMode;
+    private final AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp;
 
     public List<ImportDeclarationNode> getImports() {
         return imports;
     }
 
-    public void setImports(List<ImportDeclarationNode> imports) {
-        this.imports = imports;
-    }
 
-    public FunctionBodyGenerator(List<ImportDeclarationNode> imports, List<TypeDefinitionNode> typeDefinitionNodeList,
-                                 OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
-                                 BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator,
-                                 BallerinaUtilGenerator ballerinaUtilGenerator, boolean resourceMode) {
+    public FunctionBodyGeneratorImp(String path, Map.Entry<PathItem.HttpMethod, Operation> operation, OpenAPI openAPI,
+                                    AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp,
+                                    BallerinaUtilGenerator ballerinaUtilGenerator) {
 
-        this.imports = imports;
+        this.path = path;
+        this.operation = operation;
         this.isHeader = false;
-        this.typeDefinitionNodeList = typeDefinitionNodeList;
         this.openAPI = openAPI;
-        this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.ballerinaUtilGenerator = ballerinaUtilGenerator;
-        this.ballerinaAuthConfigGenerator = ballerinaAuthConfigGenerator;
-        this.resourceMode = resourceMode;
+        this.ballerinaAuthConfigGeneratorImp = ballerinaAuthConfigGeneratorImp;
     }
 
     /**
      * Generate function body node for the remote function.
      *
-     * @param path      - remote function path
-     * @param operation - opneapi operation
      * @return - {@link FunctionBodyNode}
      * @throws BallerinaOpenApiException - throws exception if generating FunctionBodyNode fails.
      */
-    public FunctionBodyNode getFunctionBodyNode(String path, Map.Entry<PathItem.HttpMethod, Operation> operation)
-            throws BallerinaOpenApiException {
+    public FunctionBodyNode getFunctionBodyNode() throws BallerinaOpenApiException {
 
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(
-                openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation.getValue(), openAPI);
         isHeader = false;
         // Create statements
         List<StatementNode> statementsList = new ArrayList<>();
         // Check whether given path is complex path , if complex it will handle adding these two statement
-        if (resourceMode && isComplexURL(path)) {
-            List<StatementNode> bodyStatements = generateBodyStatementForComplexUrl(path);
-            statementsList.addAll(bodyStatements);
-        }
+//        if (resourceMode && isComplexURL(path)) {
+//            List<StatementNode> bodyStatements = generateBodyStatementForComplexUrl(path);
+//            statementsList.addAll(bodyStatements);
+//        }
         //string path - common for every remote functions
         VariableDeclarationNode pathInt = getPathStatement(path, annotationNodes);
         statementsList.add(pathInt);
@@ -199,7 +188,7 @@ public class FunctionBodyGenerator {
 
         String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
         // This return type for target data type binding.
-        String rType = functionReturnType.getReturnType(operation.getValue(), true);
+        String rType = functionReturnType.getReturnType(operation.getValue(), true).toString();
         String returnType = returnTypeForTargetTypeField(rType);
         // Statement Generator for requestBody
         if (operation.getValue().getRequestBody() != null) {
@@ -227,8 +216,8 @@ public class FunctionBodyGenerator {
         Set<String> securitySchemesAvailable = getSecurityRequirementForOperation(operation.getValue());
 
         if (securitySchemesAvailable.size() > 0) {
-            Map<String, String> queryApiKeyMap = ballerinaAuthConfigGenerator.getQueryApiKeyNameList();
-            Map<String, String> headerApiKeyMap = ballerinaAuthConfigGenerator.getHeaderApiKeyNameList();
+            Map<String, String> queryApiKeyMap = ballerinaAuthConfigGeneratorImp.getQueryApiKeyNameList();
+            Map<String, String> headerApiKeyMap = ballerinaAuthConfigGeneratorImp.getHeaderApiKeyNameList();
             for (String schemaName : securitySchemesAvailable) {
                 if (queryApiKeyMap.containsKey(schemaName)) {
                     queryApiKeyNameList.add(queryApiKeyMap.get(schemaName));
@@ -266,8 +255,8 @@ public class FunctionBodyGenerator {
                                             List<StatementNode> statementsList, List<String> queryApiKeyNameList,
                                             List<String> headerApiKeyNameList) throws BallerinaOpenApiException {
 
-        boolean combinationOfApiKeyAndHTTPOAuth = ballerinaAuthConfigGenerator.isHttpOROAuth() &&
-                ballerinaAuthConfigGenerator.isApiKey();
+        boolean combinationOfApiKeyAndHTTPOAuth = ballerinaAuthConfigGeneratorImp.isHttpOROAuth() &&
+                ballerinaAuthConfigGeneratorImp.isApiKey();
         if (combinationOfApiKeyAndHTTPOAuth) {
             addUpdatedPathAndHeaders(statementsList, queryApiKeyNameList, queryParameters,
                     headerApiKeyNameList, headerParameters);
@@ -757,7 +746,7 @@ public class FunctionBodyGenerator {
                 IdentifierToken fieldName = createIdentifierToken('"' + apiKey.trim() + '"');
                 Token colon = createToken(COLON_TOKEN);
                 IdentifierToken apiKeyConfigIdentifierToken = createIdentifierToken(API_KEY_CONFIG_PARAM);
-                if (ballerinaAuthConfigGenerator.isHttpOROAuth() && ballerinaAuthConfigGenerator.isApiKey()) {
+                if (ballerinaAuthConfigGeneratorImp.isHttpOROAuth() && ballerinaAuthConfigGeneratorImp.isApiKey()) {
                     apiKeyConfigIdentifierToken = createIdentifierToken(API_KEY_CONFIG_PARAM +
                             QUESTION_MARK_TOKEN.stringValue());
                 }

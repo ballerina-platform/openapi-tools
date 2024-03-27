@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.FunctionReturnTypeGenerator;
+import io.ballerina.openapi.core.generators.client.FunctionReturnTypeGeneratorImp;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.schemaOld.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.common.model.Filter;
@@ -46,7 +47,7 @@ public class FunctionSignatureReturnTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
     @Test(description = "Tests for returnType")
     public void getReturnTypeTests() throws IOException, BallerinaOpenApiException {
-        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator();
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp();
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/all_return_type_operation.yaml"));
         Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/jsonproducts").getGet(),
                 true), "json|error");
@@ -69,7 +70,7 @@ public class FunctionSignatureReturnTypeTests {
     public void getReturnTypeForObjectSchema() throws IOException, BallerinaOpenApiException {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_without_properties_with_additional" +
                 ".yaml"));
-        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator();
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp();
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/products").getGet(),
                 true);
         Assert.assertEquals(returnType, "json|error");
@@ -79,7 +80,7 @@ public class FunctionSignatureReturnTypeTests {
     public void getReturnTypeForMapSchema() throws IOException, BallerinaOpenApiException {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/" +
                 "response_with_properties_with_additional.yaml"));
-        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(array,
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(array,
                 new BallerinaTypesGenerator(array), new ArrayList<>());
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/products").getGet(),
                 true);
@@ -91,7 +92,7 @@ public class FunctionSignatureReturnTypeTests {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type" +
                 "/response_without_properties_without_additional" +
                 ".yaml"));
-        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator();
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp();
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/products").getGet(),
                 true);
         Assert.assertEquals(returnType, "json|error");
@@ -101,7 +102,7 @@ public class FunctionSignatureReturnTypeTests {
     public void getReturnTypeForMapSchemaWithOutAdditionalProperties() throws IOException, BallerinaOpenApiException {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_properties_without_additional" +
                 ".yaml"));
-        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(array,
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(array,
                 new BallerinaTypesGenerator(array), new ArrayList<>());
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/products").getGet(),
                 true);
@@ -111,7 +112,7 @@ public class FunctionSignatureReturnTypeTests {
     @Test(description = "Tests for the response with no schema")
     public void getReturnTypeForResponseWithoutSchema() throws IOException, BallerinaOpenApiException {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_no_schema.yaml"));
-        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(array,
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(array,
                 new BallerinaTypesGenerator(array), new ArrayList<>());
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/path01").getGet(),
                 true);
@@ -121,7 +122,7 @@ public class FunctionSignatureReturnTypeTests {
     @Test(description = "Tests for the empty response")
     public void getReturnTypeForEmptyResponse() throws IOException, BallerinaOpenApiException {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/no_response.yaml"));
-        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(array,
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(array,
                 new BallerinaTypesGenerator(array), new ArrayList<>());
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/pets").getGet(),
                 true);
@@ -132,7 +133,7 @@ public class FunctionSignatureReturnTypeTests {
     public void getReturnTypeForAdditionalPropertySchema() throws IOException, BallerinaOpenApiException {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/" +
                 "response_with_only_additional_schema.yaml"));
-        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(array,
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(array,
                 new BallerinaTypesGenerator(array), new ArrayList<>());
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/store/inventory").getGet(),
                 true);

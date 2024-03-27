@@ -142,8 +142,112 @@ public class GeneratorUtils {
         return NodeFactory.createQualifiedNameReferenceNode(modulePrefixToken, colon, identifierToken);
     }
 
+    /**
+     * Generated resource function relative path node list.
+     *
+     * @param path      - resource path
+     * @param operation - resource operation
+     * @return - node lists
+     * @throws OASTypeGenException
+     */
+    public static List<Node> getRelativeResourcePath(String path, Operation operation,
+                                                     Components components, boolean isWithoutDataBinding)
+            throws OASTypeGenException {
 
+        List<Node> functionRelativeResourcePath = new ArrayList<>();
+        String[] pathNodes = path.split(GeneratorConstants.SLASH);
+        if (pathNodes.length >= 2) {
+            for (String pathNode : pathNodes) {
+                if (pathNode.contains(GeneratorConstants.OPEN_CURLY_BRACE)) {
+                    String pathParam = pathNode;
+                    pathParam = pathParam.substring(pathParam.indexOf(GeneratorConstants.OPEN_CURLY_BRACE) + 1);
+                    pathParam = pathParam.substring(0, pathParam.indexOf(GeneratorConstants.CLOSE_CURLY_BRACE));
+                    pathParam = getValidName(pathParam, false);
 
+                    /**
+                     * TODO -> `onCall/[string id]\.json` type of url won't support from syntax
+                     * issue https://github.com/ballerina-platform/ballerina-spec/issues/1138
+                     * <pre>resource function get onCall/[string id]\.json() returns string {}</>
+                     */
+                    if (operation.getParameters() != null) {
+                        extractPathParameterDetails(operation, functionRelativeResourcePath, pathNode,
+                                pathParam, components, isWithoutDataBinding);
+                    }
+                } else if (!pathNode.isBlank()) {
+                    IdentifierToken idToken = createIdentifierToken(escapeIdentifier(pathNode.trim()));
+                    functionRelativeResourcePath.add(idToken);
+                    functionRelativeResourcePath.add(createToken(SLASH_TOKEN));
+                }
+            }
+            functionRelativeResourcePath.remove(functionRelativeResourcePath.size() - 1);
+        } else if (pathNodes.length == 0) {
+            IdentifierToken idToken = createIdentifierToken(".");
+            functionRelativeResourcePath.add(idToken);
+        } else {
+            IdentifierToken idToken = createIdentifierToken(pathNodes[1].trim());
+            functionRelativeResourcePath.add(idToken);
+        }
+        return functionRelativeResourcePath;
+    }
+
+    private static void extractPathParameterDetails(Operation operation, List<Node> functionRelativeResourcePath,
+                                                    String pathNode, String pathParam,
+                                                    Components components, boolean isWithoutDataBinding)
+            throws OASTypeGenException {
+        // check whether path parameter segment has special character
+        String[] split = pathNode.split(GeneratorConstants.CLOSE_CURLY_BRACE, 2);
+        Pattern pattern = Pattern.compile(GeneratorConstants.SPECIAL_CHARACTERS_REGEX);
+        Matcher matcher = pattern.matcher(split[1]);
+        boolean hasSpecialCharacter = matcher.find();
+
+        for (Parameter parameter : operation.getParameters()) {
+            if (parameter.get$ref() != null) {
+                parameter = GeneratorMetaData.getInstance().getOpenAPI().getComponents()
+                        .getParameters().get(extractReferenceType(parameter.get$ref()));
+            }
+            if (parameter.getIn() == null) {
+                continue;
+            }
+            if (pathParam.trim().equals(getValidName(parameter.getName().trim(), false))
+                    && parameter.getIn().equals("path")) {
+                String paramType;
+                if (parameter.getSchema().get$ref() != null) {
+                    paramType = resolveReferenceType(parameter.getSchema(), components, isWithoutDataBinding,
+                            pathParam);
+                    Schema<?> schema = GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(paramType);
+                    TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
+                } else {
+                    paramType = getPathParameterType(parameter.getSchema(), pathParam);
+                    if (paramType.endsWith(GeneratorConstants.NILLABLE)) {
+                        throw new OASTypeGenException("Path parameter value cannot be null.");
+                    }
+                }
+
+                // TypeDescriptor
+                BuiltinSimpleNameReferenceNode builtSNRNode = createBuiltinSimpleNameReferenceNode(
+                        null,
+                        parameter.getSchema() == null || hasSpecialCharacter ?
+                                createIdentifierToken(GeneratorConstants.STRING) :
+                                createIdentifierToken(paramType));
+                IdentifierToken paramName = createIdentifierToken(
+                        hasSpecialCharacter ?
+                                getValidName(pathNode, false) :
+                                pathParam);
+                ResourcePathParameterNode resourcePathParameterNode =
+                        createResourcePathParameterNode(
+                                SyntaxKind.RESOURCE_PATH_SEGMENT_PARAM,
+                                createToken(OPEN_BRACKET_TOKEN),
+                                NodeFactory.createEmptyNodeList(),
+                                builtSNRNode,
+                                null,
+                                paramName,
+                                createToken(CLOSE_BRACKET_TOKEN));
+                functionRelativeResourcePath.add(resourcePathParameterNode);
+                functionRelativeResourcePath.add(createToken(SLASH_TOKEN));
+                break;
+            }
+        }
+    }
 
     /**
      * Method for convert openApi type of format to ballerina type.
@@ -321,6 +425,26 @@ public class GeneratorUtils {
         } else {
             return isRequest ? GeneratorConstants.HTTP_REQUEST : GeneratorConstants.HTTP_RESPONSE;
         }
+    }
+
+    /**
+     * If there are template values in the {@code absUrl} derive resolved url using {@code variables}.
+     *
+     * @param absUrl    abstract url with template values
+     * @param variables variable values to populate the url template
+     * @return resolved url
+     */
+    public static String buildUrl(String absUrl, ServerVariables variables) {
+
+        String url = absUrl;
+        if (variables != null) {
+            for (Map.Entry<String, ServerVariable> entry : variables.entrySet()) {
+                // According to the oas spec, default value must be specified
+                String replaceKey = "\\{" + entry.getKey() + '}';
+                url = url.replaceAll(replaceKey, entry.getValue().getDefault());
+            }
+        }
+        return url;
     }
 
     private static MinutiaeList getSingleWSMinutiae() {

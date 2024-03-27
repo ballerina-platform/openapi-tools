@@ -1,6 +1,7 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
@@ -51,12 +52,11 @@ public class NoServerURLTest {
 
     @Test(description = "Test for no server url with HTTP authentication mechanism")
     public void getClientForNoServerURLWithHTTPAuth() {
-        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(
-                false, true);
+        AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
+                false, true, new ArrayList<>());
         String expectedParams = TestConstants.HTTP_CLIENT_CONFIG_PARAM_NO_URL;
         StringBuilder generatedParams = new StringBuilder();
-        List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit(
-                "/");
+        List<ParameterNode> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit();
         for (Node param: generatedInitParamNodes) {
             generatedParams.append(param.toString());
         }
@@ -67,12 +67,11 @@ public class NoServerURLTest {
 
     @Test(description = "Test for no server url with API key authentication mechanism")
     public void getClientForNoServerURLWithAPIKeyAuth() {
-        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(
-                true, false);
+        AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
+                true, false, new ArrayList<>());
         String expectedParams = TestConstants.API_KEY_CONFIG_PARAM_NO_URL;
         StringBuilder generatedParams = new StringBuilder();
-        List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit(
-                "/");
+        List<ParameterNode> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit();
         for (Node param: generatedInitParamNodes) {
             generatedParams.append(param.toString());
         }

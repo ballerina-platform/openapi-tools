@@ -311,12 +311,12 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 .append(clientConfig.isResourceMode())
                 .append(clientConfig.getLicense())
                 .append(clientConfig.isNullable());
-        List<String> tags = clientConfig.getFilters().getTags();
+        List<String> tags = clientConfig.getFilter().getTags();
         tags.sort(String.CASE_INSENSITIVE_ORDER);
         for (String str : tags) {
             summaryOfCodegen.append(str);
         }
-        List<String> operations = clientConfig.getFilters().getOperations();
+        List<String> operations = clientConfig.getFilter().getOperations();
         operations.sort(String.CASE_INSENSITIVE_ORDER);
         for (String str : operations) {
             summaryOfCodegen.append(str);
@@ -353,7 +353,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
 
-        if (oasClientConfig.getFilters().getTags().isEmpty()) {
+        if (oasClientConfig.getFilter().getTags().isEmpty()) {
             // Remove unused records and enums when generating the client by the tags given.
             schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent,
                     null);
