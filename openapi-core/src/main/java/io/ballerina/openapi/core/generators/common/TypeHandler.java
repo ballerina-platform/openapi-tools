@@ -137,7 +137,6 @@ public class TypeHandler {
         return typeGeneratorResult.typeDescriptorNode();
     }
 
-
 //    public SimpleNameReferenceNode createStatusCodeTypeInclusionRecord(String includedType, TypeDescriptorNode type) {
 //        TypeGeneratorResult returnType = ballerinaTypesGenerator
 //                .createTypeInclusionRecord(statusCode, type);

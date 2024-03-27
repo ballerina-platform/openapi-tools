@@ -68,7 +68,7 @@ public class TypeGeneratorUtils {
                                                  HashMap<String, TypeDefinitionNode> subTypesMap,
                                                  HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
         if (schemaValue.get$ref() != null) {
-            return new ReferencedTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
+            return new ReferencedTypeGenerator(schemaValue, subTypesMap, pregeneratedTypeMap);
         } else if (GeneratorUtils.isComposedSchema(schemaValue)) {
             if (schemaValue.getAllOf() != null) {
                 return new AllOfRecordTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);

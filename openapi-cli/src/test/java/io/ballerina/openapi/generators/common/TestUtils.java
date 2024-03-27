@@ -28,6 +28,7 @@ import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiExc
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.serviceOld.BallerinaServiceGenerator;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.projects.DocumentId;

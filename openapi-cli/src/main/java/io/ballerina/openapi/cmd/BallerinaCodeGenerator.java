@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
@@ -31,9 +32,10 @@ import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-//import io.ballerina.openapi.core.service.BallerinaServiceGenerator;
-//import io.ballerina.openapi.core.service.BallerinaServiceObjectGenerator;
-//import io.ballerina.openapi.core.service.model.OASServiceMetadata;
+import io.ballerina.openapi.core.service.ServiceGenerator;
+import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
+import io.ballerina.openapi.core.service.ServiceTypeGenerator;
+import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -155,28 +157,28 @@ public class BallerinaCodeGenerator {
                     new io.ballerina.openapi.core.generators.type.model.Filter();
             filter1.setOperations(filter.getOperations());
             filter1.setTags(filter.getTags());
-//            OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
-//                    .withOpenAPI(openAPIDef)
-//                    .withFilters(filter1)
-//                    .withNullable(nullable)
-//                    .withGenerateServiceType(generateServiceType)
-//                    .withGenerateWithoutDataBinding(generateWithoutDataBinding)
-//                    .build();
-//            BallerinaServiceGenerator serviceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
-//            serviceContent = Formatter.format
-//                    (serviceGenerator.generateSyntaxTree()).toSourceCode();
-//            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile,
-//                    (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + serviceContent));
-//
-//            if (generateServiceType) {
-//                BallerinaServiceObjectGenerator ballerinaServiceObjectGenerator = new
-//                        BallerinaServiceObjectGenerator(serviceGenerator.getFunctionList());
-//                String serviceType = Formatter.format(ballerinaServiceObjectGenerator.generateSyntaxTree()).
-//                        toSourceCode();
-//                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
-//                        "service_type.bal", (licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
-//                        licenseHeader) + serviceType));
-//            }
+            OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                    .withOpenAPI(openAPIDef)
+                    .withFilters(filter1)
+                    .withNullable(nullable)
+                    .withGenerateServiceType(generateServiceType)
+                    .withGenerateWithoutDataBinding(generateWithoutDataBinding)
+                    .build();
+            ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+            serviceContent = Formatter.format
+                    (serviceGenerator.generateSyntaxTree()).toSourceCode();
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile,
+                    (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + serviceContent));
+
+            if (generateServiceType) {
+                ServiceTypeGenerator ballerinaServiceTypeGenerator = new
+                        ServiceTypeGenerator(oasServiceMetadata);
+                String serviceType = Formatter.format(ballerinaServiceTypeGenerator.generateSyntaxTree()).
+                        toSourceCode();
+                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
+                        "service_type.bal", (licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
+                        licenseHeader) + serviceType));
+            }
         }
 
         TypeHandler typeHandler = TypeHandler.getInstance();
@@ -466,7 +468,6 @@ public class BallerinaCodeGenerator {
             }
             return new ArrayList<>();
         }
-        List<GenSrcFile> sourceFiles = new ArrayList<>();
         String concatTitle = serviceName == null ?
                 openAPIDef.getInfo().getTitle().toLowerCase(Locale.ENGLISH) :
                 serviceName.toLowerCase(Locale.ENGLISH);
@@ -475,47 +476,27 @@ public class BallerinaCodeGenerator {
                 new io.ballerina.openapi.core.generators.type.model.Filter();
         filter1.setOperations(filter.getOperations());
         filter1.setTags(filter.getTags());
-//        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
-//                .withOpenAPI(openAPIDef)
-//                .withFilters(filter1)
-//                .withNullable(nullable)
-//                .withGenerateServiceType(generateServiceType)
-//                .withGenerateWithoutDataBinding(generateWithoutDataBinding)
-//                .build();
-//        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
-        // Initialize ballerina types generator
-        TypeHandler.createInstance(openAPIDef, nullable);
-        String mainContent = "";
-//        try {
-//            mainContent = Formatter.format(ballerinaServiceGenerator.generateSyntaxTree()).toSourceCode();
-//        } catch (OASTypeGenException e) {
-//                throw new BallerinaOpenApiException(e.getMessage(), e.getCause());
-//        }
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile,
-                (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + mainContent));
-//        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
-//                ballerinaServiceGenerator.getTypeInclusionRecords());
-//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
-//                openAPIDef, nullable, preGeneratedTypeDefNodes);
-//        SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-//        String schemaContent = Formatter.format(schemaSyntaxTree).toString();
-//        schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent,
-//                null);
+
         TypeHandler typeHandler = TypeHandler.getInstance();
         String schemaSyntaxTree = Formatter.format(typeHandler.generateTypeSyntaxTree()).toSourceCode();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPIDef)
+                .withFilters(filter1)
+                .withNullable(nullable)
+                .withGenerateServiceType(generateServiceType)
+                .withGenerateWithoutDataBinding(generateWithoutDataBinding)
+                .withLicenseHeader(licenseHeader)
+                .withSrcFile(srcFile)
+                .withSrcPackage(srcPackage)
+                .build();
+        // Initialize ballerina types generator
+        TypeHandler.createInstance(openAPIDef, nullable);
+        List<GenSrcFile> sourceFiles = ServiceGenerator.generateServiceFiles(oasServiceMetadata);
+        String schemaSyntaxTree = Formatter.format(TypeHandler.getInstance().generateTypeSyntaxTree()).toSourceCode();
         if (!schemaSyntaxTree.isBlank() && !generateWithoutDataBinding) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME,
                     (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaSyntaxTree));
         }
-//        if (generateServiceType) {
-//            BallerinaServiceObjectGenerator ballerinaServiceObjectGenerator = new
-//                    BallerinaServiceObjectGenerator(ballerinaServiceGenerator.getFunctionList());
-//            String serviceType = Formatter.format(ballerinaServiceObjectGenerator.generateSyntaxTree())
-//            .toSourceCode();
-//            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
-//                    "service_type.bal",
-//                    (licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER : licenseHeader) + serviceType));
-//        }
         return sourceFiles;
     }
 
