@@ -22,7 +22,6 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
-import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
@@ -32,8 +31,8 @@ import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.core.service.ServiceGenerator;
 import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
+import io.ballerina.openapi.core.service.ServiceGenerator;
 import io.ballerina.openapi.core.service.ServiceTypeGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -477,8 +476,6 @@ public class BallerinaCodeGenerator {
         filter1.setOperations(filter.getOperations());
         filter1.setTags(filter.getTags());
 
-        TypeHandler typeHandler = TypeHandler.getInstance();
-        String schemaSyntaxTree = Formatter.format(typeHandler.generateTypeSyntaxTree()).toSourceCode();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPIDef)
                 .withFilters(filter1)
