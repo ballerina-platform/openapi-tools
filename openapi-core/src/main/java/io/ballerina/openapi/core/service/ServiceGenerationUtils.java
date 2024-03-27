@@ -145,9 +145,10 @@ public class ServiceGenerationUtils {
      * objects.
      */
     public static TypeDescriptorNode generateTypeDescriptorForMediaTypes(
-            Map.Entry<String, MediaType> mediaType, String recordName) throws OASTypeGenException {
+            Map.Entry<String, MediaType> mediaType) throws OASTypeGenException {
         String mediaTypeContent = selectMediaType(mediaType.getKey().trim());
         Schema<?> schema = mediaType.getValue().getSchema();
+
         // todo : update this part
         return null;
 //        switch (mediaTypeContent) {

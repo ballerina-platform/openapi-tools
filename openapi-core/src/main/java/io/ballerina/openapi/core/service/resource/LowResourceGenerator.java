@@ -17,6 +17,7 @@ import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.GeneratorConstants;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
+import io.ballerina.openapi.core.service.parameter.RequestBodyGenerator;
 import io.ballerina.openapi.core.service.response.ReturnTypeGenerator;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -64,12 +65,14 @@ public class LowResourceGenerator extends ResourceGenerator {
         parameters.add(httpCaller);
         // create parameter `http:Request request`
         parameters.add(createToken(COMMA_TOKEN));
-        BuiltinSimpleNameReferenceNode typeNameRequest = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken(GeneratorConstants.HTTP_REQUEST));
-        IdentifierToken paramNameRequest = createIdentifierToken(GeneratorConstants.REQUEST);
-        RequiredParameterNode httpRequest = createRequiredParameterNode(createEmptyNodeList(), typeNameRequest,
-                paramNameRequest);
-        parameters.add(httpRequest);
+        RequestBodyGenerator requestBodyGenerator = RequestBodyGenerator.getRequestBodyGenerator(oasServiceMetadata,
+                operation.getValue().getRequestBody());
+        try {
+            RequiredParameterNode requestBodyNode = requestBodyGenerator.createRequestBodyNode();
+            parameters.add(requestBodyNode);
+        } catch (OASTypeGenException e) {
+            throw new RuntimeException(e);
+        }
 
         SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(parameters);
 

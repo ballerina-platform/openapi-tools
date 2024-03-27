@@ -48,7 +48,7 @@ import static io.ballerina.openapi.core.generators.type.GeneratorUtils.extractRe
  *
  * @since 1.3.0
  */
-public class DefaultRequestBodyGenerator implements RequestBodyGenerator {
+public class DefaultRequestBodyGenerator extends RequestBodyGenerator {
     private final RequestBody requestBody;
 
     public DefaultRequestBodyGenerator(RequestBody requestBody) {
@@ -128,7 +128,7 @@ public class DefaultRequestBodyGenerator implements RequestBodyGenerator {
 //                    typeName = Optional.of(createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_REQUEST)));
 //            }
         } else {
-            typeName = Optional.of(ServiceGenerationUtils.generateTypeDescriptorForMediaTypes(mediaType, null));
+            typeName = Optional.of(ServiceGenerationUtils.generateTypeDescriptorForMediaTypes(mediaType));
         }
         return typeName;
     }
