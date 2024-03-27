@@ -21,6 +21,7 @@ package io.ballerina.openapi.generators.client;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
@@ -92,7 +93,7 @@ public class AnnotationTests {
     @Test(description = "Test openAPI definition to ballerina client source code generation with deprecated annotation",
             dataProvider = "fileProviderForFilesComparison")
     public void  openApiToBallerinaClientGenWithAnnotation(String yamlFile, String expectedFile)
-            throws IOException, BallerinaOpenApiException {
+            throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/" + yamlFile);
         Path expectedPath = RESDIR.resolve("ballerina/" + expectedFile);
         List<String> list1 = new ArrayList<>();

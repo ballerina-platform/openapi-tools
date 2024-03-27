@@ -51,7 +51,7 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
         // Create function signature
         RemoteFunctionSignatureGenerator signatureGenerator = new RemoteFunctionSignatureGenerator(operation.getValue(),
-                openAPI.getComponents().getParameters());
+                openAPI);
         //Create function body
         FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
                 authConfigGeneratorImp, ballerinaUtilGenerator);

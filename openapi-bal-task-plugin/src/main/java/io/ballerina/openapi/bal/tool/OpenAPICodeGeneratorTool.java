@@ -19,6 +19,7 @@ package io.ballerina.openapi.bal.tool;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
@@ -137,7 +138,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         } catch (BallerinaOpenApiException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.PARSER_ERROR;
             createDiagnostics(toolContext, error, location);
-        } catch (IOException | FormatterException e) {
+        } catch (ClientException | IOException | FormatterException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_GENERATING_CLIENT;
             createDiagnostics(toolContext, error, location);
         }
@@ -164,7 +165,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     private void handleCodeGenerationMode(ToolContext toolContext,
                                           ImmutablePair<OASClientConfig, OASServiceMetadata> codeGeneratorConfig,
                                           TomlNodeLocation location, String mode)
-            throws BallerinaOpenApiException, IOException, FormatterException {
+            throws BallerinaOpenApiException, IOException, FormatterException, ClientException {
         if (mode.equals(CLIENT)) {
             // Create client for the given OAS
             generateClient(toolContext, codeGeneratorConfig);
@@ -285,7 +286,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
      * This method uses to generate the client module for the given openapi contract.
      */
     private void generateClient(ToolContext toolContext, ImmutablePair<OASClientConfig,
-            OASServiceMetadata> codeGeneratorConfig) throws BallerinaOpenApiException, IOException, FormatterException {
+            OASServiceMetadata> codeGeneratorConfig) throws BallerinaOpenApiException, IOException,
+            FormatterException, ClientException {
         OASClientConfig clientConfig = codeGeneratorConfig.getLeft();
         List<GenSrcFile> sources = generateClientFiles(clientConfig);
         Path outputPath = toolContext.outputPath();
@@ -329,7 +331,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
      * This will return list of (client.bal, util.bal, types.bal) {@code GenSrcFile}.
      */
     private static List<GenSrcFile> generateClientFiles(OASClientConfig oasClientConfig) throws
-            BallerinaOpenApiException, IOException, FormatterException {
+            BallerinaOpenApiException, IOException, FormatterException, ClientException {
 
         List<GenSrcFile> sourceFiles = new ArrayList<>();
 

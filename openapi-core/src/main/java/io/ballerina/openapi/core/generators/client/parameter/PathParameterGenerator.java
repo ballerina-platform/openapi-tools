@@ -35,7 +35,6 @@ public class PathParameterGenerator implements ParameterGenerator {
         this.openAPI = openAPI;
     }
 
-
     @Override
     public Optional<ParameterNode> generateParameterNode() {
         IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName(), false));
@@ -44,9 +43,10 @@ public class PathParameterGenerator implements ParameterGenerator {
         // Reference type resolve
         Optional<TypeDescriptorNode> typeNode = TypeHandler.getInstance().getTypeNodeFromOASSchema(parameterSchema);
         if (typeNode.isEmpty()) {
+//            throw new BallerinaOpenApiException("Error while generating type descriptor node for path parameter");
             //todo diagnostic
             return Optional.empty();
-//            throw new BallerinaOpenApiException("Error while generating type descriptor node for path parameter");
+
         }
         TypeDescriptorNode typeDescNode = typeNode.get();
         if (typeDescNode.kind().equals(SyntaxKind.ARRAY_TYPE_DESC)|| typeDescNode.kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
