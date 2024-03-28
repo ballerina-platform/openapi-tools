@@ -193,7 +193,7 @@ public class OpenApiCmd implements BLauncherCmd {
 
             if (baseCmd.statusCodeBinding) {
                 if (baseCmd.mode != null && baseCmd.mode.equals(SERVICE)) {
-                    outStream.println("'--status-code-binding' option is only available in client generation mode.");
+                    outStream.println("ERROR: the '--status-code-binding' option is only available in client generation mode.");
                     exitError(this.exitWhenFinish);
                 }
 
