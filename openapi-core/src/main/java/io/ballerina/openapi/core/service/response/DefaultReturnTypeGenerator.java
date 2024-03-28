@@ -95,7 +95,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 //handle multiple response scenarios ex: status code 200, 400, 500
                 TypeDescriptorNode type = handleMultipleResponse(responses, httpMethod,
                         oasServiceMetadata.getOpenAPI(), pathRecord);
-                returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), null, type);
+                returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(), type);
             } else if (responses.size() == 1) {
                 //handle single response
                 Iterator<Map.Entry<String, ApiResponse>> responseIterator = responses.entrySet().iterator();

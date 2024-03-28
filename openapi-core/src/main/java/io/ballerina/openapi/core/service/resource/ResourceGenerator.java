@@ -1,12 +1,10 @@
 package io.ballerina.openapi.core.service.resource;
 
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 
-import java.util.List;
 import java.util.Map;
 
 public abstract class ResourceGenerator {
@@ -25,5 +23,5 @@ public abstract class ResourceGenerator {
     }
 
     public abstract FunctionDefinitionNode generateResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                                    List<Node> pathNodes, String path);
+                                                                    String path);
 }

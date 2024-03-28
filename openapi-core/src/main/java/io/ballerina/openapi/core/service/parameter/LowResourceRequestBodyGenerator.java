@@ -21,8 +21,8 @@ package io.ballerina.openapi.core.service.parameter;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.GeneratorConstants;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -39,7 +39,7 @@ public class LowResourceRequestBodyGenerator extends RequestBodyGenerator {
     /**
      * This for creating request Body for given request object.
      */
-    public RequiredParameterNode createRequestBodyNode() {
+    public RequiredParameterNode createRequestBodyNode(RequestBody requestBody) {
         BuiltinSimpleNameReferenceNode typeNameRequest = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken(GeneratorConstants.HTTP_REQUEST));
         IdentifierToken paramNameRequest = createIdentifierToken(GeneratorConstants.REQUEST);

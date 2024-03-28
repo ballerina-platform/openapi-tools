@@ -40,7 +40,6 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyN
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.openapi.core.generators.type.GeneratorUtils.extractReferenceType;
 
 /**
  * This class for generating request body payload for OAS requestBody section.
@@ -48,16 +47,11 @@ import static io.ballerina.openapi.core.generators.type.GeneratorUtils.extractRe
  * @since 1.3.0
  */
 public class DefaultRequestBodyGenerator extends RequestBodyGenerator {
-    private final RequestBody requestBody;
-
-    public DefaultRequestBodyGenerator(RequestBody requestBody) {
-        this.requestBody = requestBody;
-    }
 
     /**
      * This for creating request Body for given request object.
      */
-    public RequiredParameterNode createRequestBodyNode() throws OASTypeGenException {
+    public RequiredParameterNode createRequestBodyNode(RequestBody requestBody) throws OASTypeGenException {
         // type CustomRecord record {| anydata...; |};
         // public type PayloadType string|json|xml|byte[]|CustomRecord|CustomRecord[];
         Optional<TypeDescriptorNode> typeName;
