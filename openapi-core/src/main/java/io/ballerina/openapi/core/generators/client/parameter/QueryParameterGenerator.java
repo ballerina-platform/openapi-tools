@@ -13,7 +13,6 @@ import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticIm
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -28,7 +27,6 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyN
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createLiteralValueToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultableParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createNilLiteralNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
@@ -46,9 +44,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SIMPLE_NAME_REFERENCE
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SINGLETON_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.UNION_TYPE_DESC;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
@@ -111,7 +107,7 @@ public class QueryParameterGenerator implements ParameterGenerator {
             IdentifierToken paramName =
                     createIdentifierToken(getValidName(parameter.getName().trim(), false));
             //todo doc comments separate handle
-            return Optional.of(createRequiredParameterNode(null, typeNode, paramName));
+            return Optional.of(createRequiredParameterNode(createEmptyNodeList(), typeNode, paramName));
         } else {
             IdentifierToken paramName =
                     createIdentifierToken(getValidName(parameter.getName().trim(), false));

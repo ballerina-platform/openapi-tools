@@ -13,7 +13,6 @@ import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticIm
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.client.exception.FunctionSignatureGeneratorException;
 import io.ballerina.openapi.core.generators.client.parameter.HeaderParameterGenerator;
-import io.ballerina.openapi.core.generators.client.parameter.PathParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.QueryParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.RequestBodyGenerator;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -117,7 +116,10 @@ public class ResourceFunctionSingnatureGenerator implements FunctionSignatureGen
         }
         // Remove the last comma
         //check array out of bound error if parameter size is empty
-        parameterList.remove(parameterList.size() - 1);
+        //todo paramterList size is empty
+        if (!parameterList.isEmpty()) {
+            parameterList.remove(parameterList.size() - 1);
+        }
         SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(parameterList);
 
         // 3. return statements
