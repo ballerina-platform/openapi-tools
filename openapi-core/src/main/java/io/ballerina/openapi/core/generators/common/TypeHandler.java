@@ -67,6 +67,10 @@ public class TypeHandler {
         return typeHandlerInstance;
     }
 
+    public Map<String, TypeDefinitionNode> getTypeDefinitionNodes() {
+        return typeDefinitionNodes;
+    }
+
     public SyntaxTree generateTypeSyntaxTree() {
         NodeList<ModuleMemberDeclarationNode> typeMembers = AbstractNodeFactory.createNodeList(
                 typeDefinitionNodes.values().toArray(new TypeDefinitionNode[typeDefinitionNodes.size()]));
