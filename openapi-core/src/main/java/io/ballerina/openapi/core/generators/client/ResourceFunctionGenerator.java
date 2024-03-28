@@ -1,5 +1,6 @@
 package io.ballerina.openapi.core.generators.client;
 
+import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -64,10 +65,14 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
             //Create function body
             FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
                     authConfigGeneratorImp, ballerinaUtilGenerator);
-            functionBodyGenerator.getFunctionBodyNode();
+            Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
+            if (functionBodyNodeResult.isEmpty()) {
+                return Optional.empty();
+            }
+            FunctionBodyNode functionBodyNode = functionBodyNodeResult.get();
             return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, null,
                     qualifierList, functionKeyWord, functionName, createNodeList(relativeResourcePath),
-                    signatureGenerator.generateFunctionSignature(), functionBodyGenerator.getFunctionBodyNode()));
+                    signatureGenerator.generateFunctionSignature(), functionBodyNode));
         } catch (FunctionSignatureGeneratorException | BallerinaOpenApiException e) {
             //todo diagnostic
             return Optional.empty();
