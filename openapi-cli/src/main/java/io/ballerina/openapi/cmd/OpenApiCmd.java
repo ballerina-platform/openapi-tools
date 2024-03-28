@@ -25,12 +25,23 @@ import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.toml.syntax.tree.AbstractNodeFactory;
+import io.ballerina.toml.syntax.tree.DocumentMemberDeclarationNode;
+import io.ballerina.toml.syntax.tree.DocumentNode;
+import io.ballerina.toml.syntax.tree.NodeFactory;
+import io.ballerina.toml.syntax.tree.NodeList;
+import io.ballerina.toml.syntax.tree.SyntaxTree;
+import io.ballerina.toml.syntax.tree.Token;
+import io.ballerina.toml.validator.SampleNodeGenerator;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
+import io.ballerina.tools.text.TextDocument;
+import io.ballerina.tools.text.TextDocuments;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -42,6 +53,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.ballerina.openapi.cmd.CmdConstants.BAL_EXTENSION;
@@ -52,6 +65,9 @@ import static io.ballerina.openapi.cmd.CmdConstants.RESOURCE;
 import static io.ballerina.openapi.cmd.CmdConstants.SERVICE;
 import static io.ballerina.openapi.cmd.CmdConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.YML_EXTENSION;
+import static io.ballerina.openapi.cmd.CmdUtils.addNewLine;
+import static io.ballerina.openapi.cmd.CmdUtils.validateBallerinaProject;
+import static io.ballerina.openapi.cmd.ErrorMessages.NOT_A_BALLERINA_PACKAGE;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 /**
@@ -70,6 +86,8 @@ public class OpenApiCmd implements BLauncherCmd {
     private Path targetOutputPath;
     private boolean exitWhenFinish;
     private boolean clientResourceMode;
+    private boolean statusCodeBinding;
+    private Path ballerinaTomlPath;
 
     @CommandLine.Mixin
     private BaseCmd baseCmd = new BaseCmd();
@@ -172,6 +190,23 @@ public class OpenApiCmd implements BLauncherCmd {
                 outStream.println("'--without-data-binding' option is only available in service generation mode.");
                 exitError(this.exitWhenFinish);
             }
+
+            if (baseCmd.statusCodeBinding) {
+                if (baseCmd.mode != null && baseCmd.mode.equals(SERVICE)) {
+                    outStream.println("'--status-code-binding' option is only available in client generation mode.");
+                    exitError(this.exitWhenFinish);
+                }
+
+                Optional<Path> ballerinaTomlPath = validateBallerinaProject(executionPath, outStream,
+                        NOT_A_BALLERINA_PACKAGE, false);
+                if (ballerinaTomlPath.isEmpty()) {
+                    outStream.printf(NOT_A_BALLERINA_PACKAGE, executionPath.toAbsolutePath());
+                } else {
+                    statusCodeBinding = true;
+                    this.ballerinaTomlPath = ballerinaTomlPath.get();
+                }
+            }
+
             try {
                 openApiToBallerina(fileName, filter);
             } catch (IOException e) {
@@ -268,13 +303,16 @@ public class OpenApiCmd implements BLauncherCmd {
                     generateServiceFile(generator, serviceName, resourcePath, filter);
                     break;
                 case "client":
-                    generatesClientFile(generator, resourcePath, filter, this.clientResourceMode);
+                    generatesClientFile(generator, resourcePath, filter, clientResourceMode, statusCodeBinding);
                     break;
                 default:
                     break;
             }
         } else {
-            generateBothFiles(generator, serviceName, resourcePath, filter, this.clientResourceMode);
+            generateBothFiles(generator, serviceName, resourcePath, filter, clientResourceMode, statusCodeBinding);
+        }
+        if (statusCodeBinding && Objects.nonNull(ballerinaTomlPath)) {
+            updateBallerinaTomlWithClientNativeDependency();
         }
     }
 
@@ -338,10 +376,10 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param resourceMode      flag for client resource method generation
      */
     private void generatesClientFile(BallerinaCodeGenerator generator, Path resourcePath, Filter filter,
-                                     boolean resourceMode) {
+                                     boolean resourceMode, boolean statusCodeBinding) {
         try {
             generator.generateClient(resourcePath.toString(), targetOutputPath.toString(), filter, baseCmd.nullable,
-                    resourceMode);
+                    resourceMode, statusCodeBinding);
         } catch (IOException | FormatterException | BallerinaOpenApiException |
                  OASTypeGenException e) {
             if (e.getLocalizedMessage() != null) {
@@ -381,17 +419,53 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param resourcePath      resource path
      */
     private void generateBothFiles(BallerinaCodeGenerator generator, String fileName, Path resourcePath,
-                                   Filter filter, boolean generateClientResourceFunctions) {
+                                   Filter filter, boolean generateClientResourceFunctions, boolean statusCodeBinding) {
         try {
             assert resourcePath != null;
             generator.generateClientAndService(resourcePath.toString(), fileName, targetOutputPath.toString(), filter,
-                    baseCmd.nullable, generateClientResourceFunctions, generateServiceType, generateWithoutDataBinding);
+                    baseCmd.nullable, generateClientResourceFunctions, generateServiceType, generateWithoutDataBinding,
+                    statusCodeBinding);
         } catch (IOException | BallerinaOpenApiException | FormatterException |
                  OASTypeGenException | ClientException e) {
             outStream.println("Error occurred when generating service for openAPI contract at " + argList.get(0) + "." +
                     " " + e.getMessage() + ".");
             exitError(this.exitWhenFinish);
         }
+    }
+
+    private void updateBallerinaTomlWithClientNativeDependency() {
+        try {
+            TextDocument configDocument = TextDocuments.from(Files.readString(ballerinaTomlPath));
+            SyntaxTree syntaxTree = SyntaxTree.from(configDocument);
+            DocumentNode rootNode = syntaxTree.rootNode();
+            NodeList<DocumentMemberDeclarationNode> nodeList = rootNode.members();
+            NodeList<DocumentMemberDeclarationNode> tomlMembers = AbstractNodeFactory.createEmptyNodeList();
+            for (DocumentMemberDeclarationNode node : nodeList) {
+                tomlMembers = tomlMembers.add(node);
+            }
+            tomlMembers = addNewLine(tomlMembers, 1);
+            tomlMembers = populateClientNativeDependency(tomlMembers);
+            Token eofToken = AbstractNodeFactory.createIdentifierToken("");
+            DocumentNode documentNode = NodeFactory.createDocumentNode(tomlMembers, eofToken);
+            TextDocument textDocument = TextDocuments.from(documentNode.toSourceCode());
+            String content = SyntaxTree.from(textDocument).toSourceCode();
+            try (FileWriter writer = new FileWriter(ballerinaTomlPath.toString(), StandardCharsets.UTF_8)) {
+                writer.write(content);
+                outStream.print(ErrorMessages.TOML_UPDATED_MSG);
+            }
+        } catch (IOException e) {
+            outStream.println("ERROR: Error occurred when updating Ballerina.toml file. " + e.getMessage() + ".");
+            exitError(this.exitWhenFinish);
+        }
+    }
+
+    private NodeList<DocumentMemberDeclarationNode> populateClientNativeDependency(NodeList<DocumentMemberDeclarationNode> tomlMembers) {
+        tomlMembers = tomlMembers.add(SampleNodeGenerator.createTableArray("platform.java17.dependency", null));
+        tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("groupId", "io.ballerina.openapi", null));
+        tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("artifactId", "client-native", null));
+        // TODO: Infer the version from module version
+        tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("version", "1.9.0", null));
+        return tomlMembers;
     }
 
     @Override

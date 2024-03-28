@@ -97,7 +97,7 @@ public class BallerinaCodeGenerator {
     public void generateClientAndService(String definitionPath, String serviceName,
                                          String outPath, Filter filter, boolean nullable,
                                          boolean isResource, boolean generateServiceType,
-                                         boolean generateWithoutDataBinding)
+                                         boolean generateWithoutDataBinding, boolean statusCodeBinding)
             throws IOException, FormatterException, BallerinaOpenApiException,
             OASTypeGenException, ClientException {
         Path srcPath = Paths.get(outPath);
@@ -234,14 +234,14 @@ public class BallerinaCodeGenerator {
      * @throws BallerinaOpenApiException when code generator fails
      */
     public void generateClient(String definitionPath, String outPath, Filter filter, boolean nullable,
-                               boolean isResource)
+                               boolean isResource, boolean statusCodeBinding)
             throws IOException, FormatterException, BallerinaOpenApiException,
             OASTypeGenException {
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles = null;
         try {
-            genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource);
+            genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource, statusCodeBinding);
         } catch (ClientException e) {
             //ignore
         }
@@ -358,7 +358,8 @@ public class BallerinaCodeGenerator {
      * @return generated source files as a list of {@link GenSrcFile}
      * @throws IOException when code generation with specified templates fails
      */
-    private List<GenSrcFile> generateClientFiles(Path openAPI, Filter filter, boolean nullable, boolean isResource)
+    private List<GenSrcFile> generateClientFiles(Path openAPI, Filter filter, boolean nullable, boolean isResource,
+                                                 boolean statusCodeBinding)
             throws IOException, BallerinaOpenApiException, FormatterException, OASTypeGenException, ClientException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_CLIENT_PKG;

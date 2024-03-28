@@ -36,6 +36,10 @@ public class ErrorMessages {
     public static final String TOML_UPDATED_MSG = "The `Ballerina.toml` file is updated successfully with" +
             " the OpenAPI tool configuration.";
 
+    public static final String NOT_A_BALLERINA_PACKAGE = "WARNING: the provided path: %s is not a Ballerina package." +
+            " The status code binding is only supported for Ballerina packages and falling back to the default " +
+            "client generation mode.";
+
     private ErrorMessages() {
         throw new AssertionError();
     }
