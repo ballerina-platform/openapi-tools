@@ -74,31 +74,32 @@ public class BallerinaTypesGenerator {
     //entry point for the type generation
     public TypeGeneratorResult generateTypeDescriptorNodeForOASSchema(Schema<?> schema) {
         HashMap<String, TypeDefinitionNode> subtypesMap = new HashMap<>();
-        String recordName = null;
-        if (schema.get$ref() != null) {
-            String ref = schema.get$ref();
-            //type name is there
-            try {
-                recordName = GeneratorUtils.getValidName(GeneratorUtils.extractReferenceType(ref), true);
-            } catch (OASTypeGenException e) {
-                //todo: diagnostics this exception
-
-                return new TypeGeneratorResult(null, null, new ArrayList<>());
-            }
-        }
+//        String recordName = null;
+//        if (schema.get$ref() != null) {
+//            String ref = schema.get$ref();
+//            //type name is there
+//            try {
+//                recordName = GeneratorUtils.getValidName(GeneratorUtils.extractReferenceType(ref), true);
+//            } catch (OASTypeGenException e) {
+//                //todo: diagnostics this exception
+//
+//                return new TypeGeneratorResult(null, null, new ArrayList<>());
+//            }
+//        }
         Optional<TypeDescriptorNode> typeDescriptorNode;
         try {
             typeDescriptorNode = generateTypeDescriptorNodeForOASSchema(schema, subtypesMap, new HashMap<>());
         } catch (OASTypeGenException e) {
             //todo: diagnostics this exception
-            return new TypeGeneratorResult(null, null , new ArrayList<>());
+            return new TypeGeneratorResult(null, subtypesMap , new ArrayList<>());
         }
-        if (typeDescriptorNode.isPresent() && recordName != null) {
-            subtypesMap.put(recordName, createTypeDefinitionNode(null,
-                    createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD),
-                    createIdentifierToken(recordName),
-                    typeDescriptorNode.get(), createToken(SEMICOLON_TOKEN)));
-        }
+//        if (typeDescriptorNode.isPresent() && recordName != null) {
+//            subtypesMap.put(recordName, createTypeDefinitionNode(null,
+//                    createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD),
+//                    createIdentifierToken(recordName),
+//                    typeDescriptorNode.get(), createToken(SEMICOLON_TOKEN)));
+//        }
+
         return new TypeGeneratorResult(typeDescriptorNode, subtypesMap, new ArrayList<>());
     }
 
@@ -118,7 +119,6 @@ public class BallerinaTypesGenerator {
             String recordName = GeneratorUtils.getValidName(schemaName, true);
             String typeName = GeneratorUtils.escapeIdentifier(recordName);
             if (!pregeneratedTypeMap.containsKey(typeName)) {
-                pregeneratedTypeMap.put(typeName, getSimpleNameReferenceNode(typeName));
                 TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(GeneratorMetaData.getInstance()
                         .getOpenAPI().getComponents().getSchemas().get(schemaName), GeneratorUtils.getValidName(
                         recordName.trim(), true), null, subTypesMap, pregeneratedTypeMap);
@@ -129,6 +129,7 @@ public class BallerinaTypesGenerator {
                         createIdentifierToken(typeName),
                         typeDescriptorNode,
                         createToken(SEMICOLON_TOKEN));
+                pregeneratedTypeMap.put(typeName, getSimpleNameReferenceNode(typeName));
                 subTypesMap.put(typeName, typeDefinitionNode);
             }
             return Optional.ofNullable(getSimpleNameReferenceNode(typeName));

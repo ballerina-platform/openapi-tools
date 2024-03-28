@@ -33,6 +33,7 @@ import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
+import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
@@ -61,6 +62,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -167,7 +169,7 @@ public class FunctionBodyGeneratorImp {
      * @return - {@link FunctionBodyNode}
      * @throws BallerinaOpenApiException - throws exception if generating FunctionBodyNode fails.
      */
-    public FunctionBodyNode getFunctionBodyNode() throws BallerinaOpenApiException {
+    public Optional<FunctionBodyNode> getFunctionBodyNode() throws BallerinaOpenApiException {
 
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation.getValue(), openAPI);
@@ -188,7 +190,13 @@ public class FunctionBodyGeneratorImp {
 
         String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
         // This return type for target data type binding.
-        String rType = functionReturnType.getReturnType().toString();
+        Optional<ReturnTypeDescriptorNode> returnResult = functionReturnType.getReturnType();
+        if (returnResult.isEmpty()) {
+            //todo diagnostic message
+            return Optional.empty();
+//            throw new BallerinaOpenApiException("Return type is not found for the operation : " + operation.getValue());
+        }
+        String rType = returnResult.get().type().toString();
         String returnType = returnTypeForTargetTypeField(rType);
         // Statement Generator for requestBody
         if (operation.getValue().getRequestBody() != null) {
@@ -200,8 +208,8 @@ public class FunctionBodyGeneratorImp {
 
         //Create statements
         NodeList<StatementNode> statements = createNodeList(statementsList);
-        return createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN), null, statements,
-                createToken(CLOSE_BRACE_TOKEN), null);
+        return Optional.of(createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN), null, statements,
+                createToken(CLOSE_BRACE_TOKEN), null));
     }
 
     /**

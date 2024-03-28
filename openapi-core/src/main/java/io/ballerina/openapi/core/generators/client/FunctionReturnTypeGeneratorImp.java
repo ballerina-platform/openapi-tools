@@ -97,12 +97,12 @@ public class FunctionReturnTypeGeneratorImp {
     /**
      * Get return type of the remote function.
      *
-     * @param operation swagger operation.
      * @return string with return type.
      * @throws BallerinaOpenApiException - throws exception if creating return type fails.
      */
     public Optional<ReturnTypeDescriptorNode> getReturnType() {
         //TODO: Handle multiple media-type
+        //Todo handle reference reusable response schema
         List<TypeDescriptorNode> returnTypes = new ArrayList<>();
         boolean noContentResponseFound = false;
         if (operation.getResponses() != null) {

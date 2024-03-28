@@ -19,6 +19,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.List;
 import java.util.Optional;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
@@ -57,7 +58,7 @@ public class PathParameterGenerator implements ParameterGenerator {
             return Optional.empty();
         }
 
-        return Optional.of(createRequiredParameterNode(null, typeDescNode, paramName));
+        return Optional.of(createRequiredParameterNode(createEmptyNodeList(), typeDescNode, paramName));
     }
 
     @Override
