@@ -19,6 +19,7 @@
 package io.ballerina.openapi.core.generators.type.generators;
 
 import io.ballerina.compiler.syntax.tree.NameReferenceNode;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.type.GeneratorConstants;
@@ -65,16 +66,13 @@ public class PrimitiveTypeGenerator extends TypeGenerator {
         // TODO: Need to the format of other primitive types too
         if (schema.getEnum() != null && schema.getEnum().size() > 0) {
             EnumGenerator enumGenerator = new EnumGenerator(schema, typeName, subTypesMap, pregeneratedTypeMap);
-            typeDescriptorName = enumGenerator.generateTypeDescriptorNode().toString();
-            return createSimpleNameReferenceNode(
-                    createIdentifierToken(typeDescriptorName));
+            return enumGenerator.generateTypeDescriptorNode();
         } else if (GeneratorUtils.getOpenAPIType(schema).equals(GeneratorConstants.STRING) &&
                 schema.getFormat() != null &&
                 schema.getFormat().equals(GeneratorConstants.BINARY)) {
             typeDescriptorName = "record {byte[] fileContent; string fileName;}";
         }
-        TypeDescriptorNode typeDescriptorNode = createSimpleNameReferenceNode(
-                createIdentifierToken(typeDescriptorName));
+        TypeDescriptorNode typeDescriptorNode = NodeParser.parseTypeDescriptor(typeDescriptorName);
         return TypeGeneratorUtils.getNullableType(schema, typeDescriptorNode);
     }
 }

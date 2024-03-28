@@ -113,13 +113,15 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
             }
         }
         // 2. requestBody
-        RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(operation.getRequestBody(), openAPI);
-        Optional<ParameterNode> requestBody = requestBodyGenerator.generateParameterNode();
-        if (requestBody.isEmpty()) {
-            throw new FunctionSignatureGeneratorException("Error while generating request body node");
+        if (operation.getRequestBody() != null) {
+            RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(operation.getRequestBody(), openAPI);
+            Optional<ParameterNode> requestBody = requestBodyGenerator.generateParameterNode();
+            if (requestBody.isEmpty()) {
+                throw new FunctionSignatureGeneratorException("Error while generating request body node");
+            }
+            parameterList.add(requestBody.get());
+            parameterList.add(comma);
         }
-        parameterList.add(requestBody.get());
-        parameterList.add(comma);
 
         //filter defaultable parameters
         if (!defaultable.isEmpty()) {

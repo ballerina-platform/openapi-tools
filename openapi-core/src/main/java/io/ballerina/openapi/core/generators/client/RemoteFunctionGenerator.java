@@ -1,5 +1,6 @@
 package io.ballerina.openapi.core.generators.client;
 
+import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
@@ -55,8 +56,13 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         //Create function body
         FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
                 authConfigGeneratorImp, ballerinaUtilGenerator);
+        FunctionBodyNode functionBodyNode;
         try {
-            functionBodyGenerator.getFunctionBodyNode();
+            Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
+            if (functionBodyNodeResult.isEmpty()) {
+                return Optional.empty();
+            }
+            functionBodyNode = functionBodyNodeResult.get();
         } catch (BallerinaOpenApiException e) {
             //todo diagnostic
             diagnostics.add(null);
@@ -66,8 +72,8 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         try {
             return Optional.of(NodeFactory.createFunctionDefinitionNode(OBJECT_METHOD_DEFINITION, null,
                     qualifierList, functionKeyWord, functionName, createEmptyNodeList(),
-                    signatureGenerator.generateFunctionSignature(), functionBodyGenerator.getFunctionBodyNode()));
-        } catch (FunctionSignatureGeneratorException | BallerinaOpenApiException e) {
+                    signatureGenerator.generateFunctionSignature(), functionBodyNode));
+        } catch (FunctionSignatureGeneratorException e) {
             //todo diagnostic
             return Optional.empty();
         }

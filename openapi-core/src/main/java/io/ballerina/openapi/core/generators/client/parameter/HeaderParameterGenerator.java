@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createLiteralValueToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
@@ -51,7 +52,7 @@ public class HeaderParameterGenerator implements ParameterGenerator {
         TypeDescriptorNode typeNode = typeNodeResult.get();
         Schema schema = parameter.getSchema();
         if (parameter.getRequired()) {
-            return Optional.of(createRequiredParameterNode(null, typeNode, paramName));
+            return Optional.of(createRequiredParameterNode(createEmptyNodeList(), typeNode, paramName));
         } else if (schema.getDefault() != null) {
             LiteralValueToken literalValueToken;
             if (typeNode.kind().equals(STRING_TYPE_DESC)) {
@@ -62,7 +63,7 @@ public class HeaderParameterGenerator implements ParameterGenerator {
                 literalValueToken = createLiteralValueToken(null, schema.getDefault().toString(),
                         createEmptyMinutiaeList(), createEmptyMinutiaeList());
             }
-            return Optional.of(createDefaultableParameterNode(null, typeNode, paramName,
+            return Optional.of(createDefaultableParameterNode(createEmptyNodeList(), typeNode, paramName,
                     createToken(EQUAL_TOKEN), literalValueToken));
         } else {
             String type = typeNode.toString();
@@ -86,7 +87,7 @@ public class HeaderParameterGenerator implements ParameterGenerator {
                     createIdentifierToken(nillableType));
             NilLiteralNode nilLiteralNode =
                     createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
-            return Optional.of(createDefaultableParameterNode(null, typeName, paramName,
+            return Optional.of(createDefaultableParameterNode(createEmptyNodeList(), typeName, paramName,
                     createToken(EQUAL_TOKEN), nilLiteralNode));
         }
     }
