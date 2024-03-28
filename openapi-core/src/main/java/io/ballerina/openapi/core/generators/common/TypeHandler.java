@@ -1,17 +1,22 @@
 package io.ballerina.openapi.core.generators.common;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
@@ -27,14 +32,19 @@ import io.ballerina.openapi.core.generators.type.generators.ArrayTypeGenerator;
 import io.ballerina.openapi.core.generators.type.model.TypeGeneratorResult;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.openapi.core.generators.type.model.TokenReturnType;
+import io.ballerina.openapi.core.service.ServiceGenerationUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,9 +54,22 @@ import java.util.Set;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordFieldNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeReferenceNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
+import static io.ballerina.openapi.core.service.GeneratorConstants.HTTP_RESPONSE;
 
 public class TypeHandler {
     private static TypeHandler typeHandlerInstance;
@@ -137,13 +160,110 @@ public class TypeHandler {
         return typeGeneratorResult.typeDescriptorNode();
     }
 
-//    public SimpleNameReferenceNode createStatusCodeTypeInclusionRecord(String includedType, TypeDescriptorNode type) {
-//        TypeGeneratorResult returnType = ballerinaTypesGenerator
-//                .createTypeInclusionRecord(statusCode, type);
-//        handleSubtypes(returnType.subtypeDefinitions());
-//        return returnType.nameReferenceNode().get();
-//    }
-//
+    public ReturnTypeDescriptorNode createStatusCodeTypeInclusionRecord(String statusCode, ApiResponse apiResponse)
+            throws OASTypeGenException {
+        Content responseContent = apiResponse.getContent();
+        TypeDescriptorNode type;
+        if (responseContent.entrySet().size() > 1) {
+            type = handleMultipleContents(responseContent.entrySet());
+        } else {
+            Iterator<Map.Entry<String, MediaType>> contentItr = responseContent.entrySet().iterator();
+            Map.Entry<String, MediaType> mediaTypeEntry = contentItr.next();
+//            String recordName = getNewRecordName(pathRecord);
+//            TypeDescriptorNode mediaTypeToken = ServiceGenerationUtils
+//                    .generateTypeDescriptorForMediaTypes(mediaTypeEntry, recordName);
+            TypeDescriptorNode mediaTypeToken = getTypeNodeFromOASSchema(mediaTypeEntry.getValue().getSchema()).get();
+
+            if (mediaTypeToken == null) {
+                type = createSimpleNameReferenceNode(createIdentifierToken(io.ballerina.openapi.core.service.
+                        GeneratorConstants.ANYDATA));
+            } else {
+                type = mediaTypeToken;
+            }
+        }
+        SimpleNameReferenceNode returnNameReferenceNode = createTypeInclusionRecord(statusCode, type);
+        return createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(), returnNameReferenceNode);
+    }
+
+    private SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode type) {
+        String recordName = statusCode + GeneratorUtils.getValidName(type.toString(), true);
+        Token recordKeyWord = createToken(RECORD_KEYWORD);
+        Token bodyStartDelimiter = createIdentifierToken("{|");
+        // Create record fields
+        List<Node> recordFields = new ArrayList<>();
+        // Type reference node
+        Token asteriskToken = createIdentifierToken("*");
+        QualifiedNameReferenceNode typeNameField = GeneratorUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP,
+                statusCode);
+        TypeReferenceNode typeReferenceNode = createTypeReferenceNode(
+                asteriskToken,
+                typeNameField,
+                createToken(SyntaxKind.SEMICOLON_TOKEN));
+        recordFields.add(typeReferenceNode);
+
+        IdentifierToken fieldName = createIdentifierToken(GeneratorConstants.BODY, GeneratorUtils.SINGLE_WS_MINUTIAE,
+                GeneratorUtils.SINGLE_WS_MINUTIAE);
+        RecordFieldNode recordFieldNode = createRecordFieldNode(
+                null, null,
+                type,
+                fieldName, null,
+                createToken(SyntaxKind.SEMICOLON_TOKEN));
+        recordFields.add(recordFieldNode);
+
+        NodeList<Node> fieldsList = createSeparatedNodeList(recordFields);
+        Token bodyEndDelimiter = createIdentifierToken("|}");
+
+        RecordTypeDescriptorNode recordTypeDescriptorNode = createRecordTypeDescriptorNode(
+                recordKeyWord,
+                bodyStartDelimiter,
+                fieldsList, null,
+                bodyEndDelimiter);
+
+        TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
+                createToken(PUBLIC_KEYWORD),
+                createToken(TYPE_KEYWORD),
+                createIdentifierToken(recordName),
+                recordTypeDescriptorNode,
+                createToken(SEMICOLON_TOKEN));
+        typeDefinitionNodes.put(recordName, typeDefinitionNode);
+        return createSimpleNameReferenceNode(createIdentifierToken(recordName));
+    }
+
+    static int countForRecord = 0;
+    /**
+     * Generate union type node when response has multiple content types.
+     */
+    public TypeDescriptorNode handleMultipleContents(Set<Map.Entry<String, MediaType>> contentEntries) {
+        Set<String> qualifiedNodes = new LinkedHashSet<>();
+        for (Map.Entry<String, MediaType> contentType : contentEntries) {
+//            String recordName = getNewRecordName(pathRecord);
+//            TypeDescriptorNode mediaTypeToken = ServiceGenerationUtils
+//                    .generateTypeDescriptorForMediaTypes(contentType, recordName);
+            TypeDescriptorNode mediaTypeToken = getTypeNodeFromOASSchema(contentType.getValue().getSchema()).get();
+            if (mediaTypeToken == null) {
+                SimpleNameReferenceNode httpResponse = createSimpleNameReferenceNode(createIdentifierToken(
+                        io.ballerina.openapi.core.service.GeneratorConstants.ANYDATA));
+                qualifiedNodes.add(httpResponse.name().text());
+            } else if (mediaTypeToken instanceof NameReferenceNode) {
+//                setCountForRecord(countForRecord++);
+                qualifiedNodes.add(mediaTypeToken.toSourceCode());
+            } else {
+                qualifiedNodes.add(mediaTypeToken.toSourceCode());
+            }
+        }
+
+        if (qualifiedNodes.size() == 1) {
+            return NodeParser.parseTypeDescriptor(qualifiedNodes.iterator().next());
+        }
+        String unionType = String.join(io.ballerina.openapi.core.service.GeneratorConstants.PIPE, qualifiedNodes);
+        if (qualifiedNodes.contains(io.ballerina.openapi.core.service.GeneratorConstants.ANYDATA)) {
+            return NodeParser.parseTypeDescriptor(io.ballerina.openapi.core.service.GeneratorConstants.ANYDATA);
+        }
+        return NodeParser.parseTypeDescriptor(unionType);
+    }
+
+
+
 //    public Optional<TypeDescriptorNode> generateTypeDescriptorForOASSchema(Schema<?> schema, String recordName) throws OASTypeGenException {
 //        TypeGeneratorResult returnType = ballerinaTypesGenerator.generateTypeDescriptorNodeForOASSchema(schema, recordName);
 //        handleSubtypes(returnType.subtypeDefinitions());
