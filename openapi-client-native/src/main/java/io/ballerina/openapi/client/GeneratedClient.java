@@ -25,25 +25,12 @@ import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
-import static io.ballerina.runtime.api.constants.RuntimeConstants.CURRENT_TRANSACTION_CONTEXT_PROPERTY;
-import static io.ballerina.runtime.observability.ObservabilityConstants.KEY_OBSERVER_CONTEXT;
-
 public class GeneratedClient {
 
-    static final String MAIN_STRAND = "MAIN_STRAND";
-    static final String SRC_HANDLER = "SRC_HANDLER";
-    static final String REMOTE_ADDRESS = "REMOTE_ADDRESS";
-    static final String ORIGIN_HOST = "ORIGIN_HOST";
-    static final String POOLED_BYTE_BUFFER_FACTORY = "POOLED_BYTE_BUFFER_FACTORY";
-
-    public static Object getResource(Environment env, BObject client, BArray path, BArray params) {
+    public static Object getResource(Environment env, BObject client, BArray pathParams, BArray params) {
         String functionName = env.getFunctionName();
         String methodName = ClientUtil.getResourceImplFunctionName(functionName, client);
-        return invokeClientMethod(env, client, path, params, methodName);
+        return invokeClientMethod(env, client, pathParams, params, methodName);
     }
 
     public static Object getResourceWithoutPath(Environment env, BObject client, BArray params) {
@@ -90,7 +77,6 @@ public class GeneratedClient {
 
     private static Object invokeClientMethod(Environment env, BObject client, String methodName, Object[] paramFeed) {
         Future balFuture = env.markAsync();
-        Map<String, Object> propertyMap = getPropertiesToPropagate(env);
         env.getRuntime().invokeMethodAsyncSequentially(client, methodName, null, null, new Callback() {
             @Override
             public void notifySuccess(Object result) {
@@ -103,25 +89,7 @@ public class GeneratedClient {
                                 bError.getErrorMessage(), bError);
                 balFuture.complete(invocationError);
             }
-        }, propertyMap, PredefinedTypes.TYPE_NULL, paramFeed);
+        }, null, PredefinedTypes.TYPE_NULL, paramFeed);
         return null;
-    }
-
-    private static Map<String, Object> getPropertiesToPropagate(Environment env) {
-        String[] keys = {CURRENT_TRANSACTION_CONTEXT_PROPERTY, KEY_OBSERVER_CONTEXT, SRC_HANDLER, MAIN_STRAND,
-                POOLED_BYTE_BUFFER_FACTORY, REMOTE_ADDRESS, ORIGIN_HOST};
-        Map<String, Object> subMap = new HashMap<>();
-        for (String key : keys) {
-            Object value = env.getStrandLocal(key);
-            if (value != null) {
-                subMap.put(key, value);
-            }
-        }
-        String strandParentFunctionName = Objects.isNull(env.getStrandMetadata()) ? null :
-                env.getStrandMetadata().getParentFunctionName();
-        if (Objects.nonNull(strandParentFunctionName) && strandParentFunctionName.equals("onMessage")) {
-            subMap.put(MAIN_STRAND, true);
-        }
-        return subMap;
     }
 }
