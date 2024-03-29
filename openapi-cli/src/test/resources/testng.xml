@@ -62,7 +62,7 @@
 <!--            <class name="io.ballerina.openapi.generators.service.HeaderTests"/>-->
 <!--            <class name="io.ballerina.openapi.generators.service.QueryParameterTests"/>-->
 <!--            <class name="io.ballerina.openapi.generators.service.HeaderParameterTests"/>-->
-<!--            <class name="io.ballerina.openapi.generators.service.ServiceDiagnosticTests"/>-->
+            <class name="io.ballerina.openapi.generators.service.ServiceDiagnosticTests"/>
 <!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.ImportsTests"/>&ndash;&gt;-->
 <!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.BallerinaDiagnosticTests"/>&ndash;&gt;-->
 <!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.ComparedGeneratedFileTests"/>&ndash;&gt;-->

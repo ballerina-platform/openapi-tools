@@ -111,12 +111,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 Filter filter = new Filter();
                 OASClientConfig clientConfig = new OASClientConfig.Builder()
                         .withFilters(filter).withOpenAPI(openAPI.get()).build();
-                io.ballerina.openapi.core.generators.type.model.Filter filter1 =
-                        new io.ballerina.openapi.core.generators.type.model.Filter();
-                filter1.setOperations(filter.getOperations());
-                filter1.setTags(filter.getTags());
                 OASServiceMetadata serviceMetaData = new OASServiceMetadata.Builder()
-                        .withFilters(filter1).withOpenAPI(openAPI.get()).build();
+                        .withFilters(filter).withOpenAPI(openAPI.get()).build();
                 codeGeneratorConfig =  new ImmutablePair<>(clientConfig, serviceMetaData);
                 if (validateCache(toolContext, clientConfig)) {
                     return;
@@ -266,11 +262,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
             }
         }
         clientMetaDataBuilder.withFilters(filter);
-        io.ballerina.openapi.core.generators.type.model.Filter filter1 =
-                new io.ballerina.openapi.core.generators.type.model.Filter();
-        filter1.setOperations(filter.getOperations());
-        filter1.setTags(filter.getTags());
-        serviceMetaDataBuilder.withFilters(filter1);
+        serviceMetaDataBuilder.withFilters(filter);
         return new ImmutablePair<>(clientMetaDataBuilder.build(), serviceMetaDataBuilder.build());
     }
 

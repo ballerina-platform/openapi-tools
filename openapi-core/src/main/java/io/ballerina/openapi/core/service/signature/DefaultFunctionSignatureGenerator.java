@@ -118,7 +118,6 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
                 if (parameter.getIn().trim().equals(GeneratorConstants.HEADER)) {
                     HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator();
                     param = headerParameterGenerator.generateParameterNode(parameter);
-//                    param = handleHeader(parameter);
                     if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
                         defaultableParams.add(param);
                         defaultableParams.add(comma);
@@ -137,7 +136,6 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
                     // public type () |BasicType|BasicType []| map<json>;
                     QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator();
                     param = queryParameterGenerator.generateParameterNode(parameter);
-//                    param = createNodeForQueryParam(parameter);
                     if (param != null) {
                         if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
                             defaultableParams.add(param);

@@ -165,9 +165,9 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 if (isWithOutStatusCode) {
                     typeName = handleMultipleContents(content.entrySet(), pathRecord).toSourceCode();
                 } else {
-                    ReturnTypeDescriptorNode returnTypeDescriptorNode = TypeHandler.getInstance()
+                    TypeDescriptorNode statusCodeTypeInclusionRecord = TypeHandler.getInstance()
                             .createStatusCodeTypeInclusionRecord(code, responseValue);
-                    typeName = returnTypeDescriptorNode.toSourceCode();
+                    typeName = statusCodeTypeInclusionRecord.toSourceCode();
                 }
             }
             if (typeName != null) {
@@ -192,8 +192,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
         for (Map.Entry<String, MediaType> contentType : contentEntries) {
 //            String recordName = getNewRecordName(pathRecord);
 
-            TypeDescriptorNode mediaTypeToken = ServiceGenerationUtils
-                    .generateTypeDescriptorForMediaTypes(contentType);
+            TypeDescriptorNode mediaTypeToken = ServiceGenerationUtils.generateTypeDescriptorForMediaTypes(contentType);
             if (mediaTypeToken == null) {
                 SimpleNameReferenceNode httpResponse = createSimpleNameReferenceNode(createIdentifierToken(
                         GeneratorConstants.ANYDATA));
@@ -265,7 +264,10 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             } else {
                 // handle rest of the status codes
                 String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
-                returnNode = TypeHandler.getInstance().createStatusCodeTypeInclusionRecord(code, responseValue);
+                TypeDescriptorNode statusCodeTypeInclusionRecord = TypeHandler.getInstance()
+                        .createStatusCodeTypeInclusionRecord(code, responseValue);
+                returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(),
+                        statusCodeTypeInclusionRecord);
             }
         }
         return returnNode;

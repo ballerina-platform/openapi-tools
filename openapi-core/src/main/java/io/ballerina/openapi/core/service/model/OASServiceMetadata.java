@@ -17,7 +17,7 @@
  */
 package io.ballerina.openapi.core.service.model;
 
-import io.ballerina.openapi.core.generators.type.model.Filter;
+import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 
 /**
