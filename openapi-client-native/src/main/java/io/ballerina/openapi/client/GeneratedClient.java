@@ -42,13 +42,19 @@ public class GeneratedClient {
 
     public static Object getResource(Environment env, BObject client, BArray path, BArray params) {
         String functionName = env.getFunctionName();
-        String methodName = ClientUtil.getImplFunctionName(functionName);
+        String methodName = ClientUtil.getResourceImplFunctionName(functionName, client);
         return invokeClientMethod(env, client, path, params, methodName);
+    }
+
+    public static Object getResourceWithoutPath(Environment env, BObject client, BArray params) {
+        String functionName = env.getFunctionName();
+        String methodName = ClientUtil.getResourceImplFunctionName(functionName, client);
+        return invokeClientMethod(env, client, params, methodName);
     }
 
     public static Object get(Environment env, BObject client, BArray params) {
         String functionName = env.getFunctionName();
-        String methodName = ClientUtil.getImplFunctionName(functionName);
+        String methodName = ClientUtil.getRemoteImplFunctionName(functionName, client);
         return invokeClientMethod(env, client, params, methodName);
     }
 
