@@ -25,6 +25,9 @@ import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.projects.PackageManifest.Platform;
+import io.ballerina.projects.Project;
+import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.toml.syntax.tree.AbstractNodeFactory;
 import io.ballerina.toml.syntax.tree.DocumentMemberDeclarationNode;
 import io.ballerina.toml.syntax.tree.DocumentNode;
@@ -53,8 +56,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import static io.ballerina.openapi.cmd.CmdConstants.BAL_EXTENSION;
@@ -123,6 +128,18 @@ public class OpenApiCmd implements BLauncherCmd {
         this.outStream = System.err;
         this.executionPath = Paths.get(System.getProperty("user.dir"));
         this.exitWhenFinish = true;
+    }
+
+    private String getVersion() throws IOException {
+        try (InputStream inputStream = OpenApiCmd.class.getClassLoader().getResourceAsStream(
+                "openapi-tool-version.properties")) {
+            Properties properties = new Properties();
+            properties.load(inputStream);
+            return properties.getProperty("version");
+        } catch (IOException exception) {
+            throw new IOException("error occurred while reading version from version.properties: " +
+                    exception.getMessage());
+        }
     }
 
     public OpenApiCmd(PrintStream outStream, Path executionDir) {
@@ -435,6 +452,11 @@ public class OpenApiCmd implements BLauncherCmd {
 
     private void updateBallerinaTomlWithClientNativeDependency() {
         try {
+            String version = getVersion();
+            if (checkForExistingClientNativeDependency(version)) {
+                return;
+            }
+
             TextDocument configDocument = TextDocuments.from(Files.readString(ballerinaTomlPath));
             SyntaxTree syntaxTree = SyntaxTree.from(configDocument);
             DocumentNode rootNode = syntaxTree.rootNode();
@@ -444,27 +466,56 @@ public class OpenApiCmd implements BLauncherCmd {
                 tomlMembers = tomlMembers.add(node);
             }
             tomlMembers = addNewLine(tomlMembers, 1);
-            tomlMembers = populateClientNativeDependency(tomlMembers);
+            tomlMembers = populateClientNativeDependency(tomlMembers, version);
             Token eofToken = AbstractNodeFactory.createIdentifierToken("");
             DocumentNode documentNode = NodeFactory.createDocumentNode(tomlMembers, eofToken);
             TextDocument textDocument = TextDocuments.from(documentNode.toSourceCode());
             String content = SyntaxTree.from(textDocument).toSourceCode();
             try (FileWriter writer = new FileWriter(ballerinaTomlPath.toString(), StandardCharsets.UTF_8)) {
                 writer.write(content);
-                outStream.print(ErrorMessages.TOML_UPDATED_MSG);
+                outStream.print(ErrorMessages.TOML_UPDATED_WITH_CLIENT_NATIVE_DEPENDENCY);
             }
         } catch (IOException e) {
-            outStream.println("ERROR: Error occurred when updating Ballerina.toml file. " + e.getMessage() + ".");
+            outStream.println("ERROR: error occurred when updating Ballerina.toml file. " + e.getMessage() + ".");
             exitError(this.exitWhenFinish);
         }
     }
 
-    private NodeList<DocumentMemberDeclarationNode> populateClientNativeDependency(NodeList<DocumentMemberDeclarationNode> tomlMembers) {
-        tomlMembers = tomlMembers.add(SampleNodeGenerator.createTableArray("platform.java17.dependency", null));
+    private boolean checkForExistingClientNativeDependency(String version) {
+        Project project = ProjectLoader.loadProject(executionPath);
+        Map<String, Platform> platforms = project.currentPackage().manifest().platforms();
+        if (Objects.nonNull(platforms) && platforms.containsKey("java17")) {
+            Optional<Map<String, Object>> nativeDependency = platforms.get("java17").dependencies().stream().filter(
+                    dependency -> dependency.containsKey("groupId") &&
+                            dependency.get("groupId").equals("io.ballerina.openapi")
+                            && dependency.containsKey("artifactId") &&
+                            dependency.get("artifactId").equals("client-native")
+            ).findFirst();
+            if (nativeDependency.isEmpty()) {
+                return false;
+            }
+
+            if (nativeDependency.get().containsKey("version") &&
+                    nativeDependency.get().get("version").equals(version)) {
+                outStream.println("INFO: the `Ballerina.toml` file is already updated with the OpenAPI client native " +
+                        "dependency.");;
+            } else {
+                outStream.println("INFO: the `Ballerina.toml` file is already updated with the OpenAPI client native" +
+                        " dependency. The version is different from the current version. Please remove the existing " +
+                        "dependency and try again.");
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private NodeList<DocumentMemberDeclarationNode> populateClientNativeDependency(
+            NodeList<DocumentMemberDeclarationNode> tomlMembers, String version) {
+        String description = "This dependency is added automatically by the OpenAPI tool. DO NOT REMOVE";
+        tomlMembers = tomlMembers.add(SampleNodeGenerator.createTableArray("platform.java17.dependency", description));
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("groupId", "io.ballerina.openapi", null));
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("artifactId", "client-native", null));
-        // TODO: Infer the version from module version
-        tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("version", "1.9.0", null));
+        tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("version", version, null));
         return tomlMembers;
     }
 
