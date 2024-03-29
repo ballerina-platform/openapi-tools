@@ -386,6 +386,7 @@ public class BallerinaCodeGenerator {
                 .withPlugin(false)
                 .withOpenAPI(openAPIDef)
                 .withResourceMode(isResource)
+                .withStatusCodeBinding(statusCodeBinding)
                 .build();
         //Take default DO NOT modify
         licenseHeader = licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER : licenseHeader;
