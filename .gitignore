@@ -38,3 +38,6 @@ target
 velocity.log*
 *Ballerina.lock
 .project
+
+# Client Native Jar Dependency Version
+openapi-tool-version.properties
