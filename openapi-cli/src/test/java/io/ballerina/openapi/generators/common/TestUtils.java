@@ -31,6 +31,7 @@ import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.service.ServiceGenerator;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
@@ -107,47 +108,44 @@ public class TestUtils {
 
     static int i = 0;
 
-//    public static List<Diagnostic> getDiagnosticsForService(SyntaxTree serviceSyntaxTree, OpenAPI openAPI,
-//                                                            BallerinaServiceGenerator ballerinaServiceGenerator, String yamlFile)
-//            throws FormatterException, IOException,
-//            OASTypeGenException {
-////        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
-////                ballerinaServiceGenerator.getTypeInclusionRecords());
-////        preGeneratedTypeDefNodes.addAll(BallerinaTypesGenerator.getTypeInclusionRecords().values());
-//        TypeHandler typeHandler = TypeHandler.getInstance();
-//        String schemaContent = Formatter.format(
-//                typeHandler.generateTypeSyntaxTree()).toSourceCode();
-//        ConstraintGenerator constraintGenerator = new ConstraintGenerator();
-//        constraintGenerator.generateConstraintForTypes(openAPI, typeHandler.generateTypeSyntaxTree());
-//        String serviceContent = Formatter.format(serviceSyntaxTree).toSourceCode();
-//        serviceContent = serviceContent.replaceAll(
-//                "\\{" + System.lineSeparator() + "\\s*\\}", "\\{panic error(\"Tests\");\\}");
-//        writeFile(servicePath, serviceContent);
-//        writeFile(schemaPath, schemaContent);
-//        SemanticModel semanticModel = getSemanticModel(servicePath);
-//        boolean hasErrors = true;
-////        hasErrors = semanticModel.diagnostics().stream()
-////                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
-//        String yamlFileName = yamlFile.split("/")[yamlFile.split("/").length - 1];
-//        if (hasErrors) {
-//            File f = new File("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i);
-//            f.mkdir();
-//            FileWriter myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i
-//                    + "/servicefile" + i + ".bal");
-//            myWriter.write(serviceContent);
-//            myWriter.close();
-//
-//            myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i +
-//                    "/schemafile" + i + ".bal");
-//            myWriter.write(schemaContent);
-//            myWriter.close();
-//            myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i + "/Ballerina.toml");
-//            myWriter.write("");
-//            myWriter.close();
-//            i++;
-//        }
-//        return semanticModel.diagnostics();
-//    }
+    public static List<Diagnostic> getDiagnosticsForService(SyntaxTree serviceSyntaxTree, OpenAPI openAPI,
+                                                            ServiceGenerator ballerinaServiceGenerator, String yamlFile)
+            throws FormatterException, IOException,
+            OASTypeGenException {
+        TypeHandler typeHandler = TypeHandler.getInstance();
+        String schemaContent = Formatter.format(
+                typeHandler.generateTypeSyntaxTree()).toSourceCode();
+        ConstraintGenerator constraintGenerator = new ConstraintGenerator();
+        constraintGenerator.generateConstraintForTypes(openAPI, typeHandler.generateTypeSyntaxTree());
+        String serviceContent = Formatter.format(serviceSyntaxTree).toSourceCode();
+        serviceContent = serviceContent.replaceAll(
+                "\\{" + System.lineSeparator() + "\\s*\\}", "\\{panic error(\"Tests\");\\}");
+        writeFile(servicePath, serviceContent);
+        writeFile(schemaPath, schemaContent);
+        SemanticModel semanticModel = getSemanticModel(servicePath);
+        boolean hasErrors = true;
+//        hasErrors = semanticModel.diagnostics().stream()
+//                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        String yamlFileName = yamlFile.split("/")[yamlFile.split("/").length - 1];
+        if (hasErrors) {
+            File f = new File("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i);
+            f.mkdir();
+            FileWriter myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i
+                    + "/servicefile" + i + ".bal");
+            myWriter.write(serviceContent);
+            myWriter.close();
+
+            myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i +
+                    "/schemafile" + i + ".bal");
+            myWriter.write(schemaContent);
+            myWriter.close();
+            myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i + "/Ballerina.toml");
+            myWriter.write("");
+            myWriter.close();
+            i++;
+        }
+        return semanticModel.diagnostics();
+    }
 
     //Get string as a content of ballerina file
     public static String getStringFromGivenBalFile(Path expectedServiceFile) throws IOException {

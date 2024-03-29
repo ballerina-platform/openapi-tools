@@ -40,6 +40,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -146,11 +147,11 @@ public class ServiceGenerationUtils {
      */
     public static TypeDescriptorNode generateTypeDescriptorForMediaTypes(
             Map.Entry<String, MediaType> mediaType) throws OASTypeGenException {
-        String mediaTypeContent = selectMediaType(mediaType.getKey().trim());
         Schema<?> schema = mediaType.getValue().getSchema();
-
+        Optional<TypeDescriptorNode> typeDescriptorNode = TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
+        return typeDescriptorNode.orElse(null);
         // todo : update this part
-        return null;
+//        return null;
 //        switch (mediaTypeContent) {
 //            case GeneratorConstants.APPLICATION_JSON:
 //                TypeDescriptorNode typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForJsonContent(schema, recordName);
