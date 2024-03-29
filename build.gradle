@@ -140,6 +140,17 @@ subprojects {
 
 def moduleVersion = project.version.replace("-SNAPSHOT", "")
 
+task createProperties(dependsOn: processResources) {
+    doLast {
+        def file = new File("$project.rootDir/openapi-cli/src/main/resources/openapi-tool-version.properties")
+        file.text = "version=${moduleVersion}"
+    }
+}
+
+classes {
+    dependsOn createProperties
+}
+
 release {
     // Disable check snapshots temporarily
     failOnPublishNeeded = false
