@@ -94,6 +94,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createResourcePathParameterNode;
@@ -150,7 +151,7 @@ public class GeneratorUtils {
      * @return - node lists
      * @throws OASTypeGenException
      */
-    public static List<Node> getRelativeResourcePath(String path, Operation operation,
+    public static NodeList<Node> getRelativeResourcePath(String path, Operation operation,
                                                      Components components, boolean isWithoutDataBinding)
             throws OASTypeGenException {
 
@@ -187,7 +188,7 @@ public class GeneratorUtils {
             IdentifierToken idToken = createIdentifierToken(pathNodes[1].trim());
             functionRelativeResourcePath.add(idToken);
         }
-        return functionRelativeResourcePath;
+        return createNodeList(functionRelativeResourcePath);
     }
 
     private static void extractPathParameterDetails(Operation operation, List<Node> functionRelativeResourcePath,
