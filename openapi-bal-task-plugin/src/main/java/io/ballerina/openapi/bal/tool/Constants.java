@@ -34,6 +34,7 @@ public class Constants {
     public static final String MODE = "mode";
     public static final String CLIENT = "client";
     public static final String CACHE_FILE = "openapi-cache.txt";
+    public static final String STATUS_CODE_BINDING = "withStatusCodeBinding";
 
     /**
      * Enum class for containing diagnostic messages.

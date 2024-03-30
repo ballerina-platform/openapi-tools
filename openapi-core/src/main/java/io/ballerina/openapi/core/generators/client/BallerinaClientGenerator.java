@@ -28,7 +28,6 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
-import io.ballerina.compiler.syntax.tree.MarkdownDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
@@ -46,33 +45,29 @@ import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.common.model.Filter;
+import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.tools.diagnostics.Diagnostic;
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.servers.Server;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -88,7 +83,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createFieldAccessExp
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionBodyBlockNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionSignatureNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationLineNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
@@ -115,8 +109,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.REMOTE_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.RESOURCE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURN_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
@@ -136,11 +128,11 @@ public class BallerinaClientGenerator {
     private List<ImportDeclarationNode> imports;
     private List<TypeDefinitionNode> typeDefinitionNodeList;
     private List<String> apiKeyNameList = new ArrayList<>();
-    private final OpenAPI openAPI;
+    protected final OpenAPI openAPI;
     private final io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator balTypeGenerator;
-    private final BallerinaUtilGenerator ballerinaUtilGenerator;
+    protected final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final List<String> remoteFunctionNameList;
-    private final AuthConfigGeneratorImp authConfigGeneratorImp;
+    protected final AuthConfigGeneratorImp authConfigGeneratorImp;
     private final boolean resourceMode;
     private final List<Diagnostic> diagnostics = new ArrayList<>();
 
@@ -204,15 +196,12 @@ public class BallerinaClientGenerator {
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException, ClientException {
 
         // Create `ballerina/http` import declaration node
-        ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA
-                , HTTP);
-        imports.add(importForHttp);
-        List<ModuleMemberDeclarationNode> nodes = new ArrayList<>();
+        List<ImportDeclarationNode> importForHttp = getImportDeclarationNodes();
+        imports.addAll(importForHttp);
+        List<ModuleMemberDeclarationNode> nodes = getModuleMemberDeclarationNodes();
         // Add authentication related records
         authConfigGeneratorImp.addAuthRelatedRecords(openAPI);
         List<Server> servers = openAPI.getServers();
-        // Add class definition node to module member nodes
-        nodes.add(getClassDefinitionNode());
 
         NodeList<ImportDeclarationNode> importsList = createNodeList(imports);
         ModulePartNode modulePartNode =
@@ -220,6 +209,19 @@ public class BallerinaClientGenerator {
         TextDocument textDocument = TextDocuments.from("");
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
         return syntaxTree.modifyWith(modulePartNode);
+    }
+
+    protected List<ModuleMemberDeclarationNode> getModuleMemberDeclarationNodes() throws BallerinaOpenApiException {
+        List<ModuleMemberDeclarationNode> nodes = new ArrayList<>();
+        // Add class definition node to module member nodes
+        nodes.add(getClassDefinitionNode());
+        return nodes;
+    }
+
+    protected List<ImportDeclarationNode> getImportDeclarationNodes() {
+        ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA
+                , HTTP);
+        return new ArrayList<>(List.of(importForHttp));
     }
 
     public BallerinaUtilGenerator getBallerinaUtilGenerator() {
@@ -549,14 +551,24 @@ public class BallerinaClientGenerator {
         List<FunctionDefinitionNode> remoteFunctionNodes = new ArrayList<>();
         for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {
             for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : operation.getValue().entrySet()) {
-                RemoteFunctionGenerator remoteFunctionGenerator = new RemoteFunctionGenerator(operation.getKey(), operationEntry, openAPI, authConfigGeneratorImp, ballerinaUtilGenerator);
-                Optional<FunctionDefinitionNode> remotefunction = remoteFunctionGenerator.generateFunction();
-                if (remotefunction.isPresent()) {
-                    remoteFunctionNodes.add(remotefunction.get());
-                }
+                addRemoteFunction(operation, operationEntry, remoteFunctionNodes);
             }
         }
         return remoteFunctionNodes;
+    }
+
+    protected void addRemoteFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
+                                     Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
+                                     List<FunctionDefinitionNode> remoteFunctionNodes) {
+        RemoteFunctionGenerator remoteFunctionGenerator = getRemoteFunctionGenerator(operation, operationEntry);
+        Optional<FunctionDefinitionNode> remoteFunction = remoteFunctionGenerator.generateFunction();
+        remoteFunction.ifPresent(remoteFunctionNodes::add);
+    }
+
+    protected RemoteFunctionGenerator getRemoteFunctionGenerator(Map.Entry<String,
+            Map<PathItem.HttpMethod, Operation>> operation, Map.Entry<PathItem.HttpMethod, Operation> operationEntry) {
+        return new RemoteFunctionGenerator(operation.getKey(), operationEntry, openAPI, authConfigGeneratorImp,
+                ballerinaUtilGenerator);
     }
 
 

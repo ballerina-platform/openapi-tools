@@ -25,24 +25,39 @@ import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 
+/**
+ * This class contains the generated client's native code.
+ */
 public class GeneratedClient {
 
-    public static Object getResource(Environment env, BObject client, BArray pathParams, BArray params) {
+    public static Object invokeResource(Environment env, BObject client, BArray pathParams, BArray params) {
         String functionName = env.getFunctionName();
-        String methodName = ClientUtil.getResourceImplFunctionName(functionName, client);
-        return invokeClientMethod(env, client, pathParams, params, methodName);
+        try {
+            String methodName = ClientUtil.getResourceImplFunctionName(functionName, client);
+            return invokeClientMethod(env, client, pathParams, params, methodName);
+        } catch (RuntimeException e) {
+            return ClientUtil.createHttpError("error in invoking client resource method: " + e.getMessage(), null);
+        }
     }
 
-    public static Object getResourceWithoutPath(Environment env, BObject client, BArray params) {
+    public static Object invokeResourceWithoutPath(Environment env, BObject client, BArray params) {
         String functionName = env.getFunctionName();
-        String methodName = ClientUtil.getResourceImplFunctionName(functionName, client);
-        return invokeClientMethod(env, client, params, methodName);
+        try {
+            String methodName = ClientUtil.getResourceImplFunctionName(functionName, client);
+            return invokeClientMethod(env, client, params, methodName);
+        } catch (RuntimeException e) {
+            return ClientUtil.createHttpError("error in invoking client resource method: " + e.getMessage(), null);
+        }
     }
 
-    public static Object get(Environment env, BObject client, BArray params) {
+    public static Object invoke(Environment env, BObject client, BArray params) {
         String functionName = env.getFunctionName();
-        String methodName = ClientUtil.getRemoteImplFunctionName(functionName, client);
-        return invokeClientMethod(env, client, params, methodName);
+        try {
+            String methodName = ClientUtil.getRemoteImplFunctionName(functionName, client);
+            return invokeClientMethod(env, client, params, methodName);
+        } catch (RuntimeException e) {
+            return ClientUtil.createHttpError("error in invoking client remote method: " + e.getMessage(), null);
+        }
     }
 
     private static Object invokeClientMethod(Environment env, BObject client, BArray path, BArray params,
@@ -72,6 +87,7 @@ public class GeneratedClient {
             paramFeed[i * 2] = params.get(i);
             paramFeed[i * 2 + 1] = true;
         }
+
         return invokeClientMethod(env, client, methodName, paramFeed);
     }
 

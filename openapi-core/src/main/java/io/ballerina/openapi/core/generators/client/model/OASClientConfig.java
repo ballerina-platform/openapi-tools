@@ -69,6 +69,9 @@ public class OASClientConfig {
     public String getLicense() {
         return license;
     }
+    public boolean isStatusCodeBinding() {
+        return statusCodeBinding;
+    }
 
     /**
      * Client IDL plugin meta data builder class.

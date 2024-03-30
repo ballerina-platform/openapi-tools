@@ -20,6 +20,9 @@ package io.ballerina.openapi.client;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Module;
 
+/**
+ * This class contains the generated client's module utility functions.
+ */
 public class ModuleUtils {
     private static Module module;
 

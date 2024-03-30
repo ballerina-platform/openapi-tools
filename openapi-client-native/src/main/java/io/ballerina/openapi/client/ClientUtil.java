@@ -31,6 +31,9 @@ import io.ballerina.runtime.api.values.BString;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * This class contains the generated client's utility functions.
+ */
 public class ClientUtil {
 
     static final String CLIENT_ERROR = "ClientError";
