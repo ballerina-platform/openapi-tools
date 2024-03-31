@@ -7,6 +7,7 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
@@ -19,11 +20,11 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createLiteralValueToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
@@ -43,25 +44,25 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EXTERNAL_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.OBJECT_METHOD_DEFINITION;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.RESOURCE_ACCESSOR_DEFINITION;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 
-public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
+public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator {
 
-
-    RemoteExternalFunctionGenerator(String path, Map.Entry<PathItem.HttpMethod, Operation> operation, OpenAPI openAPI,
-                                    AuthConfigGeneratorImp authConfigGeneratorImp,
-                                    BallerinaUtilGenerator ballerinaUtilGenerator) {
-        super(path, operation, openAPI, authConfigGeneratorImp, ballerinaUtilGenerator);
+    ResourceExternalFunctionGenerator(Map.Entry<PathItem.HttpMethod, Operation> operation, String path, OpenAPI openAPI,
+                                      AuthConfigGeneratorImp authConfigGeneratorImp,
+                                      BallerinaUtilGenerator ballerinaUtilGenerator) {
+        super(operation, path, openAPI, authConfigGeneratorImp, ballerinaUtilGenerator);
     }
 
     @Override
     protected Optional<FunctionDefinitionNode> getFunctionDefinitionNode(NodeList<Token> qualifierList,
                                                                          Token functionKeyWord,
                                                                          IdentifierToken functionName,
-                                                                         RemoteFunctionSignatureGenerator
+                                                                         List<Node> relativeResourcePath,
+                                                                         ResourceFunctionSingnatureGenerator
                                                                                  signatureGenerator,
                                                                          FunctionBodyNode functionBodyNode)
             throws FunctionSignatureGeneratorException {
@@ -77,8 +78,8 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
         SimpleNameReferenceNode annotationRef = createSimpleNameReferenceNode(createIdentifierToken("MethodImpl"));
         AnnotationNode implAnnotation = createAnnotationNode(createToken(AT_TOKEN), annotationRef, implFunctionMap);
         MetadataNode metadataNode = createMetadataNode(null, createNodeList(implAnnotation));
-        return Optional.of(NodeFactory.createFunctionDefinitionNode(OBJECT_METHOD_DEFINITION, metadataNode,
-                qualifierList, functionKeyWord, functionName, createEmptyNodeList(),
+        return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, metadataNode,
+                qualifierList, functionKeyWord, functionName, createNodeList(relativeResourcePath),
                 signatureGenerator.generateFunctionSignature(), functionBodyNode));
     }
 
@@ -93,7 +94,7 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
                         createEmptyMinutiaeList()));
         BasicLiteralNode methodValueExp = createBasicLiteralNode(STRING_LITERAL,
                 createLiteralValueToken(SyntaxKind.STRING_LITERAL_TOKEN,
-                        "\"invoke\"",
+                        "\"" + getNativeMethodName() + "\"",
                         createEmptyMinutiaeList(),
                         createEmptyMinutiaeList()));
         SpecificFieldNode classFieldNode = createSpecificFieldNode(null, createIdentifierToken("'class"),
@@ -105,5 +106,10 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
         AnnotationNode javaMethodAnnot = createAnnotationNode(createToken(AT_TOKEN), javaMethodToken, methodMapExp);
         return Optional.of(createExternalFunctionBodyNode(createToken(EQUAL_TOKEN),
                 createNodeList(javaMethodAnnot), createToken(EXTERNAL_KEYWORD), createToken(SEMICOLON_TOKEN)));
+    }
+
+    private String getNativeMethodName() {
+        return operation.getValue().getParameters().stream().anyMatch(p -> p.getIn().equals("path")) ? "invokeResource"
+                : "invokeResourceWithoutPath";
     }
 }

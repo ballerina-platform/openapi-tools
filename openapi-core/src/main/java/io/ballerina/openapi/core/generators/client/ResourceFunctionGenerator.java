@@ -20,14 +20,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FUNCTION_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ISOLATED_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.OBJECT_METHOD_DEFINITION;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.REMOTE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RESOURCE_ACCESSOR_DEFINITION;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RESOURCE_KEYWORD;
 
@@ -54,7 +51,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
         //Create qualifier list
         NodeList<Token> qualifierList = createNodeList(createToken(RESOURCE_KEYWORD), createToken(ISOLATED_KEYWORD));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
-        IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
+        IdentifierToken functionName = createIdentifierToken(operation.getKey().toString().toLowerCase());
         // create relative path
         try {
             List<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
@@ -63,20 +60,28 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
             ResourceFunctionSingnatureGenerator signatureGenerator = new ResourceFunctionSingnatureGenerator(
                     operation.getValue(), openAPI);
             //Create function body
-            FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
-                    authConfigGeneratorImp, ballerinaUtilGenerator);
-            Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
+            Optional<FunctionBodyNode> functionBodyNodeResult = getFunctionBodyNode();
             if (functionBodyNodeResult.isEmpty()) {
                 return Optional.empty();
             }
             FunctionBodyNode functionBodyNode = functionBodyNodeResult.get();
-            return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, null,
-                    qualifierList, functionKeyWord, functionName, createNodeList(relativeResourcePath),
-                    signatureGenerator.generateFunctionSignature(), functionBodyNode));
+            return getFunctionDefinitionNode(qualifierList, functionKeyWord, functionName, relativeResourcePath, signatureGenerator, functionBodyNode);
         } catch (FunctionSignatureGeneratorException | BallerinaOpenApiException e) {
             //todo diagnostic
             return Optional.empty();
         }
+    }
+
+    protected Optional<FunctionBodyNode> getFunctionBodyNode() throws BallerinaOpenApiException {
+        FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
+                authConfigGeneratorImp, ballerinaUtilGenerator);
+        return functionBodyGenerator.getFunctionBodyNode();
+    }
+
+    protected Optional<FunctionDefinitionNode> getFunctionDefinitionNode(NodeList<Token> qualifierList, Token functionKeyWord, IdentifierToken functionName, List<Node> relativeResourcePath, ResourceFunctionSingnatureGenerator signatureGenerator, FunctionBodyNode functionBodyNode) throws FunctionSignatureGeneratorException {
+        return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, null,
+                qualifierList, functionKeyWord, functionName, createNodeList(relativeResourcePath),
+                signatureGenerator.generateFunctionSignature(), functionBodyNode));
     }
 
     @Override

@@ -103,6 +103,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.EOF_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ERROR_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FINAL_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.FUNCTION_DEFINITION;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FUNCTION_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ISOLATED_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
@@ -371,7 +372,7 @@ public class BallerinaClientGenerator {
         FunctionBodyNode functionBodyNode = getInitFunctionBodyNode();
         NodeList<Token> qualifierList = createNodeList(createToken(PUBLIC_KEYWORD), createToken(ISOLATED_KEYWORD));
         IdentifierToken functionName = createIdentifierToken("init");
-        return createFunctionDefinitionNode(null, getInitDocComment(), qualifierList, createToken(FUNCTION_KEYWORD),
+        return createFunctionDefinitionNode(FUNCTION_DEFINITION, getInitDocComment(), qualifierList, createToken(FUNCTION_KEYWORD),
                 functionName, createEmptyNodeList(), functionSignatureNode, functionBodyNode);
     }
 
@@ -576,17 +577,22 @@ public class BallerinaClientGenerator {
         List<FunctionDefinitionNode> resourceFunctionNodes = new ArrayList<>();
         for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {
             for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : operation.getValue().entrySet()) {
-                ResourceFunctionGenerator resourceFunctionGenerator = new ResourceFunctionGenerator(operationEntry,
-                        operation.getKey(), openAPI, authConfigGeneratorImp, ballerinaUtilGenerator);
-                Optional<FunctionDefinitionNode> resourceFunction = resourceFunctionGenerator.generateFunction();
-                if (resourceFunction.isPresent()) {
-                    resourceFunctionNodes.add(resourceFunction.get());
-                }
+                addResourceFunction(operation, operationEntry, resourceFunctionNodes);
             }
         }
         return resourceFunctionNodes;
     }
 
+    protected void addResourceFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation, Map.Entry<PathItem.HttpMethod, Operation> operationEntry, List<FunctionDefinitionNode> resourceFunctionNodes) {
+        ResourceFunctionGenerator resourceFunctionGenerator = getResourceFunctionGenerator(operation, operationEntry);
+        Optional<FunctionDefinitionNode> resourceFunction = resourceFunctionGenerator.generateFunction();
+        resourceFunction.ifPresent(resourceFunctionNodes::add);
+    }
+
+    protected ResourceFunctionGenerator getResourceFunctionGenerator(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation, Map.Entry<PathItem.HttpMethod, Operation> operationEntry) {
+        return new ResourceFunctionGenerator(operationEntry,
+                operation.getKey(), openAPI, authConfigGeneratorImp, ballerinaUtilGenerator);
+    }
 
 
     /**
