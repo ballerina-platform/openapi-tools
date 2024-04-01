@@ -57,8 +57,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
             List<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
                     null, openAPI.getComponents(), false);
             // Create function signature
-            ResourceFunctionSingnatureGenerator signatureGenerator = new ResourceFunctionSingnatureGenerator(
-                    operation.getValue(), openAPI);
+            ResourceFunctionSignatureGenerator signatureGenerator = getSignatureGenerator();
             //Create function body
             Optional<FunctionBodyNode> functionBodyNodeResult = getFunctionBodyNode();
             if (functionBodyNodeResult.isEmpty()) {
@@ -72,13 +71,18 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
         }
     }
 
+    protected ResourceFunctionSignatureGenerator getSignatureGenerator() {
+        return new ResourceFunctionSignatureGenerator(
+                operation.getValue(), openAPI);
+    }
+
     protected Optional<FunctionBodyNode> getFunctionBodyNode() throws BallerinaOpenApiException {
         FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
                 authConfigGeneratorImp, ballerinaUtilGenerator);
         return functionBodyGenerator.getFunctionBodyNode();
     }
 
-    protected Optional<FunctionDefinitionNode> getFunctionDefinitionNode(NodeList<Token> qualifierList, Token functionKeyWord, IdentifierToken functionName, List<Node> relativeResourcePath, ResourceFunctionSingnatureGenerator signatureGenerator, FunctionBodyNode functionBodyNode) throws FunctionSignatureGeneratorException {
+    protected Optional<FunctionDefinitionNode> getFunctionDefinitionNode(NodeList<Token> qualifierList, Token functionKeyWord, IdentifierToken functionName, List<Node> relativeResourcePath, ResourceFunctionSignatureGenerator signatureGenerator, FunctionBodyNode functionBodyNode) throws FunctionSignatureGeneratorException {
         return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, null,
                 qualifierList, functionKeyWord, functionName, createNodeList(relativeResourcePath),
                 signatureGenerator.generateFunctionSignature(), functionBodyNode));

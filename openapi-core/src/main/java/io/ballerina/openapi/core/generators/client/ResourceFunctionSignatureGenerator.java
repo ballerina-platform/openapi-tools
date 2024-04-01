@@ -32,11 +32,11 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages.OAS_CLIENT_100;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 
-public class ResourceFunctionSingnatureGenerator implements FunctionSignatureGenerator {
-    private final Operation operation;
-    private final OpenAPI openAPI;
+public class ResourceFunctionSignatureGenerator implements FunctionSignatureGenerator {
+    protected final Operation operation;
+    protected final OpenAPI openAPI;
     private final List<ClientDiagnostic> diagnostics = new ArrayList<>();
-    public ResourceFunctionSingnatureGenerator(Operation operation, OpenAPI openAPI) {
+    public ResourceFunctionSignatureGenerator(Operation operation, OpenAPI openAPI) {
         this.operation = operation;
         this.openAPI = openAPI;
     }
@@ -44,8 +44,34 @@ public class ResourceFunctionSingnatureGenerator implements FunctionSignatureGen
     @Override
     public FunctionSignatureNode generateFunctionSignature() throws FunctionSignatureGeneratorException {
         // 1. parameters - path , query, requestBody, headers
-        List<Node> parameterList = new ArrayList<>();
         List<Parameter> parameters = operation.getParameters();
+        ParametersInfo parametersInfo = getParametersInfo(parameters);
+
+        //filter defaultable parameters
+        if (!parametersInfo.defaultable().isEmpty()) {
+            parametersInfo.parameterList().addAll(parametersInfo.defaultable());
+        }
+        // Remove the last comma
+        //check array out of bound error if parameter size is empty
+        //todo paramterList size is empty
+        if (!parametersInfo.parameterList().isEmpty()) {
+            parametersInfo.parameterList().remove(parametersInfo.parameterList().size() - 1);
+        }
+        SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(parametersInfo.parameterList());
+
+        // 3. return statements
+        FunctionReturnTypeGeneratorImp functionReturnType = getFunctionReturnTypeGenerator();
+        Optional<ReturnTypeDescriptorNode> returnType = functionReturnType.getReturnType();
+        if (returnType.isEmpty()) {
+            throw new FunctionSignatureGeneratorException("Return type is not found for the operation : " +
+                    operation.getOperationId());
+        }
+        //create function signature node
+        return NodeFactory.createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),parameterNodes, createToken(CLOSE_PAREN_TOKEN), returnType.get());
+    }
+
+    protected ParametersInfo getParametersInfo(List<Parameter> parameters) throws FunctionSignatureGeneratorException {
+        List<Node> parameterList = new ArrayList<>();
         List<Node> defaultable = new ArrayList<>();
         Token comma = createToken(COMMA_TOKEN);
         if (parameters != null) {
@@ -68,7 +94,7 @@ public class ResourceFunctionSingnatureGenerator implements FunctionSignatureGen
                 switch (in) {
                     case "query":
                         QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(parameter, openAPI);
-                        Optional<ParameterNode> queryParam = queryParameterGenerator.generateParameterNode();
+                        Optional<ParameterNode> queryParam = queryParameterGenerator.generateParameterNode(false);
                         if (queryParam.isEmpty()) {
                             throw new FunctionSignatureGeneratorException("Error while generating query parameter node");
                         }
@@ -82,7 +108,7 @@ public class ResourceFunctionSingnatureGenerator implements FunctionSignatureGen
                         break;
                     case "header":
                         HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator(parameter, openAPI);
-                        Optional<ParameterNode> headerParam = headerParameterGenerator.generateParameterNode();
+                        Optional<ParameterNode> headerParam = headerParameterGenerator.generateParameterNode(false);
                         if (headerParam.isEmpty()) {
                             throw new FunctionSignatureGeneratorException("Error while generating header parameter node");
                         }
@@ -102,35 +128,19 @@ public class ResourceFunctionSingnatureGenerator implements FunctionSignatureGen
         // 2. requestBody
         if (operation.getRequestBody() != null) {
             RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(operation.getRequestBody(), openAPI);
-            Optional<ParameterNode> requestBody = requestBodyGenerator.generateParameterNode();
+            Optional<ParameterNode> requestBody = requestBodyGenerator.generateParameterNode(false);
             if (requestBody.isEmpty()) {
                 throw new FunctionSignatureGeneratorException("Error while generating request body node");
             }
             parameterList.add(requestBody.get());
             parameterList.add(comma);
         }
+        ParametersInfo parametersInfo = new ParametersInfo(parameterList, defaultable);
+        return parametersInfo;
+    }
 
-        //filter defaultable parameters
-        if (!defaultable.isEmpty()) {
-            parameterList.addAll(defaultable);
-        }
-        // Remove the last comma
-        //check array out of bound error if parameter size is empty
-        //todo paramterList size is empty
-        if (!parameterList.isEmpty()) {
-            parameterList.remove(parameterList.size() - 1);
-        }
-        SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(parameterList);
-
-        // 3. return statements
-        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation, openAPI);
-        Optional<ReturnTypeDescriptorNode> returnType = functionReturnType.getReturnType();
-        if (returnType.isEmpty()) {
-            throw new FunctionSignatureGeneratorException("Return type is not found for the operation : " +
-                    operation.getOperationId());
-        }
-        //create function signature node
-        return NodeFactory.createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),parameterNodes, createToken(CLOSE_PAREN_TOKEN), returnType.get());
+    protected FunctionReturnTypeGeneratorImp getFunctionReturnTypeGenerator() {
+        return new FunctionReturnTypeGeneratorImp(operation, openAPI);
     }
 
     @Override

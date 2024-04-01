@@ -106,4 +106,9 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
         return Optional.of(createExternalFunctionBodyNode(createToken(EQUAL_TOKEN),
                 createNodeList(javaMethodAnnot), createToken(EXTERNAL_KEYWORD), createToken(SEMICOLON_TOKEN)));
     }
+
+    @Override
+    protected RemoteFunctionSignatureGenerator getSignatureGenerator() {
+        return new RemoteExternalFunctionSignatureGenerator(operation.getValue(), openAPI);
+    }
 }

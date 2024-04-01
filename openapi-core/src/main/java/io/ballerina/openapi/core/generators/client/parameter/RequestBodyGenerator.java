@@ -1,8 +1,6 @@
 package io.ballerina.openapi.core.generators.client.parameter;
 
-import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
@@ -14,7 +12,6 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,20 +20,12 @@ import java.util.Optional;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createStreamTypeDescriptorNode;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_OCTET_STREAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ARRAY;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.EMPTY_RECORD;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OBJECT;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SQUARE_BRACKETS;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getBallerinaMediaType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isArraySchema;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isComposedSchema;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isObjectSchema;
 
 public class RequestBodyGenerator implements ParameterGenerator {
     OpenAPI openAPI;
@@ -48,7 +37,7 @@ public class RequestBodyGenerator implements ParameterGenerator {
         this.openAPI = openAPI;
     }
     @Override
-    public Optional<ParameterNode> generateParameterNode() {
+    public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
         Content requestBodyContent;
         String referencedRequestBodyName = "";
         TypeDescriptorNode typeDescNode = null;

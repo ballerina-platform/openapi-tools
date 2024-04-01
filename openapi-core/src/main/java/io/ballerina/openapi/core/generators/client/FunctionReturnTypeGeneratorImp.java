@@ -18,17 +18,12 @@
 
 package io.ballerina.openapi.core.generators.client;
 
-import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
-import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
-import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Content;
@@ -38,11 +33,8 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -51,24 +43,14 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_RETURN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ERROR;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPTIONAL_ERROR;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isArraySchema;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isComposedSchema;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isMapSchema;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isObjectSchema;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isValidSchemaName;
 
 /**
  * This util class for maintain the operation response with ballerina return type.
@@ -77,7 +59,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isValid
  */
 public class FunctionReturnTypeGeneratorImp {
     private OpenAPI openAPI;
-    private Operation operation;
+    protected Operation operation;
     List<ClientDiagnostic> diagnostics = new ArrayList<>();
 
     public FunctionReturnTypeGeneratorImp(Operation operation, OpenAPI openAPI) {
@@ -103,47 +85,10 @@ public class FunctionReturnTypeGeneratorImp {
     public Optional<ReturnTypeDescriptorNode> getReturnType() {
         //TODO: Handle multiple media-type
         //Todo handle reference reusable response schema
-        List<TypeDescriptorNode> returnTypes = new ArrayList<>();
-        boolean noContentResponseFound = false;
-        if (operation.getResponses() != null) {
-            ApiResponses responses = operation.getResponses();
-            for (Map.Entry<String, ApiResponse> entry : responses.entrySet()) {
-                noContentResponseFound = false;
-                String statusCode = entry.getKey();
-                ApiResponse response = entry.getValue();
-                if (statusCode.startsWith("2")) {
-                    Content content = response.getContent();
-                    if (content != null && content.size() > 0) {
-                        Set<Map.Entry<String, MediaType>> mediaTypes = content.entrySet();
-                        for (Map.Entry<String, MediaType> media : mediaTypes) {
-                            TypeDescriptorNode type;
-                            if (media.getValue().getSchema() != null) {
-                                Schema schema = media.getValue().getSchema();
-                                Optional<TypeDescriptorNode> dataType = getDataType(media, schema);
-                                if (dataType.isPresent()) {
-                                    type = dataType.get();
-                                } else {
-                                    //todo add diagnostic
-                                    return Optional.empty();
-                                }
-                            } else {
-                                String mediaType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
-                                type = createSimpleNameReferenceNode(createIdentifierToken(mediaType));
-                            }
-                            returnTypes.add(type);
-                            // Currently support for first media type
-                            break;
-                        }
-                    } else {
-                        noContentResponseFound = true;
-                    }
-                }
-                if ((statusCode.startsWith("1") || statusCode.startsWith("2") || statusCode.startsWith("3")) &&
-                        response.getContent() == null) {
-                    noContentResponseFound = true;
-                }
-            }
-        }
+        ReturnTypesInfo returnTypesInfo = getReturnTypeInfo();
+        List<TypeDescriptorNode> returnTypes = returnTypesInfo.types;
+        boolean noContentResponseFound = returnTypesInfo.noContentResponseFound;
+
         if (!returnTypes.isEmpty()) {
             if (noContentResponseFound) {
                 returnTypes.add(createSimpleNameReferenceNode(createIdentifierToken(ERROR+NILLABLE)));
@@ -152,7 +97,7 @@ public class FunctionReturnTypeGeneratorImp {
             }
 
             return Optional.of(createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(),
-                    createUnionTypeDescriptorNode(returnTypes.get(0), createToken(PIPE_TOKEN), returnTypes.get(1))));
+                    createUnionReturnType(returnTypes)));
         } else if (noContentResponseFound) {
             return Optional.of(createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(),
                     createIdentifierToken(OPTIONAL_ERROR)));
@@ -160,6 +105,73 @@ public class FunctionReturnTypeGeneratorImp {
             return Optional.of(createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(),
                     createIdentifierToken(DEFAULT_RETURN)));
         }
+    }
+
+    public record ReturnTypesInfo(List<TypeDescriptorNode> types, boolean noContentResponseFound) {
+    }
+
+    public ReturnTypesInfo getReturnTypeInfo() {
+        List<TypeDescriptorNode> returnTypes = new ArrayList<>();
+        boolean noContentResponseFound = false;
+        if (operation.getResponses() != null) {
+            ApiResponses responses = operation.getResponses();
+            for (Map.Entry<String, ApiResponse> entry : responses.entrySet()) {
+                String statusCode = entry.getKey();
+                ApiResponse response = entry.getValue();
+                noContentResponseFound = populateReturnType(statusCode, response, returnTypes);
+                if ((statusCode.startsWith("1") || statusCode.startsWith("2") || statusCode.startsWith("3")) &&
+                        response.getContent() == null) {
+                    noContentResponseFound = true;
+                }
+            }
+        }
+        return new ReturnTypesInfo(returnTypes, noContentResponseFound);
+    }
+
+    public static TypeDescriptorNode createUnionReturnType(List<TypeDescriptorNode> types) {
+        if (types.size() == 1) {
+            return types.get(0);
+        }
+
+        TypeDescriptorNode unionType = types.get(0);
+        for (int i = 1; i < types.size(); i++) {
+            unionType = createUnionTypeDescriptorNode(unionType, createToken(PIPE_TOKEN), types.get(i));
+        }
+        return unionType;
+    }
+
+    protected boolean populateReturnType(String statusCode, ApiResponse response, List<TypeDescriptorNode> returnTypes) {
+        boolean noContentResponseFound = false;
+        if (statusCode.startsWith("2")) {
+            Content content = response.getContent();
+            if (content != null && content.size() > 0) {
+                Set<Map.Entry<String, MediaType>> mediaTypes = content.entrySet();
+                for (Map.Entry<String, MediaType> media : mediaTypes) {
+                    TypeDescriptorNode type = null;
+                    if (media.getValue().getSchema() != null) {
+                        Schema schema = media.getValue().getSchema();
+                        Optional<TypeDescriptorNode> dataType = getDataType(media, schema);
+                        if (dataType.isPresent()) {
+                            type = dataType.get();
+                        } else {
+                            //todo add diagnostic
+//                                    return Optional.empty();
+                        }
+                    } else {
+                        String mediaType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
+                        type = createSimpleNameReferenceNode(createIdentifierToken(mediaType));
+                    }
+                    if (type != null) {
+                        returnTypes.add(type);
+                    }
+                    // Currently support for first media type
+                    break;
+                }
+            } else {
+                noContentResponseFound = true;
+            }
+        }
+        return noContentResponseFound;
     }
 
     /**

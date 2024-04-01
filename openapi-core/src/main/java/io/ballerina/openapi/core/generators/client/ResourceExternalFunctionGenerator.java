@@ -62,7 +62,7 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
                                                                          Token functionKeyWord,
                                                                          IdentifierToken functionName,
                                                                          List<Node> relativeResourcePath,
-                                                                         ResourceFunctionSingnatureGenerator
+                                                                         ResourceFunctionSignatureGenerator
                                                                                  signatureGenerator,
                                                                          FunctionBodyNode functionBodyNode)
             throws FunctionSignatureGeneratorException {
@@ -111,5 +111,10 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
     private String getNativeMethodName() {
         return operation.getValue().getParameters().stream().anyMatch(p -> p.getIn().equals("path")) ? "invokeResource"
                 : "invokeResourceWithoutPath";
+    }
+
+    @Override
+    protected ResourceFunctionSignatureGenerator getSignatureGenerator() {
+        return new ResourceExternalFunctionSignatureGenerator(operation.getValue(), openAPI);
     }
 }

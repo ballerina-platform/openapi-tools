@@ -18,10 +18,8 @@
 
 package io.ballerina.openapi.core.service.response;
 
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.NameReferenceNode;
-import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
@@ -29,27 +27,33 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.GeneratorConstants;
-import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages;
 import io.ballerina.openapi.core.service.ServiceGenerationUtils;
+import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
@@ -59,8 +63,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleN
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
-import static io.ballerina.openapi.core.service.GeneratorConstants.DEFAULT_RETURN_COMMENT;
-import static io.ballerina.openapi.core.service.GeneratorConstants.ERROR;
 import static io.ballerina.openapi.core.service.GeneratorConstants.HTTP_RESPONSE;
 import static io.ballerina.openapi.core.service.GeneratorConstants.RETURNS;
 
@@ -165,8 +167,10 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 if (isWithOutStatusCode) {
                     typeName = handleMultipleContents(content.entrySet(), pathRecord).toSourceCode();
                 } else {
+                    Schema bodyTypeSchema = getBodyTypeSchema(responseValue);
+                    Schema headersTypeSchema = getHeadersTypeSchema(responseValue);
                     TypeDescriptorNode statusCodeTypeInclusionRecord = TypeHandler.getInstance()
-                            .createStatusCodeTypeInclusionRecord(code, responseValue);
+                            .createStatusCodeRecord(code, bodyTypeSchema, headersTypeSchema, null);
                     typeName = statusCodeTypeInclusionRecord.toSourceCode();
                 }
             }
@@ -180,6 +184,57 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             return NodeParser.parseTypeDescriptor(GeneratorConstants.ANYDATA);
         }
         return NodeParser.parseTypeDescriptor(unionType);
+    }
+
+    private static Schema getBodyTypeSchema(ApiResponse apiResponse) {
+        Content responseContent = apiResponse.getContent();
+        if (Objects.isNull(responseContent)) {
+            return null;
+        }
+        Set<Map.Entry<String, MediaType>> contentEntries = responseContent.entrySet();
+        if (contentEntries.size() > 1) {
+            List<Schema> schemas = contentEntries.stream()
+                    .map(entry -> entry.getValue().getSchema()).distinct().toList();
+            if (schemas.isEmpty()) {
+                return null;
+            } else if (schemas.size() == 1) {
+                return schemas.get(0);
+            } else {
+                return new ComposedSchema().oneOf(schemas);
+            }
+        } else {
+            Map.Entry<String, MediaType> mediaTypeEntry = contentEntries.iterator().next();
+            return mediaTypeEntry.getValue().getSchema();
+        }
+    }
+
+    private static Schema getHeadersTypeSchema(ApiResponse apiResponse) {
+        Map<String, Header> headers = apiResponse.getHeaders();
+        if (Objects.isNull(headers)) {
+            return null;
+        }
+
+        Map<String, Schema> properties = new HashMap<>();
+        List<String> requiredField = new ArrayList<>();
+        for (Map.Entry<String, Header> headerEntry : headers.entrySet()) {
+            String headerName = headerEntry.getKey();
+            Header header = headerEntry.getValue();
+            Schema headerTypeSchema = header.getSchema();
+            properties.put(headerName, headerTypeSchema);
+            if (header.getRequired()) {
+                requiredField.add(headerName);
+            }
+        }
+
+        if (properties.isEmpty()|| requiredField.isEmpty()) {
+            return null;
+        }
+
+        ObjectSchema headersSchema = new ObjectSchema();
+        headersSchema.setProperties(properties);
+        headersSchema.setRequired(requiredField);
+        headersSchema.setAdditionalProperties(false);
+        return headersSchema;
     }
 
     /**
@@ -264,8 +319,10 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             } else {
                 // handle rest of the status codes
                 String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
+                Schema bodyTypeSchema = getBodyTypeSchema(responseValue);
+                Schema headersTypeSchema = getHeadersTypeSchema(responseValue);
                 TypeDescriptorNode statusCodeTypeInclusionRecord = TypeHandler.getInstance()
-                        .createStatusCodeTypeInclusionRecord(code, responseValue);
+                        .createStatusCodeRecord(code, bodyTypeSchema, headersTypeSchema, null);
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(),
                         statusCodeTypeInclusionRecord);
             }

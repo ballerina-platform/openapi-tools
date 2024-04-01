@@ -59,7 +59,7 @@ public class QueryParameterGenerator implements ParameterGenerator {
         this.openAPI = openAPI;
     }
     @Override
-    public Optional<ParameterNode> generateParameterNode() {
+    public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
 
         TypeDescriptorNode typeNode;
 
@@ -102,7 +102,7 @@ public class QueryParameterGenerator implements ParameterGenerator {
         // generate type node from type handler
 
         // todo handle required parameter
-        if (parameter.getRequired()) {
+        if (parameter.getRequired() || treatDefaultableAsRequired) {
             // todo type handler node
             IdentifierToken paramName =
                     createIdentifierToken(getValidName(parameter.getName().trim(), false));
