@@ -53,6 +53,6 @@ public class BaseCmd {
 
 
     @CommandLine.Option(names = {"--with-status-code-binding"}, description = "Generate the client methods with " +
-            "status code responsebinding")
+            "status code response binding")
     public boolean statusCodeBinding;
 }
