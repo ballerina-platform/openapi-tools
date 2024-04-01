@@ -163,7 +163,7 @@ public class ServiceDiagnosticTests {
         return new Object[][]{
 //                {"petstore_server_with_base_path.yaml"},
 //                {"petstore_get.yaml"},
-                {"openapi_display_annotation.yaml"},
+//                {"openapi_display_annotation.yaml"},
 //                {"header_parameter.yaml"},
 //                {"petstore_post.yaml"},
 //                {"petstore_with_oneOf_response.yaml"},
@@ -173,7 +173,7 @@ public class ServiceDiagnosticTests {
 //                {"duplicated_response.yaml"},
 //                {"complex_oneOf_schema.yaml"},
 //                {"request_body_ref.yaml"},
-//                {"vendor_specific_mime_types.yaml"},
+                {"vendor_specific_mime_types.yaml"},
 ////                {"ballerinax_connector_tests/ably.yaml"}, // HTTP status code '2XX' is not supported in Ballerina
 //                {"ballerinax_connector_tests/azure.iot.yaml"},
 //                //TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1440

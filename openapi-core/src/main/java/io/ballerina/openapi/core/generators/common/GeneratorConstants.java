@@ -143,6 +143,9 @@ public class GeneratorConstants {
     public static final String APPLICATION_XML = "application/xml";
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
     public static final String APPLICATION_URL_ENCODE = "application/x-www-form-urlencoded";
+    public static final String MULTIPART_FORM_DATA = "multipart/form-data";
+    public static final String APPLICATION_FORM_URLENCODED = "application//x-www-form-urlencoded";
+
     public static final String TEXT = "text";
     public static final String IMAGE_PNG = "image/png";
     public static final String ENSURE_TYPE = "ensureType";
@@ -359,6 +362,7 @@ public class GeneratorConstants {
     public static final String MAP_STRING = "map<string>";
     public static final String TEXT_WILDCARD_REGEX = "text/.*";
     public static final String BODY = "body";
+    public static final String HEADERS = "headers";
     public static final String SPECIAL_CHARACTERS_REGEX = "[^a-zA-Z0-9]";
     public static final String OPEN_CURLY_BRACE = "{";
     public static final String CLOSE_CURLY_BRACE = "}";
