@@ -22,6 +22,8 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
+import io.ballerina.openapi.core.generators.constraint.ConstraintGeneratorImp;
+import io.ballerina.openapi.core.generators.constraint.ConstraintResult;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.model.TypeGeneratorResult;
@@ -63,12 +65,14 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 
 public class TypeHandler {
     private static TypeHandler typeHandlerInstance;
+
     private static BallerinaTypesGenerator ballerinaTypesGenerator;
-    public final Map<String, TypeDefinitionNode> typeDefinitionNodes = new HashMap<>();
+    private static GeneratorMetaData generatorMetadata;
+    public HashMap<String, TypeDefinitionNode> typeDefinitionNodes = new HashMap<>();
     private final Set<String> imports = new LinkedHashSet<>();
 
     private TypeHandler(OpenAPI openAPI, boolean isNullable) {
-        GeneratorMetaData.createInstance(openAPI, isNullable);
+        generatorMetadata = GeneratorMetaData.createInstance(openAPI, isNullable);
     }
 
     public static void createInstance(OpenAPI openAPI, boolean isNullable) {
@@ -84,7 +88,18 @@ public class TypeHandler {
         return typeDefinitionNodes;
     }
 
+    public static GeneratorMetaData getGeneratorMetadata() {
+        return generatorMetadata;
+    }
+
     public SyntaxTree generateTypeSyntaxTree() {
+        ConstraintGeneratorImp constraintGenerator = new ConstraintGeneratorImp(GeneratorMetaData.getInstance().getOpenAPI(), typeDefinitionNodes);
+        ConstraintResult constraintResult = constraintGenerator.updateTypeDefinitionsWithConstraints();
+        typeDefinitionNodes = constraintResult.typeDefinitionNodeHashMap();
+        boolean isConstraintAvailable = constraintResult.isConstraintAvailable();
+        if (isConstraintAvailable) {
+            imports.add("import ballerina/constraint;");
+        }
         NodeList<ModuleMemberDeclarationNode> typeMembers = AbstractNodeFactory.createNodeList(
                 typeDefinitionNodes.values().toArray(new TypeDefinitionNode[typeDefinitionNodes.size()]));
         NodeList<ImportDeclarationNode> imports = generateImportNodes();
@@ -354,4 +369,5 @@ public class TypeHandler {
             });
         }
     }
+
 }
