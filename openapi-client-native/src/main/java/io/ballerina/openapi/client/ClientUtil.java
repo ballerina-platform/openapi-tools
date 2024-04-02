@@ -58,9 +58,8 @@ public class ClientUtil {
     }
 
     private static String getImplFunctionName(MethodType clientMethod) {
-        BString methodImplKey = Arrays.stream(clientMethod.getAnnotations().getKeys()).filter(
-                key -> key.getValue().contains("MethodImpl")).findFirst().
-                orElseThrow(() -> new RuntimeException("Method implementation annotation not found"));
+        BString methodImplKey = Arrays.stream(clientMethod.getAnnotations().getKeys()).filter(key -> key.getValue().contains("MethodImpl")).
+                findFirst().orElseThrow(() -> new RuntimeException("Method implementation annotation not found"));
         BMap methodImplAnnotation = (BMap) clientMethod.getAnnotation(methodImplKey);
         BString implFunctionName = methodImplAnnotation.getStringValue(StringUtils.fromString("name"));
         if (Objects.isNull(implFunctionName)) {
