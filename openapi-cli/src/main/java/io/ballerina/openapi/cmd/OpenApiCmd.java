@@ -513,7 +513,7 @@ public class OpenApiCmd implements BLauncherCmd {
 
     private NodeList<DocumentMemberDeclarationNode> populateClientNativeDependency(
             NodeList<DocumentMemberDeclarationNode> tomlMembers, String version) {
-        String description = "This dependency is added automatically by the OpenAPI tool. DO NOT REMOVE";
+        String description = "This dependency is added automatically by the OpenAPI tool. DO NOT REMOVE UNLESS REQUIRED";
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createTableArray("platform.java17.dependency", description));
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("groupId", "io.ballerina.openapi", null));
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("artifactId", "client-native", null));
