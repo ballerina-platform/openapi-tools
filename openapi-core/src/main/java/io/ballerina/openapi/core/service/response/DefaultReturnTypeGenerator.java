@@ -27,9 +27,7 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
-import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.GeneratorConstants;
 import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages;
@@ -40,17 +38,13 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
@@ -59,10 +53,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getHeadersTypeSchema;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.selectMediaType;
 import static io.ballerina.openapi.core.service.GeneratorConstants.HTTP_RESPONSE;
 import static io.ballerina.openapi.core.service.GeneratorConstants.RETURNS;
@@ -81,8 +72,8 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
 
     private static int countForRecord = 0;
 
-    public DefaultReturnTypeGenerator(OASServiceMetadata oasServiceMetadata, String pathRecord) {
-        super(oasServiceMetadata, pathRecord);
+    public DefaultReturnTypeGenerator(OASServiceMetadata oasServiceMetadata) {
+        super(oasServiceMetadata);
     }
 
     /**
@@ -101,14 +92,13 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             ApiResponses responses = operation.getValue().getResponses();
             if (responses.size() > 1) {
                 //handle multiple response scenarios ex: status code 200, 400, 500
-                TypeDescriptorNode type = handleMultipleResponse(responses, httpMethod,
-                        oasServiceMetadata.getOpenAPI(), pathRecord);
+                TypeDescriptorNode type = handleMultipleResponse(responses, httpMethod);
                 returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(), type);
             } else if (responses.size() == 1) {
                 //handle single response
                 Iterator<Map.Entry<String, ApiResponse>> responseIterator = responses.entrySet().iterator();
                 Map.Entry<String, ApiResponse> response = responseIterator.next();
-                returnNode = handleSingleResponse(response, pathRecord, httpMethod);
+                returnNode = handleSingleResponse(response, httpMethod);
             } else {
                 TypeDescriptorNode defaultType = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
                 returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(), defaultType);
@@ -131,8 +121,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
     /**
      * Generate union type node when operation has multiple responses.
      */
-    private TypeDescriptorNode handleMultipleResponse(ApiResponses responses, String httpMethod,
-                                                             OpenAPI openAPI, String pathRecord)
+    private TypeDescriptorNode handleMultipleResponse(ApiResponses responses, String httpMethod)
             throws OASTypeGenException {
 
         Set<String> qualifiedNodes = new LinkedHashSet<>();
@@ -151,7 +140,8 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             if (responseValue != null && responseValue.get$ref() != null) {
                 String[] splits = responseValue.get$ref().split("/");
                 String extractReferenceType = splits[splits.length - 1];
-                responseValue = openAPI.getComponents().getResponses().get(extractReferenceType);
+                responseValue = oasServiceMetadata.getOpenAPI()
+                        .getComponents().getResponses().get(extractReferenceType);
                 content = responseValue.getContent();
             }
             if (responseCode.equals(GeneratorConstants.DEFAULT)) {
@@ -171,9 +161,10 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                                 (!httpMethod.equals(GeneratorConstants.POST) &&
                                         responseCode.equals(GeneratorConstants.HTTP_200));
                 if (isWithOutStatusCode) {
-                    typeName = handleMultipleContents(content.entrySet(), pathRecord).toSourceCode();
+                    typeName = handleMultipleContents(content.entrySet()).toSourceCode();
                 } else {
-                    TypeDescriptorNode statusCodeTypeInclusionRecord = generateStatusCodeTypeInclusionRecord(response);
+                    TypeDescriptorNode statusCodeTypeInclusionRecord = GeneratorUtils
+                            .generateStatusCodeTypeInclusionRecord(response, oasServiceMetadata.getOpenAPI());
                     typeName = statusCodeTypeInclusionRecord.toSourceCode();
                 }
             }
@@ -192,13 +183,10 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
     /**
      * Generate union type node when response has multiple content types.
      */
-    private TypeDescriptorNode handleMultipleContents(Set<Map.Entry<String, MediaType>> contentEntries,
-                                                            String pathRecord)
+    private TypeDescriptorNode handleMultipleContents(Set<Map.Entry<String, MediaType>> contentEntries)
             throws OASTypeGenException {
         Set<String> qualifiedNodes = new LinkedHashSet<>();
         for (Map.Entry<String, MediaType> contentType : contentEntries) {
-//            String recordName = getNewRecordName(pathRecord);
-
             TypeDescriptorNode mediaTypeToken = getReturnNodeForSchemaType(contentType);
             if (mediaTypeToken == null) {
                 SimpleNameReferenceNode httpResponse = createSimpleNameReferenceNode(createIdentifierToken(
@@ -225,8 +213,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
     /**
      * This util is to generate return node when the operation has one response.
      */
-    private ReturnTypeDescriptorNode handleSingleResponse(Map.Entry<String, ApiResponse> response, String pathRecord,
-                                                          String httpMethod)
+    private ReturnTypeDescriptorNode handleSingleResponse(Map.Entry<String, ApiResponse> response, String httpMethod)
             throws OASTypeGenException {
 
         ReturnTypeDescriptorNode returnNode = null;
@@ -257,7 +244,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 Set<Map.Entry<String, MediaType>> contentEntries = responseContent.entrySet();
                 TypeDescriptorNode returnType;
                 if (contentEntries.size() > 1) {
-                    returnType = handleMultipleContents(contentEntries, pathRecord);
+                    returnType = handleMultipleContents(contentEntries);
                 } else {
                     returnType = getReturnNodeForSchemaType(contentEntries.iterator().next());
                 }
@@ -269,75 +256,13 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), type);
             } else {
                 // handle rest of the status codes
-                TypeDescriptorNode statusCodeTypeInclusionRecord = generateStatusCodeTypeInclusionRecord(response);
+                TypeDescriptorNode statusCodeTypeInclusionRecord = GeneratorUtils
+                        .generateStatusCodeTypeInclusionRecord(response, oasServiceMetadata.getOpenAPI());
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(),
                         statusCodeTypeInclusionRecord);
             }
         }
         return returnNode;
-    }
-
-    private TypeDescriptorNode generateStatusCodeTypeInclusionRecord(Map.Entry<String, ApiResponse> response) {
-        String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
-        Content responseContent = response.getValue().getContent();
-        Set<Map.Entry<String, MediaType>> bodyTypeSchema;
-        if (Objects.nonNull(responseContent)) {
-            bodyTypeSchema = responseContent.entrySet();
-        } else if (response.getValue().get$ref() != null) {
-            try {
-                String referenceType = GeneratorUtils.extractReferenceType(response.getValue().get$ref());
-                ApiResponse apiResponse = oasServiceMetadata.getOpenAPI().getComponents()
-                        .getResponses().get(referenceType);
-                bodyTypeSchema = apiResponse.getContent().entrySet();
-            } catch (OASTypeGenException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            bodyTypeSchema = new LinkedHashSet<>();
-        }
-        Schema headersTypeSchema = getHeadersTypeSchema(response.getValue());
-
-        List<TypeDescriptorNode> generatedTypes = new ArrayList<>();
-        if (!code.equals("NoContent")) {
-            for (Map.Entry<String, MediaType> mediaTypeEntry : bodyTypeSchema) {
-                String mediaType = selectMediaType(mediaTypeEntry.getKey());
-                TypeDescriptorNode mediaTypeToken = switch (mediaType) {
-                    case GeneratorConstants.APPLICATION_JSON -> {
-                        if (mediaTypeEntry.getValue().getSchema() != null) {
-                            yield TypeHandler.getInstance()
-                                    .getTypeNodeFromOASSchema(mediaTypeEntry.getValue().getSchema()).get();
-                        } else {
-                            yield createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
-                        }
-                    }
-                    case GeneratorConstants.APPLICATION_XML -> generateTypeDescriptorForXMLContent();
-                    case GeneratorConstants.APPLICATION_URL_ENCODE -> generateTypeDescriptorForMapStringContent();
-                    case GeneratorConstants.TEXT -> generateTypeDescriptorForTextContent();
-                    case GeneratorConstants.APPLICATION_OCTET_STREAM -> generateTypeDescriptorForOctetStreamContent();
-                    default -> createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
-                };
-                generatedTypes.add(mediaTypeToken);
-            }
-        } else {
-            // todo : generate warning
-        }
-        if (generatedTypes.isEmpty()) {
-            return TypeHandler.getInstance().createTypeInclusionRecord(code, null,
-                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
-        } else if (generatedTypes.size() == 1) {
-            return TypeHandler.getInstance().createTypeInclusionRecord(code, generatedTypes.get(0),
-                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
-        }
-        UnionTypeDescriptorNode unionTypeDescriptorNode = null;
-        TypeDescriptorNode leftTypeDesc = generatedTypes.get(0);
-        for (int i = 1; i < generatedTypes.size(); i++) {
-            TypeDescriptorNode rightTypeDesc = generatedTypes.get(i);
-            unionTypeDescriptorNode = createUnionTypeDescriptorNode(leftTypeDesc, createToken(PIPE_TOKEN),
-                    rightTypeDesc);
-            leftTypeDesc = unionTypeDescriptorNode;
-        }
-        return TypeHandler.getInstance().createTypeInclusionRecord(code, unionTypeDescriptorNode,
-                TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
     }
 
     private TypeDescriptorNode getReturnNodeForSchemaType(Map.Entry<String, MediaType> contentEntry)
@@ -362,10 +287,6 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             return createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
         }
         return mediaTypeToken;
-    }
-
-    private static String getNewRecordName(String pathRecord) {
-        return countForRecord == 0 ? pathRecord + GeneratorConstants.RESPONSE_RECORD_NAME : pathRecord + "Response_" + countForRecord;
     }
 
     public static void setCountForRecord(int count) {

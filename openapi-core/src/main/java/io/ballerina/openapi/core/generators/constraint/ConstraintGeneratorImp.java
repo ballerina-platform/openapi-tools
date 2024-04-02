@@ -66,6 +66,9 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
 
     @Override
     public ConstraintResult updateTypeDefinitionsWithConstraints() {
+        if (openAPI.getComponents().getSchemas() == null) {
+            return new ConstraintResult(typeDefinitions, isConstraint, diagnostics);
+        }
         openAPI.getComponents().getSchemas().forEach((key, value) -> {
             if (typeDefinitions.containsKey(key) && GeneratorUtils.hasConstraints(value)) {
                 key = GeneratorUtils.getValidName(key, true);
@@ -78,7 +81,6 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                         NodeList<Node> fields = record.fields();
                         List<Node> recordFields = new ArrayList<>();
                         for (Node field : fields) {
-
                             RecordFieldNode recordFieldNode = (RecordFieldNode) field;
                             String fieldName = recordFieldNode.fieldName().text();
                             //todo remove this replacement with new lang changes

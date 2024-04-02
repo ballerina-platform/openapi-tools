@@ -58,7 +58,9 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
+import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -81,6 +83,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -107,6 +111,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -129,6 +134,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createResourcePathPa
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSpecificFieldNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
@@ -137,6 +143,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SLASH_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
@@ -182,6 +189,10 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TYP
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YML_EXTENSION;
+import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForMapStringContent;
+import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForOctetStreamContent;
+import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForTextContent;
+import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForXMLContent;
 
 /**
  * This class util for store all the common scenarios.
@@ -1246,5 +1257,73 @@ public class GeneratorUtils {
         headersSchema.setRequired(requiredField);
         headersSchema.setAdditionalProperties(false);
         return headersSchema;
+    }
+
+    public static TypeDescriptorNode generateStatusCodeTypeInclusionRecord(Map.Entry<String, ApiResponse> response,
+                                                                           OpenAPI openAPI) {
+        String code = io.ballerina.openapi.core.service.GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
+        Content responseContent = response.getValue().getContent();
+        Set<Map.Entry<String, MediaType>> bodyTypeSchema;
+        if (Objects.nonNull(responseContent)) {
+            bodyTypeSchema = responseContent.entrySet();
+        } else if (response.getValue().get$ref() != null) {
+            try {
+                String referenceType = GeneratorUtils.extractReferenceType(response.getValue().get$ref());
+                ApiResponse apiResponse = openAPI.getComponents()
+                        .getResponses().get(referenceType);
+                bodyTypeSchema = apiResponse.getContent().entrySet();
+            } catch (BallerinaOpenApiException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            bodyTypeSchema = new LinkedHashSet<>();
+        }
+        Schema headersTypeSchema = getHeadersTypeSchema(response.getValue());
+
+        List<TypeDescriptorNode> generatedTypes = new ArrayList<>();
+        if (!code.equals("NoContent")) {
+            for (Map.Entry<String, MediaType> mediaTypeEntry : bodyTypeSchema) {
+                String mediaType = selectMediaType(mediaTypeEntry.getKey());
+                TypeDescriptorNode mediaTypeToken = switch (mediaType) {
+                    case io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_JSON -> {
+                        if (mediaTypeEntry.getValue().getSchema() != null) {
+                            yield TypeHandler.getInstance()
+                                    .getTypeNodeFromOASSchema(mediaTypeEntry.getValue().getSchema()).get();
+                        } else {
+                            yield createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
+                        }
+                    }
+                    case io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_XML ->
+                            generateTypeDescriptorForXMLContent();
+                    case io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_URL_ENCODE ->
+                            generateTypeDescriptorForMapStringContent();
+                    case io.ballerina.openapi.core.service.GeneratorConstants.TEXT ->
+                            generateTypeDescriptorForTextContent();
+                    case io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_OCTET_STREAM ->
+                            generateTypeDescriptorForOctetStreamContent();
+                    default -> createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
+                };
+                generatedTypes.add(mediaTypeToken);
+            }
+        } else {
+            // todo : generate warning
+        }
+        if (generatedTypes.isEmpty()) {
+            return TypeHandler.getInstance().createTypeInclusionRecord(code, null,
+                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
+        } else if (generatedTypes.size() == 1) {
+            return TypeHandler.getInstance().createTypeInclusionRecord(code, generatedTypes.get(0),
+                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
+        }
+        UnionTypeDescriptorNode unionTypeDescriptorNode = null;
+        TypeDescriptorNode leftTypeDesc = generatedTypes.get(0);
+        for (int i = 1; i < generatedTypes.size(); i++) {
+            TypeDescriptorNode rightTypeDesc = generatedTypes.get(i);
+            unionTypeDescriptorNode = createUnionTypeDescriptorNode(leftTypeDesc, createToken(PIPE_TOKEN),
+                    rightTypeDesc);
+            leftTypeDesc = unionTypeDescriptorNode;
+        }
+        return TypeHandler.getInstance().createTypeInclusionRecord(code, unionTypeDescriptorNode,
+                TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
     }
 }

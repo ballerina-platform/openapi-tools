@@ -15,6 +15,7 @@ import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.GeneratorConstants;
 import io.ballerina.openapi.core.service.ServiceGenerationUtils;
+import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
@@ -49,6 +50,10 @@ public class HeaderParameterGenerator extends ParameterGenerator {
     private static final List<String> paramSupportedTypes =
             new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
                     GeneratorConstants.STRING, GeneratorConstants.BOOLEAN));
+
+    public HeaderParameterGenerator(OASServiceMetadata oasServiceMetadata) {
+        super(oasServiceMetadata);
+    }
 
     /**
      * This function for generating parameter ST node for header.

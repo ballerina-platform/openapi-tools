@@ -58,7 +58,7 @@ public class LowResourceFunctionSignatureGenerator extends FunctionSignatureGene
 
         SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(parameters);
 
-        ReturnTypeGenerator returnTypeGenerator = ReturnTypeGenerator.getReturnTypeGenerator(oasServiceMetadata, path);
+        ReturnTypeGenerator returnTypeGenerator = ReturnTypeGenerator.getReturnTypeGenerator(oasServiceMetadata);
         ReturnTypeDescriptorNode returnTypeDescriptorNode;
         try {
             returnTypeDescriptorNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation, path);

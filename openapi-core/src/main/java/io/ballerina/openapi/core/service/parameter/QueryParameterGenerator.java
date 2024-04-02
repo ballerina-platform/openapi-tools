@@ -17,6 +17,7 @@ import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.GeneratorConstants;
 import io.ballerina.openapi.core.service.ServiceGenerationUtils;
 import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages;
+import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -42,6 +43,10 @@ import static io.ballerina.openapi.core.generators.type.GeneratorUtils.isObjectS
 import static io.ballerina.openapi.core.service.GeneratorConstants.NILLABLE;
 
 public class QueryParameterGenerator extends ParameterGenerator {
+
+    public QueryParameterGenerator(OASServiceMetadata oasServiceMetadata) {
+        super(oasServiceMetadata);
+    }
 
     /**
      * This for generate query parameter nodes.

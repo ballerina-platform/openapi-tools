@@ -19,6 +19,7 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
@@ -53,6 +54,7 @@ public class ReturnTypeTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_01_rs.bal", syntaxTree);
@@ -66,6 +68,7 @@ public class ReturnTypeTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_02_rs.bal", syntaxTree);
@@ -79,6 +82,7 @@ public class ReturnTypeTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_03_rs.bal", syntaxTree);
@@ -92,6 +96,7 @@ public class ReturnTypeTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_04_rs.bal", syntaxTree);
@@ -105,6 +110,7 @@ public class ReturnTypeTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_05_rs.bal", syntaxTree);
@@ -118,6 +124,7 @@ public class ReturnTypeTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_06_rs.bal", syntaxTree);
@@ -131,6 +138,7 @@ public class ReturnTypeTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_07_rs.bal", syntaxTree);
@@ -144,6 +152,7 @@ public class ReturnTypeTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_08_rs.bal", syntaxTree);
@@ -157,6 +166,7 @@ public class ReturnTypeTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_09_rs.bal", syntaxTree);

@@ -19,8 +19,8 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameRefe
 
 public class LowResourceReturnTypeGenerator extends ReturnTypeGenerator {
 
-    public LowResourceReturnTypeGenerator(OASServiceMetadata oasServiceMetadata, String pathRecord) {
-        super(oasServiceMetadata, pathRecord);
+    public LowResourceReturnTypeGenerator(OASServiceMetadata oasServiceMetadata) {
+        super(oasServiceMetadata);
     }
 
     @Override
