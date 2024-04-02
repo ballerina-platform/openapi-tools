@@ -1204,39 +1204,17 @@ public class GeneratorUtils {
 
     public static String selectMediaType(String mediaTypeContent) {
         if (mediaTypeContent.matches("application/.*\\+json") || mediaTypeContent.matches(".*/json")) {
-            mediaTypeContent = io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_JSON;
+            mediaTypeContent = GeneratorConstants.APPLICATION_JSON;
         } else if (mediaTypeContent.matches("application/.*\\+xml") || mediaTypeContent.matches(".*/xml")) {
-            mediaTypeContent = io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_XML;
+            mediaTypeContent = GeneratorConstants.APPLICATION_XML;
         } else if (mediaTypeContent.matches("text/.*")) {
-            mediaTypeContent = io.ballerina.openapi.core.service.GeneratorConstants.TEXT;
+            mediaTypeContent = GeneratorConstants.TEXT;
         }  else if (mediaTypeContent.matches("application/.*\\+octet-stream")) {
-            mediaTypeContent = io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_OCTET_STREAM;
+            mediaTypeContent = GeneratorConstants.APPLICATION_OCTET_STREAM;
         } else if (mediaTypeContent.matches("application/.*\\+x-www-form-urlencoded")) {
-            mediaTypeContent = io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_URL_ENCODE;
+            mediaTypeContent = GeneratorConstants.APPLICATION_URL_ENCODE;
         }
         return mediaTypeContent;
-    }
-
-    public static Schema getBodyTypeSchema(ApiResponse apiResponse) {
-        Content responseContent = apiResponse.getContent();
-        if (Objects.isNull(responseContent)) {
-            return null;
-        }
-        Set<Map.Entry<String, MediaType>> contentEntries = responseContent.entrySet();
-        if (contentEntries.size() > 1) {
-            List<Schema> schemas = contentEntries.stream()
-                    .map(entry -> entry.getValue().getSchema()).distinct().toList();
-            if (schemas.isEmpty()) {
-                return null;
-            } else if (schemas.size() == 1) {
-                return schemas.get(0);
-            } else {
-                return new ComposedSchema().oneOf(schemas);
-            }
-        } else {
-            Map.Entry<String, MediaType> mediaTypeEntry = contentEntries.iterator().next();
-            return mediaTypeEntry.getValue().getSchema();
-        }
     }
 
     public static Schema getHeadersTypeSchema(ApiResponse apiResponse) {

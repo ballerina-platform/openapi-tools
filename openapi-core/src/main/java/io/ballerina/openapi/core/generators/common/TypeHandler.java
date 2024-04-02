@@ -121,9 +121,8 @@ public class TypeHandler {
                 continue;
             }
             if (node.typeName().text().equals(io.ballerina.openapi.core.generators.type.GeneratorConstants.CONNECTION_CONFIG)) {
-                ImportDeclarationNode importForHttp = io.ballerina.openapi.core.generators.type.GeneratorUtils.getImportDeclarationNode(
-                        io.ballerina.openapi.core.generators.type.GeneratorConstants.BALLERINA,
-                        io.ballerina.openapi.core.generators.type.GeneratorConstants.HTTP);
+                ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(
+                        GeneratorConstants.BALLERINA, GeneratorConstants.HTTP);
                 imports.add(importForHttp);
             }
             RecordTypeDescriptorNode record = (RecordTypeDescriptorNode) node.typeDescriptor();
@@ -135,12 +134,12 @@ public class TypeHandler {
                 TypeReferenceNode recordField = (TypeReferenceNode) field;
                 QualifiedNameReferenceNode typeInclusion = (QualifiedNameReferenceNode) recordField.typeName();
                 boolean isHttpImportExist = imports.stream().anyMatch(importNode -> importNode.moduleName().stream()
-                        .anyMatch(moduleName -> moduleName.text().equals(io.ballerina.openapi.core.generators.type.GeneratorConstants.HTTP)));
+                        .anyMatch(moduleName -> moduleName.text().equals(GeneratorConstants.HTTP)));
 
-                if (!isHttpImportExist && typeInclusion.modulePrefix().text().equals(io.ballerina.openapi.core.generators.type.GeneratorConstants.HTTP)) {
+                if (!isHttpImportExist && typeInclusion.modulePrefix().text().equals(GeneratorConstants.HTTP)) {
                     ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(
-                            io.ballerina.openapi.core.generators.type.GeneratorConstants.BALLERINA,
-                            io.ballerina.openapi.core.generators.type.GeneratorConstants.HTTP);
+                            GeneratorConstants.BALLERINA,
+                            GeneratorConstants.HTTP);
                     imports.add(importForHttp);
                     break;
                 }
@@ -182,7 +181,28 @@ public class TypeHandler {
         return createTypeInclusionRecord(statusCode, bodyType, headersType);
     }
 
-    private SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode bodyType,
+    public TypeDescriptorNode generateHeaderType(Schema headersSchema) {
+        TypeDescriptorNode headersType;
+        if (headersSchema != null && getTypeNodeFromOASSchema(headersSchema).isPresent()) {
+            headersType = getTypeNodeFromOASSchema(headersSchema).get();
+        } else {
+            TypeDescriptorNode stringType = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.STRING));
+
+            ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
+                    createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
+                    createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+            TypeDescriptorNode stringArrType = createArrayTypeDescriptorNode(stringType, createNodeList(dimensionNode));
+
+            UnionTypeDescriptorNode unionType = createUnionTypeDescriptorNode(stringType, createToken(PIPE_TOKEN),
+                    stringArrType);
+            TypeParameterNode headerParamNode = createTypeParameterNode(createToken(LT_TOKEN), unionType,
+                    createToken(SyntaxKind.GT_TOKEN));
+            headersType = createMapTypeDescriptorNode(createToken(MAP_KEYWORD), headerParamNode);
+        }
+        return headersType;
+    }
+
+    public SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode bodyType,
                                                               TypeDescriptorNode headersType) {
         String recordName = statusCode + GeneratorUtils.getValidName(bodyType.toString(), true);
         Token recordKeyWord = createToken(RECORD_KEYWORD);
