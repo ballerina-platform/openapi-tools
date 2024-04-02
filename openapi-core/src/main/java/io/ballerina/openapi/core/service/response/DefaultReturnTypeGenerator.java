@@ -28,7 +28,6 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
@@ -39,18 +38,13 @@ import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.headers.Header;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.ObjectSchema;
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -205,7 +199,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
         for (Map.Entry<String, MediaType> contentType : contentEntries) {
 //            String recordName = getNewRecordName(pathRecord);
 
-            TypeDescriptorNode mediaTypeToken = getReturnNodeForSchemaType(contentType, getNewRecordName(pathRecord));
+            TypeDescriptorNode mediaTypeToken = getReturnNodeForSchemaType(contentType);
             if (mediaTypeToken == null) {
                 SimpleNameReferenceNode httpResponse = createSimpleNameReferenceNode(createIdentifierToken(
                         GeneratorConstants.ANYDATA));
@@ -265,8 +259,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 if (contentEntries.size() > 1) {
                     returnType = handleMultipleContents(contentEntries, pathRecord);
                 } else {
-                    returnType = getReturnNodeForSchemaType(contentEntries.iterator().next(),
-                            getNewRecordName(pathRecord));
+                    returnType = getReturnNodeForSchemaType(contentEntries.iterator().next());
                 }
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), returnType);
             } else if (response.getKey().trim().equals(GeneratorConstants.DEFAULT)) {
@@ -317,7 +310,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
         }
         if (generatedTypes.size() == 1) {
             return TypeHandler.getInstance().createTypeInclusionRecord(code, generatedTypes.get(0),
-                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
+                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema), null);
         }
         UnionTypeDescriptorNode unionTypeDescriptorNode = null;
         TypeDescriptorNode leftTypeDesc = generatedTypes.get(0);
@@ -328,10 +321,10 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             leftTypeDesc = unionTypeDescriptorNode;
         }
         return TypeHandler.getInstance().createTypeInclusionRecord(code, unionTypeDescriptorNode,
-                TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
+                TypeHandler.getInstance().generateHeaderType(headersTypeSchema), null);
     }
 
-    private TypeDescriptorNode getReturnNodeForSchemaType(Map.Entry<String, MediaType> contentEntry, String recordName)
+    private TypeDescriptorNode getReturnNodeForSchemaType(Map.Entry<String, MediaType> contentEntry)
             throws OASTypeGenException {
         TypeDescriptorNode mediaTypeToken;
         String mediaTypeContent = selectMediaType(contentEntry.getKey().trim());

@@ -24,10 +24,8 @@ import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.core.generators.constraint.ConstraintGeneratorImp;
 import io.ballerina.openapi.core.generators.constraint.ConstraintResult;
-import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.type.GeneratorUtils;
-import io.ballerina.openapi.core.generators.type.model.TypeGeneratorResult;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.openapi.core.generators.type.model.TypeGeneratorResult;
 import io.ballerina.tools.text.TextDocument;
@@ -65,8 +63,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
-import static io.ballerina.openapi.core.generators.type.GeneratorConstants.STRING;
-import static io.ballerina.openapi.core.service.GeneratorConstants.ANYDATA;
 
 public class TypeHandler {
     private static TypeHandler typeHandlerInstance;
@@ -173,7 +169,8 @@ public class TypeHandler {
         return typeGeneratorResult.typeDescriptorNode();
     }
 
-    public TypeDescriptorNode createStatusCodeRecord(String statusCode, Schema bodySchema, Schema headersSchema) {
+    public TypeDescriptorNode createStatusCodeRecord(String statusCode, Schema bodySchema, Schema headersSchema,
+                                                     String operationId) {
         TypeDescriptorNode bodyType;
         TypeDescriptorNode headersType;
         if (bodySchema != null && getTypeNodeFromOASSchema(bodySchema).isPresent()) {
@@ -198,7 +195,7 @@ public class TypeHandler {
                     createToken(SyntaxKind.GT_TOKEN));
             headersType = createMapTypeDescriptorNode(createToken(MAP_KEYWORD), headerParamNode);
         }
-        return createTypeInclusionRecord(statusCode, bodyType, headersType);
+        return createTypeInclusionRecord(statusCode, bodyType, headersType, operationId);
     }
 
     public TypeDescriptorNode generateHeaderType(Schema headersSchema) {
