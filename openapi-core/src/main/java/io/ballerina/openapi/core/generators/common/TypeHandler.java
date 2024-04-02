@@ -179,7 +179,7 @@ public class TypeHandler {
         return typeGeneratorResult.typeDescriptorNode();
     }
 
-    public ReturnTypeDescriptorNode createStatusCodeTypeInclusionRecord(String statusCode, ApiResponse apiResponse)
+    public TypeDescriptorNode createStatusCodeTypeInclusionRecord(String statusCode, ApiResponse apiResponse)
             throws OASTypeGenException {
         Content responseContent = apiResponse.getContent();
         TypeDescriptorNode type;
@@ -201,7 +201,7 @@ public class TypeHandler {
             }
         }
         SimpleNameReferenceNode returnNameReferenceNode = createTypeInclusionRecord(statusCode, type);
-        return createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(), returnNameReferenceNode);
+        return returnNameReferenceNode;
     }
 
     private SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode type) {

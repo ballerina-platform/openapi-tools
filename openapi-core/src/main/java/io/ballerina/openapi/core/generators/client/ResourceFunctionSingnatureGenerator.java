@@ -13,7 +13,6 @@ import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticIm
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.client.exception.FunctionSignatureGeneratorException;
 import io.ballerina.openapi.core.generators.client.parameter.HeaderParameterGenerator;
-import io.ballerina.openapi.core.generators.client.parameter.PathParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.QueryParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.RequestBodyGenerator;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;

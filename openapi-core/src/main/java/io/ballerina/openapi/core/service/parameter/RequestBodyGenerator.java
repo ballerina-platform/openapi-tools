@@ -7,13 +7,12 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 
 public abstract class RequestBodyGenerator {
 
-    public static RequestBodyGenerator getRequestBodyGenerator(OASServiceMetadata oasServiceMetadata,
-                                                               RequestBody requestBody) {
+    public static RequestBodyGenerator getRequestBodyGenerator(OASServiceMetadata oasServiceMetadata) {
         if (oasServiceMetadata.generateWithoutDataBinding()) {
             return new LowResourceRequestBodyGenerator();
         }
-        return new DefaultRequestBodyGenerator(requestBody);
+        return new DefaultRequestBodyGenerator();
     }
 
-    public abstract RequiredParameterNode createRequestBodyNode() throws OASTypeGenException;
+    public abstract RequiredParameterNode createRequestBodyNode(RequestBody requestBody) throws OASTypeGenException;
 }

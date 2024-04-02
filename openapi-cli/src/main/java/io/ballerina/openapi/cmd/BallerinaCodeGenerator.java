@@ -152,13 +152,9 @@ public class BallerinaCodeGenerator {
 //        preGeneratedTypeDefNodes.addAll(typeDefinitionNodeList);
         String serviceContent = "";
         if (complexPaths.isEmpty()) {
-            io.ballerina.openapi.core.generators.type.model.Filter filter1 =
-                    new io.ballerina.openapi.core.generators.type.model.Filter();
-            filter1.setOperations(filter.getOperations());
-            filter1.setTags(filter.getTags());
             OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                     .withOpenAPI(openAPIDef)
-                    .withFilters(filter1)
+                    .withFilters(filter)
                     .withNullable(nullable)
                     .withGenerateServiceType(generateServiceType)
                     .withGenerateWithoutDataBinding(generateWithoutDataBinding)
@@ -460,7 +456,7 @@ public class BallerinaCodeGenerator {
         // Validate the service generation
         List<String> complexPaths = GeneratorUtils.getComplexPaths(openAPIDef);
         if (!complexPaths.isEmpty()) {
-            outStream.println("service generation can not be done due to the given openapi definition contains" +
+            outStream.println("service generation can not be done as the openapi definition contain" +
                     " following complex path(s):");
             for (String path: complexPaths) {
                 outStream.println(path);
@@ -468,17 +464,12 @@ public class BallerinaCodeGenerator {
             return new ArrayList<>();
         }
         String concatTitle = serviceName == null ?
-                openAPIDef.getInfo().getTitle().toLowerCase(Locale.ENGLISH) :
-                serviceName.toLowerCase(Locale.ENGLISH);
+                openAPIDef.getInfo().getTitle().toLowerCase(Locale.ENGLISH) : serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
-        io.ballerina.openapi.core.generators.type.model.Filter filter1 =
-                new io.ballerina.openapi.core.generators.type.model.Filter();
-        filter1.setOperations(filter.getOperations());
-        filter1.setTags(filter.getTags());
 
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPIDef)
-                .withFilters(filter1)
+                .withFilters(filter)
                 .withNullable(nullable)
                 .withGenerateServiceType(generateServiceType)
                 .withGenerateWithoutDataBinding(generateWithoutDataBinding)
@@ -486,7 +477,6 @@ public class BallerinaCodeGenerator {
                 .withSrcFile(srcFile)
                 .withSrcPackage(srcPackage)
                 .build();
-        // Initialize ballerina types generator
         TypeHandler.createInstance(openAPIDef, nullable);
         List<GenSrcFile> sourceFiles = ServiceGenerator.generateServiceFiles(oasServiceMetadata);
         String schemaSyntaxTree = Formatter.format(TypeHandler.getInstance().generateTypeSyntaxTree()).toSourceCode();
