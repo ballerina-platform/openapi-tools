@@ -111,8 +111,6 @@ public class TestUtils {
         TypeHandler typeHandler = TypeHandler.getInstance();
         String schemaContent = Formatter.format(
                 typeHandler.generateTypeSyntaxTree()).toSourceCode();
-        ConstraintGenerator constraintGenerator = new ConstraintGenerator();
-        constraintGenerator.generateConstraintForTypes(openAPI, typeHandler.generateTypeSyntaxTree());
         String serviceContent = Formatter.format(serviceSyntaxTree).toSourceCode();
         serviceContent = serviceContent.replaceAll(
                 "\\{" + System.lineSeparator() + "\\s*\\}", "\\{panic error(\"Tests\");\\}");

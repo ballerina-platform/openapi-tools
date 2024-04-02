@@ -2,9 +2,11 @@ package io.ballerina.openapi.core.service.parameter;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
@@ -13,8 +15,6 @@ import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.GeneratorConstants;
 import io.ballerina.openapi.core.service.ServiceGenerationUtils;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
@@ -22,11 +22,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultableParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
@@ -118,6 +118,12 @@ public class HeaderParameterGenerator extends ParameterGenerator {
                 // todo : update this part
                 headerTypeName = null;
 //            headerTypeName = TypeHandler.getInstance().getArrayTypeDescriptorNodeFromTypeDescriptorNode(headerArrayItemTypeName);
+
+                ArrayDimensionNode arrayDimensionNode = NodeFactory.createArrayDimensionNode(
+                        createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
+                        createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+                NodeList<ArrayDimensionNode> nodeList = createNodeList(arrayDimensionNode);
+                headerTypeName = createArrayTypeDescriptorNode(headerArrayItemTypeName, nodeList);
             } else {
                 headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
                         headerType, GeneratorUtils.SINGLE_WS_MINUTIAE,

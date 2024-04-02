@@ -188,6 +188,8 @@ public class ArrayTypeGenerator extends TypeGenerator {
                 schemaType.equals(GeneratorConstants.BOOLEAN) || schemaType.equals(GeneratorConstants.STRING))) {
             member = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
                     GeneratorUtils.convertOpenAPITypeToBallerina(schema.getItems())));
+        } else if (schemaType != null && schemaType.equals(GeneratorConstants.ARRAY)) {
+            member = getTypeDescNodeForArraySchema(schema.getItems(), subTypesMap).orElse(null);
         } else {
             return Optional.empty();
         }

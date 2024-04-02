@@ -80,8 +80,14 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.parser.core.models.ParseOptions;
@@ -113,8 +119,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.ws.rs.core.MediaType;
-
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
@@ -139,6 +143,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SLASH_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_FORM_URLENCODED;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_OCTET_STREAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BALLERINA_TOML;
@@ -158,6 +164,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.IMA
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.INTEGER;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.LINE_SEPARATOR;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.MULTIPART_FORM_DATA;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NULL;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NUMBER;
@@ -541,7 +548,7 @@ public class GeneratorUtils {
         String defaultBallerinaType = getBallerinaMediaType(mediaType, true);
         Schema<?> schema = mediaTypeEntry.getValue().getSchema();
 
-        boolean isValidMultipartFormData = mediaType.equals(MediaType.MULTIPART_FORM_DATA) && schema != null &&
+        boolean isValidMultipartFormData = mediaType.equals(MULTIPART_FORM_DATA) && schema != null &&
                 (schema.get$ref() != null || schema.getProperties() != null || getOpenAPIType(schema).equals(OBJECT));
 
         if (defaultBallerinaType.equals(HTTP_REQUEST) && !isValidMultipartFormData) {
@@ -559,9 +566,9 @@ public class GeneratorUtils {
             return SyntaxKind.JSON_KEYWORD.stringValue();
         } else if (mediaType.matches(".*/xml") || mediaType.matches("application/.*\\+xml")) {
             return SyntaxKind.XML_KEYWORD.stringValue();
-        } else if (mediaType.equals(MediaType.APPLICATION_FORM_URLENCODED) || mediaType.matches("text/.*")) {
+        } else if (mediaType.equals(APPLICATION_FORM_URLENCODED) || mediaType.matches("text/.*")) {
             return STRING_KEYWORD.stringValue();
-        } else if (mediaType.equals(MediaType.APPLICATION_OCTET_STREAM) ||
+        } else if (mediaType.equals(APPLICATION_OCTET_STREAM) ||
                 mediaType.equals(IMAGE_PNG) || mediaType.matches("application/.*\\+octet-stream")) {
             return SyntaxKind.BYTE_KEYWORD.stringValue() + SQUARE_BRACKETS;
         } else {
@@ -1200,5 +1207,49 @@ public class GeneratorUtils {
             }
         }
         return complexPathList;
+    }
+
+    public static String selectMediaType(String mediaTypeContent) {
+        if (mediaTypeContent.matches("application/.*\\+json") || mediaTypeContent.matches(".*/json")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_JSON;
+        } else if (mediaTypeContent.matches("application/.*\\+xml") || mediaTypeContent.matches(".*/xml")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_XML;
+        } else if (mediaTypeContent.matches("text/.*")) {
+            mediaTypeContent = GeneratorConstants.TEXT;
+        }  else if (mediaTypeContent.matches("application/.*\\+octet-stream")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_OCTET_STREAM;
+        } else if (mediaTypeContent.matches("application/.*\\+x-www-form-urlencoded")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_URL_ENCODE;
+        }
+        return mediaTypeContent;
+    }
+
+    public static Schema getHeadersTypeSchema(ApiResponse apiResponse) {
+        Map<String, Header> headers = apiResponse.getHeaders();
+        if (Objects.isNull(headers)) {
+            return null;
+        }
+
+        Map<String, Schema> properties = new HashMap<>();
+        List<String> requiredField = new ArrayList<>();
+        for (Map.Entry<String, Header> headerEntry : headers.entrySet()) {
+            String headerName = headerEntry.getKey();
+            Header header = headerEntry.getValue();
+            Schema headerTypeSchema = header.getSchema();
+            properties.put(headerName, headerTypeSchema);
+            if (header.getRequired()) {
+                requiredField.add(headerName);
+            }
+        }
+
+        if (properties.isEmpty()|| requiredField.isEmpty()) {
+            return null;
+        }
+
+        ObjectSchema headersSchema = new ObjectSchema();
+        headersSchema.setProperties(properties);
+        headersSchema.setRequired(requiredField);
+        headersSchema.setAdditionalProperties(false);
+        return headersSchema;
     }
 }

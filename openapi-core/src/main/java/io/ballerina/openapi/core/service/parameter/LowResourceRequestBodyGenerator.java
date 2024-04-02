@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.openapi.core.service.GeneratorConstants;
+import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
@@ -35,6 +36,10 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParame
  * @since 1.3.0
  */
 public class LowResourceRequestBodyGenerator extends RequestBodyGenerator {
+
+    public LowResourceRequestBodyGenerator(OASServiceMetadata oasServiceMetadata) {
+        super(oasServiceMetadata);
+    }
 
     /**
      * This for creating request Body for given request object.
