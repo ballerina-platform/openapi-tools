@@ -2,6 +2,7 @@ package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -57,26 +58,19 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
                 authConfigGeneratorImp, ballerinaUtilGenerator);
         FunctionBodyNode functionBodyNode;
-        try {
-            Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
-            if (functionBodyNodeResult.isEmpty()) {
-                return Optional.empty();
-            }
-            functionBodyNode = functionBodyNodeResult.get();
-        } catch (BallerinaOpenApiException e) {
-            //todo diagnostic
-            diagnostics.add(null);
+        Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
+        if (functionBodyNodeResult.isEmpty()) {
+            return Optional.empty();
+        }
+        functionBodyNode = functionBodyNodeResult.get();
+        if (signatureGenerator.generateFunctionSignature().isEmpty()) {
             return Optional.empty();
         }
 
-        try {
-            return Optional.of(NodeFactory.createFunctionDefinitionNode(OBJECT_METHOD_DEFINITION, null,
+        return Optional.of(NodeFactory.createFunctionDefinitionNode(OBJECT_METHOD_DEFINITION, null,
                     qualifierList, functionKeyWord, functionName, createEmptyNodeList(),
-                    signatureGenerator.generateFunctionSignature(), functionBodyNode));
-        } catch (FunctionSignatureGeneratorException e) {
-            //todo diagnostic
-            return Optional.empty();
-        }
+                    signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
+
     }
 
     @Override
