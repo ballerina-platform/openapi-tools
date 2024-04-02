@@ -5,9 +5,9 @@ import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.swagger.v3.oas.models.OpenAPI;
 
 public class DocCommentGeneratorImp {
-    private OpenAPI openAPI;
+    private final OpenAPI openAPI;
     private SyntaxTree syntaxTree;
-    private GenSrcFile.GenFileType type;
+    private final GenSrcFile.GenFileType type;
 
     public DocCommentGeneratorImp(OpenAPI openAPI, SyntaxTree syntaxTree, GenSrcFile.GenFileType type) {
         this.openAPI = openAPI;
@@ -20,8 +20,8 @@ public class DocCommentGeneratorImp {
         switch (type) {
             case GEN_CLIENT:
                 //generate client doc comments
-                ClientDocCommentGenerator clientDocCommentGenerator = new ClientDocCommentGenerator(syntaxTree, openAPI);
-
+                ClientDocCommentGenerator clientDocCommentGenerator = new ClientDocCommentGenerator(syntaxTree, openAPI, true);
+                syntaxTree = clientDocCommentGenerator.updateSyntaxTreeWithDocComments();
                 break;
             case GEN_SERVICE:
                 //generate service doc comments

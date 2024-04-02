@@ -8,7 +8,7 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "https://petstore3.swagger.io/api/v3") returns error? {
+    public isolated function init(string serviceUrl = "https://petstore3.swagger.io/api/v3", ConnectionConfig config =  {}) returns error? {
         http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
@@ -38,11 +38,11 @@ public isolated client class Client {
     # Returns pet inventories by status
     #
     # + return - successful operation
-    remote isolated function getInventory(("X"|"Y"|"Z")[]? xClient = ()) returns json|error {
+    remote isolated function getInventory(("X"|"Y"|"Z")[]? xClient = ()) returns record {|int:Signed32?...;|}|error {
         string resourcePath = string `/store/inventory`;
         map<any> headerValues = {"X-CLIENT": xClient};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        json response = check self.clientEp->get(resourcePath, httpHeaders);
+        record{|int:Signed32?...;|} response = check self.clientEp->get(resourcePath, httpHeaders);
         return response;
     }
 }

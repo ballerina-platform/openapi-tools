@@ -97,6 +97,18 @@ public class TestUtils {
         return semanticModel.diagnostics();
     }
 
+    // Get diagnostics
+    public static List<Diagnostic> getDiagnostics(SyntaxTree syntaxTree, SyntaxTree schemaSyntax,
+                                                  BallerinaClientGenerator ballerinaClientGenerator)
+            throws FormatterException, IOException,
+            OASTypeGenException {
+        SyntaxTree utilSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
+        writeFile(clientPath, Formatter.format(syntaxTree).toSourceCode());
+        writeFile(schemaPath, Formatter.format(schemaSyntax).toSourceCode());
+        writeFile(utilPath, Formatter.format(utilSyntaxTree).toSourceCode());
+        SemanticModel semanticModel = getSemanticModel(clientPath);
+        return semanticModel.diagnostics();
+    }
     public static List<Diagnostic> getDiagnostics(SyntaxTree syntaxTree) throws FormatterException, IOException {
         writeFile(schemaPath, Formatter.format(syntaxTree).toSourceCode());
         SemanticModel semanticModel = getSemanticModel(schemaPath);

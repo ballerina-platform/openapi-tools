@@ -33,6 +33,8 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -78,6 +80,7 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
         //TODO: Handle multiple media-type
         //Todo handle reference reusable response schema
         List<TypeDescriptorNode> returnTypes = new ArrayList<>();
+        HashSet<String> returnTypesSet = new HashSet<>();
         boolean noContentResponseFound = false;
         if (operation.getResponses() != null) {
             ApiResponses responses = operation.getResponses();
@@ -104,7 +107,10 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
                                 String mediaType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
                                 type = createSimpleNameReferenceNode(createIdentifierToken(mediaType));
                             }
-                            returnTypes.add(type);
+                            if (!returnTypesSet.contains(type.toString())) {
+                                returnTypesSet.add(type.toString());
+                                returnTypes.add(type);
+                            }
                             // Currently support for first media type
                             break;
                         }

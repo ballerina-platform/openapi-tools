@@ -1251,4 +1251,15 @@ public class GeneratorUtils {
         headersSchema.setAdditionalProperties(false);
         return headersSchema;
     }
+
+    public static String replaceContentWithinBrackets(String input, String replacement) {
+        Pattern pattern = Pattern.compile("[\\{\\[].*?[\\}\\]]");
+        Matcher matcher = pattern.matcher(input);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, replacement);
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
 }

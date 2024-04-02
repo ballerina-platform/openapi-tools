@@ -65,7 +65,7 @@
             <class name="io.ballerina.openapi.generators.service.ServiceDiagnosticTests"/>
 <!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.ImportsTests"/>&ndash;&gt;-->
 <!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.BallerinaDiagnosticTests"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.ComparedGeneratedFileTests"/>&ndash;&gt;-->
+            <class name="io.ballerina.openapi.generators.client.ComparedGeneratedFileTests"/>
 <!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.AnnotationTests"/>&ndash;&gt;-->
             <class name="io.ballerina.openapi.generators.client.FunctionBodyNodeTests"/>
             <class name="io.ballerina.openapi.generators.client.FunctionSignatureNodeTests"/>

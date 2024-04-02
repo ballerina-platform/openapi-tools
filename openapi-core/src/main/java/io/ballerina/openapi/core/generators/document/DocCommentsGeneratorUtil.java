@@ -170,7 +170,7 @@ public class DocCommentsGeneratorUtil {
         return documentElements;
     }
 
-    public static MarkdownDocumentationNode createAPIParamDocFromSring(String paramName, String description) {
+    public static MarkdownDocumentationNode createAPIParamDocFromString(String paramName, String description) {
         String[] paramDescriptionLines = description.split("\n");
         StringBuilder docComment = new StringBuilder("# + " + paramName + " - " +
                 paramDescriptionLines[0] + System.lineSeparator());
