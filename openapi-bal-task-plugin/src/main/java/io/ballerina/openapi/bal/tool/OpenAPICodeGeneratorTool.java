@@ -29,13 +29,24 @@ import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.projects.Package;
+import io.ballerina.projects.PackageManifest;
+import io.ballerina.projects.Project;
 import io.ballerina.projects.buildtools.CodeGeneratorTool;
 import io.ballerina.projects.buildtools.ToolConfig;
 import io.ballerina.projects.buildtools.ToolContext;
 import io.ballerina.toml.semantic.diagnostics.TomlNodeLocation;
+import io.ballerina.toml.syntax.tree.AbstractNodeFactory;
+import io.ballerina.toml.syntax.tree.DocumentMemberDeclarationNode;
+import io.ballerina.toml.syntax.tree.DocumentNode;
+import io.ballerina.toml.syntax.tree.NodeFactory;
+import io.ballerina.toml.syntax.tree.NodeList;
+import io.ballerina.toml.syntax.tree.Token;
+import io.ballerina.toml.validator.SampleNodeGenerator;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.Location;
+import io.ballerina.tools.text.TextDocument;
+import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -45,6 +56,7 @@ import org.ballerinalang.formatter.core.FormatterException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,7 +65,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
 
 import static io.ballerina.openapi.bal.tool.Constants.CACHE_FILE;
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT;
@@ -116,7 +130,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 if (validateCache(toolContext, clientConfig)) {
                     return;
                 }
-                generateClient(toolContext, codeGeneratorConfig);
+                generateClient(toolContext, codeGeneratorConfig, location);
             } else {
                 codeGeneratorConfig = extractOptionDetails(toolContext, openAPI.get());
                 if (validateCache(toolContext, codeGeneratorConfig.getLeft())) {
@@ -127,7 +141,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                     handleCodeGenerationMode(toolContext, codeGeneratorConfig, location, value);
                 } else {
                     // Create client for the given OAS
-                    generateClient(toolContext, codeGeneratorConfig);
+                    generateClient(toolContext, codeGeneratorConfig, location);
                 }
             }
         } catch (BallerinaOpenApiException e) {
@@ -163,7 +177,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
             throws BallerinaOpenApiException, IOException, FormatterException, ClientException {
         if (mode.equals(CLIENT)) {
             // Create client for the given OAS
-            generateClient(toolContext, codeGeneratorConfig);
+            generateClient(toolContext, codeGeneratorConfig, location);
         } else {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.WARNING_FOR_OTHER_GENERATION;
             createDiagnostics(toolContext, error, location, mode);
@@ -280,7 +294,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
      * This method uses to generate the client module for the given openapi contract.
      */
     private void generateClient(ToolContext toolContext, ImmutablePair<OASClientConfig,
-            OASServiceMetadata> codeGeneratorConfig) throws BallerinaOpenApiException, IOException,
+            OASServiceMetadata> codeGeneratorConfig, Location location) throws BallerinaOpenApiException, IOException,
             FormatterException, ClientException {
         OASClientConfig clientConfig = codeGeneratorConfig.getLeft();
         List<GenSrcFile> sources = generateClientFiles(clientConfig,
@@ -294,6 +308,93 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 CACHE_FILE, hashOpenAPI);
         sourcesForCache.add(genSrcFile);
         writeGeneratedSources(sourcesForCache, cachePath);
+        updateBallerinaTomlWithClientNativeDependency(toolContext,
+                toolContext.currentPackage().project().sourceRoot().resolve("Ballerina.toml"), location);
+    }
+
+    private void updateBallerinaTomlWithClientNativeDependency(ToolContext toolContext, Path ballerinaTomlPath,
+                                                               Location location) {
+        try {
+            String version = getVersion();
+            if (checkForExistingClientNativeDependency(version, toolContext, location)) {
+                return;
+            }
+
+            TextDocument configDocument = TextDocuments.from(Files.readString(ballerinaTomlPath));
+            io.ballerina.toml.syntax.tree.SyntaxTree syntaxTree = io.ballerina.toml.syntax.tree.SyntaxTree.from(configDocument);
+            DocumentNode rootNode = syntaxTree.rootNode();
+            NodeList<DocumentMemberDeclarationNode> nodeList = rootNode.members();
+            NodeList<DocumentMemberDeclarationNode> tomlMembers = AbstractNodeFactory.createEmptyNodeList();
+            for (DocumentMemberDeclarationNode node : nodeList) {
+                tomlMembers = tomlMembers.add(node);
+            }
+            tomlMembers = addNewLine(tomlMembers, 1);
+            tomlMembers = populateClientNativeDependency(tomlMembers, version);
+            Token eofToken = AbstractNodeFactory.createIdentifierToken("");
+            DocumentNode documentNode = NodeFactory.createDocumentNode(tomlMembers, eofToken);
+            TextDocument textDocument = TextDocuments.from(documentNode.toSourceCode());
+            String content = io.ballerina.toml.syntax.tree.SyntaxTree.from(textDocument).toSourceCode();
+            try (FileWriter writer = new FileWriter(ballerinaTomlPath.toString(), StandardCharsets.UTF_8)) {
+                writer.write(content);
+                createDiagnostics(toolContext, Constants.DiagnosticMessages.TOML_UPDATED_WITH_CLIENT_NATIVE_DEPENDENCY, location);
+            }
+        } catch (IOException e) {
+            createDiagnostics(toolContext, Constants.DiagnosticMessages.ERROR_WHILE_UPDATING_TOML, location);
+        }
+    }
+
+    private boolean checkForExistingClientNativeDependency(String version, ToolContext toolContext, Location location) {
+        Project project = toolContext.currentPackage().project();
+        Map<String, PackageManifest.Platform> platforms = project.currentPackage().manifest().platforms();
+        if (Objects.nonNull(platforms) && platforms.containsKey("java17")) {
+            Optional<Map<String, Object>> nativeDependency = platforms.get("java17").dependencies().stream().filter(
+                    dependency -> dependency.containsKey("groupId") &&
+                            dependency.get("groupId").equals("io.ballerina.openapi")
+                            && dependency.containsKey("artifactId") &&
+                            dependency.get("artifactId").equals("client-native")
+            ).findFirst();
+            if (nativeDependency.isEmpty()) {
+                return false;
+            }
+
+            if (nativeDependency.get().containsKey("version") &&
+                    nativeDependency.get().get("version").equals(version)) {
+                createDiagnostics(toolContext, Constants.DiagnosticMessages.TOML_ALREADY_UPDATED_WITH_CLIENT_NATIVE_DEPENDENCY, location);
+            } else {
+                createDiagnostics(toolContext, Constants.DiagnosticMessages.CLIENT_NATIVE_DEPENDENCY_VERSION_MISMATCH, location);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private NodeList<DocumentMemberDeclarationNode> populateClientNativeDependency(
+            NodeList<DocumentMemberDeclarationNode> tomlMembers, String version) {
+        String description = "This dependency is added automatically by the OpenAPI tool. DO NOT REMOVE";
+        tomlMembers = tomlMembers.add(SampleNodeGenerator.createTableArray("platform.java17.dependency", description));
+        tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("groupId", "io.ballerina.openapi", null));
+        tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("artifactId", "client-native", null));
+        tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("version", version, null));
+        return tomlMembers;
+    }
+
+    private String getVersion() throws IOException {
+        try (InputStream inputStream = OpenAPICodeGeneratorTool.class.getClassLoader().getResourceAsStream(
+                "openapi-tool-version.properties")) {
+            Properties properties = new Properties();
+            properties.load(inputStream);
+            return properties.getProperty("version");
+        } catch (IOException exception) {
+            throw new IOException("error occurred while reading version from version.properties: " +
+                    exception.getMessage());
+        }
+    }
+
+    public static NodeList<DocumentMemberDeclarationNode> addNewLine(NodeList moduleMembers, int n) {
+        for (int i = 0; i < n; i++) {
+            moduleMembers = moduleMembers.add(AbstractNodeFactory.createIdentifierToken(System.lineSeparator()));
+        }
+        return moduleMembers;
     }
 
     /**

@@ -247,6 +247,10 @@ public class Add implements BLauncherCmd {
             moduleMembers = moduleMembers.add(SampleNodeGenerator.createStringKV("options.licensePath",
                     optionsBuilder.getLicensePath(), null));
         }
+        if (optionsBuilder.getStatusCodeBinding()) {
+            moduleMembers = moduleMembers.add(SampleNodeGenerator.createBooleanKV("options.statusCodeBinding",
+                    optionsBuilder.getStatusCodeBinding(), null));
+        }
         moduleMembers = CmdUtils.addNewLine(moduleMembers, 2);
         return moduleMembers;
     }

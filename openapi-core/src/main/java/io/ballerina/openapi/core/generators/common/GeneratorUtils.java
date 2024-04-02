@@ -1011,7 +1011,9 @@ public class GeneratorUtils {
                     getSemanticModel(tmpDir.resolve(SERVICE_FILE_NAME));
             List<Symbol> symbols = semanticModel.moduleSymbols();
             for (Symbol symbol : symbols) {
-                if (symbol.kind().equals(SymbolKind.TYPE_DEFINITION) || symbol.kind().equals(SymbolKind.ENUM)) {
+                if ((symbol.kind().equals(SymbolKind.TYPE_DEFINITION) &&
+                        !((TypeDefinitionSymbol) symbol).typeDescriptor().subtypeOf(semanticModel.types().ERROR))
+                        || symbol.kind().equals(SymbolKind.ENUM)) {
                     List<Location> references = semanticModel.references(symbol);
                     if (references.size() == 1) {
                         unusedTypeDefinitionNameList.add(symbol.getName().get());
