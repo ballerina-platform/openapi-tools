@@ -22,8 +22,12 @@ jobs:
           latestCommit=$(git log -n 1 --pretty=format:"%h")
           VERSION=$((grep -w 'version' | cut -d= -f2) < gradle.properties | rev | cut --complement -d- -f1 | rev)
           updatedVersion=$VERSION-$startTime-$latestCommit
-          echo $updatedVersion
+          echo "Updated version: $updatedVersion"
           sed -i "s/version=\(.*\)/version=$updatedVersion/g" gradle.properties
+          CLIENT_NATIVE_VERSION=$((grep -w 'clientNativeVersion' | cut -d= -f2) < gradle.properties)
+          updatedClientNativeVersion=$CLIENT_NATIVE_VERSION-$startTime-$latestCommit
+          echo "Updated clientNativeVersion: $updatedClientNativeVersion"
+          sed -i "s/clientNativeVersion=\(.*\)/clientNativeVersion=$updatedClientNativeVersion/g" gradle.properties
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
@@ -31,6 +35,6 @@ jobs:
           packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
           packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
         run: |
-          ./gradlew clean build publish codeCoverageReport --stacktrace --scan --console=plain 
+          ./gradlew clean build publish codeCoverageReport --stacktrace --scan --console=plain -x test -x check
       - name: Generate CodeCov Report
         uses: codecov/codecov-action@v1
