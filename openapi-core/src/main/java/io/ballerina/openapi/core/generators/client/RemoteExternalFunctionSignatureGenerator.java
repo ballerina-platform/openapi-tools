@@ -4,7 +4,6 @@ import io.ballerina.compiler.syntax.tree.InferredTypedescDefaultNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeParameterNode;
-import io.ballerina.openapi.core.generators.client.exception.FunctionSignatureGeneratorException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -38,8 +37,12 @@ public class RemoteExternalFunctionSignatureGenerator extends RemoteFunctionSign
     }
 
     @Override
-    protected ParametersInfo getParametersInfo(List<Parameter> parameters) throws FunctionSignatureGeneratorException {
+    protected ParametersInfo getParametersInfo(List<Parameter> parameters) {
         ParametersInfo parametersInfo = super.getParametersInfo(parameters);
+
+        if (parametersInfo == null) {
+            return null;
+        }
 
         FunctionReturnTypeGeneratorImp functionReturnTypeGenerator = getFunctionReturnTypeGenerator();
         FunctionReturnTypeGeneratorImp.ReturnTypesInfo returnTypeInfo = functionReturnTypeGenerator.getReturnTypeInfo();

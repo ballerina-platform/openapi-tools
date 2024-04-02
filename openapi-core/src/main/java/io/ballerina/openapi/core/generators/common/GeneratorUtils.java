@@ -63,9 +63,10 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
-import io.ballerina.openapi.core.generators.schemaOld.ballerinatypegenerators.EnumGenerator;
-import io.ballerina.openapi.core.generators.schemaOld.model.GeneratorMetaData;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.type.generators.EnumGenerator;
+import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
@@ -343,8 +344,12 @@ public class GeneratorUtils {
     public static String convertOpenAPITypeToBallerina(Schema<?> schema) throws BallerinaOpenApiException {
         String type = getOpenAPIType(schema);
         if (schema.getEnum() != null && !schema.getEnum().isEmpty() && primitiveTypeList.contains(type)) {
-            EnumGenerator enumGenerator = new EnumGenerator(schema, null);
-            return enumGenerator.generateTypeDescriptorNode().toString();
+            EnumGenerator enumGenerator = new EnumGenerator(schema, null, new HashMap<>(), new HashMap<>());
+            try {
+                return enumGenerator.generateTypeDescriptorNode().toString();
+            } catch (OASTypeGenException exp) {
+                return "";
+            }
         } else if ((INTEGER.equals(type) || NUMBER.equals(type) || STRING.equals(type)) && schema.getFormat() != null) {
             return convertOpenAPITypeFormatToBallerina(type, schema);
         } else {

@@ -27,7 +27,6 @@ import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.openapi.core.generators.client.exception.FunctionSignatureGeneratorException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -171,26 +170,15 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
         FunctionBodyGeneratorImp functionBodyGenerator = new ImplFunctionBodyGenerator(path, operation, openAPI,
                 authConfigGeneratorImp, ballerinaUtilGenerator);
         FunctionBodyNode functionBodyNode;
-        try {
-            Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
-            if (functionBodyNodeResult.isEmpty()) {
-                return Optional.empty();
-            }
-            functionBodyNode = functionBodyNodeResult.get();
-        } catch (BallerinaOpenApiException e) {
-            //todo diagnostic
-//            diagnostics.add(null);
+        Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
+        if (functionBodyNodeResult.isEmpty()) {
             return Optional.empty();
         }
+        functionBodyNode = functionBodyNodeResult.get();
 
-        try {
-            return Optional.of(NodeFactory.createFunctionDefinitionNode(OBJECT_METHOD_DEFINITION, null,
-                    qualifierList, functionKeyWord, functionName, createEmptyNodeList(),
-                    signatureGenerator.generateFunctionSignature(), functionBodyNode));
-        } catch (FunctionSignatureGeneratorException e) {
-            //todo diagnostic
-            return Optional.empty();
-        }
+        return Optional.of(NodeFactory.createFunctionDefinitionNode(OBJECT_METHOD_DEFINITION, null,
+                qualifierList, functionKeyWord, functionName, createEmptyNodeList(),
+                signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
     }
 
     /**

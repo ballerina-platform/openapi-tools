@@ -80,7 +80,7 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
         MetadataNode metadataNode = createMetadataNode(null, createNodeList(implAnnotation));
         return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, metadataNode,
                 qualifierList, functionKeyWord, functionName, createNodeList(relativeResourcePath),
-                signatureGenerator.generateFunctionSignature(), functionBodyNode));
+                signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
     }
 
     @Override

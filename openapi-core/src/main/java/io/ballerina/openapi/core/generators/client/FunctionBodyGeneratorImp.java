@@ -122,10 +122,10 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REQ
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RESOURCE_PATH;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RETURN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SELF;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isComposedSchema;
-import static io.ballerina.openapi.core.generators.serviceOld.ServiceGenerationUtils.extractReferenceType;
 
 /**
  * This Util class uses for generating remote function body  {@link FunctionBodyNode}.

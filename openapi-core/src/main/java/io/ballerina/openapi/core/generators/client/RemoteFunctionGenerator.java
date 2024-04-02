@@ -2,13 +2,10 @@ package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.Token;
-import io.ballerina.openapi.core.generators.client.exception.FunctionSignatureGeneratorException;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -64,7 +61,7 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         }
 
         return getFunctionDefinitionNode(qualifierList, functionKeyWord, functionName, signatureGenerator,
-                functionBodyNode);;
+                functionBodyNode);
 
     }
 
@@ -84,7 +81,7 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
                 signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
     }
 
-    protected Optional<FunctionBodyNode> getFunctionBodyNode() throws BallerinaOpenApiException {
+    protected Optional<FunctionBodyNode> getFunctionBodyNode() {
         FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
                 authConfigGeneratorImp, ballerinaUtilGenerator);
         return functionBodyGenerator.getFunctionBodyNode();

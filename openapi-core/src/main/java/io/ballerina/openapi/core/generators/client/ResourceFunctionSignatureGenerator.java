@@ -11,7 +11,6 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.core.generators.client.exception.FunctionSignatureGeneratorException;
 import io.ballerina.openapi.core.generators.client.parameter.HeaderParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.QueryParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.RequestBodyGenerator;
@@ -47,16 +46,23 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
         List<Parameter> parameters = operation.getParameters();
         ParametersInfo parametersInfo = getParametersInfo(parameters);
 
+        if (parametersInfo == null) {
+            return Optional.empty();
+        }
+
+        List<Node> defaultableParameters = parametersInfo.defaultable();
+        List<Node> parameterList = parametersInfo.parameterList();
+
         //filter defaultable parameters
-        if (!parametersInfo.defaultable().isEmpty()) {
-            parametersInfo.parameterList().addAll(parametersInfo.defaultable());
+        if (!defaultableParameters.isEmpty()) {
+            parameterList.addAll(defaultableParameters);
         }
         // Remove the last comma
         //check array out of bound error if parameter size is empty
-        if (!parametersInfo.parameterList().isEmpty()) {
-            parametersInfo.parameterList().remove(parametersInfo.parameterList().size() - 1);
+        if (!parameterList.isEmpty()) {
+            parameterList.remove(parameterList.size() - 1);
         }
-        SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(parametersInfo.parameterList());
+        SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(parameterList);
 
         // 3. return statements
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation, openAPI);
@@ -69,7 +75,7 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
         //create function signature node
     }
 
-    protected ParametersInfo getParametersInfo(List<Parameter> parameters) throws FunctionSignatureGeneratorException {
+    protected ParametersInfo getParametersInfo(List<Parameter> parameters) {
         List<Node> parameterList = new ArrayList<>();
         List<Node> defaultable = new ArrayList<>();
         Token comma = createToken(COMMA_TOKEN);
@@ -96,7 +102,7 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
                         Optional<ParameterNode> queryParam = queryParameterGenerator.generateParameterNode(false);
                         if (queryParam.isEmpty()) {
                             //TODO: need to handle this
-                            return Optional.empty();
+                            return null;
 //                            throw new FunctionSignatureGeneratorException("Error while generating query parameter node");
                         }
                         if (queryParam.get() instanceof RequiredParameterNode requiredParameterNode) {
@@ -112,7 +118,7 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
                         Optional<ParameterNode> headerParam = headerParameterGenerator.generateParameterNode(false);
                         if (headerParam.isEmpty()) {
                             //todo: need to handle this
-                            return Optional.empty();
+                            return null;
 //                            throw new FunctionSignatureGeneratorException("Error while generating header parameter node");
                         }
                         if (headerParam.get() instanceof RequiredParameterNode headerNode) {
@@ -134,14 +140,13 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
             Optional<ParameterNode> requestBody = requestBodyGenerator.generateParameterNode(false);
             if (requestBody.isEmpty()) {
                 //todo: need to handle this
-                return Optional.empty();
+                return null;
 //                throw new FunctionSignatureGeneratorException("Error while generating request body node");
             }
             parameterList.add(requestBody.get());
             parameterList.add(comma);
         }
-        ParametersInfo parametersInfo = new ParametersInfo(parameterList, defaultable);
-        return parametersInfo;
+        return new ParametersInfo(parameterList, defaultable);
     }
 
     protected FunctionReturnTypeGeneratorImp getFunctionReturnTypeGenerator() {

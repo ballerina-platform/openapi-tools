@@ -14,7 +14,6 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
-import io.ballerina.openapi.core.generators.client.exception.FunctionSignatureGeneratorException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -63,8 +62,7 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
                                                                          IdentifierToken functionName,
                                                                          RemoteFunctionSignatureGenerator
                                                                                  signatureGenerator,
-                                                                         FunctionBodyNode functionBodyNode)
-            throws FunctionSignatureGeneratorException {
+                                                                         FunctionBodyNode functionBodyNode) {
         BasicLiteralNode implFuncName = createBasicLiteralNode(STRING_LITERAL,
                 createLiteralValueToken(SyntaxKind.STRING_LITERAL_TOKEN,
                         "\"" + operation.getValue().getOperationId() +  "Impl\"",
@@ -79,7 +77,7 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
         MetadataNode metadataNode = createMetadataNode(null, createNodeList(implAnnotation));
         return Optional.of(NodeFactory.createFunctionDefinitionNode(OBJECT_METHOD_DEFINITION, metadataNode,
                 qualifierList, functionKeyWord, functionName, createEmptyNodeList(),
-                signatureGenerator.generateFunctionSignature(), functionBodyNode));
+                signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
     }
 
     @Override
