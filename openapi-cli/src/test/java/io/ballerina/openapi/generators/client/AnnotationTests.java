@@ -26,7 +26,7 @@ import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
+import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
@@ -59,8 +59,8 @@ public class AnnotationTests {
         Map<String, Object> param02 =
                 display.getPaths().get("/weather").getGet().getParameters().get(1).getExtensions();
         List<AnnotationNode> annotationNodes  = new ArrayList<>();
-        DocCommentsGenerator.extractDisplayAnnotation(param01, annotationNodes);
-        DocCommentsGenerator.extractDisplayAnnotation(param02, annotationNodes);
+        DocCommentsGeneratorUtil.extractDisplayAnnotation(param01, annotationNodes);
+        DocCommentsGeneratorUtil.extractDisplayAnnotation(param02, annotationNodes);
         Assert.assertEquals(annotationNodes.get(0).annotValue().orElseThrow().toString().trim(),
                 "{label:\"City name\"}");
         Assert.assertEquals(annotationNodes.size(), 1);
@@ -74,7 +74,7 @@ public class AnnotationTests {
                 openAPI.getPaths().get("/pets").getGet().getParameters().get(0).getExtensions();
         List<AnnotationNode> annotationNodes  = new ArrayList<>();
         List<Node> documentaion = new ArrayList<>();
-        DocCommentsGenerator.extractDeprecatedAnnotation(param01, documentaion, annotationNodes);
+        DocCommentsGeneratorUtil.extractDeprecatedAnnotation(param01, documentaion, annotationNodes);
         Assert.assertEquals(annotationNodes.get(0).annotReference().toString(), "deprecated");
     }
 
@@ -86,7 +86,7 @@ public class AnnotationTests {
                 openAPI.getPaths().get("/pets").getGet().getParameters().get(1).getExtensions();
         List<AnnotationNode> annotationNodes  = new ArrayList<>();
         List<Node> documentaion = new ArrayList<>();
-        DocCommentsGenerator.extractDeprecatedAnnotation(param01, documentaion, annotationNodes);
+        DocCommentsGeneratorUtil.extractDeprecatedAnnotation(param01, documentaion, annotationNodes);
         Assert.assertEquals(annotationNodes.get(0).annotReference().toString(), "deprecated");
     }
 
