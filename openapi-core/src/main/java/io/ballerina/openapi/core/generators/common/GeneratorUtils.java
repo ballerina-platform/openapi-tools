@@ -64,8 +64,12 @@ import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.type.generators.EnumGenerator;
+import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.generators.EnumGenerator;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
@@ -342,7 +346,7 @@ public class GeneratorUtils {
                     String paramComment = parameter.getDescription() != null && !parameter.getDescription().isBlank() ?
                             parameter.getDescription() : DEFAULT_PARAM_COMMENT;
                     MarkdownParameterDocumentationLineNode paramAPIDoc =
-                            DocCommentsGenerator.createAPIParamDoc(parameterName, paramComment);
+                            DocCommentsGeneratorUtil.createAPIParamDoc(parameterName, paramComment);
                     resourceFunctionDocs.add(paramAPIDoc);
                 }
                 break;
@@ -1184,7 +1188,7 @@ public class GeneratorUtils {
 
     private static String getPathParameterType(Schema<?> typeSchema, String pathParam)
             throws BallerinaOpenApiException {
-        String type;
+        String type = null;
         if (!(isStringSchema(typeSchema) || isNumberSchema(typeSchema) || isBooleanSchema(typeSchema)
                 || isIntegerSchema(typeSchema))) {
             type = STRING;

@@ -65,7 +65,7 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
+import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityScheme;
@@ -1537,14 +1537,14 @@ public class AuthConfigGeneratorImp {
 
     private MetadataNode getMetadataNode(String comment) {
 
-        List<Node> docs = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(comment, false));
+        List<Node> docs = new ArrayList<>(DocCommentsGeneratorUtil.createAPIDescriptionDoc(comment, false));
         MarkdownDocumentationNode authDocumentationNode = createMarkdownDocumentationNode(
                 createNodeList(docs));
         return createMetadataNode(authDocumentationNode, createEmptyNodeList());
     }
 
     private MetadataNode getMetadataNode(String comment, List<AnnotationNode> annotationNodes) {
-        List<Node> docs = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(comment, false));
+        List<Node> docs = new ArrayList<>(DocCommentsGeneratorUtil.createAPIDescriptionDoc(comment, false));
         MarkdownDocumentationNode authDocumentationNode = createMarkdownDocumentationNode(
                 createNodeList(docs));
         return createMetadataNode(authDocumentationNode, createNodeList(annotationNodes));

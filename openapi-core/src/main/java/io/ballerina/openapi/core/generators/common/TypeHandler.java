@@ -22,8 +22,10 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.constraint.ConstraintGeneratorImp;
 import io.ballerina.openapi.core.generators.constraint.ConstraintResult;
+import io.ballerina.openapi.core.generators.document.DocCommentGeneratorImp;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.model.TypeGeneratorResult;
@@ -107,7 +109,10 @@ public class TypeHandler {
         ModulePartNode modulePartNode = NodeFactory.createModulePartNode(imports, typeMembers, eofToken);
         TextDocument textDocument = TextDocuments.from("");
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
-        return syntaxTree.modifyWith(modulePartNode);
+        syntaxTree = syntaxTree.modifyWith(modulePartNode);
+        DocCommentGeneratorImp docCommentGenerator = new DocCommentGeneratorImp(generatorMetadata.getOpenAPI(), syntaxTree,
+                GenSrcFile.GenFileType.GEN_TYPE);
+        return docCommentGenerator.updateSyntaxTreeWithDocComments();
     }
 
 
