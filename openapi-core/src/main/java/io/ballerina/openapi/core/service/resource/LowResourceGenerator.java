@@ -8,8 +8,8 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.service.GeneratorConstants;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.service.signature.FunctionSignatureGenerator;
@@ -22,7 +22,6 @@ import java.util.Map;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionBodyBlockNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionDefinitionNode;
@@ -43,9 +42,9 @@ public class LowResourceGenerator extends ResourceGenerator {
                 .toLowerCase(Locale.ENGLISH), GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
         NodeList<Node> relativeResourcePath = null;
         try {
-            relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
+            relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(), null,
                     oasServiceMetadata.getOpenAPI().getComponents(), oasServiceMetadata.generateWithoutDataBinding());
-        } catch (OASTypeGenException e) {
+        } catch (BallerinaOpenApiException e) {
             throw new RuntimeException(e);
         }
         FunctionSignatureGenerator functionSignatureGenerator = FunctionSignatureGenerator
@@ -60,6 +59,5 @@ public class LowResourceGenerator extends ResourceGenerator {
         return createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, null,
                 qualifiersList, functionKeyWord, functionName, relativeResourcePath, functionSignatureNode,
                 functionBodyBlockNode);
-
     }
 }

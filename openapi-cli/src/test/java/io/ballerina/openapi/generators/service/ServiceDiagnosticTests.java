@@ -141,7 +141,7 @@ public class ServiceDiagnosticTests {
                 {"complex_oneOf_schema.yaml"},
                 {"request_body_ref.yaml"},
                 {"vendor_specific_mime_types.yaml"},
-                {"single_allOf.yaml"},//
+                {"single_allOf.yaml"},
                 // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1415
 //                {"ballerinax_connector_tests/ably.yaml"},
                 {"ballerinax_connector_tests/azure.iot.yaml"},
@@ -150,10 +150,10 @@ public class ServiceDiagnosticTests {
                 {"ballerinax_connector_tests/files.com.yaml"},
                 {"ballerinax_connector_tests/openweathermap.yaml"},
                 {"ballerinax_connector_tests/soundcloud.yaml"},
-                {"ballerinax_connector_tests/stripe.yaml"},//
+                {"ballerinax_connector_tests/stripe.yaml"}, //
                 {"ballerinax_connector_tests/vimeo.yaml"},
-                {"ballerinax_connector_tests/ynab.yaml"}, // 209 status code is not supported in Ballerina
-                {"ballerinax_connector_tests/zoom.yaml"}//
+//                {"ballerinax_connector_tests/ynab.yaml"}, // 209 status code is not supported in Ballerina
+                {"ballerinax_connector_tests/zoom.yaml"}
         };
     }
 
@@ -162,6 +162,7 @@ public class ServiceDiagnosticTests {
         return new Object[][]{
                 {"petstore_server_with_base_path.yaml"},
                 {"petstore_get.yaml"},
+                {"petstore_server_with_multiple_syntaxkind_status_code_records"},
                 {"openapi_display_annotation.yaml"},
                 {"header_parameter.yaml"},
                 {"petstore_post.yaml"},

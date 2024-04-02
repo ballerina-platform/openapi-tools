@@ -127,6 +127,7 @@ import java.util.regex.Pattern;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
@@ -246,7 +247,7 @@ public class GeneratorUtils {
      * @return - node lists
      * @throws BallerinaOpenApiException
      */
-    public static List<Node> getRelativeResourcePath(String path, Operation operation, List<Node> resourceFunctionDocs,
+    public static NodeList<Node> getRelativeResourcePath(String path, Operation operation, List<Node> resourceFunctionDocs,
                                                      Components components, boolean isWithoutDataBinding)
             throws BallerinaOpenApiException {
 
@@ -283,7 +284,7 @@ public class GeneratorUtils {
             IdentifierToken idToken = createIdentifierToken(pathNodes[1].trim());
             functionRelativeResourcePath.add(idToken);
         }
-        return functionRelativeResourcePath;
+        return createNodeList(functionRelativeResourcePath);
     }
 
     private static void extractPathParameterDetails(Operation operation, List<Node> functionRelativeResourcePath,
@@ -311,14 +312,13 @@ public class GeneratorUtils {
                 if (parameter.getSchema().get$ref() != null) {
                     paramType = resolveReferenceType(parameter.getSchema(), components, isWithoutDataBinding,
                             pathParam);
+                    TypeHandler.getInstance().getTypeNodeFromOASSchema(parameter.getSchema());
                 } else {
                     paramType = getPathParameterType(parameter.getSchema(), pathParam);
                     if (paramType.endsWith(NILLABLE)) {
                         throw new BallerinaOpenApiException("Path parameter value cannot be null.");
                     }
                 }
-
-                // TypeDescriptor
                 BuiltinSimpleNameReferenceNode builtSNRNode = createBuiltinSimpleNameReferenceNode(
                         null,
                         parameter.getSchema() == null || hasSpecialCharacter ?
@@ -1265,7 +1265,7 @@ public class GeneratorUtils {
 
     public static TypeDescriptorNode generateStatusCodeTypeInclusionRecord(Map.Entry<String, ApiResponse> response,
                                                                            OpenAPI openAPI) {
-        String code = io.ballerina.openapi.core.service.GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
+        String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
         Content responseContent = response.getValue().getContent();
         Set<Map.Entry<String, MediaType>> bodyTypeSchema;
         if (Objects.nonNull(responseContent)) {
@@ -1297,13 +1297,13 @@ public class GeneratorUtils {
                             yield createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
                         }
                     }
-                    case io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_XML ->
+                    case GeneratorConstants.APPLICATION_XML ->
                             generateTypeDescriptorForXMLContent();
-                    case io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_URL_ENCODE ->
+                    case GeneratorConstants.APPLICATION_URL_ENCODE ->
                             generateTypeDescriptorForMapStringContent();
-                    case io.ballerina.openapi.core.service.GeneratorConstants.TEXT ->
+                    case GeneratorConstants.TEXT ->
                             generateTypeDescriptorForTextContent();
-                    case io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_OCTET_STREAM ->
+                    case GeneratorConstants.APPLICATION_OCTET_STREAM ->
                             generateTypeDescriptorForOctetStreamContent();
                     default -> createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
                 };

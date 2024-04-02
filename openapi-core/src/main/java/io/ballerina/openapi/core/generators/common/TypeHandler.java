@@ -226,7 +226,8 @@ public class TypeHandler {
                                                               TypeDescriptorNode headersType) {
         String recordName;
         if (bodyType != null) {
-            recordName = statusCode + GeneratorUtils.getValidName(bodyType.toString(), true);
+            String bodyTypeStr = bodyType.toString().replaceAll("[\\[\\\\]]", "Array");
+            recordName = statusCode + GeneratorUtils.getValidName(bodyTypeStr, true);
         } else {
             recordName = statusCode;
         }

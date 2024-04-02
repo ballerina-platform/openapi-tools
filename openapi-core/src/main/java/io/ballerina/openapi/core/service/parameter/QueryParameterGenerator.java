@@ -200,7 +200,7 @@ public class QueryParameterGenerator extends ParameterGenerator {
 //        TypeDescriptorNode refTypeNameNode = TypeHandler.getInstance().getReferencedQueryParameterTypeFromSchema(refSchema, refTypeName);
 
         Optional<TypeDescriptorNode> typeDescriptorNode = TypeHandler.getInstance()
-                .getTypeNodeFromOASSchema(refSchema);
+                .getTypeNodeFromOASSchema(parameter.getSchema());
         Token refTypeNameNode = createIdentifierToken(typeDescriptorNode.get().toSourceCode());
 
         //
@@ -222,7 +222,6 @@ public class QueryParameterGenerator extends ParameterGenerator {
 
     private ParameterNode handleRequiredQueryParameter(Schema<?> schema, NodeList<AnnotationNode> annotations,
                                               IdentifierToken parameterName) throws OASTypeGenException {
-
         if (isArraySchema(schema)) {
             Schema<?> items = schema.getItems();
             if (!(isArraySchema(items)) && (getOpenAPIType(items) != null || (items.get$ref() != null))) {
