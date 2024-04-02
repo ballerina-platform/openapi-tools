@@ -24,7 +24,7 @@ jobs:
           updatedVersion=$VERSION-$startTime-$latestCommit
           echo "Updated version: $updatedVersion"
           sed -i "s/version=\(.*\)/version=$updatedVersion/g" gradle.properties
-          CLIENT_NATIVE_VERSION=$((grep -w 'clientNativeVersion' | cut -d= -f2) < gradle.properties)
+          CLIENT_NATIVE_VERSION=$((grep -w 'clientNativeVersion' | cut -d= -f2) < gradle.properties | rev | cut --complement -d- -f1 | rev)
           updatedClientNativeVersion=$CLIENT_NATIVE_VERSION-$startTime-$latestCommit
           echo "Updated clientNativeVersion: $updatedClientNativeVersion"
           sed -i "s/clientNativeVersion=\(.*\)/clientNativeVersion=$updatedClientNativeVersion/g" gradle.properties
