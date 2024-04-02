@@ -42,6 +42,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.mime.MimeType;
@@ -136,7 +137,7 @@ import static io.ballerina.openapi.core.generators.serviceOld.ServiceGenerationU
  *
  * @since 1.3.0
  */
-public class FunctionBodyGeneratorImp {
+public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
 
     private List<ImportDeclarationNode> imports = new ArrayList<>();
     private boolean isHeader;
@@ -169,7 +170,8 @@ public class FunctionBodyGeneratorImp {
      * @return - {@link FunctionBodyNode}
      * @throws BallerinaOpenApiException - throws exception if generating FunctionBodyNode fails.
      */
-    public Optional<FunctionBodyNode> getFunctionBodyNode() throws BallerinaOpenApiException {
+    @Override
+    public Optional<FunctionBodyNode> getFunctionBodyNode() {
 
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation.getValue(), openAPI);
@@ -184,9 +186,11 @@ public class FunctionBodyGeneratorImp {
         //string path - common for every remote functions
         VariableDeclarationNode pathInt = getPathStatement(path, annotationNodes);
         statementsList.add(pathInt);
+        try {
 
-        //Handel query parameter map
+            //Handel query parameter map
         handleParameterSchemaInOperation(operation, statementsList);
+
 
         String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
         // This return type for target data type binding.
@@ -210,6 +214,10 @@ public class FunctionBodyGeneratorImp {
         NodeList<StatementNode> statements = createNodeList(statementsList);
         return Optional.of(createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN), null, statements,
                 createToken(CLOSE_BRACE_TOKEN), null));
+        } catch (BallerinaOpenApiException e) {
+            //todo diagnostic message
+            return Optional.empty();
+        }
     }
 
     /**
@@ -781,5 +789,10 @@ public class FunctionBodyGeneratorImp {
         return createVariableDeclarationNode(createEmptyNodeList(),
                 null, bindingPatternNode, createToken(EQUAL_TOKEN), initialize,
                 createToken(SEMICOLON_TOKEN));
+    }
+
+    @Override
+    public List<ClientDiagnostic> getDiagnostics() {
+        return new ArrayList<>();
     }
 }

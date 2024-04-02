@@ -36,8 +36,9 @@ public class GeneratorMetaData {
         this.nullable = nullable;
     }
 
-    public static void createInstance(OpenAPI openAPI, boolean nullable) {
+    public static GeneratorMetaData createInstance(OpenAPI openAPI, boolean nullable) {
         generatorMetaData = new GeneratorMetaData(openAPI, nullable);
+        return generatorMetaData;
     }
 
     public static GeneratorMetaData getInstance() {

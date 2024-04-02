@@ -75,7 +75,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isValid
  *
  * @since 1.3.0
  */
-public class FunctionReturnTypeGeneratorImp {
+public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerator {
     private OpenAPI openAPI;
     private Operation operation;
     List<ClientDiagnostic> diagnostics = new ArrayList<>();
@@ -85,21 +85,13 @@ public class FunctionReturnTypeGeneratorImp {
         this.operation = operation;
     }
 
-//    public FunctionReturnTypeGeneratorImp(OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
-//                                          List<TypeDefinitionNode> typeDefinitionNodeList) {
-//
-//        this.openAPI = openAPI;
-//        this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
-//        this.typeDefinitionNodeList = typeDefinitionNodeList;
-//    }
-
-
     /**
      * Get return type of the remote function.
      *
      * @return string with return type.
      * @throws BallerinaOpenApiException - throws exception if creating return type fails.
      */
+    @Override
     public Optional<ReturnTypeDescriptorNode> getReturnType() {
         //TODO: Handle multiple media-type
         //Todo handle reference reusable response schema
@@ -123,8 +115,8 @@ public class FunctionReturnTypeGeneratorImp {
                                 if (dataType.isPresent()) {
                                     type = dataType.get();
                                 } else {
-                                    //todo add diagnostic
-                                    return Optional.empty();
+                                    String mediaType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
+                                    type = createSimpleNameReferenceNode(createIdentifierToken(mediaType));
                                 }
                             } else {
                                 String mediaType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
@@ -373,4 +365,8 @@ public class FunctionReturnTypeGeneratorImp {
 //            return type;
 //        }
 //    }
+        @Override
+        public List<ClientDiagnostic> getDiagnostics() {
+            return diagnostics;
+        }
 }

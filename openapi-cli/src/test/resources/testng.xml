@@ -67,11 +67,11 @@
 <!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.BallerinaDiagnosticTests"/>&ndash;&gt;-->
 <!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.ComparedGeneratedFileTests"/>&ndash;&gt;-->
 <!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.AnnotationTests"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.FunctionBodyNodeTests"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.FunctionSignatureNodeTests"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.FunctionSignatureReturnTypeTests"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.FilterTests"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.HeadersTests"/>&ndash;&gt;-->
+            <class name="io.ballerina.openapi.generators.client.FunctionBodyNodeTests"/>
+            <class name="io.ballerina.openapi.generators.client.FunctionSignatureNodeTests"/>
+            <class name="io.ballerina.openapi.generators.client.FunctionSignatureReturnTypeTests"/>
+            <class name="io.ballerina.openapi.generators.client.FilterTests"/>
+            <class name="io.ballerina.openapi.generators.client.HeadersTests"/>
 <!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.PathParameterTests"/>&ndash;&gt;-->
             <class name="io.ballerina.openapi.generators.client.AllOfResponsesTests"/>
 <!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.QueryParameterTests"/>&ndash;&gt;-->
@@ -101,7 +101,7 @@
 <!--            <class name="io.ballerina.openapi.generators.schema.NestedRecordInclusionTests"/>-->
 <!--            <class name="io.ballerina.openapi.generators.schema.FieldGenWithNullableOption"/>-->
 <!--            <class name="io.ballerina.openapi.generators.schema.AnnotationTests"/>-->
-<!--            <class name="io.ballerina.openapi.generators.schema.ConstraintTests"/>-->
+            <class name="io.ballerina.openapi.generators.schema.ConstraintTests"/>
 <!--            <class name="io.ballerina.openapi.generators.schema.MapSchemaTests"/>-->
 <!--            <class name="io.ballerina.openapi.generators.schema.MapSchemaNegativeTests"/>-->
 <!--            <class name="io.ballerina.openapi.generators.schema.IntegerDataTypeTests"/>-->
