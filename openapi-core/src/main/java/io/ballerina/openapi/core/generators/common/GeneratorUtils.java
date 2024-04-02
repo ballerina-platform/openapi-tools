@@ -1232,7 +1232,7 @@ public class GeneratorUtils {
             Header header = headerEntry.getValue();
             Schema headerTypeSchema = header.getSchema();
             properties.put(headerName, headerTypeSchema);
-            if (header.getRequired()) {
+            if (header.getRequired() != null && header.getRequired()) {
                 requiredField.add(headerName);
             }
         }

@@ -69,25 +69,11 @@ public abstract class TypeGenerator {
      * Create Type Definition Node for a given OpenAPI schema.
      *
      * @param typeName        IdentifierToken of the name of the type
-     * @param typeAnnotations Annotations related to the type. Currently, only includes `Deprecated` annotation
      * @return {@link TypeDefinitionNode}
      * @throws OASTypeGenException when unsupported schema type is found
      */
-    public TypeDefinitionNode generateTypeDefinitionNode(IdentifierToken typeName, List<AnnotationNode> typeAnnotations)
+    public TypeDefinitionNode generateTypeDefinitionNode(IdentifierToken typeName)
             throws OASTypeGenException {
-        //Check the annotation for constraint support
-        boolean nullable = GeneratorMetaData.getInstance().isNullable();
-        for (AnnotationNode annotation : typeAnnotations) {
-            String annotationRef = annotation.annotReference().toString();
-            if (annotationRef.startsWith(GeneratorConstants.CONSTRAINT) && !nullable) {
-                ImportDeclarationNode constraintImport = GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA, GeneratorConstants.CONSTRAINT);
-                //Here we are unable to add ImportDeclarationNode since newly generated node has different hashcode.
-                imports.add(constraintImport.toSourceCode());
-            }
-        }
-
-//        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
-//        MetadataNode metadataNode = createMetadataNode(documentationNode, createNodeList(typeAnnotations));
         return createTypeDefinitionNode(null, createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD),
                 typeName, generateTypeDescriptorNode(), createToken(SEMICOLON_TOKEN));
     }

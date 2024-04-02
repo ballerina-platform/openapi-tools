@@ -219,7 +219,12 @@ public class TypeHandler {
 
     public SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode bodyType,
                                                               TypeDescriptorNode headersType) {
-        String recordName = statusCode + GeneratorUtils.getValidName(bodyType.toString(), true);
+        String recordName;
+        if (bodyType != null) {
+            recordName = statusCode + GeneratorUtils.getValidName(bodyType.toString(), true);
+        } else {
+            recordName = statusCode;
+        }
         Token recordKeyWord = createToken(RECORD_KEYWORD);
         Token bodyStartDelimiter = createIdentifierToken("{|");
         // Create record fields
@@ -236,12 +241,14 @@ public class TypeHandler {
 
         IdentifierToken bodyFieldName = createIdentifierToken(GeneratorConstants.BODY, GeneratorUtils.SINGLE_WS_MINUTIAE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
-        RecordFieldNode bodyFieldNode = createRecordFieldNode(
-                null, null,
-                bodyType,
-                bodyFieldName, null,
-                createToken(SyntaxKind.SEMICOLON_TOKEN));
-        recordFields.add(bodyFieldNode);
+        if (bodyType != null) {
+            RecordFieldNode bodyFieldNode = createRecordFieldNode(
+                    null, null,
+                    bodyType,
+                    bodyFieldName, null,
+                    createToken(SyntaxKind.SEMICOLON_TOKEN));
+            recordFields.add(bodyFieldNode);
+        }
 
         IdentifierToken headersFieldName = createIdentifierToken(GeneratorConstants.HEADERS, GeneratorUtils.SINGLE_WS_MINUTIAE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE);

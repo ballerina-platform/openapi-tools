@@ -259,8 +259,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 if (contentEntries.size() > 1) {
                     returnType = handleMultipleContents(contentEntries, pathRecord);
                 } else {
-                    returnType = getReturnNodeForSchemaType(contentEntries.iterator().next()
-                    );
+                    returnType = getReturnNodeForSchemaType(contentEntries.iterator().next());
                 }
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), returnType);
             } else if (response.getKey().trim().equals(GeneratorConstants.DEFAULT)) {
@@ -282,34 +281,50 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
         String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
         Content responseContent = response.getValue().getContent();
         Set<Map.Entry<String, MediaType>> bodyTypeSchema;
-        if (Objects.isNull(responseContent)) {
-            bodyTypeSchema = new LinkedHashSet<>();
-        } else {
+        if (Objects.nonNull(responseContent)) {
             bodyTypeSchema = responseContent.entrySet();
+        } else if (response.getValue().get$ref() != null) {
+            try {
+                String referenceType = GeneratorUtils.extractReferenceType(response.getValue().get$ref());
+                ApiResponse apiResponse = oasServiceMetadata.getOpenAPI().getComponents()
+                        .getResponses().get(referenceType);
+                bodyTypeSchema = apiResponse.getContent().entrySet();
+            } catch (OASTypeGenException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            bodyTypeSchema = new LinkedHashSet<>();
         }
         Schema headersTypeSchema = getHeadersTypeSchema(response.getValue());
 
         List<TypeDescriptorNode> generatedTypes = new ArrayList<>();
-        for (Map.Entry<String, MediaType> mediaTypeEntry : bodyTypeSchema) {
-            String mediaType = selectMediaType(mediaTypeEntry.getKey());
-            TypeDescriptorNode mediaTypeToken = switch (mediaType) {
-                case GeneratorConstants.APPLICATION_JSON -> {
-                    if (mediaTypeEntry.getValue().getSchema() != null) {
-                        yield TypeHandler.getInstance()
-                                .getTypeNodeFromOASSchema(mediaTypeEntry.getValue().getSchema()).get();
-                    } else {
-                        yield createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
+        if (!code.equals("NoContent")) {
+            for (Map.Entry<String, MediaType> mediaTypeEntry : bodyTypeSchema) {
+                String mediaType = selectMediaType(mediaTypeEntry.getKey());
+                TypeDescriptorNode mediaTypeToken = switch (mediaType) {
+                    case GeneratorConstants.APPLICATION_JSON -> {
+                        if (mediaTypeEntry.getValue().getSchema() != null) {
+                            yield TypeHandler.getInstance()
+                                    .getTypeNodeFromOASSchema(mediaTypeEntry.getValue().getSchema()).get();
+                        } else {
+                            yield createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
+                        }
                     }
-                }
-                case GeneratorConstants.APPLICATION_XML -> generateTypeDescriptorForXMLContent();
-                case GeneratorConstants.APPLICATION_URL_ENCODE -> generateTypeDescriptorForMapStringContent();
-                case GeneratorConstants.TEXT -> generateTypeDescriptorForTextContent();
-                case GeneratorConstants.APPLICATION_OCTET_STREAM -> generateTypeDescriptorForOctetStreamContent();
-                default -> createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
-            };
-            generatedTypes.add(mediaTypeToken);
+                    case GeneratorConstants.APPLICATION_XML -> generateTypeDescriptorForXMLContent();
+                    case GeneratorConstants.APPLICATION_URL_ENCODE -> generateTypeDescriptorForMapStringContent();
+                    case GeneratorConstants.TEXT -> generateTypeDescriptorForTextContent();
+                    case GeneratorConstants.APPLICATION_OCTET_STREAM -> generateTypeDescriptorForOctetStreamContent();
+                    default -> createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
+                };
+                generatedTypes.add(mediaTypeToken);
+            }
+        } else {
+            // todo : generate warning
         }
-        if (generatedTypes.size() == 1) {
+        if (generatedTypes.isEmpty()) {
+            return TypeHandler.getInstance().createTypeInclusionRecord(code, null,
+                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
+        } else if (generatedTypes.size() == 1) {
             return TypeHandler.getInstance().createTypeInclusionRecord(code, generatedTypes.get(0),
                     TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
         }
