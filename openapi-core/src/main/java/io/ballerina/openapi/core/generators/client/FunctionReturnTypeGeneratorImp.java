@@ -58,7 +58,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extract
  * @since 1.3.0
  */
 public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerator {
-    private OpenAPI openAPI;
+    protected OpenAPI openAPI;
     protected Operation operation;
     List<ClientDiagnostic> diagnostics = new ArrayList<>();
 

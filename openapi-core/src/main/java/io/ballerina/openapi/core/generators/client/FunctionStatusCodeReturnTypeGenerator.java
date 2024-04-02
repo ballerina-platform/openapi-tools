@@ -20,7 +20,7 @@ public class FunctionStatusCodeReturnTypeGenerator extends FunctionReturnTypeGen
     protected boolean populateReturnType(String statusCode, ApiResponse response, List<TypeDescriptorNode> returnTypes) {
         boolean noContentResponseFoundSuper = super.populateReturnType(statusCode, response, returnTypes);
         returnTypes.add(generateStatusCodeTypeInclusionRecord(
-                GeneratorConstants.HTTP_CODES_DES.get(statusCode), response, operation.getOperationId()));
+                GeneratorConstants.HTTP_CODES_DES.get(statusCode), response, operation.getOperationId(), openAPI));
         return noContentResponseFoundSuper;
     }
 }

@@ -22,8 +22,10 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.constraint.ConstraintGeneratorImp;
 import io.ballerina.openapi.core.generators.constraint.ConstraintResult;
+import io.ballerina.openapi.core.generators.document.DocCommentGeneratorImp;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
@@ -38,6 +40,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -166,6 +169,7 @@ public class TypeHandler {
     }
 
     public Optional<TypeDescriptorNode> getTypeNodeFromOASSchema(Schema schema) {
+        //
         TypeGeneratorResult typeGeneratorResult = ballerinaTypesGenerator.generateTypeDescriptorNodeForOASSchema(schema);
         handleSubtypes(typeGeneratorResult.subtypeDefinitions());
         return typeGeneratorResult.typeDescriptorNode();
@@ -193,13 +197,35 @@ public class TypeHandler {
     }
 
     public SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode bodyType,
-                                                              TypeDescriptorNode headersType) {
+                                                             TypeDescriptorNode headersType, String operationId) {
         String recordName;
         if (bodyType != null) {
             recordName = statusCode + GeneratorUtils.getValidName(bodyType.toString(), true);
         } else {
             recordName = statusCode;
         }
+
+        RecordTypeDescriptorNode recordTypeDescriptorNode = getRecordTypeDescriptorNode(statusCode, bodyType,
+                headersType);
+
+        if (typeDefinitionNodes.containsKey(recordName)) {
+            if (Objects.nonNull(typeDefinitionNodes.get(recordName).typeDescriptor()) &&
+                !typeDefinitionNodes.get(recordName).typeDescriptor().toSourceCode().equals(recordTypeDescriptorNode.toSourceCode())) {
+                recordName = statusCode + operationId.substring(0, 1).toUpperCase() + operationId.substring(1);
+            }
+        }
+
+        TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
+                createToken(PUBLIC_KEYWORD),
+                createToken(TYPE_KEYWORD),
+                createIdentifierToken(recordName),
+                recordTypeDescriptorNode,
+                createToken(SEMICOLON_TOKEN));
+        typeDefinitionNodes.put(recordName, typeDefinitionNode);
+        return createSimpleNameReferenceNode(createIdentifierToken(recordName));
+    }
+
+    private static RecordTypeDescriptorNode getRecordTypeDescriptorNode(String statusCode, TypeDescriptorNode bodyType, TypeDescriptorNode headersType) {
         Token recordKeyWord = createToken(RECORD_KEYWORD);
         Token bodyStartDelimiter = createIdentifierToken("{|");
         // Create record fields
@@ -242,15 +268,7 @@ public class TypeHandler {
                 bodyStartDelimiter,
                 fieldsList, null,
                 bodyEndDelimiter);
-
-        TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
-                createToken(PUBLIC_KEYWORD),
-                createToken(TYPE_KEYWORD),
-                createIdentifierToken(recordName),
-                recordTypeDescriptorNode,
-                createToken(SEMICOLON_TOKEN));
-        typeDefinitionNodes.put(recordName, typeDefinitionNode);
-        return createSimpleNameReferenceNode(createIdentifierToken(recordName));
+        return recordTypeDescriptorNode;
     }
 
     /**

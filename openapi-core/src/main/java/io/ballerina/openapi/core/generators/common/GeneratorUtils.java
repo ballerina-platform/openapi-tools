@@ -65,18 +65,7 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
-import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.core.generators.type.generators.EnumGenerator;
-import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
-import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
-import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
-import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.core.generators.type.generators.EnumGenerator;
-import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.generators.EnumGenerator;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
@@ -199,10 +188,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TYP
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YML_EXTENSION;
-import static io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_JSON;
-import static io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_URL_ENCODE;
-import static io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_XML;
-import static io.ballerina.openapi.core.service.GeneratorConstants.TEXT;
 import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForJsonContent;
 import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForMapStringContent;
 import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForOctetStreamContent;
@@ -1277,37 +1262,52 @@ public class GeneratorUtils {
     }
 
     public static TypeDescriptorNode generateStatusCodeTypeInclusionRecord(String code, ApiResponse response,
-                                                                           String operationId) {
+                                                                           String operationId, OpenAPI openAPI) {
         Content responseContent = response.getContent();
         Set<Map.Entry<String, MediaType>> bodyTypeSchema;
-        if (Objects.isNull(responseContent)) {
-            bodyTypeSchema = new LinkedHashSet<>();
-        } else {
+        if (Objects.nonNull(responseContent)) {
             bodyTypeSchema = responseContent.entrySet();
+        } else if (response.get$ref() != null) {
+            try {
+                String referenceType = io.ballerina.openapi.core.generators.type.GeneratorUtils.extractReferenceType(response.get$ref());
+                ApiResponse apiResponse = openAPI.getComponents().getResponses().get(referenceType);
+                bodyTypeSchema = apiResponse.getContent().entrySet();
+            } catch (OASTypeGenException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            bodyTypeSchema = new LinkedHashSet<>();
         }
         Schema headersTypeSchema = getHeadersTypeSchema(response);
 
         List<TypeDescriptorNode> generatedTypes = new ArrayList<>();
-        for (Map.Entry<String, MediaType> mediaTypeEntry : bodyTypeSchema) {
-            String mediaType = selectMediaType(mediaTypeEntry.getKey());
-            TypeDescriptorNode mediaTypeToken = switch (mediaType) {
-                case APPLICATION_JSON -> {
-                    if (mediaTypeEntry.getValue().getSchema() != null) {
-                        yield TypeHandler.getInstance()
-                                .getTypeNodeFromOASSchema(mediaTypeEntry.getValue().getSchema()).get();
-                    } else {
-                        yield createSimpleNameReferenceNode(createIdentifierToken(io.ballerina.openapi.core.service.GeneratorConstants.ANYDATA));
+        if (!code.equals("NoContent")) {
+            for (Map.Entry<String, MediaType> mediaTypeEntry : bodyTypeSchema) {
+                String mediaType = selectMediaType(mediaTypeEntry.getKey());
+                TypeDescriptorNode mediaTypeToken = switch (mediaType) {
+                    case io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_JSON -> {
+                        if (mediaTypeEntry.getValue().getSchema() != null) {
+                            yield TypeHandler.getInstance()
+                                    .getTypeNodeFromOASSchema(mediaTypeEntry.getValue().getSchema()).get();
+                        } else {
+                            yield createSimpleNameReferenceNode(createIdentifierToken(io.ballerina.openapi.core.service.GeneratorConstants.ANYDATA));
+                        }
                     }
-                }
-                case APPLICATION_XML -> generateTypeDescriptorForXMLContent();
-                case APPLICATION_URL_ENCODE -> generateTypeDescriptorForMapStringContent();
-                case TEXT -> generateTypeDescriptorForTextContent();
-                case GeneratorConstants.APPLICATION_OCTET_STREAM -> generateTypeDescriptorForOctetStreamContent();
-                default -> createSimpleNameReferenceNode(createIdentifierToken(io.ballerina.openapi.core.service.GeneratorConstants.ANYDATA));
-            };
-            generatedTypes.add(mediaTypeToken);
+                    case GeneratorConstants.APPLICATION_XML -> generateTypeDescriptorForXMLContent();
+                    case GeneratorConstants.APPLICATION_URL_ENCODE -> generateTypeDescriptorForMapStringContent();
+                    case GeneratorConstants.TEXT -> generateTypeDescriptorForTextContent();
+                    case GeneratorConstants.APPLICATION_OCTET_STREAM -> generateTypeDescriptorForOctetStreamContent();
+                    default -> createSimpleNameReferenceNode(createIdentifierToken(io.ballerina.openapi.core.service.GeneratorConstants.ANYDATA));
+                };
+                generatedTypes.add(mediaTypeToken);
+            }
+        } else {
+            // todo : generate warning
         }
-        if (generatedTypes.size() == 1) {
+        if (generatedTypes.isEmpty()) {
+            return TypeHandler.getInstance().createTypeInclusionRecord(code, null,
+                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema), operationId);
+        } else if (generatedTypes.size() == 1) {
             return TypeHandler.getInstance().createTypeInclusionRecord(code, generatedTypes.get(0),
                     TypeHandler.getInstance().generateHeaderType(headersTypeSchema), operationId);
         }
@@ -1328,16 +1328,16 @@ public class GeneratorUtils {
         TypeDescriptorNode mediaTypeToken;
         String mediaTypeContent = selectMediaType(contentEntry.getKey().trim());
         mediaTypeToken = switch (mediaTypeContent) {
-            case APPLICATION_JSON -> {
+            case GeneratorConstants.APPLICATION_JSON -> {
                 if (contentEntry.getValue() != null && contentEntry.getValue().getSchema() != null) {
                     yield generateTypeDescriptorForJsonContent(contentEntry);
                 } else {
                     yield createSimpleNameReferenceNode(createIdentifierToken(io.ballerina.openapi.core.service.GeneratorConstants.ANYDATA));
                 }
             }
-            case APPLICATION_XML -> generateTypeDescriptorForXMLContent();
-            case APPLICATION_URL_ENCODE -> generateTypeDescriptorForMapStringContent();
-            case TEXT -> generateTypeDescriptorForTextContent();
+            case GeneratorConstants.APPLICATION_XML -> generateTypeDescriptorForXMLContent();
+            case GeneratorConstants.APPLICATION_URL_ENCODE -> generateTypeDescriptorForMapStringContent();
+            case GeneratorConstants.TEXT -> generateTypeDescriptorForTextContent();
             case GeneratorConstants.APPLICATION_OCTET_STREAM -> generateTypeDescriptorForOctetStreamContent();
             default -> createSimpleNameReferenceNode(createIdentifierToken(io.ballerina.openapi.core.service.GeneratorConstants.HTTP_RESPONSE));
         };
