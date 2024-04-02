@@ -64,7 +64,7 @@ public class Constants {
                 "already updated with the latest OpenAPI client native dependency.", DiagnosticSeverity.INFO),
         CLIENT_NATIVE_DEPENDENCY_VERSION_MISMATCH("OAS_CLIENT_10", "the `Ballerina.toml` file is already" +
                 " updated with the OpenAPI client native dependency but the version is different from the current " +
-                "version. Please remove the existing dependency and try again.", DiagnosticSeverity.WARNING),
+                "version. Please remove the existing dependency and try again.", DiagnosticSeverity.ERROR),
         ERROR_WHILE_UPDATING_TOML("OAS_CLIENT_11", "error occurred when updating Ballerina.toml " +
                 "file with the client native dependency.", DiagnosticSeverity.ERROR);
 
