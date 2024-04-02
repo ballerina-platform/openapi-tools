@@ -53,6 +53,8 @@ import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
+import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
@@ -322,12 +324,12 @@ public class BallerinaClientGenerator {
         List<AnnotationNode> classLevelAnnotationNodes = new ArrayList<>();
         if (openAPI.getInfo().getExtensions() != null) {
             Map<String, Object> extensions = openAPI.getInfo().getExtensions();
-            DocCommentsGenerator.extractDisplayAnnotation(extensions, classLevelAnnotationNodes);
+            DocCommentsGeneratorUtil.extractDisplayAnnotation(extensions, classLevelAnnotationNodes);
         }
         // Generate api doc
         List<Node> documentationLines = new ArrayList<>();
         if (openAPI.getInfo().getDescription() != null && !openAPI.getInfo().getDescription().isBlank()) {
-            documentationLines.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+            documentationLines.addAll(DocCommentsGeneratorUtil.createAPIDescriptionDoc(
                     openAPI.getInfo().getDescription(), false));
         }
         MarkdownDocumentationNode apiDoc = createMarkdownDocumentationNode(createNodeList(documentationLines));
@@ -494,20 +496,20 @@ public class BallerinaClientGenerator {
             }
         }
         //todo: setInitDocComment() pass the references
-        docs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(clientInitDocComment, true));
+        docs.addAll(DocCommentsGeneratorUtil.createAPIDescriptionDoc(clientInitDocComment, true));
         if (authConfigGeneratorImp.isApiKey() && !authConfigGeneratorImp.isHttpOROAuth()) {
-            MarkdownParameterDocumentationLineNode apiKeyConfig = DocCommentsGenerator.createAPIParamDoc(
+            MarkdownParameterDocumentationLineNode apiKeyConfig = DocCommentsGeneratorUtil.createAPIParamDoc(
                     "apiKeyConfig", DEFAULT_API_KEY_DESC);
             docs.add(apiKeyConfig);
         }
         // Create method description
-        MarkdownParameterDocumentationLineNode clientConfig = DocCommentsGenerator.createAPIParamDoc("config",
+        MarkdownParameterDocumentationLineNode clientConfig = DocCommentsGeneratorUtil.createAPIParamDoc("config",
                 "The configurations to be used when initializing the `connector`");
         docs.add(clientConfig);
-        MarkdownParameterDocumentationLineNode serviceUrlAPI = DocCommentsGenerator.createAPIParamDoc("serviceUrl",
+        MarkdownParameterDocumentationLineNode serviceUrlAPI = DocCommentsGeneratorUtil.createAPIParamDoc("serviceUrl",
                 "URL of the target service");
         docs.add(serviceUrlAPI);
-        MarkdownParameterDocumentationLineNode returnDoc = DocCommentsGenerator.createAPIParamDoc("return",
+        MarkdownParameterDocumentationLineNode returnDoc = DocCommentsGeneratorUtil.createAPIParamDoc("return",
                 "An error if connector initialization failed");
         docs.add(returnDoc);
         MarkdownDocumentationNode clientInitDoc = createMarkdownDocumentationNode(createNodeList(docs));

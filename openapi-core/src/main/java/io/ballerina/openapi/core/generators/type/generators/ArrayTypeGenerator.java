@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.core.generators.type.generators;
 
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
@@ -100,11 +99,6 @@ public class ArrayTypeGenerator extends TypeGenerator {
         TypeGenerator typeGenerator;
         if (isConstraintsAvailable) {
             String normalizedTypeName = typeName.replaceAll(GeneratorConstants.SPECIAL_CHARACTER_REGEX, "").trim();
-            List<AnnotationNode> typeAnnotations = new ArrayList<>();
-            AnnotationNode constraintNode = null;//TypeGeneratorUtils.generateConstraintNode(typeName, items);
-            if (constraintNode != null) {
-                typeAnnotations.add(constraintNode);
-            }
             typeName = GeneratorUtils.getValidName(
                     parentType != null ?
                             parentType + "-" + normalizedTypeName + "-Items-" + GeneratorUtils.getOpenAPIType(items) :
@@ -114,8 +108,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
             if (!pregeneratedTypeMap.containsKey(typeName)) {
                 pregeneratedTypeMap.put(typeName, createSimpleNameReferenceNode(createIdentifierToken(typeName)));
                 TypeDefinitionNode arrayItemWithConstraint = typeGenerator.generateTypeDefinitionNode(
-                        createIdentifierToken(typeName),
-                        typeAnnotations);
+                        createIdentifierToken(typeName));
                 imports.addAll(typeGenerator.getImports());
                 subTypesMap.put(typeName, arrayItemWithConstraint);
             }
@@ -178,7 +171,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
             if (!pregeneratedTypeMap.containsKey(validTypeName)) {
                 pregeneratedTypeMap.put(validTypeName, createSimpleNameReferenceNode(createIdentifierToken(validTypeName)));
                 TypeDefinitionNode typeDefinitionNode = typeGenerator.generateTypeDefinitionNode(
-                        createIdentifierToken(validTypeName), new ArrayList<>());
+                        createIdentifierToken(validTypeName));
                 subTypesMap.put(validTypeName, typeDefinitionNode);
             }
             member = createBuiltinSimpleNameReferenceNode(null,
@@ -193,6 +186,10 @@ public class ArrayTypeGenerator extends TypeGenerator {
         } else {
             return Optional.empty();
         }
+        if (schema.getItems().getEnum() != null) {
+            member = createParenthesisedTypeDescriptorNode(
+                    createToken(OPEN_PAREN_TOKEN), member, createToken(CLOSE_PAREN_TOKEN));
+        }
         return Optional.ofNullable(getArrayTypeDescriptorNodeFromTypeDescriptorNode(member));
     }
 
@@ -203,7 +200,9 @@ public class ArrayTypeGenerator extends TypeGenerator {
         return new TypeGeneratorResult(Optional.of(typeDescriptorNode), subtypesMap, new ArrayList<>());
     }
 
-    private static ArrayTypeDescriptorNode getArrayTypeDescriptorNode(OpenAPI openAPI, Schema<?> items, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) throws OASTypeGenException {
+    private static ArrayTypeDescriptorNode getArrayTypeDescriptorNode(OpenAPI openAPI, Schema<?> items, HashMap<String,
+            TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap)
+            throws OASTypeGenException {
         String arrayName;
         if (items.get$ref() != null) {
             String referenceType = GeneratorUtils.extractReferenceType(items.get$ref());
@@ -213,7 +212,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
             if (!pregeneratedTypeMap.containsKey(type)) {
                 pregeneratedTypeMap.put(type, createSimpleNameReferenceNode(createIdentifierToken(type)));
                 TypeDefinitionNode typeDefinitionNode = typeGenerator.generateTypeDefinitionNode(
-                        createIdentifierToken(type), new ArrayList<>());
+                        createIdentifierToken(type));
                 subTypesMap.put(type, typeDefinitionNode);
             }
             if (queryParamSupportedTypes.contains(GeneratorUtils.getOpenAPIType(refSchema))) {
@@ -246,7 +245,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         return createArrayTypeDescriptorNode(memberTypeDesc, nodeList);
     }
 
-    public static ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(TypeDescriptorNode typeDescriptorNode) {
+    public ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(TypeDescriptorNode typeDescriptorNode) {
         ArrayDimensionNode arrayDimensionNode = NodeFactory.createArrayDimensionNode(
                 createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                 createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));

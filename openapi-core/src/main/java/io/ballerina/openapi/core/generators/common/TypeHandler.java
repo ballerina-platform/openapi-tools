@@ -38,7 +38,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -108,7 +107,10 @@ public class TypeHandler {
         ModulePartNode modulePartNode = NodeFactory.createModulePartNode(imports, typeMembers, eofToken);
         TextDocument textDocument = TextDocuments.from("");
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
-        return syntaxTree.modifyWith(modulePartNode);
+        syntaxTree = syntaxTree.modifyWith(modulePartNode);
+        DocCommentGeneratorImp docCommentGenerator = new DocCommentGeneratorImp(generatorMetadata.getOpenAPI(), syntaxTree,
+                GenSrcFile.GenFileType.GEN_TYPE);
+        return docCommentGenerator.updateSyntaxTreeWithDocComments();
     }
 
 
@@ -191,8 +193,13 @@ public class TypeHandler {
     }
 
     public SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode bodyType,
-                                                              TypeDescriptorNode headersType, String operationName) {
-        String recordName = getRecordName(statusCode, bodyType, operationName);
+                                                              TypeDescriptorNode headersType) {
+        String recordName;
+        if (bodyType != null) {
+            recordName = statusCode + GeneratorUtils.getValidName(bodyType.toString(), true);
+        } else {
+            recordName = statusCode;
+        }
         Token recordKeyWord = createToken(RECORD_KEYWORD);
         Token bodyStartDelimiter = createIdentifierToken("{|");
         // Create record fields
@@ -209,12 +216,14 @@ public class TypeHandler {
 
         IdentifierToken bodyFieldName = createIdentifierToken(GeneratorConstants.BODY, GeneratorUtils.SINGLE_WS_MINUTIAE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
-        RecordFieldNode bodyFieldNode = createRecordFieldNode(
-                null, null,
-                bodyType,
-                bodyFieldName, null,
-                createToken(SyntaxKind.SEMICOLON_TOKEN));
-        recordFields.add(bodyFieldNode);
+        if (bodyType != null) {
+            RecordFieldNode bodyFieldNode = createRecordFieldNode(
+                    null, null,
+                    bodyType,
+                    bodyFieldName, null,
+                    createToken(SyntaxKind.SEMICOLON_TOKEN));
+            recordFields.add(bodyFieldNode);
+        }
 
         IdentifierToken headersFieldName = createIdentifierToken(GeneratorConstants.HEADERS, GeneratorUtils.SINGLE_WS_MINUTIAE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
@@ -242,11 +251,6 @@ public class TypeHandler {
                 createToken(SEMICOLON_TOKEN));
         typeDefinitionNodes.put(recordName, typeDefinitionNode);
         return createSimpleNameReferenceNode(createIdentifierToken(recordName));
-    }
-
-    private static String getRecordName(String statusCode, TypeDescriptorNode bodyType, String operationName) {
-        return (Objects.isNull(operationName) ? GeneratorUtils.getValidName(bodyType.toString(), true) : operationName.substring(0, 1).toUpperCase() + operationName.substring(1))
-                + statusCode;
     }
 
     /**

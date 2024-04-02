@@ -267,6 +267,97 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
         return returnNode;
     }
 
+    private TypeDescriptorNode generateStatusCodeTypeInclusionRecord(Map.Entry<String, ApiResponse> response) {
+        String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
+        Content responseContent = response.getValue().getContent();
+        Set<Map.Entry<String, MediaType>> bodyTypeSchema;
+        if (Objects.nonNull(responseContent)) {
+            bodyTypeSchema = responseContent.entrySet();
+        } else if (response.getValue().get$ref() != null) {
+            try {
+                String referenceType = GeneratorUtils.extractReferenceType(response.getValue().get$ref());
+                ApiResponse apiResponse = oasServiceMetadata.getOpenAPI().getComponents()
+                        .getResponses().get(referenceType);
+                bodyTypeSchema = apiResponse.getContent().entrySet();
+            } catch (OASTypeGenException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            bodyTypeSchema = new LinkedHashSet<>();
+        }
+        Schema headersTypeSchema = getHeadersTypeSchema(response.getValue());
+
+        List<TypeDescriptorNode> generatedTypes = new ArrayList<>();
+        if (!code.equals("NoContent")) {
+            for (Map.Entry<String, MediaType> mediaTypeEntry : bodyTypeSchema) {
+                String mediaType = selectMediaType(mediaTypeEntry.getKey());
+                TypeDescriptorNode mediaTypeToken = switch (mediaType) {
+                    case GeneratorConstants.APPLICATION_JSON -> {
+                        if (mediaTypeEntry.getValue().getSchema() != null) {
+                            yield TypeHandler.getInstance()
+                                    .getTypeNodeFromOASSchema(mediaTypeEntry.getValue().getSchema()).get();
+                        } else {
+                            yield createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
+                        }
+                    }
+                    case GeneratorConstants.APPLICATION_XML -> generateTypeDescriptorForXMLContent();
+                    case GeneratorConstants.APPLICATION_URL_ENCODE -> generateTypeDescriptorForMapStringContent();
+                    case GeneratorConstants.TEXT -> generateTypeDescriptorForTextContent();
+                    case GeneratorConstants.APPLICATION_OCTET_STREAM -> generateTypeDescriptorForOctetStreamContent();
+                    default -> createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
+                };
+                generatedTypes.add(mediaTypeToken);
+            }
+        } else {
+            // todo : generate warning
+        }
+        if (generatedTypes.isEmpty()) {
+            return TypeHandler.getInstance().createTypeInclusionRecord(code, null,
+                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
+        } else if (generatedTypes.size() == 1) {
+            return TypeHandler.getInstance().createTypeInclusionRecord(code, generatedTypes.get(0),
+                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
+        }
+        UnionTypeDescriptorNode unionTypeDescriptorNode = null;
+        TypeDescriptorNode leftTypeDesc = generatedTypes.get(0);
+        for (int i = 1; i < generatedTypes.size(); i++) {
+            TypeDescriptorNode rightTypeDesc = generatedTypes.get(i);
+            unionTypeDescriptorNode = createUnionTypeDescriptorNode(leftTypeDesc, createToken(PIPE_TOKEN),
+                    rightTypeDesc);
+            leftTypeDesc = unionTypeDescriptorNode;
+        }
+        return TypeHandler.getInstance().createTypeInclusionRecord(code, unionTypeDescriptorNode,
+                TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
+    }
+
+    private TypeDescriptorNode getReturnNodeForSchemaType(Map.Entry<String, MediaType> contentEntry)
+            throws OASTypeGenException {
+        TypeDescriptorNode mediaTypeToken;
+        String mediaTypeContent = selectMediaType(contentEntry.getKey().trim());
+        mediaTypeToken = switch (mediaTypeContent) {
+            case GeneratorConstants.APPLICATION_JSON -> {
+                if (contentEntry.getValue() != null && contentEntry.getValue().getSchema() != null) {
+                    yield generateTypeDescriptorForJsonContent(contentEntry);
+                } else {
+                    yield createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
+                }
+            }
+            case GeneratorConstants.APPLICATION_XML -> generateTypeDescriptorForXMLContent();
+            case GeneratorConstants.APPLICATION_URL_ENCODE -> generateTypeDescriptorForMapStringContent();
+            case GeneratorConstants.TEXT -> generateTypeDescriptorForTextContent();
+            case GeneratorConstants.APPLICATION_OCTET_STREAM -> generateTypeDescriptorForOctetStreamContent();
+            default -> createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
+        };
+        if (mediaTypeToken == null) {
+            return createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
+        }
+        return mediaTypeToken;
+    }
+
+    private static String getNewRecordName(String pathRecord) {
+        return countForRecord == 0 ? pathRecord + GeneratorConstants.RESPONSE_RECORD_NAME : pathRecord + "Response_" + countForRecord;
+    }
+
     public static void setCountForRecord(int count) {
         countForRecord = count;
     }

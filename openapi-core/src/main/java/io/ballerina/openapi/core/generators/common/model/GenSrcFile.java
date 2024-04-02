@@ -33,6 +33,10 @@ public class GenSrcFile {
      * Type specifier for generated source files.
      */
     public enum GenFileType {
+        GEN_CLIENT,
+        GEN_SERVICE,
+        GEN_SERVICE_TYPE,
+        GEN_TYPE,
         GEN_SRC,
         MODEL_SRC,
         IMPL_SRC,

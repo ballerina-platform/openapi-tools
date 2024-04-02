@@ -151,18 +151,9 @@ public class QueryParameterGenerator extends ParameterGenerator {
                 throw new OASTypeGenException(messages.getDescription());
             } else if ((!(isObjectSchema(items)) && !(getOpenAPIType(items) != null &&
                     getOpenAPIType(items).equals(GeneratorConstants.ARRAY))) || items.get$ref() != null) {
-
-                // todo : update this part
-//                TypeDescriptorNode arrayTypeName = null;
-//                TypeDescriptorNode arrayTypeName = TypeHandler.getInstance().getArrayTypeDescriptorNode(items);
-
                 Optional<TypeDescriptorNode> typeDescriptorNode = TypeHandler.getInstance()
                         .getTypeNodeFromOASSchema(schema);
-                Token arrayTypeName = createIdentifierToken(typeDescriptorNode.get().toSourceCode());
-
-                //
-
-                OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(arrayTypeName,
+                OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(typeDescriptorNode.get(),
                         createToken(SyntaxKind.QUESTION_MARK_TOKEN));
                 return createRequiredParameterNode(annotations, optionalNode, parameterName);
             } else if (getOpenAPIType(items).equals(GeneratorConstants.ARRAY)) {

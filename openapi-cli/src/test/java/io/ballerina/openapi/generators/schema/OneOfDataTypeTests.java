@@ -21,12 +21,12 @@ package io.ballerina.openapi.generators.schema;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.schemaOld.TypeGeneratorUtils;
-import io.ballerina.openapi.core.generators.schemaOld.ballerinatypegenerators.TypeGenerator;
-import io.ballerina.openapi.core.generators.schemaOld.ballerinatypegenerators.UnionTypeGenerator;
-import io.ballerina.openapi.core.generators.schemaOld.model.GeneratorMetaData;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.type.generators.TypeGenerator;
+import io.ballerina.openapi.core.generators.type.generators.UnionTypeGenerator;
+import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -37,6 +37,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 /**
  * Test implementation to verify the `oneOf` property related scenarios in openAPI schema generation, handled by
@@ -53,8 +54,9 @@ public class OneOfDataTypeTests {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
-        GeneratorMetaData.createInstance(openAPI, false, false);
-        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error");
+        GeneratorMetaData.createInstance(openAPI, false);
+        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error",
+                new HashMap<>(), new HashMap<>());
         String oneOfUnionType = unionTypeGenerator.generateTypeDescriptorNode().toString().trim();
 
         Assert.assertEquals(oneOfUnionType, "Activity|Profile");
@@ -66,8 +68,9 @@ public class OneOfDataTypeTests {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
-        GeneratorMetaData.createInstance(openAPI, false, false);
-        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error");
+        GeneratorMetaData.createInstance(openAPI, false);
+        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error",
+                new HashMap<>(), new HashMap<>());
         String oneOfUnionType = unionTypeGenerator.generateTypeDescriptorNode().toString().trim();
         Assert.assertEquals(oneOfUnionType, "Activity|Profile01");
     }
@@ -77,8 +80,9 @@ public class OneOfDataTypeTests {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario12.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
-        GeneratorMetaData.createInstance(openAPI, true, false);
-        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, "Error", null);
+        GeneratorMetaData.createInstance(openAPI, true);
+        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, "Error", null,
+                new HashMap<>(), new HashMap<>());
         String oneOfUnionType = typeGenerator.generateTypeDescriptorNode().toString().trim();
         Assert.assertEquals(oneOfUnionType, "Activity|Profile?");
     }

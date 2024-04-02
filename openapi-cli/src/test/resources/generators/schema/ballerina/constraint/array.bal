@@ -21,5 +21,6 @@ public type Person record {
     PersonDetailsItemsString[] Details?;
     int id;
     PersonFeeItemsNumber[] fee?;
+    # The maximum number of items in the response (as set in the query or by default).
     PersonLimitItemsInteger[] 'limit?;
 };
