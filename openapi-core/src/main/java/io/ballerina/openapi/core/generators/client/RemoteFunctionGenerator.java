@@ -2,6 +2,7 @@ package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -53,25 +54,18 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         RemoteFunctionSignatureGenerator signatureGenerator = getSignatureGenerator();
         //Create function body
         FunctionBodyNode functionBodyNode;
-        try {
-            Optional<FunctionBodyNode> functionBodyNodeResult = getFunctionBodyNode();
-            if (functionBodyNodeResult.isEmpty()) {
-                return Optional.empty();
-            }
-            functionBodyNode = functionBodyNodeResult.get();
-        } catch (BallerinaOpenApiException e) {
-            //todo diagnostic
-            diagnostics.add(null);
+        Optional<FunctionBodyNode> functionBodyNodeResult = getFunctionBodyNode();
+        if (functionBodyNodeResult.isEmpty()) {
+            return Optional.empty();
+        }
+        functionBodyNode = functionBodyNodeResult.get();
+        if (signatureGenerator.generateFunctionSignature().isEmpty()) {
             return Optional.empty();
         }
 
-        try {
-            return getFunctionDefinitionNode(qualifierList, functionKeyWord, functionName, signatureGenerator,
-                    functionBodyNode);
-        } catch (FunctionSignatureGeneratorException e) {
-            //todo diagnostic
-            return Optional.empty();
-        }
+        return getFunctionDefinitionNode(qualifierList, functionKeyWord, functionName, signatureGenerator,
+                functionBodyNode);;
+
     }
 
     protected RemoteFunctionSignatureGenerator getSignatureGenerator() {
@@ -84,11 +78,10 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
                                                                          IdentifierToken functionName,
                                                                          RemoteFunctionSignatureGenerator
                                                                                  signatureGenerator,
-                                                                         FunctionBodyNode functionBodyNode)
-            throws FunctionSignatureGeneratorException {
+                                                                         FunctionBodyNode functionBodyNode) {
         return Optional.of(NodeFactory.createFunctionDefinitionNode(OBJECT_METHOD_DEFINITION, null,
                 qualifierList, functionKeyWord, functionName, createEmptyNodeList(),
-                signatureGenerator.generateFunctionSignature(), functionBodyNode));
+                signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
     }
 
     protected Optional<FunctionBodyNode> getFunctionBodyNode() throws BallerinaOpenApiException {

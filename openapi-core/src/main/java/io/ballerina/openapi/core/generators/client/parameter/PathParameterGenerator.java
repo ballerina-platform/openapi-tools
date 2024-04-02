@@ -30,7 +30,7 @@ public class PathParameterGenerator implements ParameterGenerator {
     OpenAPI openAPI;
     Parameter parameter;
 
-    List<ClientDiagnostic> diagnostics;;
+    List<ClientDiagnostic> diagnostics;
     public PathParameterGenerator(Parameter parameter, OpenAPI openAPI){
         this.parameter = parameter;
         this.openAPI = openAPI;
@@ -47,7 +47,6 @@ public class PathParameterGenerator implements ParameterGenerator {
 //            throw new BallerinaOpenApiException("Error while generating type descriptor node for path parameter");
             //todo diagnostic
             return Optional.empty();
-
         }
         TypeDescriptorNode typeDescNode = typeNode.get();
         if (typeDescNode.kind().equals(SyntaxKind.ARRAY_TYPE_DESC)|| typeDescNode.kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {

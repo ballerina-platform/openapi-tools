@@ -49,7 +49,7 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
     }
 
     @Override
-    public FunctionSignatureNode generateFunctionSignature() throws FunctionSignatureGeneratorException {
+    public Optional<FunctionSignatureNode> generateFunctionSignature() {
         // 1. parameters - path , query, requestBody, headers
         List<Parameter> parameters = operation.getParameters();
         ParametersInfo parametersInfo = getParametersInfo(parameters);
@@ -60,18 +60,21 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
         }
         // Remove the last comma
         //check array out of bound error if parameter size is empty
-        parametersInfo.parameterList().remove(parametersInfo.parameterList().size() - 1);
+        if (!parametersInfo.parameterList().isEmpty()) {
+            parametersInfo.parameterList().remove(parametersInfo.parameterList().size() - 1);
+        }
         SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(parametersInfo.parameterList());
 
         // 3. return statements
-        FunctionReturnTypeGeneratorImp functionReturnType = getFunctionReturnTypeGenerator();
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation, openAPI);
         Optional<ReturnTypeDescriptorNode> returnType = functionReturnType.getReturnType();
-        if (returnType.isEmpty()) {
-            throw new FunctionSignatureGeneratorException("Return type is not found for the operation : " +
-                    operation.getOperationId());
-        }
+        //TODO: need to handle this
+        //                            throw new FunctionSignatureGeneratorException("Error while generating query parameter node");
+        //            throw new FunctionSignatureGeneratorException("Return type is not found for the operation : " +
+        //                    operation.getOperationId());
+        return returnType.map(returnTypeDescriptorNode -> NodeFactory.createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN), parameterNodes,
+                createToken(CLOSE_PAREN_TOKEN), returnTypeDescriptorNode));
         //create function signature node
-        return NodeFactory.createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),parameterNodes, createToken(CLOSE_PAREN_TOKEN), returnType.get());
     }
 
     protected ParametersInfo getParametersInfo(List<Parameter> parameters) throws FunctionSignatureGeneratorException {
@@ -100,7 +103,9 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                         PathParameterGenerator paramGenerator = new PathParameterGenerator(parameter, openAPI);
                         Optional<ParameterNode> param = paramGenerator.generateParameterNode(treatDefaultableAsRequired);
                         if (param.isEmpty()) {
-                            throw new FunctionSignatureGeneratorException("Error while generating path parameter node");
+                            //TODO: need to handle this
+                            return Optional.empty();
+//                            throw new FunctionSignatureGeneratorException("Error while generating path parameter node");
                         }
                         // Path parameters are always required.
                         parameterList.add(param.get());
@@ -110,7 +115,9 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                         QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(parameter, openAPI);
                         Optional<ParameterNode> queryParam = queryParameterGenerator.generateParameterNode(treatDefaultableAsRequired);
                         if (queryParam.isEmpty()) {
-                            throw new FunctionSignatureGeneratorException("Error while generating query parameter node");
+                            //TODO: need to handle this
+                            return Optional.empty();
+//                            throw new FunctionSignatureGeneratorException("Error while generating query parameter node");
                         }
                         if (queryParam.get() instanceof RequiredParameterNode requiredParameterNode) {
                             parameterList.add(requiredParameterNode);
@@ -124,7 +131,9 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                         HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator(parameter, openAPI);
                         Optional<ParameterNode> headerParam = headerParameterGenerator.generateParameterNode(treatDefaultableAsRequired);
                         if (headerParam.isEmpty()) {
-                            throw new FunctionSignatureGeneratorException("Error while generating header parameter node");
+                            //TODO: need to handle this
+                            return Optional.empty();
+//                            throw new FunctionSignatureGeneratorException("Error while generating query parameter node");
                         }
                         if (headerParam.get() instanceof RequiredParameterNode headerNode) {
                             parameterList.add(headerNode);
@@ -144,7 +153,10 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
             RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(operation.getRequestBody(), openAPI);
             Optional<ParameterNode> requestBody = requestBodyGenerator.generateParameterNode(treatDefaultableAsRequired);
             if (requestBody.isEmpty()) {
-                throw new FunctionSignatureGeneratorException("Error while generating request body node");
+                //TODO: need to handle this
+                return Optional.empty();
+//                            throw new FunctionSignatureGeneratorException("Error while generating query parameter node");
+//                throw new FunctionSignatureGeneratorException("Error while generating request body node");
             }
             parameterList.add(requestBody.get());
             parameterList.add(comma);

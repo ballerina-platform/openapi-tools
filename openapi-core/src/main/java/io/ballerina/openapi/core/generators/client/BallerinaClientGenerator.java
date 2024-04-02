@@ -130,7 +130,6 @@ public class BallerinaClientGenerator {
     private List<TypeDefinitionNode> typeDefinitionNodeList;
     private List<String> apiKeyNameList = new ArrayList<>();
     protected final OpenAPI openAPI;
-    private final io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator balTypeGenerator;
     protected final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final List<String> remoteFunctionNameList;
     protected final AuthConfigGeneratorImp authConfigGeneratorImp;
@@ -181,7 +180,6 @@ public class BallerinaClientGenerator {
         this.imports = new ArrayList<>();
         this.typeDefinitionNodeList = new ArrayList<>();
         this.openAPI = oasClientConfig.getOpenAPI();
-        this.balTypeGenerator = new BallerinaTypesGenerator(openAPI, oasClientConfig.isNullable());
         this.ballerinaUtilGenerator = new BallerinaUtilGenerator();
         this.remoteFunctionNameList = new ArrayList<>();
         this.authConfigGeneratorImp = new AuthConfigGeneratorImp(false, false, diagnostics);

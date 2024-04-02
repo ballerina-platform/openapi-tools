@@ -1,9 +1,8 @@
-# At least one entry should be non-null.
-public type Scores decimal[]?;
-
 public type Average float?;
 
-public type Pet record {
+public type Scores decimal[]?;
+
+public type Subject record {
     int id;
     string name;
     decimal[]? tag?;

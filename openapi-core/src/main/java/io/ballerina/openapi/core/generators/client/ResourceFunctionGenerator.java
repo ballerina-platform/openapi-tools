@@ -85,7 +85,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
     protected Optional<FunctionDefinitionNode> getFunctionDefinitionNode(NodeList<Token> qualifierList, Token functionKeyWord, IdentifierToken functionName, List<Node> relativeResourcePath, ResourceFunctionSignatureGenerator signatureGenerator, FunctionBodyNode functionBodyNode) throws FunctionSignatureGeneratorException {
         return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, null,
                 qualifierList, functionKeyWord, functionName, createNodeList(relativeResourcePath),
-                signatureGenerator.generateFunctionSignature(), functionBodyNode));
+                signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
     }
 
     @Override

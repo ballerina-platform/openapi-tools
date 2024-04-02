@@ -1,5 +1,7 @@
 package io.ballerina.openapi.core.generators.client.parameter;
 
+import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
@@ -7,7 +9,9 @@ import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.Encoding;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -17,8 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_OCTET_STREAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ARRAY;
@@ -46,7 +52,6 @@ public class RequestBodyGenerator implements ParameterGenerator {
                 referencedRequestBodyName = extractReferenceType(requestBody.get$ref()).trim();
             } catch (BallerinaOpenApiException e) {
                 //todo diagnostic
-
             }
             RequestBody referencedRequestBody = openAPI.getComponents()
                     .getRequestBodies().get(referencedRequestBodyName);
@@ -57,10 +62,11 @@ public class RequestBodyGenerator implements ParameterGenerator {
         } else {
             requestBodyContent = requestBody.getContent();
         }
-        Iterator<Map.Entry<String, MediaType>> iterator = requestBodyContent.entrySet().iterator();
-        while (iterator.hasNext()) {
+        if (requestBodyContent == null || requestBodyContent.isEmpty()) {
+            return Optional.empty();
+        }
+        for (Map.Entry<String, MediaType> mediaTypeEntry : requestBodyContent.entrySet()) {
             // This implementation currently for first content type
-            Map.Entry<String, MediaType> mediaTypeEntry = iterator.next();
             Schema schema = mediaTypeEntry.getValue().getSchema();
             String paramType;
             //Take payload type
@@ -73,6 +79,10 @@ public class RequestBodyGenerator implements ParameterGenerator {
                 } else {
                     if (schema.get$ref() != null) {
                         Optional<TypeDescriptorNode> node = TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
+                        if (node.isEmpty()) {
+                            return Optional.empty();
+                        }
+                        typeDescNode = node.get();
                     } else if (getOpenAPIType(schema) != null && !getOpenAPIType(schema).equals(ARRAY) &&
                             !getOpenAPIType(schema).equals(OBJECT)) {
                         Optional<TypeDescriptorNode> resultNode = TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
@@ -83,14 +93,44 @@ public class RequestBodyGenerator implements ParameterGenerator {
 
                     } else {
                         paramType = getBallerinaMediaType(mediaTypeEntryKey, true);
+                        typeDescNode = createSimpleNameReferenceNode(createIdentifierToken(paramType));
                     }
                 }
             } else {
-//                paramType = getBallerinaMediaType(mediaTypeEntry.getKey(), true);
-                return Optional.empty();
+                //todo
+//                createServiceDeclarationNode(MetadataNode)
+                Map<String, Encoding> encoding = mediaTypeEntry.getValue().getEncoding();
+                if (mediaTypeEntry.getKey().equals(javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA)
+                        && encoding != null) {
+                    List<String> headerList = new ArrayList<>();
+//                    for (Map.Entry<String, Encoding> entry : encoding.entrySet()) {
+//                        Map<String, Header> headers = entry.getValue().getHeaders();
+//                        if (headers != null) {
+//                            for (Map.Entry<String, Header> header : headers.entrySet()) {
+//                                if (!headerList.contains(header.getKey())) {
+//                                    Node headerParameter = getHeaderEncoding(header, requestBodyDoc);
+//                                    if (headerParameter instanceof RequiredParameterNode) {
+//                                        parameterList.add(headerParameter);
+//                                        parameterList.add(createToken((COMMA_TOKEN)));
+//                                    } else {
+//                                        defaultable.add(headerParameter);
+//                                        defaultable.add(createToken((COMMA_TOKEN)));
+//                                    }
+//                                    headerList.add(header.getKey());
+//                                }
+//                            }
+//                        }
+//                    }
+
+                } else {
+                    paramType = getBallerinaMediaType(mediaTypeEntry.getKey(), true);
+                    typeDescNode = createSimpleNameReferenceNode(createIdentifierToken(paramType));
+    //                return Optional.empty();
+                }
             }
+            break;
         }
-        return Optional.of(createRequiredParameterNode(null, typeDescNode, createIdentifierToken("payload")));
+        return Optional.of(createRequiredParameterNode(createEmptyNodeList(), typeDescNode, createIdentifierToken("payload")));
     }
 
 //    /**

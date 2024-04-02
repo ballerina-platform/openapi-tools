@@ -57,7 +57,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extract
  *
  * @since 1.3.0
  */
-public class FunctionReturnTypeGeneratorImp {
+public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerator {
     private OpenAPI openAPI;
     protected Operation operation;
     List<ClientDiagnostic> diagnostics = new ArrayList<>();
@@ -67,21 +67,13 @@ public class FunctionReturnTypeGeneratorImp {
         this.operation = operation;
     }
 
-//    public FunctionReturnTypeGeneratorImp(OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
-//                                          List<TypeDefinitionNode> typeDefinitionNodeList) {
-//
-//        this.openAPI = openAPI;
-//        this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
-//        this.typeDefinitionNodeList = typeDefinitionNodeList;
-//    }
-
-
     /**
      * Get return type of the remote function.
      *
      * @return string with return type.
      * @throws BallerinaOpenApiException - throws exception if creating return type fails.
      */
+    @Override
     public Optional<ReturnTypeDescriptorNode> getReturnType() {
         //TODO: Handle multiple media-type
         //Todo handle reference reusable response schema
@@ -118,6 +110,37 @@ public class FunctionReturnTypeGeneratorImp {
             for (Map.Entry<String, ApiResponse> entry : responses.entrySet()) {
                 String statusCode = entry.getKey();
                 ApiResponse response = entry.getValue();
+                if (statusCode.startsWith("2")) {
+                    Content content = response.getContent();
+                    if (content != null && content.size() > 0) {
+                        Set<Map.Entry<String, MediaType>> mediaTypes = content.entrySet();
+                        for (Map.Entry<String, MediaType> media : mediaTypes) {
+                            TypeDescriptorNode type;
+                            if (media.getValue().getSchema() != null) {
+                                Schema schema = media.getValue().getSchema();
+                                Optional<TypeDescriptorNode> dataType = getDataType(media, schema);
+                                if (dataType.isPresent()) {
+                                    type = dataType.get();
+                                } else {
+                                    String mediaType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
+                                    type = createSimpleNameReferenceNode(createIdentifierToken(mediaType));
+                                }
+                            } else {
+                                String mediaType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
+                                type = createSimpleNameReferenceNode(createIdentifierToken(mediaType));
+                            }
+                            returnTypes.add(type);
+                            // Currently support for first media type
+                            break;
+                        }
+                    } else {
+                        noContentResponseFound = true;
+                    }
+                }
+                if ((statusCode.startsWith("1") || statusCode.startsWith("2") || statusCode.startsWith("3")) &&
+                        response.getContent() == null) {
+                    noContentResponseFound = true;
+                }
                 noContentResponseFound = populateReturnType(statusCode, response, returnTypes);
                 if ((statusCode.startsWith("1") || statusCode.startsWith("2") || statusCode.startsWith("3")) &&
                         response.getContent() == null) {
@@ -170,6 +193,7 @@ public class FunctionReturnTypeGeneratorImp {
             } else {
                 noContentResponseFound = true;
             }
+
         }
         return noContentResponseFound;
     }
@@ -385,4 +409,8 @@ public class FunctionReturnTypeGeneratorImp {
 //            return type;
 //        }
 //    }
+        @Override
+        public List<ClientDiagnostic> getDiagnostics() {
+            return diagnostics;
+        }
 }
