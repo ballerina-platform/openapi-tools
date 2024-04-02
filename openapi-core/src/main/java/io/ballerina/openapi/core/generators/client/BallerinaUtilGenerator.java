@@ -40,7 +40,7 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
-import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
+import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
@@ -290,7 +290,7 @@ public class BallerinaUtilGenerator {
      */
     private TypeDefinitionNode getEncodingRecord() {
         // create `style` field
-        List<Node> styleDoc = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(
+        List<Node> styleDoc = new ArrayList<>(DocCommentsGeneratorUtil.createAPIDescriptionDoc(
                 "Defines how multiple values are delimited", false));
         MarkdownDocumentationNode styleDocumentationNode = createMarkdownDocumentationNode(createNodeList(styleDoc));
         MetadataNode styleMetadataNode = createMetadataNode(styleDocumentationNode, createEmptyNodeList());
@@ -300,7 +300,7 @@ public class BallerinaUtilGenerator {
                 createToken(EQUAL_TOKEN), styleExpressionNode, createToken(SEMICOLON_TOKEN));
 
         // create `explode` field
-        List<Node> explodeDoc = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(
+        List<Node> explodeDoc = new ArrayList<>(DocCommentsGeneratorUtil.createAPIDescriptionDoc(
                 "Specifies whether arrays and objects should generate as separate fields", false));
         MarkdownDocumentationNode explodeDocumentationNode = createMarkdownDocumentationNode(
                 createNodeList(explodeDoc));
@@ -311,7 +311,7 @@ public class BallerinaUtilGenerator {
                 createToken(EQUAL_TOKEN), explodeExpressionNode, createToken(SEMICOLON_TOKEN));
 
         // create `contentType` field
-        List<Node> contentTypeDoc = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(
+        List<Node> contentTypeDoc = new ArrayList<>(DocCommentsGeneratorUtil.createAPIDescriptionDoc(
                 "Specifies the custom content type", false));
         MarkdownDocumentationNode contentTypeDocumentationNode = createMarkdownDocumentationNode(
                 createNodeList(contentTypeDoc));
@@ -321,7 +321,7 @@ public class BallerinaUtilGenerator {
                 createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
 
         // create `contentType` field
-        List<Node> headerDoc = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(
+        List<Node> headerDoc = new ArrayList<>(DocCommentsGeneratorUtil.createAPIDescriptionDoc(
                 "Specifies the custom headers", false));
         MarkdownDocumentationNode headerDocumentationNode = createMarkdownDocumentationNode(createNodeList(headerDoc));
         MetadataNode headerMetadataNode = createMetadataNode(headerDocumentationNode, createEmptyNodeList());
@@ -330,7 +330,7 @@ public class BallerinaUtilGenerator {
                 createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
 
         // Assemble the TypeDefinitionNode
-        List<Node> typeDoc = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(
+        List<Node> typeDoc = new ArrayList<>(DocCommentsGeneratorUtil.createAPIDescriptionDoc(
                 "Represents encoding mechanism details.", false));
         MarkdownDocumentationNode typeDocumentationNode = createMarkdownDocumentationNode(createNodeList(typeDoc));
         MetadataNode typeMetadataNode = createMetadataNode(typeDocumentationNode, createEmptyNodeList());
