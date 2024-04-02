@@ -173,14 +173,14 @@ public class ServiceDiagnosticTests {
 //                {"duplicated_response.yaml"},
 //                {"complex_oneOf_schema.yaml"},
 //                {"request_body_ref.yaml"},
-                {"vendor_specific_mime_types.yaml"},
+//                {"vendor_specific_mime_types.yaml"},
 ////                {"ballerinax_connector_tests/ably.yaml"}, // HTTP status code '2XX' is not supported in Ballerina
 //                {"ballerinax_connector_tests/azure.iot.yaml"},
 //                //TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1440
 ////                {"ballerinax_connector_tests/beezup.yaml"},
 //                {"ballerinax_connector_tests/files.com.yaml"},
 //                {"ballerinax_connector_tests/openweathermap.yaml"},
-//                {"ballerinax_connector_tests/soundcloud.yaml"},
+                {"ballerinax_connector_tests/soundcloud.yaml"},
 ////                {"ballerinax_connector_tests/stripe.yaml"}, // not working due to anyOf schema in parameters
 //                {"ballerinax_connector_tests/vimeo.yaml"},
 ////                {"ballerinax_connector_tests/ynab.yaml"}, // HTTP status code '209' is not supported in Ballerina.
