@@ -308,8 +308,11 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 CACHE_FILE, hashOpenAPI);
         sourcesForCache.add(genSrcFile);
         writeGeneratedSources(sourcesForCache, cachePath);
-        updateBallerinaTomlWithClientNativeDependency(toolContext,
-                toolContext.currentPackage().project().sourceRoot().resolve("Ballerina.toml"), location);
+        if (toolContext.options().containsKey(STATUS_CODE_BINDING) &&
+                toolContext.options().get(STATUS_CODE_BINDING).value().toString().contains(TRUE)) {
+            updateBallerinaTomlWithClientNativeDependency(toolContext,
+                    toolContext.currentPackage().project().sourceRoot().resolve("Ballerina.toml"), location);
+        }
     }
 
     private void updateBallerinaTomlWithClientNativeDependency(ToolContext toolContext, Path ballerinaTomlPath,

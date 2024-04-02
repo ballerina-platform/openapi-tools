@@ -65,7 +65,7 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
         SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(parameterList);
 
         // 3. return statements
-        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation, openAPI);
+        FunctionReturnTypeGeneratorImp functionReturnType = getFunctionReturnTypeGenerator();
         Optional<ReturnTypeDescriptorNode> returnType = functionReturnType.getReturnType();
         //todo: need to handle this
         //            throw new FunctionSignatureGeneratorException("Return type is not found for the operation : " +

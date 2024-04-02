@@ -33,7 +33,6 @@ import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
-import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
@@ -169,7 +168,6 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
     public Optional<FunctionBodyNode> getFunctionBodyNode() {
 
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation.getValue(), openAPI);
         isHeader = false;
         // Create statements
         List<StatementNode> statementsList = new ArrayList<>();
@@ -186,21 +184,11 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             //Handel query parameter map
         handleParameterSchemaInOperation(operation, statementsList);
 
-
         String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
-        // This return type for target data type binding.
-        Optional<ReturnTypeDescriptorNode> returnResult = functionReturnType.getReturnType();
-        if (returnResult.isEmpty()) {
-            //todo diagnostic message
-            return Optional.empty();
-//            throw new BallerinaOpenApiException("Return type is not found for the operation : " + operation.getValue());
-        }
-        String rType = returnResult.get().type().toString();
-        String returnType = returnTypeForTargetTypeField(rType);
         // Statement Generator for requestBody
         if (operation.getValue().getRequestBody() != null) {
             RequestBody requestBody = operation.getValue().getRequestBody();
-            handleRequestBodyInOperation(statementsList, method, returnType, requestBody);
+            handleRequestBodyInOperation(statementsList, method, requestBody);
         } else {
             createCommonFunctionBodyStatements(statementsList, method);
         }
@@ -498,7 +486,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
     /**
      * Handle request body in operation.
      */
-    private void handleRequestBodyInOperation(List<StatementNode> statementsList, String method, String returnType,
+    private void handleRequestBodyInOperation(List<StatementNode> statementsList, String method,
                                               RequestBody requestBody)
             throws BallerinaOpenApiException {
 

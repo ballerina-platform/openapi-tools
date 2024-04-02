@@ -75,22 +75,17 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
      */
     @Override
     public Optional<ReturnTypeDescriptorNode> getReturnType() {
-        //TODO: Handle multiple media-type
-        //Todo handle reference reusable response schema
         ReturnTypesInfo returnTypesInfo = getReturnTypeInfo();
-        List<TypeDescriptorNode> returnTypes = returnTypesInfo.types;
-        boolean noContentResponseFound = returnTypesInfo.noContentResponseFound;
-
-        if (!returnTypes.isEmpty()) {
-            if (noContentResponseFound) {
-                returnTypes.add(createSimpleNameReferenceNode(createIdentifierToken(ERROR+NILLABLE)));
+        if (!returnTypesInfo.types().isEmpty()) {
+            if (returnTypesInfo.noContentResponseFound()) {
+                returnTypesInfo.types().add(createSimpleNameReferenceNode(createIdentifierToken(ERROR+NILLABLE)));
             } else {
-                returnTypes.add(createSimpleNameReferenceNode(createIdentifierToken(ERROR)));
+                returnTypesInfo.types().add(createSimpleNameReferenceNode(createIdentifierToken(ERROR)));
             }
 
             return Optional.of(createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(),
-                    createUnionReturnType(returnTypes)));
-        } else if (noContentResponseFound) {
+                    createUnionReturnType(returnTypesInfo.types())));
+        } else if (returnTypesInfo.noContentResponseFound()) {
             return Optional.of(createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(),
                     createIdentifierToken(OPTIONAL_ERROR)));
         } else {
@@ -110,45 +105,46 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
             for (Map.Entry<String, ApiResponse> entry : responses.entrySet()) {
                 String statusCode = entry.getKey();
                 ApiResponse response = entry.getValue();
-                if (statusCode.startsWith("2")) {
-                    Content content = response.getContent();
-                    if (content != null && content.size() > 0) {
-                        Set<Map.Entry<String, MediaType>> mediaTypes = content.entrySet();
-                        for (Map.Entry<String, MediaType> media : mediaTypes) {
-                            TypeDescriptorNode type;
-                            if (media.getValue().getSchema() != null) {
-                                Schema schema = media.getValue().getSchema();
-                                Optional<TypeDescriptorNode> dataType = getDataType(media, schema);
-                                if (dataType.isPresent()) {
-                                    type = dataType.get();
-                                } else {
-                                    String mediaType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
-                                    type = createSimpleNameReferenceNode(createIdentifierToken(mediaType));
-                                }
-                            } else {
-                                String mediaType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
-                                type = createSimpleNameReferenceNode(createIdentifierToken(mediaType));
-                            }
-                            returnTypes.add(type);
-                            // Currently support for first media type
-                            break;
-                        }
-                    } else {
-                        noContentResponseFound = true;
-                    }
-                }
-                if ((statusCode.startsWith("1") || statusCode.startsWith("2") || statusCode.startsWith("3")) &&
-                        response.getContent() == null) {
-                    noContentResponseFound = true;
-                }
                 noContentResponseFound = populateReturnType(statusCode, response, returnTypes);
-                if ((statusCode.startsWith("1") || statusCode.startsWith("2") || statusCode.startsWith("3")) &&
-                        response.getContent() == null) {
-                    noContentResponseFound = true;
-                }
             }
         }
         return new ReturnTypesInfo(returnTypes, noContentResponseFound);
+    }
+
+    protected boolean populateReturnType(String statusCode, ApiResponse response, List<TypeDescriptorNode> returnTypes) {
+        boolean noContentResponseFound = false;
+        if (statusCode.startsWith("2")) {
+            Content content = response.getContent();
+            if (content != null && content.size() > 0) {
+                Set<Map.Entry<String, MediaType>> mediaTypes = content.entrySet();
+                for (Map.Entry<String, MediaType> media : mediaTypes) {
+                    TypeDescriptorNode type;
+                    if (media.getValue().getSchema() != null) {
+                        Schema schema = media.getValue().getSchema();
+                        Optional<TypeDescriptorNode> dataType = getDataType(media, schema);
+                        if (dataType.isPresent()) {
+                            type = dataType.get();
+                        } else {
+                            String mediaType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
+                            type = createSimpleNameReferenceNode(createIdentifierToken(mediaType));
+                        }
+                    } else {
+                        String mediaType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
+                        type = createSimpleNameReferenceNode(createIdentifierToken(mediaType));
+                    }
+                    returnTypes.add(type);
+                    // Currently support for first media type
+                    break;
+                }
+            } else {
+                noContentResponseFound = true;
+            }
+        }
+        if ((statusCode.startsWith("1") || statusCode.startsWith("2") || statusCode.startsWith("3")) &&
+                response.getContent() == null) {
+            noContentResponseFound = true;
+        }
+        return noContentResponseFound;
     }
 
     public static TypeDescriptorNode createUnionReturnType(List<TypeDescriptorNode> types) {
@@ -161,41 +157,6 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
             unionType = createUnionTypeDescriptorNode(unionType, createToken(PIPE_TOKEN), types.get(i));
         }
         return unionType;
-    }
-
-    protected boolean populateReturnType(String statusCode, ApiResponse response, List<TypeDescriptorNode> returnTypes) {
-        boolean noContentResponseFound = false;
-        if (statusCode.startsWith("2")) {
-            Content content = response.getContent();
-            if (content != null && content.size() > 0) {
-                Set<Map.Entry<String, MediaType>> mediaTypes = content.entrySet();
-                for (Map.Entry<String, MediaType> media : mediaTypes) {
-                    TypeDescriptorNode type = null;
-                    if (media.getValue().getSchema() != null) {
-                        Schema schema = media.getValue().getSchema();
-                        Optional<TypeDescriptorNode> dataType = getDataType(media, schema);
-                        if (dataType.isPresent()) {
-                            type = dataType.get();
-                        } else {
-                            //todo add diagnostic
-//                                    return Optional.empty();
-                        }
-                    } else {
-                        String mediaType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
-                        type = createSimpleNameReferenceNode(createIdentifierToken(mediaType));
-                    }
-                    if (type != null) {
-                        returnTypes.add(type);
-                    }
-                    // Currently support for first media type
-                    break;
-                }
-            } else {
-                noContentResponseFound = true;
-            }
-
-        }
-        return noContentResponseFound;
     }
 
     /**

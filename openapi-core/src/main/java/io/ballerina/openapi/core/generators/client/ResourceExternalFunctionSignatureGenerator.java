@@ -33,6 +33,11 @@ public class ResourceExternalFunctionSignatureGenerator extends ResourceFunction
     }
 
     @Override
+    protected FunctionReturnTypeGeneratorImp getFunctionReturnTypeGenerator() {
+        return new FunctionExternalReturnTypeGenerator(operation, openAPI);
+    }
+
+    @Override
     protected ParametersInfo getParametersInfo(List<Parameter> parameters) {
         ParametersInfo parametersInfo = super.getParametersInfo(parameters);
 
@@ -79,9 +84,5 @@ public class ResourceExternalFunctionSignatureGenerator extends ResourceFunction
         ParameterNode inferredTargetType = createDefaultableParameterNode(createEmptyNodeList(), targetType, createIdentifierToken("targetType"),
                 createToken(EQUAL_TOKEN), inferredToken);
         parameterList.add(inferredTargetType);
-    }
-
-    protected FunctionReturnTypeGeneratorImp getFunctionReturnTypeGenerator() {
-        return new FunctionExternalReturnTypeGenerator(operation, openAPI);
     }
 }

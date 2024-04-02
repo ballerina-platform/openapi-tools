@@ -31,6 +31,7 @@ apply plugin: 'jacoco'
 apply plugin: "org.javamodularity.moduleplugin"
 apply from: "$rootDir/gradle/javaProject.gradle"
 
+ext.clientNativeVersion = project.clientNativeVersion
 ext.ballerinaLangVersion = project.ballerinaLangVersion
 ext.testngVersion = project.testngVersion
 ext.commonsLang3Version = project.commonsLang3Version
@@ -138,18 +139,20 @@ subprojects {
     }
 }
 
-def moduleVersion = project.version.replace("-SNAPSHOT", "")
+def clientNativeVersion = project.clientNativeVersion.replace("-SNAPSHOT", "")
 
 task createProperties(dependsOn: processResources) {
     doLast {
         def file = new File("$project.rootDir/openapi-cli/src/main/resources/openapi-tool-version.properties")
-        file.text = "version=${moduleVersion}"
+        file.text = "version=${clientNativeVersion}"
     }
 }
 
 classes {
     dependsOn createProperties
 }
+
+def moduleVersion = project.version.replace("-SNAPSHOT", "")
 
 release {
     // Disable check snapshots temporarily

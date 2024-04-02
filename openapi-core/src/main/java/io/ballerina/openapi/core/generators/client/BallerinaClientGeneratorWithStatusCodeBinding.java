@@ -78,6 +78,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.ON_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.PRIVATE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
@@ -160,7 +161,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
                                                                 AuthConfigGeneratorImp authConfigGeneratorImp,
                                                                 BallerinaUtilGenerator ballerinaUtilGenerator) {
         //Create qualifier list
-        NodeList<Token> qualifierList = createNodeList(createToken(ISOLATED_KEYWORD));
+        NodeList<Token> qualifierList = createNodeList(createToken(PRIVATE_KEYWORD), createToken(ISOLATED_KEYWORD));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId() + "Impl");
         // Create function signature
@@ -288,7 +289,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
      */
     private TypeDefinitionNode getClientErrorType() {
         return createTypeDefinitionNode(null, null, createToken(TYPE_KEYWORD),
-                createIdentifierToken("ClientError"), createQualifiedNameReferenceNode(createIdentifierToken("http"),
+                createIdentifierToken("ClientMethodInvocationError"), createQualifiedNameReferenceNode(createIdentifierToken("http"),
                         createToken(COLON_TOKEN), createIdentifierToken("ClientError")),
                 createToken(SEMICOLON_TOKEN));
     }

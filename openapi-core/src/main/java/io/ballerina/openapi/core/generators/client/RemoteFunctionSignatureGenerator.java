@@ -72,7 +72,7 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
         SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(parameterList);
 
         // 3. return statements
-        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation, openAPI);
+        FunctionReturnTypeGeneratorImp functionReturnType = getFunctionReturnTypeGenerator();
         Optional<ReturnTypeDescriptorNode> returnType = functionReturnType.getReturnType();
         //TODO: need to handle this
         //                            throw new FunctionSignatureGeneratorException("Error while generating query parameter node");

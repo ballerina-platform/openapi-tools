@@ -36,7 +36,7 @@ import java.util.Objects;
  */
 public class ClientUtil {
 
-    static final String CLIENT_ERROR = "ClientError";
+    static final String CLIENT_ERROR = "ClientMethodInvocationError";
 
     public static BError createHttpError(String message, BError cause) {
         return ErrorCreator.createError(ModuleUtils.getPackage(), CLIENT_ERROR, StringUtils.fromString(message),
