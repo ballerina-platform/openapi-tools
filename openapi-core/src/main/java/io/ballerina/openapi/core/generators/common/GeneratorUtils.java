@@ -60,12 +60,13 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
-import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
-import io.ballerina.openapi.core.generators.schemaOld.ballerinatypegenerators.EnumGenerator;
-import io.ballerina.openapi.core.generators.schemaOld.model.GeneratorMetaData;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
+import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.type.generators.EnumGenerator;
+import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
@@ -80,9 +81,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.headers.Header;
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -168,6 +166,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NIL
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NULL;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OBJECT;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPENAPI_TYPE_TO_FORMAT_MAP;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPEN_CURLY_BRACE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REGEX_ONLY_NUMBERS_OR_NUMBERS_WITH_SPECIAL_CHARACTERS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REGEX_WITHOUT_SPECIAL_CHARACTERS;
@@ -179,7 +178,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SQU
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STYLE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TYPE_FILE_NAME;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPENAPI_TYPE_TO_FORMAT_MAP;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TYPE_NAME;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YAML_EXTENSION;
@@ -350,8 +348,12 @@ public class GeneratorUtils {
     public static String convertOpenAPITypeToBallerina(Schema<?> schema) throws BallerinaOpenApiException {
         String type = getOpenAPIType(schema);
         if (schema.getEnum() != null && !schema.getEnum().isEmpty() && primitiveTypeList.contains(type)) {
-            EnumGenerator enumGenerator = new EnumGenerator(schema, null);
-            return enumGenerator.generateTypeDescriptorNode().toString();
+            EnumGenerator enumGenerator = new EnumGenerator(schema, null, new HashMap<>(), new HashMap<>());
+            try {
+                return enumGenerator.generateTypeDescriptorNode().toString();
+            } catch (OASTypeGenException exp) {
+                return "";
+            }
         } else if ((INTEGER.equals(type) || NUMBER.equals(type) || STRING.equals(type)) && schema.getFormat() != null) {
             return convertOpenAPITypeFormatToBallerina(type, schema);
         } else {

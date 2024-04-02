@@ -199,7 +199,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
         for (Map.Entry<String, MediaType> contentType : contentEntries) {
 //            String recordName = getNewRecordName(pathRecord);
 
-            TypeDescriptorNode mediaTypeToken = getReturnNodeForSchemaType(contentType, getNewRecordName(pathRecord));
+            TypeDescriptorNode mediaTypeToken = getReturnNodeForSchemaType(contentType);
             if (mediaTypeToken == null) {
                 SimpleNameReferenceNode httpResponse = createSimpleNameReferenceNode(createIdentifierToken(
                         GeneratorConstants.ANYDATA));
@@ -259,8 +259,8 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 if (contentEntries.size() > 1) {
                     returnType = handleMultipleContents(contentEntries, pathRecord);
                 } else {
-                    returnType = getReturnNodeForSchemaType(contentEntries.iterator().next(),
-                            getNewRecordName(pathRecord));
+                    returnType = getReturnNodeForSchemaType(contentEntries.iterator().next()
+                    );
                 }
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), returnType);
             } else if (response.getKey().trim().equals(GeneratorConstants.DEFAULT)) {
@@ -325,7 +325,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
     }
 
-    private TypeDescriptorNode getReturnNodeForSchemaType(Map.Entry<String, MediaType> contentEntry, String recordName)
+    private TypeDescriptorNode getReturnNodeForSchemaType(Map.Entry<String, MediaType> contentEntry)
             throws OASTypeGenException {
         TypeDescriptorNode mediaTypeToken;
         String mediaTypeContent = selectMediaType(contentEntry.getKey().trim());

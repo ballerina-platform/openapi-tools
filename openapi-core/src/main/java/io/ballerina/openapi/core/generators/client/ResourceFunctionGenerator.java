@@ -54,7 +54,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
         //Create qualifier list
         NodeList<Token> qualifierList = createNodeList(createToken(RESOURCE_KEYWORD), createToken(ISOLATED_KEYWORD));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
-        IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
+        IdentifierToken functionName = createIdentifierToken(operation.getKey().toString().toLowerCase());
         // create relative path
         try {
             List<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),

@@ -39,14 +39,12 @@ import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.TemplateExpressionNode;
 import io.ballerina.compiler.syntax.tree.Token;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
+import io.ballerina.openapi.core.generators.client.mime.MimeType;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.mime.MimeType;
-import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -106,7 +104,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.API
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.API_KEY_CONFIG_PARAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DELETE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ENCODING;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPTIONAL_ERROR;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.EXECUTE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADER;
@@ -115,6 +112,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTT
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_REQUEST;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NEW;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPTIONAL_ERROR;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PATCH;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.POST;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PUT;
@@ -125,12 +123,10 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RES
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RESPONSE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RETURN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SELF;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.generateBodyStatementForComplexUrl;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isComplexURL;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isComposedSchema;
-import static io.ballerina.openapi.core.generators.serviceOld.ServiceGenerationUtils.extractReferenceType;
 
 /**
  * This Util class uses for generating remote function body  {@link FunctionBodyNode}.
