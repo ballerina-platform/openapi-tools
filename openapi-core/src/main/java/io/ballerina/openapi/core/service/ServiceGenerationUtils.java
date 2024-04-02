@@ -19,6 +19,7 @@ package io.ballerina.openapi.core.service;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
@@ -48,7 +49,9 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createLitera
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createAnnotationNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBasicLiteralNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
@@ -137,58 +140,33 @@ public class ServiceGenerationUtils {
         return NodeFactory.createQualifiedNameReferenceNode(modulePrefixToken, colon, identifierToken);
     }
 
-    /**
-     * Generate TypeDescriptor for all the mediaTypes.
-     *
-     * Here return the @code{ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode>} for return type.
-     * Left node(key) of the return tuple represents the return type node for given mediaType details, Right Node
-     * (Value) of the return tuple represents the newly generated TypeDefinitionNode for return type if it has inline
-     * objects.
-     */
-    public static TypeDescriptorNode generateTypeDescriptorForMediaTypes(
-            Map.Entry<String, MediaType> mediaType) throws OASTypeGenException {
+    public static TypeDescriptorNode generateTypeDescriptorForXMLContent() {
+        return getSimpleNameReferenceNode(GeneratorConstants.XML);
+    }
+
+    public static TypeDescriptorNode generateTypeDescriptorForMapStringContent() {
+        return getSimpleNameReferenceNode(GeneratorConstants.MAP_STRING);
+    }
+
+    public static TypeDescriptorNode generateTypeDescriptorForTextContent() {
+        return getSimpleNameReferenceNode(GeneratorConstants.STRING);
+    }
+
+    public static TypeDescriptorNode generateTypeDescriptorForOctetStreamContent() {
+        ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
+                createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+        return createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
+                createIdentifierToken(GeneratorConstants.BYTE)), NodeFactory.createNodeList(dimensionNode));
+    }
+
+    public static TypeDescriptorNode generateTypeDescriptorForJsonContent(Map.Entry<String, MediaType> mediaType) throws
+            OASTypeGenException {
         Schema<?> schema = mediaType.getValue().getSchema();
         Optional<TypeDescriptorNode> typeDescriptorNode = TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
         return typeDescriptorNode.orElse(null);
-        // todo : update this part
-//        return null;
-//        switch (mediaTypeContent) {
-//            case GeneratorConstants.APPLICATION_JSON:
-//                TypeDescriptorNode typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForJsonContent(schema, recordName);
-//                return typeDescriptorNode;
-//            case GeneratorConstants.APPLICATION_XML:
-//                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForXMLContent();
-//                return typeDescriptorNode;
-//            case GeneratorConstants.APPLICATION_URL_ENCODE:
-//                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForMapStringContent();
-//                return typeDescriptorNode;
-//            case GeneratorConstants.TEXT:
-//                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForTextContent(GeneratorConstants.STRING);
-//                return typeDescriptorNode;
-//            case GeneratorConstants.APPLICATION_OCTET_STREAM:
-//                typeDescriptorNode = TypeHandler.getInstance().generateTypeDescriptorForOctetStreamContent();
-//                return typeDescriptorNode;
-//            default:
-//                return null;
-//        }
     }
 
-    /**
-     *
-     * This util is used for selecting standard media type by looking at the user defined media type.
-     */
-    private static String selectMediaType(String mediaTypeContent) {
-        if (mediaTypeContent.matches("application/.*\\+json") || mediaTypeContent.matches(".*/json")) {
-            mediaTypeContent = GeneratorConstants.APPLICATION_JSON;
-        } else if (mediaTypeContent.matches("application/.*\\+xml") || mediaTypeContent.matches(".*/xml")) {
-            mediaTypeContent = GeneratorConstants.APPLICATION_XML;
-        } else if (mediaTypeContent.matches("text/.*")) {
-            mediaTypeContent = GeneratorConstants.TEXT;
-        }  else if (mediaTypeContent.matches("application/.*\\+octet-stream")) {
-            mediaTypeContent = GeneratorConstants.APPLICATION_OCTET_STREAM;
-        } else if (mediaTypeContent.matches("application/.*\\+x-www-form-urlencoded")) {
-            mediaTypeContent = GeneratorConstants.APPLICATION_URL_ENCODE;
-        }
-        return mediaTypeContent;
+    private static TypeDescriptorNode getSimpleNameReferenceNode(String typeName) {
+        return createSimpleNameReferenceNode(createIdentifierToken(typeName));
     }
 }
