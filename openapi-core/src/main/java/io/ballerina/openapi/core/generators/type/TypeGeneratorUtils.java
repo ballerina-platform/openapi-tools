@@ -63,28 +63,35 @@ public class TypeGeneratorUtils {
      * @return Relevant SchemaType object
      */
     public static TypeGenerator getTypeGenerator(Schema<?> schemaValue, String typeName, String parentName,
+                                                 boolean overrideNullable,
                                                  HashMap<String, TypeDefinitionNode> subTypesMap,
                                                  HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
         if (schemaValue.get$ref() != null) {
-            return new ReferencedTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
+            return new ReferencedTypeGenerator(schemaValue, typeName, overrideNullable,
+                    subTypesMap, pregeneratedTypeMap);
         } else if (GeneratorUtils.isComposedSchema(schemaValue)) {
             if (schemaValue.getAllOf() != null) {
-                return new AllOfRecordTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
+                return new AllOfRecordTypeGenerator(schemaValue, typeName, overrideNullable,
+                        subTypesMap, pregeneratedTypeMap);
             } else {
-                return new UnionTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
+                return new UnionTypeGenerator(schemaValue, typeName, overrideNullable,
+                        subTypesMap, pregeneratedTypeMap);
             }
         } else if ((GeneratorUtils.getOpenAPIType(schemaValue) != null &&
                 GeneratorUtils.getOpenAPIType(schemaValue).equals(GeneratorConstants.OBJECT)) ||
                 GeneratorUtils.isObjectSchema(schemaValue) || schemaValue.getProperties() != null ||
                 GeneratorUtils.isMapSchema(schemaValue)) {
-            return new RecordTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
+            return new RecordTypeGenerator(schemaValue, typeName, overrideNullable,
+                    subTypesMap, pregeneratedTypeMap);
         } else if (GeneratorUtils.isArraySchema(schemaValue)) {
-            return new ArrayTypeGenerator(schemaValue, typeName, parentName, subTypesMap, pregeneratedTypeMap);
+            return new ArrayTypeGenerator(schemaValue, typeName, overrideNullable, parentName, subTypesMap,
+                    pregeneratedTypeMap);
         } else if (GeneratorUtils.getOpenAPIType(schemaValue) != null &&
                 PRIMITIVE_TYPE_LIST.contains(GeneratorUtils.getOpenAPIType(schemaValue))) {
-            return new PrimitiveTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
+            return new PrimitiveTypeGenerator(schemaValue, typeName, overrideNullable,
+                    subTypesMap, pregeneratedTypeMap);
         } else { // when schemaValue.type == null
-            return new AnyDataTypeGenerator(schemaValue, typeName, subTypesMap, pregeneratedTypeMap);
+            return new AnyDataTypeGenerator(schemaValue, typeName, overrideNullable, subTypesMap, pregeneratedTypeMap);
         }
     }
 
@@ -101,7 +108,8 @@ public class TypeGeneratorUtils {
      * @param originalTypeDesc Type name
      * @return Final type of the field
      */
-    public static TypeDescriptorNode getNullableType(Schema schema, TypeDescriptorNode originalTypeDesc) {
+    public static TypeDescriptorNode getNullableType(Schema schema, TypeDescriptorNode originalTypeDesc,
+                                                     boolean overrideNullable) {
         TypeDescriptorNode nillableType = originalTypeDesc;
         boolean nullable = GeneratorMetaData.getInstance().isNullable();
         if (schema.getNullable() != null) {
@@ -110,7 +118,7 @@ public class TypeGeneratorUtils {
             }
         } else if (schema.getTypes() != null && schema.getTypes().contains(GeneratorConstants.NULL)) {
             nillableType = createOptionalTypeDescriptorNode(originalTypeDesc, createToken(QUESTION_MARK_TOKEN));
-        } else if (nullable) {
+        } else if (!overrideNullable && nullable) {
             nillableType = createOptionalTypeDescriptorNode(originalTypeDesc, createToken(QUESTION_MARK_TOKEN));
         }
         return nillableType;

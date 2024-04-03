@@ -123,6 +123,7 @@ import java.util.regex.Pattern;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
@@ -148,6 +149,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SLASH_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_FORM_URLENCODED;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_OCTET_STREAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BALLERINA_TOML;
@@ -242,7 +244,7 @@ public class GeneratorUtils {
      * @return - node lists
      * @throws BallerinaOpenApiException
      */
-    public static List<Node> getRelativeResourcePath(String path, Operation operation, List<Node> resourceFunctionDocs,
+    public static NodeList<Node> getRelativeResourcePath(String path, Operation operation, List<Node> resourceFunctionDocs,
                                                      Components components, boolean isWithoutDataBinding)
             throws BallerinaOpenApiException {
 
@@ -279,7 +281,7 @@ public class GeneratorUtils {
             IdentifierToken idToken = createIdentifierToken(pathNodes[1].trim());
             functionRelativeResourcePath.add(idToken);
         }
-        return functionRelativeResourcePath;
+        return createNodeList(functionRelativeResourcePath);
     }
 
     private static void extractPathParameterDetails(Operation operation, List<Node> functionRelativeResourcePath,
@@ -307,14 +309,13 @@ public class GeneratorUtils {
                 if (parameter.getSchema().get$ref() != null) {
                     paramType = resolveReferenceType(parameter.getSchema(), components, isWithoutDataBinding,
                             pathParam);
+                    TypeHandler.getInstance().getTypeNodeFromOASSchema(parameter.getSchema());
                 } else {
                     paramType = getPathParameterType(parameter.getSchema(), pathParam);
                     if (paramType.endsWith(NILLABLE)) {
                         throw new BallerinaOpenApiException("Path parameter value cannot be null.");
                     }
                 }
-
-                // TypeDescriptor
                 BuiltinSimpleNameReferenceNode builtSNRNode = createBuiltinSimpleNameReferenceNode(
                         null,
                         parameter.getSchema() == null || hasSpecialCharacter ?
@@ -356,10 +357,12 @@ public class GeneratorUtils {
      * @param schema OpenApi schema
      * @return ballerina type
      */
-    public static String convertOpenAPITypeToBallerina(Schema<?> schema) throws BallerinaOpenApiException {
+    public static String convertOpenAPITypeToBallerina(Schema<?> schema, boolean overrideNullable)
+            throws BallerinaOpenApiException {
         String type = getOpenAPIType(schema);
         if (schema.getEnum() != null && !schema.getEnum().isEmpty() && primitiveTypeList.contains(type)) {
-            EnumGenerator enumGenerator = new EnumGenerator(schema, null, new HashMap<>(), new HashMap<>());
+            EnumGenerator enumGenerator = new EnumGenerator(schema, null, overrideNullable,
+                    new HashMap<>(), new HashMap<>());
             try {
                 return enumGenerator.generateTypeDescriptorNode().toString();
             } catch (OASTypeGenException exp) {
@@ -576,7 +579,7 @@ public class GeneratorUtils {
             return SyntaxKind.XML_KEYWORD.stringValue();
         } else if (mediaType.equals(APPLICATION_FORM_URLENCODED) || mediaType.matches("text/.*")) {
             return STRING_KEYWORD.stringValue();
-        } else if (mediaType.equals(GeneratorConstants.APPLICATION_OCTET_STREAM) ||
+        } else if (mediaType.equals(APPLICATION_OCTET_STREAM) ||
                 mediaType.equals(IMAGE_PNG) || mediaType.matches("application/.*\\+octet-stream")) {
             return SyntaxKind.BYTE_KEYWORD.stringValue() + SQUARE_BRACKETS;
         } else {
@@ -1193,7 +1196,7 @@ public class GeneratorUtils {
             LOGGER.warn("unsupported path parameter type found in the parameter `" + pathParam + "`. hence the " +
                     "parameter type is set to string.");
         } else {
-            type = GeneratorUtils.convertOpenAPITypeToBallerina(typeSchema);
+            type = GeneratorUtils.convertOpenAPITypeToBallerina(typeSchema, true);
         }
         return type;
     }
@@ -1269,10 +1272,10 @@ public class GeneratorUtils {
             bodyTypeSchema = responseContent.entrySet();
         } else if (response.get$ref() != null) {
             try {
-                String referenceType = io.ballerina.openapi.core.generators.type.GeneratorUtils.extractReferenceType(response.get$ref());
+                String referenceType = GeneratorUtils.extractReferenceType(response.get$ref());
                 ApiResponse apiResponse = openAPI.getComponents().getResponses().get(referenceType);
                 bodyTypeSchema = apiResponse.getContent().entrySet();
-            } catch (OASTypeGenException e) {
+            } catch (BallerinaOpenApiException e) {
                 throw new RuntimeException(e);
             }
         } else {
@@ -1290,14 +1293,18 @@ public class GeneratorUtils {
                             yield TypeHandler.getInstance()
                                     .getTypeNodeFromOASSchema(mediaTypeEntry.getValue().getSchema()).get();
                         } else {
-                            yield createSimpleNameReferenceNode(createIdentifierToken(io.ballerina.openapi.core.service.GeneratorConstants.ANYDATA));
+                            yield createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
                         }
                     }
-                    case GeneratorConstants.APPLICATION_XML -> generateTypeDescriptorForXMLContent();
-                    case GeneratorConstants.APPLICATION_URL_ENCODE -> generateTypeDescriptorForMapStringContent();
-                    case GeneratorConstants.TEXT -> generateTypeDescriptorForTextContent();
-                    case GeneratorConstants.APPLICATION_OCTET_STREAM -> generateTypeDescriptorForOctetStreamContent();
-                    default -> createSimpleNameReferenceNode(createIdentifierToken(io.ballerina.openapi.core.service.GeneratorConstants.ANYDATA));
+                    case GeneratorConstants.APPLICATION_XML ->
+                            generateTypeDescriptorForXMLContent();
+                    case GeneratorConstants.APPLICATION_URL_ENCODE ->
+                            generateTypeDescriptorForMapStringContent();
+                    case GeneratorConstants.TEXT ->
+                            generateTypeDescriptorForTextContent();
+                    case GeneratorConstants.APPLICATION_OCTET_STREAM ->
+                            generateTypeDescriptorForOctetStreamContent();
+                    default -> createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
                 };
                 generatedTypes.add(mediaTypeToken);
             }

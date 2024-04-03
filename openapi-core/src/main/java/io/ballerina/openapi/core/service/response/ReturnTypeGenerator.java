@@ -12,19 +12,17 @@ import io.swagger.v3.oas.models.PathItem;
 import java.util.Map;
 
 public abstract class ReturnTypeGenerator {
-    final String pathRecord;
     final OASServiceMetadata oasServiceMetadata;
 
-    public ReturnTypeGenerator(OASServiceMetadata oasServiceMetadata, String pathRecord) {
+    public ReturnTypeGenerator(OASServiceMetadata oasServiceMetadata) {
         this.oasServiceMetadata = oasServiceMetadata;
-        this.pathRecord = pathRecord;
     }
 
-    public static ReturnTypeGenerator getReturnTypeGenerator(OASServiceMetadata oasServiceMetadata, String pathRecord) {
+    public static ReturnTypeGenerator getReturnTypeGenerator(OASServiceMetadata oasServiceMetadata) {
         if (oasServiceMetadata.generateWithoutDataBinding()) {
-            return new LowResourceReturnTypeGenerator(oasServiceMetadata, pathRecord);
+            return new LowResourceReturnTypeGenerator(oasServiceMetadata);
         } else {
-            return new DefaultReturnTypeGenerator(oasServiceMetadata, pathRecord);
+            return new DefaultReturnTypeGenerator(oasServiceMetadata);
         }
     }
 

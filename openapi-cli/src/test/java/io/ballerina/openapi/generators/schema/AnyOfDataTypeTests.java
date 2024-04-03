@@ -53,7 +53,7 @@ public class AnyOfDataTypeTests {
         Schema<?> schema = openAPI.getComponents().getSchemas().get("AnyOF");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         GeneratorMetaData.createInstance(openAPI, false);
-        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "AnyOF",
+        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "AnyOF", false,
                 new HashMap<>(), new HashMap<>());
         String anyOfUnionType = unionTypeGenerator.generateTypeDescriptorNode().toString().trim();
         Assert.assertEquals(anyOfUnionType, "User|Activity");

@@ -42,7 +42,8 @@ public class PathParameterGenerator implements ParameterGenerator {
         // type should be a any type node.
         Schema parameterSchema = parameter.getSchema();
         // Reference type resolve
-        Optional<TypeDescriptorNode> typeNode = TypeHandler.getInstance().getTypeNodeFromOASSchema(parameterSchema);
+        Optional<TypeDescriptorNode> typeNode = TypeHandler.getInstance()
+                .getTypeNodeFromOASSchema(parameterSchema, true);
         if (typeNode.isEmpty()) {
 //            throw new BallerinaOpenApiException("Error while generating type descriptor node for path parameter");
             //todo diagnostic

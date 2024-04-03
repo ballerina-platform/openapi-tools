@@ -15,8 +15,8 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
-import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.internal.regexp.RegExpFactory;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -66,6 +66,9 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
 
     @Override
     public ConstraintResult updateTypeDefinitionsWithConstraints() {
+        if (openAPI.getComponents().getSchemas() == null) {
+            return new ConstraintResult(typeDefinitions, isConstraint, diagnostics);
+        }
         openAPI.getComponents().getSchemas().forEach((key, value) -> {
             if (typeDefinitions.containsKey(key) && GeneratorUtils.hasConstraints(value)) {
                 key = GeneratorUtils.getValidName(key, true);
@@ -78,7 +81,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                         NodeList<Node> fields = record.fields();
                         List<Node> recordFields = new ArrayList<>();
                         for (Node field : fields) {
-
+                            // todo fix by checking field node type (RecordFieldNode, RecordFieldWithType)
                             RecordFieldNode recordFieldNode = (RecordFieldNode) field;
                             String fieldName = recordFieldNode.fieldName().text();
                             //todo remove this replacement with new lang changes
@@ -97,7 +100,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                                         constraintNode != null && fieldSchema.getNullable() != null && fieldSchema.getNullable() ||
                                                 (fieldSchema.getOneOf() != null ||
                                                         fieldSchema.getAnyOf() != null);
-                                boolean nullable = TypeHandler.getGeneratorMetadata().isNullable();
+                                boolean nullable = GeneratorMetaData.getInstance().isNullable();
                                 if (nullable) {
                                     constraintNode = null;
                                 } else if (isConstraintSupport) {
@@ -167,7 +170,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                                     constraintNode != null && value.getNullable() != null && value.getNullable() ||
                                             ((value.getOneOf() != null ||
                                                     value.getAnyOf() != null));
-                            boolean nullable = TypeHandler.getGeneratorMetadata().isNullable();
+                            boolean nullable = GeneratorMetaData.getInstance().isNullable();
                             if (nullable) {
                                 constraintNode = null;
                             } else if (isConstraintSupport) {
@@ -227,7 +230,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                             constraintNode != null && itemSchema.getNullable() != null && itemSchema.getNullable() ||
                                     ((itemSchema.getOneOf() != null ||
                                             itemSchema.getAnyOf() != null));
-                    boolean nullable = TypeHandler.getGeneratorMetadata().isNullable();
+                    boolean nullable = GeneratorMetaData.getInstance().isNullable();
                     if (nullable) {
                         constraintNode = null;
                     } else if (isConstraintSupport) {
@@ -321,7 +324,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
     public static AnnotationNode generateConstraintNode(String typeName, Schema<?> fieldSchema)
             throws BallerinaOpenApiException {
         if (isConstraintAllowed(typeName, fieldSchema)) {
-            String ballerinaType = convertOpenAPITypeToBallerina(fieldSchema);
+            String ballerinaType = convertOpenAPITypeToBallerina(fieldSchema, true);
             // For openAPI field schemas having 'string' type, constraints generation will be skipped when
             // the counterpart Ballerina type is non-string (e.g. for string schemas with format 'binary' or 'byte',
             // the counterpart ballerina type is 'byte[]', hence any string constraints cannot be applied)
@@ -346,7 +349,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
 
         boolean isConstraintNotAllowed = schema.getNullable() != null && schema.getNullable() ||
                 (schema.getOneOf() != null || schema.getAnyOf() != null) || getOpenAPIType(schema) == null;
-        boolean nullable = TypeHandler.getGeneratorMetadata().isNullable();
+        boolean nullable = GeneratorMetaData.getInstance().isNullable();
         if (nullable) {
             return false;
         } else if (isConstraintNotAllowed) {

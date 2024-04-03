@@ -47,6 +47,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.generators.EnumGenerator;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
@@ -102,6 +103,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SLASH_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
 
 /**
  * This class util for store all the common scenarios.
@@ -141,166 +143,6 @@ public class GeneratorUtils {
         Token colon = AbstractNodeFactory.createIdentifierToken(":");
         IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier);
         return NodeFactory.createQualifiedNameReferenceNode(modulePrefixToken, colon, identifierToken);
-    }
-
-    /**
-     * Generated resource function relative path node list.
-     *
-     * @param path      - resource path
-     * @param operation - resource operation
-     * @return - node lists
-     * @throws OASTypeGenException
-     */
-    public static NodeList<Node> getRelativeResourcePath(String path, Operation operation,
-                                                     Components components, boolean isWithoutDataBinding)
-            throws OASTypeGenException {
-
-        List<Node> functionRelativeResourcePath = new ArrayList<>();
-        String[] pathNodes = path.split(GeneratorConstants.SLASH);
-        if (pathNodes.length >= 2) {
-            for (String pathNode : pathNodes) {
-                if (pathNode.contains(GeneratorConstants.OPEN_CURLY_BRACE)) {
-                    String pathParam = pathNode;
-                    pathParam = pathParam.substring(pathParam.indexOf(GeneratorConstants.OPEN_CURLY_BRACE) + 1);
-                    pathParam = pathParam.substring(0, pathParam.indexOf(GeneratorConstants.CLOSE_CURLY_BRACE));
-                    pathParam = getValidName(pathParam, false);
-
-                    /**
-                     * TODO -> `onCall/[string id]\.json` type of url won't support from syntax
-                     * issue https://github.com/ballerina-platform/ballerina-spec/issues/1138
-                     * <pre>resource function get onCall/[string id]\.json() returns string {}</>
-                     */
-                    if (operation.getParameters() != null) {
-                        extractPathParameterDetails(operation, functionRelativeResourcePath, pathNode,
-                                pathParam, components, isWithoutDataBinding);
-                    }
-                } else if (!pathNode.isBlank()) {
-                    IdentifierToken idToken = createIdentifierToken(escapeIdentifier(pathNode.trim()));
-                    functionRelativeResourcePath.add(idToken);
-                    functionRelativeResourcePath.add(createToken(SLASH_TOKEN));
-                }
-            }
-            functionRelativeResourcePath.remove(functionRelativeResourcePath.size() - 1);
-        } else if (pathNodes.length == 0) {
-            IdentifierToken idToken = createIdentifierToken(".");
-            functionRelativeResourcePath.add(idToken);
-        } else {
-            IdentifierToken idToken = createIdentifierToken(pathNodes[1].trim());
-            functionRelativeResourcePath.add(idToken);
-        }
-        return createNodeList(functionRelativeResourcePath);
-    }
-
-    private static void extractPathParameterDetails(Operation operation, List<Node> functionRelativeResourcePath,
-                                                    String pathNode, String pathParam,
-                                                    Components components, boolean isWithoutDataBinding)
-            throws OASTypeGenException {
-        // check whether path parameter segment has special character
-        String[] split = pathNode.split(GeneratorConstants.CLOSE_CURLY_BRACE, 2);
-        Pattern pattern = Pattern.compile(GeneratorConstants.SPECIAL_CHARACTERS_REGEX);
-        Matcher matcher = pattern.matcher(split[1]);
-        boolean hasSpecialCharacter = matcher.find();
-
-        for (Parameter parameter : operation.getParameters()) {
-            if (parameter.get$ref() != null) {
-                parameter = GeneratorMetaData.getInstance().getOpenAPI().getComponents()
-                        .getParameters().get(extractReferenceType(parameter.get$ref()));
-            }
-            if (parameter.getIn() == null) {
-                continue;
-            }
-            if (pathParam.trim().equals(getValidName(parameter.getName().trim(), false))
-                    && parameter.getIn().equals("path")) {
-                String paramType;
-                if (parameter.getSchema().get$ref() != null) {
-                    paramType = resolveReferenceType(parameter.getSchema(), components, isWithoutDataBinding,
-                            pathParam);
-                    Schema<?> schema = GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(paramType);
-                    TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
-                } else {
-                    paramType = getPathParameterType(parameter.getSchema(), pathParam);
-                    if (paramType.endsWith(GeneratorConstants.NILLABLE)) {
-                        throw new OASTypeGenException("Path parameter value cannot be null.");
-                    }
-                }
-
-                // TypeDescriptor
-                BuiltinSimpleNameReferenceNode builtSNRNode = createBuiltinSimpleNameReferenceNode(
-                        null,
-                        parameter.getSchema() == null || hasSpecialCharacter ?
-                                createIdentifierToken(GeneratorConstants.STRING) :
-                                createIdentifierToken(paramType));
-                IdentifierToken paramName = createIdentifierToken(
-                        hasSpecialCharacter ?
-                                getValidName(pathNode, false) :
-                                pathParam);
-                ResourcePathParameterNode resourcePathParameterNode =
-                        createResourcePathParameterNode(
-                                SyntaxKind.RESOURCE_PATH_SEGMENT_PARAM,
-                                createToken(OPEN_BRACKET_TOKEN),
-                                NodeFactory.createEmptyNodeList(),
-                                builtSNRNode,
-                                null,
-                                paramName,
-                                createToken(CLOSE_BRACKET_TOKEN));
-                functionRelativeResourcePath.add(resourcePathParameterNode);
-                functionRelativeResourcePath.add(createToken(SLASH_TOKEN));
-                break;
-            }
-        }
-    }
-
-    /**
-     * Method for convert openApi type of format to ballerina type.
-     *
-     * @param schema OpenApi schema
-     * @return ballerina type
-     */
-    public static String convertOpenAPITypeToBallerina(Schema<?> schema) throws OASTypeGenException {
-        String type = getOpenAPIType(schema);
-        if (schema.getEnum() != null && !schema.getEnum().isEmpty() && primitiveTypeList.contains(type)) {
-            EnumGenerator enumGenerator = new EnumGenerator(schema, null, new HashMap<>(), new HashMap<>());
-            return enumGenerator.generateTypeDescriptorNode().toString();
-        } else if ((GeneratorConstants.INTEGER.equals(type) || GeneratorConstants.NUMBER.equals(type) || GeneratorConstants.STRING.equals(type)) && schema.getFormat() != null) {
-            return convertOpenAPITypeFormatToBallerina(type, schema);
-        } else {
-            if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(type)) {
-                return GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(type);
-            } else {
-                throw new OASTypeGenException("Unsupported OAS data type `" + type + "`");
-            }
-        }
-    }
-
-    /**
-     * This utility is used to select the Ballerina data type for a given OpenAPI type format.
-     *
-     * @param dataType name of the data type. ex: number, integer, string
-     * @param schema uses to generate the type descriptor name ex: int32, int64
-     * @return data type for invalid numeric data formats
-     */
-    private static String convertOpenAPITypeFormatToBallerina(final String dataType, final Schema<?> schema)
-            throws OASTypeGenException {
-        if (GeneratorConstants.OPENAPI_TYPE_TO_FORMAT_MAP.containsKey(dataType) &&
-                GeneratorConstants.OPENAPI_TYPE_TO_FORMAT_MAP.get(dataType).contains(schema.getFormat())) {
-            if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(schema.getFormat())) {
-                return GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(schema.getFormat());
-            } else {
-                OUT_STREAM.printf("WARNING: unsupported format `%s` will be skipped when generating the counterpart " +
-                        "Ballerina type for openAPI schema type: `%s`%n", schema.getFormat(), schema.getType());
-                if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(dataType)) {
-                    return GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(dataType);
-                } else {
-                    throw new OASTypeGenException("Unsupported OAS data type `" + dataType + "`");
-                }
-            }
-        } else {
-            if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(dataType)) {
-                return GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(dataType);
-            } else {
-                throw new OASTypeGenException("Unsupported OAS data type `" + dataType + "`");
-            }
-        }
     }
 
     /**
@@ -827,41 +669,5 @@ public class GeneratorUtils {
 
     public static boolean isNumberSchema(Schema<?> fieldSchema) {
         return Objects.equals(GeneratorUtils.getOpenAPIType(fieldSchema), GeneratorConstants.NUMBER);
-    }
-
-    public static String resolveReferenceType(Schema<?> schema, Components components, boolean isWithoutDataBinding,
-                                              String pathParam) throws OASTypeGenException {
-        String type = GeneratorUtils.extractReferenceType(schema.get$ref());
-
-        if (isWithoutDataBinding) {
-            Schema<?> referencedSchema = components.getSchemas().get(getValidName(type, true));
-            if (referencedSchema != null) {
-                if (referencedSchema.get$ref() != null) {
-                    type = resolveReferenceType(referencedSchema, components, isWithoutDataBinding, pathParam);
-                } else {
-                    type = getPathParameterType(referencedSchema, pathParam);
-                }
-            }
-        } else {
-            type = getValidName(type, true);
-        }
-        return type;
-    }
-
-    public static String getPathParameterType(Schema<?> typeSchema, String pathParam) {
-        String type;
-        if (!(isStringSchema(typeSchema) || isNumberSchema(typeSchema) || isBooleanSchema(typeSchema)
-                || isIntegerSchema(typeSchema))) {
-            type = GeneratorConstants.STRING;
-            LOGGER.warn("unsupported path parameter type found in the parameter `" + pathParam + "`. hence the " +
-                    "parameter type is set to string.");
-        } else {
-            try {
-                type = GeneratorUtils.convertOpenAPITypeToBallerina(typeSchema);
-            } catch (OASTypeGenException e) {
-                throw new RuntimeException();
-            }
-        }
-        return type;
     }
 }

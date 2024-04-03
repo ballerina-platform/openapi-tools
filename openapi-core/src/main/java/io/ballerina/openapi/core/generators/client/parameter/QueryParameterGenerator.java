@@ -67,7 +67,8 @@ public class QueryParameterGenerator implements ParameterGenerator {
 
         //supported type: type BasicType boolean|int|float|decimal|string|map<anydata>|enum;
         //public type QueryParamType ()|BasicType|BasicType[];
-        Optional<TypeDescriptorNode> result = TypeHandler.getInstance().getTypeNodeFromOASSchema(parameterSchema);
+        Optional<TypeDescriptorNode> result = TypeHandler.getInstance()
+                .getTypeNodeFromOASSchema(parameterSchema, true);
         typeNode = result.get();
         SyntaxKind kind = typeNode.kind();
         TypeDescriptorNode typeDefNode = result.get();

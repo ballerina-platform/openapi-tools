@@ -45,7 +45,8 @@ public class HeaderParameterGenerator implements ParameterGenerator {
     @Override
     public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
         IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
-        Optional<TypeDescriptorNode> typeNodeResult = TypeHandler.getInstance().getTypeNodeFromOASSchema(parameter.getSchema());
+        Optional<TypeDescriptorNode> typeNodeResult = TypeHandler.getInstance()
+                .getTypeNodeFromOASSchema(parameter.getSchema(), true);
         if (typeNodeResult.isEmpty()) {
             return Optional.empty();
         }
