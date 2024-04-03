@@ -34,7 +34,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extract
 public class ResourceFunctionSignatureGenerator implements FunctionSignatureGenerator {
     protected final Operation operation;
     protected final OpenAPI openAPI;
-    private final String httpMethod;
+    protected final String httpMethod;
 
     private final List<ClientDiagnostic> diagnostics = new ArrayList<>();
     public ResourceFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod) {

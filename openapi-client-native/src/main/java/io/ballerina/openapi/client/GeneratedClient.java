@@ -34,6 +34,8 @@ import static io.ballerina.runtime.observability.ObservabilityConstants.KEY_OBSE
 
 /**
  * This class contains the generated client's native code.
+ *
+ * @since 1.9.0
  */
 public class GeneratedClient {
 

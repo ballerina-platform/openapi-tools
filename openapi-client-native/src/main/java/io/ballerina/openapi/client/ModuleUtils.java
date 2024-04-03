@@ -22,6 +22,8 @@ import io.ballerina.runtime.api.Module;
 
 /**
  * This class contains the generated client's module utility functions.
+ *
+ * @since 1.9.0
  */
 public class ModuleUtils {
     private static Module module;

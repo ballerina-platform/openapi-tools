@@ -33,6 +33,8 @@ import java.util.Objects;
 
 /**
  * This class contains the generated client's utility functions.
+ *
+ * @since 1.9.0
  */
 public class ClientUtil {
 
