@@ -18,7 +18,7 @@
 
 package io.ballerina.openapi.service.mapper.hateoas;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,9 @@ public class Service {
             hateoasResourceMapping.get(resourceName).add(resource);
             return;
         }
-        hateoasResourceMapping.put(resourceName, Arrays.asList(resource));
+        List<Resource> hateoasResources = new ArrayList<>();
+        hateoasResources.add(resource);
+        hateoasResourceMapping.put(resourceName, hateoasResources);
     }
 
     public Map<String, List<Resource>> getHateoasResourceMapping() {
