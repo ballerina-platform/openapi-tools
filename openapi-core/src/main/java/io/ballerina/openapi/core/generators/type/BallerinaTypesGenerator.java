@@ -78,7 +78,7 @@ public class BallerinaTypesGenerator {
         try {
             typeDescriptorNode = generateTypeDescriptorNodeForOASSchema(schema, subtypesMap, new HashMap<>());
         } catch (OASTypeGenException e) {
-            //todo: diagnostics this exception
+            // todo: diagnostics this exception
             return new TypeGeneratorResult(null, subtypesMap , new ArrayList<>());
         }
         return new TypeGeneratorResult(typeDescriptorNode, subtypesMap, new ArrayList<>());

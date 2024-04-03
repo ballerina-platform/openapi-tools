@@ -166,34 +166,6 @@ public class TypeHandler {
         return typeGeneratorResult.typeDescriptorNode();
     }
 
-    public TypeDescriptorNode createStatusCodeRecord(String statusCode, Schema bodySchema, Schema headersSchema) {
-        TypeDescriptorNode bodyType;
-        TypeDescriptorNode headersType;
-        if (bodySchema != null && getTypeNodeFromOASSchema(bodySchema).isPresent()) {
-            bodyType = getTypeNodeFromOASSchema(bodySchema).get();
-        } else {
-            bodyType = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
-        }
-
-        if (headersSchema != null && getTypeNodeFromOASSchema(headersSchema).isPresent()) {
-            headersType = getTypeNodeFromOASSchema(headersSchema).get();
-        } else {
-            TypeDescriptorNode stringType = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.STRING));
-
-            ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
-                    createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
-                    createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-            TypeDescriptorNode stringArrType = createArrayTypeDescriptorNode(stringType, createNodeList(dimensionNode));
-
-            UnionTypeDescriptorNode unionType = createUnionTypeDescriptorNode(stringType, createToken(PIPE_TOKEN),
-                    stringArrType);
-            TypeParameterNode headerParamNode = createTypeParameterNode(createToken(LT_TOKEN), unionType,
-                    createToken(SyntaxKind.GT_TOKEN));
-            headersType = createMapTypeDescriptorNode(createToken(MAP_KEYWORD), headerParamNode);
-        }
-        return createTypeInclusionRecord(statusCode, bodyType, headersType);
-    }
-
     public TypeDescriptorNode generateHeaderType(Schema headersSchema) {
         TypeDescriptorNode headersType;
         if (headersSchema != null && getTypeNodeFromOASSchema(headersSchema).isPresent()) {
@@ -277,7 +249,34 @@ public class TypeHandler {
         return createSimpleNameReferenceNode(createIdentifierToken(recordName));
     }
 
-    /**
+//    public TypeDescriptorNode createStatusCodeRecord(String statusCode, Schema bodySchema, Schema headersSchema) {
+//        TypeDescriptorNode bodyType;
+//        TypeDescriptorNode headersType;
+//        if (bodySchema != null && getTypeNodeFromOASSchema(bodySchema).isPresent()) {
+//            bodyType = getTypeNodeFromOASSchema(bodySchema).get();
+//        } else {
+//            bodyType = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
+//        }
+//
+//        if (headersSchema != null && getTypeNodeFromOASSchema(headersSchema).isPresent()) {
+//            headersType = getTypeNodeFromOASSchema(headersSchema).get();
+//        } else {
+//            TypeDescriptorNode stringType = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.STRING));
+//
+//            ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
+//                    createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
+//                    createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+//            TypeDescriptorNode stringArrType = createArrayTypeDescriptorNode(stringType, createNodeList(dimensionNode));
+//
+//            UnionTypeDescriptorNode unionType = createUnionTypeDescriptorNode(stringType, createToken(PIPE_TOKEN),
+//                    stringArrType);
+//            TypeParameterNode headerParamNode = createTypeParameterNode(createToken(LT_TOKEN), unionType,
+//                    createToken(SyntaxKind.GT_TOKEN));
+//            headersType = createMapTypeDescriptorNode(createToken(MAP_KEYWORD), headerParamNode);
+//        }
+//        return createTypeInclusionRecord(statusCode, bodyType, headersType);
+//    }
+//    /**
 //     * Generate union type node when response has multiple content types.
 //     */
 //    private TypeDescriptorNode handleMultipleContents(Set<Map.Entry<String, MediaType>> contentEntries) {
