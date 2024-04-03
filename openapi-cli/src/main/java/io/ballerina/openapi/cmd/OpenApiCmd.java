@@ -498,10 +498,10 @@ public class OpenApiCmd implements BLauncherCmd {
 
             if (nativeDependency.get().containsKey("version") &&
                     nativeDependency.get().get("version").equals(version)) {
-                outStream.println("INFO: the `Ballerina.toml` file is already updated with the OpenAPI client native " +
+                outStream.println("INFO: the 'Ballerina.toml' file is already updated with the OpenAPI client native " +
                         "dependency.");;
             } else {
-                outStream.println("ERROR: the `Ballerina.toml` file is already updated with the OpenAPI client native" +
+                outStream.println("ERROR: the 'Ballerina.toml' file is already updated with the OpenAPI client native" +
                         " dependency but the version is different from the current version. Please remove the existing " +
                         "dependency and try again.");
                 exitError(this.exitWhenFinish);

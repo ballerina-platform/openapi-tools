@@ -35,12 +35,14 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extract
 public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenerator {
     OpenAPI openAPI;
     Operation operation;
+    String httpMethod;
     List<ClientDiagnostic> diagnostics;
     boolean treatDefaultableAsRequired = false;
 
-    public RemoteFunctionSignatureGenerator(Operation operation, OpenAPI openAPI) {
+    public RemoteFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod) {
         this.operation = operation;
         this.openAPI = openAPI;
+        this.httpMethod = httpMethod;
     }
 
     public void setTreatDefaultableAsRequired() {
@@ -171,7 +173,7 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
     }
 
     protected FunctionReturnTypeGeneratorImp getFunctionReturnTypeGenerator() {
-        return new FunctionReturnTypeGeneratorImp(operation, openAPI);
+        return new FunctionReturnTypeGeneratorImp(operation, openAPI, httpMethod);
     }
 
     public List<ClientDiagnostic> getDiagnostics() {

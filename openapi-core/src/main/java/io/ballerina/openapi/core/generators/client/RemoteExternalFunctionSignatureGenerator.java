@@ -27,13 +27,13 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPEDESC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPEDESC_TYPE_DESC;
 
 public class RemoteExternalFunctionSignatureGenerator extends RemoteFunctionSignatureGenerator {
-    public RemoteExternalFunctionSignatureGenerator(Operation operation, OpenAPI openAPI) {
-        super(operation, openAPI);
+    public RemoteExternalFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod) {
+        super(operation, openAPI, httpMethod);
     }
 
     @Override
     protected FunctionReturnTypeGeneratorImp getFunctionReturnTypeGenerator() {
-        return new FunctionExternalReturnTypeGenerator(operation, openAPI);
+        return new FunctionExternalReturnTypeGenerator(operation, openAPI, httpMethod);
     }
 
     @Override

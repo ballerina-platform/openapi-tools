@@ -89,13 +89,13 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             if (responses.size() > 1) {
                 //handle multiple response scenarios ex: status code 200, 400, 500
                 TypeDescriptorNode type = handleMultipleResponse(responses, httpMethod,
-                        oasServiceMetadata.getOpenAPI(), pathRecord);
+                        oasServiceMetadata.getOpenAPI());
                 returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(), type);
             } else if (responses.size() == 1) {
                 //handle single response
                 Iterator<Map.Entry<String, ApiResponse>> responseIterator = responses.entrySet().iterator();
                 Map.Entry<String, ApiResponse> response = responseIterator.next();
-                returnNode = handleSingleResponse(response, pathRecord, httpMethod);
+                returnNode = handleSingleResponse(response, httpMethod);
             } else {
                 TypeDescriptorNode defaultType = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
                 returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(), defaultType);
@@ -118,8 +118,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
     /**
      * Generate union type node when operation has multiple responses.
      */
-    private TypeDescriptorNode handleMultipleResponse(ApiResponses responses, String httpMethod,
-                                                             OpenAPI openAPI, String pathRecord)
+    private TypeDescriptorNode handleMultipleResponse(ApiResponses responses, String httpMethod, OpenAPI openAPI)
             throws OASTypeGenException {
 
         Set<String> qualifiedNodes = new LinkedHashSet<>();
@@ -158,10 +157,10 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                                 (!httpMethod.equals(GeneratorConstants.POST) &&
                                         responseCode.equals(GeneratorConstants.HTTP_200));
                 if (isWithOutStatusCode) {
-                    typeName = handleMultipleContents(content.entrySet(), pathRecord).toSourceCode();
+                    typeName = handleMultipleContents(content.entrySet()).toSourceCode();
                 } else {
                     TypeDescriptorNode statusCodeTypeInclusionRecord = generateStatusCodeTypeInclusionRecord(code,
-                            responseValue, null, openAPI);
+                            responseValue, httpMethod, openAPI);
                     typeName = statusCodeTypeInclusionRecord.toSourceCode();
                 }
             }
@@ -180,13 +179,10 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
     /**
      * Generate union type node when response has multiple content types.
      */
-    private TypeDescriptorNode handleMultipleContents(Set<Map.Entry<String, MediaType>> contentEntries,
-                                                            String pathRecord)
+    private TypeDescriptorNode handleMultipleContents(Set<Map.Entry<String, MediaType>> contentEntries)
             throws OASTypeGenException {
         Set<String> qualifiedNodes = new LinkedHashSet<>();
         for (Map.Entry<String, MediaType> contentType : contentEntries) {
-//            String recordName = getNewRecordName(pathRecord);
-
             TypeDescriptorNode mediaTypeToken = getReturnNodeForSchemaType(contentType);
             if (mediaTypeToken == null) {
                 SimpleNameReferenceNode httpResponse = createSimpleNameReferenceNode(createIdentifierToken(
@@ -213,7 +209,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
     /**
      * This util is to generate return node when the operation has one response.
      */
-    private ReturnTypeDescriptorNode handleSingleResponse(Map.Entry<String, ApiResponse> response, String pathRecord,
+    private ReturnTypeDescriptorNode handleSingleResponse(Map.Entry<String, ApiResponse> response,
                                                           String httpMethod)
             throws OASTypeGenException {
 
@@ -245,7 +241,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 Set<Map.Entry<String, MediaType>> contentEntries = responseContent.entrySet();
                 TypeDescriptorNode returnType;
                 if (contentEntries.size() > 1) {
-                    returnType = handleMultipleContents(contentEntries, pathRecord);
+                    returnType = handleMultipleContents(contentEntries);
                 } else {
                     returnType = getReturnNodeForSchemaType(contentEntries.iterator().next());
                 }
@@ -259,7 +255,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 // handle rest of the status codes
                 String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
                 TypeDescriptorNode statusCodeTypeInclusionRecord = generateStatusCodeTypeInclusionRecord(code,
-                        responseValue, null, oasServiceMetadata.getOpenAPI());
+                        responseValue, httpMethod, oasServiceMetadata.getOpenAPI());
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(),
                         statusCodeTypeInclusionRecord);
             }

@@ -33,15 +33,15 @@ public class ErrorMessages {
             "cannot find 'Ballerina.toml' file.%n%n";
     public static final String INVALID_INPUT_PATH = "ERROR: provide input oas contract path.%n%n";
 
-    public static final String TOML_UPDATED_MSG = "The `Ballerina.toml` file is updated successfully with" +
+    public static final String TOML_UPDATED_MSG = "The 'Ballerina.toml' file is updated successfully with" +
             " the OpenAPI tool configuration.";
 
-    public static final String TOML_UPDATED_WITH_CLIENT_NATIVE_DEPENDENCY = "INFO: the `Ballerina.toml` file is " +
+    public static final String TOML_UPDATED_WITH_CLIENT_NATIVE_DEPENDENCY = "INFO: the 'Ballerina.toml' file is " +
             "updated with the OpenAPI client native dependency.";
 
-    public static final String NOT_A_BALLERINA_PACKAGE = "WARNING: the provided path: %s is not a Ballerina package." +
-            " The status code binding is only supported for Ballerina packages and falling back to the default " +
-            "client generation mode.";
+    public static final String NOT_A_BALLERINA_PACKAGE = "WARNING: invalid Ballerina package directory: %s, cannot " +
+            "find 'Ballerina.toml'. Since the status code binding is only supported for Ballerina packages, client " +
+            "generation will skip the status code binding option.";
 
     private ErrorMessages() {
         throw new AssertionError();

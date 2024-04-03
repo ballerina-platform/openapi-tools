@@ -60,11 +60,13 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extract
 public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerator {
     protected OpenAPI openAPI;
     protected Operation operation;
+    protected String httpMethod;
     List<ClientDiagnostic> diagnostics = new ArrayList<>();
 
-    public FunctionReturnTypeGeneratorImp(Operation operation, OpenAPI openAPI) {
+    public FunctionReturnTypeGeneratorImp(Operation operation, OpenAPI openAPI, String httpMethod) {
         this.openAPI = openAPI;
         this.operation = operation;
+        this.httpMethod = httpMethod;
     }
 
     /**

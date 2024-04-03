@@ -66,8 +66,7 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
     }
 
     protected RemoteFunctionSignatureGenerator getSignatureGenerator() {
-        return new RemoteFunctionSignatureGenerator(operation.getValue(),
-                openAPI);
+        return new RemoteFunctionSignatureGenerator(operation.getValue(), openAPI, operation.getKey().toString().toLowerCase());
     }
 
     protected Optional<FunctionDefinitionNode> getFunctionDefinitionNode(NodeList<Token> qualifierList,

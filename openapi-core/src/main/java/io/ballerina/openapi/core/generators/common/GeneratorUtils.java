@@ -1262,7 +1262,7 @@ public class GeneratorUtils {
     }
 
     public static TypeDescriptorNode generateStatusCodeTypeInclusionRecord(String code, ApiResponse response,
-                                                                           String operationId, OpenAPI openAPI) {
+                                                                           String method, OpenAPI openAPI) {
         Content responseContent = response.getContent();
         Set<Map.Entry<String, MediaType>> bodyTypeSchema;
         if (Objects.nonNull(responseContent)) {
@@ -1306,10 +1306,10 @@ public class GeneratorUtils {
         }
         if (generatedTypes.isEmpty()) {
             return TypeHandler.getInstance().createTypeInclusionRecord(code, null,
-                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema), operationId);
+                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema), method);
         } else if (generatedTypes.size() == 1) {
             return TypeHandler.getInstance().createTypeInclusionRecord(code, generatedTypes.get(0),
-                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema), operationId);
+                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema), method);
         }
         UnionTypeDescriptorNode unionTypeDescriptorNode = null;
         TypeDescriptorNode leftTypeDesc = generatedTypes.get(0);
@@ -1320,7 +1320,7 @@ public class GeneratorUtils {
             leftTypeDesc = unionTypeDescriptorNode;
         }
         return TypeHandler.getInstance().createTypeInclusionRecord(code, unionTypeDescriptorNode,
-                TypeHandler.getInstance().generateHeaderType(headersTypeSchema), operationId);
+                TypeHandler.getInstance().generateHeaderType(headersTypeSchema), method);
     }
 
     public static TypeDescriptorNode getReturnNodeForSchemaType(Map.Entry<String, MediaType> contentEntry)

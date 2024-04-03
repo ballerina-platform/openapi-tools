@@ -197,7 +197,7 @@ public class TypeHandler {
     }
 
     public SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode bodyType,
-                                                             TypeDescriptorNode headersType, String operationId) {
+                                                             TypeDescriptorNode headersType, String method) {
         String recordName;
         if (bodyType != null) {
             recordName = statusCode + GeneratorUtils.getValidName(bodyType.toString(), true);
@@ -208,11 +208,9 @@ public class TypeHandler {
         RecordTypeDescriptorNode recordTypeDescriptorNode = getRecordTypeDescriptorNode(statusCode, bodyType,
                 headersType);
 
-        if (typeDefinitionNodes.containsKey(recordName)) {
-            if (Objects.nonNull(typeDefinitionNodes.get(recordName).typeDescriptor()) &&
-                !typeDefinitionNodes.get(recordName).typeDescriptor().toSourceCode().equals(recordTypeDescriptorNode.toSourceCode())) {
-                recordName = statusCode + operationId.substring(0, 1).toUpperCase() + operationId.substring(1);
-            }
+        if (typeDefinitionNodes.containsKey(recordName) && (Objects.nonNull(typeDefinitionNodes.get(recordName).typeDescriptor()) &&
+                !typeDefinitionNodes.get(recordName).typeDescriptor().toSourceCode().equals(recordTypeDescriptorNode.toSourceCode()))) {
+                recordName = method.toUpperCase() + recordName;
         }
 
         TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,

@@ -13,14 +13,14 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 
 public class ImplFunctionSignatureGenerator extends RemoteExternalFunctionSignatureGenerator {
 
-    public ImplFunctionSignatureGenerator(Operation operation, OpenAPI openAPI) {
-        super(operation, openAPI);
+    public ImplFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod) {
+        super(operation, openAPI, httpMethod);
         setTreatDefaultableAsRequired();
     }
 
     @Override
     protected FunctionReturnTypeGeneratorImp getFunctionReturnTypeGenerator() {
-        return new FunctionStatusCodeReturnTypeGenerator(operation, openAPI);
+        return new FunctionStatusCodeReturnTypeGenerator(operation, openAPI, httpMethod);
     }
 
     @Override

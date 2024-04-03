@@ -17,8 +17,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 
 public class FunctionExternalReturnTypeGenerator extends FunctionStatusCodeReturnTypeGenerator {
-    public FunctionExternalReturnTypeGenerator(Operation operation, OpenAPI openAPI) {
-        super(operation, openAPI);
+    public FunctionExternalReturnTypeGenerator(Operation operation, OpenAPI openAPI, String httpMethod) {
+        super(operation, openAPI, httpMethod);
     }
 
     @Override

@@ -72,8 +72,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
     }
 
     protected ResourceFunctionSignatureGenerator getSignatureGenerator() {
-        return new ResourceFunctionSignatureGenerator(
-                operation.getValue(), openAPI);
+        return new ResourceFunctionSignatureGenerator(operation.getValue(), openAPI, operation.getKey().toString().toLowerCase());
     }
 
     protected Optional<FunctionBodyNode> getFunctionBodyNode() throws BallerinaOpenApiException {

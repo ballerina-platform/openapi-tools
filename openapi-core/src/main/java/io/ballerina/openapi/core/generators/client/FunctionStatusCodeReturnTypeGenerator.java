@@ -12,15 +12,15 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.generat
 
 public class FunctionStatusCodeReturnTypeGenerator extends FunctionReturnTypeGeneratorImp {
 
-    public FunctionStatusCodeReturnTypeGenerator(Operation operation, OpenAPI openAPI) {
-        super(operation, openAPI);
+    public FunctionStatusCodeReturnTypeGenerator(Operation operation, OpenAPI openAPI, String httpMethod) {
+        super(operation, openAPI, httpMethod);
     }
 
     @Override
     protected boolean populateReturnType(String statusCode, ApiResponse response, List<TypeDescriptorNode> returnTypes) {
         boolean noContentResponseFoundSuper = super.populateReturnType(statusCode, response, returnTypes);
         returnTypes.add(generateStatusCodeTypeInclusionRecord(
-                GeneratorConstants.HTTP_CODES_DES.get(statusCode), response, operation.getOperationId(), openAPI));
+                GeneratorConstants.HTTP_CODES_DES.get(statusCode), response, httpMethod , openAPI));
         return noContentResponseFoundSuper;
     }
 }

@@ -58,11 +58,11 @@ public class Constants {
                 DiagnosticSeverity.ERROR),
         INVALID_CONTRACT_PATH("OAS_CLIENT_09", "invalid openapi contract file path.",
                 DiagnosticSeverity.ERROR),
-        TOML_UPDATED_WITH_CLIENT_NATIVE_DEPENDENCY("OAS_CLIENT_10", "the `Ballerina.toml` file is " +
+        TOML_UPDATED_WITH_CLIENT_NATIVE_DEPENDENCY("OAS_CLIENT_10", "the 'Ballerina.toml' file is " +
                 "updated with the OpenAPI client native dependency.", DiagnosticSeverity.INFO),
-        TOML_ALREADY_UPDATED_WITH_CLIENT_NATIVE_DEPENDENCY("OAS_CLIENT_10", "the `Ballerina.toml` file is " +
+        TOML_ALREADY_UPDATED_WITH_CLIENT_NATIVE_DEPENDENCY("OAS_CLIENT_10", "the 'Ballerina.toml' file is " +
                 "already updated with the latest OpenAPI client native dependency.", DiagnosticSeverity.INFO),
-        CLIENT_NATIVE_DEPENDENCY_VERSION_MISMATCH("OAS_CLIENT_10", "the `Ballerina.toml` file is already" +
+        CLIENT_NATIVE_DEPENDENCY_VERSION_MISMATCH("OAS_CLIENT_10", "the 'Ballerina.toml' file is already" +
                 " updated with the OpenAPI client native dependency but the version is different from the current " +
                 "version. Please remove the existing dependency and try again.", DiagnosticSeverity.ERROR),
         ERROR_WHILE_UPDATING_TOML("OAS_CLIENT_11", "error occurred when updating Ballerina.toml " +
