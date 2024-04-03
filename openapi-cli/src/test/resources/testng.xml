@@ -58,7 +58,7 @@
 <!--            <class name="io.ballerina.openapi.generators.service.ParameterGeneratorTest"/>-->
 <!--            <class name="io.ballerina.openapi.generators.service.ListenerTests"/>-->
 <!--            <class name="io.ballerina.openapi.generators.service.RequestBodyTests"/>-->
-<!--            <class name="io.ballerina.openapi.generators.service.ReturnTypeTests"/>-->
+            <class name="io.ballerina.openapi.generators.service.ReturnTypeTests"/>
 <!--            <class name="io.ballerina.openapi.generators.service.HeaderTests"/>-->
 <!--            <class name="io.ballerina.openapi.generators.service.QueryParameterTests"/>-->
 <!--            <class name="io.ballerina.openapi.generators.service.HeaderParameterTests"/>-->

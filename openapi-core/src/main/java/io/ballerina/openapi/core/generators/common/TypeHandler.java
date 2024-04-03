@@ -69,16 +69,13 @@ public class TypeHandler {
     private static TypeHandler typeHandlerInstance;
 
     private static BallerinaTypesGenerator ballerinaTypesGenerator;
-    private static GeneratorMetaData generatorMetadata;
     public HashMap<String, TypeDefinitionNode> typeDefinitionNodes = new HashMap<>();
     private final Set<String> imports = new LinkedHashSet<>();
 
-    private TypeHandler(OpenAPI openAPI, boolean isNullable) {
-        generatorMetadata = GeneratorMetaData.createInstance(openAPI, isNullable);
-    }
+    private TypeHandler() {}
 
     public static void createInstance(OpenAPI openAPI, boolean isNullable) {
-        typeHandlerInstance = new TypeHandler(openAPI, isNullable);
+        typeHandlerInstance = new TypeHandler();
         ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI, isNullable);
     }
 
@@ -88,10 +85,6 @@ public class TypeHandler {
 
     public Map<String, TypeDefinitionNode> getTypeDefinitionNodes() {
         return typeDefinitionNodes;
-    }
-
-    public static GeneratorMetaData getGeneratorMetadata() {
-        return generatorMetadata;
     }
 
     public SyntaxTree generateTypeSyntaxTree() {
@@ -110,8 +103,8 @@ public class TypeHandler {
         TextDocument textDocument = TextDocuments.from("");
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
         syntaxTree = syntaxTree.modifyWith(modulePartNode);
-        DocCommentGeneratorImp docCommentGenerator = new DocCommentGeneratorImp(generatorMetadata.getOpenAPI(), syntaxTree,
-                GenSrcFile.GenFileType.GEN_TYPE);
+        DocCommentGeneratorImp docCommentGenerator = new DocCommentGeneratorImp(GeneratorMetaData.getInstance()
+                .getOpenAPI(), syntaxTree, GenSrcFile.GenFileType.GEN_TYPE);
         return docCommentGenerator.updateSyntaxTreeWithDocComments();
     }
 
@@ -168,37 +161,14 @@ public class TypeHandler {
     }
 
     public Optional<TypeDescriptorNode> getTypeNodeFromOASSchema(Schema schema) {
-        TypeGeneratorResult typeGeneratorResult = ballerinaTypesGenerator.generateTypeDescriptorNodeForOASSchema(schema);
-        handleSubtypes(typeGeneratorResult.subtypeDefinitions());
-        return typeGeneratorResult.typeDescriptorNode();
+        return getTypeNodeFromOASSchema(schema, false);
     }
 
-    public TypeDescriptorNode createStatusCodeRecord(String statusCode, Schema bodySchema, Schema headersSchema) {
-        TypeDescriptorNode bodyType;
-        TypeDescriptorNode headersType;
-        if (bodySchema != null && getTypeNodeFromOASSchema(bodySchema).isPresent()) {
-            bodyType = getTypeNodeFromOASSchema(bodySchema).get();
-        } else {
-            bodyType = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
-        }
-
-        if (headersSchema != null && getTypeNodeFromOASSchema(headersSchema).isPresent()) {
-            headersType = getTypeNodeFromOASSchema(headersSchema).get();
-        } else {
-            TypeDescriptorNode stringType = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.STRING));
-
-            ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
-                    createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
-                    createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-            TypeDescriptorNode stringArrType = createArrayTypeDescriptorNode(stringType, createNodeList(dimensionNode));
-
-            UnionTypeDescriptorNode unionType = createUnionTypeDescriptorNode(stringType, createToken(PIPE_TOKEN),
-                    stringArrType);
-            TypeParameterNode headerParamNode = createTypeParameterNode(createToken(LT_TOKEN), unionType,
-                    createToken(SyntaxKind.GT_TOKEN));
-            headersType = createMapTypeDescriptorNode(createToken(MAP_KEYWORD), headerParamNode);
-        }
-        return createTypeInclusionRecord(statusCode, bodyType, headersType);
+    public Optional<TypeDescriptorNode> getTypeNodeFromOASSchema(Schema schema, boolean overrideNullable) {
+        TypeGeneratorResult typeGeneratorResult = ballerinaTypesGenerator
+                .generateTypeDescriptorNodeForOASSchema(schema, overrideNullable);
+        handleSubtypes(typeGeneratorResult.subtypeDefinitions());
+        return typeGeneratorResult.typeDescriptorNode();
     }
 
     public TypeDescriptorNode generateHeaderType(Schema headersSchema) {
@@ -226,7 +196,8 @@ public class TypeHandler {
                                                               TypeDescriptorNode headersType) {
         String recordName;
         if (bodyType != null) {
-            recordName = statusCode + GeneratorUtils.getValidName(bodyType.toString(), true);
+            String bodyTypeStr = bodyType.toString().replaceAll("[\\[\\\\]]", "Array");
+            recordName = statusCode + GeneratorUtils.getValidName(bodyTypeStr, true);
         } else {
             recordName = statusCode;
         }
@@ -283,7 +254,34 @@ public class TypeHandler {
         return createSimpleNameReferenceNode(createIdentifierToken(recordName));
     }
 
-    /**
+//    public TypeDescriptorNode createStatusCodeRecord(String statusCode, Schema bodySchema, Schema headersSchema) {
+//        TypeDescriptorNode bodyType;
+//        TypeDescriptorNode headersType;
+//        if (bodySchema != null && getTypeNodeFromOASSchema(bodySchema).isPresent()) {
+//            bodyType = getTypeNodeFromOASSchema(bodySchema).get();
+//        } else {
+//            bodyType = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
+//        }
+//
+//        if (headersSchema != null && getTypeNodeFromOASSchema(headersSchema).isPresent()) {
+//            headersType = getTypeNodeFromOASSchema(headersSchema).get();
+//        } else {
+//            TypeDescriptorNode stringType = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.STRING));
+//
+//            ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
+//                    createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
+//                    createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+//            TypeDescriptorNode stringArrType = createArrayTypeDescriptorNode(stringType, createNodeList(dimensionNode));
+//
+//            UnionTypeDescriptorNode unionType = createUnionTypeDescriptorNode(stringType, createToken(PIPE_TOKEN),
+//                    stringArrType);
+//            TypeParameterNode headerParamNode = createTypeParameterNode(createToken(LT_TOKEN), unionType,
+//                    createToken(SyntaxKind.GT_TOKEN));
+//            headersType = createMapTypeDescriptorNode(createToken(MAP_KEYWORD), headerParamNode);
+//        }
+//        return createTypeInclusionRecord(statusCode, bodyType, headersType);
+//    }
+//    /**
 //     * Generate union type node when response has multiple content types.
 //     */
 //    private TypeDescriptorNode handleMultipleContents(Set<Map.Entry<String, MediaType>> contentEntries) {

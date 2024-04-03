@@ -81,7 +81,7 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
         SeparatedNodeList<ParameterNode> parameters = createSeparatedNodeList(params);
         String pathForRecord = Objects.equals(path, GeneratorConstants.SLASH) || Objects.equals(path, GeneratorConstants.CATCH_ALL_PATH) ? "" :
                 getValidName(path, true);
-        ReturnTypeGenerator returnTypeGenerator = ReturnTypeGenerator.getReturnTypeGenerator(oasServiceMetadata, pathForRecord);
+        ReturnTypeGenerator returnTypeGenerator = ReturnTypeGenerator.getReturnTypeGenerator(oasServiceMetadata);
         ReturnTypeDescriptorNode returnNode;
         try {
             returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation, path);
@@ -116,8 +116,8 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
                     parameter = oasServiceMetadata.getOpenAPI().getComponents().getParameters().get(referenceType);
                 }
                 if (parameter.getIn().trim().equals(GeneratorConstants.HEADER)) {
-                    HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator();
-                    param = headerParameterGenerator.generateParameterNode(parameter);
+                    HeaderParameterGenerator headerParamGenerator = new HeaderParameterGenerator(oasServiceMetadata);
+                    param = headerParamGenerator.generateParameterNode(parameter);
                     if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
                         defaultableParams.add(param);
                         defaultableParams.add(comma);
@@ -134,7 +134,7 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
 //                    }
                     // type  BasicType boolean|int|float|decimal|string ;
                     // public type () |BasicType|BasicType []| map<json>;
-                    QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator();
+                    QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(oasServiceMetadata);
                     param = queryParameterGenerator.generateParameterNode(parameter);
                     if (param != null) {
                         if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {

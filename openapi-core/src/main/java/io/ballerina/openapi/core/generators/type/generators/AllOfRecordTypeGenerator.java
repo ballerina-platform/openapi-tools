@@ -88,8 +88,10 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
     private final List<Schema<?>> restSchemas = new LinkedList<>();
 
-    public AllOfRecordTypeGenerator(Schema schema, String typeName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
-        super(schema, typeName, subTypesMap, pregeneratedTypeMap);
+    public AllOfRecordTypeGenerator(Schema schema, String typeName, boolean overrideNullable,
+                                    HashMap<String, TypeDefinitionNode> subTypesMap,
+                                    HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
+        super(schema, typeName, overrideNullable, subTypesMap, pregeneratedTypeMap);
     }
 
     /**
@@ -101,12 +103,11 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
         // filtering as input. Has to use this assertion statement instead of `if` condition, because to avoid
         // unreachable else statement.
         List<Schema<?>> allOfSchemas = schema.getAllOf();
-
         RecordMetadata recordMetadata = getRecordMetadata();
         RecordRestDescriptorNode restDescriptorNode = recordMetadata.getRestDescriptorNode();
         if (allOfSchemas.size() == 1 && allOfSchemas.get(0).get$ref() != null) {
             ReferencedTypeGenerator referencedTypeGenerator = new ReferencedTypeGenerator(allOfSchemas.get(0),
-                    typeName, subTypesMap, pregeneratedTypeMap);
+                    typeName, overrideNullable, subTypesMap, pregeneratedTypeMap);
             TypeDescriptorNode typeDescriptorNode = referencedTypeGenerator.generateTypeDescriptorNode();
             return typeDescriptorNode;
         } else {
@@ -114,11 +115,13 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
             List<Node> recordFieldList = recordFlist.getLeft();
             List<Schema<?>> validSchemas = recordFlist.getRight();
             if (validSchemas.isEmpty()) {
-                AnyDataTypeGenerator anyDataTypeGenerator = new AnyDataTypeGenerator(schema, typeName, subTypesMap, pregeneratedTypeMap);
+                AnyDataTypeGenerator anyDataTypeGenerator = new AnyDataTypeGenerator(schema, typeName,
+                        overrideNullable, subTypesMap, pregeneratedTypeMap);
                 TypeDescriptorNode typeDescriptorNode = anyDataTypeGenerator.generateTypeDescriptorNode();
                 return typeDescriptorNode;
             } else if (validSchemas.size() == 1) {
-                TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(validSchemas.get(0), typeName, null, subTypesMap, pregeneratedTypeMap);
+                TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(validSchemas.get(0), typeName,
+                        null, overrideNullable, subTypesMap, pregeneratedTypeMap);
                 TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
                 return typeDescriptorNode;
             } else {
@@ -156,8 +159,10 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                 addAdditionalSchemas(refSchema);
 
                 if (!pregeneratedTypeMap.containsKey(modifiedSchemaName)) {
-                    pregeneratedTypeMap.put(modifiedSchemaName, createSimpleNameReferenceNode(createIdentifierToken(modifiedSchemaName)));
-                    TypeGenerator reffredTypeGenerator = TypeGeneratorUtils.getTypeGenerator(refSchema, modifiedSchemaName, modifiedSchemaName, subTypesMap, pregeneratedTypeMap);
+                    pregeneratedTypeMap.put(modifiedSchemaName, createSimpleNameReferenceNode(
+                            createIdentifierToken(modifiedSchemaName)));
+                    TypeGenerator reffredTypeGenerator = TypeGeneratorUtils.getTypeGenerator(refSchema,
+                            modifiedSchemaName, modifiedSchemaName, overrideNullable, subTypesMap, pregeneratedTypeMap);
                     TypeDescriptorNode typeDescriptorNode1 = reffredTypeGenerator.generateTypeDescriptorNode();
                     subTypesMap.put(extractedSchemaName, createTypeDefinitionNode(null,
                             createToken(PUBLIC_KEYWORD),
@@ -219,7 +224,8 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
         // this will be tracked via https://github.com/ballerina-platform/openapi-tools/issues/810
         List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
         for (Schema schema : schemas) {
-            TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, null, null, subTypesMap, pregeneratedTypeMap);
+            TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, null, null,
+                    overrideNullable, subTypesMap, pregeneratedTypeMap);
             TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
             imports.addAll(typeGenerator.getImports());
             typeDescriptorNodes.add(typeDescriptorNode);

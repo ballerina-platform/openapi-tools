@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.GeneratorConstants;
 import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for primitive type schemas.
@@ -52,8 +54,10 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameRefe
  */
 public class PrimitiveTypeGenerator extends TypeGenerator {
 
-    public PrimitiveTypeGenerator(Schema schema, String typeName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
-        super(schema, typeName, subTypesMap, pregeneratedTypeMap);
+    public PrimitiveTypeGenerator(Schema schema, String typeName, boolean overrideNullable,
+                                  HashMap<String, TypeDefinitionNode> subTypesMap,
+                                  HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
+        super(schema, typeName, overrideNullable, subTypesMap, pregeneratedTypeMap);
     }
 
     /**
@@ -62,10 +66,16 @@ public class PrimitiveTypeGenerator extends TypeGenerator {
      */
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws OASTypeGenException {
-        String typeDescriptorName = GeneratorUtils.convertOpenAPITypeToBallerina(schema);
+        String typeDescriptorName = null;
+        try {
+            typeDescriptorName = convertOpenAPITypeToBallerina(schema, overrideNullable);
+        } catch (BallerinaOpenApiException e) {
+            throw new RuntimeException(e);
+        }
         // TODO: Need to the format of other primitive types too
         if (schema.getEnum() != null && schema.getEnum().size() > 0) {
-            EnumGenerator enumGenerator = new EnumGenerator(schema, typeName, subTypesMap, pregeneratedTypeMap);
+            EnumGenerator enumGenerator = new EnumGenerator(schema, typeName, overrideNullable,
+                    subTypesMap, pregeneratedTypeMap);
             return enumGenerator.generateTypeDescriptorNode();
         } else if (GeneratorUtils.getOpenAPIType(schema).equals(GeneratorConstants.STRING) &&
                 schema.getFormat() != null &&
@@ -73,6 +83,6 @@ public class PrimitiveTypeGenerator extends TypeGenerator {
             typeDescriptorName = "record {byte[] fileContent; string fileName;}";
         }
         TypeDescriptorNode typeDescriptorNode = NodeParser.parseTypeDescriptor(typeDescriptorName);
-        return TypeGeneratorUtils.getNullableType(schema, typeDescriptorNode);
+        return TypeGeneratorUtils.getNullableType(schema, typeDescriptorNode, overrideNullable);
     }
 }
