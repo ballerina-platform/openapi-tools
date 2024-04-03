@@ -69,16 +69,13 @@ public class TypeHandler {
     private static TypeHandler typeHandlerInstance;
 
     private static BallerinaTypesGenerator ballerinaTypesGenerator;
-    private static GeneratorMetaData generatorMetadata;
     public HashMap<String, TypeDefinitionNode> typeDefinitionNodes = new HashMap<>();
     private final Set<String> imports = new LinkedHashSet<>();
 
-    private TypeHandler(OpenAPI openAPI, boolean isNullable) {
-        generatorMetadata = GeneratorMetaData.createInstance(openAPI, isNullable);
-    }
+    private TypeHandler() {}
 
     public static void createInstance(OpenAPI openAPI, boolean isNullable) {
-        typeHandlerInstance = new TypeHandler(openAPI, isNullable);
+        typeHandlerInstance = new TypeHandler();
         ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI, isNullable);
     }
 
@@ -88,10 +85,6 @@ public class TypeHandler {
 
     public Map<String, TypeDefinitionNode> getTypeDefinitionNodes() {
         return typeDefinitionNodes;
-    }
-
-    public static GeneratorMetaData getGeneratorMetadata() {
-        return generatorMetadata;
     }
 
     public SyntaxTree generateTypeSyntaxTree() {
@@ -110,8 +103,8 @@ public class TypeHandler {
         TextDocument textDocument = TextDocuments.from("");
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
         syntaxTree = syntaxTree.modifyWith(modulePartNode);
-        DocCommentGeneratorImp docCommentGenerator = new DocCommentGeneratorImp(generatorMetadata.getOpenAPI(), syntaxTree,
-                GenSrcFile.GenFileType.GEN_TYPE);
+        DocCommentGeneratorImp docCommentGenerator = new DocCommentGeneratorImp(GeneratorMetaData.getInstance()
+                .getOpenAPI(), syntaxTree, GenSrcFile.GenFileType.GEN_TYPE);
         return docCommentGenerator.updateSyntaxTreeWithDocComments();
     }
 
