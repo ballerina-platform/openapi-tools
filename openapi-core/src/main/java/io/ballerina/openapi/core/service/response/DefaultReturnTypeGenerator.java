@@ -266,17 +266,21 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
         String mediaTypeContent = selectMediaType(contentEntry.getKey().trim());
         mediaTypeToken = switch (mediaTypeContent) {
             case GeneratorConstants.APPLICATION_JSON -> {
+                TypeDescriptorNode typeDecNode;
                 if (contentEntry.getValue() != null && contentEntry.getValue().getSchema() != null) {
-                    yield generateTypeDescriptorForJsonContent(contentEntry);
-                } else {
-                    yield createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
+                    typeDecNode = generateTypeDescriptorForJsonContent(contentEntry);
+                    if (typeDecNode != null) {
+                        yield typeDecNode;
+                    }
                 }
+                yield createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.JSON));
             }
             case GeneratorConstants.APPLICATION_XML -> generateTypeDescriptorForXMLContent();
             case GeneratorConstants.APPLICATION_URL_ENCODE -> generateTypeDescriptorForMapStringContent();
             case GeneratorConstants.TEXT -> generateTypeDescriptorForTextContent();
             case GeneratorConstants.APPLICATION_OCTET_STREAM -> generateTypeDescriptorForOctetStreamContent();
-            default -> createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
+            default -> null;
+//            default -> createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
         };
         if (mediaTypeToken == null) {
             return createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
