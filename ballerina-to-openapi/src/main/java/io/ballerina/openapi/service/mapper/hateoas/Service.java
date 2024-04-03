@@ -32,13 +32,9 @@ public class Service {
     private final Map<String, List<Resource>> hateoasResourceMapping = new HashMap<>();
 
     public void addResource(String resourceName, Resource resource) {
-        if (hateoasResourceMapping.containsKey(resourceName)) {
-            hateoasResourceMapping.get(resourceName).add(resource);
-            return;
-        }
-        List<Resource> hateoasResources = new ArrayList<>();
-        hateoasResources.add(resource);
-        hateoasResourceMapping.put(resourceName, hateoasResources);
+        List<Resource> resources = hateoasResourceMapping.getOrDefault(resourceName, new ArrayList<>());
+        resources.add(resource);
+        hateoasResourceMapping.put(resourceName, resources);
     }
 
     public Map<String, List<Resource>> getHateoasResourceMapping() {
