@@ -10,17 +10,8 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config = {}, string serviceUrl = "https://api.uber.com/v1") returns error? {
-        http:ClientConfiguration httpClientConfig = {
-            httpVersion: config.httpVersion,
-            timeout: config.timeout,
-            forwarded: config.forwarded,
-            poolConfig: config.poolConfig,
-            compression: config.compression,
-            circuitBreaker: config.circuitBreaker,
-            retryConfig: config.retryConfig,
-            validation: config.validation
-        };
+    public isolated function init(ApiKeysConfig apiKeyConfig, string serviceUrl = "https://api.uber.com/v1", ConnectionConfig config =  {}) returns error? {
+        http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
                 ClientHttp1Settings settings = check config.http1Settings.ensureType(ClientHttp1Settings);
@@ -47,16 +38,16 @@ public isolated client class Client {
         self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
         return;
     }
-    # Product Types
+    # User Activity
     #
-    # + latitude - Latitude component of location.
-    # + longitude - Longitude component of location.
-    # + return - An array of products
-    remote isolated function getProducts(decimal latitude, decimal longitude) returns Product[]|error {
-        string resourcePath = string `/products`;
-        map<anydata> queryParam = {"latitude": latitude, "longitude": longitude, "server_token": self.apiKeyConfig.server_token};
+    # + offset - Offset the list of returned results by this amount. Default is zero.
+    # + 'limit - Number of items to retrieve. Default is 5, maximum is 100.
+    # + return - History information for the given user
+    remote isolated function getUserActivity(int? offset = (), int? 'limit = ()) returns Activities|error {
+        string resourcePath = string `/history`;
+        map<anydata> queryParam = {"offset": offset, "limit": 'limit};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Product[] response = check self.clientEp->get(resourcePath);
+        Activities response = check self.clientEp->get(resourcePath);
         return response;
     }
     # Price Estimates
@@ -73,6 +64,14 @@ public isolated client class Client {
         PriceEstimate[] response = check self.clientEp->get(resourcePath);
         return response;
     }
+    # User Profile
+    #
+    # + return - Profile information for a user
+    remote isolated function getUserProfile() returns Profile|error {
+        string resourcePath = string `/me`;
+        Profile response = check self.clientEp->get(resourcePath);
+        return response;
+    }
     # Time Estimates
     #
     # + start_latitude - Latitude component of start location.
@@ -87,24 +86,16 @@ public isolated client class Client {
         Product[] response = check self.clientEp->get(resourcePath);
         return response;
     }
-    # User Profile
+    # Product Types
     #
-    # + return - Profile information for a user
-    remote isolated function getUserProfile() returns Profile|error {
-        string resourcePath = string `/me`;
-        Profile response = check self.clientEp->get(resourcePath);
-        return response;
-    }
-    # User Activity
-    #
-    # + offset - Offset the list of returned results by this amount. Default is zero.
-    # + 'limit - Number of items to retrieve. Default is 5, maximum is 100.
-    # + return - History information for the given user
-    remote isolated function getUserActivity(int? offset = (), int? 'limit = ()) returns Activities|error {
-        string resourcePath = string `/history`;
-        map<anydata> queryParam = {"offset": offset, "limit": 'limit};
+    # + latitude - Latitude component of location.
+    # + longitude - Longitude component of location.
+    # + return - An array of products
+    remote isolated function getProducts(decimal latitude, decimal longitude) returns Product[]|error {
+        string resourcePath = string `/products`;
+        map<anydata> queryParam = {"latitude": latitude, "longitude": longitude, "server_token": self.apiKeyConfig.server_token};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Activities response = check self.clientEp->get(resourcePath);
+        Product[] response = check self.clientEp->get(resourcePath);
         return response;
     }
 }
