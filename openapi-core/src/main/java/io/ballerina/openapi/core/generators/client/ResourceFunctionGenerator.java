@@ -57,7 +57,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
         IdentifierToken functionName = createIdentifierToken(operation.getKey().toString().toLowerCase());
         // create relative path
         try {
-            List<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
+            NodeList<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
                     null, openAPI.getComponents(), false);
             // Create function signature
             ResourceFunctionSingnatureGenerator signatureGenerator = new ResourceFunctionSingnatureGenerator(
@@ -71,7 +71,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
             }
             FunctionBodyNode functionBodyNode = functionBodyNodeResult.get();
             return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, null,
-                    qualifierList, functionKeyWord, functionName, createNodeList(relativeResourcePath),
+                    qualifierList, functionKeyWord, functionName, relativeResourcePath,
                     signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
         } catch (BallerinaOpenApiException e) {
             //todo diagnostic

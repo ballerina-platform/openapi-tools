@@ -60,9 +60,10 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
  */
 public class UnionTypeGenerator extends TypeGenerator {
 
-    public UnionTypeGenerator(Schema<?> schema, String typeName, HashMap<String, TypeDefinitionNode> subTypesMap,
+    public UnionTypeGenerator(Schema<?> schema, String typeName, boolean overrideNullable,
+                              HashMap<String, TypeDefinitionNode> subTypesMap,
                               HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
-        super(schema, typeName,subTypesMap, pregeneratedTypeMap);
+        super(schema, typeName, overrideNullable, subTypesMap, pregeneratedTypeMap);
     }
 
     @Override
@@ -75,7 +76,7 @@ public class UnionTypeGenerator extends TypeGenerator {
             schemas = schema.getAnyOf();
         }
         TypeDescriptorNode unionTypeDesc = getUnionType(schemas, typeName);
-        return TypeGeneratorUtils.getNullableType(schema, unionTypeDesc);
+        return TypeGeneratorUtils.getNullableType(schema, unionTypeDesc, overrideNullable);
     }
 
     /**
@@ -90,7 +91,7 @@ public class UnionTypeGenerator extends TypeGenerator {
         List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
         for (Schema<?> schema : schemas) {
             TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, typeName, null,
-                    subTypesMap, pregeneratedTypeMap);
+                    overrideNullable, subTypesMap, pregeneratedTypeMap);
             TypeDescriptorNode typeDescNode = typeGenerator.generateTypeDescriptorNode();
             imports.addAll(typeGenerator.getImports());
             if (typeDescNode instanceof OptionalTypeDescriptorNode && GeneratorMetaData.getInstance().isNullable()) {

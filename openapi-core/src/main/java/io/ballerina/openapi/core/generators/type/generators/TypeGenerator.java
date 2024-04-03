@@ -50,13 +50,17 @@ public abstract class TypeGenerator {
 
     Schema schema;
     String typeName;
+    final boolean overrideNullable;
     final LinkedHashSet<String> imports = new LinkedHashSet<>();
     final HashMap<String, TypeDefinitionNode> subTypesMap;
     final HashMap<String, NameReferenceNode> pregeneratedTypeMap;
 
-    public TypeGenerator(Schema schema, String typeName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
+    public TypeGenerator(Schema schema, String typeName, boolean overrideNullable,
+                         HashMap<String, TypeDefinitionNode> subTypesMap,
+                         HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
         this.schema = schema;
         this.typeName = typeName;
+        this.overrideNullable = overrideNullable;
         this.subTypesMap = subTypesMap;
         this.pregeneratedTypeMap = pregeneratedTypeMap;
     }

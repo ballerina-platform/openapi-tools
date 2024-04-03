@@ -58,8 +58,10 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameRefe
  */
 public class EnumGenerator extends TypeGenerator {
 
-    public EnumGenerator(Schema schema, String typeName, HashMap<String, TypeDefinitionNode> subTypesMap, HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
-        super(schema, typeName, subTypesMap, pregeneratedTypeMap);
+    public EnumGenerator(Schema schema, String typeName, boolean overrideNullable,
+                         HashMap<String, TypeDefinitionNode> subTypesMap,
+                         HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
+        super(schema, typeName, overrideNullable, subTypesMap, pregeneratedTypeMap);
     }
 
     @Override
@@ -96,7 +98,7 @@ public class EnumGenerator extends TypeGenerator {
                 } else {
                     TypeDescriptorNode typeDescriptorNode = createSimpleNameReferenceNode(
                             createIdentifierToken(typeDescriptorName));
-                    return TypeGeneratorUtils.getNullableType(schema, typeDescriptorNode);
+                    return TypeGeneratorUtils.getNullableType(schema, typeDescriptorNode, overrideNullable);
                 }
             }
         } else {

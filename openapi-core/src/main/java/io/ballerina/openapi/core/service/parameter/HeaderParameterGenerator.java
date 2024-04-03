@@ -11,10 +11,12 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.GeneratorConstants;
 import io.ballerina.openapi.core.service.ServiceGenerationUtils;
+import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
@@ -34,7 +36,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParame
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
-import static io.ballerina.openapi.core.generators.type.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.generators.type.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.generators.type.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.type.GeneratorUtils.isArraySchema;
@@ -49,6 +51,10 @@ public class HeaderParameterGenerator extends ParameterGenerator {
     private static final List<String> paramSupportedTypes =
             new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
                     GeneratorConstants.STRING, GeneratorConstants.BOOLEAN));
+
+    public HeaderParameterGenerator(OASServiceMetadata oasServiceMetadata) {
+        super(oasServiceMetadata);
+    }
 
     /**
      * This function for generating parameter ST node for header.
@@ -82,7 +88,7 @@ public class HeaderParameterGenerator extends ParameterGenerator {
                             parameter.getName(), getOpenAPIType(refSchema)));
                 }
             } else if (paramSupportedTypes.contains(getOpenAPIType(schema)) || isArraySchema(schema)) {
-                headerType = convertOpenAPITypeToBallerina(schema).trim();
+                headerType = convertOpenAPITypeToBallerina(schema, true).trim();
             } else {
                 throw new OASTypeGenException(String.format(OAS_SERVICE_105.getDescription(),
                         parameter.getName(), getOpenAPIType(schema)));
@@ -108,10 +114,10 @@ public class HeaderParameterGenerator extends ParameterGenerator {
                     throw new OASTypeGenException(String.format(OAS_SERVICE_103.getDescription(),
                             parameter.getName(), getOpenAPIType(items)));
                 } else if (items.getEnum() != null && !items.getEnum().isEmpty()) {
-                    arrayType = OPEN_PAREN_TOKEN.stringValue() + convertOpenAPITypeToBallerina(items) +
+                    arrayType = OPEN_PAREN_TOKEN.stringValue() + convertOpenAPITypeToBallerina(items, true) +
                             CLOSE_PAREN_TOKEN.stringValue();
                 } else {
-                    arrayType = convertOpenAPITypeToBallerina(items);
+                    arrayType = convertOpenAPITypeToBallerina(items, true);
                 }
                 BuiltinSimpleNameReferenceNode headerArrayItemTypeName = createBuiltinSimpleNameReferenceNode(
                         null, createIdentifierToken(arrayType));
@@ -158,6 +164,8 @@ public class HeaderParameterGenerator extends ParameterGenerator {
             }
             return createRequiredParameterNode(headerAnnotations, headerTypeName, parameterName);
         } catch (OASTypeGenException e) {
+            throw new RuntimeException(e);
+        } catch (BallerinaOpenApiException e) {
             throw new RuntimeException(e);
         }
     }
