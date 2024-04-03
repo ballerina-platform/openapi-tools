@@ -147,7 +147,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
         if (!embed) {
             return;
         }
-        int serviceId = config.getSemanticModel().hashCode();
+        int serviceId = config.getServiceSymbol().hashCode();
         String targetFile = String.format(FILE_NAME_FORMAT, serviceId);
         OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder = new
                 OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
