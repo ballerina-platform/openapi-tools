@@ -70,8 +70,6 @@ import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateT
  */
 public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
 
-    private static int countForRecord = 0;
-
     public DefaultReturnTypeGenerator(OASServiceMetadata oasServiceMetadata) {
         super(oasServiceMetadata);
     }
@@ -192,9 +190,6 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 SimpleNameReferenceNode httpResponse = createSimpleNameReferenceNode(createIdentifierToken(
                         GeneratorConstants.ANYDATA));
                 qualifiedNodes.add(httpResponse.name().text());
-            } else if (mediaTypeToken instanceof NameReferenceNode) {
-                setCountForRecord(countForRecord++);
-                qualifiedNodes.add(mediaTypeToken.toSourceCode());
             } else {
                 qualifiedNodes.add(mediaTypeToken.toSourceCode());
             }
@@ -287,9 +282,5 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             return createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
         }
         return mediaTypeToken;
-    }
-
-    public static void setCountForRecord(int count) {
-        countForRecord = count;
     }
 }
