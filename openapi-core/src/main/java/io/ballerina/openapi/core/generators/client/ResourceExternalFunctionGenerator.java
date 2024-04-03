@@ -37,7 +37,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -83,7 +82,7 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
     protected Optional<FunctionDefinitionNode> getFunctionDefinitionNode(NodeList<Token> qualifierList,
                                                                          Token functionKeyWord,
                                                                          IdentifierToken functionName,
-                                                                         List<Node> relativeResourcePath,
+                                                                         NodeList<Node> relativeResourcePath,
                                                                          ResourceFunctionSignatureGenerator
                                                                                  signatureGenerator,
                                                                          FunctionBodyNode functionBodyNode)
@@ -101,7 +100,7 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
         AnnotationNode implAnnotation = createAnnotationNode(createToken(AT_TOKEN), annotationRef, implFunctionMap);
         MetadataNode metadataNode = createMetadataNode(null, createNodeList(implAnnotation));
         return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, metadataNode,
-                qualifierList, functionKeyWord, functionName, createNodeList(relativeResourcePath),
+                qualifierList, functionKeyWord, functionName, relativeResourcePath,
                 signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
     }
 

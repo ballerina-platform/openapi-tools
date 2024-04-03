@@ -19,7 +19,6 @@
 package io.ballerina.openapi.core.service.response;
 
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
@@ -55,10 +54,14 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDesc
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.generateStatusCodeTypeInclusionRecord;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getReturnNodeForSchemaType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.selectMediaType;
 import static io.ballerina.openapi.core.service.GeneratorConstants.HTTP_RESPONSE;
 import static io.ballerina.openapi.core.service.GeneratorConstants.RETURNS;
+import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForJsonContent;
+import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForMapStringContent;
+import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForOctetStreamContent;
+import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForTextContent;
+import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForXMLContent;
 
 /**
  * This class for generating return type definition node according to the OpenAPI specification response section.
@@ -67,8 +70,8 @@ import static io.ballerina.openapi.core.service.GeneratorConstants.RETURNS;
  */
 public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
 
-    public DefaultReturnTypeGenerator(OASServiceMetadata oasServiceMetadata, String method) {
-        super(oasServiceMetadata, method);
+    public DefaultReturnTypeGenerator(OASServiceMetadata oasServiceMetadata) {
+        super(oasServiceMetadata);
     }
 
     /**
@@ -94,7 +97,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 //handle single response
                 Iterator<Map.Entry<String, ApiResponse>> responseIterator = responses.entrySet().iterator();
                 Map.Entry<String, ApiResponse> response = responseIterator.next();
-                returnNode = handleSingleResponse(response, httpMethod, oasServiceMetadata.getOpenAPI());
+                returnNode = handleSingleResponse(response, httpMethod);
             } else {
                 TypeDescriptorNode defaultType = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
                 returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(), defaultType);
