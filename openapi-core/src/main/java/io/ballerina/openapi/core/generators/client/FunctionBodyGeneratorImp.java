@@ -726,7 +726,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
         String returnType;
         int index = rType.lastIndexOf("|");
         returnType = rType.substring(0, index);
-        return (rType.contains(NILLABLE) ? returnType + NILLABLE : returnType);
+        return (rType.endsWith(NILLABLE) ? returnType + NILLABLE : returnType);
     }
 
     /**

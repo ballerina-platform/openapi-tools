@@ -87,6 +87,9 @@ public class TypeHandler {
         return typeDefinitionNodes;
     }
 
+    public void addTypeDefinitionNode(String key, TypeDefinitionNode typeDefinitionNode) {
+        typeDefinitionNodes.put(key, typeDefinitionNode);
+    }
     public SyntaxTree generateTypeSyntaxTree() {
         ConstraintGeneratorImp constraintGenerator = new ConstraintGeneratorImp(GeneratorMetaData.getInstance().getOpenAPI(), typeDefinitionNodes);
         ConstraintResult constraintResult = constraintGenerator.updateTypeDefinitionsWithConstraints();
