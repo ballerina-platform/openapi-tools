@@ -55,7 +55,7 @@ public class OneOfDataTypeTests {
         Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         GeneratorMetaData.createInstance(openAPI, false);
-        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error",
+        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error", false,
                 new HashMap<>(), new HashMap<>());
         String oneOfUnionType = unionTypeGenerator.generateTypeDescriptorNode().toString().trim();
 
@@ -69,7 +69,7 @@ public class OneOfDataTypeTests {
         Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         GeneratorMetaData.createInstance(openAPI, false);
-        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error",
+        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error", false,
                 new HashMap<>(), new HashMap<>());
         String oneOfUnionType = unionTypeGenerator.generateTypeDescriptorNode().toString().trim();
         Assert.assertEquals(oneOfUnionType, "Activity|Profile01");
@@ -81,7 +81,7 @@ public class OneOfDataTypeTests {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
         GeneratorMetaData.createInstance(openAPI, true);
-        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, "Error", null,
+        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, "Error", null, false,
                 new HashMap<>(), new HashMap<>());
         String oneOfUnionType = typeGenerator.generateTypeDescriptorNode().toString().trim();
         Assert.assertEquals(oneOfUnionType, "Activity|Profile?");

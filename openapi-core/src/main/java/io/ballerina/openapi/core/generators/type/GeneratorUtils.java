@@ -47,6 +47,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.generators.EnumGenerator;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
@@ -102,6 +103,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SLASH_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
 
 /**
  * This class util for store all the common scenarios.
@@ -141,59 +143,6 @@ public class GeneratorUtils {
         Token colon = AbstractNodeFactory.createIdentifierToken(":");
         IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier);
         return NodeFactory.createQualifiedNameReferenceNode(modulePrefixToken, colon, identifierToken);
-    }
-
-    /**
-     * Method for convert openApi type of format to ballerina type.
-     *
-     * @param schema OpenApi schema
-     * @return ballerina type
-     */
-    public static String convertOpenAPITypeToBallerina(Schema<?> schema) throws OASTypeGenException {
-        String type = getOpenAPIType(schema);
-        if (schema.getEnum() != null && !schema.getEnum().isEmpty() && primitiveTypeList.contains(type)) {
-            EnumGenerator enumGenerator = new EnumGenerator(schema, null, new HashMap<>(), new HashMap<>());
-            return enumGenerator.generateTypeDescriptorNode().toString();
-        } else if ((GeneratorConstants.INTEGER.equals(type) || GeneratorConstants.NUMBER.equals(type) || GeneratorConstants.STRING.equals(type)) && schema.getFormat() != null) {
-            return convertOpenAPITypeFormatToBallerina(type, schema);
-        } else {
-            if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(type)) {
-                return GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(type);
-            } else {
-                throw new OASTypeGenException("Unsupported OAS data type `" + type + "`");
-            }
-        }
-    }
-
-    /**
-     * This utility is used to select the Ballerina data type for a given OpenAPI type format.
-     *
-     * @param dataType name of the data type. ex: number, integer, string
-     * @param schema uses to generate the type descriptor name ex: int32, int64
-     * @return data type for invalid numeric data formats
-     */
-    private static String convertOpenAPITypeFormatToBallerina(final String dataType, final Schema<?> schema)
-            throws OASTypeGenException {
-        if (GeneratorConstants.OPENAPI_TYPE_TO_FORMAT_MAP.containsKey(dataType) &&
-                GeneratorConstants.OPENAPI_TYPE_TO_FORMAT_MAP.get(dataType).contains(schema.getFormat())) {
-            if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(schema.getFormat())) {
-                return GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(schema.getFormat());
-            } else {
-                OUT_STREAM.printf("WARNING: unsupported format `%s` will be skipped when generating the counterpart " +
-                        "Ballerina type for openAPI schema type: `%s`%n", schema.getFormat(), schema.getType());
-                if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(dataType)) {
-                    return GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(dataType);
-                } else {
-                    throw new OASTypeGenException("Unsupported OAS data type `" + dataType + "`");
-                }
-            }
-        } else {
-            if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(dataType)) {
-                return GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(dataType);
-            } else {
-                throw new OASTypeGenException("Unsupported OAS data type `" + dataType + "`");
-            }
-        }
     }
 
     /**
@@ -720,41 +669,5 @@ public class GeneratorUtils {
 
     public static boolean isNumberSchema(Schema<?> fieldSchema) {
         return Objects.equals(GeneratorUtils.getOpenAPIType(fieldSchema), GeneratorConstants.NUMBER);
-    }
-
-    public static String resolveReferenceType(Schema<?> schema, Components components, boolean isWithoutDataBinding,
-                                              String pathParam) throws OASTypeGenException {
-        String type = GeneratorUtils.extractReferenceType(schema.get$ref());
-
-        if (isWithoutDataBinding) {
-            Schema<?> referencedSchema = components.getSchemas().get(getValidName(type, true));
-            if (referencedSchema != null) {
-                if (referencedSchema.get$ref() != null) {
-                    type = resolveReferenceType(referencedSchema, components, isWithoutDataBinding, pathParam);
-                } else {
-                    type = getPathParameterType(referencedSchema, pathParam);
-                }
-            }
-        } else {
-            type = getValidName(type, true);
-        }
-        return type;
-    }
-
-    public static String getPathParameterType(Schema<?> typeSchema, String pathParam) {
-        String type;
-        if (!(isStringSchema(typeSchema) || isNumberSchema(typeSchema) || isBooleanSchema(typeSchema)
-                || isIntegerSchema(typeSchema))) {
-            type = GeneratorConstants.STRING;
-            LOGGER.warn("unsupported path parameter type found in the parameter `" + pathParam + "`. hence the " +
-                    "parameter type is set to string.");
-        } else {
-            try {
-                type = GeneratorUtils.convertOpenAPITypeToBallerina(typeSchema);
-            } catch (OASTypeGenException e) {
-                throw new RuntimeException();
-            }
-        }
-        return type;
     }
 }

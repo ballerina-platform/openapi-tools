@@ -161,7 +161,12 @@ public class TypeHandler {
     }
 
     public Optional<TypeDescriptorNode> getTypeNodeFromOASSchema(Schema schema) {
-        TypeGeneratorResult typeGeneratorResult = ballerinaTypesGenerator.generateTypeDescriptorNodeForOASSchema(schema);
+        return getTypeNodeFromOASSchema(schema, false);
+    }
+
+    public Optional<TypeDescriptorNode> getTypeNodeFromOASSchema(Schema schema, boolean overrideNullable) {
+        TypeGeneratorResult typeGeneratorResult = ballerinaTypesGenerator
+                .generateTypeDescriptorNodeForOASSchema(schema, overrideNullable);
         handleSubtypes(typeGeneratorResult.subtypeDefinitions());
         return typeGeneratorResult.typeDescriptorNode();
     }

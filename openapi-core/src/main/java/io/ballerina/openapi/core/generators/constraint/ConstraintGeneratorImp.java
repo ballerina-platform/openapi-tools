@@ -324,7 +324,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
     public static AnnotationNode generateConstraintNode(String typeName, Schema<?> fieldSchema)
             throws BallerinaOpenApiException {
         if (isConstraintAllowed(typeName, fieldSchema)) {
-            String ballerinaType = convertOpenAPITypeToBallerina(fieldSchema);
+            String ballerinaType = convertOpenAPITypeToBallerina(fieldSchema, true);
             // For openAPI field schemas having 'string' type, constraints generation will be skipped when
             // the counterpart Ballerina type is non-string (e.g. for string schemas with format 'binary' or 'byte',
             // the counterpart ballerina type is 'byte[]', hence any string constraints cannot be applied)

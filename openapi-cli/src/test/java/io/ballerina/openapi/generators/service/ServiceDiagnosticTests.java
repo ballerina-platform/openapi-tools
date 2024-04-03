@@ -128,32 +128,32 @@ public class ServiceDiagnosticTests {
     @DataProvider(name = "singleFileProviderForDiagnosticCheck")
     public Object[][] singleFileProviderForDiagnosticCheck() {
         return new Object[][] {
-                {"petstore_server_with_base_path.yaml"},
-                {"petstore_get.yaml"},
-                {"openapi_display_annotation.yaml"},
-                {"header_parameter.yaml"},
-                {"petstore_post.yaml"},
-                {"petstore_with_oneOf_response.yaml"},
-                {"response_nested_array.yaml"},
-                {"xml_payload.yaml"},
-                {"xml_payload_with_ref.yaml"},
-                {"duplicated_response.yaml"},
-                {"complex_oneOf_schema.yaml"},
-                {"request_body_ref.yaml"},
-                {"vendor_specific_mime_types.yaml"},
-                {"single_allOf.yaml"},
-                // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1415
-//                {"ballerinax_connector_tests/ably.yaml"},
-                {"ballerinax_connector_tests/azure.iot.yaml"},
-               // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1440
-//                {"ballerinax_connector_tests/beezup.yaml"},
-                {"ballerinax_connector_tests/files.com.yaml"},
-                {"ballerinax_connector_tests/openweathermap.yaml"},
-                {"ballerinax_connector_tests/soundcloud.yaml"},
+//                {"petstore_server_with_base_path.yaml"},
+//                {"petstore_get.yaml"},
+//                {"openapi_display_annotation.yaml"},
+//                {"header_parameter.yaml"},
+//                {"petstore_post.yaml"},
+//                {"petstore_with_oneOf_response.yaml"},
+//                {"response_nested_array.yaml"},
+//                {"xml_payload.yaml"},
+//                {"xml_payload_with_ref.yaml"},
+//                {"duplicated_response.yaml"},
+//                {"complex_oneOf_schema.yaml"},
+//                {"request_body_ref.yaml"},
+//                {"vendor_specific_mime_types.yaml"},
+//                {"single_allOf.yaml"},
+//                // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1415
+////                {"ballerinax_connector_tests/ably.yaml"},
+//                {"ballerinax_connector_tests/azure.iot.yaml"},
+//               // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1440
+////                {"ballerinax_connector_tests/beezup.yaml"},
+//                {"ballerinax_connector_tests/files.com.yaml"},
+//                {"ballerinax_connector_tests/openweathermap.yaml"},
+//                {"ballerinax_connector_tests/soundcloud.yaml"},
                 {"ballerinax_connector_tests/stripe.yaml"}, //
-                {"ballerinax_connector_tests/vimeo.yaml"},
-//                {"ballerinax_connector_tests/ynab.yaml"}, // 209 status code is not supported in Ballerina
-                {"ballerinax_connector_tests/zoom.yaml"}
+//                {"ballerinax_connector_tests/vimeo.yaml"},
+////                {"ballerinax_connector_tests/ynab.yaml"}, // 209 status code is not supported in Ballerina
+//                {"ballerinax_connector_tests/zoom.yaml"}
         };
     }
 

@@ -71,14 +71,14 @@ public class BallerinaTypesGenerator {
         GeneratorMetaData.createInstance(openAPI, isNullable);
     }
 
-    //entry point for the type generation
-    public TypeGeneratorResult generateTypeDescriptorNodeForOASSchema(Schema<?> schema) {
+    public TypeGeneratorResult generateTypeDescriptorNodeForOASSchema(Schema<?> schema, boolean overrideNullable) {
         HashMap<String, TypeDefinitionNode> subtypesMap = new HashMap<>();
         Optional<TypeDescriptorNode> typeDescriptorNode;
         try {
-            typeDescriptorNode = generateTypeDescriptorNodeForOASSchema(schema, subtypesMap, new HashMap<>());
+            typeDescriptorNode = generateTypeDescriptorNodeForOASSchema(schema, overrideNullable,
+                    subtypesMap, new HashMap<>());
         } catch (OASTypeGenException e) {
-            // todo: diagnostics this exception
+            // todo: diagnostic this exception
             return new TypeGeneratorResult(null, subtypesMap , new ArrayList<>());
         }
         return new TypeGeneratorResult(typeDescriptorNode, subtypesMap, new ArrayList<>());
@@ -87,9 +87,9 @@ public class BallerinaTypesGenerator {
     /**
      * Generate typeDescriptor for given schema.
      */
-    private Optional<TypeDescriptorNode> generateTypeDescriptorNodeForOASSchema(Schema<?> schema,
-                                                                                HashMap<String, TypeDefinitionNode> subTypesMap,
-                                                                                HashMap<String, NameReferenceNode> pregeneratedTypeMap)
+    private Optional<TypeDescriptorNode> generateTypeDescriptorNodeForOASSchema(
+            Schema<?> schema, boolean overrideNullable, HashMap<String, TypeDefinitionNode> subTypesMap,
+            HashMap<String, NameReferenceNode> pregeneratedTypeMap)
             throws OASTypeGenException {
         if (schema == null) {
             return Optional.empty();
@@ -108,7 +108,8 @@ public class BallerinaTypesGenerator {
                             .getOpenAPI().getComponents().getSchemas().get(recordName);
                 }
                 TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, GeneratorUtils.getValidName(
-                        recordName.trim(), true), null, subTypesMap, pregeneratedTypeMap);
+                        recordName.trim(), true), null, overrideNullable,
+                        subTypesMap, pregeneratedTypeMap);
                 TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
                 TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
                         createToken(PUBLIC_KEYWORD),
@@ -121,19 +122,22 @@ public class BallerinaTypesGenerator {
             }
             return Optional.ofNullable(getSimpleNameReferenceNode(typeName));
         } else if (GeneratorUtils.isMapSchema(schema)) {
-            RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null,
+            RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null, overrideNullable,
                     subTypesMap, pregeneratedTypeMap);
             TypeDescriptorNode record = recordTypeGenerator.generateTypeDescriptorNode();
             return Optional.ofNullable(record);
         } else if (GeneratorUtils.getOpenAPIType(schema) != null) {
             String schemaType = GeneratorUtils.getOpenAPIType(schema);
-            boolean isPrimitiveType = schemaType.equals(GeneratorConstants.INTEGER) || schemaType.equals(GeneratorConstants.NUMBER) ||
-                    schemaType.equals(GeneratorConstants.BOOLEAN) || schemaType.equals(GeneratorConstants.STRING);
+            boolean isPrimitiveType = schemaType.equals(GeneratorConstants.INTEGER) ||
+                    schemaType.equals(GeneratorConstants.NUMBER) || schemaType.equals(GeneratorConstants.BOOLEAN) ||
+                    schemaType.equals(GeneratorConstants.STRING);
             if (GeneratorUtils.isArraySchema(schema)) {
-                ArrayTypeGenerator arrayTypeGenerator = new ArrayTypeGenerator(schema, null, schemaType, subTypesMap, pregeneratedTypeMap);
+                ArrayTypeGenerator arrayTypeGenerator = new ArrayTypeGenerator(schema, null, overrideNullable,
+                        schemaType, subTypesMap, pregeneratedTypeMap);
                 return arrayTypeGenerator.getTypeDescNodeForArraySchema(schema, subTypesMap);
             } else if (isPrimitiveType) {
-                PrimitiveTypeGenerator primitiveTypeGenerator = new PrimitiveTypeGenerator(schema, null, subTypesMap, pregeneratedTypeMap);
+                PrimitiveTypeGenerator primitiveTypeGenerator = new PrimitiveTypeGenerator(schema, null,
+                        overrideNullable, subTypesMap, pregeneratedTypeMap);
                 return Optional.ofNullable(primitiveTypeGenerator.generateTypeDescriptorNode());
                 //This returns identifier node for the types: int, float, decimal, boolean, string
 //                IdentifierToken identifierToken = createIdentifierToken(
@@ -141,28 +145,30 @@ public class BallerinaTypesGenerator {
 //                        AbstractNodeFactory.createEmptyMinutiaeList(), GeneratorUtils.SINGLE_WS_MINUTIAE);
 //                return Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
             } else if (schemaType.equals(GeneratorConstants.OBJECT) || GeneratorUtils.isObjectSchema(schema)) {
-                RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null,
+                RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null, overrideNullable,
                         subTypesMap, pregeneratedTypeMap);
                 return Optional.ofNullable(recordTypeGenerator.generateTypeDescriptorNode());
             } else {
                 return Optional.empty();
             }
         } else if (schema.getOneOf() != null) {
-            return Optional.ofNullable(getUnionNodeForOneOf(schema, subTypesMap, pregeneratedTypeMap));
+            return Optional.ofNullable(getUnionNodeForOneOf(schema, overrideNullable,
+                    subTypesMap, pregeneratedTypeMap));
         } else if (schema.getAllOf() != null) {
             AllOfRecordTypeGenerator allOfRecordTypeGenerator = new AllOfRecordTypeGenerator(schema, null,
-                    subTypesMap, pregeneratedTypeMap);
+                    overrideNullable, subTypesMap, pregeneratedTypeMap);
             return Optional.ofNullable(allOfRecordTypeGenerator.generateTypeDescriptorNode());
         } else if (schema.getAnyOf() != null) {
-            UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(schema, null, subTypesMap,
-                    pregeneratedTypeMap);
+            UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(schema, null, overrideNullable,
+                    subTypesMap, pregeneratedTypeMap);
             return Optional.ofNullable(unionTypeGenerator.generateTypeDescriptorNode());
         } else {
             return Optional.empty();
         }
     }
 
-    private TypeDescriptorNode getUnionNodeForOneOf(Schema<?> schema, HashMap<String, TypeDefinitionNode> subTypesMap,
+    private TypeDescriptorNode getUnionNodeForOneOf(Schema<?> schema, boolean overrideNullable,
+                                                    HashMap<String, TypeDefinitionNode> subTypesMap,
                                                     HashMap<String, NameReferenceNode> pregeneratedTypeMap)
             throws OASTypeGenException {
         Iterator<Schema> iterator = schema.getOneOf().iterator();
@@ -170,8 +176,8 @@ public class BallerinaTypesGenerator {
         Token pipeToken = createIdentifierToken("|");
         while (iterator.hasNext()) {
             Schema<?> contentType = iterator.next();
-            Optional<TypeDescriptorNode> qualifiedNodeType =
-                    generateTypeDescriptorNodeForOASSchema(contentType, subTypesMap, pregeneratedTypeMap);
+            Optional<TypeDescriptorNode> qualifiedNodeType = generateTypeDescriptorNodeForOASSchema(contentType,
+                    overrideNullable, subTypesMap, pregeneratedTypeMap);
             if (qualifiedNodeType.isEmpty()) {
                 continue;
             }

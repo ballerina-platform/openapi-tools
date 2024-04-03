@@ -360,10 +360,12 @@ public class GeneratorUtils {
      * @param schema OpenApi schema
      * @return ballerina type
      */
-    public static String convertOpenAPITypeToBallerina(Schema<?> schema) throws BallerinaOpenApiException {
+    public static String convertOpenAPITypeToBallerina(Schema<?> schema, boolean overrideNullable)
+            throws BallerinaOpenApiException {
         String type = getOpenAPIType(schema);
         if (schema.getEnum() != null && !schema.getEnum().isEmpty() && primitiveTypeList.contains(type)) {
-            EnumGenerator enumGenerator = new EnumGenerator(schema, null, new HashMap<>(), new HashMap<>());
+            EnumGenerator enumGenerator = new EnumGenerator(schema, null, overrideNullable,
+                    new HashMap<>(), new HashMap<>());
             try {
                 return enumGenerator.generateTypeDescriptorNode().toString();
             } catch (OASTypeGenException exp) {
@@ -1195,7 +1197,7 @@ public class GeneratorUtils {
             LOGGER.warn("unsupported path parameter type found in the parameter `" + pathParam + "`. hence the " +
                     "parameter type is set to string.");
         } else {
-            type = GeneratorUtils.convertOpenAPITypeToBallerina(typeSchema);
+            type = GeneratorUtils.convertOpenAPITypeToBallerina(typeSchema, true);
         }
         return type;
     }
