@@ -175,7 +175,7 @@ public class HateoasMapperImpl implements HateoasMapper {
                     .filter(resources -> link.getResourceName().equals(resources.getKey()))
                     .findFirst()
                     .flatMap(hateoasResourceMapping -> hateoasResourceMapping.getValue().stream()
-                            .filter(hateoasRes -> link.getResourceMethod().equals(hateoasRes.resourceMethod()))
+                            .filter(hateoasRes -> isValidResource(link, hateoasRes))
                             .findFirst());
             if (resource.isEmpty()) {
                 continue;
@@ -186,5 +186,14 @@ public class HateoasMapperImpl implements HateoasMapper {
             hateoasLinks.put(link.getRel(), openapiLink);
         }
         return hateoasLinks;
+    }
+
+    private boolean isValidResource(HateoasLink link, Resource currentResource) {
+        // If the `resourceMethod` is not provided that means there will be only one mapping for the resource,
+        // by returning `true` here will make sure the first resource matching the resource-name would be selected
+        if (Objects.isNull(link.getResourceMethod())) {
+            return true;
+        }
+        return currentResource.resourceMethod().equals(link.getResourceMethod());
     }
 }
