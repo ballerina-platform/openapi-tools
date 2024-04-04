@@ -78,7 +78,7 @@
             <class name="io.ballerina.openapi.generators.client.NoServerURLTest"/>
             <class name="io.ballerina.openapi.generators.client.RemoteFunctionNameValidationTests"/>
 <!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.RequestBodyTests"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.UtilGenerationTests"/>&ndash;&gt;-->
+            <class name="io.ballerina.openapi.generators.client.UtilGenerationTests"/>
             <class name="io.ballerina.openapi.generators.client.ResourceFunctionTests"/>
             <class name="io.ballerina.openapi.generators.client.EnumGenerationTests"/>
 <!--            <class name="io.ballerina.openapi.generators.auth.HttpAuthTests"/>-->

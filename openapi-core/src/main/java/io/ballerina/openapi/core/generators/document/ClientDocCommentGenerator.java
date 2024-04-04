@@ -22,6 +22,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
@@ -41,6 +43,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getBallerinaMediaType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.replaceContentWithinBrackets;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.createAPIDescriptionDoc;
@@ -172,9 +175,20 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                 }
             }
             if (operation.getRequestBody() != null) {
+                Content content = operation.getRequestBody().getContent();
+                final String[] paramName = {"payload"};
+                if (content != null) {
+                    Collection<MediaType> values = content.values();
+                    values.stream().findFirst().ifPresent(mediaType -> {
+                        paramName[0] = getBallerinaMediaType(mediaType.toString(),true);
+                    });
+                } else {
+                    paramName[0] = "http:Request";
+                }
+
                 if (operation.getRequestBody().getDescription() != null) {
                     String description = operation.getRequestBody().getDescription().split("\n")[0];
-                    docs.add(createAPIParamDoc("payload", description));
+                    docs.add(createAPIParamDoc(paramName[0].equals("http:Request")? "request": "payload", description));
                 }
             }
             //todo response
@@ -223,22 +237,14 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
             List<AnnotationNode> paramAnnot = new ArrayList<>();
             String parameterDescription;
             String parameterName = parameter.getName();
-            if (parameter.getIn().equals("path") || parameter.getIn().equals("header")) {
+            if (parameter.getIn().equals("path") || parameter.getIn().equals("header") ||
+                    (parameter.getIn().equals("query"))) {
                 parameterName = getValidName(parameter.getName(), false);
                 if (parameter.getExtensions() != null) {
                     extractDisplayAnnotation(parameter.getExtensions(), paramAnnot);
                     ParameterNode parameterNode = collection.get(parameterName);
                     updatedDisplayAnnotationInParameterNode(updatedParamsRequired, updatedParamsDefault,
                             paramAnnot, parameterNode);
-                }
-            } else if (parameter.getIn().equals("query")) {
-                parameterName = escapeIdentifier(parameter.getName());
-                if (parameter.getExtensions() != null) {
-                    extractDisplayAnnotation(parameter.getExtensions(), paramAnnot);
-                    ParameterNode parameterNode = collection.get(parameterName);
-                    updatedDisplayAnnotationInParameterNode(updatedParamsRequired, updatedParamsDefault,
-                            paramAnnot, parameterNode);
-
                 }
             }
             if (parameter.getDescription() != null) {
