@@ -272,7 +272,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
 
         if (value.getProperties() != null) {
             boolean constraintExists = value.getProperties().values().stream()
-                    .anyMatch(io.ballerina.openapi.core.generators.type.GeneratorUtils::hasConstraints);
+                    .anyMatch(GeneratorUtils::hasConstraints);
             if (constraintExists) {
                 return true;
             }
@@ -282,11 +282,11 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
             List<Schema> anyOf = value.getAnyOf();
             boolean constraintExists = false;
             if (allOf != null) {
-                constraintExists = allOf.stream().anyMatch(io.ballerina.openapi.core.generators.type.GeneratorUtils::hasConstraints);
+                constraintExists = allOf.stream().anyMatch(GeneratorUtils::hasConstraints);
             } else if (oneOf != null) {
-                constraintExists = oneOf.stream().anyMatch(io.ballerina.openapi.core.generators.type.GeneratorUtils::hasConstraints);
+                constraintExists = oneOf.stream().anyMatch(GeneratorUtils::hasConstraints);
             } else if (anyOf != null) {
-                constraintExists = anyOf.stream().anyMatch(io.ballerina.openapi.core.generators.type.GeneratorUtils::hasConstraints);
+                constraintExists = anyOf.stream().anyMatch(GeneratorUtils::hasConstraints);
             }
             if (constraintExists) {
                 return true;

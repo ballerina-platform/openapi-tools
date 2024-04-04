@@ -6,6 +6,6 @@ service /v1 on ep0 {
     # Creates a new pets.
     #
     # + return - A list of pets.
-    resource function post pets() returns BadRequestError {
+    resource function post pets() returns BadRequestErrorArray {
     }
 }

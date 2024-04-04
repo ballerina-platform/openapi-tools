@@ -22,11 +22,12 @@ import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.media.Schema;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 
 import java.util.HashMap;
 
@@ -70,8 +71,12 @@ public class ReferencedTypeGenerator extends TypeGenerator {
      */
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws OASTypeGenException {
-
-        String extractName = GeneratorUtils.extractReferenceType(schema.get$ref());
+        String extractName = null;
+        try {
+            extractName = GeneratorUtils.extractReferenceType(schema.get$ref());
+        } catch (BallerinaOpenApiException e) {
+            throw new OASTypeGenException(e.getMessage());
+        }
         String typeName = GeneratorUtils.getValidName(extractName, true);
         Schema<?> refSchema = GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(typeName);
         refSchema = refSchema == null ?

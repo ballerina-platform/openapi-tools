@@ -18,22 +18,15 @@
 
 package io.ballerina.openapi.core.generators.type.generators;
 
-
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
-import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.swagger.v3.oas.models.media.Schema;
-import io.ballerina.openapi.core.generators.type.GeneratorConstants;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;

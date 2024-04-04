@@ -40,7 +40,7 @@ public class LowResourceGenerator extends ResourceGenerator {
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
         IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
                 .toLowerCase(Locale.ENGLISH), GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
-        NodeList<Node> relativeResourcePath = null;
+        NodeList<Node> relativeResourcePath;
         try {
             relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(), null,
                     oasServiceMetadata.getOpenAPI().getComponents(), oasServiceMetadata.generateWithoutDataBinding());
@@ -50,12 +50,11 @@ public class LowResourceGenerator extends ResourceGenerator {
         FunctionSignatureGenerator functionSignatureGenerator = FunctionSignatureGenerator
                 .getFunctionSignatureGenerator(oasServiceMetadata);
         FunctionSignatureNode functionSignatureNode = functionSignatureGenerator.getFunctionSignature(operation, path);
-        // create function body
+        diagnostics.addAll(functionSignatureGenerator.getDiagnostics());
         FunctionBodyBlockNode functionBodyBlockNode = createFunctionBodyBlockNode(
                 createToken(SyntaxKind.OPEN_BRACE_TOKEN),
                 null, createEmptyNodeList(),
                 createToken(SyntaxKind.CLOSE_BRACE_TOKEN), null);
-
         return createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, null,
                 qualifiersList, functionKeyWord, functionName, relativeResourcePath, functionSignatureNode,
                 functionBodyBlockNode);

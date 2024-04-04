@@ -18,11 +18,12 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -58,13 +59,14 @@ public class HeaderTests {
     //Scenario 03 - Header parameters.
     @Test(dataProvider = "intHeaderTestData", description = "Generate functionDefinitionNode for Header parameters")
     public void generateHeaderParameter(final String swaggerPath, final String balPath)
-            throws IOException, OASTypeGenException {
+            throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve(swaggerPath);
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         final SyntaxTree syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(balPath, syntaxTree);

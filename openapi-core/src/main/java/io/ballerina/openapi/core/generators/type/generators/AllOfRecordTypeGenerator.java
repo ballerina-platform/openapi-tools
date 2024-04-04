@@ -29,7 +29,8 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
@@ -148,7 +149,12 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
 
         for (Schema allOfSchema : allOfSchemas) {
             if (allOfSchema.get$ref() != null) {
-                String extractedSchemaName = GeneratorUtils.extractReferenceType(allOfSchema.get$ref());
+                String extractedSchemaName = null;
+                try {
+                    extractedSchemaName = GeneratorUtils.extractReferenceType(allOfSchema.get$ref());
+                } catch (BallerinaOpenApiException e) {
+                    throw new OASTypeGenException(e.getMessage());
+                }
                 String modifiedSchemaName = GeneratorUtils.getValidName(extractedSchemaName, true);
                 Token typeRef = AbstractNodeFactory.createIdentifierToken(modifiedSchemaName);
                 TypeReferenceNode recordField = NodeFactory.createTypeReferenceNode(createToken(ASTERISK_TOKEN),
