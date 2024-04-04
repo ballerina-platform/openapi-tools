@@ -82,6 +82,18 @@ publishing {
                 password = System.getenv("packagePAT")
             }
         }
+        maven {
+            name = "WSO2Nexus"
+            if(project.clientNativeVersion.endsWith('-SNAPSHOT')) {
+                url "https://maven.wso2.org/nexus/content/repositories/snapshots/"
+            } else {
+                url "https://maven.wso2.org/nexus/service/local/staging/deploy/maven2/"
+            }
+            credentials {
+                username System.getenv("NEXUS_USERNAME")
+                password System.getenv("NEXUS_PASSWORD")
+            }
+        }
     }
 }
 
