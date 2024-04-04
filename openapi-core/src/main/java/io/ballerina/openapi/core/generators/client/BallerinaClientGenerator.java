@@ -464,7 +464,12 @@ public class BallerinaClientGenerator {
         if (!defaultParams.isEmpty()) {
             requiredParams.addAll(defaultParams);
         }
-
+        // remove trailing comma
+        if (!requiredParams.isEmpty()) {
+            if (requiredParams.toArray()[requiredParams.size() - 1] instanceof Token) {
+                requiredParams.remove(requiredParams.toArray()[requiredParams.size() - 1]);
+            }
+        }
         return requiredParams;
     }
 

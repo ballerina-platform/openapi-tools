@@ -20,6 +20,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -32,7 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
@@ -62,26 +63,17 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
         //collect all the operation details
         HashMap<String, OperationDetails> operationDetailsMap = new HashMap<>();
         Paths paths = openAPI.getPaths();
-        paths.forEach((path, pathItem) -> {
-            pathItem.readOperationsMap().forEach((method, operation) -> {
-                if (!isResource) {
-                    operationDetailsMap.put(operation.getOperationId(), new OperationDetails(operation.getOperationId(), operation, path, method.name()));
-                } else {
-                    String key = replaceContentWithinBrackets(path.replaceFirst("/",""), "XXX") + "_" + method.name().toLowerCase(Locale.ENGLISH);
-                    operationDetailsMap.put(key, new OperationDetails(operation.getOperationId(), operation, path, method.name()));
-                }
-            });
-        });
+        extractOperations(operationDetailsMap, paths);
         //Generate type doc comments
         Node rootNode = syntaxTree.rootNode();
         ModulePartNode modulePartNode = (ModulePartNode) rootNode;
         NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
+        AtomicInteger index = new AtomicInteger();
         members.forEach(member -> {
             if (member.kind().equals(SyntaxKind.CLASS_DEFINITION)) {
                 ClassDefinitionNode classDef = (ClassDefinitionNode) member;
                 List<Node> updatedList = new ArrayList<>();
                 NodeList<Node> classMembers = classDef.members();
-
                 classMembers.forEach(classMember -> {
                     if (classMember.kind().equals(SyntaxKind.OBJECT_METHOD_DEFINITION) ||
                             classMember.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
@@ -101,6 +93,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                         }
                         classMember = funcDef;
                     }
+
                     updatedList.add(classMember);
                 });
                 classDef = classDef.modify(
@@ -122,6 +115,22 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
             }
         });
         return syntaxTree;
+    }
+
+    private void extractOperations(HashMap<String, OperationDetails> operationDetailsMap, Paths paths) {
+        paths.forEach((path, pathItem) -> {
+            for (Map.Entry<PathItem.HttpMethod, Operation> entry : pathItem.readOperationsMap().entrySet()) {
+                PathItem.HttpMethod method = entry.getKey();
+                Operation operation = entry.getValue();
+                if (!isResource) {
+                    operationDetailsMap.put(operation.getOperationId(), new OperationDetails(operation.getOperationId(), operation, path, method.name()));
+                } else {
+                    path = path.equals("/") ? "." : path;
+                    String key = replaceContentWithinBrackets(path.replaceFirst("/", ""), "XXX") + "_" + method.name().toLowerCase(Locale.ENGLISH);
+                    operationDetailsMap.put(key, new OperationDetails(operation.getOperationId(), operation, path, method.name()));
+                }
+            }
+        });
     }
 
     private static FunctionDefinitionNode updateDocCommentsForFunctionNode(
@@ -214,7 +223,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
             List<AnnotationNode> paramAnnot = new ArrayList<>();
             String parameterDescription;
             String parameterName = parameter.getName();
-            if (parameter.getIn().equals("path")) {
+            if (parameter.getIn().equals("path") || parameter.getIn().equals("header")) {
                 parameterName = getValidName(parameter.getName(), false);
                 if (parameter.getExtensions() != null) {
                     extractDisplayAnnotation(parameter.getExtensions(), paramAnnot);
@@ -222,7 +231,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                     updatedDisplayAnnotationInParameterNode(updatedParamsRequired, updatedParamsDefault,
                             paramAnnot, parameterNode);
                 }
-            } else if (parameter.getIn().equals("query") || parameter.getIn().equals("header")) {
+            } else if (parameter.getIn().equals("query")) {
                 parameterName = escapeIdentifier(parameter.getName());
                 if (parameter.getExtensions() != null) {
                     extractDisplayAnnotation(parameter.getExtensions(), paramAnnot);

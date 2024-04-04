@@ -49,7 +49,7 @@ public class QueryParameterGenerator implements ParameterGenerator {
         TypeDescriptorNode typeNode;
 
         Schema<?> parameterSchema = parameter.getSchema();
-        if (!isQueryParamTypeSupported(parameterSchema.getType())) {
+        if (parameterSchema.getType() != null && !isQueryParamTypeSupported(parameterSchema.getType())) {
             //TODO diagnostic message unsupported and early return
             DiagnosticMessages unsupportedType = DiagnosticMessages.OAS_CLIENT_102;
             ClientDiagnostic diagnostic = new ClientDiagnosticImp(unsupportedType.getCode(),
