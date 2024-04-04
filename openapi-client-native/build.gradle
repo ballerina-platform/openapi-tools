@@ -68,7 +68,7 @@ publishing {
         mavenJava(MavenPublication) {
             groupId "io.ballerina.openapi"
             artifactId "client-native"
-            version = project.clientNativeVersion.replace("-SNAPSHOT", "")
+            version = clientNativeVersion
             artifact jar
         }
     }

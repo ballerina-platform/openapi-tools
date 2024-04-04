@@ -139,8 +139,6 @@ subprojects {
     }
 }
 
-def clientNativeVersion = project.clientNativeVersion.replace("-SNAPSHOT", "")
-
 task createProperties(dependsOn: processResources) {
     doLast {
         def file = new File("$project.rootDir/openapi-cli/src/main/resources/openapi-tool-version.properties")
