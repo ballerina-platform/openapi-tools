@@ -31,6 +31,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
@@ -49,7 +50,7 @@ public class QueryParameterGenerator implements ParameterGenerator {
         TypeDescriptorNode typeNode;
 
         Schema<?> parameterSchema = parameter.getSchema();
-        if (!isQueryParamTypeSupported(parameterSchema.getType())) {
+        if (parameterSchema.getType() != null && !isQueryParamTypeSupported(parameterSchema.getType())) {
             //TODO diagnostic message unsupported and early return
             DiagnosticMessages unsupportedType = DiagnosticMessages.OAS_CLIENT_102;
             ClientDiagnostic diagnostic = new ClientDiagnosticImp(unsupportedType.getCode(),

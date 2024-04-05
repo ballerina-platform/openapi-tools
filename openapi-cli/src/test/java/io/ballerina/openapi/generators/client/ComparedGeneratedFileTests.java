@@ -113,20 +113,20 @@ public class ComparedGeneratedFileTests {
     @DataProvider(name = "fileProviderForFilesComparison")
     public Object[][] fileProviderForFilesComparison() {
         return new Object[][]{
-//                {"openapi_weather_api.yaml", "openapi_weather_api.bal"}
-//                {"uber_openapi.yaml", "uber_openapi.bal"},
-//                {"multiple_pathparam.yaml", "multiple_pathparam.bal"},
-//                {"display_annotation.yaml", "display_annotation.bal"},
-//                {"api2pdf.yaml", "api2pdf.bal"},
-//                {"nillable_response.yaml", "nillable_response.bal"},
-//                {"nillable_union_response.yaml", "nillable_union_response.bal"},
-//                {"duplicated_response.yaml", "duplicated_response.bal"},
-//                {"multiline_param_comment.yaml", "multiline_param_comment.bal"},
-//                {"description_with_special_characters.yaml", "description_with_special_characters.bal"}, //special characters in description
-//                {"header_with_enum.yaml", "header_with_enum.bal"},
-//                {"incorrect_format.yaml", "incorrect_format.bal"},
-//                {"format_types_v3_0.yaml", "format_types_v3_0.bal"},
-//                {"format_types_v3_1.yaml", "format_types_v3_1.bal"}
+                {"openapi_weather_api.yaml", "openapi_weather_api.bal"},
+                {"uber_openapi.yaml", "uber_openapi.bal"},
+                {"multiple_pathparam.yaml", "multiple_pathparam.bal"},
+                {"display_annotation.yaml", "display_annotation.bal"},
+                {"api2pdf.yaml", "api2pdf.bal"},
+                {"nillable_response.yaml", "nillable_response.bal"},
+                {"nillable_union_response.yaml", "nillable_union_response.bal"},
+                {"duplicated_response.yaml", "duplicated_response.bal"},
+                {"multiline_param_comment.yaml", "multiline_param_comment.bal"},
+                {"description_with_special_characters.yaml", "description_with_special_characters.bal"}, //special characters in description
+                {"header_with_enum.yaml", "header_with_enum.bal"},
+                {"incorrect_format.yaml", "incorrect_format.bal"},
+                {"format_types_v3_0.yaml", "format_types_v3_0.bal"},
+                {"format_types_v3_1.yaml", "format_types_v3_1.bal"}
         };
     }
 

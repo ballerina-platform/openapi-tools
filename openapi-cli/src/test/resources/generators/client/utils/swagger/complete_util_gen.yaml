@@ -27,7 +27,7 @@ paths:
             type: string
           style: simple
         - in: query
-          name: payment method name
+          name: payment-method-name
           description: Payment Method
           required: true
           schema:

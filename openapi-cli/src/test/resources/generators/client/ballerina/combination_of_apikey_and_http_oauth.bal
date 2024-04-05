@@ -41,6 +41,23 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+    # Delete a pet 2
+    #
+    # + petId - The id of the pet to delete
+    # + return - Expected response to a valid request
+    remote isolated function deletePetInfo2(string petId) returns Pet|error {
+        string resourcePath = string `/pets/management2`;
+        map<any> headerValues = {"petId": petId};
+        map<anydata> queryParam = {};
+        if self.apiKeyConfig is ApiKeysConfig {
+            headerValues["api-key"] = self.apiKeyConfig?.apiKey;
+            queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
+        }
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        Pet response = check self.clientEp->delete(resourcePath, headers = httpHeaders);
+        return response;
+    }
     # Info for a specific pet
     #
     # + petId - The id of the pet to retrieve
@@ -57,23 +74,6 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         Pet response = check self.clientEp->get(resourcePath, httpHeaders);
-        return response;
-    }
-    # Vote for a pet
-    #
-    # + return - Expected response to a valid request
-    remote isolated function votePet() returns Pet|error {
-        string resourcePath = string `/pets/management`;
-        map<any> headerValues = {};
-        map<anydata> queryParam = {};
-        if self.apiKeyConfig is ApiKeysConfig {
-            headerValues["api-key"] = self.apiKeyConfig?.apiKey;
-            queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
-        }
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        http:Request request = new;
-        Pet response = check self.clientEp->post(resourcePath, request, httpHeaders);
         return response;
     }
     # Delete a pet
@@ -93,13 +93,12 @@ public isolated client class Client {
         Pet response = check self.clientEp->delete(resourcePath, headers = httpHeaders);
         return response;
     }
-    # Delete a pet 2
+    # Vote for a pet
     #
-    # + petId - The id of the pet to delete
     # + return - Expected response to a valid request
-    remote isolated function deletePetInfo2(string petId) returns Pet|error {
-        string resourcePath = string `/pets/management2`;
-        map<any> headerValues = {"petId": petId};
+    remote isolated function votePet() returns Pet|error {
+        string resourcePath = string `/pets/management`;
+        map<any> headerValues = {};
         map<anydata> queryParam = {};
         if self.apiKeyConfig is ApiKeysConfig {
             headerValues["api-key"] = self.apiKeyConfig?.apiKey;
@@ -107,7 +106,8 @@ public isolated client class Client {
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        Pet response = check self.clientEp->delete(resourcePath, headers = httpHeaders);
+        http:Request request = new;
+        Pet response = check self.clientEp->post(resourcePath, request, httpHeaders);
         return response;
     }
 }
