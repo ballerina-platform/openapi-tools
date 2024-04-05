@@ -10,7 +10,7 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(ApiKeysConfig apiKeyConfig, string serviceUrl, ConnectionConfig config =  {}) returns error? {
+    public isolated function init(string serviceUrl, ApiKeysConfig apiKeyConfig, ConnectionConfig config =  {}) returns error? {
         http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
@@ -46,9 +46,9 @@ public isolated client class Client {
     # events will be sent as data-only server-sent events as they become available. The stream will terminate with
     # a data: [DONE] message when the job is finished (succeeded, cancelled, or failed).
     # If set to false, only events generated so far will be returned..
-    # + apiVersion - The requested API version.
+    # + api\-version - The requested API version.
     # + return - Success
-    remote isolated function fineTunes_GetEvents(string fineTuneId, string apiVersion, boolean? 'stream = ()) returns EventList|error {
+    remote isolated function fineTunes_GetEvents(string? fineTuneId, string apiVersion, boolean? 'stream = ()) returns EventList|error {
         string resourcePath = string `/fine-tunes/${getEncodedUri(fineTuneId)}/events`;
         map<anydata> queryParam = {"stream": 'stream, "api-version": apiVersion};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);

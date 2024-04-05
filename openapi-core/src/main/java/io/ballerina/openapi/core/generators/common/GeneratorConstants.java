@@ -396,6 +396,7 @@ public class GeneratorConstants {
     public static final String RETURNS = "returns";
     public static final String ANYDATA = "anydata";
     public static final String RESPONSE_RECORD_NAME = "Response";
+    public static final String REQUEST_RECORD_NAME = "Request";
     public static final String HTTP_VERIONS_EXT = "httpVersion";
     public static final String SERVICE_TYPE_NAME = "OASServiceType";
     public static final String DEFAULT_RETURN_COMMENT = "return value description";

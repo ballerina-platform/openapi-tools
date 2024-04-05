@@ -33,6 +33,8 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -101,19 +103,20 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
 
     public ReturnTypesInfo getReturnTypeInfo() {
         List<TypeDescriptorNode> returnTypes = new ArrayList<>();
+        HashSet<String> returnTypesSet = new HashSet<>();
         boolean noContentResponseFound = false;
         if (operation.getResponses() != null) {
             ApiResponses responses = operation.getResponses();
             for (Map.Entry<String, ApiResponse> entry : responses.entrySet()) {
                 String statusCode = entry.getKey();
                 ApiResponse response = entry.getValue();
-                noContentResponseFound = populateReturnType(statusCode, response, returnTypes);
+                noContentResponseFound = populateReturnType(statusCode, response, returnTypes, returnTypesSet);
             }
         }
         return new ReturnTypesInfo(returnTypes, noContentResponseFound);
     }
 
-    protected boolean populateReturnType(String statusCode, ApiResponse response, List<TypeDescriptorNode> returnTypes) {
+    protected boolean populateReturnType(String statusCode, ApiResponse response, List<TypeDescriptorNode> returnTypes, HashSet<String> returnTypesSet) {
         boolean noContentResponseFound = false;
         if (statusCode.startsWith("2")) {
             Content content = response.getContent();
@@ -134,7 +137,10 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
                         String mediaType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
                         type = createSimpleNameReferenceNode(createIdentifierToken(mediaType));
                     }
-                    returnTypes.add(type);
+                    if (!returnTypesSet.contains(type.toString())) {
+                        returnTypesSet.add(type.toString());
+                        returnTypes.add(type);
+                    }
                     // Currently support for first media type
                     break;
                 }

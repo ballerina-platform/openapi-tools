@@ -197,8 +197,8 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STR
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.VALIDATION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.X_BALLERINA_HTTP_CONFIGURATIONS;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.type.GeneratorConstants.HTTP_VERSION_MAP;
-import static io.ballerina.openapi.core.generators.type.GeneratorUtils.getValidName;
 
 /**
  * This class is used to generate authentication related nodes of the ballerina connector client syntax tree.

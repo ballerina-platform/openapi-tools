@@ -3,9 +3,10 @@ package io.ballerina.openapi.core.service;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
+import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnostic;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.service.resource.ResourceGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -26,6 +27,8 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DO_
 public abstract class ServiceGenerator {
 
     final OASServiceMetadata oasServiceMetadata;
+    boolean isNullableRequired;
+    private final static List<ServiceDiagnostic> diagnostics = new ArrayList<>();
 
     public ServiceGenerator(OASServiceMetadata oasServiceMetadata) {
         this.oasServiceMetadata = oasServiceMetadata;
@@ -43,6 +46,7 @@ public abstract class ServiceGenerator {
                     "service_type.bal",
                     (oasServiceMetadata.getLicenseHeader().isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
                             oasServiceMetadata.getLicenseHeader()) + serviceType));
+            diagnostics.addAll(serviceTypeGenerator.getDiagnostics());
         } else {
             ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata);
             String serviceType = Formatter.format(serviceTypeGenerator.generateSyntaxTree()).toSourceCode();
@@ -56,11 +60,17 @@ public abstract class ServiceGenerator {
                     oasServiceMetadata.getSrcFile(),
                     (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
                             oasServiceMetadata.getLicenseHeader()) + mainContent));
+            diagnostics.addAll(serviceTypeGenerator.getDiagnostics());
+            diagnostics.addAll(serviceGenerator.getDiagnostics());
         }
         return sourceFiles;
     }
 
     public abstract SyntaxTree generateSyntaxTree();
+
+    public List<ServiceDiagnostic> getDiagnostics() {
+        return diagnostics;
+    }
 
     List<Node> createResourceFunctions(OpenAPI openApi, Filter filter) {
         List<Node> functions = new ArrayList<>();
@@ -97,15 +107,19 @@ public abstract class ServiceGenerator {
                                     filterOperations.contains(operation.getValue().getOperationId().trim()))) {
                         FunctionDefinitionNode resourceFunction = resourceGenerator
                                 .generateResourceFunction(operation, path);
+                        diagnostics.addAll(resourceGenerator.getDiagnostics());
                         functions.add(resourceFunction);
                     }
                 }
             } else {
                 FunctionDefinitionNode resourceFunction = resourceGenerator
                         .generateResourceFunction(operation, path);
+                diagnostics.addAll(resourceGenerator.getDiagnostics());
                 functions.add(resourceFunction);
             }
-        }
+            if (resourceGenerator.isNullableRequired())
+                isNullableRequired = true;
+            }
         return functions;
     }
 }

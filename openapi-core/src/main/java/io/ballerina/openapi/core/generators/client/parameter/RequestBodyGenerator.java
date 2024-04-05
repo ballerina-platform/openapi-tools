@@ -24,6 +24,8 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParame
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_OCTET_STREAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ARRAY;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.EMPTY_RECORD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_REQUEST;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getBallerinaMediaType;
@@ -126,7 +128,8 @@ public class RequestBodyGenerator implements ParameterGenerator {
             }
             break;
         }
-        return Optional.of(createRequiredParameterNode(createEmptyNodeList(), typeDescNode, createIdentifierToken("payload")));
+        String reqBody = typeDescNode.toString().equals(HTTP_REQUEST)? "request": "payload";
+        return Optional.of(createRequiredParameterNode(createEmptyNodeList(), typeDescNode, createIdentifierToken(reqBody)));
     }
 
 //    /**

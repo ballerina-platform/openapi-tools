@@ -29,9 +29,9 @@ import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.GeneratorConstants;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
@@ -159,8 +159,13 @@ public class ArrayTypeGenerator extends TypeGenerator {
         TypeDescriptorNode member;
         String schemaType = GeneratorUtils.getOpenAPIType(schema.getItems());
         if (schema.getItems().get$ref() != null) {
-            String typeName = GeneratorUtils.getValidName(GeneratorUtils
-                    .extractReferenceType(schema.getItems().get$ref()), true);
+            String typeName = null;
+            try {
+                typeName = GeneratorUtils.getValidName(GeneratorUtils
+                        .extractReferenceType(schema.getItems().get$ref()), true);
+            } catch (BallerinaOpenApiException e) {
+                throw new OASTypeGenException(e.getMessage());
+            }
             String validTypeName = GeneratorUtils.escapeIdentifier(typeName);
             TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(
                     GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(typeName),
@@ -172,9 +177,13 @@ public class ArrayTypeGenerator extends TypeGenerator {
                         createIdentifierToken(validTypeName));
                 subTypesMap.put(validTypeName, typeDefinitionNode);
             }
-            member = createBuiltinSimpleNameReferenceNode(null,
-                    createIdentifierToken(GeneratorUtils.escapeIdentifier(GeneratorUtils.getValidName(
-                            GeneratorUtils.extractReferenceType(schema.getItems().get$ref()), true))));
+            try {
+                member = createBuiltinSimpleNameReferenceNode(null,
+                        createIdentifierToken(GeneratorUtils.escapeIdentifier(GeneratorUtils.getValidName(
+                                GeneratorUtils.extractReferenceType(schema.getItems().get$ref()), true))));
+            } catch (BallerinaOpenApiException e) {
+                throw new OASTypeGenException(e.getMessage());
+            }
         } else if (schemaType != null && (schemaType.equals(GeneratorConstants.INTEGER) ||
                 schemaType.equals(GeneratorConstants.NUMBER) || schemaType.equals(GeneratorConstants.BOOLEAN) ||
                 schemaType.equals(GeneratorConstants.STRING))) {

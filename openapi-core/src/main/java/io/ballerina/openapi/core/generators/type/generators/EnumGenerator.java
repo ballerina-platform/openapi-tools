@@ -22,8 +22,9 @@ import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.GeneratorConstants;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.swagger.v3.oas.models.media.Schema;
@@ -83,7 +84,7 @@ public class EnumGenerator extends TypeGenerator {
             }
             if (enumBuilder.length() > 0) {
                 enumBuilder.deleteCharAt(enumBuilder.length() - 1);
-                String enumString = isNull ? enumBuilder.toString() + GeneratorConstants.NILLABLE : enumBuilder.toString();
+                String enumString = isNull ? enumBuilder + GeneratorConstants.NILLABLE : enumBuilder.toString();
                 return NodeParser.parseTypeDescriptor(enumString);
             } else {
                 String typeDescriptorName;

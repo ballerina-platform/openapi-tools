@@ -11,17 +11,8 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-        public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config = {}, string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {
-        http:ClientConfiguration httpClientConfig = {
-            httpVersion: config.httpVersion,
-            timeout: config.timeout,
-            forwarded: config.forwarded,
-            poolConfig: config.poolConfig,
-            compression: config.compression,
-            circuitBreaker: config.circuitBreaker,
-            retryConfig: config.retryConfig,
-            validation: config.validation
-        };
+    public isolated function init(ApiKeysConfig apiKeyConfig, string serviceUrl = "http://api.openweathermap.org/data/2.5/", ConnectionConfig config =  {}) returns error? {
+        http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
                 ClientHttp1Settings settings = check config.http1Settings.ensureType(ClientHttp1Settings);
@@ -48,6 +39,20 @@ public isolated client class Client {
         self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
         return;
     }
+    # Info for a specific pet
+    #
+    # + xRequestId - Tests header 01
+    # + xRequestClient - Tests header 02
+    # + xRequestPet - Tests header 03
+    # + return - Expected response to a valid request
+    resource isolated function get weather(string xRequestId, string[] xRequestClient, WeatherForecast[] xRequestPet) returns error? {
+        string resourcePath = string `/weather`;
+        map<anydata> queryParam = {"appid": self.apiKeyConfig.appid};
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        map<any> headerValues = {"X-Request-ID": xRequestId, "X-Request-Client": xRequestClient, "X-Request-Pet": xRequestPet};
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        return self.clientEp->get(resourcePath, httpHeaders);
+    }
     # Provide weather forecast for any geographical coordinates
     #
     # + lat - Latitude
@@ -64,19 +69,5 @@ public isolated client class Client {
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         WeatherForecast response = check self.clientEp->get(resourcePath, httpHeaders);
         return response;
-    }
-    # Info for a specific pet
-    #
-    # + xRequestId - Tests header 01
-    # + xRequestClient - Tests header 02
-    # + xRequestPet - Tests header 03
-    # + return - Expected response to a valid request
-    resource isolated function get weather(string xRequestId, string[] xRequestClient, WeatherForecast[] xRequestPet) returns error? {
-        string resourcePath = string `/weather`;
-        map<anydata> queryParam = {"appid": self.apiKeyConfig.appid};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<any> headerValues = {"X-Request-ID": xRequestId, "X-Request-Client": xRequestClient, "X-Request-Pet": xRequestPet};
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

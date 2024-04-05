@@ -13,16 +13,18 @@ import java.util.Map;
 
 public abstract class ReturnTypeGenerator {
     final OASServiceMetadata oasServiceMetadata;
+    final String path;
 
-    public ReturnTypeGenerator(OASServiceMetadata oasServiceMetadata) {
+    public ReturnTypeGenerator(OASServiceMetadata oasServiceMetadata, String path) {
         this.oasServiceMetadata = oasServiceMetadata;
+        this.path = path;
     }
 
-    public static ReturnTypeGenerator getReturnTypeGenerator(OASServiceMetadata oasServiceMetadata) {
+    public static ReturnTypeGenerator getReturnTypeGenerator(OASServiceMetadata oasServiceMetadata, String path) {
         if (oasServiceMetadata.generateWithoutDataBinding()) {
-            return new LowResourceReturnTypeGenerator(oasServiceMetadata);
+            return new LowResourceReturnTypeGenerator(oasServiceMetadata, path);
         } else {
-            return new DefaultReturnTypeGenerator(oasServiceMetadata);
+            return new DefaultReturnTypeGenerator(oasServiceMetadata, path);
         }
     }
 

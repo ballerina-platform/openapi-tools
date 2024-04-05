@@ -19,13 +19,14 @@ package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CmdUtils;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -53,6 +54,7 @@ public class QueryParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_01.bal", syntaxTree);
@@ -66,6 +68,7 @@ public class QueryParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_02.bal", syntaxTree);
@@ -82,6 +85,7 @@ public class QueryParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query.bal", syntaxTree);
@@ -97,6 +101,7 @@ public class QueryParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query.bal", syntaxTree);
@@ -119,6 +124,7 @@ public class QueryParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_05.bal", syntaxTree);
@@ -132,6 +138,7 @@ public class QueryParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_06.bal", syntaxTree);
@@ -148,6 +155,7 @@ public class QueryParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query.bal", syntaxTree);
@@ -163,6 +171,7 @@ public class QueryParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query.bal", syntaxTree);
@@ -187,6 +196,7 @@ public class QueryParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_09.bal", syntaxTree);
@@ -203,6 +213,7 @@ public class QueryParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query.bal", syntaxTree);
@@ -216,6 +227,7 @@ public class QueryParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_11.bal", syntaxTree);
@@ -229,58 +241,63 @@ public class QueryParameterTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_12.bal", syntaxTree);
     }
 
     @Test(description = "13. Default query parameter has string type")
-    public void stringDefaultQueryParameter() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
+    public void stringDefaultQueryParameter() throws IOException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_13.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_13.bal", syntaxTree);
     }
 
     @Test(description = "14. Fix the query parameter order")
-    public void queryParameterOrder() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
+    public void queryParameterOrder() throws IOException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_14.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_14.bal", syntaxTree);
     }
 
     @Test(description = "15. Optional query parameter")
-    public void optionalQueryParameter() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
+    public void optionalQueryParameter() throws IOException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_15.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_15.bal", syntaxTree);
     }
 
     @Test(description = "16. Query parameter(s) having a referenced schema")
-    public void generateParamsWithRefSchema() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
+    public void generateParamsWithRefSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_ref_schema.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, false);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
@@ -292,13 +309,14 @@ public class QueryParameterTests {
             expectedExceptionsMessageRegExp = "Type 'xml' is not a valid query parameter type in Ballerina. " +
                     "The supported types are string, int, float, boolean, decimal, array types of the aforementioned " +
                     "types and map<json>.")
-    public void generateParamsWithInvalidRefSchema() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
+    public void generateParamsWithInvalidRefSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_invalid_ref_schema.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
     }
@@ -307,25 +325,27 @@ public class QueryParameterTests {
             expectedExceptions = OASTypeGenException.class,
             expectedExceptionsMessageRegExp = "OpenAPI definition has errors: \n" +
                     "attribute components.schemas.Room.content is unexpected.*")
-    public void generateParamsWithInvalidArrayRefSchema() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
+    public void generateParamsWithInvalidArrayRefSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameter_with_ref_array_invalid_schema.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
     }
 
     @Test(description = "19. Query parameter(s) having a referenced schema type")
-    public void generateParamsWithObjectRefSchema() throws IOException, OASTypeGenException, FormatterException {
+    public void generateParamsWithObjectRefSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_object_ref_schema.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
@@ -333,13 +353,14 @@ public class QueryParameterTests {
     }
 
     @Test(description = "20. Query parameter(s) having a referenced schema of array type")
-    public void generateParamsWithObjectArrayRefSchema() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
+    public void generateParamsWithObjectArrayRefSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameter_with_ref_array_object_schema.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
@@ -347,20 +368,19 @@ public class QueryParameterTests {
     }
 
     @Test(description = "21. Query parameter(s) having a object schema")
-    public void generateParamsWithObjectType() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
+    public void generateParamsWithObjectType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/object_query.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, false);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
+        TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "query/object_query.bal", syntaxTree);
-        //Check types
-//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-//        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "query/object_query_type.bal", syntaxTree);
     }

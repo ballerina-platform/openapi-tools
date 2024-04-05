@@ -27,6 +27,7 @@ import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.ChildNodeEntry;
@@ -111,6 +112,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -126,6 +128,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createExpressionStatementNode;
@@ -145,9 +148,11 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SLASH_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_FORM_URLENCODED;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_OCTET_STREAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ARRAY;
@@ -155,6 +160,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BAL
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BALLERINA_TOML;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BALLERINA_TOML_CONTENT;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BOOLEAN;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CATCH_ALL_PATH;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLOSE_CURLY_BRACE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CONSTRAINT;
@@ -179,6 +185,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPE
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REGEX_ONLY_NUMBERS_OR_NUMBERS_WITH_SPECIAL_CHARACTERS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REGEX_WITHOUT_SPECIAL_CHARACTERS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REGEX_WORDS_STARTING_WITH_NUMBERS;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RESPONSE_RECORD_NAME;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SERVICE_FILE_NAME;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SPECIAL_CHARACTERS_REGEX;
@@ -190,10 +197,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TYP
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YML_EXTENSION;
-import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForMapStringContent;
-import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForOctetStreamContent;
-import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForTextContent;
-import static io.ballerina.openapi.core.service.ServiceGenerationUtils.generateTypeDescriptorForXMLContent;
 
 /**
  * This class util for store all the common scenarios.
@@ -207,6 +210,7 @@ public class GeneratorUtils {
     public static final MinutiaeList SINGLE_END_OF_LINE_MINUTIAE = getEndOfLineMinutiae();
     private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
     private static final PrintStream OUT_STREAM = System.err;
+    private static int recordCount = 0;
 
     private static final List<String> primitiveTypeList =
             new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
@@ -460,23 +464,6 @@ public class GeneratorUtils {
     }
 
     /**
-     * This util function is for updating the list of nodes {@link TypeDefinitionNode}.
-     * It updates the list while checking the duplicates.
-     *
-     * @param typeName               - Given node name
-     * @param typeDefNode            - Generated node
-     * @param typeDefinitionNodeList - Current node list
-     */
-    public static void updateTypeDefNodeList(String typeName, TypeDefinitionNode typeDefNode,
-                                             List<TypeDefinitionNode> typeDefinitionNodeList) {
-        boolean anyMatch = typeDefinitionNodeList.stream().anyMatch(node ->
-                (node.typeName().text().trim().equals(typeName)));
-        if (!anyMatch) {
-            typeDefinitionNodeList.add(typeDefNode);
-        }
-    }
-
-    /**
      * Check the given recordName is valid name.
      *
      * @param recordName - String record name
@@ -552,8 +539,7 @@ public class GeneratorUtils {
      * @param mediaTypeEntry
      * @return
      */
-    public static boolean isSupportedMediaType(Map.Entry<String,
-            io.swagger.v3.oas.models.media.MediaType> mediaTypeEntry) {
+    public static boolean isSupportedMediaType(Map.Entry<String, MediaType> mediaTypeEntry) {
         String mediaType = mediaTypeEntry.getKey();
         String defaultBallerinaType = getBallerinaMediaType(mediaType, true);
         Schema<?> schema = mediaTypeEntry.getValue().getSchema();
@@ -591,12 +577,10 @@ public class GeneratorUtils {
      */
     public static VariableDeclarationNode getSimpleStatement(String responseType, String variable,
                                                              String initializer) {
-
         SimpleNameReferenceNode resTypeBind = createSimpleNameReferenceNode(createIdentifierToken(responseType));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(createIdentifierToken(variable));
         TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(resTypeBind, bindingPattern);
         SimpleNameReferenceNode init = createSimpleNameReferenceNode(createIdentifierToken(initializer));
-
         return createVariableDeclarationNode(createEmptyNodeList(), null, typedBindingPatternNode,
                 createToken(EQUAL_TOKEN), init, createToken(SEMICOLON_TOKEN));
     }
@@ -605,7 +589,6 @@ public class GeneratorUtils {
      * Generate expressionStatementNode.
      */
     public static ExpressionStatementNode getSimpleExpressionStatementNode(String expression) {
-
         SimpleNameReferenceNode expressionNode = createSimpleNameReferenceNode(
                 createIdentifierToken(expression));
         return createExpressionStatementNode(null, expressionNode, createToken(SEMICOLON_TOKEN));
@@ -1263,8 +1246,34 @@ public class GeneratorUtils {
         return headersSchema;
     }
 
+    public static String replaceContentWithinBrackets(String input, String replacement) {
+        Pattern pattern = Pattern.compile("[\\{\\[].*?[\\}\\]]");
+        Matcher matcher = pattern.matcher(input);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, replacement);
+        }
+        matcher.appendTail(sb);
+        input = sb.toString();
+        if (!input.startsWith(".")) {
+            //Pattern to ignore especial characters
+            //todo: need to improve the regex pattern to capture  abc.json
+            Pattern pattern2 = Pattern.compile("/(?=[^/]*[^a-zA-Z0-9/])(.*?)(?=/)");
+            Matcher matcher2 = pattern2.matcher(input);
+            StringBuffer sb2 = new StringBuffer();
+            while (matcher2.find()) {
+                matcher2.appendReplacement(sb2, "/" + "ZZZ");
+            }
+            matcher2.appendTail(sb2);
+            return sb2.toString();
+        } else {
+            return input;
+        }
+
+    }
+
     public static TypeDescriptorNode generateStatusCodeTypeInclusionRecord(String code, ApiResponse response,
-                                                                           String method, OpenAPI openAPI) {
+                                                                           String method, OpenAPI openAPI, String path) {
         Content responseContent = response.getContent();
         Set<Map.Entry<String, MediaType>> bodyTypeSchema;
         if (Objects.nonNull(responseContent)) {
@@ -1282,30 +1291,12 @@ public class GeneratorUtils {
         }
         Schema headersTypeSchema = getHeadersTypeSchema(response);
 
-        List<TypeDescriptorNode> generatedTypes = new ArrayList<>();
+        HashMap<String, TypeDescriptorNode> generatedTypes = new LinkedHashMap<>();
         if (!code.equals("NoContent")) {
             for (Map.Entry<String, MediaType> mediaTypeEntry : bodyTypeSchema) {
-                String mediaType = selectMediaType(mediaTypeEntry.getKey());
-                TypeDescriptorNode mediaTypeToken = switch (mediaType) {
-                    case io.ballerina.openapi.core.service.GeneratorConstants.APPLICATION_JSON -> {
-                        if (mediaTypeEntry.getValue().getSchema() != null) {
-                            yield TypeHandler.getInstance()
-                                    .getTypeNodeFromOASSchema(mediaTypeEntry.getValue().getSchema()).get();
-                        } else {
-                            yield createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
-                        }
-                    }
-                    case GeneratorConstants.APPLICATION_XML ->
-                            generateTypeDescriptorForXMLContent();
-                    case GeneratorConstants.APPLICATION_URL_ENCODE ->
-                            generateTypeDescriptorForMapStringContent();
-                    case GeneratorConstants.TEXT ->
-                            generateTypeDescriptorForTextContent();
-                    case GeneratorConstants.APPLICATION_OCTET_STREAM ->
-                            generateTypeDescriptorForOctetStreamContent();
-                    default -> createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
-                };
-                generatedTypes.add(mediaTypeToken);
+                TypeDescriptorNode mediaTypeToken = generateTypeDescForToMediaType(openAPI, path,
+                        false, mediaTypeEntry);
+                generatedTypes.put(mediaTypeToken.toString(), mediaTypeToken);
             }
         } else {
             // todo : generate warning
@@ -1314,18 +1305,120 @@ public class GeneratorUtils {
             return TypeHandler.getInstance().createTypeInclusionRecord(code, null,
                     TypeHandler.getInstance().generateHeaderType(headersTypeSchema), method);
         } else if (generatedTypes.size() == 1) {
-            return TypeHandler.getInstance().createTypeInclusionRecord(code, generatedTypes.get(0),
+            return TypeHandler.getInstance().createTypeInclusionRecord(code, generatedTypes.values().stream().toList().get(0),
                     TypeHandler.getInstance().generateHeaderType(headersTypeSchema), method);
         }
         UnionTypeDescriptorNode unionTypeDescriptorNode = null;
-        TypeDescriptorNode leftTypeDesc = generatedTypes.get(0);
-        for (int i = 1; i < generatedTypes.size(); i++) {
-            TypeDescriptorNode rightTypeDesc = generatedTypes.get(i);
+        List<TypeDescriptorNode> generatedTypeList = generatedTypes.values().stream().toList();
+        TypeDescriptorNode leftTypeDesc = generatedTypeList.get(0);
+        for (int i = 1; i < generatedTypeList.size(); i++) {
+            TypeDescriptorNode rightTypeDesc = generatedTypeList.get(i);
             unionTypeDescriptorNode = createUnionTypeDescriptorNode(leftTypeDesc, createToken(PIPE_TOKEN),
                     rightTypeDesc);
             leftTypeDesc = unionTypeDescriptorNode;
         }
         return TypeHandler.getInstance().createTypeInclusionRecord(code, unionTypeDescriptorNode,
                 TypeHandler.getInstance().generateHeaderType(headersTypeSchema), method);
+    }
+
+    public static TypeDescriptorNode generateTypeDescForToMediaType(OpenAPI openAPI, String path, boolean isRequest,
+                                                                    Map.Entry<String, MediaType> mediaTypeEntry) {
+        String mediaType = selectMediaType(mediaTypeEntry.getKey().trim());
+        TypeDescriptorNode mediaTypeToken = switch (mediaType) {
+            case GeneratorConstants.APPLICATION_JSON -> {
+                if (mediaTypeEntry.getValue().getSchema() != null) {
+                    TypeDescriptorNode typeDecNode;
+                    typeDecNode = generateTypeDescriptorForJsonContent(mediaTypeEntry);
+                    if (GeneratorUtils.isMapSchema(mediaTypeEntry.getValue().getSchema())) {
+                        String recordName = getNewStatusCodeRecordName(path, isRequest);
+                        TypeHandler.getInstance().typeDefinitionNodes.put(recordName,
+                                NodeFactory.createTypeDefinitionNode(null, createToken(PUBLIC_KEYWORD),
+                                        createToken(TYPE_KEYWORD), createIdentifierToken(recordName),
+                                        typeDecNode, createToken(SEMICOLON_TOKEN)));
+                        typeDecNode = createSimpleNameReferenceNode(createIdentifierToken(recordName));
+                    }
+                    if (typeDecNode != null) {
+                        yield typeDecNode;
+                    }
+                }
+                yield createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.JSON));
+            }
+            case GeneratorConstants.APPLICATION_XML -> generateTypeDescriptorForXMLContent();
+            case GeneratorConstants.APPLICATION_URL_ENCODE -> generateTypeDescriptorForMapStringContent();
+            case GeneratorConstants.TEXT ->
+                    generateTypeDescriptorForTextContent(openAPI, mediaTypeEntry.getValue().getSchema());
+            case GeneratorConstants.APPLICATION_OCTET_STREAM -> generateTypeDescriptorForOctetStreamContent();
+            default -> null;
+        };
+        if (mediaTypeToken == null) {
+            if (isRequest) {
+                mediaTypeToken = createSimpleNameReferenceNode(createIdentifierToken(HTTP_REQUEST));
+            } else {
+                mediaTypeToken = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
+            }
+        }
+        return mediaTypeToken;
+    }
+
+    public static TypeDescriptorNode generateTypeDescriptorForJsonContent(Map.Entry<String, MediaType> mediaType) {
+        Schema<?> schema = mediaType.getValue().getSchema();
+        Optional<TypeDescriptorNode> typeDescriptorNode = TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
+        return typeDescriptorNode.orElse(null);
+    }
+
+    public static TypeDescriptorNode generateTypeDescriptorForXMLContent() {
+        return getSimpleNameReferenceNode(io.ballerina.openapi.core.service.GeneratorConstants.XML);
+    }
+
+    public static TypeDescriptorNode generateTypeDescriptorForMapStringContent() {
+        return getSimpleNameReferenceNode(io.ballerina.openapi.core.service.GeneratorConstants.MAP_STRING);
+    }
+
+    public static TypeDescriptorNode generateTypeDescriptorForTextContent(OpenAPI openAPI, Schema schema) {
+        if (schema!= null) {
+            if ((schema.getOneOf() != null && schemaHasOnlyPrimitive(schema.getOneOf())) ||
+                    (schema.getAnyOf() != null && schemaHasOnlyPrimitive(schema.getAnyOf()))) {
+                return TypeHandler.getInstance().getTypeNodeFromOASSchema(schema).get();
+            } else if (schema.get$ref() != null) {
+                String schemaRef;
+                try {
+                    schemaRef = GeneratorUtils.getValidName(extractReferenceType(schema.get$ref()), true);
+                } catch (BallerinaOpenApiException e) {
+                    throw new RuntimeException(e);
+                }
+                Schema referencedSchema = openAPI.getComponents().getSchemas().get(schemaRef);
+                if ((referencedSchema.getOneOf() != null && schemaHasOnlyPrimitive(referencedSchema.getOneOf())) ||
+                        (referencedSchema.getAnyOf() != null && schemaHasOnlyPrimitive(referencedSchema.getAnyOf()))) {
+                    return TypeHandler.getInstance().getTypeNodeFromOASSchema(schema).get();
+                }
+            }
+        }
+        return getSimpleNameReferenceNode(io.ballerina.openapi.core.service.GeneratorConstants.STRING);
+    }
+
+    private static boolean schemaHasOnlyPrimitive(List<Schema> schemas) {
+        return schemas.stream().allMatch(schema -> {
+            String schemaType = GeneratorUtils.getOpenAPIType(schema);
+            return schemaType.equals(GeneratorConstants.INTEGER) || schemaType.equals(GeneratorConstants.NUMBER) ||
+                    schemaType.equals(GeneratorConstants.BOOLEAN) || schemaType.equals(GeneratorConstants.STRING);
+        });
+    }
+
+    public static TypeDescriptorNode generateTypeDescriptorForOctetStreamContent() {
+        ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
+                createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+        return createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
+                createIdentifierToken(GeneratorConstants.BYTE)), NodeFactory.createNodeList(dimensionNode));
+    }
+
+    private static TypeDescriptorNode getSimpleNameReferenceNode(String typeName) {
+        return createSimpleNameReferenceNode(createIdentifierToken(typeName));
+    }
+
+    private static String getNewStatusCodeRecordName(String path, boolean isRequest) {
+        String pathRecord = Objects.equals(path, SLASH) || Objects.equals(path, CATCH_ALL_PATH) ? "" :
+                GeneratorUtils.getValidName(path, true);
+        String typeSuffix = isRequest ? GeneratorConstants.REQUEST_RECORD_NAME : RESPONSE_RECORD_NAME;
+        return recordCount == 0 ? pathRecord + typeSuffix  : pathRecord + typeSuffix + "_" + recordCount;
     }
 }

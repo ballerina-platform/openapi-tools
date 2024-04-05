@@ -20,7 +20,7 @@ service /v1 on ep0 {
     # BadRequestAnydata (bad request operation)
     # NotFoundAnydata (bad operation)
     # InternalServerErrorString (error operation)
-    resource function post store/inventory() returns OkJsonXml|BadRequestAnydata|NotFoundAnydata|InternalServerErrorString {
+    resource function post store/inventory() returns OkJsonXml|BadRequestAnydataJsonXml|NotFoundAnydataJsonXml|InternalServerErrorString {
     }
     # Description
     #
