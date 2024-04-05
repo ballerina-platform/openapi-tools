@@ -1,6 +1,7 @@
 package io.ballerina.openapi.core.service;
 
 import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -18,7 +19,7 @@ public class ServiceGenerationHandler {
     private final List<Diagnostic> diagnostics = new ArrayList<>();
 
     public List<GenSrcFile> generateServiceFiles(OASServiceMetadata oasServiceMetadata) throws
-            FormatterException {
+            FormatterException, BallerinaOpenApiException {
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         String mainContent;
         if (oasServiceMetadata.isGenerateOnlyServiceType()) {

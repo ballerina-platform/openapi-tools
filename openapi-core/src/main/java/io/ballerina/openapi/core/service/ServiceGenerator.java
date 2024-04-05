@@ -4,6 +4,7 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.service.resource.ResourceGenerator;
@@ -28,7 +29,7 @@ public abstract class ServiceGenerator {
         this.oasServiceMetadata = oasServiceMetadata;
     }
 
-    public abstract SyntaxTree generateSyntaxTree();
+    public abstract SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException;
 
     public List<Diagnostic> getDiagnostics() {
         return diagnostics;

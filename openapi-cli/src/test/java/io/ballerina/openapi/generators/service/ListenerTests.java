@@ -59,7 +59,7 @@ public class ListenerTests {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("listeners/importors.bal", syntaxTree);
     }
 
-    @Test(description = "Generate listeners", expectedExceptions = OASTypeGenException.class,
+    @Test(description = "Generate listeners", expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Failed to read endpoint details of the server: /v1")
     public void generatelisteners() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners02.yaml");
