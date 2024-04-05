@@ -47,7 +47,8 @@ public class LowResourceFunctionSignatureGenerator extends FunctionSignatureGene
         parameters.add(httpCaller);
         // create parameter `http:Request request`
         parameters.add(createToken(COMMA_TOKEN));
-        RequestBodyGenerator requestBodyGenerator = RequestBodyGenerator.getRequestBodyGenerator(oasServiceMetadata);
+        RequestBodyGenerator requestBodyGenerator = RequestBodyGenerator
+                .getRequestBodyGenerator(oasServiceMetadata, path);
         try {
             RequiredParameterNode requestBodyNode = requestBodyGenerator.createRequestBodyNode(operation.getValue()
                     .getRequestBody());
@@ -58,7 +59,7 @@ public class LowResourceFunctionSignatureGenerator extends FunctionSignatureGene
 
         SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(parameters);
 
-        ReturnTypeGenerator returnTypeGenerator = ReturnTypeGenerator.getReturnTypeGenerator(oasServiceMetadata);
+        ReturnTypeGenerator returnTypeGenerator = ReturnTypeGenerator.getReturnTypeGenerator(oasServiceMetadata, path);
         ReturnTypeDescriptorNode returnTypeDescriptorNode;
         try {
             returnTypeDescriptorNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation, path);

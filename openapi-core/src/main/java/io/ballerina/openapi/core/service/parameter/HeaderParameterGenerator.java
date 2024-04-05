@@ -11,11 +11,12 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.GeneratorConstants;
 import io.ballerina.openapi.core.service.ServiceGenerationUtils;
+import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnostic;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -37,9 +38,10 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameRefe
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
-import static io.ballerina.openapi.core.generators.type.GeneratorUtils.getOpenAPIType;
-import static io.ballerina.openapi.core.generators.type.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.core.generators.type.GeneratorUtils.isArraySchema;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isArraySchema;
 import static io.ballerina.openapi.core.service.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages.OAS_SERVICE_103;
 import static io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages.OAS_SERVICE_104;
@@ -77,9 +79,11 @@ public class HeaderParameterGenerator extends ParameterGenerator {
                 //       name: X-Request-ID
                 //       schema: {}
                 //  </pre>
-                throw new OASTypeGenException(String.format(OAS_SERVICE_106.getDescription(), parameter.getName()));
+                diagnostics.add(new ServiceDiagnostic(OAS_SERVICE_106, parameter.getName()));
+//                throw new OASTypeGenException(String.format(OAS_SERVICE_106.getDescription(), parameter.getName()));
+                headerType = "string";
             } else if (schema.get$ref() != null) {
-                String type = getValidName(ServiceGenerationUtils.extractReferenceType(schema.get$ref()), true);
+                String type = getValidName(extractReferenceType(schema.get$ref()), true);
                 Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
                 if (paramSupportedTypes.contains(getOpenAPIType(refSchema)) || isArraySchema(refSchema)) {
                     headerType = type;
@@ -102,7 +106,7 @@ public class HeaderParameterGenerator extends ParameterGenerator {
                     throw new OASTypeGenException(String.format(OAS_SERVICE_104.getDescription(),
                             parameter.getName()));
                 } else if (items.get$ref() != null) {
-                    String type = getValidName(ServiceGenerationUtils.extractReferenceType(items.get$ref()), true);
+                    String type = getValidName(extractReferenceType(items.get$ref()), true);
                     Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
                     if (paramSupportedTypes.contains(getOpenAPIType(refSchema))) {
                         arrayType = type;
@@ -121,10 +125,6 @@ public class HeaderParameterGenerator extends ParameterGenerator {
                 }
                 BuiltinSimpleNameReferenceNode headerArrayItemTypeName = createBuiltinSimpleNameReferenceNode(
                         null, createIdentifierToken(arrayType));
-                // todo : update this part
-                headerTypeName = null;
-//            headerTypeName = TypeHandler.getInstance().getArrayTypeDescriptorNodeFromTypeDescriptorNode(headerArrayItemTypeName);
-
                 ArrayDimensionNode arrayDimensionNode = NodeFactory.createArrayDimensionNode(
                         createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                         createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));

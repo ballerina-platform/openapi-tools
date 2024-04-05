@@ -27,7 +27,6 @@ import io.ballerina.openapi.core.generators.constraint.ConstraintGeneratorImp;
 import io.ballerina.openapi.core.generators.constraint.ConstraintResult;
 import io.ballerina.openapi.core.generators.document.DocCommentGeneratorImp;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.model.TypeGeneratorResult;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.tools.text.TextDocument;

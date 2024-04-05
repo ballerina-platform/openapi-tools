@@ -21,6 +21,7 @@ package io.ballerina.openapi.core.generators.type;
 import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.generators.AllOfRecordTypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.AnyDataTypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.ArrayTypeGenerator;
@@ -32,7 +33,6 @@ import io.ballerina.openapi.core.generators.type.generators.UnionTypeGenerator;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.media.Schema;
 
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,8 +52,6 @@ public class TypeGeneratorUtils {
             Collections.unmodifiableList(Arrays.asList(
                     GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
                     GeneratorConstants.STRING, GeneratorConstants.BOOLEAN));
-
-    private static final PrintStream OUT_STREAM = System.err;
 
     /**
      * Get SchemaType object relevant to the schema given.

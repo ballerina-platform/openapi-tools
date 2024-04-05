@@ -32,12 +32,12 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.Schema;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.model.RecordMetadata;
 
 import java.io.PrintStream;
@@ -267,25 +267,9 @@ public class RecordTypeGenerator extends TypeGenerator {
         return recordFieldList;
     }
 
-    /**
-     * This function returns record field list with its relevant imports as set of string.
-     * Ex: If the record field has a constraint annotation node, then the type.bal needs its constraint imports
-     * therefore this function makes sure to add relevant imports to the type.bal.
-     */
     public ImmutablePair<List<Node>, Set<String>> updateRecordFieldListWithImports(
             List<String> required, List<Node> recordFieldList, Map.Entry<String, Schema<?>> field,
-            Schema<?> fieldSchema, IdentifierToken fieldName,
-            TypeDescriptorNode fieldTypeName) throws OASTypeGenException {
-
-        return updateRecordFieldListWithImports(required, recordFieldList, field, fieldSchema,
-                fieldName,
-                fieldTypeName, System.err);
-    }
-
-    public ImmutablePair<List<Node>, Set<String>> updateRecordFieldListWithImports(
-            List<String> required, List<Node> recordFieldList, Map.Entry<String, Schema<?>> field,
-            Schema<?> fieldSchema, IdentifierToken fieldName,
-            TypeDescriptorNode fieldTypeName, PrintStream outStream) throws OASTypeGenException {
+            Schema<?> fieldSchema, IdentifierToken fieldName, TypeDescriptorNode fieldTypeName) {
         Set<String> imports = new HashSet<>();
 
         if (required != null) {
@@ -299,10 +283,8 @@ public class RecordTypeGenerator extends TypeGenerator {
     }
 
     private void setRequiredFields(List<String> required, List<Node> recordFieldList,
-                                          Map.Entry<String, Schema<?>> field,
-                                          Schema<?> fieldSchema,
-                                          IdentifierToken fieldName,
-                                          TypeDescriptorNode fieldTypeName) {
+                                          Map.Entry<String, Schema<?>> field, Schema<?> fieldSchema,
+                                          IdentifierToken fieldName, TypeDescriptorNode fieldTypeName) {
 
         if (!required.contains(field.getKey().trim())) {
             if (fieldSchema.getDefault() != null) {
@@ -323,8 +305,8 @@ public class RecordTypeGenerator extends TypeGenerator {
     }
 
     private RecordFieldWithDefaultValueNode getRecordFieldWithDefaultValueNode(Schema<?> fieldSchema,
-                                                                                      IdentifierToken fieldName,
-                                                                                      TypeDescriptorNode fieldTypeName) {
+                                                                               IdentifierToken fieldName,
+                                                                               TypeDescriptorNode fieldTypeName) {
         Token defaultValueToken;
         String defaultValue = fieldSchema.getDefault().toString().trim();
         if (GeneratorUtils.isStringSchema(fieldSchema)) {

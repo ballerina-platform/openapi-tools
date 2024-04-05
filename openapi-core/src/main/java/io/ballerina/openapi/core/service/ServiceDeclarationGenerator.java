@@ -33,8 +33,8 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.tools.text.TextDocument;
@@ -52,7 +52,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.openapi.core.generators.type.GeneratorUtils.escapeIdentifier;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 
 /**
  * This Util class use for generating ballerina service file according to given yaml file.
@@ -87,7 +87,7 @@ public class ServiceDeclarationGenerator extends ServiceGenerator {
             //     treatNilableAsOptional : false
             //}
             MetadataNode metadataNode = null;
-            if (oasServiceMetadata.isNullable()) {
+            if (isNullableRequired) {
                 metadataNode = ServiceGenerationUtils.generateServiceConfigAnnotation();
             }
             TypeDescriptorNode serviceType = null;

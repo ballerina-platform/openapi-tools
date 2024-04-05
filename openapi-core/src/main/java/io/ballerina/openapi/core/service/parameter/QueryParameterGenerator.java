@@ -12,9 +12,9 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.ServiceGenerationUtils;
 import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages;
@@ -37,11 +37,12 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDe
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
-import static io.ballerina.openapi.core.generators.type.GeneratorUtils.getOpenAPIType;
-import static io.ballerina.openapi.core.generators.type.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.core.generators.type.GeneratorUtils.isArraySchema;
-import static io.ballerina.openapi.core.generators.type.GeneratorUtils.isMapSchema;
-import static io.ballerina.openapi.core.generators.type.GeneratorUtils.isObjectSchema;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isArraySchema;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isMapSchema;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isObjectSchema;
 
 public class QueryParameterGenerator extends ParameterGenerator {
 
@@ -68,7 +69,7 @@ public class QueryParameterGenerator extends ParameterGenerator {
             //Todo: will enable when header parameter support objects
             //paramSupportedTypes.add(GeneratorConstants.OBJECT);
             if (schema != null && schema.get$ref() != null) {
-                String type = getValidName(ServiceGenerationUtils.extractReferenceType(schema.get$ref()), true);
+                String type = getValidName(extractReferenceType(schema.get$ref()), true);
                 Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type);
                 return handleReferencedQueryParameter(parameter, refSchema, annotations, parameterName);
             } else if (parameter.getContent() != null) {
@@ -113,11 +114,11 @@ public class QueryParameterGenerator extends ParameterGenerator {
     private RequiredParameterNode handleMapJsonQueryParameter(Parameter parameter, NodeList<AnnotationNode> annotations,
                                                               IdentifierToken parameterName,
                                                               Map.Entry<String, MediaType> mediaTypeEntry)
-            throws OASTypeGenException {
+            throws BallerinaOpenApiException {
 
         Schema<?> parameterSchema;
         if (mediaTypeEntry.getValue().getSchema() != null && mediaTypeEntry.getValue().getSchema().get$ref() != null) {
-            String type = getValidName(ServiceGenerationUtils.extractReferenceType(mediaTypeEntry.getValue()
+            String type = getValidName(extractReferenceType(mediaTypeEntry.getValue()
                     .getSchema().get$ref()), true);
             parameterSchema = (Schema<?>) openAPI.getComponents().getSchemas().get(type.trim());
         } else {
@@ -127,7 +128,7 @@ public class QueryParameterGenerator extends ParameterGenerator {
             return getMapJsonParameterNode(parameterName, parameter, annotations);
         }
         String type = GeneratorUtils.getBallerinaMediaType(mediaTypeEntry.getKey(), false);
-        throw new OASTypeGenException(String.format(ServiceDiagnosticMessages.OAS_SERVICE_102.getDescription(),
+        throw new BallerinaOpenApiException(String.format(ServiceDiagnosticMessages.OAS_SERVICE_102.getDescription(),
                 type));
     }
 

@@ -52,6 +52,10 @@ public class DefaultResourceGenerator extends ResourceGenerator {
         FunctionSignatureGenerator functionSignatureGenerator = FunctionSignatureGenerator
                 .getFunctionSignatureGenerator(oasServiceMetadata);
         FunctionSignatureNode functionSignatureNode = functionSignatureGenerator.getFunctionSignature(operation, path);
+        if (functionSignatureGenerator.isNullableRequired()) {
+            isNullableRequired = true;
+        }
+        diagnostics.addAll(functionSignatureGenerator.getDiagnostics());
         // Function Body Node
         // If path parameter has some special characters, extra body statements are added to handle the complexity.
         List<StatementNode> bodyStatements = GeneratorUtils.generateBodyStatementForComplexUrl(path);
