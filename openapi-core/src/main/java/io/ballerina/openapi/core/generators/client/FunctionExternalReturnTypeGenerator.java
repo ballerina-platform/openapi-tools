@@ -39,8 +39,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
  * @since 1.9.0
  */
 public class FunctionExternalReturnTypeGenerator extends FunctionStatusCodeReturnTypeGenerator {
-    public FunctionExternalReturnTypeGenerator(Operation operation, OpenAPI openAPI, String httpMethod) {
-        super(operation, openAPI, httpMethod);
+    public FunctionExternalReturnTypeGenerator(Operation operation, OpenAPI openAPI, String httpMethod, String path) {
+        super(operation, openAPI, httpMethod, path);
     }
 
     @Override
