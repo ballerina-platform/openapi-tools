@@ -21,6 +21,7 @@ package io.ballerina.openapi.generators.service;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CmdUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
@@ -44,9 +45,8 @@ public class ListenerTests {
     Filter filter = new Filter(list1, list2);
     SyntaxTree syntaxTree;
 
-
     @Test(description = "Generate importors")
-    public void generateImports() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
+    public void generateImports() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -61,7 +61,7 @@ public class ListenerTests {
 
     @Test(description = "Generate listeners", expectedExceptions = OASTypeGenException.class,
             expectedExceptionsMessageRegExp = "Failed to read endpoint details of the server: /v1")
-    public void generatelisteners() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
+    public void generatelisteners() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners02.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -75,7 +75,7 @@ public class ListenerTests {
     }
 
     @Test(description = "Generate listeners")
-    public void generatelisteners02() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
+    public void generatelisteners02() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners03.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -89,7 +89,7 @@ public class ListenerTests {
     }
 
     @Test(description = "Generate listeners when the server url is there and variables are absent")
-    public void generatelisteners03() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
+    public void generatelisteners03() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners04.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -103,7 +103,7 @@ public class ListenerTests {
     }
 
     @Test(description = "Generate listeners when the server url base path is absent")
-    public void generatelisteners04() throws IOException, OASTypeGenException, io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException {
+    public void generatelisteners04() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners05.yaml");
         OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

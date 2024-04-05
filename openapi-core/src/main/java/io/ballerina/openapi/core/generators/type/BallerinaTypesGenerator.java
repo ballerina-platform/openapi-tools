@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
@@ -183,7 +182,12 @@ public class BallerinaTypesGenerator {
             if (qualifiedNodeType.isEmpty()) {
                 continue;
             }
-            qualifiedNodes.add((NameReferenceNode) qualifiedNodeType.get());
+            if (qualifiedNodeType.get() instanceof NameReferenceNode nameReferenceNode) {
+                qualifiedNodes.add(nameReferenceNode);
+            } else {
+                qualifiedNodes.add(createSimpleNameReferenceNode(createIdentifierToken(qualifiedNodeType.get()
+                        .toSourceCode())));
+            }
         }
         NameReferenceNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
         NameReferenceNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);

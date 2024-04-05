@@ -57,7 +57,7 @@ public class QueryParameterGenerator extends ParameterGenerator {
      * <p>
      * Ballerina support query parameter types :
      * type BasicType boolean|int|float|decimal|string ;
-     * public type  QueryParamType <map>json | () |BasicType|BasicType[];
+     * public type  QueryParamType <map>json|()|BasicType|BasicType[];
      */
     @Override
     public ParameterNode generateParameterNode(Parameter parameter) {
