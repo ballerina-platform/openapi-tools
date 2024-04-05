@@ -18,7 +18,6 @@
 package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.InferredTypedescDefaultNode;
-import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeParameterNode;
@@ -50,13 +49,16 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPEDESC_TYPE_DESC;
  * @since 1.9.0
  */
 public class ResourceExternalFunctionSignatureGenerator extends ResourceFunctionSignatureGenerator {
-    public ResourceExternalFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod) {
+    private final String path;
+
+    public ResourceExternalFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod, String path) {
         super(operation, openAPI, httpMethod);
+        this.path = path;
     }
 
     @Override
     protected FunctionReturnTypeGeneratorImp getFunctionReturnTypeGenerator() {
-        return new FunctionExternalReturnTypeGenerator(operation, openAPI, httpMethod);
+        return new FunctionExternalReturnTypeGenerator(operation, openAPI, httpMethod, path);
     }
 
     @Override
@@ -93,18 +95,5 @@ public class ResourceExternalFunctionSignatureGenerator extends ResourceFunction
         parametersInfo.defaultable().add(targetTypeParam);
         parametersInfo.defaultable().add(createToken(COMMA_TOKEN));
         return parametersInfo;
-    }
-
-
-    private void populateTargetTypeParam(List<Node> parameterList, TypeDescriptorNode returnType) {
-        TypeParameterNode returnTypeParam = createTypeParameterNode(createToken(LT_TOKEN), returnType,
-                createToken(GT_TOKEN));
-        TypeDescriptorNode targetType = createParameterizedTypeDescriptorNode(TYPEDESC_TYPE_DESC,
-                createToken(TYPEDESC_KEYWORD), returnTypeParam);
-        InferredTypedescDefaultNode inferredToken = createInferredTypedescDefaultNode(createToken(LT_TOKEN),
-                createToken(GT_TOKEN));
-        ParameterNode inferredTargetType = createDefaultableParameterNode(createEmptyNodeList(), targetType, createIdentifierToken("targetType"),
-                createToken(EQUAL_TOKEN), inferredToken);
-        parameterList.add(inferredTargetType);
     }
 }

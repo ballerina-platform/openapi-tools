@@ -34,15 +34,17 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
  * @since 1.9.0
  */
 public class ImplFunctionSignatureGenerator extends RemoteExternalFunctionSignatureGenerator {
+    private final String path;
 
-    public ImplFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod) {
-        super(operation, openAPI, httpMethod);
+    public ImplFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod, String path) {
+        super(operation, openAPI, httpMethod, path);
         setTreatDefaultableAsRequired();
+        this.path = path;
     }
 
     @Override
     protected FunctionReturnTypeGeneratorImp getFunctionReturnTypeGenerator() {
-        return new FunctionStatusCodeReturnTypeGenerator(operation, openAPI, httpMethod);
+        return new FunctionStatusCodeReturnTypeGenerator(operation, openAPI, httpMethod, path);
     }
 
     @Override

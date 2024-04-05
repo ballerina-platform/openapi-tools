@@ -23,6 +23,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 
+import java.util.HashSet;
 import java.util.List;
 
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.generateStatusCodeTypeInclusionRecord;
@@ -33,16 +34,18 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.generat
  * @since 1.9.0
  */
 public class FunctionStatusCodeReturnTypeGenerator extends FunctionReturnTypeGeneratorImp {
+    private final String path;
 
-    public FunctionStatusCodeReturnTypeGenerator(Operation operation, OpenAPI openAPI, String httpMethod) {
+    public FunctionStatusCodeReturnTypeGenerator(Operation operation, OpenAPI openAPI, String httpMethod, String path) {
         super(operation, openAPI, httpMethod);
+        this.path = path;
     }
 
     @Override
-    protected boolean populateReturnType(String statusCode, ApiResponse response, List<TypeDescriptorNode> returnTypes) {
-        boolean noContentResponseFoundSuper = super.populateReturnType(statusCode, response, returnTypes);
+    protected boolean populateReturnType(String statusCode, ApiResponse response, List<TypeDescriptorNode> returnTypes, HashSet<String> returnTypesSet) {
+        boolean noContentResponseFoundSuper = super.populateReturnType(statusCode, response, returnTypes, returnTypesSet);
         returnTypes.add(generateStatusCodeTypeInclusionRecord(
-                GeneratorConstants.HTTP_CODES_DES.get(statusCode), response, httpMethod , openAPI));
+                GeneratorConstants.HTTP_CODES_DES.get(statusCode), response, httpMethod , openAPI, path));
         return noContentResponseFoundSuper;
     }
 }

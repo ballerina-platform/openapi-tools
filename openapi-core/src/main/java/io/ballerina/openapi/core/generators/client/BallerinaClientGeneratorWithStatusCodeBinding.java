@@ -188,7 +188,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId() + "Impl");
         // Create function signature
         RemoteFunctionSignatureGenerator signatureGenerator = new ImplFunctionSignatureGenerator(operation.getValue(),
-                openAPI, operation.getKey().toString().toLowerCase());
+                openAPI, operation.getKey().toString().toLowerCase(), path);
         //Create function body
         FunctionBodyGeneratorImp functionBodyGenerator = new ImplFunctionBodyGenerator(path, operation, openAPI,
                 authConfigGeneratorImp, ballerinaUtilGenerator);

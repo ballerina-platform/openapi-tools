@@ -29,11 +29,9 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.core.service.GeneratorConstants;
-import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages;
-import io.ballerina.openapi.core.service.ServiceGenerationUtils;
 import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Content;
@@ -45,7 +43,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
@@ -56,10 +53,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDesc
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.generateStatusCodeTypeInclusionRecord;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.selectMediaType;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CATCH_ALL_PATH;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RESPONSE_RECORD_NAME;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.core.service.GeneratorConstants.HTTP_RESPONSE;
 import static io.ballerina.openapi.core.service.GeneratorConstants.RETURNS;
 
@@ -151,7 +144,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             } else if (content == null && (responseValue == null || responseValue.get$ref() == null) ||
                     content != null && content.isEmpty()) {
                 //key and value
-                QualifiedNameReferenceNode node = ServiceGenerationUtils.getQualifiedNameReferenceNode(
+                QualifiedNameReferenceNode node = GeneratorUtils.getQualifiedNameReferenceNode(
                         GeneratorConstants.HTTP, code);
                 typeName = node.toSourceCode();
             } else if (content != null) {
@@ -187,7 +180,8 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
     private TypeDescriptorNode handleMultipleContents(Set<Map.Entry<String, MediaType>> contentEntries) {
         Set<String> qualifiedNodes = new LinkedHashSet<>();
         for (Map.Entry<String, MediaType> contentType : contentEntries) {
-            TypeDescriptorNode mediaTypeToken = getReturnNodeForSchemaType(contentType);
+            TypeDescriptorNode mediaTypeToken = GeneratorUtils.generateTypeDescForToMediaType(oasServiceMetadata
+                    .getOpenAPI(), path, false, contentType);
             if (mediaTypeToken == null) {
                 SimpleNameReferenceNode httpResponse = createSimpleNameReferenceNode(createIdentifierToken(
                         GeneratorConstants.ANYDATA));

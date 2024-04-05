@@ -42,7 +42,6 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSepara
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getBallerinaMediaType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.replaceContentWithinBrackets;
@@ -72,6 +71,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
         ModulePartNode modulePartNode = (ModulePartNode) rootNode;
         NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
         AtomicInteger index = new AtomicInteger();
+        List<ModuleMemberDeclarationNode> updatedMembers = new ArrayList<>();
         members.forEach(member -> {
             if (member.kind().equals(SyntaxKind.CLASS_DEFINITION)) {
                 ClassDefinitionNode classDef = (ClassDefinitionNode) member;
@@ -109,13 +109,15 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                         updatedList.isEmpty()? classDef.members() : createNodeList(updatedList),
                         classDef.closeBrace(),
                         classDef.semicolonToken().orElse(null));
+                member = classDef;
 
-                NodeList<ModuleMemberDeclarationNode> clientMembers = AbstractNodeFactory.createNodeList(classDef);
-                ModulePartNode updatedmodulePartNode = modulePartNode.modify(modulePartNode.imports(), clientMembers,
-                        modulePartNode.eofToken());
-
-                syntaxTree = syntaxTree.modifyWith(updatedmodulePartNode);
             }
+            updatedMembers.add(member);
+            NodeList<ModuleMemberDeclarationNode> clientMembers = AbstractNodeFactory.createNodeList(updatedMembers);
+            ModulePartNode updatedmodulePartNode = modulePartNode.modify(modulePartNode.imports(), clientMembers,
+                    modulePartNode.eofToken());
+
+            syntaxTree = syntaxTree.modifyWith(updatedmodulePartNode);
         });
         return syntaxTree;
     }

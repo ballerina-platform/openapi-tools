@@ -299,7 +299,7 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param fileName input resource file
      */
     private void openApiToBallerina(String fileName, Filter filter) throws IOException {
-        boolean skipDependecyUpdate = false;
+        boolean skipDependecyUpdate = true;
         if (statusCodeBinding && Objects.nonNull(ballerinaTomlPath)) {
             skipDependecyUpdate = clientNativeDependencyAlreadyExist(getVersion());
         }
