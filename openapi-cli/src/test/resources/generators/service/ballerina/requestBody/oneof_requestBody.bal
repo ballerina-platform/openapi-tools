@@ -34,7 +34,7 @@ service / on ep0 {
     # + return - returns can be any of following types
     # http:Ok (Successful operation.)
     # http:BadRequest (Invalid storage space name supplied)
-    resource function put pet/[string name](@http:Payload Pet_name_body payload) returns http:Ok|http:BadRequest {
+    resource function put pet/[string name](@http:Payload string payload) returns http:Ok|http:BadRequest {
     }
     # Description
     #

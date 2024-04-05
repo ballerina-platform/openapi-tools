@@ -66,8 +66,6 @@ import static io.ballerina.openapi.core.service.GeneratorConstants.RETURNS;
  */
 public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
 
-    private static int recordCount = 0;
-
     public DefaultReturnTypeGenerator(OASServiceMetadata oasServiceMetadata, String path) {
         super(oasServiceMetadata, path);
     }

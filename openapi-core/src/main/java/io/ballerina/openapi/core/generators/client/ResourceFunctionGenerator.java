@@ -49,34 +49,28 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
         this.ballerinaUtilGenerator = ballerinaUtilGenerator;
     }
     @Override
-    public Optional<FunctionDefinitionNode> generateFunction() {
-
+    public Optional<FunctionDefinitionNode> generateFunction() throws BallerinaOpenApiException {
         //Create qualifier list
         NodeList<Token> qualifierList = createNodeList(createToken(RESOURCE_KEYWORD), createToken(ISOLATED_KEYWORD));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(operation.getKey().toString().toLowerCase());
         // create relative path
-        try {
-            NodeList<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
-                    null, openAPI.getComponents(), false);
-            // Create function signature
-            ResourceFunctionSingnatureGenerator signatureGenerator = new ResourceFunctionSingnatureGenerator(
-                    operation.getValue(), openAPI);
-            //Create function body
-            FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
-                    authConfigGeneratorImp, ballerinaUtilGenerator);
-            Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
-            if (functionBodyNodeResult.isEmpty()) {
-                return Optional.empty();
-            }
-            FunctionBodyNode functionBodyNode = functionBodyNodeResult.get();
-            return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, null,
-                    qualifierList, functionKeyWord, functionName, relativeResourcePath,
-                    signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
-        } catch (BallerinaOpenApiException e) {
-            //todo diagnostic
+        NodeList<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
+                null, openAPI.getComponents(), false);
+        // Create function signature
+        ResourceFunctionSingnatureGenerator signatureGenerator = new ResourceFunctionSingnatureGenerator(
+                operation.getValue(), openAPI);
+        //Create function body
+        FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
+                authConfigGeneratorImp, ballerinaUtilGenerator);
+        Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
+        if (functionBodyNodeResult.isEmpty()) {
             return Optional.empty();
         }
+        FunctionBodyNode functionBodyNode = functionBodyNodeResult.get();
+        return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, null,
+                qualifierList, functionKeyWord, functionName, relativeResourcePath,
+                signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
     }
 
     @Override

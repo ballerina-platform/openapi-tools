@@ -305,12 +305,9 @@ public class QueryParameterGenerator extends ParameterGenerator {
                 return createStringArrayParameterNode(parameterName);
             }
         } else {
-            // todo : update this part
             Optional<TypeDescriptorNode> typeDescriptorNode = TypeHandler.getInstance()
                     .getTypeNodeFromOASSchema(schema, true);
             Token name = createIdentifierToken(typeDescriptorNode.get().toSourceCode());
-
-
             BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
             if (getOpenAPIType(schema).equals(STRING)) {
                 return createDefaultableParameterNode(createEmptyNodeList(), rTypeName, parameterName,

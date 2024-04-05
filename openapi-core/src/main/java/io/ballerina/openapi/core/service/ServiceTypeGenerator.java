@@ -31,6 +31,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
@@ -64,7 +65,7 @@ public class ServiceTypeGenerator extends ServiceGenerator {
     }
 
     @Override
-    public SyntaxTree generateSyntaxTree() {
+    public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
         // TODO: Check the possibility of having imports other than `ballerina/http`
         NodeList<ImportDeclarationNode> imports = ServiceGenerationUtils.createImportDeclarationNodes();
         NodeList<ModuleMemberDeclarationNode> moduleMembers = createNodeList(generateServiceObject());
@@ -76,7 +77,7 @@ public class ServiceTypeGenerator extends ServiceGenerator {
         return syntaxTree.modifyWith(modulePartNode);
     }
 
-    private TypeDefinitionNode generateServiceObject() {
+    private TypeDefinitionNode generateServiceObject() throws BallerinaOpenApiException {
         List<Node> serviceObjectMemberNodes = new ArrayList<>();
         TypeReferenceNode httpServiceTypeRefNode = createTypeReferenceNode(createToken(ASTERISK_TOKEN),
                 createIdentifierToken("http:Service"), createToken(SEMICOLON_TOKEN));

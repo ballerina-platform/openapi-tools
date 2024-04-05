@@ -49,13 +49,9 @@ public class LowResourceFunctionSignatureGenerator extends FunctionSignatureGene
         parameters.add(createToken(COMMA_TOKEN));
         RequestBodyGenerator requestBodyGenerator = RequestBodyGenerator
                 .getRequestBodyGenerator(oasServiceMetadata, path);
-        try {
-            RequiredParameterNode requestBodyNode = requestBodyGenerator.createRequestBodyNode(operation.getValue()
-                    .getRequestBody());
-            parameters.add(requestBodyNode);
-        } catch (OASTypeGenException e) {
-            throw new RuntimeException(e);
-        }
+        RequiredParameterNode requestBodyNode = requestBodyGenerator.createRequestBodyNode(operation.getValue()
+                .getRequestBody());
+        parameters.add(requestBodyNode);
 
         SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(parameters);
 

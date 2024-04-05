@@ -7,7 +7,7 @@ service / on ep0 {
     #
     # + payload - parameter description
     # + return - Success
-    resource function post api/HistoricoSimulacao/AddHistorico(@http:Payload record {|string...;|}|record {|HistoricoSimulacaoViewModel...;|}|record {|record {|string...;|}...;|} payload) returns http:Ok {
+    resource function post api/HistoricoSimulacao/AddHistorico(@http:Payload ApiHistoricosimulacaoAddhistoricoRequest|ApiHistoricosimulacaoAddhistoricoRequest_1|ApiHistoricosimulacaoAddhistoricoRequest_2 payload) returns http:Ok {
     }
     # Description
     #

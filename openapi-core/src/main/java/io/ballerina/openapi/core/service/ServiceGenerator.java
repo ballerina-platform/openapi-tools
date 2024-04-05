@@ -35,7 +35,7 @@ public abstract class ServiceGenerator {
         return diagnostics;
     }
 
-    List<Node> createResourceFunctions(OpenAPI openApi, Filter filter) {
+    List<Node> createResourceFunctions(OpenAPI openApi, Filter filter) throws BallerinaOpenApiException {
         List<Node> functions = new ArrayList<>();
         if (!openApi.getPaths().isEmpty()) {
             Paths paths = openApi.getPaths();
@@ -51,7 +51,8 @@ public abstract class ServiceGenerator {
     }
 
     private List<Node> applyFiltersForOperations(Filter filter, String path,
-                                                 Map<PathItem.HttpMethod, Operation> operationMap) {
+                                                 Map<PathItem.HttpMethod, Operation> operationMap)
+            throws BallerinaOpenApiException {
         List<Node> functions = new ArrayList<>();
         for (Map.Entry<PathItem.HttpMethod, Operation> operation : operationMap.entrySet()) {
             //Add filter availability
@@ -75,8 +76,7 @@ public abstract class ServiceGenerator {
                     }
                 }
             } else {
-                FunctionDefinitionNode resourceFunction = resourceGenerator
-                        .generateResourceFunction(operation, path);
+                FunctionDefinitionNode resourceFunction = resourceGenerator.generateResourceFunction(operation, path);
                 diagnostics.addAll(resourceGenerator.getDiagnostics());
                 functions.add(resourceFunction);
             }

@@ -1,6 +1,7 @@
 package io.ballerina.openapi.core.service.resource;
 
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnostic;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.Operation;
@@ -32,7 +33,7 @@ public abstract class ResourceGenerator {
     }
 
     public abstract FunctionDefinitionNode generateResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                                    String path);
+                                                                    String path) throws BallerinaOpenApiException;
 
     public List<ServiceDiagnostic> getDiagnostics() {
         return diagnostics;

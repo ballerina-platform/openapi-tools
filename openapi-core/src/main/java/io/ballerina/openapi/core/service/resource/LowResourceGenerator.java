@@ -33,7 +33,7 @@ public class LowResourceGenerator extends ResourceGenerator {
 
     @Override
     public FunctionDefinitionNode generateResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                           String path) {
+                                                           String path) throws BallerinaOpenApiException {
         NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(GeneratorConstants.RESOURCE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
         Token functionKeyWord = createIdentifierToken(GeneratorConstants.FUNCTION, GeneratorUtils.SINGLE_WS_MINUTIAE,
@@ -41,12 +41,8 @@ public class LowResourceGenerator extends ResourceGenerator {
         IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
                 .toLowerCase(Locale.ENGLISH), GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
         NodeList<Node> relativeResourcePath;
-        try {
-            relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(), null,
-                    oasServiceMetadata.getOpenAPI().getComponents(), oasServiceMetadata.generateWithoutDataBinding());
-        } catch (BallerinaOpenApiException e) {
-            throw new RuntimeException(e);
-        }
+        relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(), null,
+                oasServiceMetadata.getOpenAPI().getComponents(), oasServiceMetadata.generateWithoutDataBinding());
         FunctionSignatureGenerator functionSignatureGenerator = FunctionSignatureGenerator
                 .getFunctionSignatureGenerator(oasServiceMetadata);
         FunctionSignatureNode functionSignatureNode = functionSignatureGenerator.getFunctionSignature(operation, path);
