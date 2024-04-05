@@ -1,6 +1,5 @@
 import ballerina/http;
 
-
 public isolated client class Client {
     final http:Client clientEp;
     final readonly & ApiKeysConfig apiKeyConfig;
@@ -10,17 +9,8 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-        public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config = {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
-        http:ClientConfiguration httpClientConfig = {
-            httpVersion: config.httpVersion,
-            timeout: config.timeout,
-            forwarded: config.forwarded,
-            poolConfig: config.poolConfig,
-            compression: config.compression,
-            circuitBreaker: config.circuitBreaker,
-            retryConfig: config.retryConfig,
-            validation: config.validation
-        };
+    public isolated function init(ApiKeysConfig apiKeyConfig, string serviceUrl = "http://petstore.openapi.io/v1", ConnectionConfig config =  {}) returns error? {
+        http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
                 ClientHttp1Settings settings = check config.http1Settings.ensureType(ClientHttp1Settings);
@@ -49,15 +39,15 @@ public isolated client class Client {
     }
     # Info for a specific pet
     #
-    # + xRequestId - Tests header 01
-    # + xRequestClient - Tests header 02
-    # + xRequestPet - Tests header 03
+    # + X\-Request\-ID - Tests header 01
+    # + X\-Request\-Client - Tests header 02
+    # + X\-Request\-Pet - Tests header 03
     # + return - Expected response to a valid request
     remote isolated function showPetById(string xRequestId, string[] xRequestClient, Pet[] xRequestPet) returns http:Response|error {
         string resourcePath = string `/pets`;
         map<any> headerValues = {"X-Request-ID": xRequestId, "X-Request-Client": xRequestClient, "X-Request-Pet": xRequestPet, "X-API-KEY": self.apiKeyConfig.xApiKey};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        http:Response response = check self.clientEp-> get(resourcePath, httpHeaders);
+        http:Response response = check self.clientEp->get(resourcePath, httpHeaders);
         return response;
     }
 }

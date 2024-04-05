@@ -1273,7 +1273,22 @@ public class GeneratorUtils {
             matcher.appendReplacement(sb, replacement);
         }
         matcher.appendTail(sb);
-        return sb.toString();
+        input = sb.toString();
+        if (!input.startsWith(".")) {
+            //Pattern to ignore especial characters
+            //todo: need to improve the regex pattern to capture  abc.json
+            Pattern pattern2 = Pattern.compile("/(?=[^/]*[^a-zA-Z0-9/])(.*?)(?=/)");
+            Matcher matcher2 = pattern2.matcher(input);
+            StringBuffer sb2 = new StringBuffer();
+            while (matcher2.find()) {
+                matcher2.appendReplacement(sb2, "/" + "ZZZ");
+            }
+            matcher2.appendTail(sb2);
+            return sb2.toString();
+        } else {
+            return input;
+        }
+
     }
     
     public static TypeDescriptorNode generateStatusCodeTypeInclusionRecord(Map.Entry<String, ApiResponse> response,

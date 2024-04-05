@@ -63,10 +63,10 @@
 <!--            <class name="io.ballerina.openapi.generators.service.QueryParameterTests"/>-->
 <!--            <class name="io.ballerina.openapi.generators.service.HeaderParameterTests"/>-->
             <class name="io.ballerina.openapi.generators.service.ServiceDiagnosticTests"/>
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.ImportsTests"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.BallerinaDiagnosticTests"/>&ndash;&gt;-->
+            <class name="io.ballerina.openapi.generators.client.ImportsTests"/>
+<!--            <class name="io.ballerina.openapi.generators.client.BallerinaDiagnosticTests"/>-->
             <class name="io.ballerina.openapi.generators.client.ComparedGeneratedFileTests"/>
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.AnnotationTests"/>&ndash;&gt;-->
+            <class name="io.ballerina.openapi.generators.client.AnnotationTests"/>
             <class name="io.ballerina.openapi.generators.client.FunctionBodyNodeTests"/>
             <class name="io.ballerina.openapi.generators.client.FunctionSignatureNodeTests"/>
             <class name="io.ballerina.openapi.generators.client.FunctionSignatureReturnTypeTests"/>
@@ -74,12 +74,12 @@
             <class name="io.ballerina.openapi.generators.client.HeadersTests"/>
 <!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.PathParameterTests"/>&ndash;&gt;-->
             <class name="io.ballerina.openapi.generators.client.AllOfResponsesTests"/>
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.QueryParameterTests"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.NoServerURLTest"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.RemoteFunctionNameValidationTests"/>&ndash;&gt;-->
+            <class name="io.ballerina.openapi.generators.client.QueryParameterTests"/>
+            <class name="io.ballerina.openapi.generators.client.NoServerURLTest"/>
+            <class name="io.ballerina.openapi.generators.client.RemoteFunctionNameValidationTests"/>
 <!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.RequestBodyTests"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.UtilGenerationTests"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.ResourceFunctionTests"/>&ndash;&gt;-->
+            <class name="io.ballerina.openapi.generators.client.UtilGenerationTests"/>
+            <class name="io.ballerina.openapi.generators.client.ResourceFunctionTests"/>
             <class name="io.ballerina.openapi.generators.client.EnumGenerationTests"/>
 <!--            <class name="io.ballerina.openapi.generators.auth.HttpAuthTests"/>-->
 <!--            <class name="io.ballerina.openapi.generators.auth.OAuth2Tests"/>-->
@@ -109,10 +109,11 @@
 <!--            <class name="io.ballerina.openapi.generators.schema.NegativeConstraintTests"/>-->
 <!--            <class name="io.ballerina.openapi.generators.schema.TypeFormatTests"/>-->
 <!--            <class name="io.ballerina.openapi.generators.testcases.BallerinaTestGeneratorTests"/>-->
-<!--            <class name="io.ballerina.openapi.generators.client.OneOfResponsesTests"/>-->
+            <class name="io.ballerina.openapi.generators.client.OneOfResponsesTests"/>
 <!--            <class name="io.ballerina.openapi.generators.openapi.DataTypeTests"/>-->
 <!--            <class name="io.ballerina.openapi.generators.openapi.NegativeResponseTests"/>-->
 <!--            &lt;!&ndash;            <class name="io.ballerina.openapi.generators.schema.SwaggerParserTests"/>&ndash;&gt;-->
+            <class name="io.ballerina.openapi.generators.common.DocCommenTests"/>
         </classes>
     </test>
 </suite>
