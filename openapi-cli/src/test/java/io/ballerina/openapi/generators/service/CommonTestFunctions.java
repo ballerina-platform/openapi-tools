@@ -18,18 +18,12 @@
 
 package io.ballerina.openapi.generators.service;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.tools.diagnostics.Diagnostic;
-import org.ballerinalang.formatter.core.Formatter;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,43 +41,14 @@ public class CommonTestFunctions {
         expectedServiceLines.close();
         return expectedServiceContent;
     }
-    static int i = 0;
+
     public static void compareGeneratedSyntaxTreewithExpectedSyntaxTree(String balfile, SyntaxTree syntaxTree)
             throws IOException {
         String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve("generators/service/ballerina"),
                 balfile);
         String generatedSyntaxTree = syntaxTree.toString();
-
-        String yamlFileName = balfile.split("/")[balfile.split("/").length - 1];
-        File f = new File("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i);
-        f.mkdir();
-        FileWriter myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i
-                + "/generatedservicefile" + i + ".bal");
-        try {
-            myWriter.write(Formatter.format(syntaxTree).toSourceCode());
-        } catch (FormatterException e) {
-            throw new RuntimeException(e);
-        }
-        myWriter.close();
-
-        myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i +
-                "/expectedfile" + i + ".bal");
-        myWriter.write((expectedBallerinaContent.trim()).replaceAll("#.*[+*a\\n]", ""));
-        myWriter.close();
-        myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i + "/Ballerina.toml");
-        myWriter.write("");
-        myWriter.close();
-        i++;
-
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
-        expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("#.*[+*a\\n]", "").replaceAll("\\s+", "");
+        expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
-    }
-
-    public static void compareDiagnosticWarnings(List<Diagnostic> diagnosticList, String... expectedDiagnostics) {
-        Assert.assertEquals(diagnosticList.size(), expectedDiagnostics.length);
-        for (int i = 0; i < diagnosticList.size(); i++) {
-            Assert.assertEquals(diagnosticList.get(i).message(), expectedDiagnostics[i]);
-        }
     }
 }
