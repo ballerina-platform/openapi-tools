@@ -24,7 +24,6 @@ import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiExc
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
 
@@ -58,9 +57,7 @@ public class HeaderParameterTests {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_01.bal", syntaxTree);
     }
 
-    @Test(description = "02. Required header parameter without header data type",
-            expectedExceptions = OASTypeGenException.class,
-            expectedExceptionsMessageRegExp = "Header 'x-request-id' with no header type can not be mapped to the.*")
+    @Test(description = "02. Required header parameter without header data type")
     public void requiredHeaderWithNoHeaderType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_02.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -72,6 +69,8 @@ public class HeaderParameterTests {
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header.bal", syntaxTree);
+        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+                "Header 'x-request-id' with no header type can not be mapped to the Ballerina headers.");
     }
 
     @Test(description = "03. Header parameter with integer header data type")
@@ -88,10 +87,7 @@ public class HeaderParameterTests {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_03.bal", syntaxTree);
     }
 
-    @Test(description = "04. Header parameter with array type with no item type",
-            expectedExceptions = OASTypeGenException.class,
-            expectedExceptionsMessageRegExp = "Header 'x-request-id' with no array item type can not be mapped " +
-                    "as a valid Ballerina header parameter.*")
+    @Test(description = "04. Header parameter with array type with no item type")
     public void headerNoItemType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_04.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -102,7 +98,10 @@ public class HeaderParameterTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header.bal", syntaxTree);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_04.bal", syntaxTree);
+        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+                "Header 'x-request-id' with no array item type can " +
+                        "not be mapped as a valid Ballerina header parameter.");
     }
 
     @Test(description = "05. Header parameter has array type with integer item type")
@@ -232,10 +231,7 @@ public class HeaderParameterTests {
                 "headers/header_with_reference.bal", syntaxTree);
     }
 
-    @Test(description = "14. Header parameter with invalid reference",
-            expectedExceptions = OASTypeGenException.class,
-            expectedExceptionsMessageRegExp = "Header 'X-User' with type 'object' can not be " +
-                    "mapped as a valid Ballerina header parameter.*")
+    @Test(description = "14. Header parameter with invalid reference")
     public void parametersWithInvalidReferences() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_with_invalid_ref.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -246,12 +242,11 @@ public class HeaderParameterTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+                "Header 'X-User' with type 'object' can not be mapped as a valid Ballerina header parameter.");
     }
 
-    @Test(description = "15. Header parameter with invalid array reference with record type",
-            expectedExceptions = OASTypeGenException.class,
-            expectedExceptionsMessageRegExp = "Header 'X-Users' with array item type: 'User'" +
-                    " is not supported in Ballerina.*")
+    @Test(description = "15. Header parameter with invalid array reference with record type")
     public void parametersWithInvalidarrayReferences() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_with_invalid_array_ref.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -262,12 +257,11 @@ public class HeaderParameterTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+                "Header 'X-Users' with array item type: 'User' is not supported in Ballerina.");
     }
 
-    @Test(description = "16. Header parameter with invalid type (object)",
-            expectedExceptions = OASTypeGenException.class,
-            expectedExceptionsMessageRegExp = "Header 'X-User' with type 'object' can not be mapped as a " +
-                    "valid Ballerina header parameter.*")
+    @Test(description = "16. Header parameter with invalid type (object)")
     public void parametersWithInvalidInlineObjectType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_record_type.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -278,12 +272,11 @@ public class HeaderParameterTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+                "Header 'X-User' with type 'object' can not be mapped as a valid Ballerina header parameter.");
     }
 
-    @Test(description = "17. Header parameter with invalid array type (object)",
-            expectedExceptions = OASTypeGenException.class,
-            expectedExceptionsMessageRegExp = "Header 'X-User' with array item type: 'object' " +
-                    "is not supported in Ballerina.*")
+    @Test(description = "17. Header parameter with invalid array type (object)")
     public void parametersWithInvalidObjectTypeArray() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_with_invalid_object.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -294,12 +287,11 @@ public class HeaderParameterTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+                "Header 'X-User' with array item type: 'object' is not supported in Ballerina.");
     }
 
-    @Test(description = "18. Header parameter with invalid type (empty object)",
-            expectedExceptions = OASTypeGenException.class,
-            expectedExceptionsMessageRegExp = "Header 'X-User' with type 'object' can not be mapped " +
-                    "as a valid Ballerina header parameter.*")
+    @Test(description = "18. Header parameter with invalid type (empty object)")
     public void parametersWithInvalidEmptyObjectType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_with_invalid_type.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -310,5 +302,7 @@ public class HeaderParameterTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+                "Header 'X-User' with type 'object' can not be mapped as a valid Ballerina header parameter.");
     }
 }

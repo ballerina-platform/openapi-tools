@@ -5,30 +5,24 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.model.Filter;
-import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
-import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnostic;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.service.resource.ResourceGenerator;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
-import org.ballerinalang.formatter.core.Formatter;
-import org.ballerinalang.formatter.core.FormatterException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_FILE_HEADER;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
-
 public abstract class ServiceGenerator {
 
     final OASServiceMetadata oasServiceMetadata;
     boolean isNullableRequired;
-    private final List<ServiceDiagnostic> diagnostics = new ArrayList<>();
+    private final List<Diagnostic> diagnostics = new ArrayList<>();
 
     public ServiceGenerator(OASServiceMetadata oasServiceMetadata) {
         this.oasServiceMetadata = oasServiceMetadata;
@@ -36,7 +30,7 @@ public abstract class ServiceGenerator {
 
     public abstract SyntaxTree generateSyntaxTree();
 
-    public List<ServiceDiagnostic> getDiagnostics() {
+    public List<Diagnostic> getDiagnostics() {
         return diagnostics;
     }
 

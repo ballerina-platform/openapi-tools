@@ -92,7 +92,7 @@ public class BallerinaCodeGenerator {
     private String srcPackage;
     private String licenseHeader = "";
     private boolean includeTestFiles;
-    List<Diagnostic> diagnostics = new ArrayList<>();
+    private List<Diagnostic> diagnostics = new ArrayList<>();
 
     private static final PrintStream outStream = System.out;
 
@@ -275,6 +275,7 @@ public class BallerinaCodeGenerator {
         if (genFiles.isEmpty()) {
             return;
         }
+        diagnostics.forEach(outStream::println);
         writeGeneratedSources(genFiles, srcPath, implPath, GEN_SERVICE);
     }
 
@@ -373,7 +374,7 @@ public class BallerinaCodeGenerator {
         // Validate the service generation
         List<String> complexPaths = GeneratorUtils.getComplexPaths(openAPIDef);
         if (!complexPaths.isEmpty()) {
-            outStream.println("WARNING: remote function(s) will be generated for client due to the given openapi " +
+            outStream.println("WARNING: remote function(s) will be generated for client as the given openapi " +
                     "definition contains following complex path(s):");
             for (String path: complexPaths) {
                 outStream.println(path);
@@ -492,15 +493,8 @@ public class BallerinaCodeGenerator {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME,
                     (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaSyntaxTree));
         }
-        addServiceDiagnosticsToDiagnosticList(serviceGenerationHandler.getDiagnostics());
+        this.diagnostics.addAll(serviceGenerationHandler.getDiagnostics());
         return sourceFiles;
-    }
-
-    private void addServiceDiagnosticsToDiagnosticList(List<ServiceDiagnostic> serviceDiagnostics) {
-        for (ServiceDiagnostic serviceDiagnostic : serviceDiagnostics) {
-
-//            this.diagnostics.add(diagnostic.getDiagnostic());
-        }
     }
 
     /**
