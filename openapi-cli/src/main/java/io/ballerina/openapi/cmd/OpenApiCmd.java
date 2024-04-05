@@ -299,6 +299,10 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param fileName input resource file
      */
     private void openApiToBallerina(String fileName, Filter filter) throws IOException {
+        boolean skipDependecyUpdate = false;
+        if (statusCodeBinding && Objects.nonNull(ballerinaTomlPath)) {
+            skipDependecyUpdate = clientNativeDependencyAlreadyExist(getVersion());
+        }
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         generator.setLicenseHeader(this.setLicenseHeader());
         generator.setIncludeTestFiles(this.includeTestFiles);
@@ -329,20 +333,20 @@ public class OpenApiCmd implements BLauncherCmd {
         } else {
             generateBothFiles(generator, serviceName, resourcePath, filter, clientResourceMode, statusCodeBinding);
         }
-        if (statusCodeBinding && Objects.nonNull(ballerinaTomlPath)) {
+        if (!skipDependecyUpdate) {
             updateBallerinaTomlWithClientNativeDependency();
         }
     }
 
     /**
      * This util is to take the resource Path.
-     * 
+     *
      * @param resourceFile      resource file path
      * @return path of given resource file
      */
     public Path getRelativePath(File resourceFile, String targetOutputPath) {
         Path resourcePath = Paths.get(resourceFile.getAbsoluteFile().getParentFile().toString());
-        Path targetPath = Paths.get(targetOutputPath).toAbsolutePath();        
+        Path targetPath = Paths.get(targetOutputPath).toAbsolutePath();
         try {
             Path relativePath = targetPath.relativize(resourcePath);
             return relativePath.resolve(resourceFile.getName());
@@ -454,10 +458,6 @@ public class OpenApiCmd implements BLauncherCmd {
     private void updateBallerinaTomlWithClientNativeDependency() {
         try {
             String version = getVersion();
-            if (checkForExistingClientNativeDependency(version)) {
-                return;
-            }
-
             TextDocument configDocument = TextDocuments.from(Files.readString(ballerinaTomlPath));
             SyntaxTree syntaxTree = SyntaxTree.from(configDocument);
             DocumentNode rootNode = syntaxTree.rootNode();
@@ -482,7 +482,7 @@ public class OpenApiCmd implements BLauncherCmd {
         }
     }
 
-    private boolean checkForExistingClientNativeDependency(String version) {
+    private boolean clientNativeDependencyAlreadyExist(String version) {
         Project project = ProjectLoader.loadProject(executionPath);
         Map<String, Platform> platforms = project.currentPackage().manifest().platforms();
         if (Objects.nonNull(platforms) && platforms.containsKey("java17")) {

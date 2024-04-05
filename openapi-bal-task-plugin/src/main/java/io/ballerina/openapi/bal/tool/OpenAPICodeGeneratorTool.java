@@ -17,7 +17,6 @@
  */
 package io.ballerina.openapi.bal.tool;
 
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGeneratorWithStatusCodeBinding;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
@@ -40,6 +39,7 @@ import io.ballerina.toml.syntax.tree.DocumentMemberDeclarationNode;
 import io.ballerina.toml.syntax.tree.DocumentNode;
 import io.ballerina.toml.syntax.tree.NodeFactory;
 import io.ballerina.toml.syntax.tree.NodeList;
+import io.ballerina.toml.syntax.tree.SyntaxTree;
 import io.ballerina.toml.syntax.tree.Token;
 import io.ballerina.toml.validator.SampleNodeGenerator;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
@@ -296,6 +296,16 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     private void generateClient(ToolContext toolContext, ImmutablePair<OASClientConfig,
             OASServiceMetadata> codeGeneratorConfig, Location location) throws BallerinaOpenApiException, IOException,
             FormatterException, ClientException {
+        boolean skipDependecyUpdate = true;
+        if (getStatusCodeBindingOption(toolContext)) {
+            try {
+                skipDependecyUpdate = clientNativeDependencyAlreadyExist(getVersion(), toolContext, location);
+            } catch (BallerinaOpenApiException e) {
+                createDiagnostics(toolContext, Constants.DiagnosticMessages.CLIENT_NATIVE_DEPENDENCY_VERSION_MISMATCH,
+                        location);
+                return;
+            }
+        }
         OASClientConfig clientConfig = codeGeneratorConfig.getLeft();
         List<GenSrcFile> sources = generateClientFiles(clientConfig,
                 codeGeneratorConfig.getLeft().isStatusCodeBinding());
@@ -308,23 +318,23 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 CACHE_FILE, hashOpenAPI);
         sourcesForCache.add(genSrcFile);
         writeGeneratedSources(sourcesForCache, cachePath);
-        if (toolContext.options().containsKey(STATUS_CODE_BINDING) &&
-                toolContext.options().get(STATUS_CODE_BINDING).value().toString().contains(TRUE)) {
+        if (!skipDependecyUpdate) {
             updateBallerinaTomlWithClientNativeDependency(toolContext,
                     toolContext.currentPackage().project().sourceRoot().resolve("Ballerina.toml"), location);
         }
+    }
+
+    private static boolean getStatusCodeBindingOption(ToolContext toolContext) {
+        return toolContext.options().containsKey(STATUS_CODE_BINDING) &&
+                toolContext.options().get(STATUS_CODE_BINDING).value().toString().contains(TRUE);
     }
 
     private void updateBallerinaTomlWithClientNativeDependency(ToolContext toolContext, Path ballerinaTomlPath,
                                                                Location location) {
         try {
             String version = getVersion();
-            if (checkForExistingClientNativeDependency(version, toolContext, location)) {
-                return;
-            }
-
             TextDocument configDocument = TextDocuments.from(Files.readString(ballerinaTomlPath));
-            io.ballerina.toml.syntax.tree.SyntaxTree syntaxTree = io.ballerina.toml.syntax.tree.SyntaxTree.from(configDocument);
+            SyntaxTree syntaxTree = SyntaxTree.from(configDocument);
             DocumentNode rootNode = syntaxTree.rootNode();
             NodeList<DocumentMemberDeclarationNode> nodeList = rootNode.members();
             NodeList<DocumentMemberDeclarationNode> tomlMembers = AbstractNodeFactory.createEmptyNodeList();
@@ -336,7 +346,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
             Token eofToken = AbstractNodeFactory.createIdentifierToken("");
             DocumentNode documentNode = NodeFactory.createDocumentNode(tomlMembers, eofToken);
             TextDocument textDocument = TextDocuments.from(documentNode.toSourceCode());
-            String content = io.ballerina.toml.syntax.tree.SyntaxTree.from(textDocument).toSourceCode();
+            String content = SyntaxTree.from(textDocument).toSourceCode();
             try (FileWriter writer = new FileWriter(ballerinaTomlPath.toString(), StandardCharsets.UTF_8)) {
                 writer.write(content);
                 createDiagnostics(toolContext, Constants.DiagnosticMessages.TOML_UPDATED_WITH_CLIENT_NATIVE_DEPENDENCY, location);
@@ -346,7 +356,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         }
     }
 
-    private boolean checkForExistingClientNativeDependency(String version, ToolContext toolContext, Location location) {
+    private boolean clientNativeDependencyAlreadyExist(String version, ToolContext toolContext, Location location)
+            throws BallerinaOpenApiException {
         Project project = toolContext.currentPackage().project();
         Map<String, PackageManifest.Platform> platforms = project.currentPackage().manifest().platforms();
         if (Objects.nonNull(platforms) && platforms.containsKey("java17")) {
@@ -364,7 +375,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                     nativeDependency.get().get("version").equals(version)) {
                 createDiagnostics(toolContext, Constants.DiagnosticMessages.TOML_ALREADY_UPDATED_WITH_CLIENT_NATIVE_DEPENDENCY, location);
             } else {
-                createDiagnostics(toolContext, Constants.DiagnosticMessages.CLIENT_NATIVE_DEPENDENCY_VERSION_MISMATCH, location);
+                throw new BallerinaOpenApiException("client native dependency version mismatch");
             }
             return true;
         }
@@ -452,7 +463,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                             licenseContent + System.lineSeparator() + utilContent));
         }
 
-        SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        io.ballerina.compiler.syntax.tree.SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().
+                generateTypeSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
 
         if (oasClientConfig.getFilter().getTags().isEmpty()) {
