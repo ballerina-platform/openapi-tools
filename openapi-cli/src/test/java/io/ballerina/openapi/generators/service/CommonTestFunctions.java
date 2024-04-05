@@ -18,12 +18,14 @@
 
 package io.ballerina.openapi.generators.service;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import org.testng.Assert;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,5 +52,12 @@ public class CommonTestFunctions {
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
+    }
+
+    public static void compareDiagnosticWarnings(List<Diagnostic> diagnosticList, String... expectedDiagnostics) {
+        Assert.assertEquals(diagnosticList.size(), expectedDiagnostics.length);
+        for (int i = 0; i < diagnosticList.size(); i++) {
+            Assert.assertEquals(diagnosticList.get(i).message(), expectedDiagnostics[i]);
+        }
     }
 }
