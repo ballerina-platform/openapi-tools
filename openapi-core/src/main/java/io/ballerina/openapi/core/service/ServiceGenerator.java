@@ -28,42 +28,10 @@ public abstract class ServiceGenerator {
 
     final OASServiceMetadata oasServiceMetadata;
     boolean isNullableRequired;
-    private final static List<ServiceDiagnostic> diagnostics = new ArrayList<>();
+    private final List<ServiceDiagnostic> diagnostics = new ArrayList<>();
 
     public ServiceGenerator(OASServiceMetadata oasServiceMetadata) {
         this.oasServiceMetadata = oasServiceMetadata;
-    }
-
-    public static List<GenSrcFile> generateServiceFiles(OASServiceMetadata oasServiceMetadata) throws
-            FormatterException {
-        List<GenSrcFile> sourceFiles = new ArrayList<>();
-        String mainContent;
-        if (oasServiceMetadata.isGenerateOnlyServiceType()) {
-            ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata);
-            serviceTypeGenerator.generateSyntaxTree();
-            String serviceType = Formatter.format(serviceTypeGenerator.generateSyntaxTree()).toSourceCode();
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
-                    "service_type.bal",
-                    (oasServiceMetadata.getLicenseHeader().isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
-                            oasServiceMetadata.getLicenseHeader()) + serviceType));
-            diagnostics.addAll(serviceTypeGenerator.getDiagnostics());
-        } else {
-            ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata);
-            String serviceType = Formatter.format(serviceTypeGenerator.generateSyntaxTree()).toSourceCode();
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
-                    "service_type.bal",
-                    (oasServiceMetadata.getLicenseHeader().isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
-                            oasServiceMetadata.getLicenseHeader()) + serviceType));
-            ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
-            mainContent = Formatter.format(serviceGenerator.generateSyntaxTree()).toSourceCode();
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
-                    oasServiceMetadata.getSrcFile(),
-                    (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
-                            oasServiceMetadata.getLicenseHeader()) + mainContent));
-            diagnostics.addAll(serviceTypeGenerator.getDiagnostics());
-            diagnostics.addAll(serviceGenerator.getDiagnostics());
-        }
-        return sourceFiles;
     }
 
     public abstract SyntaxTree generateSyntaxTree();
