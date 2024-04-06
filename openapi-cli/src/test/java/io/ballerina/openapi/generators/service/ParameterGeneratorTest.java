@@ -19,6 +19,7 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.TestUtils;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -161,7 +162,7 @@ public class ParameterGeneratorTest {
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query_parameters.bal", syntaxTree);
-        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Query parameters with nested array types are not supported in Ballerina.");
     }
 
@@ -177,7 +178,7 @@ public class ParameterGeneratorTest {
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("param_type_with_content.bal", syntaxTree);
-        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Type 'json' is not a valid query parameter type in Ballerina. The supported " +
                         "types are string, int, float, boolean, decimal, array types of the " +
                         "aforementioned types and map<json>.");

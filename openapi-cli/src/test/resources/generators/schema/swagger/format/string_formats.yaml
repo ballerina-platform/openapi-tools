@@ -13,6 +13,12 @@ paths:
             "application/json":
               schema:
                 $ref: '#/components/schemas/OASStringFormats'
+        '201':
+          description: Feature flag approval request response
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/NONOASStringFormats'
 servers:
   - url: https://app.launchdarkly.com/api/v2
 components:

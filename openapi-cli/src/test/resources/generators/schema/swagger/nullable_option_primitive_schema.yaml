@@ -4,7 +4,8 @@ info:
   description: Title
   version: 1.0.0
 servers:
-  - url: 'https'
+  - url: 'https://localhost:8080'
+    description: Local server
 paths:
   /:
     get:
@@ -23,6 +24,10 @@ paths:
       responses:
         '200':
           description: An paged array of song
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPlayListDetails'
 components:
   schemas:
     UserPlayListDetails:

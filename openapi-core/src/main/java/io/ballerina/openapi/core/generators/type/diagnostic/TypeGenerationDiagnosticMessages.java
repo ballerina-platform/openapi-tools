@@ -16,22 +16,22 @@
  * under the License.
  */
 
-package io.ballerina.openapi.core.generators.type;
+package io.ballerina.openapi.core.generators.type.diagnostic;
 
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 /**
- * This {@code ServiceDiagnosticMessages} enum class for containing the error message related to openapi to ballerina
- * service generation command.
+ * This {@code TypeGenerationDiagnosticMessages} enum class for containing the error message
+ * related to openapi to ballerina type generation command.
  *
  * @since 1.3.0
  */
 public enum TypeGenerationDiagnosticMessages {
-    OAS_SERVICE_102("OAS_SERVICE_102",
-            "Type '%s' is not a valid query parameter type in Ballerina. " +
-                    "The supported types are string, int, float, boolean, decimal, array types of the aforementioned " +
-                    "types and map<json>.",
-            DiagnosticSeverity.ERROR);
+    OAS_TYPE_101("OAS_TYPE_101",
+            "Maximum item count (%s) defined in the definition exceeds the maximum ballerina array length.",
+            DiagnosticSeverity.WARNING),
+    OAS_TYPE_102("OAS_TYPE_102", "Unsupported nested AllOf schema is found inside a AllOf schema.",
+                 DiagnosticSeverity.WARNING);
 
     private final String code;
     private final String description;

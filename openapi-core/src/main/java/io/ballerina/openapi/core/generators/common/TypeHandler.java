@@ -29,6 +29,7 @@ import io.ballerina.openapi.core.generators.document.DocCommentGeneratorImp;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.type.model.TypeGeneratorResult;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -38,7 +39,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -82,15 +82,17 @@ public class TypeHandler {
         return typeHandlerInstance;
     }
 
-    public Map<String, TypeDefinitionNode> getTypeDefinitionNodes() {
-        return typeDefinitionNodes;
+    public List<Diagnostic> getDiagnostics() {
+        return ballerinaTypesGenerator.getDiagnostics();
     }
 
     public void addTypeDefinitionNode(String key, TypeDefinitionNode typeDefinitionNode) {
         typeDefinitionNodes.put(key, typeDefinitionNode);
     }
+
     public SyntaxTree generateTypeSyntaxTree() {
-        ConstraintGeneratorImp constraintGenerator = new ConstraintGeneratorImp(GeneratorMetaData.getInstance().getOpenAPI(), typeDefinitionNodes);
+        ConstraintGeneratorImp constraintGenerator = new ConstraintGeneratorImp(GeneratorMetaData
+                .getInstance().getOpenAPI(), typeDefinitionNodes);
         ConstraintResult constraintResult = constraintGenerator.updateTypeDefinitionsWithConstraints();
         typeDefinitionNodes = constraintResult.typeDefinitionNodeHashMap();
         boolean isConstraintAvailable = constraintResult.isConstraintAvailable();

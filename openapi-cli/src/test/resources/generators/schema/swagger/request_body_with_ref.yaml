@@ -56,7 +56,7 @@ paths:
         '200':
           description: Successful operation
   /pets/dogs:
-    post:
+    put:
       summary: Create a dog pet
       operationId: createDogPet
       tags:
@@ -67,6 +67,10 @@ paths:
       responses:
         '200':
           description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pets"
 
 components:
   requestBodies:
@@ -112,7 +116,7 @@ components:
     Pets:
       type: array
       items:
-        $ref: "#/components/schemas/Pet"
+        $ref: "#/components/schemas/Dog"
     Error:
       required:
         - code

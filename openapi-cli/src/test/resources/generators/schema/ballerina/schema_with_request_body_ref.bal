@@ -1,14 +1,4 @@
-public type CreatedPet_RequestBody record {
-    string petId?;
-    string createdDate?;
-};
-
-public type Pets Pet[];
-
-public type Error record {
-    int code;
-    string message;
-};
+public type Pets Dog[];
 
 public type Dog record {
     *Pet;

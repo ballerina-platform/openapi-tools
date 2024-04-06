@@ -26,7 +26,7 @@ import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
-import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -43,8 +43,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.openapi.generators.common.TestUtils.getDiagnosticsForService;
-import static io.ballerina.openapi.generators.common.TestUtils.normalizeOpenAPI;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.getDiagnosticsForService;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.normalizeOpenAPI;
 
 /**
  * Tests related to the check diagnostic issue in Ballerina service generation.
@@ -201,6 +201,6 @@ public class ServiceDiagnosticTests {
 
     @AfterTest
     public void cleanUp() throws IOException {
-        TestUtils.deleteGeneratedFiles();
+        GeneratorTestUtils.deleteGeneratedFiles();
     }
 }

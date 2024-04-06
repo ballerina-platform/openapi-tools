@@ -9,7 +9,7 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.service.GeneratorConstants;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.service.parameter.RequestBodyGenerator;
@@ -59,7 +59,8 @@ public class LowResourceFunctionSignatureGenerator extends FunctionSignatureGene
         ReturnTypeDescriptorNode returnTypeDescriptorNode;
         try {
             returnTypeDescriptorNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation, path);
-        } catch (OASTypeGenException e) {
+        } catch (BallerinaOpenApiException e) {
+            // todo :
             throw new RuntimeException(e);
         }
 

@@ -19,6 +19,7 @@
 package io.ballerina.openapi.core.service.response;
 
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
@@ -28,6 +29,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages;
 import io.ballerina.openapi.core.service.ServiceGenerationUtils;
@@ -79,7 +81,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
      */
     public ReturnTypeDescriptorNode getReturnTypeDescriptorNode(Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                                 String path)
-            throws OASTypeGenException {
+            throws BallerinaOpenApiException {
         ReturnTypeDescriptorNode returnNode;
         String httpMethod = operation.getKey().name().toLowerCase(Locale.ENGLISH);
         if (operation.getValue().getResponses() != null) {
@@ -116,7 +118,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
      * Generate union type node when operation has multiple responses.
      */
     private TypeDescriptorNode handleMultipleResponse(ApiResponses responses, String httpMethod)
-            throws OASTypeGenException {
+            throws BallerinaOpenApiException {
 
         Set<String> qualifiedNodes = new LinkedHashSet<>();
 
@@ -128,8 +130,8 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             String typeName = null;
 
             if (code == null && !responseCode.equals(GeneratorConstants.DEFAULT)) {
-                throw new OASTypeGenException(String.format(ServiceDiagnosticMessages.OAS_SERVICE_107.getDescription(),
-                        responseCode));
+                throw new BallerinaOpenApiException(String.format(ServiceDiagnosticMessages
+                                .OAS_SERVICE_107.getDescription(), responseCode));
             }
             if (responseValue != null && responseValue.get$ref() != null) {
                 String[] splits = responseValue.get$ref().split("/");
@@ -204,8 +206,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
     /**
      * This util is to generate return node when the operation has one response.
      */
-    private ReturnTypeDescriptorNode handleSingleResponse(Map.Entry<String, ApiResponse> response, String httpMethod)
-            throws OASTypeGenException {
+    private ReturnTypeDescriptorNode handleSingleResponse(Map.Entry<String, ApiResponse> response, String httpMethod) {
 
         ReturnTypeDescriptorNode returnNode = null;
         Token returnKeyWord = createToken(RETURNS_KEYWORD);

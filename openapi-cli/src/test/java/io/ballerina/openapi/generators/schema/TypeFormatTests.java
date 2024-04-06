@@ -20,16 +20,20 @@ package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.core.service.ServiceGenerationHandler;
+import io.ballerina.openapi.core.service.model.OASServiceMetadata;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static io.ballerina.openapi.TestUtils.FILTER;
 
 /**
  * This includes primitive data types format types tests.
@@ -38,12 +42,19 @@ public class TypeFormatTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree = null;
     @Test
-    public void testStringFormats() throws IOException, BallerinaOpenApiException, OASTypeGenException {
+    public void testStringFormats() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/format/string_formats.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/format/string_formats.bal",
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/format/string_formats.bal",
                 syntaxTree);
     }
 }

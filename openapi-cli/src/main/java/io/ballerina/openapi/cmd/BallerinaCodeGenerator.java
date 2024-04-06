@@ -494,6 +494,7 @@ public class BallerinaCodeGenerator {
                     (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaSyntaxTree));
         }
         this.diagnostics.addAll(serviceGenerationHandler.getDiagnostics());
+        this.diagnostics.addAll(TypeHandler.getInstance().getDiagnostics());
         return sourceFiles;
     }
 

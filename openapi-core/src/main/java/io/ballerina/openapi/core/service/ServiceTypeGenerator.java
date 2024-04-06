@@ -60,8 +60,13 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
  * This class is used to generate the ballerina service object for the given openapi contract.
  */
 public class ServiceTypeGenerator extends ServiceGenerator {
+
     public ServiceTypeGenerator(OASServiceMetadata oasServiceMetadata) {
         super(oasServiceMetadata);
+    }
+
+    public ServiceTypeGenerator(OASServiceMetadata oasServiceMetadata, List<Node> functionsList) {
+        super(oasServiceMetadata, functionsList);
     }
 
     @Override
@@ -82,8 +87,10 @@ public class ServiceTypeGenerator extends ServiceGenerator {
         TypeReferenceNode httpServiceTypeRefNode = createTypeReferenceNode(createToken(ASTERISK_TOKEN),
                 createIdentifierToken("http:Service"), createToken(SEMICOLON_TOKEN));
         serviceObjectMemberNodes.add(httpServiceTypeRefNode);
-        List<Node> functions = createResourceFunctions(oasServiceMetadata.getOpenAPI(), oasServiceMetadata.getFilters());
-        for (Node functionNode : functions) {
+        if (functionsList == null) {
+            functionsList = createResourceFunctions(oasServiceMetadata.getOpenAPI(), oasServiceMetadata.getFilters());
+        }
+        for (Node functionNode : functionsList) {
             NodeList<Token> methodQualifierList = createNodeList(createToken(RESOURCE_KEYWORD));
             if (functionNode instanceof FunctionDefinitionNode &&
                     ((FunctionDefinitionNode) functionNode).qualifierList()

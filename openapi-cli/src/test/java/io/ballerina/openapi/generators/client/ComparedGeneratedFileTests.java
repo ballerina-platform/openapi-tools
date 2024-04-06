@@ -28,11 +28,10 @@ import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -46,8 +45,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
-import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.getDiagnostics;
 
 /**
  * All the tests related to the {{@link io.ballerina.openapi.core.generators.client.BallerinaClientGenerator}} util.
@@ -133,7 +132,7 @@ public class ComparedGeneratedFileTests {
     @AfterTest
     private void deleteGeneratedFiles() {
         try {
-            TestUtils.deleteGeneratedFiles();
+            GeneratorTestUtils.deleteGeneratedFiles();
         } catch (IOException ignored) {
         }
     }

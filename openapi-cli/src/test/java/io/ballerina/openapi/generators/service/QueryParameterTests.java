@@ -18,6 +18,7 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.TestUtils;
 import io.ballerina.openapi.cmd.CmdUtils;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
@@ -87,7 +88,7 @@ public class QueryParameterTests {
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_03.bal", syntaxTree);
-        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Query parameters with nested array types are not supported in Ballerina.");
     }
 
@@ -103,7 +104,7 @@ public class QueryParameterTests {
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_04.bal", syntaxTree);
-        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Query parameters with no array item type can not be " +
                         "mapped to Ballerina resource query parameters.");
     }
@@ -158,7 +159,7 @@ public class QueryParameterTests {
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_07.bal", syntaxTree);
-        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Query parameters with nested array types are not supported in Ballerina.");
     }
 
@@ -174,7 +175,7 @@ public class QueryParameterTests {
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_08.bal", syntaxTree);
-        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Query parameters with no array item type can not be mapped to " +
                         "Ballerina resource query parameters.");
     }
@@ -216,7 +217,7 @@ public class QueryParameterTests {
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_10.bal", syntaxTree);
-        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Query parameters with no array item type can not be mapped to Ballerina resource " +
                         "query parameters.");
     }
@@ -317,7 +318,7 @@ public class QueryParameterTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Type 'xml' is not a valid query parameter type in Ballerina. The supported " +
                         "types are string, int, float, boolean, decimal, array types of the aforementioned " +
                         "types and map<json>.");

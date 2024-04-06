@@ -45,6 +45,20 @@ public type Pet02 record {|
     Pet?...;
 |};
 
+public type Store_inventory_body record {
+    Pet? pet?;
+    Pet02? pet2?;
+    User01? user1?;
+    User02? user2?;
+    User03? user3?;
+    User04? user4?;
+    User05? user5?;
+    User06? use6?;
+    User07? user7?;
+    User08? user8?;
+    User09? use9?;
+};
+
 # Without any additional field it maps to closed record.
 public type User01 record {
     *Pet;
