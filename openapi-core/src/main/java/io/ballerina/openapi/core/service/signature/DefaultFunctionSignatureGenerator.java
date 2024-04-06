@@ -11,6 +11,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.GeneratorConstants;
+import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnostic;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.service.parameter.HeaderParameterGenerator;
 import io.ballerina.openapi.core.service.parameter.QueryParameterGenerator;
@@ -73,12 +74,12 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
         ReturnTypeDescriptorNode returnNode;
         try {
             returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation, path);
-        } catch (OASTypeGenException e) {
+        } catch (BallerinaOpenApiException e) {
+//            diagnostics.add(new ServiceDiagnostic(e.getMessage(), ServiceDiagnostic.DiagnosticSeverity.ERROR));
+            // todo : check on adding diagnostics
             throw new RuntimeException(e);
         }
-
-        return createFunctionSignatureNode(
-                createToken(SyntaxKind.OPEN_PAREN_TOKEN),
+        return createFunctionSignatureNode(createToken(SyntaxKind.OPEN_PAREN_TOKEN),
                 parameters, createToken(SyntaxKind.CLOSE_PAREN_TOKEN), returnNode);
 
     }

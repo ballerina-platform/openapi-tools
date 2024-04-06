@@ -15,7 +15,7 @@ import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.getDiagnostics;
 
 /**
 Test util file generation for ballerina connectors.
@@ -59,7 +59,7 @@ public class UtilGenerationTests {
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         ballerinaClientGenerator.generateSyntaxTree();
         SyntaxTree utlisSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("client/ballerina/default_util.bal",
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("client/ballerina/default_util.bal",
                 utlisSyntaxTree);
     }
 
@@ -233,7 +233,7 @@ public class UtilGenerationTests {
 
     @AfterClass
     public void cleanUp() throws IOException {
-        TestUtils.deleteGeneratedFiles();
+        GeneratorTestUtils.deleteGeneratedFiles();
     }
 }
 

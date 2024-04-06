@@ -20,9 +20,11 @@ package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.core.service.ServiceGenerationHandler;
+import io.ballerina.openapi.core.service.model.OASServiceMetadata;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -36,7 +38,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
+import static io.ballerina.openapi.TestUtils.FILTER;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.getDiagnostics;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -48,7 +51,7 @@ public class EnumGenerationTests {
     SyntaxTree syntaxTree = null;
     @BeforeTest
     public void setUp() throws IOException {
-        TestUtils.deleteGeneratedFiles();
+        GeneratorTestUtils.deleteGeneratedFiles();
     }
 
     @Test(description = "Tests for all the enum scenarios in schema generation:" +
@@ -56,11 +59,18 @@ public class EnumGenerationTests {
             "Use case 02 : Enums in schema properties" +
             "Use case 03 : Enum with null value" +
             "Use case 04 : Enum as array items")
-    public void testForEnums() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
+    public void testForEnums() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/schema_with_enums.yaml"), true);
-//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema_with_enums.bal",
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema_with_enums.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
         assertTrue(diagnostics.isEmpty());
@@ -72,24 +82,38 @@ public class EnumGenerationTests {
             "Use case 03 : Nullable boolean enum" +
             "Use case 04 : Nullable float enum" +
             "Use case 05 : Nullable enum in arrays")
-    public void testForNullableEnums() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
+    public void testForNullableEnums() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve(
                 "swagger/schema_with_nullable_enums.yaml"), true);
-//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema_with_nullable_enums.bal",
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema_with_nullable_enums.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
         assertTrue(diagnostics.isEmpty());
     }
 
     @Test(description = "Test enum with no values")
-    public void testForEmptyEnums() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
+    public void testForEmptyEnums() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve(
                 "swagger/empty_enum.yaml"), true);
-//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/empty_enum.bal",
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/empty_enum.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
         assertTrue(diagnostics.isEmpty());
@@ -97,13 +121,13 @@ public class EnumGenerationTests {
     @AfterTest
     private void deleteGeneratedFiles() {
         try {
-            TestUtils.deleteGeneratedFiles();
+            GeneratorTestUtils.deleteGeneratedFiles();
         } catch (IOException ignored) {
         }
     }
 
     @AfterClass
     public void cleanUp() throws IOException {
-        TestUtils.deleteGeneratedFiles();
+        GeneratorTestUtils.deleteGeneratedFiles();
     }
 }

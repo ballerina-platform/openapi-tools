@@ -32,6 +32,7 @@ import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
+import io.ballerina.openapi.core.generators.type.diagnostic.TypeGeneratorDiagnostic;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.openapi.core.generators.type.model.RecordMetadata;
@@ -61,6 +62,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
+import static io.ballerina.openapi.core.generators.type.diagnostic.TypeGenerationDiagnosticMessages.OAS_TYPE_102;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for allOf schemas.
@@ -191,8 +193,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                     recordFieldList.addAll(recordAllFields);
                 } else {
                     // TODO: Needs to improve the error message. Could not access the schema name at this level.
-                    throw new OASTypeGenException(
-                            "Unsupported nested OneOf or AnyOf schema is found inside a AllOf schema.");
+                    diagnostics.add(new TypeGeneratorDiagnostic(OAS_TYPE_102));
                 }
             }
             if (allOfSchema.getType() != null || allOfSchema.getProperties() != null || allOfSchema.get$ref() != null

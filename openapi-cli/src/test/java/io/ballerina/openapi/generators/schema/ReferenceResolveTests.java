@@ -17,23 +17,22 @@
  */
 
 package io.ballerina.openapi.generators.schema;
-import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.core.service.ServiceGenerationHandler;
+import io.ballerina.openapi.core.service.model.OASServiceMetadata;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+
+import static io.ballerina.openapi.TestUtils.FILTER;
 
 /**
  * Tests for Schema Reference resolve.
@@ -41,69 +40,107 @@ import java.util.List;
 public class ReferenceResolveTests {
     SyntaxTree syntaxTree = null;
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
+
     @Test(description = "Tests with object type include reference")
-    public void testReferenceIncludeWithObjectType() throws IOException, BallerinaOpenApiException, OASTypeGenException {
+    public void testReferenceIncludeWithObjectType() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/world_bank.yaml"), true);
         TypeHandler.createInstance(openAPI, false);
-        SyntaxTree syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/world_bank.bal", syntaxTree);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/world_bank.bal", syntaxTree);
     }
 
     @Test(description = "Test for object data type when absent reference and properties fields")
-    public void testWorldBank() throws IOException, BallerinaOpenApiException, OASTypeGenException {
+    public void testWorldBank() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/object_without_fields_reference.yaml"), true);
-//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/object_without_fields_reference.bal", syntaxTree);
     }
     @Test(description = "Test for type generation for query parameters with referenced schemas")
-    public void testParameterSchemaReferences() throws IOException, BallerinaOpenApiException, OASTypeGenException {
+    public void testParameterSchemaReferences() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/schema_referenced_in_parameters.yaml"), true);
-//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/parameter_schema_refs.bal", syntaxTree);
     }
 
     @Test(description = "Test Ballerina types generation when referred by another record with no additional fields")
-    public void testReferredTypesWithoutAdditionalFields() throws IOException, BallerinaOpenApiException, OASTypeGenException {
+    public void testReferredTypesWithoutAdditionalFields() throws IOException,
+            BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/referred_inclusion.yaml"), true);
-//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/referred_inclusion.bal", syntaxTree);
+        // todo : failing due to doc issue
     }
 
     @Test(description = "Test doc comment generation of record fields when property is reffered to another schema")
-    public void testDocCommentResolvingForRefferedSchemas() throws IOException, BallerinaOpenApiException, OASTypeGenException {
+    public void testDocCommentResolvingForRefferedSchemas() throws IOException,
+            BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/resolve_reference_docs.yaml"), true);
-//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/resolve_reference_docs.bal", syntaxTree);
+        // todo : failing due to doc issue
     }
 
-//    @Test(description = "Test for type generation for request body with reference")
-//    public void testRequestBodyReferences() throws IOException, BallerinaOpenApiException {
-//        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-//                "/request_body_with_ref.yaml"), true);
-//        FunctionSignatureGeneratorImp functionSignatureGenerator = new FunctionSignatureGeneratorImp(openAPI,
-//                new BallerinaTypesGenerator(openAPI, false), new ArrayList<>(), false);
-//        FunctionSignatureNode signature1 = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
-//                .get("/pets").getPost(), new ArrayList<>());
-//        FunctionSignatureNode signature2 = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
-//                .get("/pets/dogs").getPost(), new ArrayList<>());
-//        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
-//                functionSignatureGenerator.getTypeDefinitionNodeList());
-////        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI,
-////                false);
-////        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
-//        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
-//                "schema/ballerina/schema_with_request_body_ref.bal", syntaxTree);
-//    }
+    @Test(description = "Test for type generation for request body with reference") // todo : does not generated some referred types
+    public void testRequestBodyReferences() throws IOException, BallerinaOpenApiException, FormatterException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+                "/request_body_with_ref.yaml"), true);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
+                "schema/ballerina/schema_with_request_body_ref.bal", syntaxTree);
+    }
 }

@@ -28,7 +28,6 @@ import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
-import io.ballerina.openapi.core.service.ServiceGenerator;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
@@ -67,7 +66,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpen
 /**
  * This util class for keeping all the common functions that use to tests.
  */
-public class TestUtils {
+public class GeneratorTestUtils {
 
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/").toAbsolutePath();
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
@@ -115,6 +114,8 @@ public class TestUtils {
         return semanticModel.diagnostics();
     }
 
+    static int i = 0;
+
     public static List<Diagnostic> getDiagnosticsForService(SyntaxTree serviceSyntaxTree, String yamlFile)
             throws FormatterException, IOException {
         TypeHandler typeHandler = TypeHandler.getInstance();
@@ -126,6 +127,27 @@ public class TestUtils {
         writeFile(servicePath, serviceContent);
         writeFile(schemaPath, schemaContent);
         SemanticModel semanticModel = getSemanticModel(servicePath);
+        boolean hasErrors = true;
+//        hasErrors = semanticModel.diagnostics().stream()
+//                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        String yamlFileName = yamlFile.split("/")[yamlFile.split("/").length - 1];
+        if (hasErrors) {
+            File f = new File("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i);
+            f.mkdir();
+            FileWriter myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i
+                    + "/servicefile" + i + ".bal");
+            myWriter.write(serviceContent);
+            myWriter.close();
+
+            myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i +
+                    "/schemafile" + i + ".bal");
+            myWriter.write(schemaContent);
+            myWriter.close();
+            myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i + "/Ballerina.toml");
+            myWriter.write("");
+            myWriter.close();
+            i++;
+        }
         return semanticModel.diagnostics();
     }
 
@@ -139,13 +161,12 @@ public class TestUtils {
 
     public static void compareGeneratedSyntaxTreeWithExpectedSyntaxTree(Path path, SyntaxTree syntaxTree)
             throws IOException {
-
         String expectedBallerinaContent = getStringFromGivenBalFile(path);
         String generatedSyntaxTree = syntaxTree.toSourceCode();
         generatedSyntaxTree = generatedSyntaxTree.replaceAll(LINE_SEPARATOR, "");
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
-        Assert.assertEquals(expectedBallerinaContent, generatedSyntaxTree);
+        Assert.assertEquals(generatedSyntaxTree, expectedBallerinaContent);
     }
 
     /*
@@ -190,13 +211,39 @@ public class TestUtils {
         return expectedServiceContent;
     }
 
-    public static void compareGeneratedSyntaxTreewithExpectedSyntaxTree(String s, SyntaxTree syntaxTree)
+    public static void assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(String s, SyntaxTree syntaxTree)
             throws IOException {
-
         String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve(s));
         String generatedSyntaxTree = syntaxTree.toString();
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
+
+        String yamlFileName = s.split("/")[s.split("/").length - 1];
+        File f = new File("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i);
+        f.mkdir();
+        FileWriter myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i
+                + "/schemafilegenerated" + i + ".bal");
+        try {
+            myWriter.write(Formatter.format(syntaxTree).toSourceCode());
+        } catch (FormatterException e) {
+            throw new RuntimeException(e);
+        }
+        myWriter.close();
+
+        myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i +
+                "/schemafileexpected" + i + ".bal");
+
+        Stream<String> expectedServiceLines = Files.lines(RES_DIR.resolve(s));
+        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining(LINE_SEPARATOR));
+        expectedServiceLines.close();
+
+        myWriter.write(expectedServiceContent);
+        myWriter.close();
+        myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i + "/Ballerina.toml");
+        myWriter.write("");
+        myWriter.close();
+        i++;
+
         Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
     }
 

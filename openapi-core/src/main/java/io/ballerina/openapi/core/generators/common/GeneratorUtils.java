@@ -1331,7 +1331,7 @@ public class GeneratorUtils {
                     typeDecNode = generateTypeDescriptorForJsonContent(mediaTypeEntry);
                     if (GeneratorUtils.isMapSchema(mediaTypeEntry.getValue().getSchema())) {
                         String recordName = getNewStatusCodeRecordName(path, isRequest);
-                        TypeHandler.getInstance().typeDefinitionNodes.put(recordName,
+                        TypeHandler.getInstance().addTypeDefinitionNode(recordName,
                                 NodeFactory.createTypeDefinitionNode(null, createToken(PUBLIC_KEYWORD),
                                         createToken(TYPE_KEYWORD), createIdentifierToken(recordName),
                                         typeDecNode, createToken(SEMICOLON_TOKEN)));

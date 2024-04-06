@@ -1,6 +1,14 @@
+import ballerina/http;
+
 public type Category record {
     string name?;
 };
+
+public type OkPet record {|
+    *http:Ok;
+    Pet body;
+    map<string|string[]> headers;
+|};
 
 public type Pet record {
     int id?;

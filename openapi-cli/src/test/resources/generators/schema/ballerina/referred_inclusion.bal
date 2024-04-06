@@ -1,6 +1,6 @@
-public type Pets Pet[];
-
 public type SimpleType int;
+
+public type Pets Pet[];
 
 public type TestPet Pet;
 

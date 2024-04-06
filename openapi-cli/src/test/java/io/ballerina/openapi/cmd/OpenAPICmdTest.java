@@ -20,7 +20,7 @@ package io.ballerina.openapi.cmd;
 import io.ballerina.cli.launcher.BLauncherException;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
@@ -563,7 +563,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             generatedService = (generatedService.trim()).replaceAll("\\s+", "");
             expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
             if (expectedServiceContent.equals(generatedService)) {
-                SemanticModel semanticModel = TestUtils.getSemanticModel(
+                SemanticModel semanticModel = GeneratorTestUtils.getSemanticModel(
                         projectDir.resolve("petstore_service.bal"));
                 boolean hasErrors = semanticModel.diagnostics().stream()
                         .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));

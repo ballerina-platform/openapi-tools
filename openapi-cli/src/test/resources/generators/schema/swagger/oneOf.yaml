@@ -20,10 +20,41 @@ paths:
         "200":
           description: An array of products
           content:
-            application/xml:
+            application/json:
               schema:
-                type: array
-                items: {}
+                $ref: "#/components/schemas/Subject"
+    put:
+      summary: Product Types
+      operationId: putProducts
+      description: The Products endpoint returns information about the Uber products
+        offered at a given location. The response includes the display name and
+        other details about each product, and lists the products in the proper
+        display order.
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Activities"
+    patch:
+      summary: Product Types
+      operationId: patchProducts
+      description: The Products endpoint returns information about the Uber products
+        offered at a given location. The response includes the display name and
+        other details about each product, and lists the products in the proper
+        display order.
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     Profile01:

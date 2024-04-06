@@ -3,9 +3,6 @@ import ballerina/constraint;
 @constraint:String {maxLength: 5000}
 public type TaxratesItemsString string;
 
-@constraint:String {maxLength: 5000}
-public type SubscriptiondefaulttaxratesItemsString string;
-
 public type Activities record {
     # Position in pagination.
     int offset?;
@@ -26,5 +23,3 @@ public type Activity record {
     # Unique identifier for the activity
     string uuid?;
 };
-
-public type Subscription_default_tax_rates SubscriptiondefaulttaxratesItemsString[]|"";

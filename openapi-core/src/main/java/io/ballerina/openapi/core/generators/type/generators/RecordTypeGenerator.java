@@ -254,6 +254,7 @@ public class RecordTypeGenerator extends TypeGenerator {
             TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(fieldSchema, fieldNameStr,
                     recordName, overrideNullable, subTypesMap, pregeneratedTypeMap);
             TypeDescriptorNode fieldTypeName = typeGenerator.generateTypeDescriptorNode();
+            diagnostics.addAll(typeGenerator.getDiagnostics());
             if (typeGenerator instanceof RecordTypeGenerator) {
                 fieldTypeName = TypeGeneratorUtils.getNullableType(fieldSchema, fieldTypeName, overrideNullable);
             }

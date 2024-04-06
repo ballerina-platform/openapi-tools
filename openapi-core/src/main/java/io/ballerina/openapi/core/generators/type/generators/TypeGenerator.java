@@ -22,11 +22,14 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.media.Schema;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
@@ -47,6 +50,7 @@ public abstract class TypeGenerator {
     final LinkedHashSet<String> imports = new LinkedHashSet<>();
     final HashMap<String, TypeDefinitionNode> subTypesMap;
     final HashMap<String, NameReferenceNode> pregeneratedTypeMap;
+    final List<Diagnostic> diagnostics = new ArrayList<>();
 
     public TypeGenerator(Schema schema, String typeName, boolean overrideNullable,
                          HashMap<String, TypeDefinitionNode> subTypesMap,
@@ -60,6 +64,10 @@ public abstract class TypeGenerator {
 
     public LinkedHashSet<String> getImports() {
         return imports;
+    }
+
+    public List<Diagnostic> getDiagnostics() {
+        return diagnostics;
     }
 
     /**

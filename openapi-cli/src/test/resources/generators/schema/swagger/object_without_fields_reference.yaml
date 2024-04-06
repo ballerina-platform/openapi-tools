@@ -37,8 +37,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items: {}
+                "$ref": "#/components/schemas/YouthLiteracyRate"
+        '201':
+          description: List GDP information of each year
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
 components:
   schemas:
     Country:

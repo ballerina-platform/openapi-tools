@@ -23,16 +23,27 @@ public abstract class ServiceGenerator {
 
     final OASServiceMetadata oasServiceMetadata;
     boolean isNullableRequired;
+    List<Node> functionsList;
+
     private final List<Diagnostic> diagnostics = new ArrayList<>();
 
     public ServiceGenerator(OASServiceMetadata oasServiceMetadata) {
         this.oasServiceMetadata = oasServiceMetadata;
     }
 
+    public ServiceGenerator(OASServiceMetadata oasServiceMetadata, List<Node> functionsList) {
+        this.oasServiceMetadata = oasServiceMetadata;
+        this.functionsList = functionsList;
+    }
+
     public abstract SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException;
 
     public List<Diagnostic> getDiagnostics() {
         return diagnostics;
+    }
+
+    public List<Node> getFunctionsList() {
+        return functionsList;
     }
 
     List<Node> createResourceFunctions(OpenAPI openApi, Filter filter) throws BallerinaOpenApiException {

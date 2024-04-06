@@ -66,6 +66,10 @@ public class ServiceDeclarationGenerator extends ServiceGenerator {
         GeneratorMetaData.createInstance(oasServiceMetadata.getOpenAPI(), oasServiceMetadata.isNullable());
     }
 
+    public ServiceDeclarationGenerator(OASServiceMetadata oasServiceMetadata, List<Node> functionsList) {
+        super(oasServiceMetadata, functionsList);
+    }
+
     @Override
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
 
@@ -80,9 +84,10 @@ public class ServiceDeclarationGenerator extends ServiceGenerator {
         SimpleNameReferenceNode listenerName = createSimpleNameReferenceNode(listenerDeclarationNode.variableName());
         SeparatedNodeList<ExpressionNode> expressions = createSeparatedNodeList(listenerName);
 
-        // Fill the members with function
-        List<Node> functions = createResourceFunctions(oasServiceMetadata.getOpenAPI(), oasServiceMetadata.getFilters());
-        NodeList<Node> members = createNodeList(functions);
+        if (functionsList == null) {
+            functionsList = createResourceFunctions(oasServiceMetadata.getOpenAPI(), oasServiceMetadata.getFilters());
+        }
+        NodeList<Node> members = createNodeList(functionsList);
         // Create annotation if nullable property is enabled
         // @http:ServiceConfig {
         //     treatNilableAsOptional : false

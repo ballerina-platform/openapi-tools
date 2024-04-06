@@ -18,6 +18,7 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.TestUtils;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -69,7 +70,7 @@ public class HeaderParameterTests {
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header.bal", syntaxTree);
-        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Header 'x-request-id' with no header type can not be mapped to the Ballerina headers.");
     }
 
@@ -99,7 +100,7 @@ public class HeaderParameterTests {
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_04.bal", syntaxTree);
-        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Header 'x-request-id' with no array item type can " +
                         "not be mapped as a valid Ballerina header parameter.");
     }
@@ -242,7 +243,7 @@ public class HeaderParameterTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Header 'X-User' with type 'object' can not be mapped as a valid Ballerina header parameter.");
     }
 
@@ -257,7 +258,7 @@ public class HeaderParameterTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Header 'X-Users' with array item type: 'User' is not supported in Ballerina.");
     }
 
@@ -272,7 +273,7 @@ public class HeaderParameterTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Header 'X-User' with type 'object' can not be mapped as a valid Ballerina header parameter.");
     }
 
@@ -287,7 +288,7 @@ public class HeaderParameterTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Header 'X-User' with array item type: 'object' is not supported in Ballerina.");
     }
 
@@ -302,7 +303,7 @@ public class HeaderParameterTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Header 'X-User' with type 'object' can not be mapped as a valid Ballerina header parameter.");
     }
 }

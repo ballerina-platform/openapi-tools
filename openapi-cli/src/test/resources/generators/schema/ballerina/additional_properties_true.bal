@@ -46,6 +46,26 @@ public type User09 record {|
     record {}?...;
 |};
 
+public type Store_inventory_body record {
+    User? user?;
+    User01? user1?;
+    User02? user2?;
+    User03? user3?;
+    User04? user4?;
+    User05? user5?;
+    User06? use6?;
+    User07? user7?;
+    User08? user8?;
+    User09? use9?;
+    User10? user10?;
+    User11? user11?;
+    User12? user12?;
+    User13? user13?;
+    User14? user14?;
+    User15? user15?;
+    User16? user16?;
+};
+
 # Additional properties with object with additional fields type string
 public type User10 record {|
     string? name?;

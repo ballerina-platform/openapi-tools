@@ -37,7 +37,6 @@ public class ServiceGenerationHandler {
                         (oasServiceMetadata.getLicenseHeader().isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
                                 oasServiceMetadata.getLicenseHeader()) + typeContent));
             }
-
             diagnostics.addAll(serviceTypeGenerator.getDiagnostics());
         } else {
             ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata);
@@ -46,7 +45,8 @@ public class ServiceGenerationHandler {
                     "service_type.bal",
                     (oasServiceMetadata.getLicenseHeader().isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
                             oasServiceMetadata.getLicenseHeader()) + serviceType));
-            ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+            ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata,
+                    serviceTypeGenerator.getFunctionsList());
             mainContent = Formatter.format(serviceGenerator.generateSyntaxTree()).toSourceCode();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
                     oasServiceMetadata.getSrcFile(),
