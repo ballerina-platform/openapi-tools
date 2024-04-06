@@ -36,6 +36,7 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariables;
@@ -43,7 +44,6 @@ import io.swagger.v3.oas.models.servers.ServerVariables;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This util class for processing the mapping in between openAPI server section with ballerina listeners.
@@ -68,7 +68,7 @@ public class ListenerGeneratorImpl implements ListenerGenerator {
      * @return {@link ListenerDeclarationNode} for server.
      * @throws OASTypeGenException when process break with exception
      */
-    public ListenerDeclarationNode getListenerDeclarationNodes(List<Server> servers) throws OASTypeGenException {
+    public ListenerDeclarationNode getListenerDeclarationNodes(List<Server> servers) throws BallerinaOpenApiException {
         // Assign host port value to listeners
         String host;
         int port;
@@ -77,7 +77,7 @@ public class ListenerGeneratorImpl implements ListenerGenerator {
             ServerVariables variables = server.getVariables();
             URL url;
             try {
-                String resolvedUrl = io.ballerina.openapi.core.generators.common.GeneratorUtils.buildUrl(server.getUrl(), variables);
+                String resolvedUrl = GeneratorUtils.buildUrl(server.getUrl(), variables);
                 url = new URL(resolvedUrl);
                 host = url.getHost();
                 if (!url.getPath().isBlank()) {
@@ -89,7 +89,7 @@ public class ListenerGeneratorImpl implements ListenerGenerator {
                     port = isHttps ? HTTPS_PORT : HTTP_PORT;
                 }
             } catch (MalformedURLException e) {
-                throw new OASTypeGenException("Failed to read endpoint details of the server: " +
+                throw new BallerinaOpenApiException("Failed to read endpoint details of the server: " +
                         server.getUrl(), e);
             }
         } else {

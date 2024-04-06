@@ -210,7 +210,7 @@ public class GeneratorUtils {
     public static final MinutiaeList SINGLE_END_OF_LINE_MINUTIAE = getEndOfLineMinutiae();
     private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
     private static final PrintStream OUT_STREAM = System.err;
-    private static int recordCount = 0;
+    private static final HashMap<String, Integer> recordCountMap = new HashMap<>();
 
     private static final List<String> primitiveTypeList =
             new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
@@ -1419,6 +1419,13 @@ public class GeneratorUtils {
         String pathRecord = Objects.equals(path, SLASH) || Objects.equals(path, CATCH_ALL_PATH) ? "" :
                 GeneratorUtils.getValidName(path, true);
         String typeSuffix = isRequest ? GeneratorConstants.REQUEST_RECORD_NAME : RESPONSE_RECORD_NAME;
-        return recordCount == 0 ? pathRecord + typeSuffix  : pathRecord + typeSuffix + "_" + recordCount;
+        String recordName = pathRecord + typeSuffix;
+        if (recordCountMap.containsKey(recordName)) {
+            recordCountMap.put(recordName, recordCountMap.get(recordName) + 1);
+            return recordName + "_" + recordCountMap.get(recordName);
+        } else {
+            recordCountMap.put(recordName, 0);
+            return recordName;
+        }
     }
 }

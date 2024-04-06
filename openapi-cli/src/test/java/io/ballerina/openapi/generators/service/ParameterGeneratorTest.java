@@ -149,9 +149,7 @@ public class ParameterGeneratorTest {
     }
 
     //Scenario 02 - Query parameters.
-    @Test(description = "Generate functionDefinitionNode for Query parameters",
-            expectedExceptions = OASTypeGenException.class,
-            expectedExceptionsMessageRegExp = "Query parameters with nested array types are not supported in.*")
+    @Test(description = "Generate functionDefinitionNode for Query parameters")
     public void generateQueryParameter() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/multiQueryParam.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -163,14 +161,11 @@ public class ParameterGeneratorTest {
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query_parameters.bal", syntaxTree);
-
+        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+                "Query parameters with nested array types are not supported in Ballerina.");
     }
 
-    @Test(description = "Generate functionDefinitionNode for paramter for content instead of schema",
-            expectedExceptions = OASTypeGenException.class,
-            expectedExceptionsMessageRegExp = "Type 'json' is not a valid query parameter type in Ballerina. " +
-                    "The supported types are string, int, float, boolean, decimal, " +
-                    "array types of the aforementioned types and map<json>.")
+    @Test(description = "Generate functionDefinitionNode for paramter for content instead of schema")
     public void generateParameterHasContent() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameterTypehasContent.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -182,6 +177,10 @@ public class ParameterGeneratorTest {
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("param_type_with_content.bal", syntaxTree);
+        CommonTestFunctions.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+                "Type 'json' is not a valid query parameter type in Ballerina. The supported " +
+                        "types are string, int, float, boolean, decimal, array types of the " +
+                        "aforementioned types and map<json>.");
     }
 
     @Test(description = "Tests when query parameter(s) having a keyword as the parameter name")
@@ -237,7 +236,7 @@ public class ParameterGeneratorTest {
     }
 
     @Test(description = "Test unsupported nullable path parameter with enums",
-            expectedExceptions = OASTypeGenException.class,
+            expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Path parameter value cannot be null.")
     public void testNullablePathParamWithEnum() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/path_param_nullable.yaml");

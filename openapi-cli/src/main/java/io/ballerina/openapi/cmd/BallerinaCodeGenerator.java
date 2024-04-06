@@ -32,9 +32,15 @@ import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
+import io.ballerina.openapi.core.service.ServiceGenerationHandler;
 import io.ballerina.openapi.core.service.ServiceGenerator;
 import io.ballerina.openapi.core.service.ServiceTypeGenerator;
+import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnostic;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
+import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticInfo;
+import io.ballerina.tools.diagnostics.DiagnosticProperty;
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -86,6 +92,7 @@ public class BallerinaCodeGenerator {
     private String srcPackage;
     private String licenseHeader = "";
     private boolean includeTestFiles;
+    private List<Diagnostic> diagnostics = new ArrayList<>();
 
     private static final PrintStream outStream = System.out;
 
@@ -268,6 +275,7 @@ public class BallerinaCodeGenerator {
         if (genFiles.isEmpty()) {
             return;
         }
+        diagnostics.forEach(outStream::println);
         writeGeneratedSources(genFiles, srcPath, implPath, GEN_SERVICE);
     }
 
@@ -366,7 +374,7 @@ public class BallerinaCodeGenerator {
         // Validate the service generation
         List<String> complexPaths = GeneratorUtils.getComplexPaths(openAPIDef);
         if (!complexPaths.isEmpty()) {
-            outStream.println("WARNING: remote function(s) will be generated for client due to the given openapi " +
+            outStream.println("WARNING: remote function(s) will be generated for client as the given openapi " +
                     "definition contains following complex path(s):");
             for (String path: complexPaths) {
                 outStream.println(path);
@@ -478,12 +486,14 @@ public class BallerinaCodeGenerator {
                 .withSrcPackage(srcPackage)
                 .build();
         TypeHandler.createInstance(openAPIDef, nullable);
-        List<GenSrcFile> sourceFiles = ServiceGenerator.generateServiceFiles(oasServiceMetadata);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        List<GenSrcFile> sourceFiles = serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         String schemaSyntaxTree = Formatter.format(TypeHandler.getInstance().generateTypeSyntaxTree()).toSourceCode();
         if (!schemaSyntaxTree.isBlank() && !generateWithoutDataBinding) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME,
                     (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaSyntaxTree));
         }
+        this.diagnostics.addAll(serviceGenerationHandler.getDiagnostics());
         return sourceFiles;
     }
 

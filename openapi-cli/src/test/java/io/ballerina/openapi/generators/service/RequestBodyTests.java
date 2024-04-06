@@ -150,6 +150,7 @@ public class RequestBodyTests {
                 "requestBody/oneof_requestBody.bal", syntaxTree);
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/oneof_request_body_types.bal", typeSyntaxTree);
+        // todo : check for the warning of json type for text/plain mediatype
 
     }
 

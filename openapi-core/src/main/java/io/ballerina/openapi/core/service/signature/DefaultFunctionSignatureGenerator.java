@@ -55,11 +55,7 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
             if (requestBody.getContent() != null) {
                 RequestBodyGenerator requestBodyGenerator = RequestBodyGenerator
                         .getRequestBodyGenerator(oasServiceMetadata, path);
-                try {
-                    nodeForRequestBody = requestBodyGenerator.createRequestBodyNode(requestBody);
-                } catch (OASTypeGenException e) {
-                    throw new RuntimeException(e);
-                }
+                nodeForRequestBody = requestBodyGenerator.createRequestBodyNode(requestBody);
                 params.add(nodeForRequestBody);
                 params.add(createToken(SyntaxKind.COMMA_TOKEN));
             }
@@ -122,7 +118,6 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
                         requiredParams.add(comma);
                     }
                 } else if (parameter.getIn().trim().equals(GeneratorConstants.QUERY)) {
-                    // todo : need to check on this
                     if (parameter.getRequired() != null && parameter.getRequired() &&
                             (parameter.getSchema() != null && parameter.getSchema().getNullable() != null &&
                                     parameter.getSchema().getNullable())) {

@@ -34,8 +34,8 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
@@ -67,53 +67,51 @@ public class ServiceDeclarationGenerator extends ServiceGenerator {
     }
 
     @Override
-    public SyntaxTree generateSyntaxTree() {
-        try {
+    public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
+
             // Create imports http and openapi
             NodeList<ImportDeclarationNode> imports = ServiceGenerationUtils.createImportDeclarationNodes();
             // Need to Generate Base path
             ListenerGenerator listener = new ListenerGeneratorImpl();
-            ListenerDeclarationNode listenerDeclarationNode = listener.getListenerDeclarationNodes(oasServiceMetadata.getOpenAPI().getServers());
-            NodeList<Node> absoluteResourcePath = createBasePathNodeList(listener);
+        ListenerDeclarationNode listenerDeclarationNode = null;
+        listenerDeclarationNode = listener.getListenerDeclarationNodes(oasServiceMetadata.getOpenAPI().getServers());
+        NodeList<Node> absoluteResourcePath = createBasePathNodeList(listener);
 
-            SimpleNameReferenceNode listenerName = createSimpleNameReferenceNode(listenerDeclarationNode.variableName());
-            SeparatedNodeList<ExpressionNode> expressions = createSeparatedNodeList(listenerName);
+        SimpleNameReferenceNode listenerName = createSimpleNameReferenceNode(listenerDeclarationNode.variableName());
+        SeparatedNodeList<ExpressionNode> expressions = createSeparatedNodeList(listenerName);
 
-            // Fill the members with function
-            List<Node> functions = createResourceFunctions(oasServiceMetadata.getOpenAPI(), oasServiceMetadata.getFilters());
-            NodeList<Node> members = createNodeList(functions);
-            // Create annotation if nullable property is enabled
-            // @http:ServiceConfig {
-            //     treatNilableAsOptional : false
-            //}
-            MetadataNode metadataNode = null;
-            if (isNullableRequired) {
-                metadataNode = ServiceGenerationUtils.generateServiceConfigAnnotation();
-            }
-            TypeDescriptorNode serviceType = null;
-            if (oasServiceMetadata.isServiceTypeRequired()) {
-                serviceType = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.SERVICE_TYPE_NAME));
-            }
-            ServiceDeclarationNode serviceDeclarationNode = createServiceDeclarationNode(
-                    metadataNode, createEmptyNodeList(), createToken(SyntaxKind.SERVICE_KEYWORD,
-                            GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE),
-                    serviceType, absoluteResourcePath, createToken(SyntaxKind.ON_KEYWORD,
-                            GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE), expressions,
-                    createToken(SyntaxKind.OPEN_BRACE_TOKEN), members, createToken(SyntaxKind.CLOSE_BRACE_TOKEN), null);
-
-            // Create module member declaration
-            NodeList<ModuleMemberDeclarationNode> moduleMembers = createNodeList(
-                    listenerDeclarationNode, serviceDeclarationNode);
-
-            Token eofToken = createIdentifierToken("");
-            ModulePartNode modulePartNode = createModulePartNode(imports, moduleMembers, eofToken);
-
-            TextDocument textDocument = TextDocuments.from("");
-            SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
-            return syntaxTree.modifyWith(modulePartNode);
-        } catch (OASTypeGenException e) {
-            throw new RuntimeException("Error occurred while generating service file", e);
+        // Fill the members with function
+        List<Node> functions = createResourceFunctions(oasServiceMetadata.getOpenAPI(), oasServiceMetadata.getFilters());
+        NodeList<Node> members = createNodeList(functions);
+        // Create annotation if nullable property is enabled
+        // @http:ServiceConfig {
+        //     treatNilableAsOptional : false
+        //}
+        MetadataNode metadataNode = null;
+        if (isNullableRequired) {
+            metadataNode = ServiceGenerationUtils.generateServiceConfigAnnotation();
         }
+        TypeDescriptorNode serviceType = null;
+        if (oasServiceMetadata.isServiceTypeRequired()) {
+            serviceType = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.SERVICE_TYPE_NAME));
+        }
+        ServiceDeclarationNode serviceDeclarationNode = createServiceDeclarationNode(
+                metadataNode, createEmptyNodeList(), createToken(SyntaxKind.SERVICE_KEYWORD,
+                        GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE),
+                serviceType, absoluteResourcePath, createToken(SyntaxKind.ON_KEYWORD,
+                        GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE), expressions,
+                createToken(SyntaxKind.OPEN_BRACE_TOKEN), members, createToken(SyntaxKind.CLOSE_BRACE_TOKEN), null);
+
+        // Create module member declaration
+        NodeList<ModuleMemberDeclarationNode> moduleMembers = createNodeList(
+                listenerDeclarationNode, serviceDeclarationNode);
+
+        Token eofToken = createIdentifierToken("");
+        ModulePartNode modulePartNode = createModulePartNode(imports, moduleMembers, eofToken);
+
+        TextDocument textDocument = TextDocuments.from("");
+        SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
+        return syntaxTree.modifyWith(modulePartNode);
     }
 
     private NodeList<Node> createBasePathNodeList(ListenerGenerator listener) {

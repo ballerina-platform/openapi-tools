@@ -11,10 +11,10 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.core.service.GeneratorConstants;
 import io.ballerina.openapi.core.service.ServiceGenerationUtils;
 import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnostic;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
@@ -37,12 +37,12 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParame
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isArraySchema;
-import static io.ballerina.openapi.core.service.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages.OAS_SERVICE_103;
 import static io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages.OAS_SERVICE_104;
 import static io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages.OAS_SERVICE_105;
@@ -66,7 +66,7 @@ public class HeaderParameterGenerator extends ParameterGenerator {
     public ParameterNode generateParameterNode(Parameter parameter) {
         try {
             Schema<?> schema = parameter.getSchema();
-            String headerType;
+            String headerType = GeneratorConstants.STRING;
             TypeDescriptorNode headerTypeName;
             IdentifierToken parameterName = createIdentifierToken(GeneratorUtils.escapeIdentifier(parameter.getName()
                             .toLowerCase(Locale.ENGLISH)), AbstractNodeFactory.createEmptyMinutiaeList(),
@@ -80,43 +80,39 @@ public class HeaderParameterGenerator extends ParameterGenerator {
                 //       schema: {}
                 //  </pre>
                 diagnostics.add(new ServiceDiagnostic(OAS_SERVICE_106, parameter.getName()));
-//                throw new OASTypeGenException(String.format(OAS_SERVICE_106.getDescription(), parameter.getName()));
-                headerType = "string";
             } else if (schema.get$ref() != null) {
                 String type = getValidName(extractReferenceType(schema.get$ref()), true);
                 Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
                 if (paramSupportedTypes.contains(getOpenAPIType(refSchema)) || isArraySchema(refSchema)) {
+                    TypeHandler.getInstance().getTypeNodeFromOASSchema(schema, false);
                     headerType = type;
                 } else {
-                    throw new OASTypeGenException(String.format(OAS_SERVICE_105.getDescription(),
-                            parameter.getName(), getOpenAPIType(refSchema)));
+                    diagnostics.add(new ServiceDiagnostic(OAS_SERVICE_105, parameter.getName(),
+                            getOpenAPIType(refSchema)));
                 }
             } else if (paramSupportedTypes.contains(getOpenAPIType(schema)) || isArraySchema(schema)) {
                 headerType = convertOpenAPITypeToBallerina(schema, true).trim();
             } else {
-                throw new OASTypeGenException(String.format(OAS_SERVICE_105.getDescription(),
-                        parameter.getName(), getOpenAPIType(schema)));
+                diagnostics.add(new ServiceDiagnostic(OAS_SERVICE_105, parameter.getName(),
+                        getOpenAPIType(schema)));
             }
 
             if (isArraySchema(schema)) {
                 // TODO: Support nested arrays
                 Schema<?> items = schema.getItems();
-                String arrayType;
+                String arrayType = GeneratorConstants.STRING;
                 if (getOpenAPIType(items) == null && items.get$ref() == null) {
-                    throw new OASTypeGenException(String.format(OAS_SERVICE_104.getDescription(),
-                            parameter.getName()));
+                    diagnostics.add(new ServiceDiagnostic(OAS_SERVICE_104, parameter.getName()));
                 } else if (items.get$ref() != null) {
                     String type = getValidName(extractReferenceType(items.get$ref()), true);
                     Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
                     if (paramSupportedTypes.contains(getOpenAPIType(refSchema))) {
                         arrayType = type;
                     } else {
-                        throw new OASTypeGenException(String.format(OAS_SERVICE_103.getDescription(),
-                                parameter.getName(), type));
+                        diagnostics.add(new ServiceDiagnostic(OAS_SERVICE_103, parameter.getName(), type));
                     }
                 } else if (!paramSupportedTypes.contains(getOpenAPIType(items))) {
-                    throw new OASTypeGenException(String.format(OAS_SERVICE_103.getDescription(),
-                            parameter.getName(), getOpenAPIType(items)));
+                    diagnostics.add(new ServiceDiagnostic(OAS_SERVICE_103, parameter.getName(), getOpenAPIType(items)));
                 } else if (items.getEnum() != null && !items.getEnum().isEmpty()) {
                     arrayType = OPEN_PAREN_TOKEN.stringValue() + convertOpenAPITypeToBallerina(items, true) +
                             CLOSE_PAREN_TOKEN.stringValue();
@@ -163,8 +159,6 @@ public class HeaderParameterGenerator extends ParameterGenerator {
                                 createToken(SyntaxKind.QUESTION_MARK_TOKEN));
             }
             return createRequiredParameterNode(headerAnnotations, headerTypeName, parameterName);
-        } catch (OASTypeGenException e) {
-            throw new RuntimeException(e);
         } catch (BallerinaOpenApiException e) {
             throw new RuntimeException(e);
         }

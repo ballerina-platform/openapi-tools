@@ -22,5 +22,5 @@ public abstract class RequestBodyGenerator {
         return new DefaultRequestBodyGenerator(oasServiceMetadata, path);
     }
 
-    public abstract RequiredParameterNode createRequestBodyNode(RequestBody requestBody) throws OASTypeGenException;
+    public abstract RequiredParameterNode createRequestBodyNode(RequestBody requestBody);
 }

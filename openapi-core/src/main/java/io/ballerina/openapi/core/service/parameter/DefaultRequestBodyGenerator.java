@@ -59,7 +59,7 @@ public class DefaultRequestBodyGenerator extends RequestBodyGenerator {
     /**
      * This for creating request Body for given request object.
      */
-    public RequiredParameterNode createRequestBodyNode(RequestBody requestBody) throws OASTypeGenException {
+    public RequiredParameterNode createRequestBodyNode(RequestBody requestBody) {
         // type CustomRecord record {| anydata...; |};
         // public type PayloadType string|json|xml|byte[]|CustomRecord|CustomRecord[];
         Optional<TypeDescriptorNode> typeName;

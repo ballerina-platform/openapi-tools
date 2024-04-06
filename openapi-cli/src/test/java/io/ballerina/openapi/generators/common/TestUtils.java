@@ -115,12 +115,8 @@ public class TestUtils {
         return semanticModel.diagnostics();
     }
 
-    static int i = 0;
-
-    public static List<Diagnostic> getDiagnosticsForService(SyntaxTree serviceSyntaxTree, OpenAPI openAPI,
-                                                            ServiceGenerator ballerinaServiceGenerator, String yamlFile)
-            throws FormatterException, IOException,
-            OASTypeGenException {
+    public static List<Diagnostic> getDiagnosticsForService(SyntaxTree serviceSyntaxTree, String yamlFile)
+            throws FormatterException, IOException {
         TypeHandler typeHandler = TypeHandler.getInstance();
         String schemaContent = Formatter.format(
                 typeHandler.generateTypeSyntaxTree()).toSourceCode();
@@ -130,27 +126,6 @@ public class TestUtils {
         writeFile(servicePath, serviceContent);
         writeFile(schemaPath, schemaContent);
         SemanticModel semanticModel = getSemanticModel(servicePath);
-        boolean hasErrors = true;
-//        hasErrors = semanticModel.diagnostics().stream()
-//                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
-        String yamlFileName = yamlFile.split("/")[yamlFile.split("/").length - 1];
-        if (hasErrors) {
-            File f = new File("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i);
-            f.mkdir();
-            FileWriter myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i
-                    + "/servicefile" + i + ".bal");
-            myWriter.write(serviceContent);
-            myWriter.close();
-
-            myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i +
-                    "/schemafile" + i + ".bal");
-            myWriter.write(schemaContent);
-            myWriter.close();
-            myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i + "/Ballerina.toml");
-            myWriter.write("");
-            myWriter.close();
-            i++;
-        }
         return semanticModel.diagnostics();
     }
 

@@ -4,75 +4,38 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
-import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
-import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnostic;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.service.resource.ResourceGenerator;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
-import org.ballerinalang.formatter.core.Formatter;
-import org.ballerinalang.formatter.core.FormatterException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_FILE_HEADER;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
-
 public abstract class ServiceGenerator {
 
     final OASServiceMetadata oasServiceMetadata;
     boolean isNullableRequired;
-    private final static List<ServiceDiagnostic> diagnostics = new ArrayList<>();
+    private final List<Diagnostic> diagnostics = new ArrayList<>();
 
     public ServiceGenerator(OASServiceMetadata oasServiceMetadata) {
         this.oasServiceMetadata = oasServiceMetadata;
     }
 
-    public static List<GenSrcFile> generateServiceFiles(OASServiceMetadata oasServiceMetadata) throws
-            FormatterException {
-        List<GenSrcFile> sourceFiles = new ArrayList<>();
-        String mainContent;
-        if (oasServiceMetadata.isGenerateOnlyServiceType()) {
-            ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata);
-            serviceTypeGenerator.generateSyntaxTree();
-            String serviceType = Formatter.format(serviceTypeGenerator.generateSyntaxTree()).toSourceCode();
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
-                    "service_type.bal",
-                    (oasServiceMetadata.getLicenseHeader().isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
-                            oasServiceMetadata.getLicenseHeader()) + serviceType));
-            diagnostics.addAll(serviceTypeGenerator.getDiagnostics());
-        } else {
-            ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata);
-            String serviceType = Formatter.format(serviceTypeGenerator.generateSyntaxTree()).toSourceCode();
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
-                    "service_type.bal",
-                    (oasServiceMetadata.getLicenseHeader().isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
-                            oasServiceMetadata.getLicenseHeader()) + serviceType));
-            ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
-            mainContent = Formatter.format(serviceGenerator.generateSyntaxTree()).toSourceCode();
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
-                    oasServiceMetadata.getSrcFile(),
-                    (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
-                            oasServiceMetadata.getLicenseHeader()) + mainContent));
-            diagnostics.addAll(serviceTypeGenerator.getDiagnostics());
-            diagnostics.addAll(serviceGenerator.getDiagnostics());
-        }
-        return sourceFiles;
-    }
+    public abstract SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException;
 
-    public abstract SyntaxTree generateSyntaxTree();
-
-    public List<ServiceDiagnostic> getDiagnostics() {
+    public List<Diagnostic> getDiagnostics() {
         return diagnostics;
     }
 
-    List<Node> createResourceFunctions(OpenAPI openApi, Filter filter) {
+    List<Node> createResourceFunctions(OpenAPI openApi, Filter filter) throws BallerinaOpenApiException {
         List<Node> functions = new ArrayList<>();
         if (!openApi.getPaths().isEmpty()) {
             Paths paths = openApi.getPaths();
@@ -88,7 +51,8 @@ public abstract class ServiceGenerator {
     }
 
     private List<Node> applyFiltersForOperations(Filter filter, String path,
-                                                 Map<PathItem.HttpMethod, Operation> operationMap) {
+                                                 Map<PathItem.HttpMethod, Operation> operationMap)
+            throws BallerinaOpenApiException {
         List<Node> functions = new ArrayList<>();
         for (Map.Entry<PathItem.HttpMethod, Operation> operation : operationMap.entrySet()) {
             //Add filter availability
@@ -112,8 +76,7 @@ public abstract class ServiceGenerator {
                     }
                 }
             } else {
-                FunctionDefinitionNode resourceFunction = resourceGenerator
-                        .generateResourceFunction(operation, path);
+                FunctionDefinitionNode resourceFunction = resourceGenerator.generateResourceFunction(operation, path);
                 diagnostics.addAll(resourceGenerator.getDiagnostics());
                 functions.add(resourceFunction);
             }

@@ -73,7 +73,7 @@ public class ServiceDiagnosticTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);
+        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, yamlFile);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         Assert.assertFalse(hasErrors);
@@ -95,7 +95,7 @@ public class ServiceDiagnosticTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);
+        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, yamlFile);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         Assert.assertFalse(hasErrors);
@@ -119,7 +119,7 @@ public class ServiceDiagnosticTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);
+        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, yamlFile);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         Assert.assertFalse(hasErrors);
@@ -182,7 +182,7 @@ public class ServiceDiagnosticTests {
                 {"ballerinax_connector_tests/files.com.yaml"},
                 {"ballerinax_connector_tests/openweathermap.yaml"},
                 {"ballerinax_connector_tests/soundcloud.yaml"},
-//                {"ballerinax_connector_tests/stripe.yaml"}, // not working due to anyOf schema in parameters
+                {"ballerinax_connector_tests/stripe.yaml"},
                 {"ballerinax_connector_tests/vimeo.yaml"},
 //                {"ballerinax_connector_tests/ynab.yaml"}, // HTTP status code '209' is not supported in Ballerina.
                 {"ballerinax_connector_tests/zoom.yaml"},
@@ -193,7 +193,7 @@ public class ServiceDiagnosticTests {
                 {"3.1.0_openapis/listennotes.yaml"},
                 {"3.1.0_openapis/placekit.yaml"},
                 {"3.1.0_openapis/urlbox.yaml"},
-//                {"3.1.0_openapis/vercel.yaml"}, // uncomment when /openapi-tools/issues/1332 is fixed
+                {"3.1.0_openapis/vercel.yaml"},
                 {"3.1.0_openapis/webscraping.yaml"},
                 {"3.1.0_openapis/wolframalpha.yaml"}
         };
