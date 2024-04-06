@@ -193,7 +193,7 @@ public class ServiceDiagnosticTests {
                 {"3.1.0_openapis/listennotes.yaml"},
                 {"3.1.0_openapis/placekit.yaml"},
                 {"3.1.0_openapis/urlbox.yaml"},
-                {"3.1.0_openapis/vercel.yaml"}, // uncomment when /openapi-tools/issues/1332 is fixed
+                {"3.1.0_openapis/vercel.yaml"},
                 {"3.1.0_openapis/webscraping.yaml"},
                 {"3.1.0_openapis/wolframalpha.yaml"}
         };
