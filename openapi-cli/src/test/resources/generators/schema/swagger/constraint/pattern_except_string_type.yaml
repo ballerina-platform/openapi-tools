@@ -23,7 +23,7 @@ paths:
             type: string
       requestBody:
         content:
-          text/plain:
+          application/json:
             schema:
               $ref: "#/components/schemas/Person"
       responses:

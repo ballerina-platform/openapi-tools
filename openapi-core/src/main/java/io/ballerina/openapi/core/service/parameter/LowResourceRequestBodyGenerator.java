@@ -37,8 +37,8 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParame
  */
 public class LowResourceRequestBodyGenerator extends RequestBodyGenerator {
 
-    public LowResourceRequestBodyGenerator(OASServiceMetadata oasServiceMetadata) {
-        super(oasServiceMetadata);
+    public LowResourceRequestBodyGenerator(OASServiceMetadata oasServiceMetadata, String path) {
+        super(oasServiceMetadata, path);
     }
 
     /**

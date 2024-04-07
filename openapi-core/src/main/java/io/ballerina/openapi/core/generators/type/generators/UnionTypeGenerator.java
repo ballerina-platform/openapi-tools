@@ -23,6 +23,7 @@ import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
@@ -68,7 +69,6 @@ public class UnionTypeGenerator extends TypeGenerator {
 
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws OASTypeGenException {
-
         List<Schema> schemas;
         if (schema.getOneOf() != null) {
             schemas = schema.getOneOf();

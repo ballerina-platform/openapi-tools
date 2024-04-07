@@ -19,14 +19,14 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
-import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -43,8 +43,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.openapi.generators.common.TestUtils.getDiagnosticsForService;
-import static io.ballerina.openapi.generators.common.TestUtils.normalizeOpenAPI;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.getDiagnosticsForService;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.normalizeOpenAPI;
 
 /**
  * Tests related to the check diagnostic issue in Ballerina service generation.
@@ -73,7 +73,7 @@ public class ServiceDiagnosticTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);
+        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, yamlFile);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         Assert.assertFalse(hasErrors);
@@ -95,7 +95,7 @@ public class ServiceDiagnosticTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);
+        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, yamlFile);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         Assert.assertFalse(hasErrors);
@@ -119,7 +119,7 @@ public class ServiceDiagnosticTests {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree =  ballerinaServiceGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, openAPI, ballerinaServiceGenerator, yamlFile);
+        List<Diagnostic> diagnostics = getDiagnosticsForService(syntaxTree, yamlFile);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         Assert.assertFalse(hasErrors);
@@ -128,41 +128,42 @@ public class ServiceDiagnosticTests {
     @DataProvider(name = "singleFileProviderForDiagnosticCheck")
     public Object[][] singleFileProviderForDiagnosticCheck() {
         return new Object[][] {
-//                {"petstore_server_with_base_path.yaml"},
-//                {"petstore_get.yaml"},
-//                {"openapi_display_annotation.yaml"},
-//                {"header_parameter.yaml"},
-//                {"petstore_post.yaml"},
-//                {"petstore_with_oneOf_response.yaml"},
-//                {"response_nested_array.yaml"},
-//                {"xml_payload.yaml"},
-//                {"xml_payload_with_ref.yaml"},
-//                {"duplicated_response.yaml"},
-//                {"complex_oneOf_schema.yaml"},
-//                {"request_body_ref.yaml"},
-//                {"vendor_specific_mime_types.yaml"},
-//                {"single_allOf.yaml"},
-//                // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1415
-////                {"ballerinax_connector_tests/ably.yaml"},
-//                {"ballerinax_connector_tests/azure.iot.yaml"},
-//               // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1440
-////                {"ballerinax_connector_tests/beezup.yaml"},
-//                {"ballerinax_connector_tests/files.com.yaml"},
-//                {"ballerinax_connector_tests/openweathermap.yaml"},
-//                {"ballerinax_connector_tests/soundcloud.yaml"},
-                {"ballerinax_connector_tests/stripe.yaml"}, //
-//                {"ballerinax_connector_tests/vimeo.yaml"},
+                {"petstore_server_with_base_path.yaml"},
+                {"petstore_get.yaml"},
+                {"openapi_display_annotation.yaml"},
+                {"header_parameter.yaml"},
+                {"petstore_post.yaml"},
+                {"petstore_with_oneOf_response.yaml"},
+                {"response_nested_array.yaml"},
+                {"xml_payload.yaml"},
+                {"xml_payload_with_ref.yaml"},
+                {"duplicated_response.yaml"},
+                {"complex_oneOf_schema.yaml"},
+                {"request_body_ref.yaml"},
+                {"vendor_specific_mime_types.yaml"},
+                {"single_allOf.yaml"},
+                // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1415
+//                {"ballerinax_connector_tests/ably.yaml"},
+                {"ballerinax_connector_tests/azure.iot.yaml"},
+               // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1440
+//                {"ballerinax_connector_tests/beezup.yaml"},
+                {"ballerinax_connector_tests/files.com.yaml"},
+                {"ballerinax_connector_tests/openweathermap.yaml"},
+                {"ballerinax_connector_tests/soundcloud.yaml"},
+                {"ballerinax_connector_tests/stripe.yaml"},
+                {"ballerinax_connector_tests/vimeo.yaml"},
 ////                {"ballerinax_connector_tests/ynab.yaml"}, // 209 status code is not supported in Ballerina
-//                {"ballerinax_connector_tests/zoom.yaml"}
+                {"ballerinax_connector_tests/zoom.yaml"}
         };
     }
 
     @DataProvider(name = "fileProviderForOpenAPI31DiagnosticCheck")
     public Object[][] fileProviderForOpenAPI31DiagnosticCheck() {
         return new Object[][]{
+                {"response_has_additional_properties.yaml"},
                 {"petstore_server_with_base_path.yaml"},
                 {"petstore_get.yaml"},
-                {"petstore_server_with_multiple_syntaxkind_status_code_records"},
+                {"petstore_server_with_multiple_syntaxkind_status_code_records.yaml"},
                 {"openapi_display_annotation.yaml"},
                 {"header_parameter.yaml"},
                 {"petstore_post.yaml"},
@@ -181,7 +182,7 @@ public class ServiceDiagnosticTests {
                 {"ballerinax_connector_tests/files.com.yaml"},
                 {"ballerinax_connector_tests/openweathermap.yaml"},
                 {"ballerinax_connector_tests/soundcloud.yaml"},
-//                {"ballerinax_connector_tests/stripe.yaml"}, // not working due to anyOf schema in parameters
+                {"ballerinax_connector_tests/stripe.yaml"},
                 {"ballerinax_connector_tests/vimeo.yaml"},
 //                {"ballerinax_connector_tests/ynab.yaml"}, // HTTP status code '209' is not supported in Ballerina.
                 {"ballerinax_connector_tests/zoom.yaml"},
@@ -192,7 +193,7 @@ public class ServiceDiagnosticTests {
                 {"3.1.0_openapis/listennotes.yaml"},
                 {"3.1.0_openapis/placekit.yaml"},
                 {"3.1.0_openapis/urlbox.yaml"},
-//                {"3.1.0_openapis/vercel.yaml"}, // uncomment when /openapi-tools/issues/1332 is fixed
+                {"3.1.0_openapis/vercel.yaml"},
                 {"3.1.0_openapis/webscraping.yaml"},
                 {"3.1.0_openapis/wolframalpha.yaml"}
         };
@@ -200,6 +201,6 @@ public class ServiceDiagnosticTests {
 
     @AfterTest
     public void cleanUp() throws IOException {
-        TestUtils.deleteGeneratedFiles();
+        GeneratorTestUtils.deleteGeneratedFiles();
     }
 }

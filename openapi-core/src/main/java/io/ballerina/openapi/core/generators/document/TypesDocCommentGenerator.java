@@ -58,25 +58,26 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
 
                     RecordTypeDescriptorNode record = (RecordTypeDescriptorNode) finalTypeDef.typeDescriptor();
                     NodeList<Node> fields = record.fields();
-                    schema.getProperties().forEach((key, value) -> {
-                        fields.forEach(field -> {
-                            RecordFieldNode recordField = (RecordFieldNode) field;
-                            if (recordField.fieldName().text().replace("'","").trim().equals(key)) {
-                                if (value.getDescription() != null) {
-                                    Optional<MetadataNode> metadata = recordField.metadata();
-                                    MetadataNode metadataNode = updateMetadataNode(metadata, value);
-                                    recordField = recordField.modify(metadataNode,
-                                            recordField.readonlyKeyword().orElse(null),
-                                            recordField.typeName(),
-                                            recordField.fieldName(),
-                                            recordField.questionMarkToken().orElse(null),
-                                            recordField.semicolonToken());
-
+                    if (schema.getProperties() != null) {
+                        schema.getProperties().forEach((key, value) -> {
+                            fields.forEach(field -> {
+                                RecordFieldNode recordField = (RecordFieldNode) field;
+                                if (recordField.fieldName().text().replace("'", "").trim().equals(key)) {
+                                    if (value.getDescription() != null) {
+                                        Optional<MetadataNode> metadata = recordField.metadata();
+                                        MetadataNode metadataNode = updateMetadataNode(metadata, value);
+                                        recordField = recordField.modify(metadataNode,
+                                                recordField.readonlyKeyword().orElse(null),
+                                                recordField.typeName(),
+                                                recordField.fieldName(),
+                                                recordField.questionMarkToken().orElse(null),
+                                                recordField.semicolonToken());
+                                    }
+                                    updatedFields.add(recordField);
                                 }
-                                updatedFields.add(recordField);
-                            }
+                            });
                         });
-                    });
+                    }
                     typeDef = typeDef.modify(typeDef.metadata().orElse(null),
                             typeDef.visibilityQualifier().get(),
                             typeDef.typeKeyword(),

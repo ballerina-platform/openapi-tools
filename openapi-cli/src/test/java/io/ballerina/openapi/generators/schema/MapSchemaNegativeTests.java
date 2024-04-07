@@ -18,10 +18,11 @@ package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.core.service.ServiceGenerationHandler;
+import io.ballerina.openapi.core.service.model.OASServiceMetadata;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.junit.After;
@@ -33,6 +34,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static io.ballerina.openapi.TestUtils.FILTER;
 
 /**
  * This class is for containing the negative tests related to the {@code MapSchema}.
@@ -51,22 +54,36 @@ public class MapSchemaNegativeTests {
     @Test(expectedExceptions = BallerinaOpenApiException.class,
     expectedExceptionsMessageRegExp = "OpenAPI definition has errors: \n" +
             "attribute components.schemas.User02.additionalProperties.*")
-    public void testForAdditionalPropertiesWithParserIssue() throws IOException, BallerinaOpenApiException, OASTypeGenException {
+    public void testForAdditionalPropertiesWithParserIssue() throws IOException, BallerinaOpenApiException,
+            FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/additional_properties_true_negative.yaml"), true);
-//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
-//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+        TypeHandler.createInstance(openAPI, true);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(true)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
     }
 
     @Test
     public void testForAdditionalPropertiesWithoutParserIssue()
-            throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException {
+            throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/additional_properties_true_negative_without_parser_issue.yaml"), true);
-//        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
-//        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+        TypeHandler.createInstance(openAPI, true);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(true)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         // Check the generated content, till the warning test enable.
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/additional_properties_negative.bal", syntaxTree);
 
         String expectedOut = "WARNING: constraints in the OpenAPI contract will be ignored for the " +
@@ -74,6 +91,7 @@ public class MapSchemaNegativeTests {
                 "WARNING: generating Ballerina rest record field will be ignored for the OpenAPI contract " +
                 "additionalProperties type `ComposedSchema`, as it is not supported on Ballerina rest record field.";
 //        Assert.assertTrue(output.toString().contains(expectedOut));
+        // todo : check the diagnostics list
     }
 
     @After

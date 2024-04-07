@@ -1,0 +1,11 @@
+import ballerina/constraint;
+
+public type Address record {
+    int streetNo?;
+    string country?;
+};
+
+@constraint:Array {maxLength: 2147483637}
+public type UserAddress int[];
+
+public type Pet string[];

@@ -9,7 +9,7 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.service.GeneratorConstants;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.service.parameter.RequestBodyGenerator;
@@ -47,22 +47,20 @@ public class LowResourceFunctionSignatureGenerator extends FunctionSignatureGene
         parameters.add(httpCaller);
         // create parameter `http:Request request`
         parameters.add(createToken(COMMA_TOKEN));
-        RequestBodyGenerator requestBodyGenerator = RequestBodyGenerator.getRequestBodyGenerator(oasServiceMetadata);
-        try {
-            RequiredParameterNode requestBodyNode = requestBodyGenerator.createRequestBodyNode(operation.getValue()
-                    .getRequestBody());
-            parameters.add(requestBodyNode);
-        } catch (OASTypeGenException e) {
-            throw new RuntimeException(e);
-        }
+        RequestBodyGenerator requestBodyGenerator = RequestBodyGenerator
+                .getRequestBodyGenerator(oasServiceMetadata, path);
+        RequiredParameterNode requestBodyNode = requestBodyGenerator.createRequestBodyNode(operation.getValue()
+                .getRequestBody());
+        parameters.add(requestBodyNode);
 
         SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(parameters);
 
-        ReturnTypeGenerator returnTypeGenerator = ReturnTypeGenerator.getReturnTypeGenerator(oasServiceMetadata);
+        ReturnTypeGenerator returnTypeGenerator = ReturnTypeGenerator.getReturnTypeGenerator(oasServiceMetadata, path);
         ReturnTypeDescriptorNode returnTypeDescriptorNode;
         try {
             returnTypeDescriptorNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation, path);
-        } catch (OASTypeGenException e) {
+        } catch (BallerinaOpenApiException e) {
+            // todo :
             throw new RuntimeException(e);
         }
 

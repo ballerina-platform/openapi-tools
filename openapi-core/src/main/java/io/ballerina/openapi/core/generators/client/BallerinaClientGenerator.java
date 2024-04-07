@@ -557,7 +557,8 @@ public class BallerinaClientGenerator {
                 ((operationId != null) && filterOperations.contains(operationId.trim()));
     }
 
-    private List<FunctionDefinitionNode> createRemoteFunctions(Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations) {
+    private List<FunctionDefinitionNode> createRemoteFunctions(Map<String, Map<PathItem.HttpMethod, Operation>>
+                                                                       filteredOperations) {
         //call remoteFunctionSignatureGenerator
         List<FunctionDefinitionNode> remoteFunctionNodes = new ArrayList<>();
         for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {
@@ -571,7 +572,8 @@ public class BallerinaClientGenerator {
     }
 
 
-    private List<FunctionDefinitionNode> createResourceFunctions(Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations) {
+    private List<FunctionDefinitionNode> createResourceFunctions(Map<String, Map<PathItem.HttpMethod,
+            Operation>> filteredOperations) throws BallerinaOpenApiException {
         List<FunctionDefinitionNode> resourceFunctionNodes = new ArrayList<>();
         for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {
             for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : operation.getValue().entrySet()) {

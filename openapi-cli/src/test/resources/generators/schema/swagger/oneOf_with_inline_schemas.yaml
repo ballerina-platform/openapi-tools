@@ -50,6 +50,11 @@ paths:
       responses:
         '200':
           description: An paged array of pets
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Address"
+
 components:
   schemas:
     Address:

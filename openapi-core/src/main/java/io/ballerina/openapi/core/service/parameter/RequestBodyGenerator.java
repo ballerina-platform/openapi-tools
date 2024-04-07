@@ -7,18 +7,20 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 
 public abstract class RequestBodyGenerator {
 
-    OASServiceMetadata oasServiceMetadata;
+    final OASServiceMetadata oasServiceMetadata;
+    final String path;
 
-    RequestBodyGenerator (OASServiceMetadata oasServiceMetadata) {
+    RequestBodyGenerator (OASServiceMetadata oasServiceMetadata, String path) {
         this.oasServiceMetadata = oasServiceMetadata;
+        this.path = path;
     }
 
-    public static RequestBodyGenerator getRequestBodyGenerator(OASServiceMetadata oasServiceMetadata) {
+    public static RequestBodyGenerator getRequestBodyGenerator(OASServiceMetadata oasServiceMetadata, String path) {
         if (oasServiceMetadata.generateWithoutDataBinding()) {
-            return new LowResourceRequestBodyGenerator(oasServiceMetadata);
+            return new LowResourceRequestBodyGenerator(oasServiceMetadata, path);
         }
-        return new DefaultRequestBodyGenerator(oasServiceMetadata);
+        return new DefaultRequestBodyGenerator(oasServiceMetadata, path);
     }
 
-    public abstract RequiredParameterNode createRequestBodyNode(RequestBody requestBody) throws OASTypeGenException;
+    public abstract RequiredParameterNode createRequestBodyNode(RequestBody requestBody);
 }

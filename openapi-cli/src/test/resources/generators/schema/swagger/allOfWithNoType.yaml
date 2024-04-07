@@ -59,6 +59,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+    put:
+      summary: Product Types
+      operationId: putProducts
+      description: The Products endpoint
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     Pet:

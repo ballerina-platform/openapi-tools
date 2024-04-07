@@ -31,12 +31,7 @@ import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
-import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.openapi.core.generators.common.TypeHandler;
-import io.ballerina.openapi.core.generators.type.GeneratorUtils;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,27 +63,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
  */
 public class ServiceGenerationUtils {
 
-    /**
-     * This method will extract reference type by splitting the reference string.
-     *
-     * @param referenceVariable - Reference String
-     * @return Reference variable name
-     * @throws OASTypeGenException - Throws an exception if the reference string is incompatible.
-     *                                   Note : Current implementation will not support external links a references.
-     */
-    public static String extractReferenceType(String referenceVariable) throws OASTypeGenException {
-
-        if (referenceVariable.startsWith("#") && referenceVariable.contains("/")) {
-            String[] refArray = referenceVariable.split("/");
-            return GeneratorUtils.escapeIdentifier(refArray[refArray.length - 1]);
-        } else {
-            throw new OASTypeGenException("Invalid reference value : " + referenceVariable
-                    + "\nBallerina only supports local reference values.");
-        }
-    }
-
     public static AnnotationNode getAnnotationNode(String identifier, MappingConstructorExpressionNode annotValue) {
-
         Token atToken = createIdentifierToken("@");
         QualifiedNameReferenceNode annotReference = GeneratorUtils.getQualifiedNameReferenceNode(
                 GeneratorConstants.HTTP, identifier);
@@ -131,42 +106,5 @@ public class ServiceGenerationUtils {
                 , GeneratorConstants.HTTP);
         imports.add(importForHttp);
         return AbstractNodeFactory.createNodeList(imports);
-    }
-
-    public static QualifiedNameReferenceNode getQualifiedNameReferenceNode(String modulePrefix, String identifier) {
-        Token modulePrefixToken = AbstractNodeFactory.createIdentifierToken(modulePrefix);
-        Token colon = AbstractNodeFactory.createIdentifierToken(":");
-        IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier);
-        return NodeFactory.createQualifiedNameReferenceNode(modulePrefixToken, colon, identifierToken);
-    }
-
-    public static TypeDescriptorNode generateTypeDescriptorForXMLContent() {
-        return getSimpleNameReferenceNode(GeneratorConstants.XML);
-    }
-
-    public static TypeDescriptorNode generateTypeDescriptorForMapStringContent() {
-        return getSimpleNameReferenceNode(GeneratorConstants.MAP_STRING);
-    }
-
-    public static TypeDescriptorNode generateTypeDescriptorForTextContent() {
-        return getSimpleNameReferenceNode(GeneratorConstants.STRING);
-    }
-
-    public static TypeDescriptorNode generateTypeDescriptorForOctetStreamContent() {
-        ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
-                createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-        return createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken(GeneratorConstants.BYTE)), NodeFactory.createNodeList(dimensionNode));
-    }
-
-    public static TypeDescriptorNode generateTypeDescriptorForJsonContent(Map.Entry<String, MediaType> mediaType) throws
-            OASTypeGenException {
-        Schema<?> schema = mediaType.getValue().getSchema();
-        Optional<TypeDescriptorNode> typeDescriptorNode = TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
-        return typeDescriptorNode.orElse(null);
-    }
-
-    private static TypeDescriptorNode getSimpleNameReferenceNode(String typeName) {
-        return createSimpleNameReferenceNode(createIdentifierToken(typeName));
     }
 }

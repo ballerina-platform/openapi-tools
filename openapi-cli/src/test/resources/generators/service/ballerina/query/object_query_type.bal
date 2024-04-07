@@ -1,13 +1,13 @@
+public type Default_query record {
+    string 'limit?;
+    int id?;
+};
+
 public type InventoryItem record {
     string id;
     string name;
     string releaseDate;
     Manufacturer manufacturer;
-};
-
-public type Default_query record {
-    string 'limit?;
-    int id?;
 };
 
 public type Optional_nullable record {

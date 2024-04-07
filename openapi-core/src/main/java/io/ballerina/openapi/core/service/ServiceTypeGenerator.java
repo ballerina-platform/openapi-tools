@@ -31,6 +31,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
@@ -59,12 +60,17 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
  * This class is used to generate the ballerina service object for the given openapi contract.
  */
 public class ServiceTypeGenerator extends ServiceGenerator {
+
     public ServiceTypeGenerator(OASServiceMetadata oasServiceMetadata) {
         super(oasServiceMetadata);
     }
 
+    public ServiceTypeGenerator(OASServiceMetadata oasServiceMetadata, List<Node> functionsList) {
+        super(oasServiceMetadata, functionsList);
+    }
+
     @Override
-    public SyntaxTree generateSyntaxTree() {
+    public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
         // TODO: Check the possibility of having imports other than `ballerina/http`
         NodeList<ImportDeclarationNode> imports = ServiceGenerationUtils.createImportDeclarationNodes();
         NodeList<ModuleMemberDeclarationNode> moduleMembers = createNodeList(generateServiceObject());
@@ -76,13 +82,15 @@ public class ServiceTypeGenerator extends ServiceGenerator {
         return syntaxTree.modifyWith(modulePartNode);
     }
 
-    private TypeDefinitionNode generateServiceObject() {
+    private TypeDefinitionNode generateServiceObject() throws BallerinaOpenApiException {
         List<Node> serviceObjectMemberNodes = new ArrayList<>();
         TypeReferenceNode httpServiceTypeRefNode = createTypeReferenceNode(createToken(ASTERISK_TOKEN),
                 createIdentifierToken("http:Service"), createToken(SEMICOLON_TOKEN));
         serviceObjectMemberNodes.add(httpServiceTypeRefNode);
-        List<Node> functions = createResourceFunctions(oasServiceMetadata.getOpenAPI(), oasServiceMetadata.getFilters());
-        for (Node functionNode : functions) {
+        if (functionsList == null) {
+            functionsList = createResourceFunctions(oasServiceMetadata.getOpenAPI(), oasServiceMetadata.getFilters());
+        }
+        for (Node functionNode : functionsList) {
             NodeList<Token> methodQualifierList = createNodeList(createToken(RESOURCE_KEYWORD));
             if (functionNode instanceof FunctionDefinitionNode &&
                     ((FunctionDefinitionNode) functionNode).qualifierList()

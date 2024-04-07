@@ -26,26 +26,15 @@ import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiExc
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.model.Filter;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.generators.common.TestUtils;
-import io.ballerina.tools.diagnostics.Diagnostic;
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.SpecVersion;
-import org.ballerinalang.formatter.core.FormatterException;
-import org.testng.Assert;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-
-import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
-import static io.ballerina.openapi.generators.common.TestUtils.normalizeOpenAPI;
 
 /**
  * All the tests related to the check diagnostic issue in code generators
@@ -238,6 +227,6 @@ public class BallerinaDiagnosticTests {
     }
     @AfterTest
     public void cleanUp() throws IOException {
-        TestUtils.deleteGeneratedFiles();
+        GeneratorTestUtils.deleteGeneratedFiles();
     }
 }

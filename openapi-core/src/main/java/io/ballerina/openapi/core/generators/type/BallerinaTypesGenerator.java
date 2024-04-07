@@ -24,6 +24,8 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.generators.AllOfRecordTypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.ArrayTypeGenerator;
@@ -33,6 +35,7 @@ import io.ballerina.openapi.core.generators.type.generators.TypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.UnionTypeGenerator;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.openapi.core.generators.type.model.TypeGeneratorResult;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -43,7 +46,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
@@ -60,6 +62,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
  */
 public class BallerinaTypesGenerator {
 
+    private final List<Diagnostic> diagnostics = new ArrayList<>();
+
     /**
      * This public constructor is used to generate record and other relevant data type when the nullable flag is
      * enabled in the openapi command.
@@ -71,17 +75,21 @@ public class BallerinaTypesGenerator {
         GeneratorMetaData.createInstance(openAPI, isNullable);
     }
 
+    public List<Diagnostic> getDiagnostics() {
+        return diagnostics;
+    }
+
     public TypeGeneratorResult generateTypeDescriptorNodeForOASSchema(Schema<?> schema, boolean overrideNullable) {
         HashMap<String, TypeDefinitionNode> subtypesMap = new HashMap<>();
         Optional<TypeDescriptorNode> typeDescriptorNode;
         try {
             typeDescriptorNode = generateTypeDescriptorNodeForOASSchema(schema, overrideNullable,
                     subtypesMap, new HashMap<>());
-        } catch (OASTypeGenException e) {
-            // todo: diagnostic this exception
-            return new TypeGeneratorResult(null, subtypesMap , new ArrayList<>());
+        } catch (BallerinaOpenApiException | OASTypeGenException e) {
+            // todo : diagnostic this exception
+            return new TypeGeneratorResult(null, subtypesMap);
         }
-        return new TypeGeneratorResult(typeDescriptorNode, subtypesMap, new ArrayList<>());
+        return new TypeGeneratorResult(typeDescriptorNode, subtypesMap);
     }
 
     /**
@@ -90,7 +98,7 @@ public class BallerinaTypesGenerator {
     private Optional<TypeDescriptorNode> generateTypeDescriptorNodeForOASSchema(
             Schema<?> schema, boolean overrideNullable, HashMap<String, TypeDefinitionNode> subTypesMap,
             HashMap<String, NameReferenceNode> pregeneratedTypeMap)
-            throws OASTypeGenException {
+            throws BallerinaOpenApiException, OASTypeGenException {
         if (schema == null) {
             return Optional.empty();
         }
@@ -117,6 +125,7 @@ public class BallerinaTypesGenerator {
                         createIdentifierToken(typeName),
                         typeDescriptorNode,
                         createToken(SEMICOLON_TOKEN));
+                this.diagnostics.addAll(typeGenerator.getDiagnostics());
                 pregeneratedTypeMap.put(typeName, getSimpleNameReferenceNode(typeName));
                 subTypesMap.put(typeName, typeDefinitionNode);
             }
@@ -125,6 +134,7 @@ public class BallerinaTypesGenerator {
             RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null, overrideNullable,
                     subTypesMap, pregeneratedTypeMap);
             TypeDescriptorNode record = recordTypeGenerator.generateTypeDescriptorNode();
+            this.diagnostics.addAll(recordTypeGenerator.getDiagnostics());
             return Optional.ofNullable(record);
         } else if (GeneratorUtils.getOpenAPIType(schema) != null) {
             String schemaType = GeneratorUtils.getOpenAPIType(schema);
@@ -138,7 +148,9 @@ public class BallerinaTypesGenerator {
             } else if (isPrimitiveType) {
                 PrimitiveTypeGenerator primitiveTypeGenerator = new PrimitiveTypeGenerator(schema, null,
                         overrideNullable, subTypesMap, pregeneratedTypeMap);
-                return Optional.ofNullable(primitiveTypeGenerator.generateTypeDescriptorNode());
+                TypeDescriptorNode typeDescriptorNode = primitiveTypeGenerator.generateTypeDescriptorNode();
+                this.diagnostics.addAll(primitiveTypeGenerator.getDiagnostics());
+                return Optional.ofNullable(typeDescriptorNode);
                 //This returns identifier node for the types: int, float, decimal, boolean, string
 //                IdentifierToken identifierToken = createIdentifierToken(
 //                        GeneratorUtils.convertOpenAPITypeToBallerina(schema),
@@ -147,7 +159,9 @@ public class BallerinaTypesGenerator {
             } else if (schemaType.equals(GeneratorConstants.OBJECT) || GeneratorUtils.isObjectSchema(schema)) {
                 RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null, overrideNullable,
                         subTypesMap, pregeneratedTypeMap);
-                return Optional.ofNullable(recordTypeGenerator.generateTypeDescriptorNode());
+                TypeDescriptorNode typeDescriptorNode = recordTypeGenerator.generateTypeDescriptorNode();
+                this.diagnostics.addAll(recordTypeGenerator.getDiagnostics());
+                return Optional.ofNullable(typeDescriptorNode);
             } else {
                 return Optional.empty();
             }
@@ -157,22 +171,23 @@ public class BallerinaTypesGenerator {
         } else if (schema.getAllOf() != null) {
             AllOfRecordTypeGenerator allOfRecordTypeGenerator = new AllOfRecordTypeGenerator(schema, null,
                     overrideNullable, subTypesMap, pregeneratedTypeMap);
-            return Optional.ofNullable(allOfRecordTypeGenerator.generateTypeDescriptorNode());
+            TypeDescriptorNode typeDescriptorNode = allOfRecordTypeGenerator.generateTypeDescriptorNode();
+            this.diagnostics.addAll(allOfRecordTypeGenerator.getDiagnostics());
+            return Optional.ofNullable(typeDescriptorNode);
         } else if (schema.getAnyOf() != null) {
             UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(schema, null, overrideNullable,
                     subTypesMap, pregeneratedTypeMap);
             return Optional.ofNullable(unionTypeGenerator.generateTypeDescriptorNode());
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     private TypeDescriptorNode getUnionNodeForOneOf(Schema<?> schema, boolean overrideNullable,
                                                     HashMap<String, TypeDefinitionNode> subTypesMap,
                                                     HashMap<String, NameReferenceNode> pregeneratedTypeMap)
-            throws OASTypeGenException {
+            throws OASTypeGenException, BallerinaOpenApiException {
         Iterator<Schema> iterator = schema.getOneOf().iterator();
-        List<SimpleNameReferenceNode> qualifiedNodes = new ArrayList<>();
+        List<NameReferenceNode> qualifiedNodes = new ArrayList<>();
         Token pipeToken = createIdentifierToken("|");
         while (iterator.hasNext()) {
             Schema<?> contentType = iterator.next();
@@ -181,10 +196,15 @@ public class BallerinaTypesGenerator {
             if (qualifiedNodeType.isEmpty()) {
                 continue;
             }
-            qualifiedNodes.add((SimpleNameReferenceNode) qualifiedNodeType.get());
+            if (qualifiedNodeType.get() instanceof NameReferenceNode nameReferenceNode) {
+                qualifiedNodes.add(nameReferenceNode);
+            } else {
+                qualifiedNodes.add(createSimpleNameReferenceNode(createIdentifierToken(qualifiedNodeType.get()
+                        .toSourceCode())));
+            }
         }
-        SimpleNameReferenceNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
-        SimpleNameReferenceNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
+        NameReferenceNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
+        NameReferenceNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
         UnionTypeDescriptorNode traversUnion = createUnionTypeDescriptorNode(traversRight, pipeToken,
                 right);
         if (qualifiedNodes.size() >= 3) {

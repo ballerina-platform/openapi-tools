@@ -33,29 +33,24 @@ public class LowResourceGenerator extends ResourceGenerator {
 
     @Override
     public FunctionDefinitionNode generateResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                           String path) {
+                                                           String path) throws BallerinaOpenApiException {
         NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(GeneratorConstants.RESOURCE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
         Token functionKeyWord = createIdentifierToken(GeneratorConstants.FUNCTION, GeneratorUtils.SINGLE_WS_MINUTIAE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
         IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
                 .toLowerCase(Locale.ENGLISH), GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
-        NodeList<Node> relativeResourcePath = null;
-        try {
-            relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(), null,
-                    oasServiceMetadata.getOpenAPI().getComponents(), oasServiceMetadata.generateWithoutDataBinding());
-        } catch (BallerinaOpenApiException e) {
-            throw new RuntimeException(e);
-        }
+        NodeList<Node> relativeResourcePath;
+        relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(), null,
+                oasServiceMetadata.getOpenAPI().getComponents(), oasServiceMetadata.generateWithoutDataBinding());
         FunctionSignatureGenerator functionSignatureGenerator = FunctionSignatureGenerator
                 .getFunctionSignatureGenerator(oasServiceMetadata);
         FunctionSignatureNode functionSignatureNode = functionSignatureGenerator.getFunctionSignature(operation, path);
-        // create function body
+        diagnostics.addAll(functionSignatureGenerator.getDiagnostics());
         FunctionBodyBlockNode functionBodyBlockNode = createFunctionBodyBlockNode(
                 createToken(SyntaxKind.OPEN_BRACE_TOKEN),
                 null, createEmptyNodeList(),
                 createToken(SyntaxKind.CLOSE_BRACE_TOKEN), null);
-
         return createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, null,
                 qualifiersList, functionKeyWord, functionName, relativeResourcePath, functionSignatureNode,
                 functionBodyBlockNode);
