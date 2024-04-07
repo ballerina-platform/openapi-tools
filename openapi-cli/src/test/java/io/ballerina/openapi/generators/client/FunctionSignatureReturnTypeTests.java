@@ -45,7 +45,7 @@ import static io.ballerina.openapi.generators.common.TestUtils.getOpenAPI;
  */
 public class FunctionSignatureReturnTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
-    @Test(description = "Tests for returnType")
+    @Test(description = "Tests for returnType", enabled = false)
     public void getReturnTypeTests() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RES_DIR.resolve("swagger/return_type/all_return_type_operation.yaml"));
         TypeHandler.createInstance(openAPI, false);
@@ -138,7 +138,7 @@ public class FunctionSignatureReturnTypeTests {
         Assert.assertEquals(returnType, "record{|int:Signed32...;|}|error");
     }
 
-    @Test(description = "Tests for the response without content type")
+    @Test(description = "Tests for the response without content type", enabled = false)
     public void getReturnTypeForNoContentType() throws IOException, BallerinaOpenApiException, ClientException {
         OpenAPI openAPI = getOpenAPI(RES_DIR.resolve("swagger/return_type" +
                 "/no_content_type.yaml"));

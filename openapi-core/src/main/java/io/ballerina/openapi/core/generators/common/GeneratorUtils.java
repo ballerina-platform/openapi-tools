@@ -711,7 +711,9 @@ public class GeneratorUtils {
     }
 
     public static void addImport(List<ImportDeclarationNode> imports, String module) {
-
+        if (imports == null) {
+            imports = new ArrayList<>();
+        }
         if (!checkImportDuplicate(imports, module)) {
             ImportDeclarationNode importModule = GeneratorUtils.getImportDeclarationNode(BALLERINA, module);
             imports.add(importModule);

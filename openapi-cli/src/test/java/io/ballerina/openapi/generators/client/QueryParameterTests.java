@@ -67,7 +67,8 @@ public class QueryParameterTests {
     }
 
     @Test(description = "Generate Client for query parameter with referenced schema")
-    public void generateQueryParamWithReferencedSchema() throws IOException, BallerinaOpenApiException, ClientException {
+    public void generateQueryParamWithReferencedSchema() throws IOException, BallerinaOpenApiException,
+            ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/query_param_with_ref_schema.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_with_ref_schema.bal");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
@@ -75,9 +76,9 @@ public class QueryParameterTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
-    //todo enable after preserving the order of the generated functions
-    @Test(description = "Generate query parameters when both apikeys and http/OAuth is supported", enabled = false)
-    public void genQueryParamsForCombinationOfApiKeyAndHTTPOrOAuth() throws IOException, BallerinaOpenApiException, ClientException {
+    @Test(description = "Generate query parameters when both apikeys and http/OAuth is supported")
+    public void genQueryParamsForCombinationOfApiKeyAndHTTPOrOAuth() throws IOException, BallerinaOpenApiException,
+            ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/combination_of_apikey_and_http_oauth.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/combination_of_apikey_and_http_oauth.bal");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);

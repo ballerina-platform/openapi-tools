@@ -65,6 +65,7 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.servers.Server;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -126,8 +127,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.X_B
 public class BallerinaClientGenerator {
 
     private final Filter filter;
-    private List<ImportDeclarationNode> imports;
-    private List<TypeDefinitionNode> typeDefinitionNodeList;
+    private List<ImportDeclarationNode> imports = new ArrayList<>();
     private List<String> apiKeyNameList = new ArrayList<>();
     private final OpenAPI openAPI;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
@@ -152,12 +152,6 @@ public class BallerinaClientGenerator {
         return authConfigGeneratorImp;
     }
 
-    /**
-     * Set the typeDefinitionNodeList.
-     */
-    public void setTypeDefinitionNodeList(List<TypeDefinitionNode> typeDefinitionNodeList) {
-        this.typeDefinitionNodeList = typeDefinitionNodeList;
-    }
 
     public List<String> getRemoteFunctionNameList() {
 
@@ -177,8 +171,6 @@ public class BallerinaClientGenerator {
     public BallerinaClientGenerator(OASClientConfig oasClientConfig) {
 
         this.filter = oasClientConfig.getFilter();
-        this.imports = new ArrayList<>();
-        this.typeDefinitionNodeList = new ArrayList<>();
         this.openAPI = oasClientConfig.getOpenAPI();
         this.ballerinaUtilGenerator = new BallerinaUtilGenerator();
         this.remoteFunctionNameList = new ArrayList<>();
@@ -201,7 +193,6 @@ public class BallerinaClientGenerator {
         List<ModuleMemberDeclarationNode> nodes = new ArrayList<>();
         // Add authentication related records
         authConfigGeneratorImp.addAuthRelatedRecords(openAPI);
-        List<Server> servers = openAPI.getServers();
         // Add class definition node to module member nodes
         nodes.add(getClassDefinitionNode());
 
@@ -239,15 +230,13 @@ public class BallerinaClientGenerator {
      * }
      * </pre>
      */
-    private ClassDefinitionNode getClassDefinitionNode() throws BallerinaOpenApiException {
+    private ClassDefinitionNode getClassDefinitionNode() {
         // Collect members for class definition node
         List<Node> memberNodeList = new ArrayList<>();
         // Add instance variable to class definition node
         memberNodeList.addAll(createClassInstanceVariables());
         // Add init function to class definition node
         memberNodeList.add(createInitFunction());
-        // todo: Generate remote function Nodes
-        // todo: filter tags and the operations
         Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations = filterOperations();
         //switch resource remote
         List<FunctionDefinitionNode> functionDefinitionNodeList = new ArrayList<>();
@@ -357,7 +346,7 @@ public class BallerinaClientGenerator {
      * @return {@link FunctionDefinitionNode}   Class init function
      * @throws BallerinaOpenApiException When invalid server URL is provided
      */
-    private FunctionDefinitionNode createInitFunction() throws BallerinaOpenApiException {
+    private FunctionDefinitionNode createInitFunction() {
 
         FunctionSignatureNode functionSignatureNode = getInitFunctionSignatureNode();
         FunctionBodyNode functionBodyNode = getInitFunctionBodyNode();
@@ -447,31 +436,56 @@ public class BallerinaClientGenerator {
      */
     private LinkedHashSet<Node> sortParameters(List<ParameterNode> parameters) {
         // init (required, default)
+        HashMap<String, Node> requiredParams = new HashMap<>();
+        List<String> requiredParamNames = new ArrayList<>();
+        List<String> defaultParamNames = new ArrayList<>();
 
-        LinkedHashSet<Node> requiredParams = new LinkedHashSet<>();
-        List<Node> defaultParams = new ArrayList<>();
+        HashMap<String, Node> defaultParams = new HashMap<>();
         for (ParameterNode parameter : parameters) {
             if (parameter instanceof RequiredParameterNode requiredParameterNode) {
-                requiredParams.add(requiredParameterNode);
-                requiredParams.add(createToken(COMMA_TOKEN));
+                String paramName = requiredParameterNode.paramName().get().toString();
+                requiredParamNames.add(paramName);
+                requiredParams.put(paramName, requiredParameterNode);
+//                requiredParams.add(createToken(COMMA_TOKEN));
             } else if (parameter instanceof DefaultableParameterNode defaultableParameterNode) {
-                defaultParams.add(defaultableParameterNode);
-                defaultParams.add(createToken(COMMA_TOKEN));
+                String paramName = defaultableParameterNode.paramName().get().toString();
+                defaultParams.put(paramName, defaultableParameterNode);
+                defaultParamNames.add(paramName);
+//                defaultParams.add(createToken(COMMA_TOKEN));
             }
         }
+        List<String> sortedRequiredParamNames = ascendingOrder(requiredParamNames);
+        List<String> sortedDefaultParamNames = ascendingOrder(defaultParamNames);
+        LinkedHashSet<Node> paramNodes = new LinkedHashSet<>();
         // todo handle the parameter order in ascending order
-
-        if (!defaultParams.isEmpty()) {
-            requiredParams.addAll(defaultParams);
+        for (String paramName : sortedRequiredParamNames) {
+            paramNodes.add(requiredParams.get(paramName));
+            paramNodes.add(createToken(COMMA_TOKEN));
         }
+        for (String paramName : sortedDefaultParamNames) {
+            paramNodes.add(defaultParams.get(paramName));
+            paramNodes.add(createToken(COMMA_TOKEN));
+        }
+
         // remove trailing comma
-        if (!requiredParams.isEmpty()) {
-            if (requiredParams.toArray()[requiredParams.size() - 1] instanceof Token) {
-                requiredParams.remove(requiredParams.toArray()[requiredParams.size() - 1]);
+        if (!paramNodes.isEmpty()) {
+            if (paramNodes.toArray()[paramNodes.size() - 1] instanceof Token) {
+                paramNodes.remove(paramNodes.toArray()[paramNodes.size() - 1]);
             }
         }
-        return requiredParams;
+        return paramNodes;
     }
+
+    public static List<String> ascendingOrder(List<String> inputList) {
+        // Create a new ArrayList to avoid modifying the original list
+        List<String> sortedList = new ArrayList<>(inputList);
+
+        // Sort the list in ascending order
+        Collections.sort(sortedList);
+
+        return sortedList;
+    }
+
 
     /**
      * Provide client class init function's documentation including function description and parameter descriptions.
@@ -548,11 +562,9 @@ public class BallerinaClientGenerator {
         List<FunctionDefinitionNode> remoteFunctionNodes = new ArrayList<>();
         for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {
             for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : operation.getValue().entrySet()) {
-                RemoteFunctionGenerator remoteFunctionGenerator = new RemoteFunctionGenerator(operation.getKey(), operationEntry, openAPI, authConfigGeneratorImp, ballerinaUtilGenerator);
+                RemoteFunctionGenerator remoteFunctionGenerator = new RemoteFunctionGenerator(operation.getKey(), operationEntry, openAPI, authConfigGeneratorImp, ballerinaUtilGenerator, imports);
                 Optional<FunctionDefinitionNode> remotefunction = remoteFunctionGenerator.generateFunction();
-                if (remotefunction.isPresent()) {
-                    remoteFunctionNodes.add(remotefunction.get());
-                }
+                remotefunction.ifPresent(remoteFunctionNodes::add);
             }
         }
         return remoteFunctionNodes;
@@ -564,11 +576,9 @@ public class BallerinaClientGenerator {
         for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {
             for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : operation.getValue().entrySet()) {
                 ResourceFunctionGenerator resourceFunctionGenerator = new ResourceFunctionGenerator(operationEntry,
-                        operation.getKey(), openAPI, authConfigGeneratorImp, ballerinaUtilGenerator);
+                        operation.getKey(), openAPI, authConfigGeneratorImp, ballerinaUtilGenerator, imports);
                 Optional<FunctionDefinitionNode> resourceFunction = resourceFunctionGenerator.generateFunction();
-                if (resourceFunction.isPresent()) {
-                    resourceFunctionNodes.add(resourceFunction.get());
-                }
+                resourceFunction.ifPresent(resourceFunctionNodes::add);
             }
         }
         return resourceFunctionNodes;

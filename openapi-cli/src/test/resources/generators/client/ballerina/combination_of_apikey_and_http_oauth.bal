@@ -41,6 +41,23 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+    # Delete a pet
+    #
+    # + petId - The id of the pet to delete
+    # + return - Expected response to a valid request
+    remote isolated function deletePetInfo(string petId) returns Pet|error {
+        string resourcePath = string `/pets/management`;
+        map<any> headerValues = {};
+        map<anydata> queryParam = {"petId": petId};
+        if self.apiKeyConfig is ApiKeysConfig {
+            headerValues["api-key"] = self.apiKeyConfig?.apiKey;
+            queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
+        }
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        Pet response = check self.clientEp->delete(resourcePath, headers = httpHeaders);
+        return response;
+    }
     # Delete a pet 2
     #
     # + petId - The id of the pet to delete
@@ -74,23 +91,6 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         Pet response = check self.clientEp->get(resourcePath, httpHeaders);
-        return response;
-    }
-    # Delete a pet
-    #
-    # + petId - The id of the pet to delete
-    # + return - Expected response to a valid request
-    remote isolated function deletePetInfo(string petId) returns Pet|error {
-        string resourcePath = string `/pets/management`;
-        map<any> headerValues = {};
-        map<anydata> queryParam = {"petId": petId};
-        if self.apiKeyConfig is ApiKeysConfig {
-            headerValues["api-key"] = self.apiKeyConfig?.apiKey;
-            queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
-        }
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        Pet response = check self.clientEp->delete(resourcePath, headers = httpHeaders);
         return response;
     }
     # Vote for a pet

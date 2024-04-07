@@ -7,7 +7,7 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(string serviceUrl = "localhost:9090/payloadV", ConnectionConfig config =  {}) returns error? {
+    public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "localhost:9090/payloadV") returns error? {
         http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
@@ -34,18 +34,6 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    # + return - Ok
-    resource isolated function get v1/[int version]/v2/[int 'limit]() returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri('limit)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
-    }
-    # + return - Ok
-    resource isolated function get v1/[int version]/v2/[string name]() returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri(name)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
-    }
     # Retrieves a single customer.
     #
     # + customer_id - Customer ID
@@ -56,19 +44,6 @@ public isolated client class Client {
         map<anydata> queryParam = {"fields": fields};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         return self.clientEp->get(resourcePath);
-    }
-    # + return - Ok
-    resource isolated function get v1/[int age]/v2/[string name]() returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri(age)}/v2/${getEncodedUri(name)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
-    }
-    # + return - Ok
-    resource isolated function post .() returns string|error {
-        string resourcePath = string `/`;
-        http:Request request = new;
-        string response = check self.clientEp->post(resourcePath, request);
-        return response;
     }
     # op1
     #
@@ -85,6 +60,31 @@ public isolated client class Client {
     resource isolated function get v1/[int id]() returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(id)}`;
         string response = check self.clientEp->get(resourcePath);
+        return response;
+    }
+    # + return - Ok
+    resource isolated function get v1/[int version]/v2/[string name]() returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri(name)}`;
+        string response = check self.clientEp->get(resourcePath);
+        return response;
+    }
+    # + return - Ok
+    resource isolated function get v1/[int age]/v2/[string name]() returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(age)}/v2/${getEncodedUri(name)}`;
+        string response = check self.clientEp->get(resourcePath);
+        return response;
+    }
+    # + return - Ok
+    resource isolated function get v1/[int version]/v2/[int 'limit]() returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri('limit)}`;
+        string response = check self.clientEp->get(resourcePath);
+        return response;
+    }
+    # + return - Ok
+    resource isolated function post .() returns string|error {
+        string resourcePath = string `/`;
+        http:Request request = new;
+        string response = check self.clientEp->post(resourcePath, request);
         return response;
     }
 }

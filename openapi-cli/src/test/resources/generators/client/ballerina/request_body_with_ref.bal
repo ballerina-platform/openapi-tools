@@ -38,8 +38,8 @@ public isolated client class Client {
     #
     # + payload - Return from creating a pet
     # + return - Successful operation
-    remote isolated function createPet(CreatedPet_RequestBody payload) returns error? {
-        string resourcePath = string `/pets`;
+    remote isolated function createMyPet(Pet payload) returns error? {
+        string resourcePath = string `/my/pets`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
@@ -49,8 +49,8 @@ public isolated client class Client {
     #
     # + payload - Return from creating a pet
     # + return - Successful operation
-    remote isolated function createMyPet(Pet payload) returns error? {
-        string resourcePath = string `/my/pets`;
+    remote isolated function createPet(record {string? petId?; string? createdDate?;} payload) returns error? {
+        string resourcePath = string `/pets`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");

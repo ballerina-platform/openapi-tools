@@ -36,37 +36,6 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    # 02 Example for rb has inline requestbody.
-    #
-    # + return - OK
-    remote isolated function updateUser(Path01_body payload) returns error? {
-        string resourcePath = string `/path01`;
-        http:Request request = new;
-        json jsonBody = payload.toJson();
-        request.setPayload(jsonBody, "application/json");
-        return self.clientEp->put(resourcePath, request);
-    }
-    # 01 Request body with reference.
-    #
-    # + return - OK
-    remote isolated function postUser(User payload) returns error? {
-        string resourcePath = string `/path01`;
-        http:Request request = new;
-        json jsonBody = payload.toJson();
-        request.setPayload(jsonBody, "application/json");
-        return self.clientEp->post(resourcePath, request);
-    }
-    # 04 Example for rb has inline requestbody.
-    #
-    # + payload - A JSON object containing pet information
-    # + return - OK
-    remote isolated function updateNewUser(User payload) returns error? {
-        string resourcePath = string `/path02`;
-        http:Request request = new;
-        json jsonBody = payload.toJson();
-        request.setPayload(jsonBody, "application/json");
-        return self.clientEp->put(resourcePath, request);
-    }
     # 03 Request body with record reference.
     #
     # + return - OK
@@ -77,16 +46,15 @@ public isolated client class Client {
         request.setPayload(jsonBody, "application/json");
         return self.clientEp->post(resourcePath, request);
     }
-    # 06 Example for rb has array inline requestbody.
+    # 01 Request body with reference.
     #
     # + return - OK
-    remote isolated function updateXMLUser(Path03_body payload) returns error? {
-        string resourcePath = string `/path03`;
+    remote isolated function postUser(User payload) returns error? {
+        string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = payload.toJson();
-        xml? xmlBody = check xmldata:fromJson(jsonBody);
-        request.setPayload(xmlBody, "application/xml");
-        return self.clientEp->put(resourcePath, request);
+        request.setPayload(jsonBody, "application/json");
+        return self.clientEp->post(resourcePath, request);
     }
     # 05 Example for rb has array inline requestbody.
     #
@@ -109,5 +77,37 @@ public isolated client class Client {
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
         return self.clientEp->post(resourcePath, request);
+    }
+    # 04 Example for rb has inline requestbody.
+    #
+    # + payload - A JSON object containing pet information
+    # + return - OK
+    remote isolated function updateNewUser(User payload) returns error? {
+        string resourcePath = string `/path02`;
+        http:Request request = new;
+        json jsonBody = payload.toJson();
+        request.setPayload(jsonBody, "application/json");
+        return self.clientEp->put(resourcePath, request);
+    }
+    # 02 Example for rb has inline requestbody.
+    #
+    # + return - OK
+    remote isolated function updateUser(Path01_body payload) returns error? {
+        string resourcePath = string `/path01`;
+        http:Request request = new;
+        json jsonBody = payload.toJson();
+        request.setPayload(jsonBody, "application/json");
+        return self.clientEp->put(resourcePath, request);
+    }
+    # 06 Example for rb has array inline requestbody.
+    #
+    # + return - OK
+    remote isolated function updateXMLUser(Path03_body payload) returns error? {
+        string resourcePath = string `/path03`;
+        http:Request request = new;
+        json jsonBody = payload.toJson();
+        xml? xmlBody = check xmldata:fromJson(jsonBody);
+        request.setPayload(xmlBody, "application/xml");
+        return self.clientEp->put(resourcePath, request);
     }
 }

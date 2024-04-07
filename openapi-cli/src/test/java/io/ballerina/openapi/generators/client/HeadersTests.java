@@ -26,7 +26,6 @@ import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -48,7 +47,7 @@ public class HeadersTests {
     Filter filter = new Filter(list1, list2);
 
     @Test(description = "Test for header that comes under the parameter section")
-    public void getHeaderTests() throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
+    public void getHeaderTests() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/header_parameter.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_parameter.bal");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
@@ -57,7 +56,7 @@ public class HeadersTests {
     }
 
     @Test(description = "Test for header that comes under the parameter section")
-    public void getHeaderTestsWithoutParameter() throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
+    public void getHeaderTestsWithoutParameter() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/header_without_parameter.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_without_parameter.bal");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
@@ -67,7 +66,7 @@ public class HeadersTests {
 
 
     @Test(description = "Test for header with default values")
-    public void getHeaderTestsWithDefaultValues() throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
+    public void getHeaderTestsWithDefaultValues() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/header_param_with_default_value.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_param_with_default_value.bal");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
@@ -76,7 +75,8 @@ public class HeadersTests {
     }
 
     @Test(description = "Test for optional headers without default values")
-    public void getOptionalHeaderTestsWithoutDefaultValues() throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
+    public void getOptionalHeaderTestsWithoutDefaultValues() throws IOException, BallerinaOpenApiException,
+            ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/header_optional.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_optional.bal");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);

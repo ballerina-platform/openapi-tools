@@ -34,22 +34,20 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    #
     # + version - Version Id
     # + versionName - Version Name
     # + return - Ok
     remote isolated function operationId04(int version, string versionName) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri(versionName)}`;
-        string response = check self.clientEp-> get(resourcePath);
+        string response = check self.clientEp->get(resourcePath);
         return response;
     }
-    #
     # + versionId - Version Id
     # + versionLimit - Version Limit
     # + return - Ok
     remote isolated function operationId05(int versionId, int versionLimit) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(versionId)}/v2/${getEncodedUri(versionLimit)}`;
-        string response = check self.clientEp-> get(resourcePath);
+        string response = check self.clientEp->get(resourcePath);
         return response;
     }
 }

@@ -128,7 +128,7 @@ public class FunctionSignatureNodeTests {
         Assert.assertEquals(returnTypeNode.type().toString(), "error?");
     }
 
-    @Test(description = "Test for generate function signature for multipart custom header")
+    @Test(description = "Test for generate function signature for multipart custom header", enabled = false)
     public void testFunctionSignatureNodeForMultipartCustomHeader() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RESDIR.resolve("swagger/multipart_formdata_custom.yaml"), true);

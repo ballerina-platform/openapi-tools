@@ -69,7 +69,7 @@ public class FunctionBodyNodeTests {
         TypeHandler.createInstance(openapi, false);
         FunctionBodyGeneratorImp functionBodyGeneratorImp = new FunctionBodyGeneratorImp(path, operation, openapi,
                 new AuthConfigGeneratorImp(false, false, new ArrayList<>()),
-                new BallerinaUtilGenerator());
+                new BallerinaUtilGenerator(), new ArrayList<>());
         Optional<FunctionBodyNode> bodyNode = functionBodyGeneratorImp.getFunctionBodyNode();
         content = content.trim().replaceAll("\n", "").replaceAll("\\s+", "");
         String bodyNodeContent = bodyNode.get().toString().trim().replaceAll("\n", "")

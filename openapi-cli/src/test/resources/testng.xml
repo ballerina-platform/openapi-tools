@@ -64,7 +64,7 @@
 <!--            <class name="io.ballerina.openapi.generators.service.HeaderParameterTests"/>-->
             <class name="io.ballerina.openapi.generators.service.ServiceDiagnosticTests"/>
             <class name="io.ballerina.openapi.generators.client.ImportsTests"/>
-<!--            <class name="io.ballerina.openapi.generators.client.BallerinaDiagnosticTests"/>-->
+            <class name="io.ballerina.openapi.generators.client.BallerinaDiagnosticTests"/>
             <class name="io.ballerina.openapi.generators.client.ComparedGeneratedFileTests"/>
             <class name="io.ballerina.openapi.generators.client.AnnotationTests"/>
             <class name="io.ballerina.openapi.generators.client.FunctionBodyNodeTests"/>
@@ -72,12 +72,12 @@
             <class name="io.ballerina.openapi.generators.client.FunctionSignatureReturnTypeTests"/>
             <class name="io.ballerina.openapi.generators.client.FilterTests"/>
             <class name="io.ballerina.openapi.generators.client.HeadersTests"/>
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.PathParameterTests"/>&ndash;&gt;-->
+            <class name="io.ballerina.openapi.generators.client.PathParameterTests"/>
             <class name="io.ballerina.openapi.generators.client.AllOfResponsesTests"/>
             <class name="io.ballerina.openapi.generators.client.QueryParameterTests"/>
             <class name="io.ballerina.openapi.generators.client.NoServerURLTest"/>
             <class name="io.ballerina.openapi.generators.client.RemoteFunctionNameValidationTests"/>
-<!--&lt;!&ndash;            <class name="io.ballerina.openapi.generators.client.RequestBodyTests"/>&ndash;&gt;-->
+            <class name="io.ballerina.openapi.generators.client.RequestBodyTests"/>
             <class name="io.ballerina.openapi.generators.client.UtilGenerationTests"/>
             <class name="io.ballerina.openapi.generators.client.ResourceFunctionTests"/>
             <class name="io.ballerina.openapi.generators.client.EnumGenerationTests"/>
