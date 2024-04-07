@@ -11,6 +11,7 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
+import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.client.parameter.HeaderParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.PathParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.QueryParameterGenerator;
@@ -80,8 +81,7 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                         paramName.add(param.get().toString());
                         break;
                     case "query":
-                        QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(parameter,
-                                openAPI);
+                        QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(parameter, openAPI);
                         Optional<ParameterNode> queryParam = queryParameterGenerator.generateParameterNode();
                         if (queryParam.isEmpty()) {
                             diagnostics.addAll(queryParameterGenerator.getDiagnostics());
@@ -98,8 +98,7 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                         }
                         break;
                     case "header":
-                        HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator(parameter,
-                                openAPI);
+                        HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator(parameter, openAPI);
                         Optional<ParameterNode> headerParam = headerParameterGenerator.generateParameterNode();
                         if (headerParam.isEmpty()) {
                             diagnostics.addAll(headerParameterGenerator.getDiagnostics());
