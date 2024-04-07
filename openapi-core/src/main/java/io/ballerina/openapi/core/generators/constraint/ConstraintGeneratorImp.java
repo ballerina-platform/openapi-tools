@@ -132,7 +132,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                             //when the items has constraints then we define separate type for it.
                             if (fieldSchema instanceof ArraySchema arraySchema) {
                                 updateConstraintWithArrayItems(key, fieldName, arraySchema);
-                            } else if (fieldSchema.getOneOf() != null) {
+                            } else if (fieldSchema != null && fieldSchema.getOneOf() != null) {
                                 //todo handle object schema
                                 List oneOf = fieldSchema.getOneOf();
                                 for (Schema schema : (List<Schema>) oneOf) {
@@ -269,7 +269,9 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
      * This util is to check if the given schema contains any constraints.
      */
     public static boolean hasConstraints(Schema<?> value) {
-
+        if (value == null) {
+            return false;
+        }
         if (value.getProperties() != null) {
             boolean constraintExists = value.getProperties().values().stream()
                     .anyMatch(GeneratorUtils::hasConstraints);

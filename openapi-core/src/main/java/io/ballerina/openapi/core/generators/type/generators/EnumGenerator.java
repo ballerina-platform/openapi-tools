@@ -77,7 +77,7 @@ public class EnumGenerator extends TypeGenerator {
                     continue;
                 }
                 if (enumValue instanceof String stringEnumValue) {
-                    stringEnumValue = stringEnumValue.replaceAll("\"", "\\\"");
+                    stringEnumValue = stringEnumValue.replaceAll("\"", "\\\\\"");
                     enumBuilder.append("\"").append(stringEnumValue).append("\"").append("|");
                 } else {
                     enumBuilder.append(enumValue).append("|");
