@@ -197,6 +197,10 @@ public class ArrayTypeGenerator extends TypeGenerator {
             }
         } else if (schemaType != null && schemaType.equals(GeneratorConstants.ARRAY)) {
             member = getTypeDescNodeForArraySchema(schema.getItems(), subTypesMap).orElse(null);
+        } else if (schema.getItems() != null) {
+            TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema.getItems(), typeName,
+                    parentType, overrideNullable, subTypesMap, pregeneratedTypeMap);
+            member = typeGenerator.generateTypeDescriptorNode();
         } else {
             return Optional.empty();
         }
@@ -261,7 +265,8 @@ public class ArrayTypeGenerator extends TypeGenerator {
 //        return createArrayTypeDescriptorNode(memberTypeDesc, nodeList);
 //    }
 
-    public ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(TypeDescriptorNode typeDescriptorNode) {
+    private ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(TypeDescriptorNode
+                                                                                             typeDescriptorNode) {
         ArrayDimensionNode arrayDimensionNode = NodeFactory.createArrayDimensionNode(
                 createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                 createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));

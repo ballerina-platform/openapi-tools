@@ -74,6 +74,7 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
         ReturnTypeDescriptorNode returnNode;
         try {
             returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation, path);
+            diagnostics.addAll(returnTypeGenerator.getDiagnostics());
         } catch (BallerinaOpenApiException e) {
 //            diagnostics.add(new ServiceDiagnostic(e.getMessage(), ServiceDiagnostic.DiagnosticSeverity.ERROR));
             // todo : check on adding diagnostics

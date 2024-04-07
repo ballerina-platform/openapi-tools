@@ -82,7 +82,7 @@ public class ServiceDiagnosticTests {
     @Test(description = "Test for compilation errors in OpenAPI definition to ballerina service skeleton generation",
             dataProvider = "singleFileProviderForDiagnosticCheck")
     public void checkDiagnosticIssuesInGenericServiceGen(String yamlFile) throws IOException, BallerinaOpenApiException,
-            FormatterException, OASTypeGenException {
+            FormatterException {
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -105,7 +105,7 @@ public class ServiceDiagnosticTests {
             "skeleton generation",
             dataProvider = "fileProviderForOpenAPI31DiagnosticCheck")
     public void checkDiagnosticIssuesWith31OpenAPIs(String yamlFile) throws IOException, BallerinaOpenApiException,
-            FormatterException, OASTypeGenException {
+            FormatterException {
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = normalizeOpenAPI(definitionPath, true, SpecVersion.V31);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -142,8 +142,9 @@ public class ServiceDiagnosticTests {
                 {"request_body_ref.yaml"},
                 {"vendor_specific_mime_types.yaml"},
                 {"single_allOf.yaml"},
-                // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1415
-//                {"ballerinax_connector_tests/ably.yaml"},
+                // TODO: Need to design a way to support range of response
+                //  codes (https://github.com/ballerina-platform/openapi-tools/issues/1415)
+                {"ballerinax_connector_tests/ably.yaml"},
                 {"ballerinax_connector_tests/azure.iot.yaml"},
                // TODO: Uncomment when fixed https://github.com/ballerina-platform/openapi-tools/issues/1440
 //                {"ballerinax_connector_tests/beezup.yaml"},
@@ -152,7 +153,9 @@ public class ServiceDiagnosticTests {
                 {"ballerinax_connector_tests/soundcloud.yaml"},
                 {"ballerinax_connector_tests/stripe.yaml"},
                 {"ballerinax_connector_tests/vimeo.yaml"},
-////                {"ballerinax_connector_tests/ynab.yaml"}, // 209 status code is not supported in Ballerina
+                // todo : 209 status code is not supported in
+                //  Ballerina. Generate `http:Response` at the moment.
+                {"ballerinax_connector_tests/ynab.yaml"},
                 {"ballerinax_connector_tests/zoom.yaml"}
         };
     }
@@ -184,7 +187,7 @@ public class ServiceDiagnosticTests {
                 {"ballerinax_connector_tests/soundcloud.yaml"},
                 {"ballerinax_connector_tests/stripe.yaml"},
                 {"ballerinax_connector_tests/vimeo.yaml"},
-//                {"ballerinax_connector_tests/ynab.yaml"}, // HTTP status code '209' is not supported in Ballerina.
+                {"ballerinax_connector_tests/ynab.yaml"}, // HTTP status code '209' is not supported in Ballerina.
                 {"ballerinax_connector_tests/zoom.yaml"},
                 {"3.1.0_openapis/adyen_accountservice.yaml"},
 //                {"3.1.0_openapis/codat_accounting.yaml"}, // openapi file has errors
@@ -193,7 +196,7 @@ public class ServiceDiagnosticTests {
                 {"3.1.0_openapis/listennotes.yaml"},
                 {"3.1.0_openapis/placekit.yaml"},
                 {"3.1.0_openapis/urlbox.yaml"},
-                {"3.1.0_openapis/vercel.yaml"},
+                {"3.1.0_openapis/vercel.yaml"}, // uncomment when https://github.com/ballerina-platform/openapi-tools/issues/1332 is fixed
                 {"3.1.0_openapis/webscraping.yaml"},
                 {"3.1.0_openapis/wolframalpha.yaml"}
         };

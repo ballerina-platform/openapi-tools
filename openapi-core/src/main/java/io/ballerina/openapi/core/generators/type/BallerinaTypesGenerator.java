@@ -187,7 +187,7 @@ public class BallerinaTypesGenerator {
                                                     HashMap<String, NameReferenceNode> pregeneratedTypeMap)
             throws OASTypeGenException, BallerinaOpenApiException {
         Iterator<Schema> iterator = schema.getOneOf().iterator();
-        List<NameReferenceNode> qualifiedNodes = new ArrayList<>();
+        List<TypeDescriptorNode> qualifiedNodes = new ArrayList<>();
         Token pipeToken = createIdentifierToken("|");
         while (iterator.hasNext()) {
             Schema<?> contentType = iterator.next();
@@ -196,15 +196,10 @@ public class BallerinaTypesGenerator {
             if (qualifiedNodeType.isEmpty()) {
                 continue;
             }
-            if (qualifiedNodeType.get() instanceof NameReferenceNode nameReferenceNode) {
-                qualifiedNodes.add(nameReferenceNode);
-            } else {
-                qualifiedNodes.add(createSimpleNameReferenceNode(createIdentifierToken(qualifiedNodeType.get()
-                        .toSourceCode())));
-            }
+            qualifiedNodes.add(qualifiedNodeType.get());
         }
-        NameReferenceNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
-        NameReferenceNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
+        TypeDescriptorNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
+        TypeDescriptorNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
         UnionTypeDescriptorNode traversUnion = createUnionTypeDescriptorNode(traversRight, pipeToken,
                 right);
         if (qualifiedNodes.size() >= 3) {

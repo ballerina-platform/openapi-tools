@@ -26,24 +26,21 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.ServiceGenerationUtils;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 
 /**
  * This class for generating request body payload for OAS requestBody section.
@@ -65,30 +62,22 @@ public class DefaultRequestBodyGenerator extends RequestBodyGenerator {
         Optional<TypeDescriptorNode> typeName;
         // Filter same data type
         HashSet<String> types = new HashSet<>();
-        ArrayList<TypeDescriptorNode> typeDescNodes = new ArrayList<>();
+        HashMap<String, TypeDescriptorNode> typeDescNodes = new LinkedHashMap<>();
         for (Map.Entry<String, MediaType> mime : requestBody.getContent().entrySet()) {
             typeName = getNodeForPayloadType(mime);
             if (typeName.isPresent()) {
                 types.add(typeName.get().toSourceCode());
-                typeDescNodes.add(typeName.get());
+                typeDescNodes.put(typeName.get().toSourceCode(), typeName.get());
             } else {
                 types.add(GeneratorConstants.HTTP_REQUEST);
             }
         }
-        if (types.size() > 1 && types.contains(GeneratorConstants.HTTP_REQUEST)) {
+        if (types.contains(GeneratorConstants.HTTP_REQUEST)) {
             typeName = Optional.of(NodeParser.parseTypeDescriptor(GeneratorConstants.HTTP_REQUEST));
-        } else if (types.size() > 1) {
-            TypeDescriptorNode unionTypeDescriptorNode = null;
-            TypeDescriptorNode leftTypeDesc = typeDescNodes.get(0);
-            for (int i = 1; i < typeDescNodes.size(); i++) {
-                TypeDescriptorNode rightTypeDesc = typeDescNodes.get(i);
-                unionTypeDescriptorNode = createUnionTypeDescriptorNode(leftTypeDesc, createToken(PIPE_TOKEN),
-                        rightTypeDesc);
-                leftTypeDesc = unionTypeDescriptorNode;
-            }
-            typeName = Optional.of(unionTypeDescriptorNode);
         } else {
-            typeName = Optional.of(typeDescNodes.get(0));
+            TypeDescriptorNode unionTypeDescriptorNode = GeneratorUtils
+                    .getUnionTypeDescriptorNodeFromTypeDescNodes(typeDescNodes);
+            typeName = Optional.of(unionTypeDescriptorNode);
         }
         AnnotationNode annotationNode = ServiceGenerationUtils.getAnnotationNode(GeneratorConstants.PAYLOAD_KEYWORD,
                 null);

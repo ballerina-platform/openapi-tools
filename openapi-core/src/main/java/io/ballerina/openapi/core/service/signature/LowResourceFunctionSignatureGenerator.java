@@ -59,6 +59,7 @@ public class LowResourceFunctionSignatureGenerator extends FunctionSignatureGene
         ReturnTypeDescriptorNode returnTypeDescriptorNode;
         try {
             returnTypeDescriptorNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation, path);
+            diagnostics.addAll(returnTypeGenerator.getDiagnostics());
         } catch (BallerinaOpenApiException e) {
             // todo :
             throw new RuntimeException(e);
