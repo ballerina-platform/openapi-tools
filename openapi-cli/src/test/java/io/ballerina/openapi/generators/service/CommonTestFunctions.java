@@ -52,7 +52,6 @@ public class CommonTestFunctions {
                 balfile);
         String generatedSyntaxTree = syntaxTree.toString();
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
-        generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
     }
