@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
@@ -90,7 +89,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
 
                         //remote : operationId
                         if (isResource) {
-                            sortKey = funcDef.relativeResourcePath().toString();
+                            sortKey = funcDef.functionSignature().toString();
                             storeMembers.add(sortKey);
                             NodeList<Node> nodes = funcDef.relativeResourcePath();
                             String path = "";
@@ -115,7 +114,6 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                 List<Node> sortedNodes = new ArrayList<>();
                 sortedNodes.addAll(clientInitNodes);
                 storeMembers.sort(String::compareTo);
-                System.out.println(storeMembers);
                 for (String memberStr: storeMembers) {
                      sortedNodes.add(updatedList.get(memberStr));
                 }
