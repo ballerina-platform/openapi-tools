@@ -65,6 +65,9 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.core.generators.common.diagnostic.CommonDiagnostic;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
+import io.ballerina.openapi.core.generators.common.exception.NullPathParameterException;
+import io.ballerina.openapi.core.generators.common.exception.UnsupportedOASDataTypeException;
 import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
@@ -318,7 +321,7 @@ public class GeneratorUtils {
                 } else {
                     paramType = getPathParameterType(parameter.getSchema(), pathParam);
                     if (paramType.endsWith(NILLABLE)) {
-                        throw new BallerinaOpenApiException("Path parameter value cannot be null.");
+                        throw new NullPathParameterException();
                     }
                 }
                 BuiltinSimpleNameReferenceNode builtSNRNode = createBuiltinSimpleNameReferenceNode(
@@ -363,7 +366,7 @@ public class GeneratorUtils {
      * @return ballerina type
      */
     public static String convertOpenAPITypeToBallerina(Schema<?> schema, boolean overrideNullable)
-            throws BallerinaOpenApiException {
+            throws UnsupportedOASDataTypeException {
         String type = getOpenAPIType(schema);
         if (schema.getEnum() != null && !schema.getEnum().isEmpty() && primitiveTypeList.contains(type)) {
             EnumGenerator enumGenerator = new EnumGenerator(schema, null, overrideNullable,
@@ -379,7 +382,7 @@ public class GeneratorUtils {
             if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(type)) {
                 return GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(type);
             } else {
-                throw new BallerinaOpenApiException("Unsupported OAS data type `" + type + "`");
+                throw new UnsupportedOASDataTypeException(type);
             }
         }
     }
@@ -392,7 +395,7 @@ public class GeneratorUtils {
      * @return data type for invalid numeric data formats
      */
     private static String convertOpenAPITypeFormatToBallerina(final String dataType, final Schema<?> schema)
-            throws BallerinaOpenApiException {
+            throws UnsupportedOASDataTypeException {
         if (OPENAPI_TYPE_TO_FORMAT_MAP.containsKey(dataType) &&
                 OPENAPI_TYPE_TO_FORMAT_MAP.get(dataType).contains(schema.getFormat())) {
             if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(schema.getFormat())) {
@@ -403,14 +406,14 @@ public class GeneratorUtils {
                 if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(dataType)) {
                     return GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(dataType);
                 } else {
-                    throw new BallerinaOpenApiException("Unsupported OAS data type `" + dataType + "`");
+                    throw new UnsupportedOASDataTypeException(dataType);
                 }
             }
         } else {
             if (GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.containsKey(dataType)) {
                 return GeneratorConstants.OPENAPI_TYPE_TO_BAL_TYPE_MAP.get(dataType);
             } else {
-                throw new BallerinaOpenApiException("Unsupported OAS data type `" + dataType + "`");
+                throw new UnsupportedOASDataTypeException(dataType);
             }
         }
     }
@@ -484,19 +487,16 @@ public class GeneratorUtils {
      * @throws BallerinaOpenApiException - Throws an exception if the reference string is incompatible.
      *                                   Note : Current implementation will not support external links a references.
      */
-    public static String extractReferenceType(String referenceVariable) throws BallerinaOpenApiException {
-
+    public static String extractReferenceType(String referenceVariable) throws InvalidReferenceException {
         if (referenceVariable.startsWith("#") && referenceVariable.contains("/")) {
             String[] refArray = referenceVariable.split("/");
             return refArray[refArray.length - 1];
         } else {
-            throw new BallerinaOpenApiException("Invalid reference value : " + referenceVariable
-                    + "\nBallerina only supports local reference values.");
+            throw new InvalidReferenceException(referenceVariable);
         }
     }
 
     public static boolean hasTags(List<String> tags, List<String> filterTags) {
-
         return !Collections.disjoint(filterTags, tags);
     }
 
@@ -1153,7 +1153,8 @@ public class GeneratorUtils {
     }
 
     public static String resolveReferenceType(Schema<?> schema, Components components, boolean isWithoutDataBinding,
-                                              String pathParam) throws BallerinaOpenApiException {
+                                              String pathParam) throws InvalidReferenceException,
+            UnsupportedOASDataTypeException {
         String type = GeneratorUtils.extractReferenceType(schema.get$ref());
 
         if (isWithoutDataBinding) {
@@ -1172,7 +1173,7 @@ public class GeneratorUtils {
     }
 
     private static String getPathParameterType(Schema<?> typeSchema, String pathParam)
-            throws BallerinaOpenApiException {
+            throws UnsupportedOASDataTypeException {
         String type = null;
         if (!(isStringSchema(typeSchema) || isNumberSchema(typeSchema) || isBooleanSchema(typeSchema)
                 || isIntegerSchema(typeSchema))) {
@@ -1276,20 +1277,17 @@ public class GeneratorUtils {
 
     public static TypeDescriptorNode generateStatusCodeTypeInclusionRecord(Map.Entry<String, ApiResponse> response,
                                                                            OpenAPI openAPI, String path,
-                                                                           List<Diagnostic> diagnosticList) {
+                                                                           List<Diagnostic> diagnosticList)
+            throws InvalidReferenceException {
         String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
         Content responseContent = response.getValue().getContent();
         Set<Map.Entry<String, MediaType>> bodyTypeSchema;
         if (Objects.nonNull(responseContent)) {
             bodyTypeSchema = responseContent.entrySet();
         } else if (response.getValue().get$ref() != null) {
-            try {
-                String referenceType = GeneratorUtils.extractReferenceType(response.getValue().get$ref());
-                ApiResponse apiResponse = openAPI.getComponents().getResponses().get(referenceType);
-                bodyTypeSchema = apiResponse.getContent().entrySet();
-            } catch (BallerinaOpenApiException e) {
-                throw new RuntimeException(e);
-            }
+            String referenceType = GeneratorUtils.extractReferenceType(response.getValue().get$ref());
+            ApiResponse apiResponse = openAPI.getComponents().getResponses().get(referenceType);
+            bodyTypeSchema = apiResponse.getContent().entrySet();
         } else {
             bodyTypeSchema = new LinkedHashSet<>();
         }

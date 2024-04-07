@@ -3,6 +3,7 @@ package io.ballerina.openapi.core.service.diagnostic;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticProperty;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.ballerina.tools.text.LinePosition;
 import io.ballerina.tools.text.LineRange;
@@ -16,6 +17,10 @@ public class ServiceDiagnostic extends Diagnostic {
     public ServiceDiagnostic(ServiceDiagnosticMessages diagnostic, String... args) {
         this.diagnosticInfo = new DiagnosticInfo(diagnostic.getCode(), String.format(diagnostic.getDescription(),
                 (Object[]) args), diagnostic.getSeverity());
+    }
+
+    public ServiceDiagnostic(String code, String diagnostic, DiagnosticSeverity severity) {
+        this.diagnosticInfo = new DiagnosticInfo(code, diagnostic, severity);
     }
 
     @Override

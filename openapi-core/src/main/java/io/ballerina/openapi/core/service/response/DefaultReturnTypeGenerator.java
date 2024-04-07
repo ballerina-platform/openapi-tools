@@ -26,6 +26,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
 import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnostic;
 import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
@@ -143,8 +144,12 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 if (isWithOutStatusCode) {
                     type = handleMultipleContents(content.entrySet());
                 } else {
-                    type = GeneratorUtils.generateStatusCodeTypeInclusionRecord(response,
-                            oasServiceMetadata.getOpenAPI(), path, diagnostics);
+                    try {
+                        type = GeneratorUtils.generateStatusCodeTypeInclusionRecord(response,
+                                oasServiceMetadata.getOpenAPI(), path, diagnostics);
+                    } catch (InvalidReferenceException e) {
+                        diagnostics.add(e.getDiagnostic());
+                    }
                 }
             }
             if (type != null) {
@@ -224,9 +229,14 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), type);
             } else {
                 // handle rest of the status codes
-                TypeDescriptorNode statusCodeTypeInclusionRecord = GeneratorUtils
-                        .generateStatusCodeTypeInclusionRecord(response, oasServiceMetadata.getOpenAPI(),
-                                path, diagnostics);
+                TypeDescriptorNode statusCodeTypeInclusionRecord = null;
+                try {
+                    statusCodeTypeInclusionRecord = GeneratorUtils.generateStatusCodeTypeInclusionRecord(response,
+                            oasServiceMetadata.getOpenAPI(), path, diagnostics);
+                } catch (InvalidReferenceException e) {
+                    diagnostics.add(e.getDiagnostic());
+                    statusCodeTypeInclusionRecord = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
+                }
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(),
                         statusCodeTypeInclusionRecord);
             }

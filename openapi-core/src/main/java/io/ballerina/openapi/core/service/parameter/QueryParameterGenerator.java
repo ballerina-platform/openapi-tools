@@ -14,7 +14,8 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
+import io.ballerina.openapi.core.generators.common.exception.UnsupportedOASDataTypeException;
 import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnostic;
 import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
@@ -60,44 +61,41 @@ public class QueryParameterGenerator extends ParameterGenerator {
      * public type  QueryParamType <map>json|()|BasicType|BasicType[];
      */
     @Override
-    public ParameterNode generateParameterNode(Parameter parameter) {
-        try {
-            Schema<?> schema = parameter.getSchema();
-            IdentifierToken parameterName = createIdentifierToken(
-                    GeneratorUtils.escapeIdentifier(parameter.getName().trim()),
-                    AbstractNodeFactory.createEmptyMinutiaeList(), GeneratorUtils.SINGLE_WS_MINUTIAE);
-            boolean isSchemaNotSupported = schema == null || getOpenAPIType(schema) == null;
-            //Todo: will enable when header parameter support objects
-            //paramSupportedTypes.add(GeneratorConstants.OBJECT);
-            if (schema != null && schema.get$ref() != null) {
-                String type = getValidName(extractReferenceType(schema.get$ref()), true);
-                Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type);
-                return handleReferencedQueryParameter(parameter, refSchema, parameterName);
-            } else if (parameter.getContent() != null) {
-                Content content = parameter.getContent();
-                for (Map.Entry<String, MediaType> mediaTypeEntry : content.entrySet()) {
-                    return handleMapJsonQueryParameter(parameter, parameterName, mediaTypeEntry);
-                }
-            } else if (isSchemaNotSupported) {
-                diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_102,
-                        getOpenAPIType(parameter.getSchema())));
-                OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(
-                        createIdentifierToken(STRING), createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-                return createRequiredParameterNode(createEmptyNodeList(), optionalNode, parameterName);
-            } else if (parameter.getSchema().getDefault() != null) {
-                // When query parameter has default value
-                return handleDefaultQueryParameter(schema, parameterName);
-            } else if (parameter.getRequired() && schema.getNullable() == null) {
-                // Required typeDescriptor
-                return handleRequiredQueryParameter(schema, parameterName);
-            } else {
-                // Optional typeDescriptor
-                return handleOptionalQueryParameter(schema, parameterName);
+    public ParameterNode generateParameterNode(Parameter parameter) throws InvalidReferenceException,
+            UnsupportedOASDataTypeException {
+        Schema<?> schema = parameter.getSchema();
+        IdentifierToken parameterName = createIdentifierToken(
+                GeneratorUtils.escapeIdentifier(parameter.getName().trim()),
+                AbstractNodeFactory.createEmptyMinutiaeList(), GeneratorUtils.SINGLE_WS_MINUTIAE);
+        boolean isSchemaNotSupported = schema == null || getOpenAPIType(schema) == null;
+        //Todo: will enable when header parameter support objects
+        //paramSupportedTypes.add(GeneratorConstants.OBJECT);
+        if (schema != null && schema.get$ref() != null) {
+            String type = getValidName(extractReferenceType(schema.get$ref()), true);
+            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type);
+            return handleReferencedQueryParameter(parameter, refSchema, parameterName);
+        } else if (parameter.getContent() != null) {
+            Content content = parameter.getContent();
+            for (Map.Entry<String, MediaType> mediaTypeEntry : content.entrySet()) {
+                return handleMapJsonQueryParameter(parameter, parameterName, mediaTypeEntry);
             }
-            return null;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } else if (isSchemaNotSupported) {
+            diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_102,
+                    getOpenAPIType(parameter.getSchema())));
+            OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(
+                    createIdentifierToken(STRING), createToken(SyntaxKind.QUESTION_MARK_TOKEN));
+            return createRequiredParameterNode(createEmptyNodeList(), optionalNode, parameterName);
+        } else if (parameter.getSchema().getDefault() != null) {
+            // When query parameter has default value
+            return handleDefaultQueryParameter(schema, parameterName);
+        } else if (parameter.getRequired() && schema.getNullable() == null) {
+            // Required typeDescriptor
+            return handleRequiredQueryParameter(schema, parameterName);
+        } else {
+            // Optional typeDescriptor
+            return handleOptionalQueryParameter(schema, parameterName);
         }
+        return null;
     }
 
     /**
@@ -116,7 +114,7 @@ public class QueryParameterGenerator extends ParameterGenerator {
      */
     private RequiredParameterNode handleMapJsonQueryParameter(Parameter parameter, IdentifierToken parameterName,
                                                               Map.Entry<String, MediaType> mediaTypeEntry)
-            throws BallerinaOpenApiException {
+            throws InvalidReferenceException {
         Schema<?> parameterSchema;
         if (mediaTypeEntry.getValue().getSchema() != null && mediaTypeEntry.getValue().getSchema().get$ref() != null) {
             String type = getValidName(extractReferenceType(mediaTypeEntry.getValue()
@@ -149,7 +147,7 @@ public class QueryParameterGenerator extends ParameterGenerator {
     /**
      * This function is to handle query schema which does not have required as true.
      */
-    private ParameterNode handleOptionalQueryParameter(Schema<?> schema, IdentifierToken parameterName) {
+    private ParameterNode handleOptionalQueryParameter(Schema<?> schema, IdentifierToken parameterName) throws UnsupportedOASDataTypeException {
         if (isArraySchema(schema)) {
             Schema<?> items = schema.getItems();
             if (getOpenAPIType(items) == null && items.get$ref() == null) {
@@ -183,12 +181,8 @@ public class QueryParameterGenerator extends ParameterGenerator {
                 name = createIdentifierToken(typeDescriptorNode.get().toSourceCode(),
                         GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
             } else {
-                try {
-                    name = createIdentifierToken(convertOpenAPITypeToBallerina(schema, true),
-                            GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
-                } catch (BallerinaOpenApiException e) {
-                    throw new RuntimeException(e);
-                }
+                name = createIdentifierToken(convertOpenAPITypeToBallerina(schema, true),
+                        GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
             }
             TypeDescriptorNode queryParamType = createBuiltinSimpleNameReferenceNode(null, name);
             // If schema has an enum with null value, the type is already nil. Hence, the check.

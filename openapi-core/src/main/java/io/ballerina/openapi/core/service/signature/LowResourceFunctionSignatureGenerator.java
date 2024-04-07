@@ -37,7 +37,7 @@ public class LowResourceFunctionSignatureGenerator extends FunctionSignatureGene
     }
     @Override
     public FunctionSignatureNode getFunctionSignature(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                      String path) {
+                                                      String path) throws BallerinaOpenApiException {
         List<Node> parameters = new ArrayList<>();
         // create parameter `http:Caller caller`
         BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
@@ -58,13 +58,8 @@ public class LowResourceFunctionSignatureGenerator extends FunctionSignatureGene
 
         ReturnTypeGenerator returnTypeGenerator = ReturnTypeGenerator.getReturnTypeGenerator(oasServiceMetadata, path);
         ReturnTypeDescriptorNode returnTypeDescriptorNode;
-        try {
-            returnTypeDescriptorNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation, path);
-            diagnostics.addAll(returnTypeGenerator.getDiagnostics());
-        } catch (BallerinaOpenApiException e) {
-            // todo :
-            throw new RuntimeException(e);
-        }
+        returnTypeDescriptorNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation, path);
+        diagnostics.addAll(returnTypeGenerator.getDiagnostics());
 
         return createFunctionSignatureNode(createToken(
                         SyntaxKind.OPEN_PAREN_TOKEN), parameterList, createToken(SyntaxKind.CLOSE_PAREN_TOKEN),
