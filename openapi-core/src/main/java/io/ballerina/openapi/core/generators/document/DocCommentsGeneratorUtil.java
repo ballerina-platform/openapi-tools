@@ -20,6 +20,7 @@ package io.ballerina.openapi.core.generators.document;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
@@ -28,6 +29,8 @@ import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeParser;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
@@ -35,6 +38,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -64,6 +68,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.HASH_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.MARKDOWN_DOCUMENTATION_LINE;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.X_BALLERINA_DEPRECATED_REASON;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 /**
  * This class util for maintain the API doc comment related functions.
@@ -200,4 +206,51 @@ public class DocCommentsGeneratorUtil {
                 createToken(SyntaxKind.PLUS_TOKEN), createIdentifierToken(paramName),
                 createToken(SyntaxKind.MINUS_TOKEN), createNodeList(documentElements));
     }
+
+    public static void extractDeprecatedAnnotationDetails(List<Node> deprecatedParamDocComments, Parameter parameter, List<AnnotationNode> paramAnnot) {
+        deprecatedParamDocComments.addAll(DocCommentsGeneratorUtil.createAPIDescriptionDoc(
+                "# Deprecated parameters", false));
+
+        String deprecatedDescription = "";
+        if (parameter.getExtensions() != null) {
+            for (Map.Entry<String, Object> extension : parameter.getExtensions().entrySet()) {
+                if (extension.getKey().trim().equals(X_BALLERINA_DEPRECATED_REASON)) {
+                    deprecatedDescription = extension.getValue().toString();
+                    break;
+                }
+            }
+        }
+        MarkdownParameterDocumentationLineNode paramAPIDoc =
+                DocCommentsGeneratorUtil.createAPIParamDoc(getValidName(
+                        parameter.getName(), false), deprecatedDescription);
+        deprecatedParamDocComments.add(paramAPIDoc);
+        paramAnnot.add(createAnnotationNode(createToken(AT_TOKEN),
+                createSimpleNameReferenceNode(createIdentifierToken("deprecated")), null));
+    }
+
+    public static void updatedAnnotationInParameterNode(List<Node> updatedParamsRequired,
+                                                         List<Node> updatedParamsDefault,
+                                                         List<AnnotationNode> paramAnnot,
+                                                         ParameterNode parameterNode) {
+        if (parameterNode != null) {
+            if (parameterNode instanceof RequiredParameterNode reParam) {
+                updatedParamsRequired.add(reParam.modify(
+                        reParam.annotations().isEmpty()? createNodeList(paramAnnot) :
+                                reParam.annotations().addAll(paramAnnot),
+                        reParam.typeName(),
+                        reParam.paramName().orElse(null)));
+                updatedParamsRequired.add(createToken(SyntaxKind.COMMA_TOKEN));
+            } else if (parameterNode instanceof DefaultableParameterNode deParam) {
+                updatedParamsDefault.add(deParam.modify(
+                        deParam.annotations().isEmpty()? createNodeList(paramAnnot) :
+                                deParam.annotations().addAll(paramAnnot),
+                        deParam.typeName(),
+                        deParam.paramName().orElse(null),
+                        deParam.equalsToken(),
+                        deParam.expression()));
+                updatedParamsDefault.add(createToken(SyntaxKind.COMMA_TOKEN));
+            }
+        }
+    }
+
 }
