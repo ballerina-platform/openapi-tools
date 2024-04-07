@@ -1301,23 +1301,8 @@ public class GeneratorUtils {
         } else {
             // todo : generate warning
         }
-        if (generatedTypes.isEmpty()) {
-            return TypeHandler.getInstance().createTypeInclusionRecord(code, null,
-                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
-        } else if (generatedTypes.size() == 1) {
-            return TypeHandler.getInstance().createTypeInclusionRecord(code, generatedTypes.values().stream().toList()
-                            .get(0), TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
-        }
-        UnionTypeDescriptorNode unionTypeDescriptorNode = null;
-        List<TypeDescriptorNode> generatedTypeList = generatedTypes.values().stream().toList();
-        TypeDescriptorNode leftTypeDesc = generatedTypeList.get(0);
-        for (int i = 1; i < generatedTypeList.size(); i++) {
-            TypeDescriptorNode rightTypeDesc = generatedTypeList.get(i);
-            unionTypeDescriptorNode = createUnionTypeDescriptorNode(leftTypeDesc, createToken(PIPE_TOKEN),
-                    rightTypeDesc);
-            leftTypeDesc = unionTypeDescriptorNode;
-        }
-        return TypeHandler.getInstance().createTypeInclusionRecord(code, unionTypeDescriptorNode,
+        TypeDescriptorNode typeDescriptorNode = getUnionTypeDescriptorNodeFromTypeDescNodes(generatedTypes);
+        return TypeHandler.getInstance().createTypeInclusionRecord(code, typeDescriptorNode,
                 TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
     }
 
@@ -1427,5 +1412,17 @@ public class GeneratorUtils {
             recordCountMap.put(recordName, 0);
             return recordName;
         }
+    }
+
+    public static TypeDescriptorNode getUnionTypeDescriptorNodeFromTypeDescNodes(HashMap<String, TypeDescriptorNode>
+                                                                                         typeDescNodes) {
+        List<TypeDescriptorNode> qualifiedNodeList = typeDescNodes.values().stream().toList();
+        TypeDescriptorNode unionTypeDescriptorNode = qualifiedNodeList.get(0);
+        for (int i = 1; i < qualifiedNodeList.size(); i++) {
+            TypeDescriptorNode rightTypeDesc = qualifiedNodeList.get(i);
+            unionTypeDescriptorNode = createUnionTypeDescriptorNode(unionTypeDescriptorNode, createToken(PIPE_TOKEN),
+                    rightTypeDesc);
+        }
+        return unionTypeDescriptorNode;
     }
 }
