@@ -96,7 +96,6 @@ public class AnnotationTests {
         Assert.assertEquals(annotationNodes.get(0).annotReference().toString(), "deprecated");
     }
 
-    //Todo enable after deprecated annotation is fixed
     @Test(description = "Test openAPI definition to ballerina client source code generation with deprecated annotation",
             dataProvider = "fileProviderForFilesComparison")
     public void  openApiToBallerinaClientGenWithAnnotation(String yamlFile, String expectedFile)
