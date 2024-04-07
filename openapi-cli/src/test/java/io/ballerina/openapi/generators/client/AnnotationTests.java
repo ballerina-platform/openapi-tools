@@ -30,6 +30,8 @@ import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.Formatter;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -96,9 +98,9 @@ public class AnnotationTests {
 
     //Todo enable after deprecated annotation is fixed
     @Test(description = "Test openAPI definition to ballerina client source code generation with deprecated annotation",
-            dataProvider = "fileProviderForFilesComparison", enabled = false)
+            dataProvider = "fileProviderForFilesComparison")
     public void  openApiToBallerinaClientGenWithAnnotation(String yamlFile, String expectedFile)
-            throws IOException, BallerinaOpenApiException, ClientException {
+            throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/" + yamlFile);
         Path expectedPath = RESDIR.resolve("ballerina/" + expectedFile);
         List<String> list1 = new ArrayList<>();

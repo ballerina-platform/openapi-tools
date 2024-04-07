@@ -64,7 +64,6 @@ public class RequestBodyTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
-    //todo: fix with nested all Of
     @Test(description = "Test for generate request body payload when operation has request body with AllOf scenarios")
     public void testForRequestBodyWithAllOf() throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_allOf_scenarios.bal");
