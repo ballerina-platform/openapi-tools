@@ -8,6 +8,7 @@ import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.Encoding;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -88,10 +89,19 @@ public class RequestBodyGenerator implements ParameterGenerator {
                     } else if (getOpenAPIType(schema) != null || schema.getProperties() != null) {
                         Optional<TypeDescriptorNode> resultNode = TypeHandler.getInstance().
                                 getTypeNodeFromOASSchema(schema);
+
                         if (resultNode.isEmpty()) {
-                            return Optional.empty();
+                            if (schema instanceof ArraySchema arraySchema) {
+                                paramType = getBallerinaMediaType(mediaTypeEntry.getKey(), true) + "[]";
+                                typeDescNode = createSimpleNameReferenceNode(createIdentifierToken(paramType));
+                            } else {
+
+                                paramType = getBallerinaMediaType(mediaTypeEntryKey, true);
+                                typeDescNode = createSimpleNameReferenceNode(createIdentifierToken(paramType));
+                            }
+                        } else {
+                            typeDescNode = resultNode.get();
                         }
-                        typeDescNode = resultNode.get();
 
                     } else {
                         paramType = getBallerinaMediaType(mediaTypeEntryKey, true);
