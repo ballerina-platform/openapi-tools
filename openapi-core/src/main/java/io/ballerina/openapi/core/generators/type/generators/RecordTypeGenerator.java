@@ -33,7 +33,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.exception.UnsupportedOASDataTypeException;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.Schema;
@@ -202,8 +202,8 @@ public class RecordTypeGenerator extends TypeGenerator {
             try {
                 numberNode = createSimpleNameReferenceNode(
                         createIdentifierToken(convertOpenAPITypeToBallerina(additionalPropSchema, overrideNullable)));
-            } catch (BallerinaOpenApiException e) {
-                throw new RuntimeException(e);
+            } catch (UnsupportedOASDataTypeException e) {
+                throw new OASTypeGenException(e.getDiagnostic().message());
             }
             recordRestDescNode = NodeFactory.createRecordRestDescriptorNode(
                     TypeGeneratorUtils.getNullableType(additionalPropSchema, numberNode, overrideNullable),

@@ -1,6 +1,7 @@
 package io.ballerina.openapi.core.service.signature;
 
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.Operation;
@@ -32,7 +33,7 @@ public abstract class FunctionSignatureGenerator {
     }
 
     public abstract FunctionSignatureNode getFunctionSignature(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                               String path);
+                                                               String path) throws BallerinaOpenApiException;
 
     public List<Diagnostic> getDiagnostics() {
         return diagnostics;

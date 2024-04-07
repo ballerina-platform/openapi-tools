@@ -1,14 +1,18 @@
 package io.ballerina.openapi.core.service.parameter;
 
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class RequestBodyGenerator {
 
     final OASServiceMetadata oasServiceMetadata;
     final String path;
+    final List<Diagnostic> diagnostics = new ArrayList<>();
 
     RequestBodyGenerator (OASServiceMetadata oasServiceMetadata, String path) {
         this.oasServiceMetadata = oasServiceMetadata;
@@ -20,6 +24,10 @@ public abstract class RequestBodyGenerator {
             return new LowResourceRequestBodyGenerator(oasServiceMetadata, path);
         }
         return new DefaultRequestBodyGenerator(oasServiceMetadata, path);
+    }
+
+    public List<Diagnostic> getDiagnostics() {
+        return diagnostics;
     }
 
     public abstract RequiredParameterNode createRequestBodyNode(RequestBody requestBody);

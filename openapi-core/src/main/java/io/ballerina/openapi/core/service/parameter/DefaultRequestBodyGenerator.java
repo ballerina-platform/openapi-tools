@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -59,60 +58,37 @@ public class DefaultRequestBodyGenerator extends RequestBodyGenerator {
     public RequiredParameterNode createRequestBodyNode(RequestBody requestBody) {
         // type CustomRecord record {| anydata...; |};
         // public type PayloadType string|json|xml|byte[]|CustomRecord|CustomRecord[];
-        Optional<TypeDescriptorNode> typeName;
+        TypeDescriptorNode typeName;
         // Filter same data type
         HashSet<String> types = new HashSet<>();
         HashMap<String, TypeDescriptorNode> typeDescNodes = new LinkedHashMap<>();
         for (Map.Entry<String, MediaType> mime : requestBody.getContent().entrySet()) {
-            typeName = getNodeForPayloadType(mime);
-            if (typeName.isPresent()) {
-                types.add(typeName.get().toSourceCode());
-                typeDescNodes.put(typeName.get().toSourceCode(), typeName.get());
+            typeName = GeneratorUtils.generateTypeDescForMediaType(oasServiceMetadata.getOpenAPI(), path,
+                    true, mime);
+            if (typeName != null) {
+                types.add(typeName.toSourceCode());
+                typeDescNodes.put(typeName.toSourceCode(), typeName);
             } else {
                 types.add(GeneratorConstants.HTTP_REQUEST);
             }
         }
         if (types.contains(GeneratorConstants.HTTP_REQUEST)) {
-            typeName = Optional.of(NodeParser.parseTypeDescriptor(GeneratorConstants.HTTP_REQUEST));
+            typeName = NodeParser.parseTypeDescriptor(GeneratorConstants.HTTP_REQUEST);
         } else {
-            TypeDescriptorNode unionTypeDescriptorNode = GeneratorUtils
-                    .getUnionTypeDescriptorNodeFromTypeDescNodes(typeDescNodes);
-            typeName = Optional.of(unionTypeDescriptorNode);
+            typeName = GeneratorUtils.getUnionTypeDescriptorNodeFromTypeDescNodes(typeDescNodes);
         }
         AnnotationNode annotationNode = ServiceGenerationUtils.getAnnotationNode(GeneratorConstants.PAYLOAD_KEYWORD,
                 null);
         NodeList<AnnotationNode> annotation = NodeFactory.createNodeList(annotationNode);
-        String paramName = typeName.get().toString().equals(GeneratorConstants.HTTP_REQUEST) ?
+        String paramName = typeName.toString().equals(GeneratorConstants.HTTP_REQUEST) ?
                 GeneratorConstants.REQUEST : GeneratorConstants.PAYLOAD;
 
-        if (typeName.get().toString().equals(GeneratorConstants.HTTP_REQUEST)) {
+        if (typeName.toString().equals(GeneratorConstants.HTTP_REQUEST)) {
             return createRequiredParameterNode(createEmptyNodeList(),
                     createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_REQUEST)),
                     createIdentifierToken(GeneratorConstants.REQUEST));
         }
-        return createRequiredParameterNode(annotation, typeName.get(), createIdentifierToken(paramName,
+        return createRequiredParameterNode(annotation, typeName, createIdentifierToken(paramName,
                 GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
-    }
-
-    private Optional<TypeDescriptorNode> getNodeForPayloadType(Map.Entry<String, MediaType> mediaType) {
-        TypeDescriptorNode typeName;
-//        String mediaTypeContent = selectMediaType(mediaType.getKey().trim());
-//        typeName = switch (mediaTypeContent) {
-//            case GeneratorConstants.APPLICATION_XML -> generateTypeDescriptorForXMLContent();
-//            case GeneratorConstants.TEXT -> generateTypeDescriptorForTextContent(oasServiceMetadata.getOpenAPI(),
-//                    mediaType.getValue().getSchema());
-//            case GeneratorConstants.APPLICATION_OCTET_STREAM -> generateTypeDescriptorForOctetStreamContent();
-//            case GeneratorConstants.APPLICATION_JSON -> {
-//                if (mediaType.getValue() != null && mediaType.getValue().getSchema() != null) {
-//                    yield generateTypeDescriptorForJsonContent(mediaType);
-//                } else {
-//                    yield createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
-//                }
-//            }
-//            case GeneratorConstants.APPLICATION_URL_ENCODE -> generateTypeDescriptorForMapStringContent();
-//            default -> createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_REQUEST));
-//        };
-        return Optional.of(GeneratorUtils.generateTypeDescForToMediaType(oasServiceMetadata.getOpenAPI(), path,
-                true, mediaType));
     }
 }

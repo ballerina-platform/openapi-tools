@@ -11,16 +11,16 @@ service /v1 on ep0 {
     # Creates a new pets.
     #
     # + return - A list of pets.
+    resource function post pets04() returns record {}[] {
+    }
+    # Creates a new pets.
+    #
+    # + return - A list of pets.
+    resource function post pets03() returns record {}[] {
+    }
+    # Creates a new pets.
+    #
+    # + return - A list of pets.
     resource function post pets02() returns string[] {
-    }
-    # Creates a new pets.
-    #
-    # + return - A list of pets.
-    resource function post pets03() returns json {
-    }
-    # Creates a new pets.
-    #
-    # + return - A list of pets.
-    resource function post pets04() returns json {
     }
 }

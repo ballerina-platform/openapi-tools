@@ -26,6 +26,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
 import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnostic;
 import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnosticMessages;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
@@ -143,8 +144,12 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 if (isWithOutStatusCode) {
                     type = handleMultipleContents(content.entrySet());
                 } else {
-                    type = GeneratorUtils
-                            .generateStatusCodeTypeInclusionRecord(response, oasServiceMetadata.getOpenAPI(), path);
+                    try {
+                        type = GeneratorUtils.generateStatusCodeTypeInclusionRecord(response,
+                                oasServiceMetadata.getOpenAPI(), path, diagnostics);
+                    } catch (InvalidReferenceException e) {
+                        diagnostics.add(e.getDiagnostic());
+                    }
                 }
             }
             if (type != null) {
@@ -166,7 +171,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
     private TypeDescriptorNode handleMultipleContents(Set<Map.Entry<String, MediaType>> contentEntries) {
         HashMap<String, TypeDescriptorNode> qualifiedNodes = new LinkedHashMap<>();
         for (Map.Entry<String, MediaType> contentType : contentEntries) {
-            TypeDescriptorNode mediaTypeToken = GeneratorUtils.generateTypeDescForToMediaType(oasServiceMetadata
+            TypeDescriptorNode mediaTypeToken = GeneratorUtils.generateTypeDescForMediaType(oasServiceMetadata
                     .getOpenAPI(), path, false, contentType);
             if (mediaTypeToken == null) {
                 return createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
@@ -213,7 +218,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 if (contentEntries.size() > 1) {
                     returnType = handleMultipleContents(contentEntries);
                 } else {
-                    returnType = GeneratorUtils.generateTypeDescForToMediaType(oasServiceMetadata.getOpenAPI(), path,
+                    returnType = GeneratorUtils.generateTypeDescForMediaType(oasServiceMetadata.getOpenAPI(), path,
                             false, contentEntries.iterator().next());
                 }
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), returnType);
@@ -224,8 +229,14 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), type);
             } else {
                 // handle rest of the status codes
-                TypeDescriptorNode statusCodeTypeInclusionRecord = GeneratorUtils
-                        .generateStatusCodeTypeInclusionRecord(response, oasServiceMetadata.getOpenAPI(), path);
+                TypeDescriptorNode statusCodeTypeInclusionRecord = null;
+                try {
+                    statusCodeTypeInclusionRecord = GeneratorUtils.generateStatusCodeTypeInclusionRecord(response,
+                            oasServiceMetadata.getOpenAPI(), path, diagnostics);
+                } catch (InvalidReferenceException e) {
+                    diagnostics.add(e.getDiagnostic());
+                    statusCodeTypeInclusionRecord = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
+                }
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(),
                         statusCodeTypeInclusionRecord);
             }

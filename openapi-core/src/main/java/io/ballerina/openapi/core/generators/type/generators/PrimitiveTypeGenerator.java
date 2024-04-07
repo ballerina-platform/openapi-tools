@@ -23,7 +23,7 @@ import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.exception.UnsupportedOASDataTypeException;
 import io.ballerina.openapi.core.generators.type.GeneratorConstants;
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
@@ -64,11 +64,11 @@ public class PrimitiveTypeGenerator extends TypeGenerator {
      */
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws OASTypeGenException {
-        String typeDescriptorName = null;
+        String typeDescriptorName;
         try {
             typeDescriptorName = convertOpenAPITypeToBallerina(schema, overrideNullable);
-        } catch (BallerinaOpenApiException e) {
-            throw new RuntimeException(e);
+        } catch (UnsupportedOASDataTypeException e) {
+            throw new OASTypeGenException(e.getDiagnostic().message());
         }
         // TODO: Need to the format of other primitive types too
         if (schema.getEnum() != null && schema.getEnum().size() > 0) {

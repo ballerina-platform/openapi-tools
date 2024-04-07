@@ -18,30 +18,17 @@
 
 package io.ballerina.openapi.core.generators.common.exception;
 
-import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.openapi.core.generators.common.diagnostic.CommonDiagnostic;
+import io.ballerina.openapi.core.generators.common.diagnostic.CommonDiagnosticMessages;
 
 /**
  * Exception type definition for OpenAPI to Ballerina parsing related errors.
  *
  * @since 1.3.0
  */
-public class BallerinaOpenApiException extends Exception {
+public class UnsupportedOASDataTypeException extends BallerinaOpenApiException {
 
-    private Diagnostic diagnostic;
-
-    public BallerinaOpenApiException(String message, Throwable e) {
-        super(message, e);
-    }
-
-    public BallerinaOpenApiException(String message) {
-        super(message);
-    }
-
-    public BallerinaOpenApiException(Diagnostic diagnostic) {
-        this.diagnostic = diagnostic;
-    }
-
-    public Diagnostic getDiagnostic() {
-        return diagnostic;
+    public UnsupportedOASDataTypeException(String dataType) {
+        super(new CommonDiagnostic(CommonDiagnosticMessages.OAS_COMMON_201, dataType));
     }
 }

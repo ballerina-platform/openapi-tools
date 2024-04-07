@@ -9,6 +9,8 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
+import io.ballerina.openapi.core.generators.common.exception.UnsupportedOASDataTypeException;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.GeneratorConstants;
 import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnostic;
@@ -17,6 +19,7 @@ import io.ballerina.openapi.core.service.parameter.HeaderParameterGenerator;
 import io.ballerina.openapi.core.service.parameter.QueryParameterGenerator;
 import io.ballerina.openapi.core.service.parameter.RequestBodyGenerator;
 import io.ballerina.openapi.core.service.response.ReturnTypeGenerator;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -39,13 +42,9 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
 
     @Override
     public FunctionSignatureNode getFunctionSignature(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                      String path) {
+                                                      String path) throws BallerinaOpenApiException {
         ParametersGeneratorResult parametersGeneratorResult;
-        try {
-            parametersGeneratorResult = generateParameters(operation);
-        } catch (BallerinaOpenApiException e) {
-            throw new RuntimeException(e);
-        }
+        parametersGeneratorResult = generateParameters(operation);
         List<Node> params = new ArrayList<>(parametersGeneratorResult.requiredParameters());
 
         // Handle request Body (Payload)
@@ -53,12 +52,13 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
             RequestBody requestBody = operation.getValue().getRequestBody();
             requestBody = resolveRequestBodyReference(requestBody);
             RequiredParameterNode nodeForRequestBody;
-            if (requestBody.getContent() != null) {
+            if (requestBody != null && requestBody.getContent() != null) {
                 RequestBodyGenerator requestBodyGenerator = RequestBodyGenerator
                         .getRequestBodyGenerator(oasServiceMetadata, path);
                 nodeForRequestBody = requestBodyGenerator.createRequestBodyNode(requestBody);
                 params.add(nodeForRequestBody);
                 params.add(createToken(SyntaxKind.COMMA_TOKEN));
+                diagnostics.addAll(requestBodyGenerator.getDiagnostics());
             }
         }
 
@@ -72,14 +72,8 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
         SeparatedNodeList<ParameterNode> parameters = createSeparatedNodeList(params);
         ReturnTypeGenerator returnTypeGenerator = ReturnTypeGenerator.getReturnTypeGenerator(oasServiceMetadata, path);
         ReturnTypeDescriptorNode returnNode;
-        try {
-            returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation, path);
-            diagnostics.addAll(returnTypeGenerator.getDiagnostics());
-        } catch (BallerinaOpenApiException e) {
-//            diagnostics.add(new ServiceDiagnostic(e.getMessage(), ServiceDiagnostic.DiagnosticSeverity.ERROR));
-            // todo : check on adding diagnostics
-            throw new RuntimeException(e);
-        }
+        returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation, path);
+        diagnostics.addAll(returnTypeGenerator.getDiagnostics());
         return createFunctionSignatureNode(createToken(SyntaxKind.OPEN_PAREN_TOKEN),
                 parameters, createToken(SyntaxKind.CLOSE_PAREN_TOKEN), returnNode);
 
@@ -91,8 +85,7 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
      * @param operation OAS operation
      * @throws OASTypeGenException when the parameter generation fails.
      */
-    public ParametersGeneratorResult generateParameters(Map.Entry<PathItem.HttpMethod, Operation> operation)
-            throws BallerinaOpenApiException {
+    public ParametersGeneratorResult generateParameters(Map.Entry<PathItem.HttpMethod, Operation> operation) {
         List<Node> requiredParams = new ArrayList<>();
         List<Node> defaultableParams = new ArrayList<>();
         Token comma = createToken(SyntaxKind.COMMA_TOKEN);
@@ -102,12 +95,25 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
             for (Parameter parameter : parameters) {
                 Node param;
                 if (parameter.get$ref() != null) {
-                    String referenceType = extractReferenceType(parameter.get$ref());
+                    String referenceType;
+                    try {
+                        referenceType = extractReferenceType(parameter.get$ref());
+                    } catch (InvalidReferenceException e) {
+                        Diagnostic diagnostic = e.getDiagnostic();
+                        diagnostics.add(new ServiceDiagnostic(diagnostic.diagnosticInfo().code(),
+                                diagnostic.message(), diagnostic.diagnosticInfo().severity()));
+                        return new ParametersGeneratorResult(new ArrayList<>(), new ArrayList<>());
+                    }
                     parameter = oasServiceMetadata.getOpenAPI().getComponents().getParameters().get(referenceType);
                 }
                 if (parameter.getIn().trim().equals(GeneratorConstants.HEADER)) {
                     HeaderParameterGenerator headerParamGenerator = new HeaderParameterGenerator(oasServiceMetadata);
-                    param = headerParamGenerator.generateParameterNode(parameter);
+                    try {
+                        param = headerParamGenerator.generateParameterNode(parameter);
+                    } catch (UnsupportedOASDataTypeException | InvalidReferenceException e) {
+                        diagnostics.add(e.getDiagnostic());
+                        continue;
+                    }
                     diagnostics.addAll(headerParamGenerator.getDiagnostics());
                     if (headerParamGenerator.isNullableRequired()) {
                         isNullableRequired = true;
@@ -128,7 +134,12 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
                     // type  BasicType boolean|int|float|decimal|string ;
                     // public type () |BasicType|BasicType []| map<json>;
                     QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(oasServiceMetadata);
-                    param = queryParameterGenerator.generateParameterNode(parameter);
+                    try {
+                        param = queryParameterGenerator.generateParameterNode(parameter);
+                    } catch (InvalidReferenceException | UnsupportedOASDataTypeException e) {
+                        diagnostics.add(e.getDiagnostic());
+                        continue;
+                    }
                     diagnostics.addAll(queryParameterGenerator.getDiagnostics());
                     if (param != null) {
                         if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
@@ -154,8 +165,9 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
                 String requestBodyName = extractReferenceType(requestBody.get$ref());
                 requestBody = resolveRequestBodyReference(oasServiceMetadata.getOpenAPI().getComponents()
                         .getRequestBodies().get(requestBodyName.trim()));
-            } catch (BallerinaOpenApiException e) {
-                throw new RuntimeException();
+            } catch (InvalidReferenceException e) {
+                diagnostics.add(e.getDiagnostic());
+                return null;
             }
         }
         return requestBody;

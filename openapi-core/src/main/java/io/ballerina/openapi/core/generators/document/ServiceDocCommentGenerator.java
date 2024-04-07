@@ -16,6 +16,7 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -75,19 +76,19 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
         NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
         List<ModuleMemberDeclarationNode> updatedMembers = new ArrayList<>();
         members.forEach(member -> {
-            if (member.kind().equals(SyntaxKind.CLASS_DEFINITION)) {
-                ClassDefinitionNode classDef = (ClassDefinitionNode) member;
+            if (member.kind().equals(SyntaxKind.SERVICE_DECLARATION)) {
+                ServiceDeclarationNode classDef = (ServiceDeclarationNode) member;
                 HashMap<String, Node> updatedList = new HashMap<>();
                 NodeList<Node> classMembers = classDef.members();
                 //sort these members according to .toString();
-                List<String> storeMembers = new ArrayList<>();
+                List<String> sortedMembers = new ArrayList<>();
                 List<Node> clientInitNodes = new ArrayList<>();
                 classMembers.forEach(classMember -> {
                     String sortKey = "";
                     if (classMember.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
                         FunctionDefinitionNode funcDef = (FunctionDefinitionNode) classMember;
                             sortKey = funcDef.relativeResourcePath().toString() + "_" + funcDef.functionName().text();
-                            storeMembers.add(sortKey);
+                            sortedMembers.add(sortKey);
                             NodeList<Node> nodes = funcDef.relativeResourcePath();
                             String path = "";
                             for (Node node: nodes) {
@@ -105,21 +106,22 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
                 //sort the members
                 List<Node> sortedNodes = new ArrayList<>();
                 sortedNodes.addAll(clientInitNodes);
-                storeMembers.sort(String::compareTo);
-                for (String memberStr: storeMembers) {
+                sortedMembers.sort(String::compareTo);
+                for (String memberStr: sortedMembers) {
                     sortedNodes.add(updatedList.get(memberStr));
                 }
-                classDef = classDef.modify(
+                member = classDef.modify(
                         classDef.metadata().orElse(null),
-                        classDef.visibilityQualifier().orElse(null),
-                        classDef.classTypeQualifiers(),
-                        classDef.classKeyword(),
-                        classDef.className(),
-                        classDef.openBrace(),
-                        updatedList.isEmpty()? classDef.members() : createNodeList(sortedNodes),
-                        classDef.closeBrace(),
+                        classDef.qualifiers(),
+                        classDef.serviceKeyword(),
+                        classDef.typeDescriptor().orElse(null),
+                        classDef.absoluteResourcePath(),
+                        classDef.onKeyword(),
+                        classDef.expressions(),
+                        classDef.openBraceToken(),
+                        createSeparatedNodeList(sortedNodes),
+                        classDef.closeBraceToken(),
                         classDef.semicolonToken().orElse(null));
-                member = classDef;
             }
 
             updatedMembers.add(member);

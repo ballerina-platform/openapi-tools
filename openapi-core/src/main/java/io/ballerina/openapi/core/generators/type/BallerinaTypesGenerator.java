@@ -111,7 +111,8 @@ public class BallerinaTypesGenerator {
                 schema = GeneratorMetaData.getInstance()
                         .getOpenAPI().getComponents().getSchemas().get(schemaName);
                 if (schema == null) {
-                    //this check for safe method because swagger parser has a issue with representing the wrong name for reference
+                    //this check for safe method because swagger parser has a issue with representing
+                    // the wrong name for reference
                     schema = GeneratorMetaData.getInstance()
                             .getOpenAPI().getComponents().getSchemas().get(recordName);
                 }
@@ -211,138 +212,6 @@ public class BallerinaTypesGenerator {
         return traversUnion;
     }
 
-//    public TypeGeneratorResult createTypeInclusionRecord(String includedType, TypeDescriptorNode type) {
-//        HashMap<String, TypeDefinitionNode> subTypesMap = new HashMap<>();
-//        SimpleNameReferenceNode nameReferenceNode = createTypeInclusionRecord(includedType, type, subTypesMap);
-//        return new TypeGeneratorResult(Optional.of(nameReferenceNode), subTypesMap, new ArrayList<>());
-//    }
-
-//    /**
-//     * Create recordType TypeDescriptor.
-//     */
-//    private SimpleNameReferenceNode createTypeInclusionRecord(String includedType, TypeDescriptorNode type,
-//                                                              HashMap<String, TypeDefinitionNode> subTypesMap) {
-//        //todo refactor this implementation with
-//        String recordName = includedType + GeneratorUtils.getValidName(type.toString(), true);
-//        Token recordKeyWord = createToken(RECORD_KEYWORD);
-//        Token bodyStartDelimiter = createIdentifierToken("{|");
-//        // Create record fields
-//        List<Node> recordFields = new ArrayList<>();
-//        // Type reference node
-//        Token asteriskToken = createIdentifierToken("*");
-//        QualifiedNameReferenceNode typeNameField = GeneratorUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP,
-//                includedType);
-//        TypeReferenceNode typeReferenceNode = createTypeReferenceNode(
-//                asteriskToken,
-//                typeNameField,
-//                createToken(SyntaxKind.SEMICOLON_TOKEN));
-//        recordFields.add(typeReferenceNode);
-//
-//        IdentifierToken fieldName = createIdentifierToken(GeneratorConstants.BODY, GeneratorUtils.SINGLE_WS_MINUTIAE,
-//                GeneratorUtils.SINGLE_WS_MINUTIAE);
-//        RecordFieldNode recordFieldNode = createRecordFieldNode(
-//                null, null,
-//                type,
-//                fieldName, null,
-//                createToken(SyntaxKind.SEMICOLON_TOKEN));
-//        recordFields.add(recordFieldNode);
-//
-//        NodeList<Node> fieldsList = createSeparatedNodeList(recordFields);
-//        Token bodyEndDelimiter = createIdentifierToken("|}");
-//
-//        RecordTypeDescriptorNode recordTypeDescriptorNode = createRecordTypeDescriptorNode(
-//                recordKeyWord,
-//                bodyStartDelimiter,
-//                fieldsList, null,
-//                bodyEndDelimiter);
-//
-//        TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
-//                createToken(PUBLIC_KEYWORD),
-//                createToken(TYPE_KEYWORD),
-//                createIdentifierToken(recordName),
-//                recordTypeDescriptorNode,
-//                createToken(SEMICOLON_TOKEN));
-//        subTypesMap.put(typeDefinitionNode.typeName().text(), typeDefinitionNode);
-//        return createSimpleNameReferenceNode(createIdentifierToken(recordName));
-//    }
-//
-//    //todo: revist the place we are using this method
-//    public TypeDescriptorReturnType generateTypeDescriptorForJsonContent(Schema<?> schema, String recordName) throws
-//            OASTypeGenException {
-//        HashMap<String, TypeDefinitionNode> subtypesMap = new HashMap<>();
-//        Optional<TypeDescriptorNode> typeDescriptorNode =
-//                generateTypeDescriptorForJsonContent(schema, recordName, subtypesMap);
-//        return new TypeDescriptorReturnType(typeDescriptorNode, subtypesMap);
-//    }
-//
-//    public TypeDescriptorReturnType getReferencedQueryParamTypeFromSchema(Schema<?> schema, String typeName) throws OASTypeGenException {
-//        HashMap<String, TypeDefinitionNode> subTypesMap = new HashMap<>();
-//        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, typeName, null, subTypesMap, new HashMap<>());
-//        TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
-//        subTypesMap.put(typeName, createTypeDefinitionNode(null,
-//                createToken(SyntaxKind.PUBLIC_KEYWORD), createToken(SyntaxKind.TYPE_KEYWORD),
-//                createIdentifierToken(typeName), typeDescriptorNode, createToken(SyntaxKind.SEMICOLON_TOKEN)));
-//        return new TypeDescriptorReturnType(Optional.of(createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(typeName))),
-//                subTypesMap);
-//    }
-//
-//    private Optional<TypeDescriptorNode> generateTypeDescriptorForJsonContent(Schema<?> schema, String recordName,
-//                                                                              HashMap<String, TypeDefinitionNode> subTypesMap) throws
-//            OASTypeGenException {
-//        Optional<TypeDescriptorNode> typeDecNode =
-//                generateTypeDescriptorNodeForOASSchema(schema, subTypesMap, new HashMap<>());
-//        if (typeDecNode.isEmpty()) {
-//            return Optional.of(getSimpleNameReferenceNode(GeneratorConstants.JSON));
-//        } else if (typeDecNode.get() instanceof RecordTypeDescriptorNode recordNode) {
-//            if (recordName == null) {
-//                return typeDecNode;
-//            }
-//            Token rname;
-//            if (schema.get$ref() != null) {
-//                rname = createIdentifierToken(GeneratorUtils.getValidName(GeneratorUtils.extractReferenceType(schema.get$ref()), true));
-//            } else {
-//                rname = createIdentifierToken(recordName);
-//            }
-//            TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
-//                    createToken(PUBLIC_KEYWORD),
-//                    createToken(TYPE_KEYWORD),
-//                    rname,
-//                    recordNode,
-//                    createToken(SEMICOLON_TOKEN));
-//            subTypesMap.put(recordName, typeDefinitionNode);
-//            return Optional.of(recordNode);
-//        }
-//        return typeDecNode;
-//    }
-//
-//    //todo make this function common name
-//    public TokenReturnType getQueryParamTypeToken(Schema<?> schema) throws OASTypeGenException {
-//        HashMap<String, TypeDefinitionNode> subTypesMap = new HashMap<>();
-//        Token token = getQueryParamTypeToken(schema, subTypesMap);
-//        return new TokenReturnType(Optional.of(token), subTypesMap);
-//    }
-//
-//    private Token getQueryParamTypeToken(Schema<?> schema, HashMap<String, TypeDefinitionNode> subTypesMap)
-//            throws OASTypeGenException {
-//        if (schema instanceof MapSchema) {
-//            // handle inline record open
-//            RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null,
-//                    subTypesMap, new HashMap<>());
-//            TypeDescriptorNode recordNode = recordTypeGenerator.generateTypeDescriptorNode();
-//            return createIdentifierToken(recordNode.toSourceCode(),
-//                    GeneratorUtils.SINGLE_WS_MINUTIAE,
-//                    GeneratorUtils.SINGLE_WS_MINUTIAE);
-//        } else {
-//            return createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(schema),
-//                    GeneratorUtils.SINGLE_WS_MINUTIAE,
-//                    GeneratorUtils.SINGLE_WS_MINUTIAE);
-//        }
-//    }
-//
-//    public ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(TypeDescriptorNode typeDescriptorNode) {
-//        return ArrayTypeGenerator.getArrayTypeDescriptorNodeFromTypeDescriptorNode(typeDescriptorNode);
-//    }
-//
     private SimpleNameReferenceNode getSimpleNameReferenceNode(String name) {
         return createSimpleNameReferenceNode(createIdentifierToken(name));
     }
