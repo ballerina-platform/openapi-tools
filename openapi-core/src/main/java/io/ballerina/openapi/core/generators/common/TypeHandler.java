@@ -108,7 +108,7 @@ public class TypeHandler {
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
         syntaxTree = syntaxTree.modifyWith(modulePartNode);
         DocCommentGeneratorImp docCommentGenerator = new DocCommentGeneratorImp(GeneratorMetaData.getInstance()
-                .getOpenAPI(), syntaxTree, GenSrcFile.GenFileType.GEN_TYPE);
+                .getOpenAPI(), syntaxTree, GenSrcFile.GenFileType.GEN_TYPE, false);
         return docCommentGenerator.updateSyntaxTreeWithDocComments();
     }
 
