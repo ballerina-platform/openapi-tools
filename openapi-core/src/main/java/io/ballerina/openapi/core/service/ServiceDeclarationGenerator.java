@@ -35,6 +35,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.document.ServiceDocCommentGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.tools.text.TextDocument;
@@ -116,7 +117,11 @@ public class ServiceDeclarationGenerator extends ServiceGenerator {
 
         TextDocument textDocument = TextDocuments.from("");
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
-        return syntaxTree.modifyWith(modulePartNode);
+        syntaxTree = syntaxTree.modifyWith(modulePartNode);
+        // Add comments
+        ServiceDocCommentGenerator serviceDocCommentGenerator = new ServiceDocCommentGenerator(syntaxTree,
+                oasServiceMetadata.getOpenAPI(), oasServiceMetadata.generateWithoutDataBinding());
+        return serviceDocCommentGenerator.updateSyntaxTreeWithDocComments();
     }
 
     private NodeList<Node> createBasePathNodeList(ListenerGenerator listener) {

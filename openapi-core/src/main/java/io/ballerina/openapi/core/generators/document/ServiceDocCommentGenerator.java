@@ -24,7 +24,6 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -52,15 +51,15 @@ import static io.ballerina.openapi.core.generators.document.DocCommentsGenerator
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.createAPIParamDocFromString;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.extractDisplayAnnotation;
 
-public class ClientDocCommentGenerator implements DocCommentsGenerator {
+public class ServiceDocCommentGenerator implements DocCommentsGenerator {
     OpenAPI openAPI;
     SyntaxTree syntaxTree;
-    boolean isResource;
+    boolean isProxyService;
 
-    public ClientDocCommentGenerator(SyntaxTree syntaxTree, OpenAPI openAPI, boolean isResource) {
+    public ServiceDocCommentGenerator(SyntaxTree syntaxTree, OpenAPI openAPI, boolean isProxyService) {
         this.openAPI = openAPI;
         this.syntaxTree = syntaxTree;
-        this.isResource = isResource;
+        this.isProxyService = isProxyService;
     }
     @Override
     public SyntaxTree updateSyntaxTreeWithDocComments() {
@@ -83,13 +82,9 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                 List<Node> clientInitNodes = new ArrayList<>();
                 classMembers.forEach(classMember -> {
                     String sortKey = "";
-                    if (classMember.kind().equals(SyntaxKind.OBJECT_METHOD_DEFINITION) ||
-                            classMember.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
+                    if (classMember.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
                         FunctionDefinitionNode funcDef = (FunctionDefinitionNode) classMember;
-
-                        //remote : operationId
-                        if (isResource) {
-                            sortKey = funcDef.functionSignature().toString();
+                            sortKey = funcDef.relativeResourcePath().toString() + "_" + funcDef.functionName().text();
                             storeMembers.add(sortKey);
                             NodeList<Node> nodes = funcDef.relativeResourcePath();
                             String path = "";
@@ -98,12 +93,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                             }
                             String key = replaceContentWithinBrackets(path, "XXX") + "_" + funcDef.functionName().text();
                             funcDef = updateDocCommentsForFunctionNode(operationDetailsMap, funcDef, key);
-                        } else {
-                            sortKey = funcDef.functionName().text();
-                            storeMembers.add(sortKey);
-                            String key = funcDef.functionName().text();
-                            funcDef = updateDocCommentsForFunctionNode(operationDetailsMap, funcDef, key);
-                        }
+
                         classMember = funcDef;
                     } else {
                         clientInitNodes.add(classMember);
@@ -115,7 +105,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                 sortedNodes.addAll(clientInitNodes);
                 storeMembers.sort(String::compareTo);
                 for (String memberStr: storeMembers) {
-                     sortedNodes.add(updatedList.get(memberStr));
+                    sortedNodes.add(updatedList.get(memberStr));
                 }
                 classDef = classDef.modify(
                         classDef.metadata().orElse(null),
@@ -145,13 +135,9 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
             for (Map.Entry<PathItem.HttpMethod, Operation> entry : pathItem.readOperationsMap().entrySet()) {
                 PathItem.HttpMethod method = entry.getKey();
                 Operation operation = entry.getValue();
-                if (!isResource) {
-                    operationDetailsMap.put(operation.getOperationId(), new OperationDetails(operation.getOperationId(), operation, path, method.name()));
-                } else {
-                    path = path.equals("/") ? "." : path;
-                    String key = replaceContentWithinBrackets(path.replaceFirst("/", ""), "XXX") + "_" + method.name().toLowerCase(Locale.ENGLISH);
-                    operationDetailsMap.put(key, new OperationDetails(operation.getOperationId(), operation, path, method.name()));
-                }
+                path = path.equals("/") ? "." : path;
+                String key = replaceContentWithinBrackets(path.replaceFirst("/", ""), "XXX") + "_" + method.name().toLowerCase(Locale.ENGLISH);
+                operationDetailsMap.put(key, new OperationDetails(operation.getOperationId(), operation, path, method.name()));
             }
         });
     }

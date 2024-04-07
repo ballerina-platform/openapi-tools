@@ -36,17 +36,6 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    # 06 Example for rb has array inline requestbody.
-    #
-    # + return - OK
-    resource isolated function put path03(Path03_body payload) returns error? {
-        string resourcePath = string `/path03`;
-        http:Request request = new;
-        json jsonBody = payload.toJson();
-        xml? xmlBody = check xmldata:fromJson(jsonBody);
-        request.setPayload(xmlBody, "application/xml");
-        return self.clientEp->put(resourcePath, request);
-    }
     # 02 Example for rb has inline requestbody.
     #
     # + return - OK
@@ -67,6 +56,17 @@ public isolated client class Client {
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
         return self.clientEp->post(resourcePath, request);
+    }
+    # 06 Example for rb has array inline requestbody.
+    #
+    # + return - OK
+    resource isolated function put path03(Path03_body payload) returns error? {
+        string resourcePath = string `/path03`;
+        http:Request request = new;
+        json jsonBody = payload.toJson();
+        xml? xmlBody = check xmldata:fromJson(jsonBody);
+        request.setPayload(xmlBody, "application/xml");
+        return self.clientEp->put(resourcePath, request);
     }
     # 07 Example for rb has array inline requestbody.
     #
@@ -89,15 +89,16 @@ public isolated client class Client {
         request.setPayload(jsonBody, "application/json");
         return self.clientEp->post(resourcePath, request);
     }
-    # 01 Request body with reference.
+    # 04 Example for rb has inline requestbody.
     #
+    # + payload - A JSON object containing pet information
     # + return - OK
-    resource isolated function post path01(User payload) returns error? {
-        string resourcePath = string `/path01`;
+    resource isolated function put path02(User payload) returns error? {
+        string resourcePath = string `/path02`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->put(resourcePath, request);
     }
     # 04 Example for rb has inline requestbody.
     #

@@ -8,15 +8,19 @@ public class DocCommentGeneratorImp {
     private final OpenAPI openAPI;
     private SyntaxTree syntaxTree;
     private final GenSrcFile.GenFileType type;
+    private final boolean isProxyService;
 
-    public DocCommentGeneratorImp(OpenAPI openAPI, SyntaxTree syntaxTree, GenSrcFile.GenFileType type) {
+    public DocCommentGeneratorImp(OpenAPI openAPI, SyntaxTree syntaxTree, GenSrcFile.GenFileType type, boolean isProxyService) {
         this.openAPI = openAPI;
         this.syntaxTree = syntaxTree;
         this.type = type;
+        this.isProxyService = isProxyService;
     }
     public SyntaxTree updateSyntaxTreeWithDocComments() {
         //separate the main sections in syntax tree
         // ex: get a client syntax tree
+
+        //todo this is only integrate to type handler rest of the  service adn client integrate later
         switch (type) {
             case GEN_CLIENT:
                 //generate client doc comments
@@ -25,6 +29,8 @@ public class DocCommentGeneratorImp {
                 break;
             case GEN_SERVICE:
                 //generate service doc comments
+                ServiceDocCommentGenerator serviceDocCommentGenerator = new ServiceDocCommentGenerator(syntaxTree, openAPI, isProxyService);
+                syntaxTree = serviceDocCommentGenerator.updateSyntaxTreeWithDocComments();
                 break;
             case GEN_SERVICE_TYPE:
                 //generate service type doc comments
