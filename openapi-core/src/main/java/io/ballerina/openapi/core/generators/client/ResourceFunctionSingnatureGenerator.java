@@ -1,5 +1,6 @@
 package io.ballerina.openapi.core.generators.client;
 
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
@@ -44,6 +45,7 @@ public class ResourceFunctionSingnatureGenerator implements FunctionSignatureGen
     @Override
     public Optional<FunctionSignatureNode> generateFunctionSignature() {
         // 1. parameters - path , query, requestBody, headers
+        List<String> paramName = new ArrayList<>();
         List<Node> parameterList = new ArrayList<>();
         List<Parameter> parameters = operation.getParameters();
         List<Node> defaultable = new ArrayList<>();
@@ -113,6 +115,24 @@ public class ResourceFunctionSingnatureGenerator implements FunctionSignatureGen
             }
             parameterList.add(requestBody.get());
             parameterList.add(comma);
+
+            List<ParameterNode> rBheaderParameters = requestBodyGenerator.getHeaderParameters();
+            parameterList.add(requestBody.get());
+            parameterList.add(comma);
+            if (!rBheaderParameters.isEmpty()) {
+                rBheaderParameters.forEach(header -> {
+                    if (!paramName.contains(header.toString())) {
+                        paramName.add(header.toString());
+                        if (header instanceof DefaultableParameterNode defaultableParameterNode) {
+                            defaultable.add(defaultableParameterNode);
+                            defaultable.add(comma);
+                        } else {
+                            parameterList.add(header);
+                            parameterList.add(comma);
+                        }
+                    }
+                });
+            }
         }
 
         //filter defaultable parameters

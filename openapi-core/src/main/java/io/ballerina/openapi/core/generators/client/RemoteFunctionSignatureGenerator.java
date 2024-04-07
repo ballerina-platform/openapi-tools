@@ -1,5 +1,6 @@
 package io.ballerina.openapi.core.generators.client;
 
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
@@ -11,7 +12,6 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.core.generators.client.exception.FunctionSignatureGeneratorException;
 import io.ballerina.openapi.core.generators.client.parameter.HeaderParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.PathParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.QueryParameterGenerator;
@@ -23,7 +23,6 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
@@ -46,6 +45,7 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
 
     @Override
     public Optional<FunctionSignatureNode> generateFunctionSignature() {
+        List<String> paramName = new ArrayList<>();
         // 1. parameters - path , query, requestBody, headers
         List<Node> parameterList = new ArrayList<>();
         List<Parameter> parameters = operation.getParameters();
@@ -78,6 +78,7 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                         // Path parameters are always required.
                         parameterList.add(param.get());
                         parameterList.add(comma);
+                        paramName.add(param.get().toString());
                         break;
                     case "query":
                         QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(parameter, openAPI);
@@ -86,6 +87,8 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                             diagnostics.addAll(queryParameterGenerator.getDiagnostics());
                             return Optional.empty();
                         }
+
+                        paramName.add(queryParam.get().toString());
                         if (queryParam.get() instanceof RequiredParameterNode requiredParameterNode) {
                             parameterList.add(requiredParameterNode);
                             parameterList.add(comma);
@@ -95,12 +98,15 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                         }
                         break;
                     case "header":
-                        HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator(parameter, openAPI);
+                        HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator(parameter,
+                                openAPI);
                         Optional<ParameterNode> headerParam = headerParameterGenerator.generateParameterNode();
                         if (headerParam.isEmpty()) {
                             diagnostics.addAll(headerParameterGenerator.getDiagnostics());
                             return Optional.empty();
                         }
+                        paramName.add(headerParam.get().toString());
+
                         if (headerParam.get() instanceof RequiredParameterNode headerNode) {
                             parameterList.add(headerNode);
                             parameterList.add(comma);
@@ -122,8 +128,23 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                 diagnostics.addAll(requestBodyGenerator.getDiagnostics());
                 return Optional.empty();
             }
+            List<ParameterNode> rBheaderParameters = requestBodyGenerator.getHeaderParameters();
             parameterList.add(requestBody.get());
             parameterList.add(comma);
+            if (!rBheaderParameters.isEmpty()) {
+                rBheaderParameters.forEach(header -> {
+                    if (!paramName.contains(header.toString())) {
+                        paramName.add(header.toString());
+                        if (header instanceof DefaultableParameterNode defaultableParameterNode) {
+                            defaultable.add(defaultableParameterNode);
+                            defaultable.add(comma);
+                        } else {
+                            parameterList.add(header);
+                            parameterList.add(comma);
+                        }
+                    }
+                });
+            }
         }
 
         // filter defaultable parameters
