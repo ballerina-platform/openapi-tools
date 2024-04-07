@@ -103,7 +103,9 @@ public class ApiKeyAuthTests {
         List<ParameterNode> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit();
         for (Node param: generatedInitParamNodes) {
             generatedParams.append(param.toString());
+            generatedParams.append(",");
         }
+        generatedParams.replace(generatedParams.length() - 1, generatedParams.length(), "");
         expectedParams = (expectedParams.trim()).replaceAll("\\s+", "");
         String generatedParamsStr = (generatedParams.toString().trim()).replaceAll("\\s+", "");
         Assert.assertEquals(generatedParamsStr, expectedParams);

@@ -57,7 +57,8 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
     }
 
     @Override
-    public Optional<FunctionDefinitionNode> generateFunction() throws BallerinaOpenApiException {
+    public Optional<FunctionDefinitionNode> generateFunction() {
+
         //Create qualifier list
         NodeList<Token> qualifierList = createNodeList(createToken(RESOURCE_KEYWORD), createToken(ISOLATED_KEYWORD));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
@@ -84,10 +85,6 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
             //todo diagnostic
             return Optional.empty();
         }
-        FunctionBodyNode functionBodyNode = functionBodyNodeResult.get();
-        return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, null,
-                qualifierList, functionKeyWord, functionName, relativeResourcePath,
-                signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
     }
 
     @Override
