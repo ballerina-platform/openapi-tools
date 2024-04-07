@@ -50,7 +50,9 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.replace
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.createAPIDescriptionDoc;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.createAPIParamDoc;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.createAPIParamDocFromString;
+import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.extractDeprecatedAnnotationDetails;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.extractDisplayAnnotation;
+import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.updatedAnnotationInParameterNode;
 
 public class ServiceDocCommentGenerator implements DocCommentsGenerator {
     OpenAPI openAPI;
@@ -253,6 +255,7 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
     private static void updateParameterNodes(List<Node> docs, Operation operation, List<Node> updatedParamsRequired,
                                              List<Node> updatedParamsDefault, HashMap<String,
             ParameterNode> collection) {
+        List<Node> deprecatedParamDocComments = new ArrayList<>();
         operation.getParameters().forEach(parameter -> {
             List<AnnotationNode> paramAnnot = new ArrayList<>();
             String parameterDescription;
@@ -260,12 +263,21 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
             if (parameter.getIn().equals("path") || parameter.getIn().equals("header") ||
                     (parameter.getIn().equals("query"))) {
                 parameterName = getValidName(parameter.getName(), false);
+                // add deprecated annotation
+                if (parameter.getDeprecated() != null && parameter.getDeprecated()) {
+                    extractDeprecatedAnnotationDetails(deprecatedParamDocComments, parameter, paramAnnot);
+                }
+
                 if (parameter.getExtensions() != null) {
                     extractDisplayAnnotation(parameter.getExtensions(), paramAnnot);
                     ParameterNode parameterNode = collection.get(parameterName);
                     updatedDisplayAnnotationInParameterNode(updatedParamsRequired, updatedParamsDefault,
                             paramAnnot, parameterNode);
                 }
+
+                ParameterNode parameterNode = collection.get(parameterName);
+                updatedAnnotationInParameterNode(updatedParamsRequired, updatedParamsDefault,
+                        paramAnnot, parameterNode);
             }
             if (parameter.getDescription() != null) {
                 parameterDescription = parameter.getDescription();

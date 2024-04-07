@@ -24,7 +24,6 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -40,7 +39,6 @@ import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
@@ -50,7 +48,10 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.replace
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.createAPIDescriptionDoc;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.createAPIParamDoc;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.createAPIParamDocFromString;
+import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.extractDeprecatedAnnotation;
+import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.extractDeprecatedAnnotationDetails;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.extractDisplayAnnotation;
+import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.updatedAnnotationInParameterNode;
 
 public class ClientDocCommentGenerator implements DocCommentsGenerator {
     OpenAPI openAPI;
@@ -212,6 +213,10 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                     }
                 }
             }
+            if (operation.getDeprecated() != null && operation.getDeprecated()) {
+                extractDeprecatedAnnotation(operation.getExtensions(),
+                        docs, annotations);
+            }
 
             MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(docs));
             Optional<MetadataNode> metadata = funcDef.metadata();
@@ -265,26 +270,35 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
     private static void updateParameterNodes(List<Node> docs, Operation operation, List<Node> updatedParamsRequired,
                                              List<Node> updatedParamsDefault, HashMap<String,
             ParameterNode> collection) {
+        List<Node> deprecatedParamDocComments = new ArrayList<>();
         operation.getParameters().forEach(parameter -> {
             List<AnnotationNode> paramAnnot = new ArrayList<>();
             String parameterDescription;
             String parameterName = parameter.getName();
+
             if (parameter.getIn().equals("path") || parameter.getIn().equals("header") ||
                     (parameter.getIn().equals("query"))) {
                 parameterName = getValidName(parameter.getName(), false);
+                // add deprecated annotation
+                if (parameter.getDeprecated() != null && parameter.getDeprecated()) {
+                    extractDeprecatedAnnotationDetails(deprecatedParamDocComments, parameter, paramAnnot);
+                }
                 if (parameter.getExtensions() != null) {
                     extractDisplayAnnotation(parameter.getExtensions(), paramAnnot);
-                    ParameterNode parameterNode = collection.get(parameterName);
-                    updatedDisplayAnnotationInParameterNode(updatedParamsRequired, updatedParamsDefault,
-                            paramAnnot, parameterNode);
+
                 }
+                ParameterNode parameterNode = collection.get(parameterName);
+                updatedAnnotationInParameterNode(updatedParamsRequired, updatedParamsDefault,
+                        paramAnnot, parameterNode);
             }
             if (parameter.getDescription() != null) {
                 parameterDescription = parameter.getDescription();
                 docs.add(createAPIParamDocFromString(parameterName, parameterDescription));
             }
         });
+        docs.addAll(deprecatedParamDocComments);
     }
+
 
     private static HashMap<String, ParameterNode> getParameterNodeHashMap(SeparatedNodeList<ParameterNode> parameters) {
         HashMap<String, ParameterNode> collection = new HashMap<>();
@@ -296,30 +310,5 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
             }
         }
         return collection;
-    }
-
-    private static void updatedDisplayAnnotationInParameterNode(List<Node> updatedParamsRequired,
-                                                                List<Node> updatedParamsDefault,
-                                                                List<AnnotationNode> paramAnnot,
-                                                                ParameterNode parameterNode) {
-        if (parameterNode != null) {
-            if (parameterNode instanceof RequiredParameterNode reParam) {
-                updatedParamsRequired.add(reParam.modify(
-                        reParam.annotations().isEmpty()? createNodeList(paramAnnot) :
-                                reParam.annotations().addAll(paramAnnot),
-                        reParam.typeName(),
-                        reParam.paramName().orElse(null)));
-                updatedParamsRequired.add(createToken(SyntaxKind.COMMA_TOKEN));
-            } else if (parameterNode instanceof DefaultableParameterNode deParam) {
-                updatedParamsDefault.add(deParam.modify(
-                        deParam.annotations().isEmpty()? createNodeList(paramAnnot) :
-                                deParam.annotations().addAll(paramAnnot),
-                        deParam.typeName(),
-                        deParam.paramName().orElse(null),
-                        deParam.equalsToken(),
-                        deParam.expression()));
-                updatedParamsDefault.add(createToken(SyntaxKind.COMMA_TOKEN));
-            }
-        }
     }
 }

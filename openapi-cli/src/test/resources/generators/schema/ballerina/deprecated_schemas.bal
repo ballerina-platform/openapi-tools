@@ -1,5 +1,13 @@
+import ballerina/http;
+
 @deprecated
 public type Pets Pet[];
+
+public type CreatedDog record {|
+    *http:Created;
+    Dog body;
+    map<string|string[]> headers;
+|};
 
 @deprecated
 public type Owner record {

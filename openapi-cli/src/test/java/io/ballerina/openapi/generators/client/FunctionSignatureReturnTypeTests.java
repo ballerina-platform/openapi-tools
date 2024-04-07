@@ -138,12 +138,12 @@ public class FunctionSignatureReturnTypeTests {
         Assert.assertEquals(returnType, "record{|int:Signed32...;|}|error");
     }
 
-    @Test(description = "Tests for the response without content type", enabled = false)
+    @Test(description = "Tests for the response without content type")
     public void getReturnTypeForNoContentType() throws IOException, BallerinaOpenApiException, ClientException {
         OpenAPI openAPI = getOpenAPI(RES_DIR.resolve("swagger/return_type" +
                 "/no_content_type.yaml"));
         Path expectedPath = RES_DIR.resolve("ballerina/return/no_content_type.bal");
-
+        TypeHandler.createInstance(openAPI, false);
         List<String> list1 = new ArrayList<>();
         Filter filter = new Filter(list1, list1);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
