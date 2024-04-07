@@ -4,6 +4,7 @@ import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.Token;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import org.ballerinalang.model.tree.FunctionNode;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,16 +37,23 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
     OpenAPI openAPI;
     AuthConfigGeneratorImp authConfigGeneratorImp;
     BallerinaUtilGenerator ballerinaUtilGenerator;
+    List<ImportDeclarationNode> imports;
     RemoteFunctionGenerator(String path, Map.Entry<PathItem.HttpMethod, Operation> operation, OpenAPI openAPI,
                             AuthConfigGeneratorImp authConfigGeneratorImp,
-                            BallerinaUtilGenerator ballerinaUtilGenerator) {
+                            BallerinaUtilGenerator ballerinaUtilGenerator, List<ImportDeclarationNode> imports) {
         this.path = path;
         this.operation = operation;
         this.openAPI = openAPI;
         this.authConfigGeneratorImp = authConfigGeneratorImp;
         this.ballerinaUtilGenerator = ballerinaUtilGenerator;
+        this.imports = imports;
 
     }
+
+    public List<ImportDeclarationNode> getImports() {
+        return imports;
+    }
+
     @Override
     public Optional<FunctionDefinitionNode> generateFunction() {
         //Create qualifier list
@@ -56,7 +65,7 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
                 openAPI);
         //Create function body
         FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
-                authConfigGeneratorImp, ballerinaUtilGenerator);
+                authConfigGeneratorImp, ballerinaUtilGenerator, imports);
         FunctionBodyNode functionBodyNode;
         Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
         if (functionBodyNodeResult.isEmpty()) {

@@ -18,12 +18,14 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
@@ -42,7 +44,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSepara
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getBallerinaMediaType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.replaceContentWithinBrackets;
@@ -71,18 +73,25 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
         Node rootNode = syntaxTree.rootNode();
         ModulePartNode modulePartNode = (ModulePartNode) rootNode;
         NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
-        AtomicInteger index = new AtomicInteger();
+        List<ModuleMemberDeclarationNode> updatedMembers = new ArrayList<>();
         members.forEach(member -> {
             if (member.kind().equals(SyntaxKind.CLASS_DEFINITION)) {
                 ClassDefinitionNode classDef = (ClassDefinitionNode) member;
-                List<Node> updatedList = new ArrayList<>();
+                HashMap<String, Node> updatedList = new HashMap<>();
                 NodeList<Node> classMembers = classDef.members();
+                //sort these members according to .toString();
+                List<String> storeMembers = new ArrayList<>();
+                List<Node> clientInitNodes = new ArrayList<>();
                 classMembers.forEach(classMember -> {
+                    String sortKey = "";
                     if (classMember.kind().equals(SyntaxKind.OBJECT_METHOD_DEFINITION) ||
                             classMember.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
                         FunctionDefinitionNode funcDef = (FunctionDefinitionNode) classMember;
+
                         //remote : operationId
                         if (isResource) {
+                            sortKey = funcDef.relativeResourcePath().toString();
+                            storeMembers.add(sortKey);
                             NodeList<Node> nodes = funcDef.relativeResourcePath();
                             String path = "";
                             for (Node node: nodes) {
@@ -91,14 +100,25 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                             String key = replaceContentWithinBrackets(path, "XXX") + "_" + funcDef.functionName().text();
                             funcDef = updateDocCommentsForFunctionNode(operationDetailsMap, funcDef, key);
                         } else {
+                            sortKey = funcDef.functionName().text();
+                            storeMembers.add(sortKey);
                             String key = funcDef.functionName().text();
                             funcDef = updateDocCommentsForFunctionNode(operationDetailsMap, funcDef, key);
                         }
                         classMember = funcDef;
+                    } else {
+                        clientInitNodes.add(classMember);
                     }
-
-                    updatedList.add(classMember);
+                    updatedList.put(sortKey, classMember);
                 });
+                //sort the members
+                List<Node> sortedNodes = new ArrayList<>();
+                sortedNodes.addAll(clientInitNodes);
+                storeMembers.sort(String::compareTo);
+                System.out.println(storeMembers);
+                for (String memberStr: storeMembers) {
+                     sortedNodes.add(updatedList.get(memberStr));
+                }
                 classDef = classDef.modify(
                         classDef.metadata().orElse(null),
                         classDef.visibilityQualifier().orElse(null),
@@ -106,16 +126,18 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                         classDef.classKeyword(),
                         classDef.className(),
                         classDef.openBrace(),
-                        updatedList.isEmpty()? classDef.members() : createNodeList(updatedList),
+                        updatedList.isEmpty()? classDef.members() : createNodeList(sortedNodes),
                         classDef.closeBrace(),
                         classDef.semicolonToken().orElse(null));
-
-                NodeList<ModuleMemberDeclarationNode> clientMembers = AbstractNodeFactory.createNodeList(classDef);
-                ModulePartNode updatedmodulePartNode = modulePartNode.modify(modulePartNode.imports(), clientMembers,
-                        modulePartNode.eofToken());
-
-                syntaxTree = syntaxTree.modifyWith(updatedmodulePartNode);
+                member = classDef;
             }
+
+            updatedMembers.add(member);
+            NodeList<ModuleMemberDeclarationNode> clientMembers = AbstractNodeFactory.createNodeList(updatedMembers);
+            ModulePartNode updatedmodulePartNode = modulePartNode.modify(modulePartNode.imports(), clientMembers,
+                    modulePartNode.eofToken());
+
+            syntaxTree = syntaxTree.modifyWith(updatedmodulePartNode);
         });
         return syntaxTree;
     }
@@ -136,7 +158,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
         });
     }
 
-    private static FunctionDefinitionNode updateDocCommentsForFunctionNode(
+    private  FunctionDefinitionNode updateDocCommentsForFunctionNode(
             HashMap<String, OperationDetails> operationDetailsMap, FunctionDefinitionNode funcDef, String key) {
         OperationDetails operationDetails = operationDetailsMap.get(key);
         if (operationDetails != null) {
@@ -174,22 +196,9 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
 
                 }
             }
-            if (operation.getRequestBody() != null) {
-                Content content = operation.getRequestBody().getContent();
-                final String[] paramName = {"payload"};
-                if (content != null) {
-                    Collection<MediaType> values = content.values();
-                    values.stream().findFirst().ifPresent(mediaType -> {
-                        paramName[0] = getBallerinaMediaType(mediaType.toString(),true);
-                    });
-                } else {
-                    paramName[0] = "http:Request";
-                }
-
-                if (operation.getRequestBody().getDescription() != null) {
-                    String description = operation.getRequestBody().getDescription().split("\n")[0];
-                    docs.add(createAPIParamDoc(paramName[0].equals("http:Request")? "request": "payload", description));
-                }
+            RequestBody requestBody = operation.getRequestBody();
+            if (requestBody != null) {
+                RequestBodyDoc(docs, requestBody);
             }
             //todo response
             if (operation.getResponses() != null) {
@@ -228,6 +237,31 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                     funcDef.functionBody());
         }
         return funcDef;
+    }
+
+    private void RequestBodyDoc(List<Node> docs, RequestBody requestBody) {
+        if (requestBody.get$ref() != null) {
+            try {
+                requestBody = openAPI.getComponents().getRequestBodies().get(
+                        extractReferenceType(requestBody.get$ref()));
+            } catch (BallerinaOpenApiException e) {
+                requestBody = new RequestBody();
+            }
+        }
+        Content content = requestBody.getContent();
+        final String[] paramName = {"http:Request"};
+        if (content != null) {
+            content.entrySet().stream().findFirst().ifPresent(mediaType -> {
+                paramName[0] = getBallerinaMediaType(mediaType.getKey(),true);
+            });
+        } else {
+            paramName[0] = "http:Request";
+        }
+
+        if (requestBody.getDescription() != null) {
+            String description = requestBody.getDescription().split("\n")[0];
+            docs.add(createAPIParamDoc(paramName[0].equals("http:Request")? "request": "payload", description));
+        }
     }
 
     private static void updateParameterNodes(List<Node> docs, Operation operation, List<Node> updatedParamsRequired,

@@ -150,7 +150,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
 
     public FunctionBodyGeneratorImp(String path, Map.Entry<PathItem.HttpMethod, Operation> operation, OpenAPI openAPI,
                                     AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp,
-                                    BallerinaUtilGenerator ballerinaUtilGenerator) {
+                                    BallerinaUtilGenerator ballerinaUtilGenerator, List<ImportDeclarationNode> imports) {
 
         this.path = path;
         this.operation = operation;
@@ -158,6 +158,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
         this.openAPI = openAPI;
         this.ballerinaUtilGenerator = ballerinaUtilGenerator;
         this.ballerinaAuthConfigGeneratorImp = ballerinaAuthConfigGeneratorImp;
+        this.imports = imports;
     }
 
     /**
@@ -174,11 +175,6 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
         isHeader = false;
         // Create statements
         List<StatementNode> statementsList = new ArrayList<>();
-        // Check whether given path is complex path , if complex it will handle adding these two statement
-//        if (resourceMode && isComplexURL(path)) {
-//            List<StatementNode> bodyStatements = generateBodyStatementForComplexUrl(path);
-//            statementsList.addAll(bodyStatements);
-//        }
         //string path - common for every remote functions
         VariableDeclarationNode pathInt = getPathStatement(path, annotationNodes);
         statementsList.add(pathInt);
@@ -186,7 +182,6 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
 
             //Handel query parameter map
         handleParameterSchemaInOperation(operation, statementsList);
-
 
         String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
         // This return type for target data type binding.

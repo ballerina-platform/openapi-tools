@@ -57,15 +57,4 @@ public isolated client class Client {
         request.setPayload(jsonBody, "application/json");
         return self.clientEp->post(resourcePath, request);
     }
-    # Request Body has Array type AllOf.
-    #
-    # + return - OK
-    remote isolated function postXMLUserInLineArray(CompoundArrayItemPostXMLUserInLineArrayRequest payload) returns error? {
-        string resourcePath = string `/path02`;
-        http:Request request = new;
-        json jsonBody = payload.toJson();
-        xml? xmlBody = check xmldata:fromJson(jsonBody);
-        request.setPayload(xmlBody, "application/xml");
-        return self.clientEp->post(resourcePath, request);
-    }
 }

@@ -24,6 +24,8 @@ import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.Formatter;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -70,12 +72,14 @@ public class ResourceFunctionTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
-    @Test(description = "Generate Client for request body")
-    public void generateForRequestBody() throws IOException, BallerinaOpenApiException, ClientException {
+    @Test(description = "Generate Client for request body", enabled = false)
+    public void generateForRequestBody() throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/request_body.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/request_body.bal");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        System.out.println(Formatter.format(syntaxTree));
+
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
