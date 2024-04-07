@@ -92,8 +92,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Test for generate request body payload with empty array schema")
-    public void testForRequestBodyWithEmptyArraySchema() throws IOException, BallerinaOpenApiException,
-            ClientException {
+    public void testForRequestBodyWithEmptyArraySchema() throws IOException, BallerinaOpenApiException, ClientException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_empty_array.bal");
         Path definitionPath = RES_DIR.resolve("swagger/request_body_empty_array.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);

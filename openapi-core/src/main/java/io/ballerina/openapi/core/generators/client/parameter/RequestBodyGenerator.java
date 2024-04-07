@@ -94,8 +94,6 @@ public class RequestBodyGenerator implements ParameterGenerator {
                     } else if (getOpenAPIType(schema) != null || schema.getProperties() != null) {
                         Optional<TypeDescriptorNode> resultNode = TypeHandler.getInstance().
                                 getTypeNodeFromOASSchema(schema);
-                        Optional<TypeDescriptorNode> resultNode = TypeHandler.getInstance().
-                                getTypeNodeFromOASSchema(schema);
 
                         if (resultNode.isEmpty()) {
                             if (schema instanceof ArraySchema arraySchema) {
