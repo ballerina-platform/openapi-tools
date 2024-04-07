@@ -74,10 +74,10 @@ public class ServiceDeclarationGenerator extends ServiceGenerator {
     @Override
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
 
-            // Create imports http and openapi
-            NodeList<ImportDeclarationNode> imports = ServiceGenerationUtils.createImportDeclarationNodes();
-            // Need to Generate Base path
-            ListenerGenerator listener = new ListenerGeneratorImpl();
+        // Create imports http and openapi
+        NodeList<ImportDeclarationNode> imports = ServiceGenerationUtils.createImportDeclarationNodes();
+        // Need to Generate Base path
+        ListenerGenerator listener = new ListenerGeneratorImpl();
         ListenerDeclarationNode listenerDeclarationNode = null;
         listenerDeclarationNode = listener.getListenerDeclarationNodes(oasServiceMetadata.getOpenAPI().getServers());
         NodeList<Node> absoluteResourcePath = createBasePathNodeList(listener);

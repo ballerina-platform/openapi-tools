@@ -143,8 +143,8 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 if (isWithOutStatusCode) {
                     type = handleMultipleContents(content.entrySet());
                 } else {
-                    type = GeneratorUtils
-                            .generateStatusCodeTypeInclusionRecord(response, oasServiceMetadata.getOpenAPI(), path);
+                    type = GeneratorUtils.generateStatusCodeTypeInclusionRecord(response,
+                            oasServiceMetadata.getOpenAPI(), path, diagnostics);
                 }
             }
             if (type != null) {
@@ -166,7 +166,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
     private TypeDescriptorNode handleMultipleContents(Set<Map.Entry<String, MediaType>> contentEntries) {
         HashMap<String, TypeDescriptorNode> qualifiedNodes = new LinkedHashMap<>();
         for (Map.Entry<String, MediaType> contentType : contentEntries) {
-            TypeDescriptorNode mediaTypeToken = GeneratorUtils.generateTypeDescForToMediaType(oasServiceMetadata
+            TypeDescriptorNode mediaTypeToken = GeneratorUtils.generateTypeDescForMediaType(oasServiceMetadata
                     .getOpenAPI(), path, false, contentType);
             if (mediaTypeToken == null) {
                 return createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANYDATA));
@@ -213,7 +213,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 if (contentEntries.size() > 1) {
                     returnType = handleMultipleContents(contentEntries);
                 } else {
-                    returnType = GeneratorUtils.generateTypeDescForToMediaType(oasServiceMetadata.getOpenAPI(), path,
+                    returnType = GeneratorUtils.generateTypeDescForMediaType(oasServiceMetadata.getOpenAPI(), path,
                             false, contentEntries.iterator().next());
                 }
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), returnType);
@@ -225,7 +225,8 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             } else {
                 // handle rest of the status codes
                 TypeDescriptorNode statusCodeTypeInclusionRecord = GeneratorUtils
-                        .generateStatusCodeTypeInclusionRecord(response, oasServiceMetadata.getOpenAPI(), path);
+                        .generateStatusCodeTypeInclusionRecord(response, oasServiceMetadata.getOpenAPI(),
+                                path, diagnostics);
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(),
                         statusCodeTypeInclusionRecord);
             }

@@ -59,6 +59,7 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
                 nodeForRequestBody = requestBodyGenerator.createRequestBodyNode(requestBody);
                 params.add(nodeForRequestBody);
                 params.add(createToken(SyntaxKind.COMMA_TOKEN));
+                diagnostics.addAll(requestBodyGenerator.getDiagnostics());
             }
         }
 

@@ -61,9 +61,9 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
-import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
+import io.ballerina.openapi.core.generators.common.diagnostic.CommonDiagnostic;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
@@ -77,6 +77,7 @@ import io.ballerina.projects.Project;
 import io.ballerina.projects.ProjectException;
 import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.Components;
@@ -197,6 +198,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TYP
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YML_EXTENSION;
+import static io.ballerina.openapi.core.generators.common.diagnostic.CommonDiagnosticMessages.OAS_COMMON_101;
 
 /**
  * This class util for store all the common scenarios.
@@ -1273,7 +1275,8 @@ public class GeneratorUtils {
     }
 
     public static TypeDescriptorNode generateStatusCodeTypeInclusionRecord(Map.Entry<String, ApiResponse> response,
-                                                                           OpenAPI openAPI, String path) {
+                                                                           OpenAPI openAPI, String path,
+                                                                           List<Diagnostic> diagnosticList) {
         String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
         Content responseContent = response.getValue().getContent();
         Set<Map.Entry<String, MediaType>> bodyTypeSchema;
@@ -1282,8 +1285,7 @@ public class GeneratorUtils {
         } else if (response.getValue().get$ref() != null) {
             try {
                 String referenceType = GeneratorUtils.extractReferenceType(response.getValue().get$ref());
-                ApiResponse apiResponse = openAPI.getComponents()
-                        .getResponses().get(referenceType);
+                ApiResponse apiResponse = openAPI.getComponents().getResponses().get(referenceType);
                 bodyTypeSchema = apiResponse.getContent().entrySet();
             } catch (BallerinaOpenApiException e) {
                 throw new RuntimeException(e);
@@ -1296,44 +1298,38 @@ public class GeneratorUtils {
         HashMap<String, TypeDescriptorNode> generatedTypes = new LinkedHashMap<>();
         if (!code.equals("NoContent")) {
             for (Map.Entry<String, MediaType> mediaTypeEntry : bodyTypeSchema) {
-                TypeDescriptorNode mediaTypeToken = generateTypeDescForToMediaType(openAPI, path,
+                TypeDescriptorNode mediaTypeToken = generateTypeDescForMediaType(openAPI, path,
                         false, mediaTypeEntry);
                 generatedTypes.put(mediaTypeToken.toString(), mediaTypeToken);
             }
         } else {
-            // todo : generate warning
+            diagnosticList.add(new CommonDiagnostic(OAS_COMMON_101));
         }
         TypeDescriptorNode typeDescriptorNode = getUnionTypeDescriptorNodeFromTypeDescNodes(generatedTypes);
         return TypeHandler.getInstance().createTypeInclusionRecord(code, typeDescriptorNode,
                 TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
     }
 
-    public static TypeDescriptorNode generateTypeDescForToMediaType(OpenAPI openAPI, String path, boolean isRequest,
-                                                                    Map.Entry<String, MediaType> mediaTypeEntry) {
+    public static TypeDescriptorNode generateTypeDescForMediaType(OpenAPI openAPI, String path, boolean isRequest,
+                                                                  Map.Entry<String, MediaType> mediaTypeEntry) {
         String mediaType = selectMediaType(mediaTypeEntry.getKey().trim());
         TypeDescriptorNode mediaTypeToken = switch (mediaType) {
             case GeneratorConstants.APPLICATION_JSON -> {
                 if (mediaTypeEntry.getValue().getSchema() != null) {
-                    TypeDescriptorNode typeDecNode;
-                    typeDecNode = generateTypeDescriptorForJsonContent(mediaTypeEntry);
-                    if (GeneratorUtils.isMapSchema(mediaTypeEntry.getValue().getSchema())) {
-                        String recordName = getNewStatusCodeRecordName(path, isRequest);
-                        TypeHandler.getInstance().addTypeDefinitionNode(recordName,
-                                NodeFactory.createTypeDefinitionNode(null, createToken(PUBLIC_KEYWORD),
-                                        createToken(TYPE_KEYWORD), createIdentifierToken(recordName),
-                                        typeDecNode, createToken(SEMICOLON_TOKEN)));
-                        typeDecNode = createSimpleNameReferenceNode(createIdentifierToken(recordName));
-                    }
-                    if (typeDecNode != null) {
-                        yield typeDecNode;
-                    }
+                    yield generateTypeDescriptorForGenericMediaType(mediaTypeEntry, path, isRequest);
                 }
                 yield createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.JSON));
             }
             case GeneratorConstants.APPLICATION_XML -> generateTypeDescriptorForXMLContent();
             case GeneratorConstants.APPLICATION_URL_ENCODE -> generateTypeDescriptorForMapStringContent();
-            case GeneratorConstants.TEXT ->
-                    generateTypeDescriptorForTextContent(openAPI, mediaTypeEntry.getValue().getSchema());
+            // Commented due to the data binding issue in the ballerina http module
+            // TODO: Related issue:https://github.com/ballerina-platform/ballerina-standard-library/issues/4090
+            case GeneratorConstants.TEXT -> {
+                if (mediaTypeEntry.getValue().getSchema() != null) {
+                    yield generateTypeDescriptorForGenericMediaType(mediaTypeEntry, path, isRequest);
+                }
+                yield getSimpleNameReferenceNode(GeneratorConstants.STRING);
+            }
             case GeneratorConstants.APPLICATION_OCTET_STREAM -> generateTypeDescriptorForOctetStreamContent();
             default -> null;
         };
@@ -1347,40 +1343,50 @@ public class GeneratorUtils {
         return mediaTypeToken;
     }
 
-    public static TypeDescriptorNode generateTypeDescriptorForJsonContent(Map.Entry<String, MediaType> mediaType) {
-        Schema<?> schema = mediaType.getValue().getSchema();
-        Optional<TypeDescriptorNode> typeDescriptorNode = TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
-        return typeDescriptorNode.orElse(null);
-    }
-
     public static TypeDescriptorNode generateTypeDescriptorForXMLContent() {
-        return getSimpleNameReferenceNode(io.ballerina.openapi.core.service.GeneratorConstants.XML);
+        return getSimpleNameReferenceNode(GeneratorConstants.XML);
     }
 
     public static TypeDescriptorNode generateTypeDescriptorForMapStringContent() {
-        return getSimpleNameReferenceNode(io.ballerina.openapi.core.service.GeneratorConstants.MAP_STRING);
+        return getSimpleNameReferenceNode(GeneratorConstants.MAP_STRING);
     }
 
-    public static TypeDescriptorNode generateTypeDescriptorForTextContent(OpenAPI openAPI, Schema schema) {
-        if (schema!= null) {
+    public static TypeDescriptorNode generateTypeDescriptorForTextContent(OpenAPI openAPI, Schema schema,
+                                                                          List<Diagnostic> diagnosticList)
+            throws BallerinaOpenApiException {
+        if (schema != null) {
             if ((schema.getOneOf() != null && schemaHasOnlyPrimitive(schema.getOneOf())) ||
                     (schema.getAnyOf() != null && schemaHasOnlyPrimitive(schema.getAnyOf()))) {
                 return TypeHandler.getInstance().getTypeNodeFromOASSchema(schema).get();
             } else if (schema.get$ref() != null) {
                 String schemaRef;
-                try {
-                    schemaRef = GeneratorUtils.getValidName(extractReferenceType(schema.get$ref()), true);
-                } catch (BallerinaOpenApiException e) {
-                    throw new RuntimeException(e);
-                }
+                schemaRef = GeneratorUtils.getValidName(extractReferenceType(schema.get$ref()), true);
                 Schema referencedSchema = openAPI.getComponents().getSchemas().get(schemaRef);
                 if ((referencedSchema.getOneOf() != null && schemaHasOnlyPrimitive(referencedSchema.getOneOf())) ||
                         (referencedSchema.getAnyOf() != null && schemaHasOnlyPrimitive(referencedSchema.getAnyOf()))) {
                     return TypeHandler.getInstance().getTypeNodeFromOASSchema(schema).get();
                 }
+            } else {
+//                diagnosticList.add(new CommonDiagnostic())
             }
         }
-        return getSimpleNameReferenceNode(io.ballerina.openapi.core.service.GeneratorConstants.STRING);
+        return getSimpleNameReferenceNode(GeneratorConstants.STRING);
+    }
+
+    private static TypeDescriptorNode generateTypeDescriptorForGenericMediaType(
+            Map.Entry<String, MediaType> mediaTypeEntry, String path, boolean isRequest) {
+        TypeDescriptorNode typeDescNode;
+        Schema<?> schema = mediaTypeEntry.getValue().getSchema();
+        typeDescNode = TypeHandler.getInstance().getTypeNodeFromOASSchema(schema).orElse(null);
+        if (GeneratorUtils.isMapSchema(mediaTypeEntry.getValue().getSchema())) {
+            String recordName = getNewStatusCodeRecordName(path, isRequest);
+            TypeHandler.getInstance().addTypeDefinitionNode(recordName,
+                    NodeFactory.createTypeDefinitionNode(null, createToken(PUBLIC_KEYWORD),
+                            createToken(TYPE_KEYWORD), createIdentifierToken(recordName),
+                            typeDescNode, createToken(SEMICOLON_TOKEN)));
+            typeDescNode = createSimpleNameReferenceNode(createIdentifierToken(recordName));
+        }
+        return typeDescNode;
     }
 
     private static boolean schemaHasOnlyPrimitive(List<Schema> schemas) {

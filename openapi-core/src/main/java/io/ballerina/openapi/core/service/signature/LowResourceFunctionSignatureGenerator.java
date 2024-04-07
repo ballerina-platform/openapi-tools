@@ -52,6 +52,7 @@ public class LowResourceFunctionSignatureGenerator extends FunctionSignatureGene
         RequiredParameterNode requestBodyNode = requestBodyGenerator.createRequestBodyNode(operation.getValue()
                 .getRequestBody());
         parameters.add(requestBodyNode);
+        diagnostics.addAll(requestBodyGenerator.getDiagnostics());
 
         SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(parameters);
 
