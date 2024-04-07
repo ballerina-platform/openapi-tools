@@ -69,21 +69,6 @@ public class HeaderParameterGenerator implements ParameterGenerator {
         } else {
             String type = typeNode.toString();
             String nillableType = type.endsWith(NILLABLE) ? type : type + NILLABLE;
-//            if (isArraySchema(schema)) {
-//                if (schema.getItems().get$ref() != null) {
-//                    nillableType = extractReferenceType(schema.getItems().get$ref()) +
-//                            SQUARE_BRACKETS + NILLABLE;
-//                } else if (schema.getItems().getEnum() != null &&
-//                        !schema.getItems().getEnum().isEmpty()) {
-//                    nillableType = OPEN_PAREN_TOKEN.stringValue() +
-//                            convertOpenAPITypeToBallerina(schema.getItems()) +
-//                            CLOSE_PAREN_TOKEN.stringValue() + SQUARE_BRACKETS
-//                            + NILLABLE;
-//                } else {
-//                    nillableType = convertOpenAPITypeToBallerina(schema.getItems()) + SQUARE_BRACKETS
-//                            + NILLABLE;
-//                }
-//            }
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(nillableType));
             NilLiteralNode nilLiteralNode =
