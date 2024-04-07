@@ -45,4 +45,3 @@ public isolated client class Client {
         return self.clientEp->post(resourcePath, request);
     }
 }
-

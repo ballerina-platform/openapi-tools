@@ -8,7 +8,7 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(string serviceUrl,ConnectionConfig config =  {}) returns error? {
+    public isolated function init(string serviceUrl, ConnectionConfig config =  {}) returns error? {
         http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
@@ -47,13 +47,11 @@ public isolated client class Client {
     # <p>Creates a new customer object.</p>
     #
     # + customer - Customer ID
-    # + payload - Customer Details
+    # + request - Customer Details
     # + return - Successful response.
-    remote isolated function postCustomers(string customer, Customer_customer_body payload) returns Customer|error {
+    remote isolated function postCustomers(string customer, http:Request request) returns Customer|error {
         string resourcePath = string `/v1/customer/${getEncodedUri(customer)}`;
-        http:Request request = new;
-        string encodedRequestBody = createFormURLEncodedRequestBody(payload);
-        request.setPayload(encodedRequestBody, "application/x-www-form-urlencoded");
+        // TODO: Update the request as needed;
         Customer response = check self.clientEp->post(resourcePath, request);
         return response;
     }

@@ -90,6 +90,12 @@ public class QueryParameterGenerator implements ParameterGenerator {
             IdentifierToken paramName =
                     createIdentifierToken(getValidName(parameter.getName().trim(), false));
             // Handle given default values in query parameter.
+            if (parameterSchema.get$ref() != null) {
+                Schema<?> schema = openAPI.getComponents().getSchemas().get(parameterSchema.get$ref().split("/")[3]);
+                if (schema != null) {
+                    parameterSchema = schema;
+                }
+            }
             if (parameterSchema.getDefault() != null) {
                 LiteralValueToken literalValueToken;
                 if (Objects.equals(getOpenAPIType(parameterSchema), STRING)) {

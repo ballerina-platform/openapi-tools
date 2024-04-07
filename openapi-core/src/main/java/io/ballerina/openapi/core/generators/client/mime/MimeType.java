@@ -19,6 +19,7 @@
 package io.ballerina.openapi.core.generators.client.mime;
 
 import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
+import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -32,6 +33,8 @@ import java.util.Map;
  * @since 1.3.0
  */
 public abstract class MimeType {
+
+    private List<ImportDeclarationNode> imports;
 
     /**
      * Generate statements of defining structure and setting payload.
@@ -52,5 +55,9 @@ public abstract class MimeType {
         ExpressionStatementNode setPayloadExpression = GeneratorUtils.getSimpleExpressionStatementNode(
                 String.format("request.setPayload(%s, \"%s\")", payloadName, mediaType));
         statementsList.add(setPayloadExpression);
+    }
+
+    public List<ImportDeclarationNode> getImports() {
+        return this.imports;
     }
 }

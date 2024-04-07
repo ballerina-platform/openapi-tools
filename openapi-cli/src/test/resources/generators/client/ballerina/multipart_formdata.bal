@@ -8,7 +8,7 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(ConnectionConfig config = {}, string serviceUrl = "http://petstore.{host}.io/v1") returns error? {
+    public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "http://petstore.{host}.io/v1") returns error? {
         http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
@@ -37,7 +37,7 @@ public isolated client class Client {
     }
     # Create a pet
     #
-    # + payload - Pet
+    # + request - Pet
     # + return - Null response
     remote isolated function createPet(Pets_body payload) returns error? {
         string resourcePath = string `/pets`;
@@ -46,10 +46,9 @@ public isolated client class Client {
         request.setBodyParts(bodyParts);
         return self.clientEp->post(resourcePath, request);
     }
-
     # Create an user
     #
-    # + payload - User
+    # + request - User
     # + return - Null response
     remote isolated function createUser(User_body payload) returns error? {
         string resourcePath = string `/user`;

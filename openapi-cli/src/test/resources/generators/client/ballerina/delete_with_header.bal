@@ -34,24 +34,6 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    # Delete neither header nor request body.
-    #
-    # + order_id - Order ID
-    # + risk_id - Order Risk ID
-    # + return - Status OK
-    remote isolated function delete_order_risk(string order_id, string risk_id) returns error? {
-        string resourcePath = string `/admin/api/2021-10/orders/${getEncodedUri(order_id)}/risks/${getEncodedUri(risk_id)}.json`;
-        return self.clientEp-> delete(resourcePath);
-    }
-    # Delete with request body.
-    #
-    # + return - Status OK
-    remote isolated function order_risk(json payload) returns error? {
-        string resourcePath = string `/request-body`;
-        http:Request request = new;
-        request.setPayload(payload, "application/json");
-        return self.clientEp->delete(resourcePath, request);
-    }
     # Delete with header.
     #
     # + xRequestId - Tests header 01
@@ -73,5 +55,23 @@ public isolated client class Client {
         http:Request request = new;
         request.setPayload(payload, "application/json");
         return self.clientEp->delete(resourcePath, request, httpHeaders);
+    }
+    # Delete neither header nor request body.
+    #
+    # + order_id - Order ID
+    # + risk_id - Order Risk ID
+    # + return - Status OK
+    remote isolated function delete_order_risk(string order_id, string risk_id) returns error? {
+        string resourcePath = string `/admin/api/2021-10/orders/${getEncodedUri(order_id)}/risks/${getEncodedUri(risk_id)}.json`;
+        return self.clientEp->delete(resourcePath);
+    }
+    # Delete with request body.
+    #
+    # + return - Status OK
+    remote isolated function order_risk(json payload) returns error? {
+        string resourcePath = string `/request-body`;
+        http:Request request = new;
+        request.setPayload(payload, "application/json");
+        return self.clientEp->delete(resourcePath, request);
     }
 }
