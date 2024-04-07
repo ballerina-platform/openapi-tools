@@ -1,9 +1,6 @@
 package io.ballerina.openapi.core.generators.client.parameter;
 
-import io.ballerina.compiler.syntax.tree.MetadataNode;
-import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
@@ -11,6 +8,7 @@ import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.Encoding;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -18,7 +16,6 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,32 +23,27 @@ import java.util.Optional;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createStreamTypeDescriptorNode;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_OCTET_STREAM;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ARRAY;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.EMPTY_RECORD;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_REQUEST;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OBJECT;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SQUARE_BRACKETS;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getBallerinaMediaType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isArraySchema;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isComposedSchema;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isObjectSchema;
 
 public class RequestBodyGenerator implements ParameterGenerator {
     OpenAPI openAPI;
     RequestBody requestBody;
     List<ClientDiagnostic> diagnostics;
+    List<ParameterNode> headerParameters = new ArrayList<>();
 
     public RequestBodyGenerator(RequestBody requestBody, OpenAPI openAPI) {
         this.requestBody = requestBody;
         this.openAPI = openAPI;
+    }
+
+    public List<ParameterNode> getHeaderParameters() {
+        return headerParameters;
     }
     @Override
     public Optional<ParameterNode> generateParameterNode() {
@@ -95,91 +87,66 @@ public class RequestBodyGenerator implements ParameterGenerator {
                         }
                         typeDescNode = node.get();
                     } else if (getOpenAPIType(schema) != null || schema.getProperties() != null) {
-                        Optional<TypeDescriptorNode> resultNode = TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
+                        Optional<TypeDescriptorNode> resultNode = TypeHandler.getInstance().
+                                getTypeNodeFromOASSchema(schema);
+
                         if (resultNode.isEmpty()) {
-                            return Optional.empty();
+                            if (schema instanceof ArraySchema arraySchema) {
+                                paramType = getBallerinaMediaType(mediaTypeEntry.getKey(), true) + "[]";
+                                typeDescNode = createSimpleNameReferenceNode(createIdentifierToken(paramType));
+                            } else {
+
+                                paramType = getBallerinaMediaType(mediaTypeEntryKey, true);
+                                typeDescNode = createSimpleNameReferenceNode(createIdentifierToken(paramType));
+                            }
+                        } else {
+                            typeDescNode = resultNode.get();
                         }
-                        typeDescNode = resultNode.get();
 
                     } else {
                         paramType = getBallerinaMediaType(mediaTypeEntryKey, true);
                         typeDescNode = createSimpleNameReferenceNode(createIdentifierToken(paramType));
                     }
                 }
-            } else {
-                //todo
-//                createServiceDeclarationNode(MetadataNode)
-                Map<String, Encoding> encoding = mediaTypeEntry.getValue().getEncoding();
-                if (mediaTypeEntry.getKey().equals(javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA)
-                        && encoding != null) {
-                    List<String> headerList = new ArrayList<>();
-//                    for (Map.Entry<String, Encoding> entry : encoding.entrySet()) {
-//                        Map<String, Header> headers = entry.getValue().getHeaders();
-//                        if (headers != null) {
-//                            for (Map.Entry<String, Header> header : headers.entrySet()) {
-//                                if (!headerList.contains(header.getKey())) {
-//                                    Node headerParameter = getHeaderEncoding(header, requestBodyDoc);
-//                                    if (headerParameter instanceof RequiredParameterNode) {
-//                                        parameterList.add(headerParameter);
-//                                        parameterList.add(createToken((COMMA_TOKEN)));
-//                                    } else {
-//                                        defaultable.add(headerParameter);
-//                                        defaultable.add(createToken((COMMA_TOKEN)));
-//                                    }
-//                                    headerList.add(header.getKey());
-//                                }
-//                            }
-//                        }
-//                    }
 
+                //handle headers
+                if (mediaTypeEntryKey.equals(javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA) || mediaTypeEntryKey.matches("multipart/.*\\+form-data")) {
+                    extracteHeaders(mediaTypeEntry);
+                }
+            } else {
+                if (mediaTypeEntry.getKey().equals(javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA)
+                        && mediaTypeEntry.getValue().getEncoding() != null) {
+                    extracteHeaders(mediaTypeEntry);
                 } else {
                     paramType = getBallerinaMediaType(mediaTypeEntry.getKey(), true);
                     typeDescNode = createSimpleNameReferenceNode(createIdentifierToken(paramType));
-    //                return Optional.empty();
                 }
             }
             break;
         }
         String reqBody = typeDescNode.toString().equals(HTTP_REQUEST)? "request": "payload";
-        return Optional.of(createRequiredParameterNode(createEmptyNodeList(), typeDescNode, createIdentifierToken(reqBody)));
+        return Optional.of(createRequiredParameterNode(createEmptyNodeList(), typeDescNode,
+                createIdentifierToken(reqBody)));
     }
 
-//    /**
-//     * Generate RequestBody for array type schema.
-//     */
-//    private String getRequestBodyParameterForArraySchema(String operationId, Map.Entry<String, MediaType> next,
-//                                                         Schema<?> arraySchema) throws BallerinaOpenApiException {
-//
-//        String paramType;
-//        Schema<?> arrayItems = arraySchema.getItems();
-//        if (getOpenAPIType(arrayItems) != null) {
-//            paramType = convertOpenAPITypeToBallerina(arrayItems) + SQUARE_BRACKETS;
-//        } else if (arrayItems.get$ref() != null) {
-//            paramType = getValidName(extractReferenceType(arrayItems.get$ref()), true) + SQUARE_BRACKETS;
-//        } else if (isComposedSchema(arrayItems)) {
-//            paramType = "CompoundArrayItem" + getValidName(operationId, true) + "Request";
-//            // TODO - Add API doc by checking requestBody
-//            TypeDefinitionNode arrayTypeNode =
-//                    ballerinaSchemaGenerator.getTypeDefinitionNode(arraySchema, paramType, new ArrayList<>());
-//            GeneratorUtils.updateTypeDefNodeList(paramType, arrayTypeNode, typeDefinitionNodeList);
-//        } else {
-//            paramType = getBallerinaMediaType(next.getKey().trim(), true) + SQUARE_BRACKETS;
-//        }
-//        return paramType;
-//    }
+    private void extracteHeaders(Map.Entry<String, MediaType> mediaTypeEntry) {
+        Map<String, Encoding> encodingHeaders = mediaTypeEntry.getValue().getEncoding();
+        List<String> headerList = new ArrayList<>();
+        for (Map.Entry<String, Encoding> entry : encodingHeaders.entrySet()) {
+            Map<String, Header> headers = entry.getValue().getHeaders();
+            if (headers != null) {
+                for (Map.Entry<String, Header> header : headers.entrySet()) {
+                    if (!headerList.contains(getValidName(header.getKey(), false))) {
+                        RequestBodyHeaderParameter requestBodyHeaderParameter = new RequestBodyHeaderParameter(header);
+                        Optional<ParameterNode> parameterNode = requestBodyHeaderParameter.generateParameterNode();
 
-
-//    private String getRequestBodyParameterForObjectSchema (String recordName, Schema objectSchema)
-//            throws BallerinaOpenApiException {
-//        recordName = getValidName(recordName + "_RequestBody", true);
-//        if (objectSchema.getProperties() == null || objectSchema.getProperties().isEmpty()) {
-//            return EMPTY_RECORD;
-//        }
-//        TypeDefinitionNode record =
-//                ballerinaSchemaGenerator.getTypeDefinitionNode(objectSchema, recordName, new ArrayList<>());
-//        GeneratorUtils.updateTypeDefNodeList(recordName, record, typeDefinitionNodeList);
-//        return recordName;
-//    }
+                        parameterNode.ifPresent(node -> headerParameters.add(node));
+                        headerList.add(getValidName(header.getKey(), false));
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     public List<ClientDiagnostic> getDiagnostics() {

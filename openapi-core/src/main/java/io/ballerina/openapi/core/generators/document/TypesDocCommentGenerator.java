@@ -1,6 +1,7 @@
 package io.ballerina.openapi.core.generators.document;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
@@ -62,7 +63,8 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
                         schema.getProperties().forEach((key, value) -> {
                             fields.forEach(field -> {
                                 RecordFieldNode recordField = (RecordFieldNode) field;
-                                if (recordField.fieldName().text().replace("'", "").trim().equals(key)) {
+                                if (recordField.fieldName().text().replace("'", "")
+                                        .trim().equals(key)) {
                                     if (value.getDescription() != null) {
                                         Optional<MetadataNode> metadata = recordField.metadata();
                                         MetadataNode metadataNode = updateMetadataNode(metadata, value);
@@ -85,17 +87,13 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
                             NodeFactory.createRecordTypeDescriptorNode(
                                     record.recordKeyword(),
                                     record.bodyStartDelimiter(),
-                                    createNodeList(updatedFields),
+                                    updatedFields.isEmpty()? fields : createNodeList(updatedFields),
                                     record.recordRestDescriptor().orElse(null),
                                     record.bodyEndDelimiter()),
                             typeDef.semicolonToken());
                 }
-                //todo: condition && schema.getDescription() != null
-                //handle record
-                //add doc comment
-                //typeDef.addDocComment(schema.getDescription());
                 Optional<MetadataNode> metadata = typeDef.metadata();
-                if (schema.getDescription() != null){
+                if (schema.getDescription() != null || schema.getDeprecated() != null){
                     MetadataNode metadataNode = updateMetadataNode(metadata, schema);
                     typeDef = typeDef.modify(metadataNode,
                             typeDef.visibilityQualifier().get(),
@@ -104,9 +102,7 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
                             typeDef.typeDescriptor(),
                             typeDef.semicolonToken());
                 }
-
                 updatedList.add(typeDef);
-
             } else {
                 updatedList.add(typeDef);
             }
@@ -118,20 +114,28 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
         return syntaxTree.modifyWith(modulePartNode);
     }
 
-
     private static MetadataNode updateMetadataNode(Optional<MetadataNode> metadata, Schema<?> schema) {
         List<Node> schemaDoc = new ArrayList<>();
-        schemaDoc.addAll(DocCommentsGeneratorUtil
-                .createAPIDescriptionDoc(schema.getDescription(), false));
-        MarkdownDocumentationNode documentationNode = NodeFactory.createMarkdownDocumentationNode(createNodeList(schemaDoc));
+        List<AnnotationNode> typeAnnotations = new ArrayList<>();
+        if (schema.getDescription() != null) {
+            schemaDoc.addAll(DocCommentsGeneratorUtil
+                    .createAPIDescriptionDoc(schema.getDescription(), false));
+        }
+        if (schema.getDeprecated() != null) {
+            DocCommentsGeneratorUtil.extractDeprecatedAnnotation(schema.getExtensions(),
+                    schemaDoc, typeAnnotations);
+        }
+        MarkdownDocumentationNode documentationNode = NodeFactory.createMarkdownDocumentationNode(
+                createNodeList(schemaDoc));
         MetadataNode metadataNode;
         if (metadata.isEmpty()) {
-            metadataNode = NodeFactory.createMetadataNode(documentationNode,
-                    AbstractNodeFactory.createEmptyNodeList());
+            metadataNode = NodeFactory.createMetadataNode(documentationNode, createNodeList(typeAnnotations));
 
         } else {
             metadataNode = metadata.get();
-            metadataNode = NodeFactory.createMetadataNode(documentationNode, metadataNode.annotations());
+            NodeList<AnnotationNode> annotations = metadataNode.annotations();
+            annotations = annotations.addAll(typeAnnotations);
+            metadataNode = NodeFactory.createMetadataNode(documentationNode, annotations);
         }
         return metadataNode;
     }
