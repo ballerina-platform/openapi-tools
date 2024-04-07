@@ -65,17 +65,18 @@ public class RequestBodyTests {
     }
 
     //todo: fix with nested all Of
-    @Test(description = "Test for generate request body payload when operation has request body with AllOf scenarios", enabled = false)
+    @Test(description = "Test for generate request body payload when operation has request body with AllOf scenarios")
     public void testForRequestBodyWithAllOf() throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_allOf_scenarios.bal");
         Path definitionPath = RES_DIR.resolve("swagger/request_body_allOf_scenarios.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        System.out.println(Formatter.format(syntaxTree));
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "Test for generate request body payload when operation has request body OneOf scenarios")
-    public void testForRequestBodyWithOneOf() throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
+    public void testForRequestBodyWithOneOf() throws IOException, BallerinaOpenApiException, ClientException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_oneOf_scenarios.bal");
         Path definitionPath = RES_DIR.resolve("swagger/request_body_oneOf_scenarios.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
@@ -84,7 +85,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Test for generate request body payload with array schema")
-    public void testForRequestBodyWithArraySchema() throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
+    public void testForRequestBodyWithArraySchema() throws IOException, BallerinaOpenApiException, ClientException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_array.bal");
         Path definitionPath = RES_DIR.resolve("swagger/request_body_array.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
@@ -92,8 +93,8 @@ public class RequestBodyTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
-    @Test(description = "Test for generate request body payload with empty array schema", enabled = false)
-    public void testForRequestBodyWithEmptyArraySchema() throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
+    @Test(description = "Test for generate request body payload with empty array schema")
+    public void testForRequestBodyWithEmptyArraySchema() throws IOException, BallerinaOpenApiException, ClientException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_empty_array.bal");
         Path definitionPath = RES_DIR.resolve("swagger/request_body_empty_array.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
@@ -225,7 +226,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Test for generating request body with reference")
-    public void testRequestBodyWithReference() throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
+    public void testRequestBodyWithReference() throws IOException, BallerinaOpenApiException, ClientException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_with_ref.bal");
         Path definitionPath = RES_DIR.resolve("swagger/request_body_with_ref.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);

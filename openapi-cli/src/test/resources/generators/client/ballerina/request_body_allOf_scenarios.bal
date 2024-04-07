@@ -9,7 +9,7 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(ConnectionConfig config = {}, string serviceUrl = "https://petstore.swagger.io:443/v2") returns error? {
+    public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "https://petstore.swagger.io:443/v2") returns error? {
         http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
@@ -36,6 +36,27 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+    # Request Body has nested allOf.
+    #
+    # + return - OK
+    remote isolated function postXMLUser(Path01_body_1 payload) returns error? {
+        string resourcePath = string `/path01`;
+        http:Request request = new;
+        json jsonBody = payload.toJson();
+        request.setPayload(jsonBody, "application/json");
+        return self.clientEp->post(resourcePath, request);
+    }
+    # Request Body has Array type AllOf.
+    #
+    # + return - OK
+    remote isolated function postXMLUserInLineArray(xml[] payload) returns error? {
+        string resourcePath = string `/path02`;
+        http:Request request = new;
+        json jsonBody = payload.toJson();
+        xml? xmlBody = check xmldata:fromJson(jsonBody);
+        request.setPayload(xmlBody, "application/xml");
+        return self.clientEp->post(resourcePath, request);
+    }
     # Request Body has allOf with specific properties.
     #
     # + return - OK
@@ -46,15 +67,5 @@ public isolated client class Client {
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
         return self.clientEp->put(resourcePath, request);
-    }
-    # Request Body has nested allOf.
-    #
-    # + return - OK
-    remote isolated function postXMLUser(Path01_body_1 payload) returns error? {
-        string resourcePath = string `/path01`;
-        http:Request request = new;
-        json jsonBody = payload.toJson();
-        request.setPayload(jsonBody, "application/json");
-        return self.clientEp->post(resourcePath, request);
     }
 }
