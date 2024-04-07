@@ -24,7 +24,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -38,11 +38,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createAnnotationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.AT_TOKEN;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.X_BALLERINA_DEPRECATED_REASON;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getBallerinaMediaType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
@@ -212,6 +217,10 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                     }
                 }
             }
+            if (operation.getDeprecated() != null && operation.getDeprecated()) {
+                DocCommentsGeneratorUtil.extractDeprecatedAnnotation(operation.getExtensions(),
+                        docs, annotations);
+            }
 
             MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(docs));
             Optional<MetadataNode> metadata = funcDef.metadata();
@@ -265,26 +274,56 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
     private static void updateParameterNodes(List<Node> docs, Operation operation, List<Node> updatedParamsRequired,
                                              List<Node> updatedParamsDefault, HashMap<String,
             ParameterNode> collection) {
+        List<Node> deprecatedParamDocComments = new ArrayList<>();
         operation.getParameters().forEach(parameter -> {
             List<AnnotationNode> paramAnnot = new ArrayList<>();
             String parameterDescription;
             String parameterName = parameter.getName();
+
             if (parameter.getIn().equals("path") || parameter.getIn().equals("header") ||
                     (parameter.getIn().equals("query"))) {
                 parameterName = getValidName(parameter.getName(), false);
+                // add deprecated annotation
+                if (parameter.getDeprecated() != null && parameter.getDeprecated()) {
+                    extractDepractedAnnotation(deprecatedParamDocComments, parameter, paramAnnot);
+                }
                 if (parameter.getExtensions() != null) {
                     extractDisplayAnnotation(parameter.getExtensions(), paramAnnot);
-                    ParameterNode parameterNode = collection.get(parameterName);
-                    updatedDisplayAnnotationInParameterNode(updatedParamsRequired, updatedParamsDefault,
-                            paramAnnot, parameterNode);
+
                 }
+                ParameterNode parameterNode = collection.get(parameterName);
+                updatedAnnotationInParameterNode(updatedParamsRequired, updatedParamsDefault,
+                        paramAnnot, parameterNode);
             }
             if (parameter.getDescription() != null) {
                 parameterDescription = parameter.getDescription();
                 docs.add(createAPIParamDocFromString(parameterName, parameterDescription));
             }
         });
+        docs.addAll(deprecatedParamDocComments);
     }
+
+    private static void extractDepractedAnnotation(List<Node> deprecatedParamDocComments, Parameter parameter, List<AnnotationNode> paramAnnot) {
+        deprecatedParamDocComments.addAll(DocCommentsGeneratorUtil.createAPIDescriptionDoc(
+                "# Deprecated parameters", false));
+
+        String deprecatedDescription = "";
+        if (parameter.getExtensions() != null) {
+            for (Map.Entry<String, Object> extension : parameter.getExtensions().entrySet()) {
+                if (extension.getKey().trim().equals(X_BALLERINA_DEPRECATED_REASON)) {
+                    deprecatedDescription = extension.getValue().toString();
+                    break;
+                }
+            }
+        }
+        MarkdownParameterDocumentationLineNode paramAPIDoc =
+                DocCommentsGeneratorUtil.createAPIParamDoc(getValidName(
+                        parameter.getName(), false), deprecatedDescription);
+        deprecatedParamDocComments.add(paramAPIDoc);
+        paramAnnot.add(createAnnotationNode(createToken(AT_TOKEN),
+                createSimpleNameReferenceNode(createIdentifierToken("deprecated")), null));
+    }
+
 
     private static HashMap<String, ParameterNode> getParameterNodeHashMap(SeparatedNodeList<ParameterNode> parameters) {
         HashMap<String, ParameterNode> collection = new HashMap<>();
@@ -298,10 +337,10 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
         return collection;
     }
 
-    private static void updatedDisplayAnnotationInParameterNode(List<Node> updatedParamsRequired,
-                                                                List<Node> updatedParamsDefault,
-                                                                List<AnnotationNode> paramAnnot,
-                                                                ParameterNode parameterNode) {
+    private static void updatedAnnotationInParameterNode(List<Node> updatedParamsRequired,
+                                                         List<Node> updatedParamsDefault,
+                                                         List<AnnotationNode> paramAnnot,
+                                                         ParameterNode parameterNode) {
         if (parameterNode != null) {
             if (parameterNode instanceof RequiredParameterNode reParam) {
                 updatedParamsRequired.add(reParam.modify(
