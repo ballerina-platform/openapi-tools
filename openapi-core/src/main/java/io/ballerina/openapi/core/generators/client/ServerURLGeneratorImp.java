@@ -8,6 +8,9 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
+import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -17,6 +20,7 @@ import io.swagger.v3.oas.models.servers.ServerVariables;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
@@ -29,53 +33,54 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 
 public class ServerURLGeneratorImp implements ServerURLGenerator {
     private final List<Server> servers;
-    private final List<Diagnostic> diagnostics;
-    public ServerURLGeneratorImp(List<Server> servers, List<Diagnostic> diagnostics) {
+    private List<ClientDiagnostic> diagnostics = new ArrayList<>();
+
+    public ServerURLGeneratorImp(List<Server> servers) {
         this.servers = servers;
-        this.diagnostics = diagnostics;
     }
 
     @Override
     public ParameterNode generateServerURL() {
 
-            String serverURL;
-            Server selectedServer = servers.get(0);
-            if (!selectedServer.getUrl().startsWith("https:") && servers.size() > 1) {
-                for (Server server : servers) {
-                    if (server.getUrl().startsWith("https:")) {
-                        selectedServer = server;
-                        break;
-                    }
+        String serverURL;
+        Server selectedServer = servers.get(0);
+        if (!selectedServer.getUrl().startsWith("https:") && servers.size() > 1) {
+            for (Server server : servers) {
+                if (server.getUrl().startsWith("https:")) {
+                    selectedServer = server;
+                    break;
                 }
             }
-            if (selectedServer.getUrl() == null) {
-                //TODO: diagnostic log
-                return getServiceURLNode("/");
-            } else if (selectedServer.getVariables() != null) {
-                ServerVariables variables = selectedServer.getVariables();
-                for (ServerVariable variable  : variables.values()) {
-                  if (variable.getDefault().isBlank() && variable.getEnum().size() == 0) {
-                      //TODO: diagnostic log
+        }
+        if (selectedServer.getUrl() == null) {
+            return getServiceURLNode("/");
+        } else if (selectedServer.getVariables() != null) {
+            ServerVariables variables = selectedServer.getVariables();
+            for (ServerVariable variable : variables.values()) {
+                if (variable.getDefault().isBlank() && variable.getEnum().size() == 0) {
+                    DiagnosticMessages diagnosticMessages = DiagnosticMessages.OAS_CLIENT_105;
+                    ClientDiagnosticImp diagnostic = new ClientDiagnosticImp(diagnosticMessages);
+                    diagnostics.add(diagnostic);
                     return getServiceURLNode("/");
-                  }
                 }
-                URL url;
-                String resolvedUrl = GeneratorUtils.buildUrl(selectedServer.getUrl(), variables);
-                try {
-                    url = new URL(resolvedUrl);
-                    serverURL = url.toString();
-                } catch (MalformedURLException e) {
-                    serverURL = "/";
-                    //TODO: diagnostic log
-//                    throw new BallerinaOpenApiException("Failed to read endpoint details of the server: " +
-//                            selectedServer.getUrl(), e);
-                }
-
-            } else {
-                serverURL = selectedServer.getUrl();
-
             }
-            return getServiceURLNode(serverURL);
+            URL url;
+            String resolvedUrl = GeneratorUtils.buildUrl(selectedServer.getUrl(), variables);
+            try {
+                url = new URL(resolvedUrl);
+                serverURL = url.toString();
+            } catch (MalformedURLException e) {
+                serverURL = "/";
+                ClientDiagnosticImp diagnostic = new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_106,
+                        selectedServer.getUrl());
+                diagnostics.add(diagnostic);
+            }
+
+        } else {
+            serverURL = selectedServer.getUrl();
+
+        }
+        return getServiceURLNode(serverURL);
     }
 
 
@@ -105,7 +110,7 @@ public class ServerURLGeneratorImp implements ServerURLGenerator {
     }
 
     @Override
-    public List<Diagnostic> getDiagnostics() {
+    public List<ClientDiagnostic> getDiagnostics() {
         return diagnostics;
     }
 }

@@ -8,6 +8,8 @@ import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
+import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.client.exception.FunctionSignatureGeneratorException;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -33,7 +35,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.REMOTE_KEYWORD;
 public class RemoteFunctionGenerator implements FunctionGenerator {
     String path;
     Map.Entry<PathItem.HttpMethod, Operation> operation;
-    List<Diagnostic> diagnostics;
+    List<ClientDiagnostic> diagnostics = new ArrayList<>();
     OpenAPI openAPI;
     AuthConfigGeneratorImp authConfigGeneratorImp;
     BallerinaUtilGenerator ballerinaUtilGenerator;
@@ -63,27 +65,32 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         // Create function signature
         RemoteFunctionSignatureGenerator signatureGenerator = new RemoteFunctionSignatureGenerator(operation.getValue(),
                 openAPI);
+        Optional<FunctionSignatureNode> signatureNodeOptional = signatureGenerator.generateFunctionSignature();
+
+        if (signatureNodeOptional.isEmpty()) {
+            diagnostics.addAll(signatureGenerator.getDiagnostics());
+            return Optional.empty();
+        }
+        FunctionSignatureNode functionSignatureNode = signatureNodeOptional.get();
         //Create function body
         FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
                 authConfigGeneratorImp, ballerinaUtilGenerator, imports);
         FunctionBodyNode functionBodyNode;
         Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
         if (functionBodyNodeResult.isEmpty()) {
+            diagnostics.addAll(functionBodyGenerator.getDiagnostics());
             return Optional.empty();
         }
         functionBodyNode = functionBodyNodeResult.get();
-        if (signatureGenerator.generateFunctionSignature().isEmpty()) {
-            return Optional.empty();
-        }
 
         return Optional.of(NodeFactory.createFunctionDefinitionNode(OBJECT_METHOD_DEFINITION, null,
                     qualifierList, functionKeyWord, functionName, createEmptyNodeList(),
-                    signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
+                functionSignatureNode, functionBodyNode));
 
     }
 
     @Override
-    public List<Diagnostic> getDiagnostics() {
-        return null;
+    public List<ClientDiagnostic> getDiagnostics() {
+        return diagnostics;
     }
 }

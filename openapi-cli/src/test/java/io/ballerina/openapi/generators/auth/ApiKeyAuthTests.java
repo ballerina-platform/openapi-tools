@@ -47,7 +47,7 @@ import java.util.Optional;
 public class ApiKeyAuthTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client/").toAbsolutePath();
     AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
-            true, false, new ArrayList<>());
+            true, false);
 
     @Test(description = "Generate ConnectionConfig record for openweathermap api",
             dataProvider = "apiKeyAuthIOProvider")
@@ -125,7 +125,7 @@ public class ApiKeyAuthTests {
     @Test(description = "Test the generation of api key documentation comment when multiple api keys defined")
     public void testGetApiKeyDescriptionForMultipleApiKeys () throws IOException, BallerinaOpenApiException, ClientException {
         AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
-                true, false, new ArrayList<>());
+                true, false);
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/multiple_apikey_descriptions.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
@@ -142,7 +142,7 @@ public class ApiKeyAuthTests {
     public void testConfigRecordGenForAPIKeyAuth() throws IOException, BallerinaOpenApiException, ClientException {
         // generate ApiKeysConfig record
         AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
-                true, false, new ArrayList<>());
+                true, false);
         String expectedConfigRecord = TestConstants.API_KEYS_CONFIG_RECORD;
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/multiple_api_keys.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -160,7 +160,7 @@ public class ApiKeyAuthTests {
     public void testConfigRecordDocumentationGen() throws IOException, BallerinaOpenApiException, ClientException {
         // generate ApiKeysConfig record
         AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
-                true, false, new ArrayList<>());
+                true, false);
         String expectedConfigRecord = TestConstants.MULTI_LINE_API_KEY_DESC;
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/multiline_api_key_desc.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);

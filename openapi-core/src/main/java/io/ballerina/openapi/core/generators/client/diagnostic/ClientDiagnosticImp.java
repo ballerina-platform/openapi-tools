@@ -11,9 +11,9 @@ public class ClientDiagnosticImp implements ClientDiagnostic {
     private final DiagnosticSeverity diagnosticSeverity;
 //    private final Location location;
 
-    public ClientDiagnosticImp(String code, String message, String... args) {
-        this.code = code;
-        this.message = String.format(message, (Object[]) args);
+    public ClientDiagnosticImp(DiagnosticMessages message, String... args) {
+        this.code = message.getCode();
+        this.message = String.format(message.getDescription(), (Object[]) args);
         this.diagnosticSeverity = DiagnosticSeverity.ERROR;
 //        this.location = location;
     }

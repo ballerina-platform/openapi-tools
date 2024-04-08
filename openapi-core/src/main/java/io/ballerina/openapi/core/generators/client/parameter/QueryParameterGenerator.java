@@ -31,7 +31,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
@@ -51,9 +50,8 @@ public class QueryParameterGenerator implements ParameterGenerator {
 
         Schema<?> parameterSchema = parameter.getSchema();
         if (parameterSchema.getType() != null && !isQueryParamTypeSupported(parameterSchema.getType())) {
-            //TODO diagnostic message unsupported and early return
             DiagnosticMessages unsupportedType = DiagnosticMessages.OAS_CLIENT_102;
-            ClientDiagnostic diagnostic = new ClientDiagnosticImp(unsupportedType.getCode(),
+            ClientDiagnostic diagnostic = new ClientDiagnosticImp(unsupportedType,
                     unsupportedType.getDescription(), parameter.getName());
             diagnostics.add(diagnostic);
             return Optional.empty();
@@ -61,28 +59,17 @@ public class QueryParameterGenerator implements ParameterGenerator {
 
         //supported type: type BasicType boolean|int|float|decimal|string|map<anydata>|enum;
         //public type QueryParamType ()|BasicType|BasicType[];
-        Optional<TypeDescriptorNode> result = TypeHandler.getInstance().getTypeNodeFromOASSchema(parameterSchema, true);
+        Optional<TypeDescriptorNode> result = TypeHandler.getInstance().getTypeNodeFromOASSchema(parameterSchema,
+                true);
         if (result.isEmpty()) {
-            //TODO diagnostic message unsupported and early return
             DiagnosticMessages unsupportedType = DiagnosticMessages.OAS_CLIENT_102;
-            ClientDiagnostic diagnostic = new ClientDiagnosticImp(unsupportedType.getCode(),
-                    unsupportedType.getDescription(), parameter.getName());
+            ClientDiagnostic diagnostic = new ClientDiagnosticImp(unsupportedType, parameter.getName());
             diagnostics.add(diagnostic);
             return Optional.empty();
         }
         typeNode = result.get();
-
-        // required parameter- done
-        // default parameter- done
-        // nullable parameter - done
-
-        // unsupported content type in query parameter
-        // generate type node from type handler
-
-        // Todo handle required parameter
+        // required parameter
         if (parameter.getRequired()) {
-            // to remove the ? from the type node this code is a hack for now ,
-            // further implementation need to do modify the typeNode
             IdentifierToken paramName =
                     createIdentifierToken(getValidName(parameter.getName().trim(), false));
             return Optional.of(createRequiredParameterNode(createEmptyNodeList(), typeNode, paramName));
@@ -109,8 +96,6 @@ public class QueryParameterGenerator implements ParameterGenerator {
                                     createEmptyMinutiaeList());
 
                 }
-                // to remove the ? from the type node this code is a hack for now ,
-                // further implementation need to do modify the typeNode
                 return Optional.of(createDefaultableParameterNode(createEmptyNodeList(), typeNode, paramName,
                         createToken(EQUAL_TOKEN), literalValueToken));
             } else {

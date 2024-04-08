@@ -1,6 +1,7 @@
 package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.tools.diagnostics.Diagnostic;
 
@@ -9,5 +10,5 @@ import java.util.Optional;
 
 public interface FunctionGenerator {
     Optional<FunctionDefinitionNode> generateFunction() throws BallerinaOpenApiException;
-    List<Diagnostic> getDiagnostics();
+    List<ClientDiagnostic> getDiagnostics();
 }

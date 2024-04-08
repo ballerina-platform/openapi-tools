@@ -44,8 +44,7 @@ import java.util.Optional;
  */
 public class MixedApiKeyAndHTTPAuthTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client/").toAbsolutePath();
-    List<Diagnostic> diagnostics = new ArrayList<>();
-    AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(true, true, diagnostics);
+    AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(true, true);
 
     @Test(description = "Generate ApiKeysConfig record", dataProvider = "apiKeyAuthIOProvider")
     public void testGetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException, ClientException {

@@ -62,6 +62,7 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -219,8 +220,9 @@ public class AuthConfigGeneratorImp {
     private final Set<String> authTypes = new LinkedHashSet<>();
 
     private List<TypeDefinitionNode> authRelatedTypeDefinitionNodes = new ArrayList<>();
+    private List<ClientDiagnostic> diagnostics = new ArrayList<>();
 
-    public AuthConfigGeneratorImp(boolean isAPIKey, boolean isHttpOROAuth, List<Diagnostic> diagnostics) {
+    public AuthConfigGeneratorImp(boolean isAPIKey, boolean isHttpOROAuth) {
         this.apiKey = isAPIKey;
         this.httpOROAuth = isHttpOROAuth;
     }
@@ -272,6 +274,9 @@ public class AuthConfigGeneratorImp {
         return authTypes;
     }
 
+    public List<ClientDiagnostic> getDiagnostics() {
+        return diagnostics;
+    }
     public List<TypeDefinitionNode> getAuthRelatedTypeDefinitionNodes() {
         return authRelatedTypeDefinitionNodes;
     }

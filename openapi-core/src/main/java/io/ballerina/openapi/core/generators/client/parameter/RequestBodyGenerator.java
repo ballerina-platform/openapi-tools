@@ -1,16 +1,14 @@
 package io.ballerina.openapi.core.generators.client.parameter;
 
-import io.ballerina.compiler.syntax.tree.MetadataNode;
-import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
+import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.Encoding;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -18,7 +16,6 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,23 +23,12 @@ import java.util.Optional;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createStreamTypeDescriptorNode;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_OCTET_STREAM;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ARRAY;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.EMPTY_RECORD;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_REQUEST;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OBJECT;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SQUARE_BRACKETS;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getBallerinaMediaType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isArraySchema;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isComposedSchema;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isObjectSchema;
 
 public class RequestBodyGenerator implements ParameterGenerator {
     OpenAPI openAPI;
@@ -63,6 +49,10 @@ public class RequestBodyGenerator implements ParameterGenerator {
                 referencedRequestBodyName = extractReferenceType(requestBody.get$ref()).trim();
             } catch (BallerinaOpenApiException e) {
                 //todo diagnostic
+                ClientDiagnosticImp diagnostic = new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_109,
+                        requestBody.get$ref());
+                diagnostics.add(diagnostic);
+                return Optional.empty();
             }
             RequestBody referencedRequestBody = openAPI.getComponents()
                     .getRequestBodies().get(referencedRequestBodyName);
@@ -78,7 +68,7 @@ public class RequestBodyGenerator implements ParameterGenerator {
         }
         for (Map.Entry<String, MediaType> mediaTypeEntry : requestBodyContent.entrySet()) {
             // This implementation currently for first content type
-            Schema schema = mediaTypeEntry.getValue().getSchema();
+            Schema<?> schema = mediaTypeEntry.getValue().getSchema();
             String paramType;
             //Take payload type
             if (schema != null && GeneratorUtils.isSupportedMediaType(mediaTypeEntry)) {
