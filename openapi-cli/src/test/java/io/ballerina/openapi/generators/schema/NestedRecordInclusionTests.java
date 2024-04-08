@@ -39,6 +39,5 @@ public class NestedRecordInclusionTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree
                 ("schema/ballerina/nested_schema_refs.bal", syntaxTree);
-        // todo : failing due to doc issue
     }
 }

@@ -105,7 +105,6 @@ public class ReferenceResolveTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/referred_inclusion.bal", syntaxTree);
-        // todo : failing due to doc issue
     }
 
     @Test(description = "Test doc comment generation of record fields when property is reffered to another schema")
@@ -124,10 +123,9 @@ public class ReferenceResolveTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/resolve_reference_docs.bal", syntaxTree);
-        // todo : failing due to doc issue
     }
 
-    @Test(description = "Test for type generation for request body with reference") // todo : does not generated some referred types
+    @Test(description = "Test for type generation for request body with reference")
     public void testRequestBodyReferences() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/request_body_with_ref.yaml"), true);

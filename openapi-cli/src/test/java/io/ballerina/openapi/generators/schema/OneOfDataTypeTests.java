@@ -124,7 +124,6 @@ public class OneOfDataTypeTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/oneOf_with_inline_schemas.bal", syntaxTree);
-        // todo : failing due to doc issue
     }
 
     @Test(description = "Tests record generation for nested OneOf schema inside AllOf schema")
@@ -142,6 +141,5 @@ public class OneOfDataTypeTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/nested_oneOf_with_allOf.bal", syntaxTree);
-        // todo : failing due to doc issue
     }
 }

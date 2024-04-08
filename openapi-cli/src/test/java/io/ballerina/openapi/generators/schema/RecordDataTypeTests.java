@@ -56,7 +56,6 @@ public class RecordDataTypeTests {
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema05.bal", syntaxTree);
-        // todo : failing due to doc issue
     }
 
     @Test(description = "Generate record with nested record type filed record")

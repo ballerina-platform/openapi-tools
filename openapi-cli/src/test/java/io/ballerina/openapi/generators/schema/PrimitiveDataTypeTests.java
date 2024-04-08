@@ -155,7 +155,6 @@ public class PrimitiveDataTypeTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/invalid_formats.bal", syntaxTree);
-        // todo : failing due to constraint issue
     }
 
     @AfterTest
