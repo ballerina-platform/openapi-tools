@@ -255,6 +255,7 @@ public class BallerinaCodeGenerator {
         } catch (ClientException e) {
             outStream.println("error occurred while generating the client: " + e.getMessage());
         }
+        assert genFiles != null;
         if (!genFiles.isEmpty()) {
             writeGeneratedSources(genFiles, srcPath, implPath, GEN_CLIENT);
         }

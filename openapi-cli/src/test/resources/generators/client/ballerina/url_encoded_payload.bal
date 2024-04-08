@@ -47,11 +47,13 @@ public isolated client class Client {
     # <p>Creates a new customer object.</p>
     #
     # + customer - Customer ID
-    # + request - Customer Details
+    # + payload - Customer Details
     # + return - Successful response.
-    remote isolated function postCustomers(string customer, http:Request request) returns Customer|error {
+    remote isolated function postCustomers(string customer, Customer_customer_body payload) returns Customer|error {
         string resourcePath = string `/v1/customer/${getEncodedUri(customer)}`;
-        // TODO: Update the request as needed;
+        http:Request request = new;
+        string encodedRequestBody = createFormURLEncodedRequestBody(payload);
+        request.setPayload(encodedRequestBody, "application/x-www-form-urlencoded");
         Customer response = check self.clientEp->post(resourcePath, request);
         return response;
     }

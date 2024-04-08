@@ -135,7 +135,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException| FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -503,7 +503,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException| FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");

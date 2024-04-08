@@ -7,7 +7,7 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(string serviceUrl = "https://app.launchdarkly.com/api/v2", ConnectionConfig config =  {}) returns error? {
+    public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "https://app.launchdarkly.com/api/v2") returns error? {
         http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
@@ -35,16 +35,16 @@ public isolated client class Client {
         return;
     }
     # + return - Feature flag approval request response
+    remote isolated function op1() returns StringObject|error {
+        string resourcePath = string `/projects`;
+        StringObject response = check self.clientEp->get(resourcePath);
+        return response;
+    }
+    # + return - Feature flag approval request response
     remote isolated function op2() returns IntegerObject|error {
         string resourcePath = string `/projects`;
         http:Request request = new;
         IntegerObject response = check self.clientEp->post(resourcePath, request);
-        return response;
-    }
-    # + return - Feature flag approval request response
-    remote isolated function op1() returns StringObject|error {
-        string resourcePath = string `/projects`;
-        StringObject response = check self.clientEp->get(resourcePath);
         return response;
     }
     # + return - Feature flag approval request response

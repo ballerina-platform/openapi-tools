@@ -707,12 +707,12 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Assert.assertTrue(outputStream.toString().contains("WARNING: remote function(s) will be generated for client " +
-                "due to the given openapi definition contains following complex path(s):" + System.lineSeparator() +
+                "as the given openapi definition contains following complex path(s):" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
-                "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/" +
-                "{imageId}.{imageExtension}" + System.lineSeparator() +
+                "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/{imageId}." +
+                "{imageExtension}" + System.lineSeparator() +
                 "/v3/ClientGroups/GetClientGroupByUserDefinedIdentifier(UserDefinedIdentifier=" +
                 "'{userDefinedIdentifier}')" + System.lineSeparator() +
                 "/companies({company_id})/items({item_id})" + System.lineSeparator() +

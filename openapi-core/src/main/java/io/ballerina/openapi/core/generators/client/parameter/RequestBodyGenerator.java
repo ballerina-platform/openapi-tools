@@ -36,7 +36,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getVali
 public class RequestBodyGenerator implements ParameterGenerator {
     OpenAPI openAPI;
     RequestBody requestBody;
-    List<ClientDiagnostic> diagnostics;
+    List<ClientDiagnostic> diagnostics = new ArrayList<>();
     List<ParameterNode> headerParameters = new ArrayList<>();
 
     public RequestBodyGenerator(RequestBody requestBody, OpenAPI openAPI) {
@@ -96,16 +96,19 @@ public class RequestBodyGenerator implements ParameterGenerator {
                                 getTypeNodeFromOASSchema(schema);
 
                         if (resultNode.isEmpty()) {
-                            if (schema instanceof ArraySchema arraySchema) {
+                            if (schema instanceof ArraySchema) {
                                 paramType = getBallerinaMediaType(mediaTypeEntry.getKey(), true) + "[]";
                                 typeDescNode = createSimpleNameReferenceNode(createIdentifierToken(paramType));
                             } else {
-
                                 paramType = getBallerinaMediaType(mediaTypeEntryKey, true);
                                 typeDescNode = createSimpleNameReferenceNode(createIdentifierToken(paramType));
                             }
                         } else {
                             typeDescNode = resultNode.get();
+                            if (schema instanceof ArraySchema && typeDescNode.toSourceCode().contains("anydata")) {
+                                paramType = getBallerinaMediaType(mediaTypeEntry.getKey(), true) + "[]";
+                                typeDescNode = createSimpleNameReferenceNode(createIdentifierToken(paramType));
+                            }
                         }
 
                     } else {
