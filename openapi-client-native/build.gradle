@@ -68,35 +68,61 @@ spotbugsTest {
     enabled = false
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId "io.ballerina.openapi"
-            artifactId "client-native"
-            version = clientNativeVersion
-            artifact jar
+task publishToGitHub(type: PublishToMavenRepository) {
+    def githubPublishVersion = clientNativeVersion
+    doFirst {
+        if (project.version.endsWith('-SNAPSHOT')) {
+            def timestamp = new Date().format("yyyyMMdd-HHmmss", TimeZone.getTimeZone("Asia/Kolkata"))
+            githubPublishVersion = project.version.replace("-SNAPSHOT", "-${timestamp}")
         }
     }
 
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/ballerina-platform/openapi-tools")
-            credentials {
-                username = System.getenv("packageUser")
-                password = System.getenv("packagePAT")
+    publishing {
+        publications {
+            githubPublication(MavenPublication) {
+                groupId = "io.ballerina.openapi"
+                artifactId = "client-native"
+                version = githubPublishVersion
+                artifact jar
             }
         }
-        maven {
-            name = "WSO2Nexus"
-            if(project.clientNativeVersion.endsWith('-SNAPSHOT')) {
-                url "https://maven.wso2.org/nexus/content/repositories/snapshots/"
-            } else {
-                url "https://maven.wso2.org/nexus/service/local/staging/deploy/maven2/"
+
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/ballerina-platform/openapi-tools")
+                credentials {
+                    username = System.getenv("packageUser")
+                    password = System.getenv("packagePAT")
+                }
             }
-            credentials {
-                username System.getenv("nexusUser")
-                password System.getenv("nexusPassword")
+        }
+    }
+}
+
+task publishToWSO2Nexus(type: PublishToMavenRepository) {
+    publishing {
+        publications {
+            wso2Publication(MavenPublication) {
+                groupId = "io.ballerina.openapi"
+                artifactId = "client-native"
+                version = clientNativeVersion
+                artifact jar
+            }
+        }
+
+        repositories {
+            maven {
+                name = "WSO2Nexus"
+                if (project.version.endsWith('-SNAPSHOT')) {
+                    url "https://maven.wso2.org/nexus/content/repositories/snapshots/"
+                } else {
+                    url "https://maven.wso2.org/nexus/service/local/staging/deploy/maven2/"
+                }
+                credentials {
+                    username System.getenv("nexusUser")
+                    password System.getenv("nexusPassword")
+                }
             }
         }
     }
