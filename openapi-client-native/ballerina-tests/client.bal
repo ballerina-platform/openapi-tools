@@ -47,4 +47,16 @@ public isolated client class Client {
 
     @MethodImpl {name: "getAlbumsImpl"}
     remote isolated function getAlbums(string genre = "Rock", typedesc<Album[]|OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
+
+    @MethodImpl {name: "getAlbumsImpl1"}
+    remote isolated function getAlbums1(string genre = "Rock", typedesc<Album[]|OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
+
+    remote isolated function getAlbums2(string genre = "Rock", typedesc<Album[]|OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
+
+    @MethodImpl {name: "getAlbumsImpl3"}
+    remote isolated function getAlbums3(string genre = "Rock", typedesc<Album[]|OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
+
+    private isolated function getAlbumsImpl3(string genre, string 'type) returns Album[]|OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload|error {
+        return [];
+    }
 }

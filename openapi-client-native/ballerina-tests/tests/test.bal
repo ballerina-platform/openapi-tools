@@ -1,5 +1,4 @@
 import ballerina/test;
-import ballerina/io;
 
 final Client albumClient = check new;
 
@@ -16,7 +15,6 @@ function testResourceMethod1() {
         test:assertEquals(res.headers, expected.headers, "headers did not match");
         test:assertEquals(res.body, expected.body, "body did not match");
     } else {
-        io:println(res);
         test:assertFail("invalid response type");
     }
 }
@@ -34,7 +32,6 @@ function testResourceMethod2() {
         test:assertEquals(res.headers, expected.headers, "headers did not match");
         test:assertEquals(res.body, expected.body, "body did not match");
     } else {
-        io:println(res);
         test:assertFail("invalid response type");
     }
 }
@@ -51,7 +48,6 @@ function testResourceMethod3() {
     if res is Album {
         test:assertEquals(res, expected, "response did not match");
     } else {
-        io:println(res);
         test:assertFail("invalid response type");
     }
 }
@@ -65,7 +61,6 @@ function testResourceMethod4() {
     if res is Album[] {
         test:assertEquals(res, expected, "response did not match");
     } else {
-        io:println(res);
         test:assertFail("invalid response type");
     }
 }
@@ -83,7 +78,6 @@ function testResourceMethod5() {
         test:assertEquals(res.headers, expected.headers, "headers did not match");
         test:assertEquals(res.body, expected.body, "body did not match");
     } else {
-        io:println(res);
         test:assertFail("invalid response type");
     }
 }
@@ -101,7 +95,6 @@ function testResourceMethod6() {
         test:assertEquals(res.headers, expected.headers, "headers did not match");
         test:assertEquals(res.body, expected.body, "body did not match");
     } else {
-        io:println(res);
         test:assertFail("invalid response type");
     }
 }
@@ -119,7 +112,6 @@ function testRemoteMethod1() {
         test:assertEquals(res.headers, expected.headers, "headers did not match");
         test:assertEquals(res.body, expected.body, "body did not match");
     } else {
-        io:println(res);
         test:assertFail("invalid response type");
     }
 }
@@ -137,7 +129,6 @@ function testRemoteMethod2() {
         test:assertEquals(res.headers, expected.headers, "headers did not match");
         test:assertEquals(res.body, expected.body, "body did not match");
     } else {
-        io:println(res);
         test:assertFail("invalid response type");
     }
 }
@@ -154,7 +145,6 @@ function testRemoteMethod3() {
     if res is Album {
         test:assertEquals(res, expected, "response did not match");
     } else {
-        io:println(res);
         test:assertFail("invalid response type");
     }
 }
@@ -168,7 +158,6 @@ function testRemoteMethod4() {
     if res is Album[] {
         test:assertEquals(res, expected, "response did not match");
     } else {
-        io:println(res);
         test:assertFail("invalid response type");
     }
 }
@@ -186,7 +175,6 @@ function testRemoteMethod5() {
         test:assertEquals(res.headers, expected.headers, "headers did not match");
         test:assertEquals(res.body, expected.body, "body did not match");
     } else {
-        io:println(res);
         test:assertFail("invalid response type");
     }
 }
@@ -204,7 +192,42 @@ function testRemoteMethod6() {
         test:assertEquals(res.headers, expected.headers, "headers did not match");
         test:assertEquals(res.body, expected.body, "body did not match");
     } else {
-        io:println(res);
         test:assertFail("invalid response type");
     }
 }
+
+@test:Config {}
+function testInvalidMethodInvocation() {
+    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->getAlbums1("Hard Rock");
+    if res is error {
+        test:assertTrue(res is ClientMethodInvocationError);
+        test:assertEquals(res.message(), "client method invocation failed: No such method: getAlbumsImpl1");
+    } else {
+        test:assertFail("invalid response type");
+    }
+}
+
+@test:Config {}
+function testAnnotationNotFound() {
+    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->getAlbums2("Hard Rock");
+    if res is error {
+        test:assertTrue(res is ClientMethodInvocationError);
+        test:assertEquals(res.message(), "error in invoking client remote method: Method implementation annotation not found");
+    } else {
+        test:assertFail("invalid response type");
+    }
+}
+
+@test:Config {}
+function testInvalidImplFunctionSignature() {
+    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->getAlbums3("Hard Rock");
+    if res is error {
+        test:assertTrue(res is ClientMethodInvocationError);
+        test:assertTrue(res.message().includes("client method invocation failed: java.lang.ClassCastException: " +
+        "class io.ballerina.runtime.internal.values.TypedescValueImpl cannot be cast to class io.ballerina.runtime.api.values.BString"));
+    } else {
+        test:assertFail("invalid response type");
+    }
+}
+
+
