@@ -100,6 +100,9 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                             }
                             //todo remove this replacement with new lang changes
                             fieldName = fieldName.replaceAll("^'", "");
+                            if (properties == null) {
+                                return;
+                            }
                             Schema<?> fieldSchema = (Schema<?>) properties.get(fieldName);
                             if (hasConstraints(fieldSchema)) {
                                 //modify the record field with constraints

@@ -72,7 +72,7 @@ public class DefaultRequestBodyGenerator extends RequestBodyGenerator {
                 types.add(GeneratorConstants.HTTP_REQUEST);
             }
         }
-        if (types.contains(GeneratorConstants.HTTP_REQUEST)) {
+        if (types.contains(GeneratorConstants.HTTP_REQUEST) || types.isEmpty()) {
             typeName = NodeParser.parseTypeDescriptor(GeneratorConstants.HTTP_REQUEST);
         } else {
             typeName = GeneratorUtils.getUnionTypeDescriptorNodeFromTypeDescNodes(typeDescNodes);

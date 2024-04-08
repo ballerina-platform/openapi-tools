@@ -154,7 +154,6 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 qualifiedNodes.put(type.toString(), type);
             }
         }
-
         TypeDescriptorNode unionTypeDescriptorNode = GeneratorUtils.getUnionTypeDescriptorNodeFromTypeDescNodes(
                 qualifiedNodes);
         if (unionTypeDescriptorNode.toSourceCode().contains(GeneratorConstants.ANYDATA)) {
