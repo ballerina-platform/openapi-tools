@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 /*
  *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org).
  *
@@ -26,6 +28,10 @@ plugins {
 apply from: "$rootDir/gradle/javaProject.gradle"
 
 description = "OpenAPI Tooling - OpenAPI generated client native utils"
+
+def distributionBinPath = project.rootDir.absolutePath + "/module-ballerina-openapi/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
+def ballerinaTomlFilePlaceHolder = new File("${project.projectDir}/build-configs/resources/Ballerina.toml")
+def ballerinaTomlFile = new File("$project.projectDir/ballerina-tests/Ballerina.toml")
 
 dependencies {
     implementation "org.ballerinalang:ballerina-runtime"
@@ -105,3 +111,49 @@ compileJava {
         classpath = files()
     }
 }
+
+jar {
+    archiveFileName = "openapi-client-native-${clientNativeVersion}.jar"
+}
+
+task updateTomlFile {
+    dependsOn(jar)
+    doLast {
+        def newBallerinaToml = ballerinaTomlFilePlaceHolder.text.replace("@client.native.version@", clientNativeVersion)
+        ballerinaTomlFile.text = newBallerinaToml
+    }
+}
+
+task commitTomlFiles {
+    doLast {
+        project.exec {
+            ignoreExitValue true
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "git commit -m \"[Automated] Update the toml files for client native tests\" ballerina-tests/Ballerina.toml ballerina-tests/Dependencies.toml"
+            } else {
+                commandLine 'sh', '-c', "git commit -m '[Automated] Update the toml files for client native tests' ballerina-tests/Ballerina.toml ballerina-tests/Dependencies.toml"
+            }
+        }
+    }
+}
+
+task ballerinaTests {
+    dependsOn(":module-ballerina-openapi:build")
+    dependsOn(updateTomlFile)
+    dependsOn(jar)
+    finalizedBy(commitTomlFiles)
+
+    doLast {
+        exec {
+            workingDir "${project.projectDir}/ballerina-tests"
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test --offline && exit " +
+                        "%%ERRORLEVEL%%"
+            } else {
+                commandLine 'sh', '-c', "${distributionBinPath}"+'/bal test --offline'
+            }
+        }
+    }
+}
+
+build.dependsOn(ballerinaTests)
