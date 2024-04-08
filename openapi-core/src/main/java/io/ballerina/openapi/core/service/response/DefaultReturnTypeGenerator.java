@@ -179,8 +179,12 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 qualifiedNodes.put(mediaTypeToken.toSourceCode(), mediaTypeToken);
             }
         }
-        return GeneratorUtils
+        TypeDescriptorNode unionTypeDescriptorNode = GeneratorUtils
                 .getUnionTypeDescriptorNodeFromTypeDescNodes(qualifiedNodes);
+        if (unionTypeDescriptorNode.toSourceCode().contains(GeneratorConstants.ANYDATA)) {
+            return NodeParser.parseTypeDescriptor(GeneratorConstants.ANYDATA);
+        }
+        return unionTypeDescriptorNode;
     }
 
     /**

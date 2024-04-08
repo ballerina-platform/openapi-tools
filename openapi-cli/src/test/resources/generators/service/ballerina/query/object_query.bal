@@ -3,6 +3,12 @@ import ballerina/http;
 listener http:Listener ep0 = new (443, config = {host: "virtserver.swaggerhub.com"});
 
 service /lnash94/QueryParam/'1\.0\.0 on ep0 {
+    # Update inventory
+    #
+    # + arrayRecord - 15. Query parameter with object array
+    # + return - Created
+    resource function delete inventory(InventoryItem[]? arrayRecord) returns http:Created {
+    }
     # searches inventory
     #
     # + required_query - 1. required query param with inline object
@@ -18,12 +24,6 @@ service /lnash94/QueryParam/'1\.0\.0 on ep0 {
     # http:BadRequest (bad input parameter)
     resource function get inventory(Required_query required_query, Optional_query? optional_query, Manufacturer? reference_query, Required_nullable? required_nullable, Optional_nullable? optional_nullable, Manufacturer? reference_nullable, Default_query default_query = {"limit":"9","id":9}, Default_nullable default_nullable = {"limit":"9","id":9}) returns http:Ok|http:BadRequest {
     }
-    # Update inventory
-    #
-    # + primitive - 14. object query parameter with additional property with primitive value
-    # + return - Created
-    resource function put inventory(record{|PrimitiveValues...;|}? primitive) returns http:Created {
-    }
     # adds an inventory item
     #
     # + required_query - 9. required query param with inline object including additional properties with reference.
@@ -37,9 +37,9 @@ service /lnash94/QueryParam/'1\.0\.0 on ep0 {
     }
     # Update inventory
     #
-    # + arrayRecord - 15. Query parameter with object array
+    # + primitive - 14. object query parameter with additional property with primitive value
     # + return - Created
-    resource function delete inventory(InventoryItem[]? arrayRecord) returns http:Created {
+    resource function put inventory(record{|PrimitiveValues...;|}? primitive) returns http:Created {
     }
     # Update inventory
     #

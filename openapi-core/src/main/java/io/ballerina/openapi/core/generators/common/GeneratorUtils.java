@@ -1349,28 +1349,6 @@ public class GeneratorUtils {
         return getSimpleNameReferenceNode(GeneratorConstants.MAP_STRING);
     }
 
-    public static TypeDescriptorNode generateTypeDescriptorForTextContent(OpenAPI openAPI, Schema schema,
-                                                                          List<Diagnostic> diagnosticList)
-            throws BallerinaOpenApiException {
-        if (schema != null) {
-            if ((schema.getOneOf() != null && schemaHasOnlyPrimitive(schema.getOneOf())) ||
-                    (schema.getAnyOf() != null && schemaHasOnlyPrimitive(schema.getAnyOf()))) {
-                return TypeHandler.getInstance().getTypeNodeFromOASSchema(schema).get();
-            } else if (schema.get$ref() != null) {
-                String schemaRef;
-                schemaRef = GeneratorUtils.getValidName(extractReferenceType(schema.get$ref()), true);
-                Schema referencedSchema = openAPI.getComponents().getSchemas().get(schemaRef);
-                if ((referencedSchema.getOneOf() != null && schemaHasOnlyPrimitive(referencedSchema.getOneOf())) ||
-                        (referencedSchema.getAnyOf() != null && schemaHasOnlyPrimitive(referencedSchema.getAnyOf()))) {
-                    return TypeHandler.getInstance().getTypeNodeFromOASSchema(schema).get();
-                }
-            } else {
-//                diagnosticList.add(new CommonDiagnostic())
-            }
-        }
-        return getSimpleNameReferenceNode(GeneratorConstants.STRING);
-    }
-
     private static TypeDescriptorNode generateTypeDescriptorForGenericMediaType(
             Map.Entry<String, MediaType> mediaTypeEntry, String path, boolean isRequest) {
         TypeDescriptorNode typeDescNode;

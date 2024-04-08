@@ -1,7 +1,7 @@
-public type Average float?;
-
 # At least one entry should be non-null.
 public type Scores decimal[]?;
+
+public type Average float?;
 
 public type Subject record {
     int id;

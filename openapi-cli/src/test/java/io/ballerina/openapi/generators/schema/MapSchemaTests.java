@@ -73,6 +73,5 @@ public class MapSchemaTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/additional_properties_composed_schema.bal", syntaxTree);
-        // todo : failing due to doc comment generator updating the records
     }
 }

@@ -9,6 +9,6 @@ service /v1 on ep0 {
     # User (Created)
     # BadRequestXml (Bad request)
     # NotFoundString (Not found)
-    resource function post pets() returns User|BadRequestXml|NotFoundString {
+    resource function post pets() returns User|BadRequestXml|NotFoundError {
     }
 }

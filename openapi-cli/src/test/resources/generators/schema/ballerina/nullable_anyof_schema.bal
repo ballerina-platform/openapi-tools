@@ -1,4 +1,5 @@
 import ballerina/constraint;
+import ballerina/http;
 
 public type Customers_customer_body record {
     # The customer's address.
@@ -27,3 +28,9 @@ public type Customer record {
     Customer_address? address?;
     string name?;
 };
+
+public type OkCustomer record {|
+    *http:Ok;
+    Customer body;
+    map<string|string[]> headers;
+|};

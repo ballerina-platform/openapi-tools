@@ -57,7 +57,6 @@ public class RecordDefaultValueTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/" +
                         "default_optional_primitive_schema.bal", syntaxTree);
-        // todo : failing due to doc issue
     }
 
     @Test(description = "Test for default optional String fields in records")
@@ -75,7 +74,6 @@ public class RecordDefaultValueTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/" +
                         "default_optional_string_schema.bal", syntaxTree);
-        // todo : failing due to doc issue
     }
 
     @Test(description = "Test for default optional String fields with value double quote in records")
@@ -93,7 +91,6 @@ public class RecordDefaultValueTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/" +
                 "default_optional_schema_with_doublequote.bal", syntaxTree);
-        // todo : failing due to doc issue
     }
 
     @Test(description = "Test for default value for array record")
@@ -111,7 +108,6 @@ public class RecordDefaultValueTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/" +
                         "default_optional_array_schema.bal", syntaxTree);
-        // todo : failing due to doc issue
     }
 
     @Test(description = "Test for default value for required fields")

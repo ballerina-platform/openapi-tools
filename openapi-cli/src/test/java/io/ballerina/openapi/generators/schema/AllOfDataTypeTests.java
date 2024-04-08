@@ -58,7 +58,6 @@ public class AllOfDataTypeTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema09.bal",
                 syntaxTree);
-        // todo : delete by doc comments
     }
 
     @Test(description = "Generate record for schema has allOf reference in record field")
@@ -145,7 +144,6 @@ public class AllOfDataTypeTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/array_with_inline_allOf.bal", syntaxTree);
-        // todo : failing due do comment issue
     }
 
     @Test(description = "Generate record for allOf schema with empty object schema")
@@ -164,7 +162,6 @@ public class AllOfDataTypeTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/allOfWithEmptyObject.bal", syntaxTree);
-        // todo : failing due do comment issue
     }
 
     @Test(description = "Generate record for nested allOf schemas")
@@ -182,7 +179,6 @@ public class AllOfDataTypeTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/nested_all_of.bal",
                 syntaxTree);
-        // todo : failing due doc issue
     }
 
     @Test(description = "Generate type definition from allOf schema with valid single item")

@@ -59,7 +59,7 @@ public class ServiceGenerationHandler {
                         (oasServiceMetadata.getLicenseHeader().isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
                                 oasServiceMetadata.getLicenseHeader()) + typeContent));
             }
-            diagnostics.addAll(serviceGenerator.getDiagnostics());
+            diagnostics.addAll(serviceTypeGenerator.getDiagnostics());
         }
         return sourceFiles;
     }

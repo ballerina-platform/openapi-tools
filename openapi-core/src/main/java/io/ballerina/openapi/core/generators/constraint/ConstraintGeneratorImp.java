@@ -8,7 +8,9 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
+import io.ballerina.compiler.syntax.tree.NonTerminalNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
+import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
@@ -25,6 +27,7 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,13 +80,22 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                     //modify the typeDefinitionNode with constraints
                     if (typeDefinitionNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
                         Map properties = value.getProperties();
-                        RecordTypeDescriptorNode record = (RecordTypeDescriptorNode) typeDefinitionNode.typeDescriptor();
+                        RecordTypeDescriptorNode record = (RecordTypeDescriptorNode)
+                                typeDefinitionNode.typeDescriptor();
                         NodeList<Node> fields = record.fields();
                         List<Node> recordFields = new ArrayList<>();
                         for (Node field : fields) {
-                            // todo fix by checking field node type (RecordFieldNode, RecordFieldWithType)
-                            RecordFieldNode recordFieldNode = (RecordFieldNode) field;
-                            String fieldName = recordFieldNode.fieldName().text();
+                            NonTerminalNode node;
+                            String fieldName;
+                            if (field instanceof RecordFieldNode recordFieldNode) {
+                                node = recordFieldNode;
+                                fieldName = recordFieldNode.fieldName().text();
+                            } else if (field instanceof RecordFieldWithDefaultValueNode recordFieldWithTypeNode) {
+                                node = recordFieldWithTypeNode;
+                                fieldName = recordFieldWithTypeNode.fieldName().text();
+                            } else {
+                                return;
+                            }
                             //todo remove this replacement with new lang changes
                             fieldName = fieldName.replaceAll("^'", "");
                             Schema<?> fieldSchema = (Schema<?>) properties.get(fieldName);
@@ -96,10 +108,10 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                                     //todo diagnostic
                                 }
                                 MetadataNode metadataNode;
-                                boolean isConstraintSupport =
-                                        constraintNode != null && fieldSchema.getNullable() != null && fieldSchema.getNullable() ||
-                                                (fieldSchema.getOneOf() != null ||
-                                                        fieldSchema.getAnyOf() != null);
+                                boolean isConstraintSupport = constraintNode != null &&
+                                        fieldSchema.getNullable() != null &&
+                                        fieldSchema.getNullable() || (fieldSchema.getOneOf() != null ||
+                                        fieldSchema.getAnyOf() != null);
                                 boolean nullable = GeneratorMetaData.getInstance().isNullable();
                                 if (nullable) {
                                     constraintNode = null;
@@ -116,17 +128,32 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                                     isConstraint = true;
                                     metadataNode = createMetadataNode(null, createNodeList(constraintNode));
                                 }
-                                recordFieldNode = recordFieldNode.modify(
-                                        metadataNode,
-                                        recordFieldNode.readonlyKeyword().orElse(null),
-                                        recordFieldNode.typeName(),
-                                        recordFieldNode.fieldName(),
-                                        recordFieldNode.questionMarkToken().orElse(null),
-                                        recordFieldNode.semicolonToken()
-                                );
-
+                                if (node instanceof RecordFieldNode recordFieldNode) {
+                                    recordFieldNode = recordFieldNode.modify(
+                                            metadataNode,
+                                            recordFieldNode.readonlyKeyword().orElse(null),
+                                            recordFieldNode.typeName(),
+                                            recordFieldNode.fieldName(),
+                                            recordFieldNode.questionMarkToken().orElse(null),
+                                            recordFieldNode.semicolonToken()
+                                    );
+                                    node = recordFieldNode;
+                                } else if (node instanceof RecordFieldWithDefaultValueNode recordFieldWithTypeNode) {
+                                    recordFieldWithTypeNode = recordFieldWithTypeNode.modify(
+                                            metadataNode,
+                                            recordFieldWithTypeNode.readonlyKeyword().orElse(null),
+                                            recordFieldWithTypeNode.typeName(),
+                                            recordFieldWithTypeNode.fieldName(),
+                                            recordFieldWithTypeNode.equalsToken(),
+                                            recordFieldWithTypeNode.expression(),
+                                            recordFieldWithTypeNode.semicolonToken()
+                                    );
+                                    node = recordFieldWithTypeNode;
+                                } else {
+                                    return;
+                                }
                             }
-                            recordFields.add(recordFieldNode);
+                            recordFields.add(node);
 
                             //This is special scenario for array schema,
                             //when the items has constraints then we define separate type for it.
@@ -204,6 +231,15 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                     typeDefinitions.put(key, typeDefinitionNode);
                 }
             }
+        });
+        List<String> typeDefinitionSortingList = new ArrayList<>();
+        typeDefinitions.forEach((key, value) -> {
+            typeDefinitionSortingList.add(key);
+        });
+        Collections.sort(typeDefinitionSortingList);
+        HashMap<String, TypeDefinitionNode> sortedTypeDefinitions = new HashMap<>();
+        typeDefinitionSortingList.forEach(key -> {
+            sortedTypeDefinitions.put(key, typeDefinitions.get(key));
         });
         return new ConstraintResult(typeDefinitions, isConstraint, diagnostics);
     }
