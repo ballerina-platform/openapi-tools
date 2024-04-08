@@ -49,7 +49,7 @@ public isolated client class Client {
     # Request Body has Array type AllOf.
     #
     # + return - OK
-    remote isolated function postXMLUserInLineArray(xml[] payload) returns error? {
+    remote isolated function postXMLUserInLineArray(record {*User; boolean? hunts?; int? age?;}[] payload) returns error? {
         string resourcePath = string `/path02`;
         http:Request request = new;
         json jsonBody = payload.toJson();

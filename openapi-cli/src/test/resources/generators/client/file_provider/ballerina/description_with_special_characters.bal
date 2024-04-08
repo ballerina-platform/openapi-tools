@@ -44,7 +44,7 @@ public isolated client class Client {
     # If the value is `false` and the `encoding` property is `TEXT` then non-GSM 03.38 characters will be replaced by the `?` character.
     # When using this setting on the API, you should take case to ensure that your message is _clean_.
     # Invisible unicode and unexpected characters could unintentionally convert an message to `UNICODE`.  A common mistake is to use the backtick character (\`) which is unicode and will turn your`TEXT` message into a `UNICODE` message.
-    # + payload - Create a new pet in the store
+ MISSING[`]    # + payload - Create a new pet in the store
     # + return - Successful operation
     remote isolated function addPet(json payload, boolean autoUnicode = false) returns json|error {
         string resourcePath = string `/pet`;

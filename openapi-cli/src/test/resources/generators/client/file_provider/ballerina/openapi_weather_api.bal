@@ -11,7 +11,7 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(ApiKeysConfig apiKeyConfig, string serviceUrl = "http://api.openweathermap.org/data/2.5/", ConnectionConfig config =  {}) returns error? {
+    public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config =  {}, string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {
         http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {

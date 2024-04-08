@@ -66,7 +66,7 @@ public class RequestBodyHeaderParameter implements ParameterGenerator {
 
     @Override
     public List<ClientDiagnostic> getDiagnostics() {
-        return null;
+        return diagnostics;
     }
 
 }
