@@ -229,5 +229,3 @@ function testInvalidImplFunctionSignature() {
         test:assertFail("invalid response type");
     }
 }
-
-

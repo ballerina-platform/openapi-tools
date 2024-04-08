@@ -22,7 +22,7 @@ public type OkAlbumArray record {|
 |};
 
 public type Album record {|
-    string id;
+    readonly string id;
     string name;
     string artist;
     string genre;
