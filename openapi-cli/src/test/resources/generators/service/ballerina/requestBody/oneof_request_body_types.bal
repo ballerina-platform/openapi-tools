@@ -12,6 +12,8 @@ public type Cat record {
     string kind?;
 };
 
+public type Pet_name_body (string|int|decimal)[];
+
 public type Pet_body Dog|Cat;
 
 public type Dog record {

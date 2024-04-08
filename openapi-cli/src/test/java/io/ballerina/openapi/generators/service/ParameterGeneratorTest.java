@@ -26,9 +26,8 @@ import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiExc
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -236,9 +235,7 @@ public class ParameterGeneratorTest {
                 "parameters_with_nullable_enums.bal", syntaxTree);
     }
 
-    @Test(description = "Test unsupported nullable path parameter with enums",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Path parameter value cannot be null.")
+    @Test(description = "Test unsupported nullable path parameter with enums")
     public void testNullablePathParamWithEnum() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/path_param_nullable.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -249,6 +246,8 @@ public class ParameterGeneratorTest {
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        List<Diagnostic> diagnostics = ballerinaServiceGenerator.getDiagnostics();
+        TestUtils.compareDiagnosticWarnings(diagnostics, "Path parameter value cannot be null.");
     }
 
     @Test(description = "Tests int32, int64, and invalid integer path parameters")

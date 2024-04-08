@@ -6,6 +6,8 @@ import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.MarkdownCodeLineNode;
+import io.ballerina.compiler.syntax.tree.MarkdownDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
@@ -19,6 +21,7 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -37,10 +40,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownCodeLineNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
@@ -87,7 +93,7 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
                     String sortKey = "";
                     if (classMember.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
                         FunctionDefinitionNode funcDef = (FunctionDefinitionNode) classMember;
-                            sortKey = funcDef.relativeResourcePath().toString() + "_" + funcDef.functionName().text();
+                            sortKey = funcDef.toSourceCode();
                             sortedMembers.add(sortKey);
                             NodeList<Node> nodes = funcDef.relativeResourcePath();
                             String path = "";
@@ -119,7 +125,7 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
                         classDef.onKeyword(),
                         classDef.expressions(),
                         classDef.openBraceToken(),
-                        createSeparatedNodeList(sortedNodes),
+                        updatedList.isEmpty()? classDef.members() : createNodeList(sortedNodes),
                         classDef.closeBraceToken(),
                         classDef.semicolonToken().orElse(null));
             }
@@ -191,10 +197,27 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
             //todo response
             if (operation.getResponses() != null) {
                 ApiResponses responses = operation.getResponses();
-                Collection<ApiResponse> values = responses.values();
-                Iterator<ApiResponse> iteratorRes = values.iterator();
-                if (iteratorRes.hasNext()) {
-                    ApiResponse response = iteratorRes.next();
+                Set<String> responseKeys = responses.keySet();
+                if (responseKeys.size() > 1) {
+                    MarkdownParameterDocumentationLineNode returnDoc = createAPIParamDoc("return",
+                            "returns can be any of following types");
+                    docs.add(returnDoc);
+                    for (String responseKey : responseKeys) {
+                        ApiResponse response = responses.get(responseKey);
+                        String code = GeneratorConstants.HTTP_CODES_DES.get(responseKey.trim());
+                        if (response.getDescription() != null && !response.getDescription().isBlank()) {
+                            if (code == null) {
+                                code = "Response";
+                            }
+                            MarkdownCodeLineNode returnDocLine = createMarkdownCodeLineNode(
+                                    createToken(SyntaxKind.HASH_TOKEN), createIdentifierToken(String
+                                            .format("http:%s (%s)", code, response.getDescription()
+                                                    .replaceAll("\n", "\n# "))));
+                            docs.add(returnDocLine);
+                        }
+                    }
+                } else if (responseKeys.size() == 1) {
+                    ApiResponse response = responses.get(responseKeys.iterator().next());
                     if (response.getDescription() != null && !response.getDescription().isBlank()) {
                         MarkdownParameterDocumentationLineNode returnDoc = createAPIParamDoc("return",
                                 response.getDescription());
@@ -260,8 +283,8 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
             List<AnnotationNode> paramAnnot = new ArrayList<>();
             String parameterDescription;
             String parameterName = parameter.getName();
-            if (parameter.getIn().equals("path") || parameter.getIn().equals("header") ||
-                    (parameter.getIn().equals("query"))) {
+            if (parameter.getIn() != null && (parameter.getIn().equals("path") || parameter.getIn().equals("header") ||
+                    (parameter.getIn().equals("query")))) {
                 parameterName = getValidName(parameter.getName(), false);
                 // add deprecated annotation
                 if (parameter.getDeprecated() != null && parameter.getDeprecated()) {

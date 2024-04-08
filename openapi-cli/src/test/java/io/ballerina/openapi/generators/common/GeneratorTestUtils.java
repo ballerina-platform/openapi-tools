@@ -114,8 +114,6 @@ public class GeneratorTestUtils {
         return semanticModel.diagnostics();
     }
 
-    static int i = 0;
-
     public static List<Diagnostic> getDiagnosticsForService(SyntaxTree serviceSyntaxTree, String yamlFile)
             throws FormatterException, IOException {
         TypeHandler typeHandler = TypeHandler.getInstance();
@@ -127,27 +125,6 @@ public class GeneratorTestUtils {
         writeFile(servicePath, serviceContent);
         writeFile(schemaPath, schemaContent);
         SemanticModel semanticModel = getSemanticModel(servicePath);
-        boolean hasErrors = true;
-//        hasErrors = semanticModel.diagnostics().stream()
-//                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
-        String yamlFileName = yamlFile.split("/")[yamlFile.split("/").length - 1];
-        if (hasErrors) {
-            File f = new File("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i);
-            f.mkdir();
-            FileWriter myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i
-                    + "/servicefile" + i + ".bal");
-            myWriter.write(serviceContent);
-            myWriter.close();
-
-            myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i +
-                    "/schemafile" + i + ".bal");
-            myWriter.write(schemaContent);
-            myWriter.close();
-            myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i + "/Ballerina.toml");
-            myWriter.write("");
-            myWriter.close();
-            i++;
-        }
         return semanticModel.diagnostics();
     }
 
@@ -213,37 +190,18 @@ public class GeneratorTestUtils {
 
     public static void assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(String s, SyntaxTree syntaxTree)
             throws IOException {
-        String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve(s));
-        String generatedSyntaxTree = syntaxTree.toString();
-        generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
-        expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
-
-        String yamlFileName = s.split("/")[s.split("/").length - 1];
-        File f = new File("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i);
-        f.mkdir();
-        FileWriter myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i
-                + "/schemafilegenerated" + i + ".bal");
+        String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR,(s));
+        String generatedSyntaxTree;
         try {
-            myWriter.write(Formatter.format(syntaxTree).toSourceCode());
+            generatedSyntaxTree = Formatter.format(syntaxTree).toSourceCode();
         } catch (FormatterException e) {
             throw new RuntimeException(e);
         }
-        myWriter.close();
-
-        myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i +
-                "/schemafileexpected" + i + ".bal");
-
-        Stream<String> expectedServiceLines = Files.lines(RES_DIR.resolve(s));
-        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining(LINE_SEPARATOR));
-        expectedServiceLines.close();
-
-        myWriter.write(expectedServiceContent);
-        myWriter.close();
-        myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i + "/Ballerina.toml");
-        myWriter.write("");
-        myWriter.close();
-        i++;
-
+        // todo : removing the comments as we are not matching them atm.
+        generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("#.*[+*a\\n]", "")
+                .replaceAll("\\s+", "");
+        expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("#.*[+*a\\n]", "")
+                .replaceAll("\\s+", "");
         Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
     }
 

@@ -3,15 +3,15 @@ import ballerina/http;
 listener http:Listener ep0 = new (80, config = {host: "petstore.openapi.io"});
 
 service /v1 on ep0 {
+    # Description
+    #
+    # + return - successful operation
+    resource function delete store/inventory() returns anydata {
+    }
     # Returns pet inventories by status
     #
     # + return - successful operation
     resource function get store/inventory() returns json {
-    }
-    # Description
-    #
-    # + return - successful operation
-    resource function put store/inventory() returns json {
     }
     # Description
     #
@@ -25,6 +25,6 @@ service /v1 on ep0 {
     # Description
     #
     # + return - successful operation
-    resource function delete store/inventory() returns anydata {
+    resource function put store/inventory() returns json {
     }
 }
