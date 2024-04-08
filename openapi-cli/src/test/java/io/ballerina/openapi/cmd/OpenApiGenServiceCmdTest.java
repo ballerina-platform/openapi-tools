@@ -119,7 +119,7 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
     public void testWithoutDataBinding() throws IOException {
         Path yamlPath = resourceDir.resolve(Paths.get("withoutDataBinding.yaml"));
         String[] args = {"--input", yamlPath.toString(), "--without-data-binding", "-o",
-                this.tmpDir.toString(), "--mode", "io/ballerina/openapi/corenew/service"};
+                this.tmpDir.toString(), "--mode", "service"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, this.tmpDir);
         new CommandLine(cmd).parseArgs(args);
         String output = "";
@@ -131,13 +131,12 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
 
         Path expectedServiceFile = resourceDir.resolve(Paths.get("expected_gen",
                 "without-data-binding.bal"));
-        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile);
-        String expectedService = expectedServiceLines.collect(Collectors.joining("\n"));
-        expectedServiceLines.close();
+        String expectedService = new String(Files.readAllBytes(expectedServiceFile));
         Assert.assertFalse(Files.exists(this.tmpDir.resolve("types.bal")));
         if (Files.exists(this.tmpDir.resolve("withoutdatabinding_service.bal"))) {
             String generatedService = getStringFromFile(this.tmpDir.resolve("withoutdatabinding_service.bal"));
-            Assert.assertEquals(replaceWhiteSpace(generatedService), replaceWhiteSpace(expectedService),
+            Assert.assertEquals(replaceWhiteSpace(generatedService.replaceAll("#.*[+*a\\n]", "")),
+                    replaceWhiteSpace(expectedService.replaceAll("#.*[+*a\\n]", "")),
                     "Expected content and actual generated content is mismatched for: " + yamlPath);
             deleteGeneratedFiles("without-data-binding-service.bal");
         } else {

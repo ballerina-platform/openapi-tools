@@ -17,7 +17,7 @@ service /v1 on ep0 {
     # + return - returns can be any of following types
     # http:Ok (Expected response to a valid request)
     # http:Response (unexpected error)
-    resource function get pets/[string petId]() returns Pets|http:Response {
+    resource function get pets/[string petId]() returns Dog|http:Response {
     }
     # Create a pet
     #

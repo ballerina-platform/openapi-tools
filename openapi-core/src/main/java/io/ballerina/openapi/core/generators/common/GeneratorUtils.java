@@ -317,7 +317,6 @@ public class GeneratorUtils {
                 if (parameter.getSchema().get$ref() != null) {
                     paramType = resolveReferenceType(parameter.getSchema(), components, isWithoutDataBinding,
                             pathParam);
-                    TypeHandler.getInstance().getTypeNodeFromOASSchema(parameter.getSchema());
                 } else {
                     paramType = getPathParameterType(parameter.getSchema(), pathParam);
                     if (paramType.endsWith(NILLABLE)) {
@@ -1170,6 +1169,7 @@ public class GeneratorUtils {
             }
         } else {
             type = getValidName(type, true);
+            TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
         }
         return type;
     }

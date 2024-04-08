@@ -28,9 +28,8 @@ public abstract class ReturnTypeGenerator {
     public static ReturnTypeGenerator getReturnTypeGenerator(OASServiceMetadata oasServiceMetadata, String path) {
         if (oasServiceMetadata.generateWithoutDataBinding()) {
             return new LowResourceReturnTypeGenerator(oasServiceMetadata, path);
-        } else {
-            return new DefaultReturnTypeGenerator(oasServiceMetadata, path);
         }
+        return new DefaultReturnTypeGenerator(oasServiceMetadata, path);
     }
 
     public abstract ReturnTypeDescriptorNode getReturnTypeDescriptorNode(Map.Entry<PathItem.HttpMethod,
