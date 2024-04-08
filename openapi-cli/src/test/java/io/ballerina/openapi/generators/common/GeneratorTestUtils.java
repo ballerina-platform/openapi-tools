@@ -187,6 +187,13 @@ public class GeneratorTestUtils {
         return expectedServiceContent;
     }
 
+    public static String getStringWithNewlineFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
+        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
+        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining(LINE_SEPARATOR));
+        expectedServiceLines.close();
+        return expectedServiceContent;
+    }
+
     public static void assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(String s, SyntaxTree syntaxTree)
             throws IOException {
         String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR, (s));
