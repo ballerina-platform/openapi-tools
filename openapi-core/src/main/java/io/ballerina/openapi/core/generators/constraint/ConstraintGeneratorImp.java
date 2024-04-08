@@ -83,6 +83,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                         for (Node field : fields) {
                             // todo fix by checking field node type (RecordFieldNode, RecordFieldWithType)
                             RecordFieldNode recordFieldNode = (RecordFieldNode) field;
+                            // todo : fix this by checking the cast
                             String fieldName = recordFieldNode.fieldName().text();
                             //todo remove this replacement with new lang changes
                             fieldName = fieldName.replaceAll("^'", "");
