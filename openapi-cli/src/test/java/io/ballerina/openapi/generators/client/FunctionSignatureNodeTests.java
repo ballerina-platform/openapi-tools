@@ -92,7 +92,7 @@ public class FunctionSignatureNodeTests {
         Operation operation = openAPI.getPaths().get("/pets").getPost();
         TypeHandler.createInstance(openAPI, false);
         RemoteFunctionSignatureGenerator functionSignatureGenerator = new RemoteFunctionSignatureGenerator(operation,
-                openAPI);
+                 openAPI);
         FunctionSignatureNode signature = functionSignatureGenerator.generateFunctionSignature().get();
         SeparatedNodeList<ParameterNode> parameters = signature.parameters();
         Assert.assertFalse(parameters.isEmpty());
@@ -232,11 +232,11 @@ public class FunctionSignatureNodeTests {
     public void testNumericFunctionSignatureJSONPayload() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/integer_request_payload.yaml"));
         TypeHandler.createInstance(openAPI, false);
-        RemoteFunctionSignatureGenerator signature = new RemoteFunctionSignatureGenerator(
-                openAPI.getPaths().get("/pets").getPost(), openAPI);
+        RemoteFunctionSignatureGenerator signature = new RemoteFunctionSignatureGenerator(openAPI.getPaths().
+                get("/pets").getPost(), openAPI);
         FunctionSignatureNode petSignature = signature.generateFunctionSignature().get();
-        RemoteFunctionSignatureGenerator owSignature = new RemoteFunctionSignatureGenerator(
-                openAPI.getPaths().get("/owners").getPost(), openAPI);
+        RemoteFunctionSignatureGenerator owSignature = new RemoteFunctionSignatureGenerator(openAPI.getPaths().
+                get("/owners").getPost(), openAPI);
         FunctionSignatureNode ownerSignature = owSignature.generateFunctionSignature().get();
         SeparatedNodeList<ParameterNode> parameters = petSignature.parameters();
         Assert.assertFalse(parameters.isEmpty());

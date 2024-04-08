@@ -23,6 +23,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyN
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
+import static io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages.OAS_CLIENT_101;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
@@ -45,15 +46,13 @@ public class PathParameterGenerator implements ParameterGenerator {
         Optional<TypeDescriptorNode> typeNode = TypeHandler.getInstance()
                 .getTypeNodeFromOASSchema(parameterSchema, true);
         if (typeNode.isEmpty()) {
-//            throw new BallerinaOpenApiException("Error while generating type descriptor node for path parameter");
-            //todo diagnostic
+            diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_101, parameter.getName()));
             return Optional.empty();
         }
         TypeDescriptorNode typeDescNode = typeNode.get();
-        if (typeDescNode.kind().equals(SyntaxKind.ARRAY_TYPE_DESC)|| typeDescNode.kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
-            DiagnosticMessages diagMessages = DiagnosticMessages.OAS_CLIENT_101;
-            ClientDiagnosticImp diagnostic = new ClientDiagnosticImp(diagMessages.getCode(),
-                    diagMessages.getDescription(), parameter.getName());
+        if (typeDescNode.kind().equals(SyntaxKind.ARRAY_TYPE_DESC)||
+                typeDescNode.kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
+            ClientDiagnosticImp diagnostic = new ClientDiagnosticImp(OAS_CLIENT_101, parameter.getName());
             diagnostics.add(diagnostic);
             return Optional.empty();
         }

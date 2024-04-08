@@ -135,7 +135,7 @@ public class TestConstants {
     public static final String AUTH_CONFIG_PARAM = "" +
             "ConnectionConfig config";
     public static final String API_KEY_CONFIG_PARAM_NO_URL = "" +
-            "ApiKeysConfig apiKeyConfig, string serviceUrl,ConnectionConfig config =  {}";
+            "ApiKeysConfig apiKeyConfig ConnectionConfig config =  {}";
     public static final String API_KEYS_CONFIG_RECORD = "# Provides API key configurations needed when communicating " +
             "with a remote HTTP endpoint.\n" +
             "public type ApiKeysConfig record {|\n" +

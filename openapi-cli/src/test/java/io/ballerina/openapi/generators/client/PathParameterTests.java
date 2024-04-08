@@ -66,8 +66,7 @@ public class PathParameterTests {
     }
 
     @Test(description = "Generate Client for path parameter with referenced schema")
-    public void generatePathParamWithReferencedSchema() throws IOException, BallerinaOpenApiException,
-            ClientException {
+    public void generatePathParamWithReferencedSchema() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/path_param_with_ref_schemas.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/path_param_with_ref_schema.bal");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
@@ -96,8 +95,7 @@ public class PathParameterTests {
 
     @Test(description = "When path parameter has given unmatch data type in ballerina",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Invalid path parameter data type for the parameter: .*",
-            enabled = false)
+            expectedExceptionsMessageRegExp = "Invalid path parameter data type for the parameter: .*", enabled = false)
     public void testInvalidPathParameterType() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/path_parameter_invalid.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
@@ -114,8 +112,7 @@ public class PathParameterTests {
     }
 
     @Test (description = "Generate Client for path parameter with anyOf, oneOf type")
-    public void unionPathParameter() throws IOException, BallerinaOpenApiException, ClientException,
-            FormatterException {
+    public void unionPathParameter() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/union_path_parameter.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/union_path_parameter.bal");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
@@ -139,7 +136,6 @@ public class PathParameterTests {
         Path definitionPath = RESDIR.resolve("swagger/allOf_path_parameter.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-//        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test (description = "Generate Client for path parameter with integer int32 and int64 types")

@@ -130,7 +130,7 @@ public class RequestBodyTests {
 
     @Test(description = "Test for generating request body when operation has binary octet-stream media type")
     public void testRequestBodyWithBinaryOctetStreamMediaType()
-            throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
+            throws IOException, BallerinaOpenApiException, ClientException {
         Path expectedPath = RES_DIR.resolve("ballerina/binary_format_octet_stream_payload.bal");
         Path definitionPath = RES_DIR.resolve("swagger/binary_format_octet_stream_payload.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
@@ -203,7 +203,7 @@ public class RequestBodyTests {
     @Test(description = "Test for generating request body when operation has multipart form-data media type " +
             "with no schema")
     public void testRequestBodyWithMultipartMediaTypeAndNoSchema()
-            throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
+            throws IOException, BallerinaOpenApiException, ClientException {
         Path expectedPath = RES_DIR.resolve("ballerina/multipart_formdata_empty.bal");
         Path definitionPath = RES_DIR.resolve("swagger/mutipart_formdata_empty.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
@@ -214,7 +214,7 @@ public class RequestBodyTests {
     @Test(description = "Test for generating request body when operation has multipart form-data media type " +
             "with invalid schema")
     public void testRequestBodyWithMultipartMediaTypeInvalidSchema()
-            throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
+            throws IOException, BallerinaOpenApiException, ClientException {
         Path expectedPath = RES_DIR.resolve("ballerina/multipart_binary.bal");
         Path definitionPath = RES_DIR.resolve("swagger/multipart_binary.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
@@ -223,8 +223,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Test for generating request body when schema is empty")
-    public void testRequestBodyWithoutSchema() throws IOException, BallerinaOpenApiException,
-            ClientException {
+    public void testRequestBodyWithoutSchema() throws IOException, BallerinaOpenApiException, ClientException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_without_schema.bal");
         Path definitionPath = RES_DIR.resolve("swagger/request_body_without_schema.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
@@ -243,7 +242,7 @@ public class RequestBodyTests {
 
     @Test(description = "Test for generating request body with octet-stream media type")
     public void testWithOctetStreamInRequestBody()
-            throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
+            throws IOException, BallerinaOpenApiException, ClientException {
         Path expectedPath = RES_DIR.resolve("ballerina/octet_stream_request_payload.bal");
         Path definitionPath = RES_DIR.resolve("swagger/octet_stream_request_payload.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);

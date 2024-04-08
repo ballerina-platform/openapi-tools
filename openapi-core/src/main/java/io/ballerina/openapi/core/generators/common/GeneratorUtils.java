@@ -569,6 +569,8 @@ public class GeneratorUtils {
         } else if (mediaType.equals(APPLICATION_OCTET_STREAM) ||
                 mediaType.equals(IMAGE_PNG) || mediaType.matches("application/.*\\+octet-stream")) {
             return SyntaxKind.BYTE_KEYWORD.stringValue() + SQUARE_BRACKETS;
+        } else if (mediaType.equals("application/x-www-form-urlencoded")) {
+            return "map<string>";
         } else {
             return isRequest ? HTTP_REQUEST : HTTP_RESPONSE;
         }

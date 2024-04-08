@@ -65,7 +65,7 @@ public class FunctionBodyNodeTests {
         Map.Entry<PathItem.HttpMethod, Operation> operation = iterator.next();
         TypeHandler.createInstance(openapi, false);
         FunctionBodyGeneratorImp functionBodyGeneratorImp = new FunctionBodyGeneratorImp(path, operation, openapi,
-                new AuthConfigGeneratorImp(false, false, new ArrayList<>()),
+                new AuthConfigGeneratorImp(false, false),
                 new BallerinaUtilGenerator(), new ArrayList<>());
         Optional<FunctionBodyNode> bodyNode = functionBodyGeneratorImp.getFunctionBodyNode();
         content = content.trim().replaceAll("\n", "").replaceAll("\\s+", "");
@@ -137,8 +137,8 @@ public class FunctionBodyNodeTests {
                         "        return response;}"},
                 {"client/swagger/map_schema_response.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +
-                        "        record{|Inline_response_map200...;|} response = check" +
-                        " self.clientEp->post(resourcePath, request);\n" +
+                        "        record{|Inline_response_map200...;|} response = check self.clientEp->post(" +
+                        "resourcePath, request);\n" +
                         "        return response;}"},
                 {"client/swagger/array_response_pdf.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +

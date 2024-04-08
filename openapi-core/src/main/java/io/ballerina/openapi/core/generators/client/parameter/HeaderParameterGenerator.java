@@ -7,6 +7,8 @@ import io.ballerina.compiler.syntax.tree.NilLiteralNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
+import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -44,10 +46,13 @@ public class HeaderParameterGenerator implements ParameterGenerator {
 
     @Override
     public Optional<ParameterNode> generateParameterNode() {
+        //supported types string, int, boolean, decimal, float , primitive array
         IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
         Optional<TypeDescriptorNode> typeNodeResult = TypeHandler.getInstance()
                 .getTypeNodeFromOASSchema(parameter.getSchema(), true);
         if (typeNodeResult.isEmpty()) {
+            ClientDiagnosticImp diagnostic = new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_108, paramName.text());
+            diagnostics.add(diagnostic);
             return Optional.empty();
         }
         TypeDescriptorNode typeNode = typeNodeResult.get();

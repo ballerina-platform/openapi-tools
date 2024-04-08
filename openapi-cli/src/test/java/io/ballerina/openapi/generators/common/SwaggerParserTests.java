@@ -43,8 +43,7 @@ public class SwaggerParserTests {
     //TODO: readd expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*" after checking failure
     @Test(description = "Functionality tests for getBallerinaOpenApiType",
             expectedExceptions = BallerinaOpenApiException.class)
-    public void generateHandleUnsupportedData() throws  IOException, BallerinaOpenApiException,
-            OASTypeGenException {
+    public void generateHandleUnsupportedData() throws  IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/invalid.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
 //        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
