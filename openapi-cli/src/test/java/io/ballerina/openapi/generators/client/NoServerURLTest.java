@@ -4,17 +4,15 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.generators.common.TestConstants;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.Formatter;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -24,7 +22,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.openapi.generators.common.GeneratorTestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils
+        .compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
 /**
  * Test client generation when server url is not given in the open-api definition.
@@ -37,7 +36,7 @@ public class NoServerURLTest {
     Filter filter = new Filter(list1, list2);
 
     @Test(description = "Test for no server url with no security schema given")
-    public void getClientForNoServerURL() throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
+    public void getClientForNoServerURL() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/missing_server_url.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/missing_server_url.bal");
 
@@ -50,7 +49,6 @@ public class NoServerURLTest {
                 .withResourceMode(false).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        System.out.println(Formatter.format(syntaxTree));
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 

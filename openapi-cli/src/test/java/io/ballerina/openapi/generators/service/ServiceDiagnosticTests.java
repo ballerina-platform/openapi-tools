@@ -20,12 +20,12 @@ package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -196,7 +196,8 @@ public class ServiceDiagnosticTests {
                 {"3.1.0_openapis/listennotes.yaml"},
                 {"3.1.0_openapis/placekit.yaml"},
                 {"3.1.0_openapis/urlbox.yaml"},
-                {"3.1.0_openapis/vercel.yaml"}, // uncomment when https://github.com/ballerina-platform/openapi-tools/issues/1332 is fixed
+                {"3.1.0_openapis/vercel.yaml"}, // uncomment when
+                // https://github.com/ballerina-platform/openapi-tools/issues/1332 is fixed
                 {"3.1.0_openapis/webscraping.yaml"},
                 {"3.1.0_openapis/wolframalpha.yaml"}
         };

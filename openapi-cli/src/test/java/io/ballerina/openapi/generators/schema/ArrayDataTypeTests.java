@@ -67,7 +67,8 @@ public class ArrayDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema03.bal", syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema03.bal",
+                syntaxTree);
     }
 
     @Test(description = "Scenario04-Generate record with nested array filed record")
@@ -83,7 +84,8 @@ public class ArrayDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema04.bal", syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema04.bal",
+                syntaxTree);
     }
 
     @Test(description = "Generate record with record type array filed record")
@@ -99,7 +101,8 @@ public class ArrayDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema06.bal", syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema06.bal",
+                syntaxTree);
     }
 
 
@@ -116,7 +119,8 @@ public class ArrayDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema08.bal", syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema08.bal",
+                syntaxTree);
     }
 
     @Test(description = "Generate Array for schema has array reference")
@@ -132,12 +136,13 @@ public class ArrayDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema_with_array.bal",
-                syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
+                "schema/ballerina/schema_with_array.bal", syntaxTree);
     }
 
     @Test(description = "Generate Array for schema has array reference")
-    public void generateSchemaNestedArrayReference() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateSchemaNestedArrayReference() throws IOException, BallerinaOpenApiException,
+            FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/schema_with_nested_array.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         TypeHandler.createInstance(openAPI, false);
@@ -149,8 +154,8 @@ public class ArrayDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema_with_nested_array.bal",
-                syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
+                "schema/ballerina/schema_with_nested_array.bal", syntaxTree);
     }
 
     @Test(description = "Array schema has no data type in items")
@@ -166,8 +171,8 @@ public class ArrayDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/array_no_item_type.bal",
-                syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
+                "schema/ballerina/array_no_item_type.bal", syntaxTree);
     }
 
     @Test(description = "Array schema has max item count")
@@ -183,8 +188,8 @@ public class ArrayDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/array_max_item.bal",
-                syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
+                "schema/ballerina/array_max_item.bal", syntaxTree);
     }
 
     @Test(description = "Array schema with allOf")
@@ -200,8 +205,8 @@ public class ArrayDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/array_with_allOf.bal",
-                syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
+                "schema/ballerina/array_with_allOf.bal", syntaxTree);
     }
 
     @Test(description = "Array schema with oneOf")
@@ -217,8 +222,8 @@ public class ArrayDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/array_with_oneOf.bal",
-                syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
+                "schema/ballerina/array_with_oneOf.bal", syntaxTree);
     }
 
     @Test(description = "Array schema with oneOf schema with nullable item")
@@ -253,7 +258,8 @@ public class ArrayDataTypeTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/array_exceed_max_item.bal", syntaxTree);
-        TestUtils.compareDiagnosticWarnings(TypeHandler.getInstance().getDiagnostics(), "Maximum item count " +
+        TestUtils.compareDiagnosticWarnings(TypeHandler.getInstance().getDiagnostics(),
+                "Maximum item count " +
                 "(2147483638) defined in the definition exceeds the maximum ballerina array length.");
     }
 
@@ -272,7 +278,8 @@ public class ArrayDataTypeTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/array_exceed_max_item_02.bal", syntaxTree);
-        TestUtils.compareDiagnosticWarnings(TypeHandler.getInstance().getDiagnostics(), "Maximum item count " +
+        TestUtils.compareDiagnosticWarnings(TypeHandler.getInstance().getDiagnostics(),
+                "Maximum item count " +
                 "(2147483640) defined in the definition exceeds the maximum ballerina array length.");
     }
 

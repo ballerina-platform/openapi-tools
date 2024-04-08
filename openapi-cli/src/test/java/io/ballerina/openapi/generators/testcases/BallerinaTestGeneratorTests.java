@@ -68,7 +68,8 @@
 //    Filter filter = new Filter(list1, list2);
 //
 //    @Test(description = "Generate Client with test skelotins", dataProvider = "httpAuthIOProvider")
-//    public void generateclientWithTestSkel(String yamlFile) throws IOException, BallerinaOpenApiException, OASTypeGenException,
+//    public void generateclientWithTestSkel(String yamlFile) throws IOException, BallerinaOpenApiException,
+//    OASTypeGenException,
 //            FormatterException, BallerinaOpenApiException, URISyntaxException {
 //        Files.createDirectories(Paths.get(PROJECT_DIR + OAS_PATH_SEPARATOR + TEST_DIR));
 //        Path definitionPath = RES_DIR.resolve("sample_yamls/" + yamlFile);
@@ -99,7 +100,8 @@
 //    }
 //
 //    public List<Diagnostic> getDiagnostics(SyntaxTree clientSyntaxTree, SyntaxTree testSyntaxTree,
-//                                           SyntaxTree schemaSyntaxTree, String configContent, SyntaxTree utilSyntaxTree)
+//                                           SyntaxTree schemaSyntaxTree, String configContent,
+//                                           SyntaxTree utilSyntaxTree)
 //            throws FormatterException, IOException {
 //        TestUtils.writeFile(clientPath, Formatter.format(clientSyntaxTree).toSourceCode());
 //        TestUtils.writeFile(utilPath, Formatter.format(utilSyntaxTree).toSourceCode());

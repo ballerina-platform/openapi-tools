@@ -56,8 +56,8 @@ public class NullableFieldTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/nullable_primitive.bal",
-                syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
+                "schema/ballerina/nullable_primitive.bal", syntaxTree);
     }
 
     @Test(description = "Test for nullable array fields")
@@ -90,8 +90,8 @@ public class NullableFieldTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/nullable_ref_array.bal",
-                syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
+                "schema/ballerina/nullable_ref_array.bal", syntaxTree);
     }
 
     @Test(description = "Test nullable for primitive referenced type")
@@ -142,8 +142,8 @@ public class NullableFieldTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/nullable_record.bal",
-                syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
+                "schema/ballerina/nullable_record.bal", syntaxTree);
     }
 
     @Test(description = "Test for union type generation for nullable anyOf schema")
@@ -159,8 +159,8 @@ public class NullableFieldTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/nullable_anyof_schema.bal",
-                syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
+                "schema/ballerina/nullable_anyof_schema.bal", syntaxTree);
     }
 
     @Test(description = "Test for union type generation for nullable anyOf schema with array schema")

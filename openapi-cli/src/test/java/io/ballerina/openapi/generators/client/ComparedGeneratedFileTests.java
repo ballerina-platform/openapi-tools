@@ -20,12 +20,12 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.generators.common.GeneratorTestUtils;
@@ -97,7 +97,8 @@ public class ComparedGeneratedFileTests {
                 .withResourceMode(false).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -121,7 +122,8 @@ public class ComparedGeneratedFileTests {
                 {"nillable_union_response.yaml", "nillable_union_response.bal"},
                 {"duplicated_response.yaml", "duplicated_response.bal"},
                 {"multiline_param_comment.yaml", "multiline_param_comment.bal"},
-                {"description_with_special_characters.yaml", "description_with_special_characters.bal"}, //special characters in description
+                {"description_with_special_characters.yaml", "description_with_special_characters.bal"},
+                //special characters in description
                 {"header_with_enum.yaml", "header_with_enum.bal"},
                 {"incorrect_format.yaml", "incorrect_format.bal"},
                 {"format_types_v3_0.yaml", "format_types_v3_0.bal"},

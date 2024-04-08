@@ -22,12 +22,12 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.cmd.CmdUtils;
-import io.ballerina.openapi.core.generators.common.GeneratorUtils;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
@@ -45,7 +45,6 @@ import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -190,7 +189,7 @@ public class GeneratorTestUtils {
 
     public static void assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(String s, SyntaxTree syntaxTree)
             throws IOException {
-        String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR,(s));
+        String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR, (s));
         String generatedSyntaxTree;
         try {
             generatedSyntaxTree = Formatter.format(syntaxTree).toSourceCode();

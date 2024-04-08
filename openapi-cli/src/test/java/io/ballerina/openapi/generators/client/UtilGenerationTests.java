@@ -7,12 +7,12 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.generators.common.GeneratorTestUtils;
@@ -72,7 +72,8 @@ public class UtilGenerationTests {
         List<String> invalidFunctionNames = Arrays.asList(CREATE_FORM_URLENCODED_REQUEST_BODY, GET_MAP_FOR_HEADERS);
         Assert.assertTrue(checkUtil(invalidFunctionNames,
                 ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()));
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -93,7 +94,8 @@ public class UtilGenerationTests {
                 GET_ORIGINAL_KEY, GET_PATH_FOR_QUERY_PARAM, GET_SERIALIZED_RECORD_ARRAY);
         Assert.assertTrue(checkUtil(invalidFunctionNames,
                 ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()));
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -103,15 +105,16 @@ public class UtilGenerationTests {
     }
 
     @Test(description = "Validate the util functions generated for OpenAPI definition with URL encoded request body")
-    public void testUtilFileGenURLEncodedRequestBody() throws IOException, BallerinaOpenApiException, OASTypeGenException,
-            FormatterException, ClientException {
+    public void testUtilFileGenURLEncodedRequestBody() throws IOException, BallerinaOpenApiException,
+            OASTypeGenException, FormatterException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/url_encoded.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<String> invalidFunctionNames = Arrays.asList(GET_PATH_FOR_QUERY_PARAM, GET_MAP_FOR_HEADERS);
         Assert.assertTrue(checkUtil(invalidFunctionNames,
                 ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()));
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -130,7 +133,8 @@ public class UtilGenerationTests {
         List<String> invalidFunctionNames = Arrays.asList(GET_PATH_FOR_QUERY_PARAM, GET_MAP_FOR_HEADERS);
         Assert.assertTrue(checkUtil(invalidFunctionNames,
                 ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()));
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -145,7 +149,8 @@ public class UtilGenerationTests {
         Path definitionPath = RESDIR.resolve("swagger/complete_util_gen.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -160,7 +165,8 @@ public class UtilGenerationTests {
         Path definitionPath = RESDIR.resolve("swagger/apikey_with_no_query_param.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -170,12 +176,15 @@ public class UtilGenerationTests {
     }
 
     //Todo enable after multipart form data handing in RB with response
-    @Test(description = "Validate the util functions generated for OpenAPI definition with multi part request bodies", enabled = false)
-    public void testMultipartBodyParts() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException, ClientException {
+    @Test(description = "Validate the util functions generated for OpenAPI definition with multi part request bodies",
+            enabled = false)
+    public void testMultipartBodyParts() throws IOException, BallerinaOpenApiException, OASTypeGenException,
+            FormatterException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/multipart_formdata.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -186,11 +195,13 @@ public class UtilGenerationTests {
 
     @Test(description = "Validate the util functions generated for OpenAPI definition with multi part " +
             "request custom bodies", enabled = false)
-    public void testMultipartCustomBodyParts() throws IOException, BallerinaOpenApiException, OASTypeGenException, FormatterException, ClientException {
+    public void testMultipartCustomBodyParts() throws IOException, BallerinaOpenApiException, OASTypeGenException,
+            FormatterException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/multipart_formdata_custom.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -219,7 +230,8 @@ public class UtilGenerationTests {
         return false;
     }
 
-    private BallerinaClientGenerator getBallerinaClientGenerator(Path definitionPath) throws IOException, BallerinaOpenApiException {
+    private BallerinaClientGenerator getBallerinaClientGenerator(Path definitionPath) throws IOException,
+            BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         TypeHandler.createInstance(openAPI, true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
