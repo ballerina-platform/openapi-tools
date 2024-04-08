@@ -125,13 +125,17 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
         }
         if (!returnTypes.isEmpty()) {
             if (noContentResponseFound) {
-                returnTypes.add(createSimpleNameReferenceNode(createIdentifierToken(ERROR+NILLABLE)));
+                return Optional.of(createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(),
+                        createUnionTypeDescriptorNode(returnTypes.get(0), createToken(PIPE_TOKEN),
+                                createSimpleNameReferenceNode(createIdentifierToken(OPTIONAL_ERROR)))));
+//                returnTypes.add(createSimpleNameReferenceNode(createIdentifierToken(ERROR + NILLABLE)));
             } else {
-                returnTypes.add(createSimpleNameReferenceNode(createIdentifierToken(ERROR)));
+                return Optional.of(createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(),
+                        createUnionTypeDescriptorNode(returnTypes.get(0), createToken(PIPE_TOKEN),
+                                createSimpleNameReferenceNode(createIdentifierToken(ERROR)))));
+//                returnTypes.add(createSimpleNameReferenceNode(createIdentifierToken(ERROR)));
             }
 
-            return Optional.of(createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(),
-                    createUnionTypeDescriptorNode(returnTypes.get(0), createToken(PIPE_TOKEN), returnTypes.get(1))));
         } else if (noContentResponseFound) {
             return Optional.of(createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(),
                     createIdentifierToken(OPTIONAL_ERROR)));
