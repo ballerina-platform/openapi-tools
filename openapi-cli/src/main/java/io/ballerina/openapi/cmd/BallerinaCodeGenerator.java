@@ -446,7 +446,13 @@ public class BallerinaCodeGenerator {
                         CONFIG_FILE_NAME, configContent));
             }
         }
-
+        List<ClientDiagnostic> clientDiagnostic = clientGenerator.getDiagnostics();
+        if (!clientDiagnostic.isEmpty()) {
+            outStream.println("error occurred while generating the client: ");
+            for (ClientDiagnostic diagnostic : clientDiagnostic) {
+                outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
+            }
+        }
         return sourceFiles;
     }
 

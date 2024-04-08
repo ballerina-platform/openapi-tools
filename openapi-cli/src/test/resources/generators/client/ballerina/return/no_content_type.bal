@@ -34,25 +34,9 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    # + return - Created
-    resource isolated function post users02(User payload, User payload) returns error? {
-        string resourcePath = string `/users02`;
-        http:Request request = new;
-        json jsonBody = payload.toJson();
-        request.setPayload(jsonBody, "application/json");
-        return self.clientEp->post(resourcePath, request);
-    }
-    # + return - Created
-    resource isolated function post users02(User payload, User payload) returns error? {
-        string resourcePath = string `/users02`;
-        http:Request request = new;
-        json jsonBody = payload.toJson();
-        request.setPayload(jsonBody, "application/json");
-        return self.clientEp->post(resourcePath, request);
-    }
-    # + return - Created
-    resource isolated function post users02(User payload, User payload) returns error? {
-        string resourcePath = string `/users02`;
+    # + return - Moved Permanently
+    resource isolated function post user3(User payload, User payload) returns error? {
+        string resourcePath = string `/user3`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
@@ -68,5 +52,21 @@ public isolated client class Client {
         request.setPayload(jsonBody, "application/json");
         http:Response response = check self.clientEp->post(resourcePath, request);
         return response;
+    }
+    # + return - Switching protocols
+    resource isolated function post users(User payload, User payload) returns error? {
+        string resourcePath = string `/users`;
+        http:Request request = new;
+        json jsonBody = payload.toJson();
+        request.setPayload(jsonBody, "application/json");
+        return self.clientEp->post(resourcePath, request);
+    }
+    # + return - Created
+    resource isolated function post users02(User payload, User payload) returns error? {
+        string resourcePath = string `/users02`;
+        http:Request request = new;
+        json jsonBody = payload.toJson();
+        request.setPayload(jsonBody, "application/json");
+        return self.clientEp->post(resourcePath, request);
     }
 }
