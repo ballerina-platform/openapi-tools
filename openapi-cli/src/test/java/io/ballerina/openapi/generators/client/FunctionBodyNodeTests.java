@@ -137,8 +137,8 @@ public class FunctionBodyNodeTests {
                         "        return response;}"},
                 {"client/swagger/map_schema_response.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +
-                        "        record{|Inline_response_map200...;|} response = check" +
-                        " self.clientEp->post(resourcePath, request);\n" +
+                        "        record{|Inline_response_map200...;|} response = check self.clientEp->post(" +
+                        "resourcePath, request);\n" +
                         "        return response;}"},
                 {"client/swagger/array_response_pdf.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +

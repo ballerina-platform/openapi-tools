@@ -160,6 +160,7 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation, openAPI);
         Optional<ReturnTypeDescriptorNode> returnType = functionReturnType.getReturnType();
         if (returnType.isEmpty()) {
+            diagnostics.addAll(functionReturnType.getDiagnostics());
             return Optional.empty();
         }
 

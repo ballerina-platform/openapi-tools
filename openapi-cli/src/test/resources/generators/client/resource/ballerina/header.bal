@@ -39,20 +39,6 @@ public isolated client class Client {
         self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
         return;
     }
-    # Info for a specific pet
-    #
-    # + xRequestId - Tests header 01
-    # + xRequestClient - Tests header 02
-    # + xRequestPet - Tests header 03
-    # + return - Expected response to a valid request
-    resource isolated function get weather(string xRequestId, string[] xRequestClient, WeatherForecast[] xRequestPet) returns error? {
-        string resourcePath = string `/weather`;
-        map<anydata> queryParam = {"appid": self.apiKeyConfig.appid};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<any> headerValues = {"X-Request-ID": xRequestId, "X-Request-Client": xRequestClient, "X-Request-Pet": xRequestPet};
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        return self.clientEp->get(resourcePath, httpHeaders);
-    }
     # Provide weather forecast for any geographical coordinates
     #
     # + lat - Latitude
@@ -69,5 +55,19 @@ public isolated client class Client {
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         WeatherForecast response = check self.clientEp->get(resourcePath, httpHeaders);
         return response;
+    }
+    # Info for a specific pet
+    #
+    # + xRequestId - Tests header 01
+    # + xRequestClient - Tests header 02
+    # + xRequestPet - Tests header 03
+    # + return - Expected response to a valid request
+    resource isolated function get weather(string xRequestId, string[] xRequestClient, WeatherForecast[] xRequestPet) returns error? {
+        string resourcePath = string `/weather`;
+        map<anydata> queryParam = {"appid": self.apiKeyConfig.appid};
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        map<any> headerValues = {"X-Request-ID": xRequestId, "X-Request-Client": xRequestClient, "X-Request-Pet": xRequestPet};
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

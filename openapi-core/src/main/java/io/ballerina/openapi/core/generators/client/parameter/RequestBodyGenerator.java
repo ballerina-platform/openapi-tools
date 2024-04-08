@@ -50,7 +50,7 @@ public class RequestBodyGenerator implements ParameterGenerator {
     @Override
     public Optional<ParameterNode> generateParameterNode() {
         Content requestBodyContent;
-        String referencedRequestBodyName = "";
+        String referencedRequestBodyName;
         TypeDescriptorNode typeDescNode = null;
         if (requestBody.get$ref() != null) {
             try {
@@ -115,13 +115,14 @@ public class RequestBodyGenerator implements ParameterGenerator {
                 }
 
                 //handle headers
-                if (mediaTypeEntryKey.equals(javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA) || mediaTypeEntryKey.matches("multipart/.*\\+form-data")) {
-                    extracteHeaders(mediaTypeEntry);
+                if (mediaTypeEntryKey.equals(javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA) ||
+                        mediaTypeEntryKey.matches("multipart/.*\\+form-data")) {
+                    extractHeaders(mediaTypeEntry);
                 }
             } else {
                 if (mediaTypeEntry.getKey().equals(javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA)
                         && mediaTypeEntry.getValue().getEncoding() != null) {
-                    extracteHeaders(mediaTypeEntry);
+                    extractHeaders(mediaTypeEntry);
                 } else {
                     paramType = getBallerinaMediaType(mediaTypeEntry.getKey(), true);
                     typeDescNode = createSimpleNameReferenceNode(createIdentifierToken(paramType));
@@ -134,8 +135,11 @@ public class RequestBodyGenerator implements ParameterGenerator {
                 createIdentifierToken(reqBody)));
     }
 
-    private void extracteHeaders(Map.Entry<String, MediaType> mediaTypeEntry) {
+    private void extractHeaders(Map.Entry<String, MediaType> mediaTypeEntry) {
         Map<String, Encoding> encodingHeaders = mediaTypeEntry.getValue().getEncoding();
+        if (encodingHeaders == null) {
+            return;
+        }
         List<String> headerList = new ArrayList<>();
         for (Map.Entry<String, Encoding> entry : encodingHeaders.entrySet()) {
             Map<String, Header> headers = entry.getValue().getHeaders();
@@ -146,6 +150,7 @@ public class RequestBodyGenerator implements ParameterGenerator {
                         Optional<ParameterNode> parameterNode = requestBodyHeaderParameter.generateParameterNode();
 
                         parameterNode.ifPresent(node -> headerParameters.add(node));
+                        diagnostics.addAll(requestBodyHeaderParameter.getDiagnostics());
                         headerList.add(getValidName(header.getKey(), false));
                     }
                 }

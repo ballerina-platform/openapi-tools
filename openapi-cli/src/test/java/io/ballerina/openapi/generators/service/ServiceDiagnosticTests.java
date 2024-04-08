@@ -60,7 +60,7 @@ public class ServiceDiagnosticTests {
     @Test(description = "Test for compilation errors in OpenAPI definition to ballerina service skeleton generation",
             dataProvider = "singleFileProviderForDiagnosticCheck")
     public void checkDiagnosticIssues(String yamlFile) throws IOException, BallerinaOpenApiException,
-            FormatterException, OASTypeGenException {
+            FormatterException {
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

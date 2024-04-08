@@ -34,6 +34,14 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+    # op1
+    #
+    # + return - Ok
+    resource isolated function get .() returns string|error {
+        string resourcePath = string `/`;
+        string response = check self.clientEp->get(resourcePath);
+        return response;
+    }
     # Retrieves a single customer.
     #
     # + customer_id - Customer ID
@@ -45,11 +53,9 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         return self.clientEp->get(resourcePath);
     }
-    # op1
-    #
     # + return - Ok
-    resource isolated function get .() returns string|error {
-        string resourcePath = string `/`;
+    resource isolated function get v1/[int age]/v2/[string name]() returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(age)}/v2/${getEncodedUri(name)}`;
         string response = check self.clientEp->get(resourcePath);
         return response;
     }
@@ -63,20 +69,14 @@ public isolated client class Client {
         return response;
     }
     # + return - Ok
-    resource isolated function get v1/[int version]/v2/[string name]() returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri(name)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
-    }
-    # + return - Ok
-    resource isolated function get v1/[int age]/v2/[string name]() returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri(age)}/v2/${getEncodedUri(name)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
-    }
-    # + return - Ok
     resource isolated function get v1/[int version]/v2/[int 'limit]() returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri('limit)}`;
+        string response = check self.clientEp->get(resourcePath);
+        return response;
+    }
+    # + return - Ok
+    resource isolated function get v1/[int version]/v2/[string name]() returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri(name)}`;
         string response = check self.clientEp->get(resourcePath);
         return response;
     }

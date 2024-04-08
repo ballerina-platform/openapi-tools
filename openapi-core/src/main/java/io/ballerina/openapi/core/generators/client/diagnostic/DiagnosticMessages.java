@@ -19,7 +19,8 @@ public enum DiagnosticMessages {
     OAS_CLIENT_107("OAS_CLIENT_107", "error while generating ",DiagnosticSeverity.WARNING),
     OAS_CLIENT_108("OAS_CLIENT_108", "encounter unsupported header parameter data type for the header: '%s'",
             DiagnosticSeverity.WARNING),
-    OAS_CLIENT_109("OAS_CLIENT_109", "encounter issue while resolving reference: '%s'", DiagnosticSeverity.WARNING);
+    OAS_CLIENT_109("OAS_CLIENT_109", "encounter issue while resolving reference: '%s'",
+            DiagnosticSeverity.WARNING);
     private final String code;
     private final String description;
     private final DiagnosticSeverity severity;

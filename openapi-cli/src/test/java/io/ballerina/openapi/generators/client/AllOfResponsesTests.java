@@ -44,8 +44,8 @@ public class AllOfResponsesTests {
     public void getReturnTypeTests() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_allof_reference.yaml"));
         TypeHandler.createInstance(response, false);
-        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(response.getPaths()
-                .get("/products").getGet(), response);
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
+                response.getPaths().get("/products").getGet(), response);
         assertEquals(functionReturnType.getReturnType().get().type().toString(), "Inline_response_200|error");
     }
 
@@ -72,8 +72,8 @@ public class AllOfResponsesTests {
 
     @Test(description = "Tests for the object response without property")
     public void getReturnTypeForMapSchema() throws IOException, BallerinaOpenApiException {
-        OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_wit" +
-                "h_properties_with_additional.yaml"));
+        OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_properties_with_additional" +
+                ".yaml"));
         TypeHandler.createInstance(response, false);
         Operation get = response.getPaths().get("/products").getGet();
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(get, response);

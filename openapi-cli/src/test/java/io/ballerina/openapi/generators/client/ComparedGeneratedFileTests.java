@@ -39,7 +39,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -64,9 +63,7 @@ public class ComparedGeneratedFileTests {
 
     @Test(description = "Generate Client for path parameter has parameter name as key word", enabled = false)
     public void generateClientForJira() throws IOException, BallerinaOpenApiException,
-            OASTypeGenException,
-            FormatterException, URISyntaxException, ClientException {
-//        Path definitionPath = RES_DIR.resolve("swagger/request_body_oneOf_scenarios.yaml");
+            OASTypeGenException, FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("openapi.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/jira_openapi.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -85,7 +82,7 @@ public class ComparedGeneratedFileTests {
     @Test(description = "Test openAPI definition to ballerina client source code generation",
             dataProvider = "fileProviderForFilesComparison")
     public void  openApiToBallerinaCodeGenTestForClient(String yamlFile, String expectedFile) throws IOException,
-            BallerinaOpenApiException, OASTypeGenException, FormatterException, ClientException {
+            OASTypeGenException, FormatterException, ClientException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/" + yamlFile);
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/" + expectedFile);
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
