@@ -121,13 +121,12 @@ public class PrimitiveDataTypeTests {
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
-                "schema/ballerina/schema_with_primitive.bal",
-                syntaxTree);
+                "schema/ballerina/schema_with_primitive.bal", syntaxTree);
     }
 
     @Test(description = "Test for unsupported primitive type additional properties")
-    public void generateSchemaForInvalidAdditionalProperty() throws IOException,
-            BallerinaOpenApiException, FormatterException {
+    public void generateSchemaForInvalidAdditionalProperty() throws IOException, BallerinaOpenApiException,
+            FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/additional_properties_invalid_format.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         TypeHandler.createInstance(openAPI, false);

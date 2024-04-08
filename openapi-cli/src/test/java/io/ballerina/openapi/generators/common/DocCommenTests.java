@@ -9,7 +9,7 @@ public class DocCommenTests {
 //        Assert.assertEquals("admin/api/ZZZ/customers/XXX/abc.json",
 //        GeneratorUtils.replaceContentWithinBrackets("admin/api/2021-10/customers/{customer_id}/abc.json", "XXX"));
 //        Assert.assertEquals("admin/api/ZZZ/customers/XXX/abc.json",
-//        GeneratorUtils.replaceContentWithinBrackets("admin/api/'2021\\-10/customers/[string customer_id]/abc\\.json",
-//        "XXX"));
+//        GeneratorUtils.replaceContentWithinBrackets(
+//        "admin/api/'2021\\-10/customers/[string customer_id]/abc\\.json", "XXX"));
     }
 }

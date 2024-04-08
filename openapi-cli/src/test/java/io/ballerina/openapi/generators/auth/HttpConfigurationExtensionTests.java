@@ -30,7 +30,6 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -43,7 +42,7 @@ public class HttpConfigurationExtensionTests {
     @Test(description = "Generate config record when http version is given")
     public void testGetConfigRecordGeneration() throws IOException, BallerinaOpenApiException, ClientException {
         AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
-                false, false, new ArrayList<>());
+                false, false);
         Path definitionPath = RES_DIR.resolve("scenarios/http_config_extension/petstore_with_http_version.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI);
@@ -59,7 +58,7 @@ public class HttpConfigurationExtensionTests {
     public void testGetConfigRecordGenerationForInvalidHTTPVersion() throws IOException, BallerinaOpenApiException,
             ClientException {
         AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
-                false, false, new ArrayList<>());
+                false, false);
         Path definitionPath = RES_DIR.resolve(
                 "scenarios/http_config_extension/petstore_with_invalid_http_version.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);

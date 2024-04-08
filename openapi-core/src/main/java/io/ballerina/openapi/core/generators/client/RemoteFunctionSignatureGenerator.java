@@ -58,9 +58,8 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                     try {
                         paramType = extractReferenceType(parameter.get$ref());
                     } catch (BallerinaOpenApiException e) {
-                        DiagnosticMessages diagnostic = OAS_CLIENT_100;
-                        ClientDiagnosticImp clientDiagnostic = new ClientDiagnosticImp(diagnostic.getCode(),
-                                diagnostic.getDescription(), parameter.get$ref());
+                        ClientDiagnosticImp clientDiagnostic = new ClientDiagnosticImp(OAS_CLIENT_100,
+                                parameter.get$ref());
                         diagnostics.add(clientDiagnostic);
                     }
                     parameter = openAPI.getComponents().getParameters().get(paramType);
@@ -73,10 +72,8 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                         PathParameterGenerator paramGenerator = new PathParameterGenerator(parameter, openAPI);
                         Optional<ParameterNode> param = paramGenerator.generateParameterNode();
                         if (param.isEmpty()) {
-                            //TODO: need to handle this
+                            diagnostics.addAll(paramGenerator.getDiagnostics());
                             return Optional.empty();
-//                            throw new FunctionSignatureGeneratorException("Error while generating path parameter
-//                            node");
                         }
                         // Path parameters are always required.
                         parameterList.add(param.get());
@@ -84,14 +81,11 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                         paramName.add(param.get().toString());
                         break;
                     case "query":
-                        QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(parameter,
-                                openAPI);
+                        QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(parameter, openAPI);
                         Optional<ParameterNode> queryParam = queryParameterGenerator.generateParameterNode();
                         if (queryParam.isEmpty()) {
-                            //TODO: need to handle this
+                            diagnostics.addAll(queryParameterGenerator.getDiagnostics());
                             return Optional.empty();
-//                            throw new FunctionSignatureGeneratorException("Error while generating query parameter
-//                            node");
                         }
 
                         paramName.add(queryParam.get().toString());
@@ -104,14 +98,11 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                         }
                         break;
                     case "header":
-                        HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator(parameter,
-                                openAPI);
+                        HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator(parameter, openAPI);
                         Optional<ParameterNode> headerParam = headerParameterGenerator.generateParameterNode();
                         if (headerParam.isEmpty()) {
-                            //TODO: need to handle this
+                            diagnostics.addAll(headerParameterGenerator.getDiagnostics());
                             return Optional.empty();
-//                            throw new FunctionSignatureGeneratorException("Error while generating query
-//                            parameter node");
                         }
                         paramName.add(headerParam.get().toString());
 
@@ -133,11 +124,8 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
             RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(operation.getRequestBody(), openAPI);
             Optional<ParameterNode> requestBody = requestBodyGenerator.generateParameterNode();
             if (requestBody.isEmpty()) {
-                //TODO: need to handle this
+                diagnostics.addAll(requestBodyGenerator.getDiagnostics());
                 return Optional.empty();
-//                            throw new FunctionSignatureGeneratorException("Error while generating
-//                            query parameter node");
-//                throw new FunctionSignatureGeneratorException("Error while generating request body node");
             }
             List<ParameterNode> rBheaderParameters = requestBodyGenerator.getHeaderParameters();
             parameterList.add(requestBody.get());
@@ -158,12 +146,11 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
             }
         }
 
-        //filter defaultable parameters
+        // filter defaultable parameters
         if (!defaultable.isEmpty()) {
             parameterList.addAll(defaultable);
         }
         // Remove the last comma
-        //check array out of bound error if parameter size is empty
         if (!parameterList.isEmpty()) {
             parameterList.remove(parameterList.size() - 1);
         }
@@ -172,13 +159,15 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
         // 3. return statements
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation, openAPI);
         Optional<ReturnTypeDescriptorNode> returnType = functionReturnType.getReturnType();
-        //TODO: need to handle this
-        //                            throw new FunctionSignatureGeneratorException("Error while generating query parameter node");
-        //            throw new FunctionSignatureGeneratorException("Return type is not found for the operation : " +
-        //                    operation.getOperationId());
-        return returnType.map(returnTypeDescriptorNode -> NodeFactory.createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN), parameterNodes,
+        if (returnType.isEmpty()) {
+            diagnostics.addAll(functionReturnType.getDiagnostics());
+            return Optional.empty();
+        }
+
+        return returnType.map(returnTypeDescriptorNode -> NodeFactory.createFunctionSignatureNode(
+                createToken(OPEN_PAREN_TOKEN), parameterNodes,
                 createToken(CLOSE_PAREN_TOKEN), returnTypeDescriptorNode));
-        //create function signature node
+
     }
 
     public List<ClientDiagnostic> getDiagnostics() {

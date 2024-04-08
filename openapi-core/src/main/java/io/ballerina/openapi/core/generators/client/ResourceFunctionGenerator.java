@@ -8,6 +8,7 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.exception.FunctionSignatureGeneratorException;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -35,7 +36,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RESOURCE_KEYWORD;
 public class ResourceFunctionGenerator implements FunctionGenerator {
     OpenAPI openAPI;
     List<ImportDeclarationNode> imports;
-    List<Diagnostic> diagnostics = new ArrayList<>();
+    List<ClientDiagnostic> diagnostics = new ArrayList<>();
     Map.Entry<PathItem.HttpMethod, Operation> operation;
     String path;
     AuthConfigGeneratorImp authConfigGeneratorImp;
@@ -88,7 +89,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
     }
 
     @Override
-    public List<Diagnostic> getDiagnostics() {
+    public List<ClientDiagnostic> getDiagnostics() {
         return diagnostics;
     }
 }

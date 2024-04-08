@@ -49,6 +49,7 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
             // Find a matching schema based on type name
             TypeDefinitionNode finalTypeDef = typeDef;
             if (schemas == null) {
+                updatedList.add(typeDef);
                 return;
             }
             Schema<?> schema = schemas.entrySet()
