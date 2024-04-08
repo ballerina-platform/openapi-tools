@@ -1,13 +1,5 @@
 import ballerina/constraint;
 
-public type IntegerObject record {
-    string name?;
-    @constraint:Int {maxValue: 2147483647}
-    int:Signed32 int32Content?;
-    @constraint:Int {minValue: 0}
-    int int64Content?;
-};
-
 public type StringObject record {
     string name?;
     @constraint:String {pattern: re `^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$`}
@@ -39,4 +31,12 @@ public type NumberObject record {
     float floatContent?;
     @constraint:Number {maxValue: 200}
     decimal doubleContent?;
+};
+
+public type IntegerObject record {
+    string name?;
+    @constraint:Int {maxValue: 2147483647}
+    int:Signed32 int32Content?;
+    @constraint:Int {minValue: 0}
+    int int64Content?;
 };
