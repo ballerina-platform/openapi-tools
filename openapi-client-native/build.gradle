@@ -71,8 +71,9 @@ spotbugsTest {
 def githubReleaseVersion = project.clientNativeVersion
 if (githubReleaseVersion.endsWith('-SNAPSHOT')) {
     def date = new Date()
-    def formattedDate = date.format('yyyyMMdd.HHmmss', TimeZone.getTimeZone('Asia/Kolkata'))
-    githubReleaseVersion = githubReleaseVersion.replace('-SNAPSHOT', "-${formattedDate}")
+    def formattedDate = date.format('yyyyMMdd-HHmmss', TimeZone.getTimeZone('Asia/Kolkata'))
+    def lastCommitId = 'git rev-parse --short HEAD'.execute().text.trim()
+    githubReleaseVersion = githubReleaseVersion.replace("-SNAPSHOT", "-${formattedDate}-${lastCommitId}")
 }
 
 publishing {
