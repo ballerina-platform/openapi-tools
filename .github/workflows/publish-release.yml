@@ -41,6 +41,8 @@ jobs:
           BALLERINA_CENTRAL_ACCESS_TOKEN: ${{ secrets.BALLERINA_CENTRAL_ACCESS_TOKEN }}
           packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
           packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
+          nexusUser: ${{ secrets.NEXUS_USERNAME }}
+          nexusPassword: ${{ secrets.NEXUS_PASSWORD }}
         run: |
           ./gradlew release -Prelease.useAutomaticVersion=true
           ./gradlew -Pversion=${VERSION} publish -x test -PpublishToCentral=true

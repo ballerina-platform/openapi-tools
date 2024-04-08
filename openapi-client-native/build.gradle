@@ -95,8 +95,8 @@ publishing {
                 url "https://maven.wso2.org/nexus/service/local/staging/deploy/maven2/"
             }
             credentials {
-                username System.getenv("NEXUS_USERNAME")
-                password System.getenv("NEXUS_PASSWORD")
+                username System.getenv("nexusUser")
+                password System.getenv("nexusPassword")
             }
         }
     }
