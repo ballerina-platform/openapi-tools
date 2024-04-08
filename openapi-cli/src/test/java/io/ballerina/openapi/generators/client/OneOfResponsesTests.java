@@ -18,9 +18,9 @@
 
 package io.ballerina.openapi.generators.client;
 
+import io.ballerina.openapi.core.generators.client.FunctionReturnTypeGeneratorImp;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.FunctionReturnTypeGeneratorImp;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -44,7 +44,8 @@ public class OneOfResponsesTests {
         TypeHandler.createInstance(openapi, false);
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
                 openapi.getPaths().get("/pet").getGet(), openapi);
-        Assert.assertEquals(functionReturnType.getReturnType().get().type().toString(), "Inline_response_2XX|error");
+        Assert.assertEquals(functionReturnType.getReturnType().get().type().toString(),
+                "Inline_response_2XX|error");
     }
 
 }

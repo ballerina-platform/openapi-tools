@@ -67,7 +67,8 @@ public class PrimitiveDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema01.bal", syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema01.bal",
+                syntaxTree);
     }
 
     @Test(description = "Generate multiple record")
@@ -83,7 +84,8 @@ public class PrimitiveDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema02.bal", syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema02.bal",
+                syntaxTree);
     }
 
     @Test(description = "Scenario for missing DataType")
@@ -118,12 +120,14 @@ public class PrimitiveDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema_with_primitive.bal",
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
+                "schema/ballerina/schema_with_primitive.bal",
                 syntaxTree);
     }
 
     @Test(description = "Test for unsupported primitive type additional properties")
-    public void generateSchemaForInvalidAdditionalProperty() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateSchemaForInvalidAdditionalProperty() throws IOException,
+            BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/additional_properties_invalid_format.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         TypeHandler.createInstance(openAPI, false);
@@ -141,7 +145,8 @@ public class PrimitiveDataTypeTests {
     }
 
     @Test(description = "Test for primitive types with formats")
-    public void generateSchemaForPrimitiveTypesWithUnsupportedFormats() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateSchemaForPrimitiveTypesWithUnsupportedFormats() throws IOException,
+            BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/invalid_formats.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         TypeHandler.createInstance(openAPI, false);

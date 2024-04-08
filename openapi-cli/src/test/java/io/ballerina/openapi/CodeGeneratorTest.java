@@ -241,7 +241,8 @@
 //        }
 //    }
 //
-//    @Test(description = "Test Ballerina types generation when nullable option is given in the cmd and definition both")
+//    @Test(description = "Test Ballerina types generation when nullable option is
+//    given in the cmd and definition both")
 //    public void generateTypesWithNullableFieldsAndGlobalNullableTrue() {
 //        String definitionPath = RES_DIR.resolve("petstore_nullable_false.yaml").toString();
 //        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
@@ -672,7 +673,8 @@
 //            expectedExceptions = BallerinaOpenApiException.class,
 //            expectedExceptionsMessageRegExp = "Provided OpenAPI contract version is not supported in the tool. " +
 //                    "Use OpenAPI specification version 2 or higher")
-//    public void testGenerationForUnsupportedOpenAPIVersion() throws IOException, BallerinaOpenApiException, OASTypeGenException,
+//    public void testGenerationForUnsupportedOpenAPIVersion() throws IOException, BallerinaOpenApiException,
+//    OASTypeGenException,
 //    FormatterException {
 //        String definitionPath = RES_DIR.resolve("petstore_swagger_1.2.json").toString();
 //        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();

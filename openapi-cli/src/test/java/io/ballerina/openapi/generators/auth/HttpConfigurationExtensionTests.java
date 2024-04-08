@@ -56,7 +56,8 @@ public class HttpConfigurationExtensionTests {
     }
 
     @Test(description = "Generate config record when invalid http version is given")
-    public void testGetConfigRecordGenerationForInvalidHTTPVersion() throws IOException, BallerinaOpenApiException, ClientException {
+    public void testGetConfigRecordGenerationForInvalidHTTPVersion() throws IOException, BallerinaOpenApiException,
+            ClientException {
         AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
                 false, false, new ArrayList<>());
         Path definitionPath = RES_DIR.resolve(

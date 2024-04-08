@@ -17,6 +17,7 @@
  */
 
 package io.ballerina.openapi.generators.schema;
+
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
@@ -42,8 +43,10 @@ public class ReferenceResolveTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
 
     @Test(description = "Tests with object type include reference")
-    public void testReferenceIncludeWithObjectType() throws IOException, BallerinaOpenApiException, FormatterException {
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/world_bank.yaml"), true);
+    public void testReferenceIncludeWithObjectType() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/world_bank.yaml"),
+                true);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -53,7 +56,8 @@ public class ReferenceResolveTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/world_bank.bal", syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/world_bank.bal",
+                syntaxTree);
     }
 
     @Test(description = "Test for object data type when absent reference and properties fields")
