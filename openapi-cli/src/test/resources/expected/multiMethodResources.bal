@@ -11,14 +11,14 @@ service / on ep0 {
     # + return - Successful
     resource function get user() returns json {
     }
-    # Put operation for the path /user
-    #
-    # + return - Successful
-    resource function put user() returns json {
-    }
     # Post operation for the path /user
     #
     # + return - Successful
     resource function post user() returns OkJson {
+    }
+    # Put operation for the path /user
+    #
+    # + return - Successful
+    resource function put user() returns json {
     }
 }
