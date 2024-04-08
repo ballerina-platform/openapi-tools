@@ -92,7 +92,6 @@ public class NullableFieldTests {
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/nullable_ref_array.bal",
                 syntaxTree);
-        // todo : failing due to doc issue
     }
 
     @Test(description = "Test nullable for primitive referenced type")

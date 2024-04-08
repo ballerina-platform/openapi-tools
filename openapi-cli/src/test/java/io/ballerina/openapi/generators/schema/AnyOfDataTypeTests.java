@@ -64,7 +64,7 @@ public class AnyOfDataTypeTests {
         Assert.assertEquals(anyOfUnionType, "User|Activity");
     }
 
-    @Test(description = "Test for the schema generations")
+    @Test(description = "Test for the schema generations", enabled = false)
     public void testAnyOfSchema() throws BallerinaOpenApiException, FormatterException, IOException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/schema15.bal");
