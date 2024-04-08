@@ -26,6 +26,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,6 +58,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
     HashMap<String, TypeDefinitionNode> typeDefinitions;
     boolean isConstraint = false;
     List<Diagnostic> diagnostics = new ArrayList<>();
+    public static final PrintStream OUT_STREAM = System.err;
 
     public ConstraintGeneratorImp(OpenAPI openAPI, HashMap<String, TypeDefinitionNode> typeDefinitions) {
         this.openAPI = openAPI;
@@ -534,11 +536,11 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
             } catch (BError err) {
                 //TODO
                 //This handle a case which Ballerina doesn't support
-//                OUT_STREAM.printf("WARNING: skipped generation for unsupported pattern in ballerina: %s %n", value);
+                OUT_STREAM.printf("WARNING: skipped generation for unsupported pattern in ballerina: %s %n", value);
             } catch (Exception e) {
                 // This try catch is to check whether the pattern is valid or not. Swagger parser doesn't provide any
                 // error for invalid patterns. Therefore, we need to check it within code. (ex: syntax errors)
-//                OUT_STREAM.printf("WARNING: skipped generation for non-ECMA flavoured pattern: %s %n", value);
+                OUT_STREAM.printf("WARNING: skipped generation for non-ECMA flavoured pattern: %s %n", value);
             }
         }
         return fields;

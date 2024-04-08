@@ -32,7 +32,6 @@ public class OASServiceMetadata {
     private final boolean nullable;
     private final boolean generateServiceType;
     private final boolean generateWithoutDataBinding;
-    private final boolean generateOnlyServiceType;
     private final String licenseHeader;
     private final String srcPackage;
     private final String srcFile;
@@ -43,7 +42,6 @@ public class OASServiceMetadata {
         this.nullable = serviceMetadataBuilder.nullable;
         this.generateServiceType = serviceMetadataBuilder.generateServiceType;
         this.generateWithoutDataBinding = serviceMetadataBuilder.generateWithoutDataBinding;
-        this.generateOnlyServiceType = false;
         this.licenseHeader = serviceMetadataBuilder.licenseHeader;
         this.srcPackage = serviceMetadataBuilder.srcPackage;
         this.srcFile = serviceMetadataBuilder.srcFile;
@@ -67,10 +65,6 @@ public class OASServiceMetadata {
 
     public boolean generateWithoutDataBinding() {
         return generateWithoutDataBinding;
-    }
-
-    public boolean isGenerateOnlyServiceType() {
-        return generateOnlyServiceType;
     }
 
     public String getLicenseHeader() {
