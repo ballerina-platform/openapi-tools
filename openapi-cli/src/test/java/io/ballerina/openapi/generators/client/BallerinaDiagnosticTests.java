@@ -20,11 +20,11 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.generators.common.GeneratorTestUtils;
@@ -74,7 +74,8 @@ public class BallerinaDiagnosticTests {
                 .withResourceMode(false).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -100,7 +101,8 @@ public class BallerinaDiagnosticTests {
                 .withResourceMode(false).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -127,7 +129,8 @@ public class BallerinaDiagnosticTests {
                 .withResourceMode(false).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().
+                getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -154,7 +157,8 @@ public class BallerinaDiagnosticTests {
                 .withResourceMode(false).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }

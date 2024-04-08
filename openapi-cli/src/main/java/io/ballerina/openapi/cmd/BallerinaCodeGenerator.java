@@ -30,18 +30,12 @@ import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
-import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.service.ServiceGenerationHandler;
-import io.ballerina.openapi.core.service.ServiceGenerator;
 import io.ballerina.openapi.core.service.ServiceTypeGenerator;
-import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnostic;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
 import io.ballerina.tools.diagnostics.Diagnostic;
-import io.ballerina.tools.diagnostics.DiagnosticInfo;
-import io.ballerina.tools.diagnostics.DiagnosticProperty;
-import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -220,7 +214,13 @@ public class BallerinaCodeGenerator {
                 .collect(Collectors.toList());
         //display diagnostics- client
         List<ClientDiagnostic> clientDiagnostic = clientGenerator.getDiagnostics();
-//        diagnostics.addAll(clientDiagnostic);
+
+        if (!clientDiagnostic.isEmpty()) {
+            outStream.println("error occurred while generating the client: ");
+            for (ClientDiagnostic diagnostic : clientDiagnostic) {
+                outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
+            }
+        }
         writeGeneratedSources(newGenFiles, srcPath, implPath, GEN_BOTH);
     }
 
@@ -253,7 +253,7 @@ public class BallerinaCodeGenerator {
         try {
             genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource);
         } catch (ClientException e) {
-            //ignore
+            outStream.println("error occurred while generating the client: " + e.getMessage());
         }
         if (!genFiles.isEmpty()) {
             writeGeneratedSources(genFiles, srcPath, implPath, GEN_CLIENT);
@@ -370,7 +370,7 @@ public class BallerinaCodeGenerator {
      * @throws IOException when code generation with specified templates fails
      */
     private List<GenSrcFile> generateClientFiles(Path openAPI, Filter filter, boolean nullable, boolean isResource)
-            throws IOException, BallerinaOpenApiException, FormatterException, OASTypeGenException, ClientException {
+            throws IOException, BallerinaOpenApiException, FormatterException, ClientException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_CLIENT_PKG;
         }
@@ -423,7 +423,8 @@ public class BallerinaCodeGenerator {
         String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
         if (filter.getTags().size() > 0) {
             // Remove unused records and enums when generating the client by the tags given.
-            schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent, null);
+            schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent,
+                    null);
         }
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,

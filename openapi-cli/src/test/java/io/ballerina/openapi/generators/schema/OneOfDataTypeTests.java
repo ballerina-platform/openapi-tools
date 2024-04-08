@@ -106,7 +106,8 @@ public class OneOfDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/oneOf.bal", syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/oneOf.bal",
+                syntaxTree);
     }
 
     @Test(description = "Tests record generation for oneOf schemas with inline object schemas")

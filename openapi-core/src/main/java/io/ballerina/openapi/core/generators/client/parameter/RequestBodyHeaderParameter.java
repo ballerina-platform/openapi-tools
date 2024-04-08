@@ -1,16 +1,14 @@
 package io.ballerina.openapi.core.generators.client.parameter;
 
-import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.NilLiteralNode;
-import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
+import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.swagger.v3.oas.models.headers.Header;
-import io.swagger.v3.oas.models.media.Encoding;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
@@ -18,10 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createLiteralValueToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultableParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createNilLiteralNode;
@@ -50,6 +46,9 @@ public class RequestBodyHeaderParameter implements ParameterGenerator {
         Optional<TypeDescriptorNode> typeNodeResult = TypeHandler.getInstance()
                 .getTypeNodeFromOASSchema(schema, true);
         if (typeNodeResult.isEmpty()) {
+            ClientDiagnosticImp diagnosticImp = new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_108,
+                    header.getKey());
+            diagnostics.add(diagnosticImp);
             return Optional.empty();
         }
         if (required) {

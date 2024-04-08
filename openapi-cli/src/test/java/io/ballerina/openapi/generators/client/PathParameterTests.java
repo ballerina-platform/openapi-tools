@@ -20,17 +20,14 @@ package io.ballerina.openapi.generators.client;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.model.Filter;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.Formatter;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -52,7 +49,7 @@ public class PathParameterTests {
     Filter filter = new Filter(list1, list2);
 
     @Test(description = "Generate Client for path parameter has parameter name as key word - unit tests for method")
-    public void generatePathWithPathParameterTests() throws IOException, BallerinaOpenApiException, OASTypeGenException, ClientException, FormatterException {
+    public void generatePathWithPathParameterTests() throws IOException, BallerinaOpenApiException, ClientException {
         // "/v1/v2"), "/v1/v2"
         // "/v1/{version}/v2/{name}", "/v1/${'version}/v2/${name}"
         // "/v1/{version}/v2/{limit}", "/v1/${'version}/v2/${'limit}"
@@ -63,70 +60,65 @@ public class PathParameterTests {
         Path expectedPath = RESDIR.resolve("ballerina/path_parameter_valid.bal");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        System.out.println(Formatter.format(syntaxTree));
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "Generate Client for path parameter with referenced schema")
-    public void generatePathParamWithReferencedSchema() throws IOException, BallerinaOpenApiException, OASTypeGenException, ClientException, FormatterException {
+    public void generatePathParamWithReferencedSchema() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/path_param_with_ref_schemas.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/path_param_with_ref_schema.bal");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        System.out.println(Formatter.format(syntaxTree));
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "Generate Client while handling special characters in path parameter name")
-    public void generateFormattedPathParamName() throws IOException, BallerinaOpenApiException, OASTypeGenException, ClientException, FormatterException {
+    public void generateFormattedPathParamName() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/path_parameter_special_name.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/path_parameter_with_special_name.bal");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        System.out.println(Formatter.format(syntaxTree));
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "Generate Client with duplicated path parameter name in the path")
-    public void generateFormattedDuplicatedPathParamName() throws IOException, BallerinaOpenApiException, OASTypeGenException, ClientException, FormatterException {
+    public void generateFormattedDuplicatedPathParamName() throws IOException, BallerinaOpenApiException,
+            ClientException {
         Path definitionPath = RESDIR.resolve("swagger/path_param_duplicated_name.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/path_param_duplicated_name.bal");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        System.out.println(Formatter.format(syntaxTree));
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "When path parameter has given unmatch data type in ballerina",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Invalid path parameter data type for the parameter: .*", enabled = false)
-    public void testInvalidPathParameterType() throws IOException, BallerinaOpenApiException, OASTypeGenException, ClientException, FormatterException {
+    public void testInvalidPathParameterType() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/path_parameter_invalid.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        System.out.println(Formatter.format(syntaxTree));
     }
 
     @Test(description = "When given data type not match with ballerina data type",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Unsupported OAS data type .*", enabled = false)
-    public void testInvalidDataType() throws IOException, BallerinaOpenApiException, OASTypeGenException, ClientException, FormatterException {
+    public void testInvalidDataType() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/path_parameter_invalid02.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        System.out.println(Formatter.format(syntaxTree));
     }
 
     @Test (description = "Generate Client for path parameter with anyOf, oneOf type")
-    public void unionPathParameter() throws IOException, BallerinaOpenApiException, ClientException,
-            FormatterException {
+    public void unionPathParameter() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/union_path_parameter.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/union_path_parameter.bal");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
         Path expectedTypePath = RESDIR.resolve("ballerina/union_path_types.bal");
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -138,25 +130,23 @@ public class PathParameterTests {
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Path parameter: 'id' is invalid. " +
                     "Ballerina does not support object type path parameters.", enabled = false)
-    public void allOfPathParameter() throws IOException, BallerinaOpenApiException, OASTypeGenException, ClientException, FormatterException {
+    public void allOfPathParameter() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/allOf_path_parameter.yaml");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        System.out.println(Formatter.format(syntaxTree));
-//        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test (description = "Generate Client for path parameter with integer int32 and int64 types")
-    public void testIntegerPathParameters() throws IOException, BallerinaOpenApiException, OASTypeGenException, ClientException, FormatterException {
+    public void testIntegerPathParameters() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/integer_signed32_path_parameter.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/integer_signed32_path_parameter.bal");
         BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        System.out.println(Formatter.format(syntaxTree));
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
-    private BallerinaClientGenerator getBallerinaClientGenerator(Path definitionPath) throws IOException, BallerinaOpenApiException {
+    private BallerinaClientGenerator getBallerinaClientGenerator(Path definitionPath) throws IOException,
+            BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         TypeHandler.createInstance(openAPI, true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();

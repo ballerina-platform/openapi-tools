@@ -53,7 +53,8 @@ public class ReferenceResolveTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/world_bank.bal", syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/world_bank.bal",
+                syntaxTree);
     }
 
     @Test(description = "Test for object data type when absent reference and properties fields")
@@ -127,7 +128,8 @@ public class ReferenceResolveTests {
         // todo : failing due to doc issue
     }
 
-    @Test(description = "Test for type generation for request body with reference") // todo : does not generated some referred types
+    // todo : does not generated some referred types
+    @Test(description = "Test for type generation for request body with reference")
     public void testRequestBodyReferences() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/request_body_with_ref.yaml"), true);

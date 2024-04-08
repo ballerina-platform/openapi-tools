@@ -20,12 +20,12 @@ package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -60,7 +60,7 @@ public class ServiceDiagnosticTests {
     @Test(description = "Test for compilation errors in OpenAPI definition to ballerina service skeleton generation",
             dataProvider = "singleFileProviderForDiagnosticCheck")
     public void checkDiagnosticIssues(String yamlFile) throws IOException, BallerinaOpenApiException,
-            FormatterException, OASTypeGenException {
+            FormatterException {
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

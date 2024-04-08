@@ -19,11 +19,11 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
-import io.ballerina.openapi.core.generators.common.TypeHandler;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.core.generators.client.FunctionBodyGeneratorImp;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -137,7 +137,8 @@ public class FunctionBodyNodeTests {
                         "        return response;}"},
                 {"client/swagger/map_schema_response.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +
-                        "        record{|Inline_response_map200...;|} response = check self.clientEp->post(resourcePath, request);\n" +
+                        "        record{|Inline_response_map200...;|} response = check self.clientEp->post(" +
+                        "resourcePath, request);\n" +
                         "        return response;}"},
                 {"client/swagger/array_response_pdf.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +

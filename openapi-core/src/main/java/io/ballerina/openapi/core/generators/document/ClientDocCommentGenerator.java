@@ -18,6 +18,7 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -39,6 +40,7 @@ import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
@@ -90,14 +92,15 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
 
                         //remote : operationId
                         if (isResource) {
-                            sortKey = funcDef.functionSignature().toString();
+                            sortKey = funcDef.toSourceCode();
                             storeMembers.add(sortKey);
                             NodeList<Node> nodes = funcDef.relativeResourcePath();
                             String path = "";
                             for (Node node: nodes) {
                                 path = path + node.toString().replace("\"", "");
                             }
-                            String key = replaceContentWithinBrackets(path, "XXX") + "_" + funcDef.functionName().text();
+                            String key = replaceContentWithinBrackets(path, "XXX") + "_" +
+                                    funcDef.functionName().text();
                             funcDef = updateDocCommentsForFunctionNode(operationDetailsMap, funcDef, key);
                         } else {
                             sortKey = funcDef.functionName().text();
@@ -184,9 +187,22 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                 HashMap<String, ParameterNode> collection = getParameterNodeHashMap(parameters);
                 //todo parameter reference
                 updateParameterNodes(docs, operation, updatedParamsRequired, updatedParamsDefault, collection);
+                if (collection.size() > 0) {
+                    collection.forEach((keyParam, value) -> {
+                        if (value instanceof RequiredParameterNode reParam) {
+                            updatedParamsRequired.add(reParam);
+                            updatedParamsRequired.add(createToken(SyntaxKind.COMMA_TOKEN));
+                        } else if (value instanceof DefaultableParameterNode deParam) {
+                            updatedParamsDefault.add(deParam);
+                            updatedParamsDefault.add(createToken(SyntaxKind.COMMA_TOKEN));
+                        }
+                    });
+                }
                 updatedParamsRequired.addAll(updatedParamsDefault);
                 if (!updatedParamsRequired.isEmpty()) {
-                    updatedParamsRequired.remove(updatedParamsRequired.size() - 1);
+                    if (updatedParamsRequired.get(updatedParamsRequired.size() - 1) instanceof Token) {
+                        updatedParamsRequired.remove(updatedParamsRequired.size() - 1);
+                    }
                     functionSignatureNode = functionSignatureNode.modify(
                             functionSignatureNode.openParenToken(),
                             createSeparatedNodeList(updatedParamsRequired),
@@ -197,7 +213,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
             }
             RequestBody requestBody = operation.getRequestBody();
             if (requestBody != null) {
-                RequestBodyDoc(docs, requestBody);
+                addRequestBodyDoc(docs, requestBody);
             }
             //todo response
             if (operation.getResponses() != null) {
@@ -242,7 +258,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
         return funcDef;
     }
 
-    private void RequestBodyDoc(List<Node> docs, RequestBody requestBody) {
+    private void addRequestBodyDoc(List<Node> docs, RequestBody requestBody) {
         if (requestBody.get$ref() != null) {
             try {
                 requestBody = openAPI.getComponents().getRequestBodies().get(
@@ -290,6 +306,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                 ParameterNode parameterNode = collection.get(parameterName);
                 updatedAnnotationInParameterNode(updatedParamsRequired, updatedParamsDefault,
                         paramAnnot, parameterNode);
+                collection.remove(parameterName);
             }
             if (parameter.getDescription() != null) {
                 parameterDescription = parameter.getDescription();

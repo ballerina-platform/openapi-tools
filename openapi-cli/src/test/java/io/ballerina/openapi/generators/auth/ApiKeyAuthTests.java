@@ -35,7 +35,6 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -73,7 +72,8 @@ public class ApiKeyAuthTests {
 
     @Test(description = "Generate ConnectionConfig record for openweathermap api",
             dataProvider = "apiKeyAuthIOProvider")
-    public void testGetApiKeysConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException, ClientException {
+    public void testGetApiKeysConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException,
+            ClientException {
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/" + yamlFile);
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI);
@@ -123,7 +123,8 @@ public class ApiKeyAuthTests {
     }
 
     @Test(description = "Test the generation of api key documentation comment when multiple api keys defined")
-    public void testGetApiKeyDescriptionForMultipleApiKeys () throws IOException, BallerinaOpenApiException, ClientException {
+    public void testGetApiKeyDescriptionForMultipleApiKeys () throws IOException, BallerinaOpenApiException,
+            ClientException {
         AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
                 true, false);
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/multiple_apikey_descriptions.yaml");

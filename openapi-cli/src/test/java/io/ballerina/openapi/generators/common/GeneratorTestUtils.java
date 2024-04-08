@@ -22,12 +22,12 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.cmd.CmdUtils;
-import io.ballerina.openapi.core.generators.common.GeneratorUtils;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
@@ -134,7 +134,8 @@ public class GeneratorTestUtils {
         if (hasErrors) {
             File f = new File("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i);
             f.mkdir();
-            FileWriter myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i
+            FileWriter myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" +
+                    yamlFileName + i
                     + "/servicefile" + i + ".bal");
             myWriter.write(serviceContent);
             myWriter.close();
@@ -143,7 +144,8 @@ public class GeneratorTestUtils {
                     "/schemafile" + i + ".bal");
             myWriter.write(schemaContent);
             myWriter.close();
-            myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i + "/Ballerina.toml");
+            myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" +
+                    yamlFileName + i + "/Ballerina.toml");
             myWriter.write("");
             myWriter.close();
             i++;
@@ -239,7 +241,8 @@ public class GeneratorTestUtils {
 
         myWriter.write(expectedServiceContent);
         myWriter.close();
-        myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i + "/Ballerina.toml");
+        myWriter = new FileWriter("/home/dilan/Documents/tempopenapigenfiles/folder" + yamlFileName + i +
+                "/Ballerina.toml");
         myWriter.write("");
         myWriter.close();
         i++;

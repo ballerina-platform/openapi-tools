@@ -30,7 +30,6 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -56,7 +55,8 @@ public class HttpConfigurationExtensionTests {
     }
 
     @Test(description = "Generate config record when invalid http version is given")
-    public void testGetConfigRecordGenerationForInvalidHTTPVersion() throws IOException, BallerinaOpenApiException, ClientException {
+    public void testGetConfigRecordGenerationForInvalidHTTPVersion() throws IOException, BallerinaOpenApiException,
+            ClientException {
         AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
                 false, false);
         Path definitionPath = RES_DIR.resolve(

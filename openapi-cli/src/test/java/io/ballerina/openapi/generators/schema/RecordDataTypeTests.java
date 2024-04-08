@@ -55,7 +55,8 @@ public class RecordDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema05.bal", syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema05.bal",
+                syntaxTree);
         // todo : failing due to doc issue
     }
 
@@ -72,7 +73,8 @@ public class RecordDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema07.bal", syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema07.bal",
+                syntaxTree);
     }
 
     @Test(description = "Generate empty record when no properties are given")
@@ -88,6 +90,7 @@ public class RecordDataTypeTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/empty_record.bal", syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/empty_record.bal",
+                syntaxTree);
     }
 }

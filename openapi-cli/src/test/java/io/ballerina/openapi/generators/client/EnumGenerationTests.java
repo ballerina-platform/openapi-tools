@@ -20,19 +20,18 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -78,7 +77,8 @@ public class EnumGenerationTests {
                 .withResourceMode(false).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -96,8 +96,8 @@ public class EnumGenerationTests {
             "Use case 03 : Nullable enum in header parameter" +
             "Use case 04 : Nullable enum in reusable parameter" +
             "Use case 05 : Nullable enum in parameter with referenced schema")
-    public void generateRemoteParametersWithNullableEnums() throws IOException, BallerinaOpenApiException, OASTypeGenException,
-            FormatterException, ClientException {
+    public void generateRemoteParametersWithNullableEnums() throws IOException, BallerinaOpenApiException,
+            OASTypeGenException, FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_nullable_enums.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/parameters_with_nullable_enums.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -109,7 +109,8 @@ public class EnumGenerationTests {
                 .withResourceMode(false).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -127,8 +128,8 @@ public class EnumGenerationTests {
             "Use case 03 : Enum in header parameter" +
             "Use case 04 : Enum in reusable parameter" +
             "Use case 05 : Enum in parameter with referenced schema")
-    public void generateResourceParametersWithEnums() throws IOException, BallerinaOpenApiException, OASTypeGenException,
-            FormatterException, ClientException {
+    public void generateResourceParametersWithEnums() throws IOException, BallerinaOpenApiException,
+            OASTypeGenException, FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_enum.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/paramters_with_enum_resource.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -140,7 +141,8 @@ public class EnumGenerationTests {
                 .withResourceMode(true).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -158,8 +160,8 @@ public class EnumGenerationTests {
             "Use case 03 : Nullable enum in header parameter" +
             "Use case 04 : Nullable enum in reusable parameter" +
             "Use case 05 : Nullable enum in parameter with referenced schema")
-    public void generateResourceParametersWithNullableEnums() throws IOException, BallerinaOpenApiException, OASTypeGenException,
-            FormatterException, ClientException {
+    public void generateResourceParametersWithNullableEnums() throws IOException, BallerinaOpenApiException,
+            OASTypeGenException, FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_nullable_enums.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/parameters_with_nullable_enums_resource.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -171,7 +173,8 @@ public class EnumGenerationTests {
                 .withResourceMode(true).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
@@ -179,7 +182,6 @@ public class EnumGenerationTests {
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, schemaSyntaxTree, ballerinaClientGenerator);
         boolean hasErrors = diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
-        System.out.println(Formatter.format(syntaxTree));
         Assert.assertFalse(hasErrors);
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }

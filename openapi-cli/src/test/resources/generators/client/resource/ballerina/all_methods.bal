@@ -37,16 +37,6 @@ public isolated client class Client {
         self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
         return;
     }
-    # Update a pet
-    #
-    # + return - Null response
-    resource isolated function put pets() returns error? {
-        string resourcePath = string `/pets`;
-        map<anydata> queryParam = {"appid1": self.apiKeyConfig.appid1, "appid2": self.apiKeyConfig.appid2};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        http:Request request = new;
-        return self.clientEp->put(resourcePath, request);
-    }
     # Delete a pet
     #
     # + return - Ok response
@@ -76,5 +66,15 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
         return self.clientEp->post(resourcePath, request);
+    }
+    # Update a pet
+    #
+    # + return - Null response
+    resource isolated function put pets() returns error? {
+        string resourcePath = string `/pets`;
+        map<anydata> queryParam = {"appid1": self.apiKeyConfig.appid1, "appid2": self.apiKeyConfig.appid2};
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        http:Request request = new;
+        return self.clientEp->put(resourcePath, request);
     }
 }

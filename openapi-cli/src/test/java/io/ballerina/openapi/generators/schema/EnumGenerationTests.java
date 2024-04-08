@@ -94,8 +94,8 @@ public class EnumGenerationTests {
                 .build();
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema_with_nullable_enums.bal",
-                syntaxTree);
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
+                "schema/ballerina/schema_with_nullable_enums.bal", syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
         assertTrue(diagnostics.isEmpty());
     }
