@@ -468,7 +468,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             cmd.execute();
         } catch (BLauncherException e) {
         }
-        Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema.bal"));
+        Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema_2.bal"));
         String expectedSchemaContent = "";
         try (Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile)) {
             expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));

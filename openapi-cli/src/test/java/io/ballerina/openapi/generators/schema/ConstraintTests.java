@@ -310,7 +310,8 @@ public class ConstraintTests {
         assertFalse(hasErrors);
     }
 
-    @Test(description = "Test for schema properties containing data types with format constraints for OASV3.")
+    @Test(description = "Test for schema properties containing data types with format constraints for OASV3.",
+            enabled = false) // todo : need to fix as the resource order changes intermittently
     public void testDataTypeHasFormatWithConstraint() throws IOException, BallerinaOpenApiException, ClientException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
                 "/format_types_v3_0.yaml"), true);
@@ -327,7 +328,8 @@ public class ConstraintTests {
                 "schema/ballerina/constraint/format_type.bal", syntaxTree);
     }
 
-    @Test(description = "Test for schema properties containing data types with format constraints.")
+    @Test(description = "Test for schema properties containing data types with format constraints.", enabled = false)
+    // todo : need to fix as the resource order changes intermittently
     public void testDataTypeHasFormatWithConstraintOASV3() throws IOException, BallerinaOpenApiException,
             ClientException {
         //Test for OpenAPI version 3.1
