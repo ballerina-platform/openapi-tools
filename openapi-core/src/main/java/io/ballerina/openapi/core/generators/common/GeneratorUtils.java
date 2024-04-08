@@ -1302,6 +1302,8 @@ public class GeneratorUtils {
             }
         } else {
             diagnosticList.add(new CommonDiagnostic(OAS_COMMON_101));
+            return TypeHandler.getInstance().createTypeInclusionRecord(code, null,
+                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
         }
         TypeDescriptorNode typeDescriptorNode = getUnionTypeDescriptorNodeFromTypeDescNodes(generatedTypes);
         return TypeHandler.getInstance().createTypeInclusionRecord(code, typeDescriptorNode,
@@ -1400,6 +1402,9 @@ public class GeneratorUtils {
 
     public static TypeDescriptorNode getUnionTypeDescriptorNodeFromTypeDescNodes(HashMap<String, TypeDescriptorNode>
                                                                                          typeDescNodes) {
+        if (typeDescNodes.isEmpty()) {
+            return getSimpleNameReferenceNode(GeneratorConstants.ANYDATA);
+        }
         List<TypeDescriptorNode> qualifiedNodeList = typeDescNodes.values().stream().toList();
         TypeDescriptorNode unionTypeDescriptorNode = qualifiedNodeList.get(0);
         for (int i = 1; i < qualifiedNodeList.size(); i++) {

@@ -31,16 +31,11 @@ import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.core.service.ServiceDeclarationGenerator;
-import io.ballerina.openapi.core.service.ServiceGenerationHandler;
-import io.ballerina.openapi.core.service.ServiceGenerator;
-import io.ballerina.openapi.core.service.ServiceTypeGenerator;
-import io.ballerina.openapi.core.service.diagnostic.ServiceDiagnostic;
-import io.ballerina.openapi.core.service.model.OASServiceMetadata;
+import io.ballerina.openapi.core.generators.service.ServiceDeclarationGenerator;
+import io.ballerina.openapi.core.generators.service.ServiceGenerationHandler;
+import io.ballerina.openapi.core.generators.service.ServiceTypeGenerator;
+import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.tools.diagnostics.Diagnostic;
-import io.ballerina.tools.diagnostics.DiagnosticInfo;
-import io.ballerina.tools.diagnostics.DiagnosticProperty;
-import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -275,7 +270,9 @@ public class BallerinaCodeGenerator {
         if (genFiles.isEmpty()) {
             return;
         }
-        diagnostics.forEach(outStream::println);
+        diagnostics.forEach(diagnostic -> {
+            outStream.println(String.format("%s: $s", diagnostic.diagnosticInfo().severity(), diagnostic.message()));
+        });
         writeGeneratedSources(genFiles, srcPath, implPath, GEN_SERVICE);
     }
 
