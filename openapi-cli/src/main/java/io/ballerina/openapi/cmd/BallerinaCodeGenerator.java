@@ -252,11 +252,11 @@ public class BallerinaCodeGenerator {
         List<GenSrcFile> genFiles = null;
         try {
             genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource);
+            if (!genFiles.isEmpty()) {
+                writeGeneratedSources(genFiles, srcPath, implPath, GEN_CLIENT);
+            }
         } catch (ClientException e) {
             outStream.println("error occurred while generating the client: " + e.getMessage());
-        }
-        if (!genFiles.isEmpty()) {
-            writeGeneratedSources(genFiles, srcPath, implPath, GEN_CLIENT);
         }
     }
 
