@@ -38,6 +38,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
@@ -130,8 +131,9 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
     }
 
     private String getNativeMethodName() {
-        return operation.getValue().getParameters().stream().anyMatch(p -> p.getIn().equals("path")) ? "invokeResource"
-                : "invokeResourceWithoutPath";
+        return Objects.nonNull(operation.getValue().getParameters()) &&
+                operation.getValue().getParameters().stream().anyMatch(p -> p.getIn().equals("path"))
+                ? "invokeResource" : "invokeResourceWithoutPath";
     }
 
     @Override
