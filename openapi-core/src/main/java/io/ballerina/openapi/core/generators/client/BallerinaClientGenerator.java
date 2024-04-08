@@ -48,6 +48,7 @@ import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
@@ -134,12 +135,12 @@ public class BallerinaClientGenerator {
     private final List<String> remoteFunctionNameList;
     private final AuthConfigGeneratorImp authConfigGeneratorImp;
     private final boolean resourceMode;
-    private final List<Diagnostic> diagnostics = new ArrayList<>();
+    private final List<ClientDiagnostic> diagnostics = new ArrayList<>();
 
     /**
      * Return a Diagnostic list.
      */
-    public List<Diagnostic> getDiagnostics() {
+    public List<ClientDiagnostic> getDiagnostics() {
         return diagnostics;
     }
 
@@ -174,7 +175,7 @@ public class BallerinaClientGenerator {
         this.openAPI = oasClientConfig.getOpenAPI();
         this.ballerinaUtilGenerator = new BallerinaUtilGenerator();
         this.remoteFunctionNameList = new ArrayList<>();
-        this.authConfigGeneratorImp = new AuthConfigGeneratorImp(false, false, diagnostics);
+        this.authConfigGeneratorImp = new AuthConfigGeneratorImp(false, false);
         this.resourceMode = oasClientConfig.isResourceMode();
     }
 
@@ -411,11 +412,13 @@ public class BallerinaClientGenerator {
      */
     private FunctionSignatureNode getInitFunctionSignatureNode() {
         List<ParameterNode> parameterNodes  = new ArrayList<>();
-        ServerURLGeneratorImp serverURLGeneratorImp = new ServerURLGeneratorImp(openAPI.getServers(), diagnostics);
+        ServerURLGeneratorImp serverURLGeneratorImp = new ServerURLGeneratorImp(openAPI.getServers());
         ParameterNode serverURLNode = serverURLGeneratorImp.generateServerURL();
+        diagnostics.addAll(serverURLGeneratorImp.getDiagnostics());
         parameterNodes.add(serverURLNode);
         // get auth config details
         List<ParameterNode> configParams = authConfigGeneratorImp.getConfigParamForClassInit();
+        diagnostics.addAll(authConfigGeneratorImp.getDiagnostics());
         parameterNodes.addAll(configParams);
         LinkedHashSet<Node> orderedParam = sortParameters(parameterNodes);
         SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(orderedParam);
@@ -446,12 +449,10 @@ public class BallerinaClientGenerator {
                 String paramName = requiredParameterNode.paramName().get().toString();
                 requiredParamNames.add(paramName);
                 requiredParams.put(paramName, requiredParameterNode);
-//                requiredParams.add(createToken(COMMA_TOKEN));
             } else if (parameter instanceof DefaultableParameterNode defaultableParameterNode) {
                 String paramName = defaultableParameterNode.paramName().get().toString();
                 defaultParams.put(paramName, defaultableParameterNode);
                 defaultParamNames.add(paramName);
-//                defaultParams.add(createToken(COMMA_TOKEN));
             }
         }
         List<String> sortedRequiredParamNames = ascendingOrder(requiredParamNames);
@@ -477,12 +478,8 @@ public class BallerinaClientGenerator {
     }
 
     public static List<String> ascendingOrder(List<String> inputList) {
-        // Create a new ArrayList to avoid modifying the original list
         List<String> sortedList = new ArrayList<>(inputList);
-
-        // Sort the list in ascending order
         Collections.sort(sortedList);
-
         return sortedList;
     }
 
@@ -505,7 +502,6 @@ public class BallerinaClientGenerator {
                 }
             }
         }
-        //todo: setInitDocComment() pass the references
         docs.addAll(DocCommentsGeneratorUtil.createAPIDescriptionDoc(clientInitDocComment, true));
         if (authConfigGeneratorImp.isApiKey() && !authConfigGeneratorImp.isHttpOROAuth()) {
             MarkdownParameterDocumentationLineNode apiKeyConfig = DocCommentsGeneratorUtil.createAPIParamDoc(
@@ -513,14 +509,15 @@ public class BallerinaClientGenerator {
             docs.add(apiKeyConfig);
         }
         // Create method description
-        MarkdownParameterDocumentationLineNode clientConfig = DocCommentsGeneratorUtil.createAPIParamDoc("config",
-                "The configurations to be used when initializing the `connector`");
+        MarkdownParameterDocumentationLineNode clientConfig = DocCommentsGeneratorUtil.
+                createAPIParamDoc("config",
+                        "The configurations to be used when initializing the `connector`");
         docs.add(clientConfig);
-        MarkdownParameterDocumentationLineNode serviceUrlAPI = DocCommentsGeneratorUtil.createAPIParamDoc("serviceUrl",
-                "URL of the target service");
+        MarkdownParameterDocumentationLineNode serviceUrlAPI = DocCommentsGeneratorUtil.createAPIParamDoc(
+                "serviceUrl", "URL of the target service");
         docs.add(serviceUrlAPI);
-        MarkdownParameterDocumentationLineNode returnDoc = DocCommentsGeneratorUtil.createAPIParamDoc("return",
-                "An error if connector initialization failed");
+        MarkdownParameterDocumentationLineNode returnDoc = DocCommentsGeneratorUtil.createAPIParamDoc(
+                "return", "An error if connector initialization failed");
         docs.add(returnDoc);
         MarkdownDocumentationNode clientInitDoc = createMarkdownDocumentationNode(createNodeList(docs));
         return createMetadataNode(clientInitDoc, createEmptyNodeList());
@@ -558,13 +555,13 @@ public class BallerinaClientGenerator {
     }
 
     private List<FunctionDefinitionNode> createRemoteFunctions(Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations) {
-        //call remoteFunctionSignatureGenerator
         List<FunctionDefinitionNode> remoteFunctionNodes = new ArrayList<>();
         for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {
             for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : operation.getValue().entrySet()) {
                 RemoteFunctionGenerator remoteFunctionGenerator = new RemoteFunctionGenerator(operation.getKey(), operationEntry, openAPI, authConfigGeneratorImp, ballerinaUtilGenerator, imports);
                 Optional<FunctionDefinitionNode> remotefunction = remoteFunctionGenerator.generateFunction();
                 remotefunction.ifPresent(remoteFunctionNodes::add);
+                diagnostics.addAll(remoteFunctionGenerator.getDiagnostics());
             }
         }
         return remoteFunctionNodes;
@@ -579,6 +576,7 @@ public class BallerinaClientGenerator {
                         operation.getKey(), openAPI, authConfigGeneratorImp, ballerinaUtilGenerator, imports);
                 Optional<FunctionDefinitionNode> resourceFunction = resourceFunctionGenerator.generateFunction();
                 resourceFunction.ifPresent(resourceFunctionNodes::add);
+                diagnostics.addAll(resourceFunctionGenerator.getDiagnostics());
             }
         }
         return resourceFunctionNodes;

@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
@@ -112,6 +113,8 @@ public class BallerinaCodeGenerator {
         // if resource is enabled, we avoid checking operationId.
         OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPIPath, !isResource);
         checkOpenAPIVersion(openAPIDef);
+        // Add typeHandler
+        TypeHandler.createInstance(openAPIDef, nullable);
         // Generate service
         String serviceTitle = serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = String.format("%s_service.bal", serviceTitle);
@@ -137,6 +140,13 @@ public class BallerinaCodeGenerator {
 
         BallerinaClientGenerator clientGenerator = new BallerinaClientGenerator(oasClientConfig);
         String clientContent = Formatter.format(clientGenerator.generateSyntaxTree()).toSourceCode();
+
+        //Update type definition list with auth related type definitions
+        List<TypeDefinitionNode> authNodes = clientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
+        for (TypeDefinitionNode typeDef: authNodes) {
+            TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
+        }
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME,
                 (licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER : licenseHeader) + clientContent));
         String utilContent = Formatter.format(clientGenerator
@@ -147,11 +157,6 @@ public class BallerinaCodeGenerator {
                     (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + utilContent));
         }
 
-        //Update type definition list
-        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
-                clientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
-//        List<TypeDefinitionNode> typeDefinitionNodeList = clientGenerator.getTypeDefinitionNodeList();
-//        preGeneratedTypeDefNodes.addAll(typeDefinitionNodeList);
         String serviceContent = "";
         if (complexPaths.isEmpty()) {
             OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -208,7 +213,9 @@ public class BallerinaCodeGenerator {
         List<GenSrcFile> newGenFiles = sourceFiles.stream()
                 .filter(distinctByKey(GenSrcFile::getFileName))
                 .collect(Collectors.toList());
-
+        //display diagnostics- client
+        List<ClientDiagnostic> clientDiagnostic = clientGenerator.getDiagnostics();
+//        diagnostics.addAll(clientDiagnostic);
         writeGeneratedSources(newGenFiles, srcPath, implPath, GEN_BOTH);
     }
 
@@ -390,24 +397,24 @@ public class BallerinaCodeGenerator {
         //Take default DO NOT modify
         licenseHeader = licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER : licenseHeader;
         TypeHandler.createInstance(openAPIDef, nullable);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
-        String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toSourceCode();
+        BallerinaClientGenerator clientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        String mainContent = Formatter.format(clientGenerator.generateSyntaxTree()).toSourceCode();
+        //Update type definition list with auth related type definitions
+        List<TypeDefinitionNode> authNodes = clientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
+        for (TypeDefinitionNode typeDef: authNodes) {
+            TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
+        }
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME,
                 licenseHeader + mainContent));
         String utilContent = Formatter.format(
-                ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
+                clientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
         if (!utilContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, srcPackage, UTIL_FILE_NAME,
                     licenseHeader + utilContent));
         }
 
-        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
-                ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
-//        preGeneratedTypeDefNodes.addAll(ballerinaClientGenerator.getTypeDefinitionNodeList());
         // Generate ballerina records to represent schemas.
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
-                openAPIDef, nullable);
-
         SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
 
         String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
@@ -422,7 +429,7 @@ public class BallerinaCodeGenerator {
 
         // Generate test boilerplate code for test cases
         if (this.includeTestFiles) {
-            BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
+            BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(clientGenerator);
             String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toSourceCode();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME,
                     licenseHeader + testContent));

@@ -3,6 +3,8 @@ package io.ballerina.openapi.core.generators.client.parameter;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
+import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -54,7 +56,10 @@ public class RequestBodyGenerator implements ParameterGenerator {
             try {
                 referencedRequestBodyName = extractReferenceType(requestBody.get$ref()).trim();
             } catch (BallerinaOpenApiException e) {
-                //todo diagnostic
+                ClientDiagnosticImp diagnostic = new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_109,
+                        requestBody.get$ref());
+                diagnostics.add(diagnostic);
+                return Optional.empty();
             }
             RequestBody referencedRequestBody = openAPI.getComponents()
                     .getRequestBodies().get(referencedRequestBodyName);
@@ -70,7 +75,7 @@ public class RequestBodyGenerator implements ParameterGenerator {
         }
         for (Map.Entry<String, MediaType> mediaTypeEntry : requestBodyContent.entrySet()) {
             // This implementation currently for first content type
-            Schema schema = mediaTypeEntry.getValue().getSchema();
+            Schema<?> schema = mediaTypeEntry.getValue().getSchema();
             String paramType;
             //Take payload type
             if (schema != null && GeneratorUtils.isSupportedMediaType(mediaTypeEntry)) {

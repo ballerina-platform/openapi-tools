@@ -55,7 +55,7 @@ public class NoServerURLTest {
     @Test(description = "Test for no server url with HTTP authentication mechanism")
     public void getClientForNoServerURLWithHTTPAuth() {
         AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
-                false, true, new ArrayList<>());
+                false, true);
         String expectedParams = TestConstants.HTTP_CLIENT_CONFIG_PARAM_NO_URL;
         StringBuilder generatedParams = new StringBuilder();
         List<ParameterNode> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit();
@@ -67,18 +67,18 @@ public class NoServerURLTest {
         Assert.assertEquals(expectedParams, generatedParamsStr);
     }
 
-//    @Test(description = "Test for no server url with API key authentication mechanism")
-//    public void getClientForNoServerURLWithAPIKeyAuth() {
-//        AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
-//                true, false, new ArrayList<>());
-//        String expectedParams = TestConstants.API_KEY_CONFIG_PARAM_NO_URL;
-//        StringBuilder generatedParams = new StringBuilder();
-//        List<ParameterNode> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit();
-//        for (Node param: generatedInitParamNodes) {
-//            generatedParams.append(param.toString());
-//        }
-//        expectedParams = (expectedParams.trim()).replaceAll("\\s+", "");
-//        String generatedParamsStr = (generatedParams.toString().trim()).replaceAll("\\s+", "");
-//        Assert.assertEquals(expectedParams, generatedParamsStr);
-//    }
+    @Test(description = "Test for no server url with API key authentication mechanism")
+    public void getClientForNoServerURLWithAPIKeyAuth() {
+        AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
+                true, false);
+        String expectedParams = TestConstants.API_KEY_CONFIG_PARAM_NO_URL;
+        StringBuilder generatedParams = new StringBuilder();
+        List<ParameterNode> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit();
+        for (Node param: generatedInitParamNodes) {
+            generatedParams.append(param.toString());
+        }
+        expectedParams = (expectedParams.trim()).replaceAll("\\s+", "");
+        String generatedParamsStr = (generatedParams.toString().trim()).replaceAll("\\s+", "");
+        Assert.assertEquals(expectedParams, generatedParamsStr);
+    }
 }

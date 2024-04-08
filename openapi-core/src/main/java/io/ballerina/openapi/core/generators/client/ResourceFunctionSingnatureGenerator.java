@@ -58,8 +58,7 @@ public class ResourceFunctionSingnatureGenerator implements FunctionSignatureGen
                         paramType = extractReferenceType(parameter.get$ref());
                     } catch (BallerinaOpenApiException e) {
                         DiagnosticMessages diagnostic = OAS_CLIENT_100;
-                        ClientDiagnosticImp clientDiagnostic = new ClientDiagnosticImp(diagnostic.getCode(),
-                                diagnostic.getDescription(), parameter.get$ref());
+                        ClientDiagnosticImp clientDiagnostic = new ClientDiagnosticImp(diagnostic, parameter.get$ref());
                         diagnostics.add(clientDiagnostic);
                     }
                     parameter = openAPI.getComponents().getParameters().get(paramType);
