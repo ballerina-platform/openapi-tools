@@ -556,6 +556,10 @@ public class GeneratorUtils {
         }
     }
 
+    public static boolean hasRequestBinding(String mediaType) {
+        return getBallerinaMediaType(mediaType, true).equals(HTTP_REQUEST);
+    }
+
     /**
      * Generate BallerinaMediaType for all the return mediaTypes.
      */
@@ -1022,7 +1026,9 @@ public class GeneratorUtils {
                     getSemanticModel(tmpDir.resolve(SERVICE_FILE_NAME));
             List<Symbol> symbols = semanticModel.moduleSymbols();
             for (Symbol symbol : symbols) {
-                if (symbol.kind().equals(SymbolKind.TYPE_DEFINITION) || symbol.kind().equals(SymbolKind.ENUM)) {
+                if ((symbol.kind().equals(SymbolKind.TYPE_DEFINITION) &&
+                        !((TypeDefinitionSymbol) symbol).typeDescriptor().subtypeOf(semanticModel.types().ERROR))
+                        || symbol.kind().equals(SymbolKind.ENUM)) {
                     List<Location> references = semanticModel.references(symbol);
                     if (references.size() == 1) {
                         unusedTypeDefinitionNameList.add(symbol.getName().get());
@@ -1278,23 +1284,22 @@ public class GeneratorUtils {
 
     }
 
-    public static TypeDescriptorNode generateStatusCodeTypeInclusionRecord(Map.Entry<String, ApiResponse> response,
-                                                                           OpenAPI openAPI, String path,
+    public static TypeDescriptorNode generateStatusCodeTypeInclusionRecord(String code, ApiResponse response,
+                                                                           String method, OpenAPI openAPI, String path,
                                                                            List<Diagnostic> diagnosticList)
             throws InvalidReferenceException {
-        String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
-        Content responseContent = response.getValue().getContent();
+        Content responseContent = response.getContent();
         Set<Map.Entry<String, MediaType>> bodyTypeSchema;
         if (Objects.nonNull(responseContent)) {
             bodyTypeSchema = responseContent.entrySet();
-        } else if (response.getValue().get$ref() != null) {
-            String referenceType = GeneratorUtils.extractReferenceType(response.getValue().get$ref());
+        } else if (response.get$ref() != null) {
+            String referenceType = GeneratorUtils.extractReferenceType(response.get$ref());
             ApiResponse apiResponse = openAPI.getComponents().getResponses().get(referenceType);
             bodyTypeSchema = apiResponse.getContent().entrySet();
         } else {
             bodyTypeSchema = new LinkedHashSet<>();
         }
-        Schema headersTypeSchema = getHeadersTypeSchema(response.getValue());
+        Schema headersTypeSchema = getHeadersTypeSchema(response);
 
         HashMap<String, TypeDescriptorNode> generatedTypes = new LinkedHashMap<>();
         if (!code.equals("NoContent")) {
@@ -1306,11 +1311,11 @@ public class GeneratorUtils {
         } else {
             diagnosticList.add(new CommonDiagnostic(OAS_COMMON_101));
             return TypeHandler.getInstance().createTypeInclusionRecord(code, null,
-                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
+                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema), method);
         }
         TypeDescriptorNode typeDescriptorNode = getUnionTypeDescriptorNodeFromTypeDescNodes(generatedTypes);
         return TypeHandler.getInstance().createTypeInclusionRecord(code, typeDescriptorNode,
-                TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
+                TypeHandler.getInstance().generateHeaderType(headersTypeSchema), method);
     }
 
     public static TypeDescriptorNode generateTypeDescForMediaType(OpenAPI openAPI, String path, boolean isRequest,

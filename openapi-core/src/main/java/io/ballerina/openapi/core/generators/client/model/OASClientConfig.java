@@ -34,6 +34,7 @@ public class OASClientConfig {
     private final boolean resourceMode;
     private final boolean isPlugin;
     private final String license;
+    private final boolean statusCodeBinding;
 
 
     private OASClientConfig(Builder clientConfigBuilder) {
@@ -43,6 +44,7 @@ public class OASClientConfig {
         this.isPlugin = clientConfigBuilder.isPlugin;
         this.resourceMode = clientConfigBuilder.resourceMode;
         this.license = clientConfigBuilder.license;
+        this.statusCodeBinding = clientConfigBuilder.statusCodeBinding;
     }
 
     public OpenAPI getOpenAPI() {
@@ -67,6 +69,9 @@ public class OASClientConfig {
     public String getLicense() {
         return license;
     }
+    public boolean isStatusCodeBinding() {
+        return statusCodeBinding;
+    }
 
     /**
      * Client IDL plugin meta data builder class.
@@ -78,6 +83,7 @@ public class OASClientConfig {
         private boolean resourceMode = true;
         private boolean isPlugin = false;
         private String license = DO_NOT_MODIFY_FILE_HEADER;
+        private boolean statusCodeBinding = false;
 
         public Builder withOpenAPI(OpenAPI openAPI) {
             this.openAPI = openAPI;
@@ -106,6 +112,11 @@ public class OASClientConfig {
 
         public Builder withLicense(String license) {
             this.license = license;
+            return this;
+        }
+
+        public Builder withStatusCodeBinding(boolean statusCodeBinding) {
+            this.statusCodeBinding = statusCodeBinding;
             return this;
         }
 

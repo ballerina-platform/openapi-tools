@@ -1,21 +1,3 @@
-/*
- *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com).
- *
- *  WSO2 LLC. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
- */
-
 package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
@@ -83,23 +65,45 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
             NodeList<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
                     null, openAPI.getComponents(), false);
             // Create function signature
-            ResourceFunctionSingnatureGenerator signatureGenerator = new ResourceFunctionSingnatureGenerator(
-                    operation.getValue(), openAPI);
+            ResourceFunctionSignatureGenerator signatureGenerator = getSignatureGenerator();
             //Create function body
-            FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
-                    authConfigGeneratorImp, ballerinaUtilGenerator, imports);
-            Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
+            Optional<FunctionBodyNode> functionBodyNodeResult = getFunctionBodyNode(diagnostics);
             if (functionBodyNodeResult.isEmpty()) {
                 return Optional.empty();
             }
             FunctionBodyNode functionBodyNode = functionBodyNodeResult.get();
-            return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, null,
-                    qualifierList, functionKeyWord, functionName, relativeResourcePath,
-                    signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
+            return getFunctionDefinitionNode(qualifierList, functionKeyWord, functionName, relativeResourcePath, signatureGenerator, functionBodyNode);
         } catch (BallerinaOpenApiException e) {
             //todo diagnostic
             return Optional.empty();
         }
+    }
+
+    protected Optional<FunctionBodyNode> getFunctionBodyNode(List<ClientDiagnostic> diagnostics) {
+        FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
+                authConfigGeneratorImp, ballerinaUtilGenerator, imports);
+        Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
+        if (functionBodyNodeResult.isEmpty()) {
+            diagnostics.addAll(functionBodyGenerator.getDiagnostics());
+        }
+        return functionBodyNodeResult;
+    }
+
+    protected ResourceFunctionSignatureGenerator getSignatureGenerator() {
+        return new ResourceFunctionSignatureGenerator(operation.getValue(), openAPI,
+                operation.getKey().toString().toLowerCase());
+    }
+
+    protected Optional<FunctionDefinitionNode> getFunctionDefinitionNode(NodeList<Token> qualifierList,
+                                                                         Token functionKeyWord,
+                                                                         IdentifierToken functionName,
+                                                                         NodeList<Node> relativeResourcePath,
+                                                                         ResourceFunctionSignatureGenerator
+                                                                                 signatureGenerator,
+                                                                         FunctionBodyNode functionBodyNode) {
+        return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, null,
+                qualifierList, functionKeyWord, functionName, relativeResourcePath,
+                signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
     }
 
     @Override
