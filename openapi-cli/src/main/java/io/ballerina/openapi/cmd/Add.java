@@ -19,7 +19,6 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.toml.syntax.tree.AbstractNodeFactory;
 import io.ballerina.toml.syntax.tree.ArrayNode;
 import io.ballerina.toml.syntax.tree.DocumentMemberDeclarationNode;
@@ -53,14 +52,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static io.ballerina.cli.cmd.CommandUtil.exitError;
-import static io.ballerina.openapi.cmd.CmdConstants.BALLERINA_TOML;
 import static io.ballerina.openapi.cmd.CmdConstants.DEFAULT_CLIENT_ID;
 import static io.ballerina.openapi.cmd.CmdConstants.OPENAPI_ADD_CMD;
+import static io.ballerina.openapi.cmd.CmdUtils.validateBallerinaProject;
+import static io.ballerina.openapi.cmd.ErrorMessages.INVALID_BALLERINA_PACKAGE;
 import static io.ballerina.toml.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.toml.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.toml.syntax.tree.AbstractNodeFactory.createToken;
@@ -115,9 +113,10 @@ public class Add implements BLauncherCmd {
                 return;
             }
             //check the given path is the Ballerina package
-            Optional<Path> ballerinaTomlPath = validateBallerinaProject(projectPath);
+            Optional<Path> ballerinaTomlPath = validateBallerinaProject(projectPath, outStream,
+                    INVALID_BALLERINA_PACKAGE, exitWhenFinish);
             if (ballerinaTomlPath.isEmpty()) {
-                outStream.printf(ErrorMessages.INVALID_BALLERINA_PACKAGE, projectPath.toAbsolutePath());
+                outStream.printf(INVALID_BALLERINA_PACKAGE, projectPath.toAbsolutePath());
                 exitError(this.exitWhenFinish);
             } else {
                 validateInputPath();
@@ -133,7 +132,7 @@ public class Add implements BLauncherCmd {
                 //set default client id
                 createDefaultClientID();
                 CmdOptions options = collectCLIOptions();
-                moduleMembers = addNewLine(moduleMembers, 1);
+                moduleMembers = CmdUtils.addNewLine(moduleMembers, 1);
                 moduleMembers = populateOpenAPITomlConfig(options, moduleMembers);
                 Token eofToken = AbstractNodeFactory.createIdentifierToken("");
                 DocumentNode documentNode = NodeFactory.createDocumentNode(moduleMembers, eofToken);
@@ -145,7 +144,7 @@ public class Add implements BLauncherCmd {
                     outStream.print(ErrorMessages.TOML_UPDATED_MSG);
                 }
             }
-        } catch (BallerinaOpenApiException | IOException e) {
+        } catch (IOException e) {
             outStream.println(e.getMessage());
             exitError(exitWhenFinish);
         }
@@ -181,7 +180,8 @@ public class Add implements BLauncherCmd {
                 .withNullable(baseCmd.nullable)
                 .withOperations(getOperations())
                 .withTags(getTags())
-                .withLicensePath(baseCmd.licenseFilePath).build();
+                .withLicensePath(baseCmd.licenseFilePath)
+                .withStatusCodeBinding(baseCmd.statusCodeBinding).build();
     }
 
     /**
@@ -225,7 +225,7 @@ public class Add implements BLauncherCmd {
         }
         if (optionsBuilder.getOperations() != null && !optionsBuilder.getOperations().isEmpty()) {
             if (optionsBuilder.getTags() != null && !optionsBuilder.getTags().isEmpty()) {
-                moduleMembers = addNewLine(moduleMembers, 1);
+                moduleMembers = CmdUtils.addNewLine(moduleMembers, 1);
             }
             Node[] arrayItems = getArrayItemNodes(getOperations());
             SeparatedNodeList<ValueNode> value = createSeparatedNodeList(arrayItems);
@@ -247,7 +247,11 @@ public class Add implements BLauncherCmd {
             moduleMembers = moduleMembers.add(SampleNodeGenerator.createStringKV("options.licensePath",
                     optionsBuilder.getLicensePath(), null));
         }
-        moduleMembers = addNewLine(moduleMembers, 2);
+        if (optionsBuilder.getStatusCodeBinding()) {
+            moduleMembers = moduleMembers.add(SampleNodeGenerator.createBooleanKV("options.statusCodeBinding",
+                    optionsBuilder.getStatusCodeBinding(), null));
+        }
+        moduleMembers = CmdUtils.addNewLine(moduleMembers, 2);
         return moduleMembers;
     }
 
@@ -286,22 +290,6 @@ public class Add implements BLauncherCmd {
         //This is not using in this command
     }
 
-    private Optional<Path> validateBallerinaProject(Path projectPath) throws BallerinaOpenApiException {
-        Optional<Path> ballerinaToml;
-        try (Stream<Path> stream = Files.list(projectPath)) {
-            ballerinaToml = stream.filter(file -> !Files.isDirectory(file))
-                    .map(Path::getFileName)
-                    .filter(Objects::nonNull)
-                    .filter(file -> BALLERINA_TOML.equals(file.toString()))
-                    .findFirst();
-        } catch (IOException e) {
-            outStream.printf(ErrorMessages.INVALID_BALLERINA_PACKAGE, projectPath.toAbsolutePath(), e.getMessage());
-            exitError(this.exitWhenFinish);
-            return Optional.empty();
-        }
-        return ballerinaToml;
-    }
-
     public List<String> getTags() {
         return baseCmd.tags == null ? new ArrayList<>() : Arrays.asList(baseCmd.tags.split(","));
     }
@@ -319,12 +307,5 @@ public class Add implements BLauncherCmd {
         MinutiaeList whitespaceMinList = NodeFactory.createMinutiaeList(
                 new Minutiae[]{NodeFactory.createWhitespaceMinutiae(" ")});
         return NodeFactory.createToken(SyntaxKind.EQUAL_TOKEN, whitespaceMinList, whitespaceMinList);
-    }
-
-    public static NodeList<DocumentMemberDeclarationNode> addNewLine(NodeList moduleMembers, int n) {
-        for (int i = 0; i < n; i++) {
-            moduleMembers = moduleMembers.add(AbstractNodeFactory.createIdentifierToken(System.lineSeparator()));
-        }
-        return moduleMembers;
     }
 }

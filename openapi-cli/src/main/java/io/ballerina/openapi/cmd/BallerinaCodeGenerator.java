@@ -21,8 +21,8 @@ package io.ballerina.openapi.cmd;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGeneratorWithStatusCodeBinding;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
-import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
@@ -97,7 +97,7 @@ public class BallerinaCodeGenerator {
     public void generateClientAndService(String definitionPath, String serviceName,
                                          String outPath, Filter filter, boolean nullable,
                                          boolean isResource, boolean generateServiceType,
-                                         boolean generateWithoutDataBinding)
+                                         boolean generateWithoutDataBinding, boolean statusCodeBinding)
             throws IOException, FormatterException, BallerinaOpenApiException,
             OASTypeGenException, ClientException {
         Path srcPath = Paths.get(outPath);
@@ -135,7 +135,7 @@ public class BallerinaCodeGenerator {
                 .withOpenAPI(openAPIDef)
                 .withResourceMode(isResource).build();
 
-        BallerinaClientGenerator clientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        BallerinaClientGenerator clientGenerator = getBallerinaClientGenerator(oasClientConfig, statusCodeBinding);
         String clientContent = Formatter.format(clientGenerator.generateSyntaxTree()).toSourceCode();
 
         //Update type definition list with auth related type definitions
@@ -206,15 +206,7 @@ public class BallerinaCodeGenerator {
         List<GenSrcFile> newGenFiles = sourceFiles.stream()
                 .filter(distinctByKey(GenSrcFile::getFileName))
                 .collect(Collectors.toList());
-        //display diagnostics- client
-        List<ClientDiagnostic> clientDiagnostic = clientGenerator.getDiagnostics();
 
-        if (!clientDiagnostic.isEmpty()) {
-            outStream.println("error occurred while generating the client: ");
-            for (ClientDiagnostic diagnostic : clientDiagnostic) {
-                outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
-            }
-        }
         writeGeneratedSources(newGenFiles, srcPath, implPath, GEN_BOTH);
     }
 
@@ -238,14 +230,14 @@ public class BallerinaCodeGenerator {
      * @throws BallerinaOpenApiException when code generator fails
      */
     public void generateClient(String definitionPath, String outPath, Filter filter, boolean nullable,
-                               boolean isResource)
+                               boolean isResource, boolean statusCodeBinding)
             throws IOException, FormatterException, BallerinaOpenApiException,
             OASTypeGenException {
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles = null;
         try {
-            genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource);
+            genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource, statusCodeBinding);
             if (!genFiles.isEmpty()) {
                 writeGeneratedSources(genFiles, srcPath, implPath, GEN_CLIENT);
             }
@@ -365,7 +357,8 @@ public class BallerinaCodeGenerator {
      * @return generated source files as a list of {@link GenSrcFile}
      * @throws IOException when code generation with specified templates fails
      */
-    private List<GenSrcFile> generateClientFiles(Path openAPI, Filter filter, boolean nullable, boolean isResource)
+    private List<GenSrcFile> generateClientFiles(Path openAPI, Filter filter, boolean nullable, boolean isResource,
+                                                 boolean statusCodeBinding)
             throws IOException, BallerinaOpenApiException, FormatterException, ClientException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_CLIENT_PKG;
@@ -392,11 +385,13 @@ public class BallerinaCodeGenerator {
                 .withPlugin(false)
                 .withOpenAPI(openAPIDef)
                 .withResourceMode(isResource)
+                .withStatusCodeBinding(statusCodeBinding)
                 .build();
         //Take default DO NOT modify
         licenseHeader = licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER : licenseHeader;
         TypeHandler.createInstance(openAPIDef, nullable);
-        BallerinaClientGenerator clientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        BallerinaClientGenerator clientGenerator = getBallerinaClientGenerator(oasClientConfig,
+                statusCodeBinding);
         String mainContent = Formatter.format(clientGenerator.generateSyntaxTree()).toSourceCode();
         //Update type definition list with auth related type definitions
         List<TypeDefinitionNode> authNodes = clientGenerator.getBallerinaAuthConfigGenerator()
@@ -440,19 +435,32 @@ public class BallerinaCodeGenerator {
                         CONFIG_FILE_NAME, configContent));
             }
         }
-        List<ClientDiagnostic> clientDiagnostic = clientGenerator.getDiagnostics();
-        if (!clientDiagnostic.isEmpty()) {
-            outStream.println("error occurred while generating the client: ");
-            for (ClientDiagnostic diagnostic : clientDiagnostic) {
-                outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
-            }
-        }
+
         return sourceFiles;
+    }
+
+    private static BallerinaClientGenerator getBallerinaClientGenerator(OASClientConfig oasClientConfig,
+                                                                        boolean statusCodeBinding) {
+        if (!statusCodeBinding || hasRequestBinding(oasClientConfig.getOpenAPI())) {
+            if (statusCodeBinding) {
+                outStream.println("WARNING: the generated client will not have status code response binding since " +
+                        "the OpenAPI definition contains unsupported media-type for request payload binding.");
+            }
+            return new BallerinaClientGenerator(oasClientConfig);
+        }
+        return new BallerinaClientGeneratorWithStatusCodeBinding(oasClientConfig);
+    }
+
+    private static boolean hasRequestBinding(OpenAPI openAPI) {
+        return openAPI.getPaths().values().stream().anyMatch(pathItem -> pathItem.readOperations().stream()
+                .anyMatch(operation -> operation.getRequestBody() != null &&
+                        operation.getRequestBody().getContent().keySet().stream()
+                                .anyMatch(GeneratorUtils::hasRequestBinding)));
     }
 
 
     public List<GenSrcFile> generateBallerinaService(Path openAPI, String serviceName,
-                                                      Filter filter, boolean nullable, boolean generateServiceType,
+                                                     Filter filter, boolean nullable, boolean generateServiceType,
                                                      boolean generateWithoutDataBinding)
             throws IOException, FormatterException, BallerinaOpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
@@ -503,8 +511,6 @@ public class BallerinaCodeGenerator {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME,
                     (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaSyntaxTree));
         }
-        this.diagnostics.addAll(serviceGenerationHandler.getDiagnostics());
-        this.diagnostics.addAll(TypeHandler.getInstance().getDiagnostics());
         return sourceFiles;
     }
 
