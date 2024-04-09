@@ -6,7 +6,7 @@ table<Album> key(id) albums = table [
     {id: "3", name: "The Wall", artist: "Pink Floyd", genre: "Progressive Rock"}
 ];
 
-service /api on new http:Listener(9090) {
+service /api on new http:Listener(9999) {
 
     resource function get albums/[string id]() returns OkAlbum|NotFoundErrorMessage {
         if albums.hasKey(id) {
@@ -33,6 +33,20 @@ service /api on new http:Listener(9090) {
         }
         return {
             body: selectedAlbums,
+            headers: {user\-id: "user-1", req\-id: 1}
+        };
+    }
+
+    resource function get albums\-all() returns OkAlbumArray|NotFoundErrorMessage {
+        Album[] albumsArr = albums.toArray();
+        if albumsArr.length() == 0 {
+            return {
+                body: {"message": "No albums found"},
+                headers: {user\-id: "user-1", req\-id: 1}
+            };
+        }
+        return {
+            body: albumsArr,
             headers: {user\-id: "user-1", req\-id: 1}
         };
     }

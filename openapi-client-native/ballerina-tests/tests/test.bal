@@ -100,6 +100,23 @@ function testResourceMethod6() {
 }
 
 @test:Config {}
+function testResourceMethod7() {
+    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->/albums\-all;
+    OkAlbumArray expected = {
+        mediaType: "application/json",
+        headers: {user\-id: "user-1", req\-id: 1},
+        body: albums.toArray()
+    };
+    if res is OkAlbumArray {
+        test:assertEquals(res.mediaType, expected.mediaType, "mediaType did not match");
+        test:assertEquals(res.headers, expected.headers, "headers did not match");
+        test:assertEquals(res.body, expected.body, "body did not match");
+    } else {
+        test:assertFail("invalid response type");
+    }
+}
+
+@test:Config {}
 function testRemoteMethod1() {
     OkAlbum|NotFoundErrorMessage|error res = albumClient->getAlbumsId("1");
     OkAlbum expected = {

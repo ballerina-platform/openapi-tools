@@ -18,7 +18,7 @@ type ClientMethodInvocationError http:ClientError;
 public isolated client class Client {
     final http:Client clientEp;
 
-    public isolated function init(string serviceUrl = "http://localhost:9090/api") returns error? {
+    public isolated function init(string serviceUrl = "http://localhost:9999/api") returns error? {
         http:Client httpEp = check new (serviceUrl);
         self.clientEp = httpEp;
         return;
@@ -39,6 +39,14 @@ public isolated client class Client {
         string resourcePath = string `/albums`;
         map<anydata> queryParam = {"genre": genre};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        return self.clientEp->get(resourcePath, targetType = targetType);
+    }
+
+    @MethodImpl {name: "getAlbumsAllImpl"}
+    resource isolated function get albums\-all(typedesc<Album[]|OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
+
+    private isolated function getAlbumsAllImpl(typedesc<Album[]|OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType) returns Album[]|OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload|error {
+        string resourcePath = string `/albums-all`;
         return self.clientEp->get(resourcePath, targetType = targetType);
     }
 
