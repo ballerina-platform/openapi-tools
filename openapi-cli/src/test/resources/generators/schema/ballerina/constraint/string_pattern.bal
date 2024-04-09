@@ -1,5 +1,8 @@
 import ballerina/constraint;
 
+@constraint:String {pattern: re `[ a-zA-Z0-9/.+!@#$%^&*()+\- ]*`}
+public type PersonHobbyItemsString string;
+
 public type Person record {
     @constraint:String {maxLength: 14}
     string name?;
@@ -11,6 +14,3 @@ public type Person record {
     string net?;
     int count?;
 };
-
-@constraint:String {pattern: re `[ a-zA-Z0-9/.+!@#$%^&*()+\- ]*`}
-public type PersonHobbyItemsString string;

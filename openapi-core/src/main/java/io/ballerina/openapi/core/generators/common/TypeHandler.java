@@ -55,7 +55,6 @@ import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -87,7 +86,7 @@ public class TypeHandler {
     private static TypeHandler typeHandlerInstance;
 
     private static BallerinaTypesGenerator ballerinaTypesGenerator;
-    public HashMap<String, TypeDefinitionNode> typeDefinitionNodes = new LinkedHashMap<>();
+    public HashMap<String, TypeDefinitionNode> typeDefinitionNodes = new HashMap<>();
     private final Set<String> imports = new LinkedHashSet<>();
 
     private TypeHandler() {}

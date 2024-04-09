@@ -1,7 +1,5 @@
 public type Average float?;
 
-public type Name string?;
-
 # At least one entry should be non-null.
 public type Scores decimal[]?;
 
@@ -10,3 +8,5 @@ public type Subject record{
     string name;
     decimal[]? tag?;
 };
+
+public type Name string?;

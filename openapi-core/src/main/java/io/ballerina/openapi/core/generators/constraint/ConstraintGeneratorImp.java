@@ -271,7 +271,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
         typeDefinitionSortingList.forEach(key -> {
             sortedTypeDefinitions.put(key, typeDefinitions.get(key));
         });
-        return new ConstraintResult(sortedTypeDefinitions, isConstraint, diagnostics);
+        return new ConstraintResult(typeDefinitions, isConstraint, diagnostics);
     }
 
     private void updateConstraintWithArrayItems(String key, String fieldName, ArraySchema arraySchema) {
