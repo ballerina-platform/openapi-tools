@@ -88,10 +88,14 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.servers.ServerVariable;
@@ -1240,7 +1244,7 @@ public class GeneratorUtils {
         for (Map.Entry<String, Header> headerEntry : headers.entrySet()) {
             String headerName = headerEntry.getKey();
             Header header = headerEntry.getValue();
-            Schema headerTypeSchema = header.getSchema();
+            Schema headerTypeSchema = getValidatedHeaderSchema(header.getSchema());
             properties.put(headerName, headerTypeSchema);
             if (header.getRequired() != null && header.getRequired()) {
                 requiredField.add(headerName);
@@ -1256,6 +1260,25 @@ public class GeneratorUtils {
         headersSchema.setRequired(requiredField);
         headersSchema.setAdditionalProperties(false);
         return headersSchema;
+    }
+
+    private static  Schema getValidatedHeaderSchema(Schema headerSchema) {
+        return getValidatedHeaderSchema(headerSchema, headerSchema);
+    }
+
+    private static Schema getValidatedHeaderSchema(Schema targetSchema, Schema originalSchema) {
+        // Only supporting string, integer, boolean and the array types of the above types
+        if (targetSchema instanceof StringSchema || targetSchema instanceof IntegerSchema ||
+                targetSchema instanceof BooleanSchema) {
+            return originalSchema;
+        }
+        if (targetSchema instanceof ArraySchema arraySchema) {
+            Schema items = arraySchema.getItems();
+            return getValidatedHeaderSchema(items, originalSchema);
+        }
+        // Returning a string schema as the default type
+        // TODO: Add support for reference, oneof schemas
+        return new StringSchema();
     }
 
     public static String replaceContentWithinBrackets(String input, String replacement) {
