@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.core.generators.service;
 
-import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
@@ -51,7 +50,7 @@ public class ServiceGenerationHandler {
             ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata,
                     serviceGenerator.getFunctionsList());
             String serviceType = Formatter.format(serviceTypeGenerator.generateSyntaxTree()).toSourceCode();
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SERVICE_TYPE, oasServiceMetadata.getSrcPackage(),
                     "service_type.bal",
                     (oasServiceMetadata.getLicenseHeader().isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
                             oasServiceMetadata.getLicenseHeader()) + serviceType));

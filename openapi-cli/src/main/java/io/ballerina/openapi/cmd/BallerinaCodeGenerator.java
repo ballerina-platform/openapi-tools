@@ -160,16 +160,12 @@ public class BallerinaCodeGenerator {
                     .withNullable(nullable)
                     .withGenerateServiceType(generateServiceType)
                     .withGenerateWithoutDataBinding(generateWithoutDataBinding)
+                    .withSrcFile(srcFile)
+                    .withSrcPackage(srcPackage)
                     .build();
 
             ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
-            sourceFiles = serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
-            String schemaSyntaxTree = Formatter.format(TypeHandler.getInstance().generateTypeSyntaxTree())
-                    .toSourceCode();
-            if (!schemaSyntaxTree.isBlank() && !generateWithoutDataBinding) {
-                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME,
-                        (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaSyntaxTree));
-            }
+            sourceFiles.addAll(serviceGenerationHandler.generateServiceFiles(oasServiceMetadata));
             this.diagnostics.addAll(serviceGenerationHandler.getDiagnostics());
             this.diagnostics.addAll(TypeHandler.getInstance().getDiagnostics());
         }
