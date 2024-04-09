@@ -227,8 +227,7 @@ public class BallerinaCodeGenerator {
      */
     public void generateClient(String definitionPath, String outPath, Filter filter, boolean nullable,
                                boolean isResource, boolean statusCodeBinding)
-            throws IOException, FormatterException, BallerinaOpenApiException,
-            OASTypeGenException {
+            throws IOException, FormatterException, BallerinaOpenApiException, OASTypeGenException {
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles = null;
