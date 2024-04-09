@@ -51,7 +51,6 @@ public isolated client class Client {
         string resourcePath = string `/pet/findByStatus`;
         map<anydata> queryParam = {"status": status, "limit": 'limit};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Pet[] response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
 }

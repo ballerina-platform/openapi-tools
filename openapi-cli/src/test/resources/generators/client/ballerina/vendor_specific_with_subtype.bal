@@ -43,8 +43,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/vnd.petstore.v3.diff+json");
-        json response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
     # Create a pet
     #
@@ -55,7 +54,6 @@ public isolated client class Client {
         json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/vnd.petstore.v3.diff+xml");
-        xml response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
 }

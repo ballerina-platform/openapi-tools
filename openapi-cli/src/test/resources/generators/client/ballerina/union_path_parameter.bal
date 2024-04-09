@@ -38,15 +38,13 @@ public isolated client class Client {
     # + return - Ok
     remote isolated function operationId03(Id id) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(id)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # + id - id oneOf
     # + return - Ok
     remote isolated function post(Id_1 id) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(id)}`;
         http:Request request = new;
-        string response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
 }

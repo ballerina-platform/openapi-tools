@@ -14,31 +14,26 @@ public isolated client class Client {
     }
     remote isolated function  pet() returns http:Response | error {
         string resourcePath = string `/pet`;
-        http:Response  response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp-> get(resourcePath);
     }
     remote isolated function createPet(Pet payload) returns http:Response | error {
         string resourcePath = string `/pet`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        http:Response  response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
     remote isolated function getpetsBypetId(string petId) returns Pet|error {
         string resourcePath = string `/pets/${getEncodedUri(petId)}`;
-        Pet response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp-> get(resourcePath);
     }
     remote isolated function deletepetsBypetId(int petId) returns http:Response | error {
         string resourcePath = string `/pets/${getEncodedUri(petId)}`;
         http:Request request = new;
-        http:Response  response = check self.clientEp-> delete(resourcePath, request);
-        return response;
+        return self.clientEp-> delete(resourcePath, request);
     }
     remote isolated function  Image(int petId) returns http:Response | error {
         string resourcePath = string `/pets/${getEncodedUri(petId)}/Image`;
-        http:Response  response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp-> get(resourcePath);
     }
 }

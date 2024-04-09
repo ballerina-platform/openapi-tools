@@ -39,7 +39,7 @@ public isolated client class Client {
     # 01 Request body with reference.
     #
     # + return - OK
-    resource isolated function post path01(User payload, User payload) returns error? {
+    resource isolated function post path01(User payload) returns error? {
         string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = payload.toJson();
@@ -49,7 +49,7 @@ public isolated client class Client {
     # 03 Request body with record reference.
     #
     # + return - OK
-    resource isolated function post path02(User[] payload, User[] payload) returns error? {
+    resource isolated function post path02(User[] payload) returns error? {
         string resourcePath = string `/path02`;
         http:Request request = new;
         json jsonBody = payload.toJson();
@@ -59,7 +59,7 @@ public isolated client class Client {
     # 05 Example for rb has array inline requestbody.
     #
     # + return - OK
-    resource isolated function post path03(Path03_body_1 payload, Path03_body_1 payload) returns error? {
+    resource isolated function post path03(Path03_body_1 payload) returns error? {
         string resourcePath = string `/path03`;
         http:Request request = new;
         json jsonBody = payload.toJson();
@@ -70,7 +70,7 @@ public isolated client class Client {
     # 07 Example for rb has array inline requestbody.
     #
     # + return - OK
-    resource isolated function post path04(Path04_body[] payload, Path04_body[] payload) returns error? {
+    resource isolated function post path04(Path04_body[] payload) returns error? {
         string resourcePath = string `/path04`;
         http:Request request = new;
         json jsonBody = payload.toJson();
@@ -81,7 +81,7 @@ public isolated client class Client {
     # 02 Example for rb has inline requestbody.
     #
     # + return - OK
-    resource isolated function put path01(Path01_body payload, Path01_body payload) returns error? {
+    resource isolated function put path01(Path01_body payload) returns error? {
         string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = payload.toJson();
@@ -92,7 +92,7 @@ public isolated client class Client {
     #
     # + payload - A JSON object containing pet information
     # + return - OK
-    resource isolated function put path02(User payload, User payload) returns error? {
+    resource isolated function put path02(User payload) returns error? {
         string resourcePath = string `/path02`;
         http:Request request = new;
         json jsonBody = payload.toJson();
@@ -102,7 +102,7 @@ public isolated client class Client {
     # 06 Example for rb has array inline requestbody.
     #
     # + return - OK
-    resource isolated function put path03(Path03_body payload, Path03_body payload) returns error? {
+    resource isolated function put path03(Path03_body payload) returns error? {
         string resourcePath = string `/path03`;
         http:Request request = new;
         json jsonBody = payload.toJson();

@@ -35,7 +35,7 @@ public isolated client class Client {
         return;
     }
     # + return - Moved Permanently
-    resource isolated function post user3(User payload, User payload) returns error? {
+    resource isolated function post user3(User payload) returns error? {
         string resourcePath = string `/user3`;
         http:Request request = new;
         json jsonBody = payload.toJson();
@@ -45,16 +45,15 @@ public isolated client class Client {
     # This status code will be generate with previous approach till we address the error status code.
     #
     # + return - Unauthorized
-    resource isolated function post user4(User payload, User payload) returns http:Response|error {
+    resource isolated function post user4(User payload) returns http:Response|error {
         string resourcePath = string `/user4`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        http:Response response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
     # + return - Switching protocols
-    resource isolated function post users(User payload, User payload) returns error? {
+    resource isolated function post users(User payload) returns error? {
         string resourcePath = string `/users`;
         http:Request request = new;
         json jsonBody = payload.toJson();
@@ -62,7 +61,7 @@ public isolated client class Client {
         return self.clientEp->post(resourcePath, request);
     }
     # + return - Created
-    resource isolated function post users02(User payload, User payload) returns error? {
+    resource isolated function post users02(User payload) returns error? {
         string resourcePath = string `/users02`;
         http:Request request = new;
         json jsonBody = payload.toJson();

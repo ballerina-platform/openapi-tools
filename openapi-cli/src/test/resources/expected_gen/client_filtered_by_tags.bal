@@ -43,8 +43,7 @@ public isolated client class Client {
     remote isolated function createPet() returns http:Response|error {
         string resourcePath = string `/pets`;
         http:Request request = new;
-        http:Response response = check self.clientEp-> post(resourcePath, request);
-        return response;
+        return self.clientEp-> post(resourcePath, request);
     }
     # Info for a specific pet
     #
@@ -52,8 +51,7 @@ public isolated client class Client {
     # + return - Expected response to a valid request
     remote isolated function getDogs(string dog_id) returns Dog|error {
         string resourcePath = string `/pets/dogs/${getEncodedUri(dog_id)}`;
-        Dog response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # List all pets
     #
@@ -63,8 +61,7 @@ public isolated client class Client {
         string resourcePath = string `/pets`;
         map<anydata> queryParam = {"limit": 'limit};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # Info for a specific pet
     #
@@ -72,7 +69,6 @@ public isolated client class Client {
     # + return - Expected response to a valid request
     remote isolated function showPetById(string petId) returns Pets|error {
         string resourcePath = string `/pets/${getEncodedUri(petId)}`;
-        Pets response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
 }

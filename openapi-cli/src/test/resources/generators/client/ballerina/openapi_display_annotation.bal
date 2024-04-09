@@ -64,7 +64,6 @@ public isolated client class Client {
         string resourcePath = string `/weather`;
         map<anydata> queryParam = {"q": q, "id": id, "lat": lat, "lon": lon, "zip": zip, "units": units, "lang": lang, "mode": mode, "appid": self.apiKeyConfig.appid};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        CurrentWeatherDataResponse response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp-> get(resourcePath);
     }
 }

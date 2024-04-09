@@ -51,7 +51,6 @@ public isolated client class Client {
         string resourcePath = string `/onecall`;
         map<anydata> queryParam = {"lat": lat, "lon": lon, "exclude": exclude, "units": units, "appid": self.apiKeyConfig.appid};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        json response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
 }

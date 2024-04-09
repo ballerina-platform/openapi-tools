@@ -49,8 +49,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, httpHeaders);
-        return response;
+        return self.clientEp->post(resourcePath, request, httpHeaders);
     }
     # Convert URL to PDF
     #
@@ -61,8 +60,7 @@ public isolated client class Client {
         string resourcePath = string `/chrome/url`;
         map<anydata> queryParam = {"url": url, "output": output, "apikey": self.apiKeyConfig.apikey};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        ApiResponseSuccess response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # Convert URL to PDF
     #
@@ -75,8 +73,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, httpHeaders);
-        return response;
+        return self.clientEp->post(resourcePath, request, httpHeaders);
     }
     # Convert office document or image to PDF
     #
@@ -89,8 +86,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, httpHeaders);
-        return response;
+        return self.clientEp->post(resourcePath, request, httpHeaders);
     }
     # Merge multiple PDFs together
     #
@@ -103,8 +99,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, httpHeaders);
-        return response;
+        return self.clientEp->post(resourcePath, request, httpHeaders);
     }
     # Convert raw HTML to PDF
     #
@@ -117,8 +112,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, httpHeaders);
-        return response;
+        return self.clientEp->post(resourcePath, request, httpHeaders);
     }
     # Convert URL to PDF
     #
@@ -129,8 +123,7 @@ public isolated client class Client {
         string resourcePath = string `/wkhtmltopdf/url`;
         map<anydata> queryParam = {"url": url, "output": output, "apikey": self.apiKeyConfig.apikey};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        ApiResponseSuccess response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # Convert URL to PDF
     #
@@ -143,8 +136,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, httpHeaders);
-        return response;
+        return self.clientEp->post(resourcePath, request, httpHeaders);
     }
     # Generate bar codes and QR codes with ZXING.
     #
@@ -158,7 +150,6 @@ public isolated client class Client {
         string resourcePath = string `/zebra`;
         map<anydata> queryParam = {"format": format, "value": value, "showlabel": showlabel, "height": height, "width": width, "apikey": self.apiKeyConfig.apikey};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        byte[] response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
 }

@@ -38,7 +38,6 @@ public isolated client class Client {
     # + return - Ok
     remote isolated function operationId03(Id id) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(id)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
 }

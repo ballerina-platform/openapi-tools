@@ -49,8 +49,7 @@ public isolated client class Client {
         string resourcePath = string `/estimates/price`;
         map<anydata> queryParam = {"start_latitude": start_latitude, "start_longitude": start_longitude, "end_latitude": end_latitude, "end_longitude": end_longitude};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        PriceEstimate[] response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # Product Types
     #
@@ -61,8 +60,7 @@ public isolated client class Client {
         string resourcePath = string `/products`;
         map<anydata> queryParam = {"latitude": latitude, "longitude": longitude, "server_token": self.apiKeyConfig.server_token};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Product[] response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # Time Estimates
     #
@@ -75,8 +73,7 @@ public isolated client class Client {
         string resourcePath = string `/estimates/time`;
         map<anydata> queryParam = {"start_latitude": start_latitude, "start_longitude": start_longitude, "customer_uuid": customer_uuid, "product_id": product_id};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Product[] response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # User Activity
     #
@@ -87,15 +84,13 @@ public isolated client class Client {
         string resourcePath = string `/history`;
         map<anydata> queryParam = {"offset": offset, "limit": 'limit};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Activities response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # User Profile
     #
     # + return - Profile information for a user
     remote isolated function getUserProfile() returns Profile|error {
         string resourcePath = string `/me`;
-        Profile response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
 }

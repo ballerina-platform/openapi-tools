@@ -54,8 +54,7 @@ public isolated client class Client {
         string resourcePath = string `/pets`;
         map<anydata> queryParam = {"limit": 'limit, "appid1": self.apiKeyConfig.appid1, "appid2": self.apiKeyConfig.appid2};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # Create a pet
     #

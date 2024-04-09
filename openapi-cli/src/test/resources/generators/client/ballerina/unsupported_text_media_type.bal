@@ -41,7 +41,6 @@ public isolated client class Client {
         string resourcePath = string `/pets`;
         http:Request request = new;
         request.setPayload(payload, "text/xxx");
-        string response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
 }
