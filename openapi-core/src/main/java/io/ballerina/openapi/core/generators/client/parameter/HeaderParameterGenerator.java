@@ -51,7 +51,8 @@ public class HeaderParameterGenerator implements ParameterGenerator {
         Optional<TypeDescriptorNode> typeNodeResult = TypeHandler.getInstance()
                 .getTypeNodeFromOASSchema(parameter.getSchema(), true);
         if (typeNodeResult.isEmpty()) {
-            ClientDiagnosticImp diagnostic = new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_108, paramName.text());
+            ClientDiagnosticImp diagnostic = new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_108,
+                    paramName.text());
             diagnostics.add(diagnostic);
             return Optional.empty();
         }

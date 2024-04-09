@@ -128,7 +128,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                         classDef.classKeyword(),
                         classDef.className(),
                         classDef.openBrace(),
-                        updatedList.isEmpty()? classDef.members() : createNodeList(sortedNodes),
+                        updatedList.isEmpty() ? classDef.members() : createNodeList(sortedNodes),
                         classDef.closeBrace(),
                         classDef.semicolonToken().orElse(null));
                 member = classDef;
@@ -150,11 +150,14 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                 PathItem.HttpMethod method = entry.getKey();
                 Operation operation = entry.getValue();
                 if (!isResource) {
-                    operationDetailsMap.put(operation.getOperationId(), new OperationDetails(operation.getOperationId(), operation, path, method.name()));
+                    operationDetailsMap.put(operation.getOperationId(),
+                            new OperationDetails(operation.getOperationId(), operation, path, method.name()));
                 } else {
                     path = path.equals("/") ? "." : path;
-                    String key = replaceContentWithinBrackets(path.replaceFirst("/", ""), "XXX") + "_" + method.name().toLowerCase(Locale.ENGLISH);
-                    operationDetailsMap.put(key, new OperationDetails(operation.getOperationId(), operation, path, method.name()));
+                    String key = replaceContentWithinBrackets(path.replaceFirst("/", ""),
+                            "XXX") + "_" + method.name().toLowerCase(Locale.ENGLISH);
+                    operationDetailsMap.put(key, new OperationDetails(operation.getOperationId(),
+                            operation, path, method.name()));
                 }
             }
         });
@@ -174,7 +177,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                 docs.addAll(createAPIDescriptionDoc(operation.getDescription(), true));
             }
             //function display annotation
-            if (operation.getExtensions() != null ) {
+            if (operation.getExtensions() != null) {
                 extractDisplayAnnotation(operation.getExtensions(), annotations);
             }
             FunctionSignatureNode functionSignatureNode = funcDef.functionSignature();
@@ -242,7 +245,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
             } else {
                 metadataNode = metadata.get();
                 metadataNode = createMetadataNode(documentationNode,
-                        metadataNode.annotations().isEmpty()? createNodeList(annotations) :
+                        metadataNode.annotations().isEmpty() ? createNodeList(annotations) :
                                 metadataNode.annotations().addAll(annotations));
             }
             funcDef = funcDef.modify(
@@ -271,7 +274,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
         final String[] paramName = {"http:Request"};
         if (content != null) {
             content.entrySet().stream().findFirst().ifPresent(mediaType -> {
-                paramName[0] = getBallerinaMediaType(mediaType.getKey(),true);
+                paramName[0] = getBallerinaMediaType(mediaType.getKey(), true);
             });
         } else {
             paramName[0] = "http:Request";
@@ -279,7 +282,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
 
         if (requestBody.getDescription() != null) {
             String description = requestBody.getDescription().split("\n")[0];
-            docs.add(createAPIParamDoc(paramName[0].equals("http:Request")? "request": "payload", description));
+            docs.add(createAPIParamDoc(paramName[0].equals("http:Request") ? "request" : "payload", description));
         }
     }
 

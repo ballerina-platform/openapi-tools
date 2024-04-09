@@ -12,7 +12,6 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.core.generators.client.exception.FunctionSignatureGeneratorException;
 import io.ballerina.openapi.core.generators.client.parameter.HeaderParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.QueryParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.RequestBodyGenerator;
@@ -58,7 +57,8 @@ public class ResourceFunctionSingnatureGenerator implements FunctionSignatureGen
                         paramType = extractReferenceType(parameter.get$ref());
                     } catch (BallerinaOpenApiException e) {
                         DiagnosticMessages diagnostic = OAS_CLIENT_100;
-                        ClientDiagnosticImp clientDiagnostic = new ClientDiagnosticImp(diagnostic, parameter.get$ref());
+                        ClientDiagnosticImp clientDiagnostic = new ClientDiagnosticImp(diagnostic,
+                                parameter.get$ref());
                         diagnostics.add(clientDiagnostic);
                     }
                     parameter = openAPI.getComponents().getParameters().get(paramType);
@@ -68,7 +68,8 @@ public class ResourceFunctionSingnatureGenerator implements FunctionSignatureGen
 
                 switch (in) {
                     case "query":
-                        QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(parameter, openAPI);
+                        QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(parameter,
+                                openAPI);
                         Optional<ParameterNode> queryParam = queryParameterGenerator.generateParameterNode();
                         if (queryParam.isEmpty()) {
                             diagnostics.addAll(queryParameterGenerator.getDiagnostics());
@@ -83,7 +84,8 @@ public class ResourceFunctionSingnatureGenerator implements FunctionSignatureGen
                         }
                         break;
                     case "header":
-                        HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator(parameter, openAPI);
+                        HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator(parameter,
+                                openAPI);
                         Optional<ParameterNode> headerParam = headerParameterGenerator.generateParameterNode();
                         if (headerParam.isEmpty()) {
                             diagnostics.addAll(headerParameterGenerator.getDiagnostics());

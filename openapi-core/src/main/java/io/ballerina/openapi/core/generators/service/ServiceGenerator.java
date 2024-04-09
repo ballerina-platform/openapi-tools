@@ -104,9 +104,10 @@ public abstract class ServiceGenerator {
                 diagnostics.addAll(resourceGenerator.getDiagnostics());
                 functions.add(resourceFunction);
             }
-            if (resourceGenerator.isNullableRequired())
+            if (resourceGenerator.isNullableRequired()) {
                 isNullableRequired = true;
             }
+        }
         return functions;
     }
 }

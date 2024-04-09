@@ -34,11 +34,11 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.UnsupportedOASDataTypeException;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.type.model.RecordMetadata;
 import io.swagger.v3.oas.models.media.Schema;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import io.ballerina.openapi.core.generators.type.model.RecordMetadata;
 
 import java.io.PrintStream;
 import java.util.ArrayList;

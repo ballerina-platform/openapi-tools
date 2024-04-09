@@ -68,8 +68,8 @@ import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiExc
 import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
 import io.ballerina.openapi.core.generators.common.exception.NullPathParameterException;
 import io.ballerina.openapi.core.generators.common.exception.UnsupportedOASDataTypeException;
-import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
+import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.generators.EnumGenerator;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
@@ -252,7 +252,8 @@ public class GeneratorUtils {
      * @return - node lists
      * @throws BallerinaOpenApiException
      */
-    public static NodeList<Node> getRelativeResourcePath(String path, Operation operation, List<Node> resourceFunctionDocs,
+    public static NodeList<Node> getRelativeResourcePath(String path, Operation operation,
+                                                         List<Node> resourceFunctionDocs,
                                                      Components components, boolean isWithoutDataBinding)
             throws BallerinaOpenApiException {
 
@@ -1240,7 +1241,7 @@ public class GeneratorUtils {
             }
         }
 
-        if (properties.isEmpty()|| requiredField.isEmpty()) {
+        if (properties.isEmpty() || requiredField.isEmpty()) {
             return null;
         }
 

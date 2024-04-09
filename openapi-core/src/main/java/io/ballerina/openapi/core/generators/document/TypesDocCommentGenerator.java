@@ -9,7 +9,6 @@ import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.NonTerminalNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
@@ -114,13 +113,13 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
                             NodeFactory.createRecordTypeDescriptorNode(
                                     record.recordKeyword(),
                                     record.bodyStartDelimiter(),
-                                    updatedFields.isEmpty()? fields : createNodeList(updatedFields),
+                                    updatedFields.isEmpty() ? fields : createNodeList(updatedFields),
                                     record.recordRestDescriptor().orElse(null),
                                     record.bodyEndDelimiter()),
                             typeDef.semicolonToken());
                 }
                 Optional<MetadataNode> metadata = typeDef.metadata();
-                if (schema.getDescription() != null || schema.getDeprecated() != null){
+                if (schema.getDescription() != null || schema.getDeprecated() != null) {
                     MetadataNode metadataNode = updateMetadataNode(metadata, schema);
                     typeDef = typeDef.modify(metadataNode,
                             typeDef.visibilityQualifier().get(),

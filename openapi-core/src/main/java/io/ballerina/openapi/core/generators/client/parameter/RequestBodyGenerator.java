@@ -133,7 +133,7 @@ public class RequestBodyGenerator implements ParameterGenerator {
             }
             break;
         }
-        String reqBody = typeDescNode.toString().equals(HTTP_REQUEST)? "request": "payload";
+        String reqBody = typeDescNode.toString().equals(HTTP_REQUEST) ? "request" : "payload";
         return Optional.of(createRequiredParameterNode(createEmptyNodeList(), typeDescNode,
                 createIdentifierToken(reqBody)));
     }

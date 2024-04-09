@@ -8,12 +8,11 @@ import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
 import io.ballerina.openapi.core.generators.common.exception.UnsupportedOASDataTypeException;
 import io.ballerina.openapi.core.generators.service.diagnostic.ServiceDiagnostic;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
-import io.ballerina.openapi.core.generators.service.GeneratorConstants;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.generators.service.parameter.HeaderParameterGenerator;
 import io.ballerina.openapi.core.generators.service.parameter.QueryParameterGenerator;
@@ -83,7 +82,6 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
      * This function for generating operation parameters.
      *
      * @param operation OAS operation
-     * @throws OASTypeGenException when the parameter generation fails.
      */
     public ParametersGeneratorResult generateParameters(Map.Entry<PathItem.HttpMethod, Operation> operation) {
         List<Node> requiredParams = new ArrayList<>();
@@ -173,5 +171,5 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
         return requestBody;
     }
 
-    public record ParametersGeneratorResult(List<Node> requiredParameters, List<Node> defaultableParameters) {}
+    public record ParametersGeneratorResult(List<Node> requiredParameters, List<Node> defaultableParameters) { }
 }

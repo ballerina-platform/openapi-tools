@@ -49,7 +49,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_RETURN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ERROR;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPTIONAL_ERROR;
 
 /**

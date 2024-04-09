@@ -19,8 +19,6 @@
 package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
-import io.ballerina.openapi.core.generators.common.GeneratorUtils;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.mime.CustomType;
 import io.ballerina.openapi.core.generators.client.mime.JsonType;
 import io.ballerina.openapi.core.generators.client.mime.MimeType;
@@ -28,6 +26,8 @@ import io.ballerina.openapi.core.generators.client.mime.MultipartFormData;
 import io.ballerina.openapi.core.generators.client.mime.OctetStreamType;
 import io.ballerina.openapi.core.generators.client.mime.UrlEncodedType;
 import io.ballerina.openapi.core.generators.client.mime.XmlType;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 

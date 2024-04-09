@@ -67,7 +67,6 @@ import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
-import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 
@@ -456,7 +455,8 @@ public class AuthConfigGeneratorImp {
      * @return {@link TypeDefinitionNode}   Custom `OAuth2ClientCredentialsGrantConfig` record with default tokenUrl
      */
     private TypeDefinitionNode getOAuth2ClientCredsGrantConfigRecord() {
-        Token typeName = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.AuthConfigTypes.CUSTOM_CLIENT_CREDENTIAL.getValue());
+        Token typeName = AbstractNodeFactory.createIdentifierToken(GeneratorConstants
+                .AuthConfigTypes.CUSTOM_CLIENT_CREDENTIAL.getValue());
         NodeList<Node> recordFieldList = createNodeList(getClientCredsGrantConfigFields());
         MetadataNode configRecordMetadataNode = getMetadataNode("OAuth2 Client Credentials Grant Configs");
         RecordTypeDescriptorNode recordTypeDescriptorNode =
@@ -515,7 +515,8 @@ public class AuthConfigGeneratorImp {
      * @return {@link TypeDefinitionNode}   Custom `OAuth2PasswordGrantConfig` record with default tokenUrl
      */
     private TypeDefinitionNode getOAuth2PasswordGrantConfigRecord() {
-        Token typeName = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.AuthConfigTypes.CUSTOM_PASSWORD.getValue());
+        Token typeName = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.AuthConfigTypes
+                .CUSTOM_PASSWORD.getValue());
         NodeList<Node> recordFieldList = createNodeList(getPasswordGrantConfigFields());
         MetadataNode configRecordMetadataNode = getMetadataNode("OAuth2 Password Grant Configs");
         RecordTypeDescriptorNode recordTypeDescriptorNode =
@@ -575,7 +576,8 @@ public class AuthConfigGeneratorImp {
      * @return {@link TypeDefinitionNode}   Custom `OAuth2RefreshTokenGrantConfig` record with default refreshUrl
      */
     private TypeDefinitionNode getOAuth2RefreshTokenGrantConfigRecord() {
-        Token typeName = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.AuthConfigTypes.CUSTOM_REFRESH_TOKEN.getValue());
+        Token typeName = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.AuthConfigTypes
+                .CUSTOM_REFRESH_TOKEN.getValue());
         NodeList<Node> recordFieldList = createNodeList(getRefreshTokenGrantConfigFields());
         MetadataNode configRecordMetadataNode = getMetadataNode("OAuth2 Refresh Token Grant Configs");
         RecordTypeDescriptorNode recordTypeDescriptorNode =
