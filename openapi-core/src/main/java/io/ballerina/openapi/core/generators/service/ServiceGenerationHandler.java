@@ -46,13 +46,6 @@ public class ServiceGenerationHandler {
                 oasServiceMetadata.getSrcFile(),
                 (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
                         oasServiceMetadata.getLicenseHeader()) + mainContent));
-        String typeContent = Formatter.format(TypeHandler.getInstance().generateTypeSyntaxTree()).toSourceCode();
-        if (!typeContent.isBlank()) {
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
-                    "types.bal",
-                    (oasServiceMetadata.getLicenseHeader().isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
-                            oasServiceMetadata.getLicenseHeader()) + typeContent));
-        }
 
         if (oasServiceMetadata.isServiceTypeRequired()) {
             ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata,

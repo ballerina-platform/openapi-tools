@@ -165,21 +165,17 @@ public class BallerinaCodeGenerator {
                     .withGenerateServiceType(generateServiceType)
                     .withGenerateWithoutDataBinding(generateWithoutDataBinding)
                     .build();
-            ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
-            serviceContent = Formatter.format
-                    (serviceGenerator.generateSyntaxTree()).toSourceCode();
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile,
-                    (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + serviceContent));
 
-            if (generateServiceType) {
-                ServiceTypeGenerator ballerinaServiceTypeGenerator = new
-                        ServiceTypeGenerator(oasServiceMetadata);
-                String serviceType = Formatter.format(ballerinaServiceTypeGenerator.generateSyntaxTree()).
-                        toSourceCode();
-                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
-                        "service_type.bal", (licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
-                        licenseHeader) + serviceType));
+            ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+            sourceFiles = serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+            String schemaSyntaxTree = Formatter.format(TypeHandler.getInstance().generateTypeSyntaxTree())
+                    .toSourceCode();
+            if (!schemaSyntaxTree.isBlank() && !generateWithoutDataBinding) {
+                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME,
+                        (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaSyntaxTree));
             }
+            this.diagnostics.addAll(serviceGenerationHandler.getDiagnostics());
+            this.diagnostics.addAll(TypeHandler.getInstance().getDiagnostics());
         }
 
         TypeHandler typeHandler = TypeHandler.getInstance();

@@ -1,21 +1,31 @@
 import ballerina/http;
 
-public type InternalServerErrorString record {|
-    *http:InternalServerError;
-    string body;
-|};
-
 public type OkJson record {|
     *http:Ok;
     json body;
+    map<string|string[]> headers;
 |};
 
-public type NotFoundAnydata record {|
+public type NotFoundAnydataJsonXml record {|
     *http:NotFound;
-    anydata body;
+    anydata|json|xml body;
+    map<string|string[]> headers;
+|};
+
+public type InternalServerErrorString record {|
+    *http:InternalServerError;
+    string body;
+    map<string|string[]> headers;
+|};
+
+public type BadRequestAnydataJsonXml record {|
+    *http:BadRequest;
+    anydata|json|xml body;
+    map<string|string[]> headers;
 |};
 
 public type BadRequestAnydata record {|
     *http:BadRequest;
     anydata body;
+    map<string|string[]> headers;
 |};
