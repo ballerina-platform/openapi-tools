@@ -34,6 +34,7 @@ public class Constants {
     public static final String MODE = "mode";
     public static final String CLIENT = "client";
     public static final String CACHE_FILE = "openapi-cache.txt";
+    public static final String STATUS_CODE_BINDING = "statusCodeBinding";
 
     /**
      * Enum class for containing diagnostic messages.
@@ -56,7 +57,19 @@ public class Constants {
                 ".yaml, or .json files for code generation.",
                 DiagnosticSeverity.ERROR),
         INVALID_CONTRACT_PATH("OAS_CLIENT_09", "invalid openapi contract file path.",
-                DiagnosticSeverity.ERROR);
+                DiagnosticSeverity.ERROR),
+        TOML_UPDATED_WITH_CLIENT_NATIVE_DEPENDENCY("OAS_CLIENT_10", "the 'Ballerina.toml' file is " +
+                "updated with the OpenAPI client native dependency.", DiagnosticSeverity.INFO),
+        TOML_ALREADY_UPDATED_WITH_CLIENT_NATIVE_DEPENDENCY("OAS_CLIENT_10", "the 'Ballerina.toml' file is " +
+                "already updated with the latest OpenAPI client native dependency.", DiagnosticSeverity.INFO),
+        CLIENT_NATIVE_DEPENDENCY_VERSION_MISMATCH("OAS_CLIENT_10", "the 'Ballerina.toml' file is already" +
+                " updated with the OpenAPI client native dependency but the version is different from the current " +
+                "version. Please remove the existing dependency and try again.", DiagnosticSeverity.ERROR),
+        ERROR_WHILE_UPDATING_TOML("OAS_CLIENT_11", "error occurred when updating Ballerina.toml " +
+                "file with the client native dependency.", DiagnosticSeverity.ERROR),
+        WARNING_FOR_UNSUPPORTED_MEDIA_TYPE("OAS_CLIENT_12", "the generated client will not have status code" +
+                " response binding since the OpenAPI definition contains unsupported media-type for request " +
+                "payload binding.", DiagnosticSeverity.WARNING);
 
         private final String code;
         private final String description;

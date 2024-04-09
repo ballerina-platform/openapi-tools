@@ -25,6 +25,9 @@
     },
     "license": {
       "type": "string"
+    },
+    "statusCodeBinding": {
+      "type": "boolean"
     }
   },
   "additionalProperties": false
