@@ -50,10 +50,12 @@ public class CommonTestFunctions {
         } catch (FormatterException e) {
             throw new RuntimeException(e);
         }
+        String osName = System.getProperty("os.name");
+        String replaceRegex  = osName.toLowerCase().contains("windows") ? "#.*[+*a\\r\\n]" : "#.*[+*a\\n]";
         // todo : removing the comments as we are not checking the docs atm.
-        generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("#.*[+*a\\n]", "")
+        generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll(replaceRegex, "")
                 .replaceAll("\\s+", "");
-        expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("#.*[+*a\\n]", "")
+        expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll(replaceRegex, "")
                 .replaceAll("\\s+", "");
         Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
     }
