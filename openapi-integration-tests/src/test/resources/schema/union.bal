@@ -1,5 +1,49 @@
-import ballerina/constraint;
+
 import ballerina/http;
+
+public type TaxratesItemsString string;
+
+# Provides settings related to HTTP/1.x protocol.
+public type ClientHttp1Settings record {|
+    # Specifies whether to reuse a connection for multiple requests
+    http:KeepAlive keepAlive = http:KEEPALIVE_AUTO;
+    # The chunking behaviour of the request
+    http:Chunking chunking = http:CHUNKING_AUTO;
+    # Proxy server related options
+    ProxyConfig proxy?;
+|};
+
+public type TaxratesanyofarrayItemsNull int|string;
+
+# Proxy server configurations to be used with the HTTP client endpoint.
+public type ProxyConfig record {|
+    # Host name of the proxy server
+    string host = "";
+    # Proxy server port
+    int port = 0;
+    # Proxy server username
+    string userName = "";
+    # Proxy server password
+    @display {label: "", kind: "password"}
+    string password = "";
+|};
+
+public type TaxratesanyofItemsString string;
+
+public type TaxratesoneofarrayItemsNull string|int;
+
+public type Person record {
+    # scenario 01 - field with nullable.
+    string? service_class;
+    # scenario 02 - field with oneOf type.
+    TaxratesItemsString[]|int tax_rates?;
+    # scenario 03 - field with anyOf.
+    TaxratesanyofItemsString[]|int tax_rates_anyOf?;
+    # scenario 03 - field with a oneOf type array that items has oneOf.
+    (string|int)[]|string tax_rates_oneOF_array?;
+    # scenario 04 - field with a anyOf type array items has anyOf.
+    (int|string)[]|int tax_rates_anyOf_array?;
+};
 
 # Provides a set of configurations for controlling the behaviours when communicating with a remote HTTP endpoint.
 @display {label: "Connection Config"}
@@ -33,49 +77,3 @@ public type ConnectionConfig record {|
     # Enables the inbound payload validation functionality which provided by the constraint package. Enabled by default
     boolean validation = true;
 |};
-
-# Provides settings related to HTTP/1.x protocol.
-public type ClientHttp1Settings record {|
-    # Specifies whether to reuse a connection for multiple requests
-    http:KeepAlive keepAlive = http:KEEPALIVE_AUTO;
-    # The chunking behaviour of the request
-    http:Chunking chunking = http:CHUNKING_AUTO;
-    # Proxy server related options
-    ProxyConfig proxy?;
-|};
-
-# Proxy server configurations to be used with the HTTP client endpoint.
-public type ProxyConfig record {|
-    # Host name of the proxy server
-    string host = "";
-    # Proxy server port
-    int port = 0;
-    # Proxy server username
-    string userName = "";
-    # Proxy server password
-    @display {label: "", kind: "password"}
-    string password = "";
-|};
-
-@constraint:String {maxLength: 5000}
-public type TaxratesItemsString string;
-
-@constraint:String {maxLength: 5000}
-public type TaxratesanyofItemsString string;
-
-public type TaxratesoneofarrayItemsNull string|int;
-
-public type TaxratesanyofarrayItemsNull int|string;
-
-public type Person record {
-    # scenario 01 - field with nullable.
-    string? service_class;
-    # scenario 02 - field with oneOf type.
-    TaxratesItemsString[]|int tax_rates?;
-    # scenario 03 - field with anyOf.
-    TaxratesanyofItemsString[]|int tax_rates_anyOf?;
-    # scenario 03 - field with a oneOf type array that items has oneOf.
-    (string|int)[]|string tax_rates_oneOF_array?;
-    # scenario 04 - field with a anyOf type array items has anyOf.
-    (int|string)[]|int tax_rates_anyOf_array?;
-};
