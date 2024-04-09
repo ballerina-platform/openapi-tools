@@ -23,7 +23,6 @@ import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.type.GeneratorConstants;
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
@@ -96,7 +95,8 @@ public class EnumGenerator extends TypeGenerator {
                     throw new OASTypeGenException("Unsupported OAS data type `" + schema.getType().trim() + "`");
                 }
                 if (isNull) {
-                    return createSimpleNameReferenceNode(createIdentifierToken(typeDescriptorName + GeneratorConstants.NILLABLE));
+                    return createSimpleNameReferenceNode(createIdentifierToken(typeDescriptorName +
+                            GeneratorConstants.NILLABLE));
                 } else {
                     TypeDescriptorNode typeDescriptorNode = createSimpleNameReferenceNode(
                             createIdentifierToken(typeDescriptorName));

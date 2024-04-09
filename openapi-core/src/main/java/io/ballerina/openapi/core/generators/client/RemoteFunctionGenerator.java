@@ -9,14 +9,9 @@ import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
-import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.core.generators.client.exception.FunctionSignatureGeneratorException;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import org.ballerinalang.model.tree.FunctionNode;
 
 import java.util.ArrayList;
 import java.util.List;

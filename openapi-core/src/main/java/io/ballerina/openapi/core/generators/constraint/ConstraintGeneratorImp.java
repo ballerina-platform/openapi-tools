@@ -122,8 +122,10 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                                     constraintNode = null;
                                 } else if (isConstraintSupport) {
                                     //todo diagnostic
-//                                    outStream.printf("WARNING: constraints in the OpenAPI contract will be ignored for the " +
-//                                                    "field `%s`, as constraints are not supported on Ballerina union types%n",
+//                                    outStream.printf("WARNING: constraints in the OpenAPI contract will be
+//                                    ignored for the " +
+//                                                    "field `%s`, as constraints are not supported on
+//                                                    Ballerina union types%n",
 //                                            fieldName.toString().trim());
                                     constraintNode = null;
                                 }
@@ -207,8 +209,10 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                                 constraintNode = null;
                             } else if (isConstraintSupport) {
                                 //todo diagnostic
-//                                    outStream.printf("WARNING: constraints in the OpenAPI contract will be ignored for the " +
-//                                                    "field `%s`, as constraints are not supported on Ballerina union types%n",
+//                                    outStream.printf("WARNING: constraints in the OpenAPI contract will
+//                                    be ignored for the " +
+//                                                    "field `%s`, as constraints are not supported on Ballerina
+//                                                    union types%n",
 //                                            fieldName.toString().trim());
                                 constraintNode = null;
                             }
@@ -216,7 +220,8 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                                 metadataNode = createMetadataNode(null, createEmptyNodeList());
                             } else {
                                 isConstraint = true;
-                                metadataNode = createMetadataNode(null, createNodeList(constraintNode));
+                                metadataNode = createMetadataNode(null,
+                                        createNodeList(constraintNode));
                             }
                             typeDefinitionNode = typeDefinitionNode.modify(
                                     metadataNode,
@@ -228,7 +233,8 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                             );
 
                             if (value instanceof ArraySchema arraySchema) {
-                                String normalizedTypeName = key.replaceAll(GeneratorConstants.SPECIAL_CHARACTER_REGEX, "").trim();
+                                String normalizedTypeName = key.replaceAll(GeneratorConstants
+                                        .SPECIAL_CHARACTER_REGEX, "").trim();
                                 updateConstraintWithArrayItems("", normalizedTypeName, arraySchema);
                             }
                         }
@@ -276,8 +282,10 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                         constraintNode = null;
                     } else if (isConstraintSupport) {
                         //todo diagnostic
-//                                    outStream.printf("WARNING: constraints in the OpenAPI contract will be ignored for the " +
-//                                                    "field `%s`, as constraints are not supported on Ballerina union types%n",
+//                                    outStream.printf("WARNING: constraints in the OpenAPI contract
+//                                    will be ignored for the " +
+//                                                    "field `%s`, as constraints are not supported on
+//                                                    Ballerina union types%n",
 //                                            fieldName.toString().trim());
                         constraintNode = null;
                     }

@@ -27,8 +27,8 @@ import io.ballerina.openapi.core.generators.constraint.ConstraintGeneratorImp;
 import io.ballerina.openapi.core.generators.constraint.ConstraintResult;
 import io.ballerina.openapi.core.generators.document.DocCommentGeneratorImp;
 import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.generators.type.model.TypeGeneratorResult;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
+import io.ballerina.openapi.core.generators.type.model.TypeGeneratorResult;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
@@ -137,7 +137,7 @@ public class TypeHandler {
             if (!(node.typeDescriptor() instanceof RecordTypeDescriptorNode)) {
                 continue;
             }
-            if (node.typeName().text().equals(io.ballerina.openapi.core.generators.type.GeneratorConstants.CONNECTION_CONFIG)) {
+            if (node.typeName().text().equals(GeneratorConstants.CONNECTION_CONFIG)) {
                 ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(
                         GeneratorConstants.BALLERINA, GeneratorConstants.HTTP);
                 imports.add(importForHttp);
@@ -180,12 +180,14 @@ public class TypeHandler {
         if (headersSchema != null && getTypeNodeFromOASSchema(headersSchema).isPresent()) {
             headersType = getTypeNodeFromOASSchema(headersSchema).get();
         } else {
-            TypeDescriptorNode stringType = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.STRING));
+            TypeDescriptorNode stringType = createSimpleNameReferenceNode(createIdentifierToken(
+                    GeneratorConstants.STRING));
 
             ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
                     createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                     createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-            TypeDescriptorNode stringArrType = createArrayTypeDescriptorNode(stringType, createNodeList(dimensionNode));
+            TypeDescriptorNode stringArrType = createArrayTypeDescriptorNode(stringType,
+                    createNodeList(dimensionNode));
 
             UnionTypeDescriptorNode unionType = createUnionTypeDescriptorNode(stringType, createToken(PIPE_TOKEN),
                     stringArrType);
@@ -219,7 +221,8 @@ public class TypeHandler {
                 createToken(SyntaxKind.SEMICOLON_TOKEN));
         recordFields.add(typeReferenceNode);
 
-        IdentifierToken bodyFieldName = createIdentifierToken(GeneratorConstants.BODY, GeneratorUtils.SINGLE_WS_MINUTIAE,
+        IdentifierToken bodyFieldName = createIdentifierToken(GeneratorConstants.BODY,
+                GeneratorUtils.SINGLE_WS_MINUTIAE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
         if (bodyType != null) {
             RecordFieldNode bodyFieldNode = createRecordFieldNode(
@@ -230,7 +233,8 @@ public class TypeHandler {
             recordFields.add(bodyFieldNode);
         }
 
-        IdentifierToken headersFieldName = createIdentifierToken(GeneratorConstants.HEADERS, GeneratorUtils.SINGLE_WS_MINUTIAE,
+        IdentifierToken headersFieldName = createIdentifierToken(GeneratorConstants.HEADERS,
+                GeneratorUtils.SINGLE_WS_MINUTIAE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
         RecordFieldNode headersFieldNode = createRecordFieldNode(
                 null, null,

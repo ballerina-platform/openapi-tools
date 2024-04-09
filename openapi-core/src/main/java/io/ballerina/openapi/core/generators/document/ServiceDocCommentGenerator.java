@@ -31,9 +31,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -61,12 +59,10 @@ import static io.ballerina.openapi.core.generators.document.DocCommentsGenerator
 public class ServiceDocCommentGenerator implements DocCommentsGenerator {
     OpenAPI openAPI;
     SyntaxTree syntaxTree;
-    boolean isProxyService;
 
     public ServiceDocCommentGenerator(SyntaxTree syntaxTree, OpenAPI openAPI, boolean isProxyService) {
         this.openAPI = openAPI;
         this.syntaxTree = syntaxTree;
-        this.isProxyService = isProxyService;
     }
     @Override
     public SyntaxTree updateSyntaxTreeWithDocComments() {
@@ -94,11 +90,12 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
                             sortKey = funcDef.toSourceCode();
                             sortedMembers.add(sortKey);
                             NodeList<Node> nodes = funcDef.relativeResourcePath();
-                            String path = "";
+                            StringBuilder path = new StringBuilder();
                             for (Node node: nodes) {
-                                path = path + node.toString().replace("\"", "");
+                                path.append(node.toString().replace("\"", ""));
                             }
-                            String key = replaceContentWithinBrackets(path, "XXX") + "_" + funcDef.functionName().text();
+                            String key = replaceContentWithinBrackets(path.toString(), "XXX") + "_" +
+                                    funcDef.functionName().text();
                             funcDef = updateDocCommentsForFunctionNode(operationDetailsMap, funcDef, key);
 
                         classMember = funcDef;
@@ -123,7 +120,7 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
                         classDef.onKeyword(),
                         classDef.expressions(),
                         classDef.openBraceToken(),
-                        updatedList.isEmpty()? classDef.members() : createNodeList(sortedNodes),
+                        updatedList.isEmpty() ? classDef.members() : createNodeList(sortedNodes),
                         classDef.closeBraceToken(),
                         classDef.semicolonToken().orElse(null));
             }
@@ -144,8 +141,10 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
                 PathItem.HttpMethod method = entry.getKey();
                 Operation operation = entry.getValue();
                 path = path.equals("/") ? "." : path;
-                String key = replaceContentWithinBrackets(path.replaceFirst("/", ""), "XXX") + "_" + method.name().toLowerCase(Locale.ENGLISH);
-                operationDetailsMap.put(key, new OperationDetails(operation.getOperationId(), operation, path, method.name()));
+                String key = replaceContentWithinBrackets(path.replaceFirst("/", ""),
+                        "XXX") + "_" + method.name().toLowerCase(Locale.ENGLISH);
+                operationDetailsMap.put(key, new OperationDetails(operation.getOperationId(),
+                        operation, path, method.name()));
             }
         });
     }
@@ -164,7 +163,7 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
                 docs.addAll(createAPIDescriptionDoc(operation.getDescription(), true));
             }
             //function display annotation
-            if (operation.getExtensions() != null ) {
+            if (operation.getExtensions() != null) {
                 extractDisplayAnnotation(operation.getExtensions(), annotations);
             }
             FunctionSignatureNode functionSignatureNode = funcDef.functionSignature();
@@ -190,35 +189,36 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
             }
             RequestBody requestBody = operation.getRequestBody();
             if (requestBody != null) {
-                RequestBodyDoc(docs, requestBody);
+                requestBodyDoc(docs, requestBody);
             }
             //todo response
             if (operation.getResponses() != null) {
                 ApiResponses responses = operation.getResponses();
-                Set<String> responseKeys = responses.keySet();
-                if (responseKeys.size() > 1) {
+                Set<Map.Entry<String, ApiResponse>> entrySet = responses.entrySet();
+                if (entrySet.size() > 1) {
                     MarkdownParameterDocumentationLineNode returnDoc = createAPIParamDoc("return",
                             "returns can be any of following types");
                     docs.add(returnDoc);
-                    for (String responseKey : responseKeys) {
-                        ApiResponse response = responses.get(responseKey);
-                        String code = GeneratorConstants.HTTP_CODES_DES.get(responseKey.trim());
-                        if (response.getDescription() != null && !response.getDescription().isBlank()) {
+                    for (Map.Entry<String, ApiResponse> response : entrySet) {
+                        String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
+                        if (response.getValue().getDescription() != null &&
+                                !response.getValue().getDescription().isBlank()) {
                             if (code == null) {
                                 code = "Response";
                             }
                             MarkdownCodeLineNode returnDocLine = createMarkdownCodeLineNode(
                                     createToken(SyntaxKind.HASH_TOKEN), createIdentifierToken(String
-                                            .format("http:%s (%s)", code, response.getDescription()
+                                            .format("http:%s (%s)", code, response.getValue().getDescription()
                                                     .replaceAll("\n", "\n# "))));
                             docs.add(returnDocLine);
                         }
                     }
-                } else if (responseKeys.size() == 1) {
-                    ApiResponse response = responses.get(responseKeys.iterator().next());
-                    if (response.getDescription() != null && !response.getDescription().isBlank()) {
+                } else if (entrySet.size() == 1) {
+                    Map.Entry<String, ApiResponse> response = responses.entrySet().iterator().next();
+                    if (response.getValue().getDescription() != null &&
+                            !response.getValue().getDescription().isBlank()) {
                         MarkdownParameterDocumentationLineNode returnDoc = createAPIParamDoc("return",
-                                response.getDescription());
+                                response.getValue().getDescription());
                         docs.add(returnDoc);
                     }
                 }
@@ -232,7 +232,7 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
             } else {
                 metadataNode = metadata.get();
                 metadataNode = createMetadataNode(documentationNode,
-                        metadataNode.annotations().isEmpty()? createNodeList(annotations) :
+                        metadataNode.annotations().isEmpty() ? createNodeList(annotations) :
                                 metadataNode.annotations().addAll(annotations));
             }
             funcDef = funcDef.modify(
@@ -248,7 +248,7 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
         return funcDef;
     }
 
-    private void RequestBodyDoc(List<Node> docs, RequestBody requestBody) {
+    private void requestBodyDoc(List<Node> docs, RequestBody requestBody) {
         if (requestBody.get$ref() != null) {
             try {
                 requestBody = openAPI.getComponents().getRequestBodies().get(
@@ -261,7 +261,7 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
         final String[] paramName = {"http:Request"};
         if (content != null) {
             content.entrySet().stream().findFirst().ifPresent(mediaType -> {
-                paramName[0] = getBallerinaMediaType(mediaType.getKey(),true);
+                paramName[0] = getBallerinaMediaType(mediaType.getKey(), true);
             });
         } else {
             paramName[0] = "http:Request";
@@ -269,7 +269,7 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
 
         if (requestBody.getDescription() != null) {
             String description = requestBody.getDescription().split("\n")[0];
-            docs.add(createAPIParamDoc(paramName[0].equals("http:Request")? "request": "payload", description));
+            docs.add(createAPIParamDoc(paramName[0].equals("http:Request") ? "request" : "payload", description));
         }
     }
 
@@ -326,14 +326,14 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
         if (parameterNode != null) {
             if (parameterNode instanceof RequiredParameterNode reParam) {
                 updatedParamsRequired.add(reParam.modify(
-                        reParam.annotations().isEmpty()? createNodeList(paramAnnot) :
+                        reParam.annotations().isEmpty() ? createNodeList(paramAnnot) :
                                 reParam.annotations().addAll(paramAnnot),
                         reParam.typeName(),
                         reParam.paramName().orElse(null)));
                 updatedParamsRequired.add(createToken(SyntaxKind.COMMA_TOKEN));
             } else if (parameterNode instanceof DefaultableParameterNode deParam) {
                 updatedParamsDefault.add(deParam.modify(
-                        deParam.annotations().isEmpty()? createNodeList(paramAnnot) :
+                        deParam.annotations().isEmpty() ? createNodeList(paramAnnot) :
                                 deParam.annotations().addAll(paramAnnot),
                         deParam.typeName(),
                         deParam.paramName().orElse(null),

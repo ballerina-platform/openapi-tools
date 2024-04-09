@@ -22,9 +22,9 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.media.Schema;
-import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -86,8 +86,10 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 Map.Entry<String, ApiResponse> response = responseIterator.next();
                 returnNode = handleSingleResponse(response, httpMethod);
             } else {
-                TypeDescriptorNode defaultType = createSimpleNameReferenceNode(createIdentifierToken(io.ballerina.openapi.core.generators.service.GeneratorConstants.HTTP_RESPONSE));
-                returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(), defaultType);
+                TypeDescriptorNode defaultType = createSimpleNameReferenceNode(createIdentifierToken(
+                        GeneratorConstants.HTTP_RESPONSE));
+                returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(),
+                        defaultType);
             }
         } else {
             // --error node TypeDescriptor
@@ -97,7 +99,8 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
 
         if (GeneratorUtils.isComplexURL(path)) {
             assert returnNode != null;
-            String returnStatement = returnNode.toString().trim().replace(io.ballerina.openapi.core.generators.service.GeneratorConstants.RETURNS, "") + "|error";
+            String returnStatement = returnNode.toString().trim().replace(
+                    GeneratorConstants.RETURNS, "") + "|error";
             return createReturnTypeDescriptorNode(createToken(SyntaxKind.RETURNS_KEYWORD), createEmptyNodeList(),
                     createSimpleNameReferenceNode(createIdentifierToken(returnStatement)));
         }
@@ -125,9 +128,9 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             }
             if (code == null && !responseCode.equals(GeneratorConstants.DEFAULT)) {
                 diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_108, responseCode));
-                type = createSimpleNameReferenceNode(createIdentifierToken(io.ballerina.openapi.core.generators.service.GeneratorConstants.HTTP_RESPONSE));
-            } else if(responseCode.equals(GeneratorConstants.DEFAULT)) {
-                type = createSimpleNameReferenceNode(createIdentifierToken(io.ballerina.openapi.core.generators.service.GeneratorConstants.HTTP_RESPONSE));
+                type = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
+            } else if (responseCode.equals(GeneratorConstants.DEFAULT)) {
+                type = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
             } else if (content == null && (responseValue == null || responseValue.get$ref() == null) ||
                     content != null && content.isEmpty()) {
                 type = GeneratorUtils.getQualifiedNameReferenceNode(
@@ -200,7 +203,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
             TypeDescriptorNode statues;
             if (response.getKey().trim().equals(GeneratorConstants.DEFAULT)) {
-                statues = createSimpleNameReferenceNode(createIdentifierToken(io.ballerina.openapi.core.generators.service.GeneratorConstants.HTTP_RESPONSE));
+                statues = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
             } else {
                 statues = GeneratorUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
             }
@@ -226,7 +229,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             } else if (response.getKey().trim().equals(GeneratorConstants.DEFAULT)) {
                 // handle status code with `default`, this maps to `http:Response`
                 BuiltinSimpleNameReferenceNode type = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(io.ballerina.openapi.core.generators.service.GeneratorConstants.HTTP_RESPONSE));
+                        createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), type);
             } else {
                 // handle rest of the status codes
@@ -236,7 +239,8 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                             oasServiceMetadata.getOpenAPI(), path, diagnostics);
                 } catch (InvalidReferenceException e) {
                     diagnostics.add(e.getDiagnostic());
-                    statusCodeTypeInclusionRecord = createSimpleNameReferenceNode(createIdentifierToken(io.ballerina.openapi.core.generators.service.GeneratorConstants.HTTP_RESPONSE));
+                    statusCodeTypeInclusionRecord = createSimpleNameReferenceNode(
+                            createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
                 }
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(),
                         statusCodeTypeInclusionRecord);

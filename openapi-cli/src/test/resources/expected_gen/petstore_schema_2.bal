@@ -28,11 +28,6 @@ public type ProxyConfig record {|
     string password = "";
 |};
 
-public type Dog record{
-    *Pet;
-    boolean bark?;
-};
-
 public type Pet record {
     int id;
     string name;

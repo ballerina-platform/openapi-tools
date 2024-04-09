@@ -10,7 +10,8 @@ public class DocCommentGeneratorImp {
     private final GenSrcFile.GenFileType type;
     private final boolean isProxyService;
 
-    public DocCommentGeneratorImp(OpenAPI openAPI, SyntaxTree syntaxTree, GenSrcFile.GenFileType type, boolean isProxyService) {
+    public DocCommentGeneratorImp(OpenAPI openAPI, SyntaxTree syntaxTree, GenSrcFile.GenFileType type,
+                                  boolean isProxyService) {
         this.openAPI = openAPI;
         this.syntaxTree = syntaxTree;
         this.type = type;
@@ -24,12 +25,14 @@ public class DocCommentGeneratorImp {
         switch (type) {
             case GEN_CLIENT:
                 //generate client doc comments
-                ClientDocCommentGenerator clientDocCommentGenerator = new ClientDocCommentGenerator(syntaxTree, openAPI, true);
+                ClientDocCommentGenerator clientDocCommentGenerator = new ClientDocCommentGenerator(syntaxTree,
+                        openAPI, true);
                 syntaxTree = clientDocCommentGenerator.updateSyntaxTreeWithDocComments();
                 break;
             case GEN_SERVICE:
                 //generate service doc comments
-                ServiceDocCommentGenerator serviceDocCommentGenerator = new ServiceDocCommentGenerator(syntaxTree, openAPI, isProxyService);
+                ServiceDocCommentGenerator serviceDocCommentGenerator = new ServiceDocCommentGenerator(syntaxTree,
+                        openAPI, isProxyService);
                 syntaxTree = serviceDocCommentGenerator.updateSyntaxTreeWithDocComments();
                 break;
             case GEN_SERVICE_TYPE:

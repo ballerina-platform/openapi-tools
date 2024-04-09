@@ -147,7 +147,8 @@ public class QueryParameterGenerator extends ParameterGenerator {
     /**
      * This function is to handle query schema which does not have required as true.
      */
-    private ParameterNode handleOptionalQueryParameter(Schema<?> schema, IdentifierToken parameterName) throws UnsupportedOASDataTypeException {
+    private ParameterNode handleOptionalQueryParameter(Schema<?> schema, IdentifierToken parameterName)
+            throws UnsupportedOASDataTypeException {
         if (isArraySchema(schema)) {
             Schema<?> items = schema.getItems();
             if (getOpenAPIType(items) == null && items.get$ref() == null) {

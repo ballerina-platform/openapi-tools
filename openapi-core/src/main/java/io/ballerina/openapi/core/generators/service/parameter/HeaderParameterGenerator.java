@@ -107,10 +107,12 @@ public class HeaderParameterGenerator extends ParameterGenerator {
                 if (paramSupportedTypes.contains(getOpenAPIType(refSchema))) {
                     arrayType = type;
                 } else {
-                    diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_103, parameter.getName(), type));
+                    diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_103,
+                            parameter.getName(), type));
                 }
             } else if (!paramSupportedTypes.contains(getOpenAPIType(items))) {
-                diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_103, parameter.getName(), getOpenAPIType(items)));
+                diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_103, parameter.getName(),
+                        getOpenAPIType(items)));
             } else if (items.getEnum() != null && !items.getEnum().isEmpty()) {
                 arrayType = OPEN_PAREN_TOKEN.stringValue() + convertOpenAPITypeToBallerina(items, true) +
                         CLOSE_PAREN_TOKEN.stringValue();

@@ -150,7 +150,8 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
 
     public FunctionBodyGeneratorImp(String path, Map.Entry<PathItem.HttpMethod, Operation> operation, OpenAPI openAPI,
                                     AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp,
-                                    BallerinaUtilGenerator ballerinaUtilGenerator, List<ImportDeclarationNode> imports) {
+                                    BallerinaUtilGenerator ballerinaUtilGenerator,
+                                    List<ImportDeclarationNode> imports) {
 
         this.path = path;
         this.operation = operation;
@@ -171,7 +172,8 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
     public Optional<FunctionBodyNode> getFunctionBodyNode() {
 
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation.getValue(), openAPI);
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation.getValue(),
+                openAPI);
         isHeader = false;
         // Create statements
         List<StatementNode> statementsList = new ArrayList<>();
@@ -189,7 +191,8 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
         if (returnResult.isEmpty()) {
             //todo diagnostic message
             return Optional.empty();
-//            throw new BallerinaOpenApiException("Return type is not found for the operation : " + operation.getValue());
+//            throw new BallerinaOpenApiException("Return type is not found for the operation : "
+//            + operation.getValue());
         }
         String rType = returnResult.get().type().toString();
         String returnType = returnTypeForTargetTypeField(rType);
@@ -203,7 +206,8 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
 
         //Create statements
         NodeList<StatementNode> statements = createNodeList(statementsList);
-        return Optional.of(createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN), null, statements,
+        return Optional.of(createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN), null,
+                statements,
                 createToken(CLOSE_BRACE_TOKEN), null));
         } catch (BallerinaOpenApiException e) {
             //todo diagnostic message
@@ -215,7 +219,8 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
      * Generate statements for query parameters and headers.
      */
     private void handleParameterSchemaInOperation(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                  List<StatementNode> statementsList) throws BallerinaOpenApiException {
+                                                  List<StatementNode> statementsList) throws
+            BallerinaOpenApiException {
 
         List<String> queryApiKeyNameList = new ArrayList<>();
         List<String> headerApiKeyNameList = new ArrayList<>();
@@ -411,7 +416,8 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                             DOT_TOKEN.stringValue() + API_KEY_CONFIG_PARAM),
                     createToken(IS_KEYWORD),
                     createIdentifierToken(API_KEYS_CONFIG));
-            IfElseStatementNode ifBlock = createIfElseStatementNode(createToken(IF_KEYWORD), condition, ifBody, null);
+            IfElseStatementNode ifBlock = createIfElseStatementNode(createToken(IF_KEYWORD), condition, ifBody,
+                    null);
             statementsList.add(ifBlock);
         }
     }

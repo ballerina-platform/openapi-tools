@@ -13,7 +13,6 @@ import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticIm
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
-import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;

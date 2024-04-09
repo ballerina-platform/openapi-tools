@@ -68,8 +68,8 @@ import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiExc
 import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
 import io.ballerina.openapi.core.generators.common.exception.NullPathParameterException;
 import io.ballerina.openapi.core.generators.common.exception.UnsupportedOASDataTypeException;
-import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
+import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.generators.EnumGenerator;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
@@ -252,7 +252,8 @@ public class GeneratorUtils {
      * @return - node lists
      * @throws BallerinaOpenApiException
      */
-    public static NodeList<Node> getRelativeResourcePath(String path, Operation operation, List<Node> resourceFunctionDocs,
+    public static NodeList<Node> getRelativeResourcePath(String path, Operation operation,
+                                                         List<Node> resourceFunctionDocs,
                                                      Components components, boolean isWithoutDataBinding)
             throws BallerinaOpenApiException {
 
@@ -317,7 +318,6 @@ public class GeneratorUtils {
                 if (parameter.getSchema().get$ref() != null) {
                     paramType = resolveReferenceType(parameter.getSchema(), components, isWithoutDataBinding,
                             pathParam);
-                    TypeHandler.getInstance().getTypeNodeFromOASSchema(parameter.getSchema());
                 } else {
                     paramType = getPathParameterType(parameter.getSchema(), pathParam);
                     if (paramType.endsWith(NILLABLE)) {
@@ -1170,6 +1170,7 @@ public class GeneratorUtils {
             }
         } else {
             type = getValidName(type, true);
+            TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
         }
         return type;
     }
@@ -1240,7 +1241,7 @@ public class GeneratorUtils {
             }
         }
 
-        if (properties.isEmpty()|| requiredField.isEmpty()) {
+        if (properties.isEmpty() || requiredField.isEmpty()) {
             return null;
         }
 
@@ -1367,14 +1368,6 @@ public class GeneratorUtils {
             typeDescNode = createSimpleNameReferenceNode(createIdentifierToken(recordName));
         }
         return typeDescNode;
-    }
-
-    private static boolean schemaHasOnlyPrimitive(List<Schema> schemas) {
-        return schemas.stream().allMatch(schema -> {
-            String schemaType = GeneratorUtils.getOpenAPIType(schema);
-            return schemaType.equals(GeneratorConstants.INTEGER) || schemaType.equals(GeneratorConstants.NUMBER) ||
-                    schemaType.equals(GeneratorConstants.BOOLEAN) || schemaType.equals(GeneratorConstants.STRING);
-        });
     }
 
     public static TypeDescriptorNode generateTypeDescriptorForOctetStreamContent() {

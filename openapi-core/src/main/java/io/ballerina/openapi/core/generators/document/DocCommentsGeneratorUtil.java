@@ -207,7 +207,8 @@ public class DocCommentsGeneratorUtil {
                 createToken(SyntaxKind.MINUS_TOKEN), createNodeList(documentElements));
     }
 
-    public static void extractDeprecatedAnnotationDetails(List<Node> deprecatedParamDocComments, Parameter parameter, List<AnnotationNode> paramAnnot) {
+    public static void extractDeprecatedAnnotationDetails(List<Node> deprecatedParamDocComments,
+                                                          Parameter parameter, List<AnnotationNode> paramAnnot) {
         deprecatedParamDocComments.addAll(DocCommentsGeneratorUtil.createAPIDescriptionDoc(
                 "# Deprecated parameters", false));
 
@@ -235,14 +236,14 @@ public class DocCommentsGeneratorUtil {
         if (parameterNode != null) {
             if (parameterNode instanceof RequiredParameterNode reParam) {
                 updatedParamsRequired.add(reParam.modify(
-                        reParam.annotations().isEmpty()? createNodeList(paramAnnot) :
+                        reParam.annotations().isEmpty() ? createNodeList(paramAnnot) :
                                 reParam.annotations().addAll(paramAnnot),
                         reParam.typeName(),
                         reParam.paramName().orElse(null)));
                 updatedParamsRequired.add(createToken(SyntaxKind.COMMA_TOKEN));
             } else if (parameterNode instanceof DefaultableParameterNode deParam) {
                 updatedParamsDefault.add(deParam.modify(
-                        deParam.annotations().isEmpty()? createNodeList(paramAnnot) :
+                        deParam.annotations().isEmpty() ? createNodeList(paramAnnot) :
                                 deParam.annotations().addAll(paramAnnot),
                         deParam.typeName(),
                         deParam.paramName().orElse(null),

@@ -43,7 +43,7 @@ public class ServiceDiagnostic extends Diagnostic {
         return null;
     }
 
-    private class NullLocation implements Location {
+    private static class NullLocation implements Location {
 
         @Override
         public LineRange lineRange() {

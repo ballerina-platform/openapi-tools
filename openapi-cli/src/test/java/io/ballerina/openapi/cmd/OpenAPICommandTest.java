@@ -76,7 +76,7 @@ public abstract class OpenAPICommandTest {
     public Path getExecuteCommand(String yamlFile, String serviceName) {
         Path yamlPath = resourceDir.resolve(Paths.get(yamlFile));
         String[] args = {"--input", yamlPath.toString(), "--service-name", serviceName, "-o",
-                         this.tmpDir.toString(), "--mode", "io/ballerina/openapi/corenew/service"};
+                         this.tmpDir.toString(), "--mode", "io/ballerina/openapi/core/service"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, this.tmpDir);
         new CommandLine(cmd).parseArgs(args);
         String output = "";

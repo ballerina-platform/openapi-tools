@@ -627,7 +627,7 @@ public class CodeGeneratorTest {
     }
 
     @Test(description = "Test code generation for no schema in given contract but user created type available in " +
-            "io/ballerina/openapi/corenew/service")
+            "service")
     public void testForGeneratingTypeFileWhenNoSchema() {
         final String serviceName = "no_schema";
         String definitionPath = RES_DIR.resolve("no_schema_with_type_bal.yaml").toString();
