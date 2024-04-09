@@ -15,6 +15,7 @@ import io.swagger.v3.oas.models.PathItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -89,7 +90,7 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
 
     protected RemoteFunctionSignatureGenerator getSignatureGenerator() {
         return new RemoteFunctionSignatureGenerator(operation.getValue(), openAPI,
-                operation.getKey().toString().toLowerCase());
+                operation.getKey().toString().toLowerCase(Locale.ROOT));
     }
 
     protected Optional<FunctionDefinitionNode> getFunctionDefinitionNode(NodeList<Token> qualifierList,

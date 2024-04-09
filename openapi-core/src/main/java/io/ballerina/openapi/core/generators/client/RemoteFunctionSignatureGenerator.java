@@ -63,10 +63,6 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
         this.httpMethod = httpMethod;
     }
 
-    public void setTreatDefaultableAsRequired() {
-        this.treatDefaultableAsRequired = true;
-    }
-
     @Override
     public Optional<FunctionSignatureNode> generateFunctionSignature() {
         List<Parameter> parameters = operation.getParameters();

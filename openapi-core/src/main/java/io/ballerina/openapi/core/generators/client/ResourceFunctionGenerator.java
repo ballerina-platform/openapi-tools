@@ -72,7 +72,8 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
                 return Optional.empty();
             }
             FunctionBodyNode functionBodyNode = functionBodyNodeResult.get();
-            return getFunctionDefinitionNode(qualifierList, functionKeyWord, functionName, relativeResourcePath, signatureGenerator, functionBodyNode);
+            return getFunctionDefinitionNode(qualifierList, functionKeyWord, functionName, relativeResourcePath,
+                    signatureGenerator, functionBodyNode);
         } catch (BallerinaOpenApiException e) {
             //todo diagnostic
             return Optional.empty();
@@ -91,7 +92,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
 
     protected ResourceFunctionSignatureGenerator getSignatureGenerator() {
         return new ResourceFunctionSignatureGenerator(operation.getValue(), openAPI,
-                operation.getKey().toString().toLowerCase());
+                operation.getKey().toString().toLowerCase(Locale.ROOT));
     }
 
     protected Optional<FunctionDefinitionNode> getFunctionDefinitionNode(NodeList<Token> qualifierList,

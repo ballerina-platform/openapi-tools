@@ -110,8 +110,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEA
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_HEADERS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_REQUEST;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NEW;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPTIONAL_ERROR;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PATCH;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.POST;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PUT;
@@ -702,22 +700,6 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
         MimeFactory factory = new MimeFactory();
         MimeType mimeType = factory.getMimeType(mediaTypeEntry, ballerinaUtilGenerator, imports);
         mimeType.setPayload(statementsList, mediaTypeEntry);
-    }
-
-    /**
-     * This util function for getting type to the targetType data binding.
-     *
-     * @param rType - Given Data type
-     * @return - return type
-     */
-    private String returnTypeForTargetTypeField(String rType) {
-        if (rType.equals(OPTIONAL_ERROR)) {
-            return rType;
-        }
-        String returnType;
-        int index = rType.lastIndexOf("|");
-        returnType = rType.substring(0, index);
-        return (rType.endsWith(NILLABLE) ? returnType + NILLABLE : returnType);
     }
 
     /**

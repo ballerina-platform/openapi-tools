@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -234,7 +235,7 @@ public class TypeHandler {
                 (Objects.nonNull(typeDefinitionNodes.get(recordName).typeDescriptor()) &&
                 !typeDefinitionNodes.get(recordName).typeDescriptor().toSourceCode()
                         .equals(recordTypeDescriptorNode.toSourceCode()))) {
-            recordName = method.toUpperCase() + recordName;
+            recordName = method.substring(0, 1).toUpperCase(Locale.ROOT) + method.substring(1) + recordName;
         }
 
         TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
@@ -247,7 +248,8 @@ public class TypeHandler {
         return createSimpleNameReferenceNode(createIdentifierToken(recordName));
     }
 
-    private static RecordTypeDescriptorNode getRecordTypeDescriptorNode(String statusCode, TypeDescriptorNode bodyType, TypeDescriptorNode headersType) {
+    private static RecordTypeDescriptorNode getRecordTypeDescriptorNode(String statusCode, TypeDescriptorNode bodyType,
+                                                                        TypeDescriptorNode headersType) {
         Token recordKeyWord = createToken(RECORD_KEYWORD);
         Token bodyStartDelimiter = createIdentifierToken("{|");
         // Create record fields

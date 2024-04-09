@@ -53,6 +53,7 @@ import io.swagger.v3.oas.models.PathItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -166,7 +167,9 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
     }
 
     @Override
-    protected void addResourceFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation, Map.Entry<PathItem.HttpMethod, Operation> operationEntry, List<FunctionDefinitionNode> resourceFunctionNodes) {
+    protected void addResourceFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
+                                       Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
+                                       List<FunctionDefinitionNode> resourceFunctionNodes) {
         super.addResourceFunction(operation, operationEntry, resourceFunctionNodes);
         addClientFunctionImpl(operation, operationEntry, resourceFunctionNodes);
     }
@@ -189,7 +192,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId() + "Impl");
         // Create function signature
         RemoteFunctionSignatureGenerator signatureGenerator = new ImplFunctionSignatureGenerator(operation.getValue(),
-                openAPI, operation.getKey().toString().toLowerCase(), path);
+                openAPI, operation.getKey().toString().toLowerCase(Locale.ROOT), path);
         //Create function body
         FunctionBodyGeneratorImp functionBodyGenerator = new ImplFunctionBodyGenerator(path, operation, openAPI,
                 authConfigGeneratorImp, ballerinaUtilGenerator, imports);
@@ -230,8 +233,9 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
                         createEmptyMinutiaeList()));
         SpecificFieldNode classFieldNode = createSpecificFieldNode(null, createIdentifierToken("'class"),
                 createToken(COLON_TOKEN), classValueExp);
-        MappingConstructorExpressionNode methodMapExp = createMappingConstructorExpressionNode(createToken(OPEN_BRACE_TOKEN),
-                createSeparatedNodeList(classFieldNode), createToken(CLOSE_BRACE_TOKEN));
+        MappingConstructorExpressionNode methodMapExp = createMappingConstructorExpressionNode(
+                createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(classFieldNode),
+                createToken(CLOSE_BRACE_TOKEN));
         AnnotationNode javaMethodAnnot = createAnnotationNode(createToken(AT_TOKEN), javaMethodToken, methodMapExp);
         ExternalFunctionBodyNode externalFunctionBodyNode = createExternalFunctionBodyNode(createToken(EQUAL_TOKEN),
                 createNodeList(javaMethodAnnot), createToken(EXTERNAL_KEYWORD), createToken(SEMICOLON_TOKEN));
@@ -312,8 +316,9 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
      */
     private TypeDefinitionNode getClientErrorType() {
         return createTypeDefinitionNode(null, null, createToken(TYPE_KEYWORD),
-                createIdentifierToken("ClientMethodInvocationError"), createQualifiedNameReferenceNode(createIdentifierToken("http"),
-                        createToken(COLON_TOKEN), createIdentifierToken("ClientError")),
+                createIdentifierToken("ClientMethodInvocationError"),
+                createQualifiedNameReferenceNode(createIdentifierToken("http"), createToken(COLON_TOKEN),
+                        createIdentifierToken("ClientError")),
                 createToken(SEMICOLON_TOKEN));
     }
 }

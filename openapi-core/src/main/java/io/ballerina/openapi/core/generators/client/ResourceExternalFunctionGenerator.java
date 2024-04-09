@@ -39,6 +39,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -126,8 +127,10 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
                 createToken(COLON_TOKEN), classValueExp);
         SpecificFieldNode methodFieldNode = createSpecificFieldNode(null, createIdentifierToken("name"),
                 createToken(COLON_TOKEN), methodValueExp);
-        MappingConstructorExpressionNode methodMapExp = createMappingConstructorExpressionNode(createToken(OPEN_BRACE_TOKEN),
-                createSeparatedNodeList(classFieldNode, createToken(COMMA_TOKEN), methodFieldNode), createToken(CLOSE_BRACE_TOKEN));
+        MappingConstructorExpressionNode methodMapExp = createMappingConstructorExpressionNode(
+                createToken(OPEN_BRACE_TOKEN),
+                createSeparatedNodeList(classFieldNode, createToken(COMMA_TOKEN), methodFieldNode),
+                createToken(CLOSE_BRACE_TOKEN));
         AnnotationNode javaMethodAnnot = createAnnotationNode(createToken(AT_TOKEN), javaMethodToken, methodMapExp);
         return Optional.of(createExternalFunctionBodyNode(createToken(EQUAL_TOKEN),
                 createNodeList(javaMethodAnnot), createToken(EXTERNAL_KEYWORD), createToken(SEMICOLON_TOKEN)));
@@ -142,6 +145,6 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
     @Override
     protected ResourceFunctionSignatureGenerator getSignatureGenerator() {
         return new ResourceExternalFunctionSignatureGenerator(operation.getValue(), openAPI,
-                operation.getKey().toString().toLowerCase(), path);
+                operation.getKey().toString().toLowerCase(Locale.ROOT), path);
     }
 }

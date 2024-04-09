@@ -39,6 +39,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -137,6 +138,6 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
     @Override
     protected RemoteFunctionSignatureGenerator getSignatureGenerator() {
         return new RemoteExternalFunctionSignatureGenerator(operation.getValue(), openAPI,
-                operation.getKey().toString().toLowerCase(), path);
+                operation.getKey().toString().toLowerCase(Locale.ROOT), path);
     }
 }

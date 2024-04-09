@@ -51,7 +51,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPEDESC_TYPE_DESC;
 public class ResourceExternalFunctionSignatureGenerator extends ResourceFunctionSignatureGenerator {
     private final String path;
 
-    public ResourceExternalFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod, String path) {
+    public ResourceExternalFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod,
+                                                      String path) {
         super(operation, openAPI, httpMethod);
         this.path = path;
     }
@@ -90,8 +91,8 @@ public class ResourceExternalFunctionSignatureGenerator extends ResourceFunction
     protected ParametersInfo populateTargetTypeParam(TypeDescriptorNode targetType, ParametersInfo parametersInfo) {
         InferredTypedescDefaultNode inferredToken = createInferredTypedescDefaultNode(createToken(LT_TOKEN),
                 createToken(GT_TOKEN));
-        ParameterNode targetTypeParam = createDefaultableParameterNode(createEmptyNodeList(), targetType, createIdentifierToken("targetType"),
-                createToken(EQUAL_TOKEN), inferredToken);
+        ParameterNode targetTypeParam = createDefaultableParameterNode(createEmptyNodeList(), targetType,
+                createIdentifierToken("targetType"), createToken(EQUAL_TOKEN), inferredToken);
         parametersInfo.defaultable().add(targetTypeParam);
         parametersInfo.defaultable().add(createToken(COMMA_TOKEN));
         return parametersInfo;

@@ -38,7 +38,7 @@ public class ImplFunctionSignatureGenerator extends RemoteExternalFunctionSignat
 
     public ImplFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod, String path) {
         super(operation, openAPI, httpMethod, path);
-        setTreatDefaultableAsRequired();
+        this.treatDefaultableAsRequired = true;
         this.path = path;
     }
 
@@ -49,7 +49,8 @@ public class ImplFunctionSignatureGenerator extends RemoteExternalFunctionSignat
 
     @Override
     protected ParametersInfo populateTargetTypeParam(TypeDescriptorNode targetType, ParametersInfo parametersInfo) {
-        ParameterNode targetTypeParam = createRequiredParameterNode(createEmptyNodeList(), targetType, createIdentifierToken("targetType"));
+        ParameterNode targetTypeParam = createRequiredParameterNode(createEmptyNodeList(), targetType,
+                createIdentifierToken("targetType"));
         parametersInfo.parameterList().add(targetTypeParam);
         parametersInfo.parameterList().add(createToken(COMMA_TOKEN));
         return parametersInfo;
