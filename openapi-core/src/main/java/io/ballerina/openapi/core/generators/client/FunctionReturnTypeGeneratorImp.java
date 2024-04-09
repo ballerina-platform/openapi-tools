@@ -57,12 +57,10 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPT
  * @since 1.9.0
  */
 public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerator {
-    private OpenAPI openAPI;
     private Operation operation;
     List<ClientDiagnostic> diagnostics = new ArrayList<>();
 
     public FunctionReturnTypeGeneratorImp(Operation operation, OpenAPI openAPI) {
-        this.openAPI = openAPI;
         this.operation = operation;
     }
 

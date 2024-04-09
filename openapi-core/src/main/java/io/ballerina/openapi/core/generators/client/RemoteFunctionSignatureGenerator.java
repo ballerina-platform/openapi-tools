@@ -35,7 +35,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extract
 public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenerator {
     OpenAPI openAPI;
     Operation operation;
-    List<ClientDiagnostic> diagnostics;
+    List<ClientDiagnostic> diagnostics = new ArrayList<>();
 
     public RemoteFunctionSignatureGenerator(Operation operation, OpenAPI openAPI) {
         this.operation = operation;

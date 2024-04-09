@@ -95,11 +95,11 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                             sortKey = funcDef.toSourceCode();
                             storeMembers.add(sortKey);
                             NodeList<Node> nodes = funcDef.relativeResourcePath();
-                            String path = "";
+                            StringBuilder path = new StringBuilder();
                             for (Node node: nodes) {
-                                path = path + node.toString().replace("\"", "");
+                                path.append(node.toString().replace("\"", ""));
                             }
-                            String key = replaceContentWithinBrackets(path, "XXX") + "_" +
+                            String key = replaceContentWithinBrackets(path.toString(), "XXX") + "_" +
                                     funcDef.functionName().text();
                             funcDef = updateDocCommentsForFunctionNode(operationDetailsMap, funcDef, key);
                         } else {

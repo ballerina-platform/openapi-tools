@@ -17,6 +17,7 @@ import io.swagger.v3.oas.models.PathItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -58,7 +59,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
         //Create qualifier list
         NodeList<Token> qualifierList = createNodeList(createToken(RESOURCE_KEYWORD), createToken(ISOLATED_KEYWORD));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
-        IdentifierToken functionName = createIdentifierToken(operation.getKey().toString().toLowerCase());
+        IdentifierToken functionName = createIdentifierToken(operation.getKey().toString().toLowerCase(Locale.ROOT));
         // create relative path
         try {
             NodeList<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),

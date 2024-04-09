@@ -59,12 +59,10 @@ import static io.ballerina.openapi.core.generators.document.DocCommentsGenerator
 public class ServiceDocCommentGenerator implements DocCommentsGenerator {
     OpenAPI openAPI;
     SyntaxTree syntaxTree;
-    boolean isProxyService;
 
     public ServiceDocCommentGenerator(SyntaxTree syntaxTree, OpenAPI openAPI, boolean isProxyService) {
         this.openAPI = openAPI;
         this.syntaxTree = syntaxTree;
-        this.isProxyService = isProxyService;
     }
     @Override
     public SyntaxTree updateSyntaxTreeWithDocComments() {
@@ -92,11 +90,11 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
                             sortKey = funcDef.toSourceCode();
                             sortedMembers.add(sortKey);
                             NodeList<Node> nodes = funcDef.relativeResourcePath();
-                            String path = "";
+                            StringBuilder path = new StringBuilder();
                             for (Node node: nodes) {
-                                path = path + node.toString().replace("\"", "");
+                                path.append(node.toString().replace("\"", ""));
                             }
-                            String key = replaceContentWithinBrackets(path, "XXX") + "_" +
+                            String key = replaceContentWithinBrackets(path.toString(), "XXX") + "_" +
                                     funcDef.functionName().text();
                             funcDef = updateDocCommentsForFunctionNode(operationDetailsMap, funcDef, key);
 
@@ -196,30 +194,31 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
             //todo response
             if (operation.getResponses() != null) {
                 ApiResponses responses = operation.getResponses();
-                Set<String> responseKeys = responses.keySet();
-                if (responseKeys.size() > 1) {
+                Set<Map.Entry<String, ApiResponse>> entrySet = responses.entrySet();
+                if (entrySet.size() > 1) {
                     MarkdownParameterDocumentationLineNode returnDoc = createAPIParamDoc("return",
                             "returns can be any of following types");
                     docs.add(returnDoc);
-                    for (String responseKey : responseKeys) {
-                        ApiResponse response = responses.get(responseKey);
-                        String code = GeneratorConstants.HTTP_CODES_DES.get(responseKey.trim());
-                        if (response.getDescription() != null && !response.getDescription().isBlank()) {
+                    for (Map.Entry<String, ApiResponse> response : entrySet) {
+                        String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
+                        if (response.getValue().getDescription() != null &&
+                                !response.getValue().getDescription().isBlank()) {
                             if (code == null) {
                                 code = "Response";
                             }
                             MarkdownCodeLineNode returnDocLine = createMarkdownCodeLineNode(
                                     createToken(SyntaxKind.HASH_TOKEN), createIdentifierToken(String
-                                            .format("http:%s (%s)", code, response.getDescription()
+                                            .format("http:%s (%s)", code, response.getValue().getDescription()
                                                     .replaceAll("\n", "\n# "))));
                             docs.add(returnDocLine);
                         }
                     }
-                } else if (responseKeys.size() == 1) {
-                    ApiResponse response = responses.get(responseKeys.iterator().next());
-                    if (response.getDescription() != null && !response.getDescription().isBlank()) {
+                } else if (entrySet.size() == 1) {
+                    Map.Entry<String, ApiResponse> response = responses.entrySet().iterator().next();
+                    if (response.getValue().getDescription() != null &&
+                            !response.getValue().getDescription().isBlank()) {
                         MarkdownParameterDocumentationLineNode returnDoc = createAPIParamDoc("return",
-                                response.getDescription());
+                                response.getValue().getDescription());
                         docs.add(returnDoc);
                     }
                 }

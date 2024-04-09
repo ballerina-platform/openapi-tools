@@ -133,9 +133,13 @@ public class RequestBodyGenerator implements ParameterGenerator {
             }
             break;
         }
-        String reqBody = typeDescNode.toString().equals(HTTP_REQUEST) ? "request" : "payload";
-        return Optional.of(createRequiredParameterNode(createEmptyNodeList(), typeDescNode,
-                createIdentifierToken(reqBody)));
+        if (typeDescNode != null) {
+            String reqBody = typeDescNode.toSourceCode().equals(HTTP_REQUEST) ? "request" : "payload";
+            return Optional.of(createRequiredParameterNode(createEmptyNodeList(), typeDescNode,
+                    createIdentifierToken(reqBody)));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private void extractHeaders(Map.Entry<String, MediaType> mediaTypeEntry) {

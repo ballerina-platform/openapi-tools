@@ -12,6 +12,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,13 +23,11 @@ import static io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticM
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 public class PathParameterGenerator implements ParameterGenerator {
-    OpenAPI openAPI;
     Parameter parameter;
 
-    List<ClientDiagnostic> diagnostics;
+    List<ClientDiagnostic> diagnostics = new ArrayList<>();
     public PathParameterGenerator(Parameter parameter, OpenAPI openAPI) {
         this.parameter = parameter;
-        this.openAPI = openAPI;
     }
 
     @Override

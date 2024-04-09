@@ -1370,14 +1370,6 @@ public class GeneratorUtils {
         return typeDescNode;
     }
 
-    private static boolean schemaHasOnlyPrimitive(List<Schema> schemas) {
-        return schemas.stream().allMatch(schema -> {
-            String schemaType = GeneratorUtils.getOpenAPIType(schema);
-            return schemaType.equals(GeneratorConstants.INTEGER) || schemaType.equals(GeneratorConstants.NUMBER) ||
-                    schemaType.equals(GeneratorConstants.BOOLEAN) || schemaType.equals(GeneratorConstants.STRING);
-        });
-    }
-
     public static TypeDescriptorNode generateTypeDescriptorForOctetStreamContent() {
         ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
                 createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
