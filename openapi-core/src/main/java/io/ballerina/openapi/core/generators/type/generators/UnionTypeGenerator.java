@@ -15,6 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package io.ballerina.openapi.core.generators.type.generators;
 
 import io.ballerina.compiler.syntax.tree.NameReferenceNode;

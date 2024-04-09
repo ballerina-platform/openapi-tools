@@ -15,6 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package io.ballerina.openapi.core.generators.service.model;
 
 import io.ballerina.openapi.core.generators.common.model.Filter;
