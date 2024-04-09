@@ -29,7 +29,6 @@ import io.swagger.v3.oas.models.parameters.PathParameter;
 
 import java.util.Map;
 
-import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 /**
@@ -55,7 +54,7 @@ public class PathParameterMapper extends AbstractParameterMapper {
         this.type = pathParameterSymbol.typeDescriptor();
         this.typeMapper = typeMapper;
         this.name = unescapeIdentifier(pathParameterSymbol.getName().get());
-        this.description = apiDocs.get(removeStartingSingleQuote(pathParameterSymbol.getName().get()));
+        this.description = apiDocs.get(pathParameterSymbol.getName().get());
     }
 
     @Override

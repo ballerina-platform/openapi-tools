@@ -132,3 +132,27 @@ compileJava {
         classpath = files()
     }
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId "io.ballerina.openapi"
+            artifactId "ballerina-to-openapi"
+            version = project.version
+            artifact jar
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/ballerina-platform/openapi-tools")
+            credentials {
+                username = System.getenv("packageUser")
+                password = System.getenv("packagePAT")
+            }
+        }
+    }
+}
+
+publish.dependsOn build

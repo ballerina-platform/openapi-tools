@@ -36,7 +36,6 @@ import io.swagger.v3.oas.models.parameters.QueryParameter;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.removeStartingSingleQuote;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 /**
@@ -65,7 +64,7 @@ public class QueryParameterMapper extends AbstractParameterMapper {
             this.type = queryParameter.typeDescriptor();
             this.name = unescapeIdentifier(queryParameter.getName().get());
             this.isRequired = queryParameter.paramKind().equals(ParameterKind.REQUIRED);
-            this.description = apiDocs.get(removeStartingSingleQuote(queryParameter.getName().get()));
+            this.description = apiDocs.get(queryParameter.getName().get());
             this.treatNilableAsOptional = treatNilableAsOptional;
             this.semanticModel = additionalData.semanticModel();
             this.typeMapper = typeMapper;
