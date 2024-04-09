@@ -48,6 +48,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -266,11 +267,11 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
             typeDefinitionSortingList.add(key);
         });
         Collections.sort(typeDefinitionSortingList);
-        HashMap<String, TypeDefinitionNode> sortedTypeDefinitions = new HashMap<>();
+        HashMap<String, TypeDefinitionNode> sortedTypeDefinitions = new LinkedHashMap<>();
         typeDefinitionSortingList.forEach(key -> {
             sortedTypeDefinitions.put(key, typeDefinitions.get(key));
         });
-        return new ConstraintResult(typeDefinitions, isConstraint, diagnostics);
+        return new ConstraintResult(sortedTypeDefinitions, isConstraint, diagnostics);
     }
 
     private void updateConstraintWithArrayItems(String key, String fieldName, ArraySchema arraySchema) {
