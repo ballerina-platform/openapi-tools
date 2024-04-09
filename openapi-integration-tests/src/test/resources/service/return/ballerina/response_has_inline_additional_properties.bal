@@ -9,14 +9,7 @@ public type StoreInventory03Response record {|
 public type BadRequestStoreInventory05Response record {|
     *http:BadRequest;
     StoreInventory05Response body;
-|};
-
-public type StoreInventory05Response record {|
-    User...;
-|};
-
-public type StoreInventory04Response record {|
-    User...;
+    map<string|string[]> headers;
 |};
 
 public type User record {
@@ -24,10 +17,18 @@ public type User record {
     int id?;
 };
 
+public type StoreInventory04Response record {|
+    User...;
+|};
+
 public type Inline_response_map200 record {
     int id?;
     int age?;
 };
+
+public type StoreInventory05Response record {|
+    User...;
+|};
 
 public type Inline_response_200 record {|
     string name?;
