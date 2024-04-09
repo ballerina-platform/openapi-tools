@@ -75,7 +75,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
         return new ResourceFunctionSignatureGenerator(operation.getValue(), openAPI, operation.getKey().toString().toLowerCase());
     }
 
-    protected Optional<FunctionBodyNode> getFunctionBodyNode() throws BallerinaOpenApiException {
+    protected Optional<FunctionBodyNode> getFunctionBodyNode() {
         FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
                 authConfigGeneratorImp, ballerinaUtilGenerator);
         return functionBodyGenerator.getFunctionBodyNode();

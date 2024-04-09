@@ -307,7 +307,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
             }
         }
         OASClientConfig clientConfig = codeGeneratorConfig.getLeft();
-        List<GenSrcFile> sources = generateClientFiles(clientConfig,
+        List<GenSrcFile> sources = generateClientFiles(clientConfig, toolContext, location,
                 codeGeneratorConfig.getLeft().isStatusCodeBinding());
         Path outputPath = toolContext.outputPath();
         writeGeneratedSources(sources, outputPath);
@@ -440,8 +440,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
      * This method uses to generate ballerina files for openapi client stub.
      * This will return list of (client.bal, util.bal, types.bal) {@code GenSrcFile}.
      */
-    private static List<GenSrcFile> generateClientFiles(OASClientConfig oasClientConfig,
-                                                        boolean statusCodeBinding) throws
+    private static List<GenSrcFile> generateClientFiles(OASClientConfig oasClientConfig, ToolContext toolContext,
+                                                        Location location, boolean statusCodeBinding) throws
             BallerinaOpenApiException, IOException, FormatterException, ClientException {
 
         List<GenSrcFile> sourceFiles = new ArrayList<>();
@@ -449,7 +449,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         // Generate ballerina client files.
         TypeHandler.createInstance(oasClientConfig.getOpenAPI(), oasClientConfig.isNullable());
         String licenseContent = oasClientConfig.getLicense();
-        BallerinaClientGenerator ballerinaClientGenerator = getClientGenerator(oasClientConfig, statusCodeBinding);
+        BallerinaClientGenerator ballerinaClientGenerator = getClientGenerator(oasClientConfig, statusCodeBinding,
+                toolContext, location);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
                 licenseContent == null || licenseContent.isBlank() ? mainContent :
@@ -482,9 +483,23 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     }
 
     private static BallerinaClientGenerator getClientGenerator(OASClientConfig oasClientConfig,
-                                                               boolean statusCodeBinding) {
-        return statusCodeBinding ? new BallerinaClientGeneratorWithStatusCodeBinding(oasClientConfig) :
-                new BallerinaClientGenerator(oasClientConfig);
+                                                               boolean statusCodeBinding, ToolContext toolContext,
+                                                               Location location) {
+        if (!statusCodeBinding || hasRequestBinding(oasClientConfig.getOpenAPI())) {
+            if (statusCodeBinding) {
+                createDiagnostics(toolContext, Constants.DiagnosticMessages.WARNING_FOR_UNSUPPORTED_MEDIA_TYPE,
+                        location);
+            }
+            return new BallerinaClientGenerator(oasClientConfig);
+        }
+        return new BallerinaClientGeneratorWithStatusCodeBinding(oasClientConfig);
+    }
+
+    private static boolean hasRequestBinding(OpenAPI openAPI) {
+        return openAPI.getPaths().values().stream().anyMatch(pathItem -> pathItem.readOperations().stream()
+                .anyMatch(operation -> operation.getRequestBody() != null &&
+                        operation.getRequestBody().getContent().keySet().stream()
+                                .anyMatch(GeneratorUtils::hasRequestBinding)));
     }
 
     /**

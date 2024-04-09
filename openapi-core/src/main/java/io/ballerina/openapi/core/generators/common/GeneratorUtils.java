@@ -554,6 +554,10 @@ public class GeneratorUtils {
         }
     }
 
+    public static boolean hasRequestBinding(String mediaType) {
+        return getBallerinaMediaType(mediaType, true).equals(HTTP_REQUEST);
+    }
+
     /**
      * Generate BallerinaMediaType for all the return mediaTypes.
      */
