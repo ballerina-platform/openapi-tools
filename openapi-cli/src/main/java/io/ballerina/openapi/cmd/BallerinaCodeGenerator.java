@@ -164,6 +164,7 @@ public class BallerinaCodeGenerator {
                     .withGenerateWithoutDataBinding(generateWithoutDataBinding)
                     .withSrcFile(srcFile)
                     .withSrcPackage(srcPackage)
+                    .withLicenseHeader(licenseHeader)
                     .build();
 
             ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();

@@ -60,6 +60,9 @@ public class CodeGeneratorTest {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
 
+    String replaceRegex  = System.getProperty("os.name").toLowerCase()
+            .contains("windows") ? "#.*[+*a\\r\\n]" : "#.*[+*a\\n]";
+
     @Test(description = "Test Ballerina skeleton generation")
     public void generateSkeleton() {
         final String serviceName = "openapipetstore";
@@ -74,9 +77,9 @@ public class CodeGeneratorTest {
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringWithNewlineFromGivenBalFile(resourcePath,
                         "openapipetstore_service.bal");
-                generatedService = (generatedService.trim()).replaceAll("#.*[+*a\\n]", "")
+                generatedService = (generatedService.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
-                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("#.*[+*a\\n]", "")
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
                 Assert.assertTrue(generatedService.contains(expectedServiceContent));
             } else {
@@ -127,9 +130,9 @@ public class CodeGeneratorTest {
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringWithNewlineFromGivenBalFile(resourcePath,
                         "openapipetstore_service.bal");
-                generatedService = (generatedService.trim()).replaceAll("#.*[+*a\\n]", "")
+                generatedService = (generatedService.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
-                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("#.*[+*a\\n]", "")
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
                 Assert.assertTrue(generatedService.contains(expectedServiceContent));
             } else {
@@ -385,9 +388,9 @@ public class CodeGeneratorTest {
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringWithNewlineFromGivenBalFile(resourcePath,
                         "openapipetstore_service.bal");
-                generatedService = (generatedService.trim()).replaceAll("#.*[+*a\\n]", "")
+                generatedService = (generatedService.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
-                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("#.*[+*a\\n]", "")
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
 
                 Assert.assertTrue(generatedService.contains(expectedServiceContent));
@@ -415,9 +418,9 @@ public class CodeGeneratorTest {
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringWithNewlineFromGivenBalFile(resourcePath,
                         "openapipetstore_service.bal");
-                generatedService = (generatedService.trim()).replaceAll("#.*[+*a\\n]", "")
+                generatedService = (generatedService.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
-                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("#.*[+*a\\n]", "")
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
 
                 Assert.assertTrue(generatedService.contains(expectedServiceContent));
@@ -468,9 +471,9 @@ public class CodeGeneratorTest {
                     Paths.get(definitionPath), "", filter, false, false, false);
             if (generatedFileList.size() > 0) {
                 GenSrcFile actualGeneratedContent = generatedFileList.get(0);
-                Assert.assertEquals((actualGeneratedContent.getContent().trim()).replaceAll("#.*[+*a\\n]", "")
+                Assert.assertEquals((actualGeneratedContent.getContent().trim()).replaceAll(replaceRegex, "")
                                 .replaceAll("\\s+", ""),
-                        (expectedContent.trim()).replaceAll("#.*[+*a\\n]", "")
+                        (expectedContent.trim()).replaceAll(replaceRegex, "")
                                 .replaceAll("\\s+", ""),
                         "expected content and actual generated content is mismatched for: " + yamlFile);
             }
@@ -494,9 +497,9 @@ public class CodeGeneratorTest {
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringWithNewlineFromGivenBalFile(resourcePath,
                         "openapipetstore_service.bal");
-                generatedService = (generatedService.trim()).replaceAll("#.*[+*a\\n]", "")
+                generatedService = (generatedService.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
-                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("#.*[+*a\\n]", "")
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
 
                 Assert.assertTrue(generatedService.contains(expectedServiceContent));
@@ -528,9 +531,9 @@ public class CodeGeneratorTest {
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringWithNewlineFromGivenBalFile(resourcePath,
                         "openapipetstore_service.bal");
-                generatedService = (generatedService.trim()).replaceAll("#.*[+*a\\n]", "")
+                generatedService = (generatedService.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
-                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("#.*[+*a\\n]", "")
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
 
                 Assert.assertTrue(generatedService.contains(expectedServiceContent));
@@ -563,9 +566,9 @@ public class CodeGeneratorTest {
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringWithNewlineFromGivenBalFile(resourcePath,
                         "openapipetstore_service.bal");
-                generatedService = (generatedService.trim()).replaceAll("#.*[+*a\\n]", "")
+                generatedService = (generatedService.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
-                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("#.*[+*a\\n]", "")
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
 
                 Assert.assertTrue(generatedService.contains(expectedServiceContent));
@@ -611,9 +614,9 @@ public class CodeGeneratorTest {
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringWithNewlineFromGivenBalFile(resourcePath,
                         "openapipetstore_service.bal");
-                generatedService = (generatedService.trim()).replaceAll("#.*[+*a\\n]", "")
+                generatedService = (generatedService.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
-                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("#.*[+*a\\n]", "")
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
                 Assert.assertTrue(generatedService.contains(expectedServiceContent));
             } else {
@@ -662,18 +665,18 @@ public class CodeGeneratorTest {
                     Files.exists(resourcePath.resolve("types.bal"))) {
                 String generatedService = getStringWithNewlineFromGivenBalFile(resourcePath,
                         "openapipetstore_service.bal");
-                generatedService = (generatedService.trim()).replaceAll("#.*[+*a\\n]", "")
+                generatedService = (generatedService.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
-                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("#.*[+*a\\n]", "")
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
                 Assert.assertTrue(generatedService.contains(expectedServiceContent),
                         "Expected service and actual generated service is not matching");
 
                 String generatedTypes = getStringWithNewlineFromGivenBalFile(resourcePath,
                         "types.bal");
-                generatedTypes = (generatedTypes.trim()).replaceAll("#.*[+*a\\n]", "")
+                generatedTypes = (generatedTypes.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
-                expectedTypesContent = (expectedTypesContent.trim()).replaceAll("#.*[+*a\\n]", "")
+                expectedTypesContent = (expectedTypesContent.trim()).replaceAll(replaceRegex, "")
                         .replaceAll("\\s+", "");
                 Assert.assertTrue(generatedTypes.contains(expectedTypesContent),
                         "Expected types and actual generated types are not matching");

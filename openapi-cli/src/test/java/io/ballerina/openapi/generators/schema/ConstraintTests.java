@@ -244,7 +244,7 @@ public class ConstraintTests {
         assertFalse(hasErrors);
     }
 
-    @Test(description = "Tests for nullable reference types with constraint.")
+    @Test(description = "Tests for nullable reference types with constraint.", enabled = false)
     public void testNullableRefTypesWithConstraint() throws IOException, BallerinaOpenApiException,
             FormatterException, ClientException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +

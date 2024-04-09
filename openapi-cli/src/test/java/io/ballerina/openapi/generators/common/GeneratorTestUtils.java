@@ -73,6 +73,8 @@ public class GeneratorTestUtils {
     private static final Path utilPath = RES_DIR.resolve("ballerina_project/utils.bal");
     private static final Path servicePath = RES_DIR.resolve("ballerina_project/service.bal");
     private static final String LINE_SEPARATOR = System.lineSeparator();
+    static String replaceRegex  = System.getProperty("os.name").toLowerCase()
+            .contains("windows") ? "#.*[+*a\\r\\n]" : "#.*[+*a\\n]";
 
     // Get diagnostics
     public static List<Diagnostic> getDiagnostics(SyntaxTree syntaxTree, OpenAPI openAPI,
@@ -204,9 +206,9 @@ public class GeneratorTestUtils {
             throw new RuntimeException(e);
         }
         // todo : removing the comments as we are not matching them atm.
-        generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("#.*[+*a\\n]", "")
+        generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll(replaceRegex, "")
                 .replaceAll("\\s+", "");
-        expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("#.*[+*a\\n]", "")
+        expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll(replaceRegex, "")
                 .replaceAll("\\s+", "");
         Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
     }
