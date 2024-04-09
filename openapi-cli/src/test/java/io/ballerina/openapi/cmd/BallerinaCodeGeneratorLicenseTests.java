@@ -196,6 +196,7 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
         File schemaFile = new File(this.tmpDir.resolve("types.bal").toString());
         File testFile = new File(this.tmpDir.resolve("tests/test.bal").toString());
         File testDir = new File(this.tmpDir.resolve("tests").toString());
+        File serviceTypeFile = new File(this.tmpDir.resolve("service_type.bal").toString());
         serviceFile.delete();
         clientFile.delete();
         schemaFile.delete();
@@ -203,6 +204,9 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
         if (isConfigGenerated) {
             File configFile = new File(this.tmpDir.resolve("tests/Config.toml").toString());
             configFile.delete();
+        }
+        if (serviceTypeFile.exists()) {
+            serviceTypeFile.delete();
         }
         FileUtils.deleteDirectory(testDir);
     }
