@@ -17,7 +17,6 @@
  */
 package io.ballerina.openapi.bal.tool;
 
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.bal.tool.Constants.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
@@ -475,7 +474,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
 
-        SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        io.ballerina.compiler.syntax.tree.SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().
+                generateTypeSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
 
         if (oasClientConfig.getFilter().getTags().isEmpty()) {
