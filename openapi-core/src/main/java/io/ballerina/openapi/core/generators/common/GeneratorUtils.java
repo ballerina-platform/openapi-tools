@@ -1319,7 +1319,11 @@ public class GeneratorUtils {
         TypeDescriptorNode mediaTypeToken = switch (mediaType) {
             case GeneratorConstants.APPLICATION_JSON -> {
                 if (mediaTypeEntry.getValue().getSchema() != null) {
-                    yield generateTypeDescriptorForGenericMediaType(mediaTypeEntry, path, isRequest);
+                    TypeDescriptorNode typeDescriptorNode =
+                            generateTypeDescriptorForGenericMediaType(mediaTypeEntry, path, isRequest);
+                    if (typeDescriptorNode != null) {
+                        yield typeDescriptorNode;
+                    }
                 }
                 yield createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.JSON));
             }
