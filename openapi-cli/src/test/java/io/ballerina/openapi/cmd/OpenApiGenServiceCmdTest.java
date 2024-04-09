@@ -37,6 +37,8 @@ import java.util.stream.Stream;
 public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
     public static final String USER_DIR = "user.dir";
     Path resourcePath = Paths.get(System.getProperty(USER_DIR));
+    String replaceRegex  = System.getProperty("os.name").toLowerCase()
+            .contains("windows") ? "#.*[+*a\\r\\n]" : "#.*[+*a\\n]";
 
     @Test(description = "Test openapi gen-service for successful service generation with inline request body type",
             enabled = false)
@@ -135,8 +137,8 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
         Assert.assertFalse(Files.exists(this.tmpDir.resolve("types.bal")));
         if (Files.exists(this.tmpDir.resolve("withoutdatabinding_service.bal"))) {
             String generatedService = getStringFromFile(this.tmpDir.resolve("withoutdatabinding_service.bal"));
-            Assert.assertEquals(replaceWhiteSpace(generatedService.replaceAll("#.*[+*a\\n]", "")),
-                    replaceWhiteSpace(expectedService.replaceAll("#.*[+*a\\n]", "")),
+            Assert.assertEquals(replaceWhiteSpace(generatedService.replaceAll(replaceRegex, "")),
+                    replaceWhiteSpace(expectedService.replaceAll(replaceRegex, "")),
                     "Expected content and actual generated content is mismatched for: " + yamlPath);
             deleteGeneratedFiles("without-data-binding-service.bal");
         } else {
