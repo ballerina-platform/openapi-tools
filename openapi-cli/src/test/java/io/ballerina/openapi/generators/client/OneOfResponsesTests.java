@@ -43,7 +43,7 @@ public class OneOfResponsesTests {
         OpenAPI openapi = getOpenAPI(RES_DIR.resolve("swagger/return_type/inline_oneOf_response.yaml"));
         TypeHandler.createInstance(openapi, false);
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
-                openapi.getPaths().get("/pet").getGet(), openapi);
+                openapi.getPaths().get("/pet").getGet(), openapi, "get");
         Assert.assertEquals(functionReturnType.getReturnType().get().type().toString(),
                 "Inline_response_2XX|error");
     }

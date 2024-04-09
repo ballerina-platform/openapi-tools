@@ -40,14 +40,17 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.generat
 public class FunctionStatusCodeReturnTypeGenerator extends FunctionReturnTypeGeneratorImp {
     private final String path;
 
-    public FunctionStatusCodeReturnTypeGenerator(Operation operation, OpenAPI openAPI, String httpMethod, String path) {
+    public FunctionStatusCodeReturnTypeGenerator(Operation operation, OpenAPI openAPI, String httpMethod,
+                                                 String path) {
         super(operation, openAPI, httpMethod);
         this.path = path;
     }
 
     @Override
-    protected boolean populateReturnType(String statusCode, ApiResponse response, List<TypeDescriptorNode> returnTypes, HashSet<String> returnTypesSet) {
-        boolean noContentResponseFoundSuper = super.populateReturnType(statusCode, response, returnTypes, returnTypesSet);
+    protected boolean populateReturnType(String statusCode, ApiResponse response, List<TypeDescriptorNode> returnTypes,
+                                         HashSet<String> returnTypesSet) {
+        boolean noContentResponseFoundSuper = super.populateReturnType(statusCode, response, returnTypes,
+                returnTypesSet);
         try {
             List<Diagnostic> newDiagnostics = new ArrayList<>();
             returnTypes.add(generateStatusCodeTypeInclusionRecord(GeneratorConstants.HTTP_CODES_DES.get(statusCode),

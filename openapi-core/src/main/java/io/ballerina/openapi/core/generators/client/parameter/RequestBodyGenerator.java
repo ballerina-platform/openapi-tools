@@ -65,6 +65,12 @@ public class RequestBodyGenerator implements ParameterGenerator {
     public List<ParameterNode> getHeaderParameters() {
         return headerParameters;
     }
+
+    @Override
+    public Optional<ParameterNode> generateParameterNode() {
+        return generateParameterNode(false);
+    }
+
     @Override
     public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
         Content requestBodyContent;
@@ -172,7 +178,7 @@ public class RequestBodyGenerator implements ParameterGenerator {
                 for (Map.Entry<String, Header> header : headers.entrySet()) {
                     if (!headerList.contains(getValidName(header.getKey(), false))) {
                         RequestBodyHeaderParameter requestBodyHeaderParameter = new RequestBodyHeaderParameter(header);
-                        Optional<ParameterNode> parameterNode = requestBodyHeaderParameter.generateParameterNode(false);
+                        Optional<ParameterNode> parameterNode = requestBodyHeaderParameter.generateParameterNode();
 
                         parameterNode.ifPresent(node -> headerParameters.add(node));
                         diagnostics.addAll(requestBodyHeaderParameter.getDiagnostics());

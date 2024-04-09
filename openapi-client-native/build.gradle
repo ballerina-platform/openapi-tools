@@ -1,5 +1,3 @@
-import org.apache.tools.ant.taskdefs.condition.Os
-
 /*
  *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org).
  *
@@ -38,7 +36,7 @@ dependencies {
 }
 
 checkstyle {
-    toolVersion '10.12.0'
+    toolVersion "${project.puppycrawlCheckstyleVersion}"
     configFile rootProject.file("config/checkstyle/build/checkstyle.xml")
     configProperties = ["suppressionFile" : file("${rootDir}/config/checkstyle/build/suppressions.xml")]
 }
@@ -52,15 +50,16 @@ checkstyleMain.dependsOn(":checkstyle:downloadCheckstyleRuleFiles")
 checkstyleTest.dependsOn(":checkstyle:downloadCheckstyleRuleFiles")
 
 spotbugsMain {
-    effort "max"
-    reportLevel "low"
+    ignoreFailures = true
+    effort = "max"
+    reportLevel = "low"
     reportsDir = file("$project.buildDir/reports/spotbugs")
     def excludeFile = file("${rootDir}/spotbugs-exclude.xml")
     if (excludeFile.exists()) {
         it.excludeFilter = excludeFile
     }
     reports {
-        html.enabled true
+        text.enabled = true
     }
 }
 

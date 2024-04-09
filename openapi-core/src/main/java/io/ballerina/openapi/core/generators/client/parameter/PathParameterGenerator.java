@@ -49,6 +49,11 @@ public class PathParameterGenerator implements ParameterGenerator {
     }
 
     @Override
+    public Optional<ParameterNode> generateParameterNode() {
+        return generateParameterNode(false);
+    }
+
+    @Override
     public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
         IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName(), false));
         // type should be a any type node.

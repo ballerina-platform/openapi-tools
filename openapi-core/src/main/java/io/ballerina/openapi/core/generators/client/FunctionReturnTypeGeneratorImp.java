@@ -33,7 +33,6 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +51,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEF
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ERROR;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPTIONAL_ERROR;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 
 /**
  * This util class for maintain the operation response with ballerina return type.
@@ -84,7 +82,7 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
         boolean noContentResponseFound = returnTypesInfo.noContentResponseFound();
         if (!returnTypes.isEmpty()) {
             if (noContentResponseFound) {
-                returnTypesInfo.types().add(createSimpleNameReferenceNode(createIdentifierToken(ERROR+NILLABLE)));
+                returnTypesInfo.types().add(createSimpleNameReferenceNode(createIdentifierToken(ERROR + NILLABLE)));
             } else {
                 returnTypesInfo.types().add(createSimpleNameReferenceNode(createIdentifierToken(ERROR)));
             }

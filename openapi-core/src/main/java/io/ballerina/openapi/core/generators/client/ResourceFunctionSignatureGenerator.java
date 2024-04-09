@@ -125,7 +125,7 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
                     case "query":
                         QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(parameter,
                                 openAPI);
-                        Optional<ParameterNode> queryParam = queryParameterGenerator.generateParameterNode(false);
+                        Optional<ParameterNode> queryParam = queryParameterGenerator.generateParameterNode();
                         if (queryParam.isEmpty()) {
                             diagnostics.addAll(queryParameterGenerator.getDiagnostics());
                             return null;
@@ -141,7 +141,7 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
                     case "header":
                         HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator(parameter,
                                 openAPI);
-                        Optional<ParameterNode> headerParam = headerParameterGenerator.generateParameterNode(false);
+                        Optional<ParameterNode> headerParam = headerParameterGenerator.generateParameterNode();
                         if (headerParam.isEmpty()) {
                             diagnostics.addAll(headerParameterGenerator.getDiagnostics());
                             return null;
@@ -162,7 +162,7 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
         // 2. requestBody
         if (operation.getRequestBody() != null) {
             RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(operation.getRequestBody(), openAPI);
-            Optional<ParameterNode> requestBody = requestBodyGenerator.generateParameterNode(false);
+            Optional<ParameterNode> requestBody = requestBodyGenerator.generateParameterNode();
             if (requestBody.isEmpty()) {
                 diagnostics.addAll(requestBodyGenerator.getDiagnostics());
                 return null;

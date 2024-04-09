@@ -83,6 +83,7 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
         super(path, operation, openAPI, authConfigGeneratorImp, ballerinaUtilGenerator, imports);
     }
 
+    @Override
     protected Optional<FunctionDefinitionNode> getFunctionDefinitionNode(NodeList<Token> qualifierList,
                                                                          Token functionKeyWord,
                                                                          IdentifierToken functionName,
@@ -95,8 +96,9 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
                         createEmptyMinutiaeList()));
         SpecificFieldNode implFuncNameField = createSpecificFieldNode(null, createIdentifierToken("name"),
                 createToken(COLON_TOKEN), implFuncName);
-        MappingConstructorExpressionNode implFunctionMap = createMappingConstructorExpressionNode(createToken(OPEN_BRACE_TOKEN),
-                createSeparatedNodeList(implFuncNameField), createToken(CLOSE_BRACE_TOKEN));
+        MappingConstructorExpressionNode implFunctionMap = createMappingConstructorExpressionNode(
+                createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(implFuncNameField),
+                createToken(CLOSE_BRACE_TOKEN));
         SimpleNameReferenceNode annotationRef = createSimpleNameReferenceNode(createIdentifierToken("MethodImpl"));
         AnnotationNode implAnnotation = createAnnotationNode(createToken(AT_TOKEN), annotationRef, implFunctionMap);
         MetadataNode metadataNode = createMetadataNode(null, createNodeList(implAnnotation));
@@ -123,8 +125,10 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
                 createToken(COLON_TOKEN), classValueExp);
         SpecificFieldNode methodFieldNode = createSpecificFieldNode(null, createIdentifierToken("name"),
                 createToken(COLON_TOKEN), methodValueExp);
-        MappingConstructorExpressionNode methodMapExp = createMappingConstructorExpressionNode(createToken(OPEN_BRACE_TOKEN),
-                createSeparatedNodeList(classFieldNode, createToken(COMMA_TOKEN), methodFieldNode), createToken(CLOSE_BRACE_TOKEN));
+        MappingConstructorExpressionNode methodMapExp = createMappingConstructorExpressionNode(
+                createToken(OPEN_BRACE_TOKEN),
+                createSeparatedNodeList(classFieldNode, createToken(COMMA_TOKEN), methodFieldNode),
+                createToken(CLOSE_BRACE_TOKEN));
         AnnotationNode javaMethodAnnot = createAnnotationNode(createToken(AT_TOKEN), javaMethodToken, methodMapExp);
         return Optional.of(createExternalFunctionBodyNode(createToken(EQUAL_TOKEN),
                 createNodeList(javaMethodAnnot), createToken(EXTERNAL_KEYWORD), createToken(SEMICOLON_TOKEN)));
@@ -132,6 +136,7 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
 
     @Override
     protected RemoteFunctionSignatureGenerator getSignatureGenerator() {
-        return new RemoteExternalFunctionSignatureGenerator(operation.getValue(), openAPI, operation.getKey().toString().toLowerCase(), path);
+        return new RemoteExternalFunctionSignatureGenerator(operation.getValue(), openAPI,
+                operation.getKey().toString().toLowerCase(), path);
     }
 }

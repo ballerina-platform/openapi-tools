@@ -62,6 +62,11 @@ public class HeaderParameterGenerator implements ParameterGenerator {
     }
 
     @Override
+    public Optional<ParameterNode> generateParameterNode() {
+        return generateParameterNode(false);
+    }
+
+    @Override
     public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
         //supported types string, int, boolean, decimal, float , primitive array
         IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));

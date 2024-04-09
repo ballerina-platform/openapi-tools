@@ -51,7 +51,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPEDESC_TYPE_DESC;
 public class RemoteExternalFunctionSignatureGenerator extends RemoteFunctionSignatureGenerator {
     private final String path;
 
-    public RemoteExternalFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod, String path) {
+    public RemoteExternalFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod,
+                                                    String path) {
         super(operation, openAPI, httpMethod);
         this.path = path;
     }
@@ -70,7 +71,8 @@ public class RemoteExternalFunctionSignatureGenerator extends RemoteFunctionSign
         }
 
         FunctionReturnTypeGeneratorImp functionReturnTypeGenerator = getFunctionReturnTypeGenerator();
-        FunctionReturnTypeGeneratorImp.ReturnTypesInfo returnTypeInfo = functionReturnTypeGenerator.getReturnTypeInfo();
+        FunctionReturnTypeGeneratorImp.ReturnTypesInfo returnTypeInfo = functionReturnTypeGenerator.
+                getReturnTypeInfo();
         List<TypeDescriptorNode> returnTypes = returnTypeInfo.types();
         boolean noContentResponseFound = returnTypeInfo.noContentResponseFound();
         if (noContentResponseFound) {
@@ -90,8 +92,8 @@ public class RemoteExternalFunctionSignatureGenerator extends RemoteFunctionSign
     protected ParametersInfo populateTargetTypeParam(TypeDescriptorNode targetType, ParametersInfo parametersInfo) {
         InferredTypedescDefaultNode inferredToken = createInferredTypedescDefaultNode(createToken(LT_TOKEN),
                 createToken(GT_TOKEN));
-        ParameterNode targetTypeParam = createDefaultableParameterNode(createEmptyNodeList(), targetType, createIdentifierToken("targetType"),
-                createToken(EQUAL_TOKEN), inferredToken);
+        ParameterNode targetTypeParam = createDefaultableParameterNode(createEmptyNodeList(), targetType,
+                createIdentifierToken("targetType"), createToken(EQUAL_TOKEN), inferredToken);
         parametersInfo.defaultable().add(targetTypeParam);
         parametersInfo.defaultable().add(createToken(COMMA_TOKEN));
         return parametersInfo;

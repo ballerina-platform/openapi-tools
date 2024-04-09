@@ -54,6 +54,11 @@ public class RequestBodyHeaderParameter implements ParameterGenerator {
     }
 
     @Override
+    public Optional<ParameterNode> generateParameterNode() {
+        return generateParameterNode(false);
+    }
+
+    @Override
     public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
         Schema<?> schema = header.getValue().getSchema();
         Boolean required = header.getValue().getRequired();

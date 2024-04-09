@@ -501,9 +501,9 @@ public class OpenApiCmd implements BLauncherCmd {
                 outStream.println("INFO: the 'Ballerina.toml' file is already updated with the OpenAPI client native " +
                         "dependency.");;
             } else {
-                outStream.println("ERROR: the 'Ballerina.toml' file is already updated with the OpenAPI client native" +
-                        " dependency but the version is different from the current version. Please remove the existing " +
-                        "dependency and try again.");
+                outStream.println("ERROR: the 'Ballerina.toml' file is already updated with the OpenAPI client " +
+                        "native dependency but the version is different from the current version. Please remove the" +
+                        " existing dependency and try again.");
                 exitError(this.exitWhenFinish);
             }
             return true;
@@ -513,8 +513,8 @@ public class OpenApiCmd implements BLauncherCmd {
 
     private NodeList<DocumentMemberDeclarationNode> populateClientNativeDependency(
             NodeList<DocumentMemberDeclarationNode> tomlMembers, String version) {
-        String description = "This dependency is added automatically by the OpenAPI tool. DO NOT REMOVE UNLESS REQUIRED";
-        tomlMembers = tomlMembers.add(SampleNodeGenerator.createTableArray("platform.java17.dependency", description));
+        String desc = "This dependency is added automatically by the OpenAPI tool. DO NOT REMOVE UNLESS REQUIRED";
+        tomlMembers = tomlMembers.add(SampleNodeGenerator.createTableArray("platform.java17.dependency", desc));
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("groupId", "io.ballerina.openapi", null));
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("artifactId", "client-native", null));
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("version", version, null));

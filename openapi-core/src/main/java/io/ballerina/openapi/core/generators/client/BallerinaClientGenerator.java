@@ -589,7 +589,8 @@ public class BallerinaClientGenerator {
                 ballerinaUtilGenerator, imports);
     }
 
-    private List<FunctionDefinitionNode> createResourceFunctions(Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations) {
+    private List<FunctionDefinitionNode> createResourceFunctions(Map<String,
+            Map<PathItem.HttpMethod, Operation>> filteredOperations) {
         List<FunctionDefinitionNode> resourceFunctionNodes = new ArrayList<>();
         for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {
             for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : operation.getValue().entrySet()) {
@@ -599,7 +600,9 @@ public class BallerinaClientGenerator {
         return resourceFunctionNodes;
     }
 
-    protected void addResourceFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation, Map.Entry<PathItem.HttpMethod, Operation> operationEntry, List<FunctionDefinitionNode> resourceFunctionNodes) {
+    protected void addResourceFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
+                                       Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
+                                       List<FunctionDefinitionNode> resourceFunctionNodes) {
         remoteFunctionNameList.add(operationEntry.getValue().getOperationId());
         ResourceFunctionGenerator resourceFunctionGenerator = getResourceFunctionGenerator(operation, operationEntry);
         Optional<FunctionDefinitionNode> resourceFunction = resourceFunctionGenerator.generateFunction();

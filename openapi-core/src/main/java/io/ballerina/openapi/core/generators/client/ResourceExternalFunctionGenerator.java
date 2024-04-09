@@ -34,7 +34,6 @@ import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
-import io.ballerina.openapi.core.generators.client.exception.FunctionSignatureGeneratorException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -76,8 +75,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
  */
 public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator {
 
-    ResourceExternalFunctionGenerator(Map.Entry<PathItem.HttpMethod, Operation> operation, String path, OpenAPI openAPI,
-                                      AuthConfigGeneratorImp authConfigGeneratorImp,
+    ResourceExternalFunctionGenerator(Map.Entry<PathItem.HttpMethod, Operation> operation, String path,
+                                      OpenAPI openAPI, AuthConfigGeneratorImp authConfigGeneratorImp,
                                       BallerinaUtilGenerator ballerinaUtilGenerator,
                                       List<ImportDeclarationNode> imports) {
         super(operation, path, openAPI, authConfigGeneratorImp, ballerinaUtilGenerator, imports);
@@ -98,8 +97,9 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
                         createEmptyMinutiaeList()));
         SpecificFieldNode implFuncNameField = createSpecificFieldNode(null, createIdentifierToken("name"),
                 createToken(COLON_TOKEN), implFuncName);
-        MappingConstructorExpressionNode implFunctionMap = createMappingConstructorExpressionNode(createToken(OPEN_BRACE_TOKEN),
-                createSeparatedNodeList(implFuncNameField), createToken(CLOSE_BRACE_TOKEN));
+        MappingConstructorExpressionNode implFunctionMap = createMappingConstructorExpressionNode(
+                createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(implFuncNameField),
+                createToken(CLOSE_BRACE_TOKEN));
         SimpleNameReferenceNode annotationRef = createSimpleNameReferenceNode(createIdentifierToken("MethodImpl"));
         AnnotationNode implAnnotation = createAnnotationNode(createToken(AT_TOKEN), annotationRef, implFunctionMap);
         MetadataNode metadataNode = createMetadataNode(null, createNodeList(implAnnotation));
@@ -141,6 +141,7 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
 
     @Override
     protected ResourceFunctionSignatureGenerator getSignatureGenerator() {
-        return new ResourceExternalFunctionSignatureGenerator(operation.getValue(), openAPI, operation.getKey().toString().toLowerCase(), path);
+        return new ResourceExternalFunctionSignatureGenerator(operation.getValue(), openAPI,
+                operation.getKey().toString().toLowerCase(), path);
     }
 }

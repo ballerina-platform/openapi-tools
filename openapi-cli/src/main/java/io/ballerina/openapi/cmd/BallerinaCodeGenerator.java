@@ -113,8 +113,6 @@ public class BallerinaCodeGenerator {
         // Add typeHandler
         TypeHandler.createInstance(openAPIDef, nullable);
         // Generate service
-        String serviceTitle = serviceName.toLowerCase(Locale.ENGLISH);
-        String srcFile = String.format("%s_service.bal", serviceTitle);
         List<String> complexPaths = GeneratorUtils.getComplexPaths(openAPIDef);
         if (!complexPaths.isEmpty()) {
             isResource = false;

@@ -61,6 +61,12 @@ public class QueryParameterGenerator implements ParameterGenerator {
         this.parameter = parameter;
         this.openAPI = openAPI;
     }
+
+    @Override
+    public Optional<ParameterNode> generateParameterNode() {
+        return generateParameterNode(false);
+    }
+
     @Override
     public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
 
