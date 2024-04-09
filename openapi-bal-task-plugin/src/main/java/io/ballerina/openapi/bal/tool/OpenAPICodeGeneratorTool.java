@@ -18,6 +18,7 @@
 package io.ballerina.openapi.bal.tool;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
@@ -342,6 +343,12 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, null, UTIL_FILE_NAME,
                     licenseContent == null || licenseContent.isBlank() ? utilContent :
                             licenseContent + System.lineSeparator() + utilContent));
+        }
+
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
+        for (TypeDefinitionNode typeDef: authNodes) {
+            TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
 
         SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
