@@ -23,6 +23,7 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGeneratorWithStatusCodeBinding;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
@@ -203,6 +204,15 @@ public class BallerinaCodeGenerator {
         List<GenSrcFile> newGenFiles = sourceFiles.stream()
                 .filter(distinctByKey(GenSrcFile::getFileName))
                 .collect(Collectors.toList());
+        //display diagnostics- client
+        List<ClientDiagnostic> clientDiagnostic = clientGenerator.getDiagnostics();
+
+        if (!clientDiagnostic.isEmpty()) {
+            outStream.println("error occurred while generating the client: ");
+            for (ClientDiagnostic diagnostic : clientDiagnostic) {
+                outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
+            }
+        }
 
         writeGeneratedSources(newGenFiles, srcPath, implPath, GEN_BOTH);
     }
@@ -432,6 +442,13 @@ public class BallerinaCodeGenerator {
             }
         }
 
+        List<ClientDiagnostic> clientDiagnostic = clientGenerator.getDiagnostics();
+        if (!clientDiagnostic.isEmpty()) {
+            outStream.println("error occurred while generating the client: ");
+            for (ClientDiagnostic diagnostic : clientDiagnostic) {
+                outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
+            }
+        }
         return sourceFiles;
     }
 
@@ -507,6 +524,8 @@ public class BallerinaCodeGenerator {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME,
                     (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaSyntaxTree));
         }
+        this.diagnostics.addAll(serviceGenerationHandler.getDiagnostics());
+        this.diagnostics.addAll(TypeHandler.getInstance().getDiagnostics());
         return sourceFiles;
     }
 

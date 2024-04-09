@@ -186,10 +186,11 @@ public class BallerinaClientGenerator {
         // Create `ballerina/http` import declaration node
         List<ImportDeclarationNode> importForHttp = getImportDeclarationNodes();
         imports.addAll(importForHttp);
-        List<ModuleMemberDeclarationNode> nodes = getModuleMemberDeclarationNodes();
+
         // Add authentication related records
         authConfigGeneratorImp.addAuthRelatedRecords(openAPI);
 
+        List<ModuleMemberDeclarationNode> nodes = getModuleMemberDeclarationNodes();
         NodeList<ImportDeclarationNode> importsList = createNodeList(imports);
         ModulePartNode modulePartNode =
                 createModulePartNode(importsList, createNodeList(nodes), createToken(EOF_TOKEN));
