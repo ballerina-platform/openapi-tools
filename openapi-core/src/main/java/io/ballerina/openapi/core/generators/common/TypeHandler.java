@@ -232,9 +232,11 @@ public class TypeHandler {
                 headersType);
 
         if (typeDefinitionNodes.containsKey(recordName) &&
-                (Objects.nonNull(typeDefinitionNodes.get(recordName).typeDescriptor()) &&
-                !typeDefinitionNodes.get(recordName).typeDescriptor().toSourceCode()
-                        .equals(recordTypeDescriptorNode.toSourceCode()))) {
+                Objects.nonNull(typeDefinitionNodes.get(recordName).typeDescriptor())) {
+            if (typeDefinitionNodes.get(recordName).typeDescriptor().toSourceCode()
+                    .equals(recordTypeDescriptorNode.toSourceCode())) {
+                return createSimpleNameReferenceNode(createIdentifierToken(recordName));
+            }
             recordName = method.substring(0, 1).toUpperCase(Locale.ROOT) + method.substring(1) + recordName;
         }
 
