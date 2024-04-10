@@ -15,9 +15,11 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.mapper.interceptor;
+package io.ballerina.openapi.service.mapper.interceptor.types;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ParameterSymbol;
+import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
@@ -25,19 +27,21 @@ import io.ballerina.openapi.service.mapper.response.utils.StatusCodeResponseUtil
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
- * This {@link Service} class represents the abstract service.
+ * This {@link Resource} class represents the abstract service.
  *
  * @since 1.9.0
  */
-public abstract class Service {
+public abstract class Resource {
 
     private final List<TypeSymbol> errorReturnType = new ArrayList<>();
     private final List<TypeSymbol> nonErrorReturnType = new ArrayList<>();
     protected final SemanticModel semanticModel;
+    protected ResourceMethodSymbol resourceMethod = null;
 
-    protected Service(SemanticModel semanticModel) {
+    protected Resource(SemanticModel semanticModel) {
         this.semanticModel = semanticModel;
     }
 
@@ -91,5 +95,14 @@ public abstract class Service {
 
     public boolean hasErrorReturn() {
         return !errorReturnType.isEmpty();
+    }
+
+    public boolean hasDataBinding() {
+        return Objects.nonNull(resourceMethod) &&
+                hasAnydataParameters(resourceMethod.typeDescriptor().params().orElse(List.of()));
+    }
+
+    private boolean hasAnydataParameters(List<ParameterSymbol> params) {
+        return params.stream().anyMatch(param -> param.typeDescriptor().subtypeOf(semanticModel.types().ANYDATA));
     }
 }
