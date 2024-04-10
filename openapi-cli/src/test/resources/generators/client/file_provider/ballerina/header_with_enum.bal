@@ -42,7 +42,6 @@ public isolated client class Client {
         string resourcePath = string `/store/inventory`;
         map<any> headerValues = {"X-CLIENT": xClient};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        record{|int:Signed32...;|} response = check self.clientEp->get(resourcePath, httpHeaders);
-        return response;
+        return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

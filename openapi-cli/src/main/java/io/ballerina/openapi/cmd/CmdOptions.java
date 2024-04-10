@@ -34,6 +34,7 @@ public class CmdOptions {
     private final String clientMethod;
     private final boolean nullable;
     private final String licensePath;
+    private boolean statusCodeBinding;
 
     private CmdOptions(CmdOptionsBuilder builder) {
         this.input = builder.input;
@@ -46,6 +47,7 @@ public class CmdOptions {
         this.clientMethod = builder.clientMethod;
         this.nullable = builder.nullable;
         this.licensePath = builder.licensePath;
+        this.statusCodeBinding = builder.statusCodeBinding;
     }
 
     public String getInput() {
@@ -88,6 +90,11 @@ public class CmdOptions {
     public String getLicensePath() {
         return licensePath;
     }
+
+    public boolean getStatusCodeBinding() {
+        return statusCodeBinding;
+    }
+
     /**
      * CMD options builder class.
      */
@@ -102,6 +109,7 @@ public class CmdOptions {
         private boolean nullable;
         private String input;
         private String licensePath;
+        private boolean statusCodeBinding;
 
         public CmdOptionsBuilder withOutputModule(String outputModule) {
             this.outputModule = outputModule;
@@ -152,6 +160,12 @@ public class CmdOptions {
             this.licensePath = licensePath;
             return this;
         }
+
+        public CmdOptionsBuilder withStatusCodeBinding(boolean statusCodeBinding) {
+            this.statusCodeBinding = statusCodeBinding;
+            return this;
+        }
+
         public CmdOptions build() {
             return new CmdOptions(this);
         }

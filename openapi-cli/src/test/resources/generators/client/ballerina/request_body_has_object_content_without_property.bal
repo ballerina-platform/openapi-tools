@@ -43,8 +43,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        string response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
     # Request body has object schema content without the properties field
     #
@@ -55,8 +54,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        string response = check self.clientEp->put(resourcePath, request);
-        return response;
+        return self.clientEp->put(resourcePath, request);
     }
     # RequestBody has object content without properties with application/xml
     #
@@ -67,8 +65,7 @@ public isolated client class Client {
         json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
-        string response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
     # RequestBody has object content without properties with vendor-specific media type vnd.petstore.v3.diff+json
     #
@@ -78,8 +75,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/vnd.petstore.v3.diff+json");
-        string response = check self.clientEp->put(resourcePath, request);
-        return response;
+        return self.clientEp->put(resourcePath, request);
     }
     # Request body has properties with {} value
     #

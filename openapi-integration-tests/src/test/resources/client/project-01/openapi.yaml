@@ -1,0 +1,208 @@
+openapi: 3.0.1
+info:
+  title: Api
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/api"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /albums/{id}:
+    get:
+      operationId: getAlbumsId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          headers:
+            req-id:
+              required: true
+              schema:
+                type: integer
+                format: int64
+            user-id:
+              required: true
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Album'
+        "404":
+          description: NotFound
+          headers:
+            req-id:
+              required: true
+              schema:
+                type: integer
+                format: int64
+            user-id:
+              required: true
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /albums:
+    get:
+      operationId: getAlbums
+      parameters:
+        - name: genre
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          headers:
+            req-id:
+              required: true
+              schema:
+                type: integer
+                format: int64
+            user-id:
+              required: true
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Album'
+        "404":
+          description: NotFound
+          headers:
+            req-id:
+              required: true
+              schema:
+                type: integer
+                format: int64
+            user-id:
+              required: true
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+    post:
+      operationId: postAlbums
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Album'
+        required: true
+      responses:
+        "201":
+          description: Created
+          headers:
+            req-id:
+              required: true
+              schema:
+                type: integer
+                format: int64
+            user-id:
+              required: true
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Album'
+        "409":
+          description: Conflict
+          headers:
+            req-id:
+              required: true
+              schema:
+                type: integer
+                format: int64
+            user-id:
+              required: true
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    Album:
+      required:
+        - artist
+        - genre
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        artist:
+          type: string
+        genre:
+          type: string
+      additionalProperties: false
+    ErrorMessage:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+      additionalProperties:
+        type: string
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string

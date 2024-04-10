@@ -57,6 +57,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -155,7 +157,9 @@ public class TypeHandler {
             if (!(node.typeDescriptor() instanceof RecordTypeDescriptorNode)) {
                 continue;
             }
-            if (node.typeName().text().equals(GeneratorConstants.CONNECTION_CONFIG)) {
+            boolean isHttpImportExist = imports.stream().anyMatch(importNode -> importNode.moduleName().stream()
+                    .anyMatch(moduleName -> moduleName.text().equals(GeneratorConstants.HTTP)));
+            if (node.typeName().text().equals(GeneratorConstants.CONNECTION_CONFIG) && !isHttpImportExist) {
                 ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(
                         GeneratorConstants.BALLERINA, GeneratorConstants.HTTP);
                 imports.add(importForHttp);
@@ -168,8 +172,6 @@ public class TypeHandler {
                 }
                 TypeReferenceNode recordField = (TypeReferenceNode) field;
                 QualifiedNameReferenceNode typeInclusion = (QualifiedNameReferenceNode) recordField.typeName();
-                boolean isHttpImportExist = imports.stream().anyMatch(importNode -> importNode.moduleName().stream()
-                        .anyMatch(moduleName -> moduleName.text().equals(GeneratorConstants.HTTP)));
 
                 if (!isHttpImportExist && typeInclusion.modulePrefix().text().equals(GeneratorConstants.HTTP)) {
                     ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(
@@ -217,7 +219,7 @@ public class TypeHandler {
     }
 
     public SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode bodyType,
-                                                              TypeDescriptorNode headersType) {
+                                                             TypeDescriptorNode headersType, String method) {
         String recordName;
         if (bodyType != null) {
             String bodyTypeStr = bodyType.toString().replaceAll("[\\[\\\\]]", "Array");
@@ -225,6 +227,31 @@ public class TypeHandler {
         } else {
             recordName = statusCode;
         }
+
+        RecordTypeDescriptorNode recordTypeDescriptorNode = getRecordTypeDescriptorNode(statusCode, bodyType,
+                headersType);
+
+        if (typeDefinitionNodes.containsKey(recordName) &&
+                Objects.nonNull(typeDefinitionNodes.get(recordName).typeDescriptor())) {
+            if (typeDefinitionNodes.get(recordName).typeDescriptor().toSourceCode()
+                    .equals(recordTypeDescriptorNode.toSourceCode())) {
+                return createSimpleNameReferenceNode(createIdentifierToken(recordName));
+            }
+            recordName = method.substring(0, 1).toUpperCase(Locale.ROOT) + method.substring(1) + recordName;
+        }
+
+        TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
+                createToken(PUBLIC_KEYWORD),
+                createToken(TYPE_KEYWORD),
+                createIdentifierToken(recordName),
+                recordTypeDescriptorNode,
+                createToken(SEMICOLON_TOKEN));
+        typeDefinitionNodes.put(recordName, typeDefinitionNode);
+        return createSimpleNameReferenceNode(createIdentifierToken(recordName));
+    }
+
+    private static RecordTypeDescriptorNode getRecordTypeDescriptorNode(String statusCode, TypeDescriptorNode bodyType,
+                                                                        TypeDescriptorNode headersType) {
         Token recordKeyWord = createToken(RECORD_KEYWORD);
         Token bodyStartDelimiter = createIdentifierToken("{|");
         // Create record fields
@@ -264,20 +291,11 @@ public class TypeHandler {
         NodeList<Node> fieldsList = createSeparatedNodeList(recordFields);
         Token bodyEndDelimiter = createIdentifierToken("|}");
 
-        RecordTypeDescriptorNode recordTypeDescriptorNode = createRecordTypeDescriptorNode(
+        return createRecordTypeDescriptorNode(
                 recordKeyWord,
                 bodyStartDelimiter,
                 fieldsList, null,
                 bodyEndDelimiter);
-
-        TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
-                createToken(PUBLIC_KEYWORD),
-                createToken(TYPE_KEYWORD),
-                createIdentifierToken(recordName),
-                recordTypeDescriptorNode,
-                createToken(SEMICOLON_TOKEN));
-        typeDefinitionNodes.put(recordName, typeDefinitionNode);
-        return createSimpleNameReferenceNode(createIdentifierToken(recordName));
     }
 
     private void handleSubtypes(HashMap<String, TypeDefinitionNode> subTypesMap) {

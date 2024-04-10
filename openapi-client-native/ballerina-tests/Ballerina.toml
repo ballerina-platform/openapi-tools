@@ -1,0 +1,11 @@
+[package]
+org = "ballerina"
+name = "client_native_test"
+version = "0.1.0"
+distribution = "2201.8.6"
+
+[[platform.java17.dependency]]
+groupId = "io.ballerina.openapi"
+artifactId = "client-native"
+version = "1.0.0-SNAPSHOT"
+path = "../build/libs/openapi-client-native-1.0.0-SNAPSHOT.jar"

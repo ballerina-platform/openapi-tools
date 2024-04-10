@@ -37,20 +37,17 @@ public isolated client class Client {
     # + return - Feature flag approval request response
     remote isolated function op1() returns StringObject|error {
         string resourcePath = string `/projects`;
-        StringObject response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # + return - Feature flag approval request response
     remote isolated function op2() returns IntegerObject|error {
         string resourcePath = string `/projects`;
         http:Request request = new;
-        IntegerObject response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
     # + return - Feature flag approval request response
     remote isolated function op3() returns NumberObject|error {
         string resourcePath = string `/projects`;
-        NumberObject response = check self.clientEp->delete(resourcePath);
-        return response;
+        return self.clientEp->delete(resourcePath);
     }
 }

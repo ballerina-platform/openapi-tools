@@ -95,6 +95,7 @@ public class GeneratorConstants {
             "*\\-=^+();:\\/{}\\s|.$])]*\\b";
     //ClientCode generator
     public static final String HTTP = "http";
+    public static final String J_BALLERINA = "jballerina.java";
     public static final String URL = "url";
     public static final String MODULE_TEST = "test";
     public static final String BALLERINA = "ballerina";

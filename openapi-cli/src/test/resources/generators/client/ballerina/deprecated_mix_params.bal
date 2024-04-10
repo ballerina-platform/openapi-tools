@@ -52,7 +52,6 @@ public isolated client class Client {
         string resourcePath = string `/tracks/${getEncodedUri(track_id)}/comments`;
         map<anydata> queryParam = {"limit": 'limit, "offset": offset, "linked_partitioning": linked_partitioning};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        http:Response response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
 }

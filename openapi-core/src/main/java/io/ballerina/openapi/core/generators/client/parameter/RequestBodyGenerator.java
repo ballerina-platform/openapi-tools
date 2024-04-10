@@ -65,8 +65,14 @@ public class RequestBodyGenerator implements ParameterGenerator {
     public List<ParameterNode> getHeaderParameters() {
         return headerParameters;
     }
+
     @Override
     public Optional<ParameterNode> generateParameterNode() {
+        return generateParameterNode(false);
+    }
+
+    @Override
+    public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
         Content requestBodyContent;
         String referencedRequestBodyName;
         TypeDescriptorNode typeDescNode = null;

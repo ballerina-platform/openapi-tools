@@ -54,7 +54,6 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<any> headerValues = {"api-key": self.apiKeyConfig.apiKey};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        EventList response = check self.clientEp->get(resourcePath, httpHeaders);
-        return response;
+        return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

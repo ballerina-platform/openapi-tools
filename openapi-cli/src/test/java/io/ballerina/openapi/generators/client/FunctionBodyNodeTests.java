@@ -79,8 +79,8 @@ public class FunctionBodyNodeTests {
                 {"diagnostic_files/header_parameter.yaml", "/pets", "{string resourcePath=string`/pets`;" +
                         "map<any>headerValues=" +
                         "{\"X-Request-ID\":xRequestId,\"X-Request-Client\":xRequestClient};map<string|string[]>" +
-                        "httpHeaders=getMapForHeaders(headerValues);http:Response response =checkself.clientEp->get" +
-                        "(resourcePath,httpHeaders); return response;}"},
+                        "httpHeaders=getMapForHeaders(headerValues);return self.clientEp->" +
+                        "get(resourcePath,httpHeaders);}"},
                 {"diagnostic_files/head_operation.yaml", "/{filesystem}",
                         "{string resourcePath=string`/${getEncodedUri(filesystem)}`;" +
                         "map<anydata>queryParam={\"resource\":'resource,\"timeout\":timeout};" +
@@ -88,7 +88,7 @@ public class FunctionBodyNodeTests {
                         "map<any>headerValues={\"x-ms-client-request-id\":xMsClientRequestId," +
                         "\"x-ms-date\":xMsDate,\"x-ms-version\":xMsVersion};map<string|string[]> " +
                         "httpHeaders = getMapForHeaders(headerValues);" +
-                        "http:Responseresponse=check self.clientEp-> head(resourcePath, httpHeaders);returnresponse;}"},
+                        "return self.clientEp-> head(resourcePath, httpHeaders);}"},
                 {"diagnostic_files/operation_delete.yaml", "/pets/{petId}", "{string resourcePath = " +
                         "string `/pets/${getEncodedUri(petId)}`;" +
                         "return  self.clientEp-> delete(resourcePath);}"},
@@ -107,14 +107,12 @@ public class FunctionBodyNodeTests {
                         "return self.clientEp->post(resourcePath, request);}"},
                 {"client/swagger/response_type_order.yaml", "/pet/{petId}",
                         "{string resourcePath = string `/pet/${getEncodedUri(petId)}`;" +
-                        "Pet response = check self.clientEp->get(resourcePath);" +
-                        "return response;}"},
+                        "return self.clientEp->get(resourcePath);}"},
                 {"client/swagger/text_request_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
                         "http:Request request = new;" +
                         "json jsonBody = payload.toJson();" +
                         "request.setPayload(jsonBody, \"text/json\");" +
-                        "record{} response = check self.clientEp->post(resourcePath, request);" +
-                        "return response;}"},
+                        "return self.clientEp->post(resourcePath, request);}"},
                 {"client/swagger/pdf_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
                         "// TODO: Update the request as needed;\n" +
                         " return  self.clientEp->post(resourcePath, request);}"},
@@ -133,26 +131,20 @@ public class FunctionBodyNodeTests {
                         " return  self.clientEp->post(resourcePath, request);\n}"},
                 {"client/swagger/empty_object_responnse.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +
-                        "        record{} response = check self.clientEp->post(resourcePath, request);\n" +
-                        "        return response;}"},
+                        "        return self.clientEp->post(resourcePath, request);}"},
                 {"client/swagger/map_schema_response.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +
-                        "        record{|Inline_response_map200...;|} response = check self.clientEp->post(" +
-                        "resourcePath, request);\n" +
-                        "        return response;}"},
+                        "        return self.clientEp->post(resourcePath, request);}"},
                 {"client/swagger/array_response_pdf.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +
-                        "        http:Response response = check self.clientEp->post(resourcePath, request);\n" +
-                        "        return response;}"},
+                        "        return self.clientEp->post(resourcePath, request);}"},
                 {"client/swagger/any_type_response.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +
-                        "        http:Response response = check self.clientEp->post(resourcePath, request);\n" +
-                        "        return response;}"},
+                        "        return self.clientEp->post(resourcePath, request);}"},
                 {"client/swagger/return_type/no_response.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        map<anydata> queryParam = {\"limit\": 'limit};\n" +
                         "        resourcePath = resourcePath + check getPathForQueryParam(queryParam);\n" +
-                        "        http:Response response = check self.clientEp->get(resourcePath);\n" +
-                        "        return response;}"}
+                        "        return self.clientEp->get(resourcePath);}"}
         };
     }
 

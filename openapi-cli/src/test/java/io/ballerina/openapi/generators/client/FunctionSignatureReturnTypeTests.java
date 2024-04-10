@@ -51,27 +51,27 @@ public class FunctionSignatureReturnTypeTests {
         OpenAPI openAPI = getOpenAPI(RES_DIR.resolve("swagger/return_type/all_return_type_operation.yaml"));
         TypeHandler.createInstance(openAPI, false);
         FunctionReturnTypeGeneratorImp returnType = new FunctionReturnTypeGeneratorImp(openAPI.getPaths().
-                get("/jsonproducts").getGet(), openAPI);
+                get("/jsonproducts").getGet(), openAPI, "get");
         Assert.assertEquals(returnType.getReturnType().get().type().toString(), "json|error");
         FunctionReturnTypeGeneratorImp returnType2 = new FunctionReturnTypeGeneratorImp(openAPI.getPaths().
-                get("/stringproducts/record").getGet(), openAPI);
+                get("/stringproducts/record").getGet(), openAPI, "get");
         //todo check the- this should be product array
         Assert.assertEquals(returnType2.getReturnType().get().type().toString(), "Product[]|error");
 //        Assert.assertEquals(functionReturnType.getReturnType(openAPI.getPaths().get("/stringproducts/record")
 //        .getGet(), false), "ProductArr|error");
         FunctionReturnTypeGeneratorImp returnType3 = new FunctionReturnTypeGeneratorImp(openAPI.getPaths().
-                get("/xmlproducts").getGet(), openAPI);
+                get("/xmlproducts").getGet(), openAPI, "get");
         Assert.assertEquals(returnType3.getReturnType().get().type().toString(), "xml|error");
         FunctionReturnTypeGeneratorImp returnType4 = new FunctionReturnTypeGeneratorImp(openAPI.getPaths().
-                get("/xmlarrayproducts").getGet(), openAPI);
+                get("/xmlarrayproducts").getGet(), openAPI, "get");
         //todo need to check convention this should be xml
 //        Assert.assertEquals(returnType4.getReturnType().get().type().toString(), "xml[]|error");
         FunctionReturnTypeGeneratorImp returnType5 = new FunctionReturnTypeGeneratorImp(openAPI.getPaths().
-                get("/xmlarrayproducts").getGet(), openAPI);
+                get("/xmlarrayproducts").getGet(), openAPI, "get");
         //todo need to check convention
 //        Assert.assertEquals(returnType5.getReturnType().get().type().toString(), "XMLArr|error");
         FunctionReturnTypeGeneratorImp returnType6 = new FunctionReturnTypeGeneratorImp(openAPI.getPaths().
-                get("/products/nocontent").getGet(), openAPI);
+                get("/products/nocontent").getGet(), openAPI, "get");
         String returnTypeV = returnType6.getReturnType().get().type().toString();
         Assert.assertEquals(returnTypeV, "error?");
     }
@@ -82,7 +82,7 @@ public class FunctionSignatureReturnTypeTests {
                 "perties_with_additional.yaml"));
         TypeHandler.createInstance(openapi, false);
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(openapi
-                .getPaths().get("/products").getGet(), openapi);
+                .getPaths().get("/products").getGet(), openapi, "get");
         String returnType = functionReturnType.getReturnType().get().type().toString();
         Assert.assertEquals(returnType, "record{|string...;|}|error");
     }
@@ -93,7 +93,7 @@ public class FunctionSignatureReturnTypeTests {
                 "response_with_properties_with_additional.yaml"));
         TypeHandler.createInstance(openapi, false);
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
-                openapi.getPaths().get("/products").getGet(), openapi);
+                openapi.getPaths().get("/products").getGet(), openapi, "get");
         String returnType = functionReturnType.getReturnType().get().type().toString();
         Assert.assertEquals(returnType, "Inline_response_200|error");
     }
@@ -105,7 +105,7 @@ public class FunctionSignatureReturnTypeTests {
                 ".yaml"));
         TypeHandler.createInstance(openapi, false);
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
-                openapi.getPaths().get("/products").getGet(), openapi);
+                openapi.getPaths().get("/products").getGet(), openapi, "get");
         String returnType = functionReturnType.getReturnType().get().type().toString();
         Assert.assertEquals(returnType, "record{}|error");
     }
@@ -116,7 +116,7 @@ public class FunctionSignatureReturnTypeTests {
                 "without_additional.yaml"));
         TypeHandler.createInstance(openapi, false);
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
-                openapi.getPaths().get("/products").getGet(), openapi);
+                openapi.getPaths().get("/products").getGet(), openapi, "get");
         String returnType = functionReturnType.getReturnType().get().type().toString();
         Assert.assertEquals(returnType, "Inline_response_200|error");
     }
@@ -126,7 +126,7 @@ public class FunctionSignatureReturnTypeTests {
         OpenAPI openapi = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_no_schema.yaml"));
         TypeHandler.createInstance(openapi, false);
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
-                openapi.getPaths().get("/path01").getGet(), openapi);
+                openapi.getPaths().get("/path01").getGet(), openapi, "get");
         String returnType = functionReturnType.getReturnType().get().type().toString();
         Assert.assertEquals(returnType, "json|error");
     }
@@ -136,7 +136,7 @@ public class FunctionSignatureReturnTypeTests {
         OpenAPI openapi = getOpenAPI(RES_DIR.resolve("swagger/return_type/no_response.yaml"));
         TypeHandler.createInstance(openapi, false);
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
-                openapi.getPaths().get("/pets").getGet(), openapi);
+                openapi.getPaths().get("/pets").getGet(), openapi, "get");
         String returnType = functionReturnType.getReturnType().get().type().toString();
         Assert.assertEquals(returnType, "http:Response|error");
     }
@@ -147,7 +147,7 @@ public class FunctionSignatureReturnTypeTests {
                 "response_with_only_additional_schema.yaml"));
         TypeHandler.createInstance(openapi, false);
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
-                openapi.getPaths().get("/store/inventory").getGet(), openapi);
+                openapi.getPaths().get("/store/inventory").getGet(), openapi, "get");
         String returnType = functionReturnType.getReturnType().get().type().toString();
         Assert.assertEquals(returnType, "record{|int:Signed32...;|}|error");
     }

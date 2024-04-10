@@ -55,8 +55,7 @@ public isolated client class Client {
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        Pet response = check self.clientEp->delete(resourcePath, headers = httpHeaders);
-        return response;
+        return self.clientEp->delete(resourcePath, headers = httpHeaders);
     }
     # Delete a pet 2
     #
@@ -72,8 +71,7 @@ public isolated client class Client {
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        Pet response = check self.clientEp->delete(resourcePath, headers = httpHeaders);
-        return response;
+        return self.clientEp->delete(resourcePath, headers = httpHeaders);
     }
     # Info for a specific pet
     #
@@ -90,8 +88,7 @@ public isolated client class Client {
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        Pet response = check self.clientEp->get(resourcePath, httpHeaders);
-        return response;
+        return self.clientEp->get(resourcePath, httpHeaders);
     }
     # Vote for a pet
     #
@@ -107,7 +104,6 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
-        Pet response = check self.clientEp->post(resourcePath, request, httpHeaders);
-        return response;
+        return self.clientEp->post(resourcePath, request, httpHeaders);
     }
 }

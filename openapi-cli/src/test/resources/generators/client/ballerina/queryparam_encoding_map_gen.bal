@@ -46,7 +46,6 @@ public isolated client class Client {
         map<anydata> queryParam = {"collection_method": collection_method, "created": created, "due_date": due_date, "subscriptions": subscriptions};
         map<Encoding> queryParamEncoding = {"created": {style: DEEPOBJECT, explode: true}, "due_date": {style: DEEPOBJECT, explode: true}, "subscriptions": {style: FORM, explode: true}};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam, queryParamEncoding);
-        json response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
 }

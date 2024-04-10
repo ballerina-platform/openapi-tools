@@ -33,7 +33,6 @@ import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
-import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
@@ -111,8 +110,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEA
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_HEADERS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_REQUEST;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NEW;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPTIONAL_ERROR;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PATCH;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.POST;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PUT;
@@ -120,7 +117,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUE
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERY_PARAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REQUEST;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RESOURCE_PATH;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RESPONSE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RETURN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SELF;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
@@ -152,7 +148,6 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                                     AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp,
                                     BallerinaUtilGenerator ballerinaUtilGenerator,
                                     List<ImportDeclarationNode> imports) {
-
         this.path = path;
         this.operation = operation;
         this.isHeader = false;
@@ -172,8 +167,6 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
     public Optional<FunctionBodyNode> getFunctionBodyNode() {
 
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation.getValue(),
-                openAPI);
         isHeader = false;
         // Create statements
         List<StatementNode> statementsList = new ArrayList<>();
@@ -186,22 +179,12 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
         handleParameterSchemaInOperation(operation, statementsList);
 
         String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
-        // This return type for target data type binding.
-        Optional<ReturnTypeDescriptorNode> returnResult = functionReturnType.getReturnType();
-        if (returnResult.isEmpty()) {
-            //todo diagnostic message
-            return Optional.empty();
-//            throw new BallerinaOpenApiException("Return type is not found for the operation : "
-//            + operation.getValue());
-        }
-        String rType = returnResult.get().type().toString();
-        String returnType = returnTypeForTargetTypeField(rType);
         // Statement Generator for requestBody
         if (operation.getValue().getRequestBody() != null) {
             RequestBody requestBody = operation.getValue().getRequestBody();
-            handleRequestBodyInOperation(statementsList, method, returnType, requestBody);
+            handleRequestBodyInOperation(statementsList, method, requestBody);
         } else {
-            createCommonFunctionBodyStatements(statementsList, method, returnType);
+            createCommonFunctionBodyStatements(statementsList, method);
         }
 
         //Create statements
@@ -416,8 +399,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                             DOT_TOKEN.stringValue() + API_KEY_CONFIG_PARAM),
                     createToken(IS_KEYWORD),
                     createIdentifierToken(API_KEYS_CONFIG));
-            IfElseStatementNode ifBlock = createIfElseStatementNode(createToken(IF_KEYWORD), condition, ifBody,
-                    null);
+            IfElseStatementNode ifBlock = createIfElseStatementNode(createToken(IF_KEYWORD), condition, ifBody, null);
             statementsList.add(ifBlock);
         }
     }
@@ -500,7 +482,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
     /**
      * Handle request body in operation.
      */
-    private void handleRequestBodyInOperation(List<StatementNode> statementsList, String method, String returnType,
+    private void handleRequestBodyInOperation(List<StatementNode> statementsList, String method,
                                               RequestBody requestBody)
             throws BallerinaOpenApiException {
 
@@ -510,7 +492,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
             //Currently align with first content of the requestBody
             while (iterator.hasNext()) {
-                createRequestBodyStatements(isHeader, statementsList, method, returnType, iterator);
+                createRequestBodyStatements(isHeader, statementsList, method, iterator);
                 break;
             }
         } else if (requestBody.get$ref() != null) {
@@ -521,7 +503,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
             //Currently align with first content of the requestBody
             while (iterator.hasNext()) {
-                createRequestBodyStatements(isHeader, statementsList, method, returnType, iterator);
+                createRequestBodyStatements(isHeader, statementsList, method, iterator);
                 break;
             }
         }
@@ -530,8 +512,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
     /**
      * Generate common statements in function bosy.
      */
-    private void createCommonFunctionBodyStatements(List<StatementNode> statementsList, String method,
-                                                    String returnType) {
+    private void createCommonFunctionBodyStatements(List<StatementNode> statementsList, String method) {
 
         String clientCallStatement;
 
@@ -543,31 +524,51 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                 ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                         "http:Request request = new");
                 statementsList.add(requestStatementNode);
-                clientCallStatement = "check self.clientEp->%s(%s, request, %s)".formatted(method, RESOURCE_PATH,
+                clientCallStatement = getClientCallWithRequestAndHeaders().formatted(method, RESOURCE_PATH,
                         HTTP_HEADERS);
 
             } else if (method.equals(DELETE)) {
-                clientCallStatement = "check self.clientEp->%s(%s, headers = %s)".formatted(method, RESOURCE_PATH,
+                clientCallStatement = getClientCallWithHeadersParam().formatted(method, RESOURCE_PATH,
                         HTTP_HEADERS);
             } else if (method.equals(HEAD)) {
-                clientCallStatement = "check self.clientEp->%s(%s, %s)".formatted(method, RESOURCE_PATH,
+                clientCallStatement = getClientCallWithHeaders().formatted(method, RESOURCE_PATH,
                         HTTP_HEADERS);
             } else {
-                clientCallStatement = "check self.clientEp->%s(%s, %s)".formatted(method, RESOURCE_PATH,
+                clientCallStatement = getClientCallWithHeaders().formatted(method, RESOURCE_PATH,
                         HTTP_HEADERS);
             }
         } else if (method.equals(DELETE)) {
-            clientCallStatement = "check self.clientEp->%s(%s)".formatted(method, RESOURCE_PATH);
+            clientCallStatement = getSimpleClientCall().formatted(method, RESOURCE_PATH);
         } else if (isEntityBodyMethods) {
             ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                     "http:Request request = new");
             statementsList.add(requestStatementNode);
-            clientCallStatement = "check self.clientEp->%s(%s, request)".formatted(method, RESOURCE_PATH);
+            clientCallStatement = getClientCallWithRequest().formatted(method, RESOURCE_PATH);
         } else {
-            clientCallStatement =  "check self.clientEp->%s(%s)".formatted(method, RESOURCE_PATH);
+            clientCallStatement =  getSimpleClientCall().formatted(method, RESOURCE_PATH);
         }
         //Return Variable
-        generateReturnStatement(statementsList, returnType, clientCallStatement);
+        generateReturnStatement(statementsList, clientCallStatement);
+    }
+
+    protected String getClientCallWithHeadersParam() {
+        return "self.clientEp->%s(%s, headers = %s)";
+    }
+
+    protected String getClientCallWithRequestAndHeaders() {
+        return "self.clientEp->%s(%s, request, %s)";
+    }
+
+    protected String getClientCallWithHeaders() {
+        return "self.clientEp->%s(%s, %s)";
+    }
+
+    protected String getClientCallWithRequest() {
+        return "self.clientEp->%s(%s, request)";
+    }
+
+    protected String getSimpleClientCall() {
+        return "self.clientEp->%s(%s)";
     }
 
     /**
@@ -630,18 +631,16 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
      *    http:Request request = new;
      *    json jsonBody = payload.toJson();
      *    request.setPayload(jsonBody, "application/json");
-     *    json response = check self.clientEp->put(path, request);
+     *    self.clientEp->put(path, request);
      * </pre>
      *
      * @param isHeader       - Boolean value for header availability.
      * @param statementsList - StatementNode list in body node
      * @param method         - Operation method name.
-     * @param returnType     - Response type
      * @param iterator       - RequestBody media type
      */
-    private void createRequestBodyStatements(boolean isHeader, List<StatementNode> statementsList,
-                                             String method, String returnType, Iterator<Map.Entry<String,
-            MediaType>> iterator)
+    private void createRequestBodyStatements(boolean isHeader, List<StatementNode> statementsList, String method,
+                                             Iterator<Map.Entry<String, MediaType>> iterator)
             throws BallerinaOpenApiException {
 
         //Create Request statement
@@ -661,16 +660,16 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             statementsList.add(expressionStatementNode);
         }
         // POST, PUT, PATCH, DELETE, EXECUTE
-        String requestStatement = "check self.clientEp->%s(%s, request)".formatted(method, RESOURCE_PATH);
+        String requestStatement = getClientCallWithRequest().formatted(method, RESOURCE_PATH);
         if (isHeader) {
             if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
                     || method.equals(EXECUTE)) {
-                requestStatement = "check self.clientEp->%s(%s, request, %s)".formatted(method, RESOURCE_PATH,
+                requestStatement = getClientCallWithRequestAndHeaders().formatted(method, RESOURCE_PATH,
                         HTTP_HEADERS);
-                generateReturnStatement(statementsList, returnType, requestStatement);
+                generateReturnStatement(statementsList, requestStatement);
             }
         } else {
-            generateReturnStatement(statementsList, returnType, requestStatement);
+            generateReturnStatement(statementsList, requestStatement);
         }
     }
 
@@ -678,23 +677,12 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
      * This function is used for generating return statement.
      *
      * @param statementsList  - Previous statements list
-     * @param returnType      - Return type
      * @param returnStatement - Request statement
      */
-    private static void generateReturnStatement(List<StatementNode> statementsList, String returnType,
-                                                String returnStatement) {
+    private static void generateReturnStatement(List<StatementNode> statementsList, String returnStatement) {
         Token returnKeyWord = createIdentifierToken(RETURN);
         SimpleNameReferenceNode returns;
-        if (returnType.equals(OPTIONAL_ERROR)) {
-            //to ignore the check keyword
-            returnStatement = returnStatement.substring(6);
-            returns = createSimpleNameReferenceNode(createIdentifierToken(returnStatement));
-        } else {
-            VariableDeclarationNode requestStatementNode =
-                    GeneratorUtils.getSimpleStatement(returnType, RESPONSE, returnStatement);
-            statementsList.add(requestStatementNode);
-            returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
-        }
+        returns = createSimpleNameReferenceNode(createIdentifierToken(returnStatement));
         ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returns,
                 createToken(SEMICOLON_TOKEN));
         statementsList.add(returnStatementNode);
@@ -712,22 +700,6 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
         MimeFactory factory = new MimeFactory();
         MimeType mimeType = factory.getMimeType(mediaTypeEntry, ballerinaUtilGenerator, imports);
         mimeType.setPayload(statementsList, mediaTypeEntry);
-    }
-
-    /**
-     * This util function for getting type to the targetType data binding.
-     *
-     * @param rType - Given Data type
-     * @return - return type
-     */
-    private String returnTypeForTargetTypeField(String rType) {
-        if (rType.equals(OPTIONAL_ERROR)) {
-            return rType;
-        }
-        String returnType;
-        int index = rType.lastIndexOf("|");
-        returnType = rType.substring(0, index);
-        return (rType.endsWith(NILLABLE) ? returnType + NILLABLE : returnType);
     }
 
     /**

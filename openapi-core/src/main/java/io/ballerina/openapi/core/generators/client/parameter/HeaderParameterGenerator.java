@@ -63,6 +63,11 @@ public class HeaderParameterGenerator implements ParameterGenerator {
 
     @Override
     public Optional<ParameterNode> generateParameterNode() {
+        return generateParameterNode(false);
+    }
+
+    @Override
+    public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
         //supported types string, int, boolean, decimal, float , primitive array
         IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
         Optional<TypeDescriptorNode> typeNodeResult = TypeHandler.getInstance()
@@ -75,7 +80,7 @@ public class HeaderParameterGenerator implements ParameterGenerator {
         }
         TypeDescriptorNode typeNode = typeNodeResult.get();
         Schema schema = parameter.getSchema();
-        if (parameter.getRequired()) {
+        if (parameter.getRequired() || treatDefaultableAsRequired) {
             return Optional.of(createRequiredParameterNode(createEmptyNodeList(), typeNode, paramName));
         } else if (schema.getDefault() != null) {
             LiteralValueToken literalValueToken;

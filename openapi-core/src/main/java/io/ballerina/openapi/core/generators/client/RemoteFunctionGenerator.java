@@ -1,21 +1,3 @@
-/*
- *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com).
- *
- *  WSO2 LLC. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
- */
-
 package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
@@ -33,6 +15,7 @@ import io.swagger.v3.oas.models.PathItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -53,6 +36,7 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
     AuthConfigGeneratorImp authConfigGeneratorImp;
     BallerinaUtilGenerator ballerinaUtilGenerator;
     List<ImportDeclarationNode> imports;
+
     RemoteFunctionGenerator(String path, Map.Entry<PathItem.HttpMethod, Operation> operation, OpenAPI openAPI,
                             AuthConfigGeneratorImp authConfigGeneratorImp,
                             BallerinaUtilGenerator ballerinaUtilGenerator, List<ImportDeclarationNode> imports) {
@@ -62,7 +46,6 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         this.authConfigGeneratorImp = authConfigGeneratorImp;
         this.ballerinaUtilGenerator = ballerinaUtilGenerator;
         this.imports = imports;
-
     }
 
     public List<ImportDeclarationNode> getImports() {
@@ -76,8 +59,7 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
         // Create function signature
-        RemoteFunctionSignatureGenerator signatureGenerator = new RemoteFunctionSignatureGenerator(operation.getValue(),
-                openAPI);
+        RemoteFunctionSignatureGenerator signatureGenerator = getSignatureGenerator();
         Optional<FunctionSignatureNode> signatureNodeOptional = signatureGenerator.generateFunctionSignature();
 
         if (signatureNodeOptional.isEmpty()) {
@@ -86,19 +68,39 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         }
         FunctionSignatureNode functionSignatureNode = signatureNodeOptional.get();
         //Create function body
+        Optional<FunctionBodyNode> functionBodyNodeResult = getFunctionBodyNode(diagnostics);
+        if (functionBodyNodeResult.isEmpty()) {
+            return Optional.empty();
+        }
+        FunctionBodyNode functionBodyNode = functionBodyNodeResult.get();
+
+        return getFunctionDefinitionNode(qualifierList, functionKeyWord, functionName, functionSignatureNode,
+                functionBodyNode);
+    }
+
+    protected Optional<FunctionBodyNode> getFunctionBodyNode(List<ClientDiagnostic> diagnostics) {
         FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
                 authConfigGeneratorImp, ballerinaUtilGenerator, imports);
-        FunctionBodyNode functionBodyNode;
         Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
         if (functionBodyNodeResult.isEmpty()) {
             diagnostics.addAll(functionBodyGenerator.getDiagnostics());
-            return Optional.empty();
         }
-        functionBodyNode = functionBodyNodeResult.get();
+        return functionBodyNodeResult;
+    }
 
+    protected RemoteFunctionSignatureGenerator getSignatureGenerator() {
+        return new RemoteFunctionSignatureGenerator(operation.getValue(), openAPI,
+                operation.getKey().toString().toLowerCase(Locale.ROOT));
+    }
+
+    protected Optional<FunctionDefinitionNode> getFunctionDefinitionNode(NodeList<Token> qualifierList,
+                                                                         Token functionKeyWord,
+                                                                         IdentifierToken functionName,
+                                                                         FunctionSignatureNode functionSignatureNode,
+                                                                         FunctionBodyNode functionBodyNode) {
         return Optional.of(NodeFactory.createFunctionDefinitionNode(OBJECT_METHOD_DEFINITION, null,
-                    qualifierList, functionKeyWord, functionName, createEmptyNodeList(),
-                functionSignatureNode, functionBodyNode));
+                qualifierList, functionKeyWord, functionName, createEmptyNodeList(), functionSignatureNode,
+                functionBodyNode));
 
     }
 

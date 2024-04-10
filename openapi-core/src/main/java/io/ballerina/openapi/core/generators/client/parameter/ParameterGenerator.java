@@ -27,6 +27,7 @@ import java.util.Optional;
 public interface ParameterGenerator {
     //type handler attribute
     Optional<ParameterNode> generateParameterNode();
+    Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired);
     List<ClientDiagnostic> getDiagnostics();
 
 }

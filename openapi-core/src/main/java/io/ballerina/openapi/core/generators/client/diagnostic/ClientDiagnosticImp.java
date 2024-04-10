@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.core.generators.client.diagnostic;
 
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 
@@ -34,6 +35,12 @@ public class ClientDiagnosticImp implements ClientDiagnostic {
         this.message = String.format(message.getDescription(), (Object[]) args);
         this.diagnosticSeverity = DiagnosticSeverity.ERROR;
 //        this.location = location;
+    }
+
+    public ClientDiagnosticImp(Diagnostic diagnostic) {
+        this.code = diagnostic.diagnosticInfo().code();
+        this.message = diagnostic.message();
+        this.diagnosticSeverity = diagnostic.diagnosticInfo().severity();
     }
 
     @Override

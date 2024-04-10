@@ -46,7 +46,6 @@ public isolated client class Client {
     # + return - An array of Movie Critics
     remote isolated function criticsPicks() returns Inline_response_200|error {
         string resourcePath = string `/`;
-        Inline_response_200 response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
 }

@@ -45,6 +45,7 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+
     resource isolated function get \*(int petId) returns Pet|error {
         string resourcePath = string `/*`;
         map<any> headerValues = {};
@@ -54,31 +55,30 @@ public isolated client class Client {
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        Pet response = check self.clientEp->get(resourcePath, httpHeaders);
-        return response;
+        return self.clientEp->get(resourcePath, httpHeaders);
     }
+
     # Add a new pet to the store
     #
-    # + payload - Create a new pet in the store 
-    # + return - Successful operation 
-    resource isolated function post pet(Pet payload, Pet payload) returns Pet|error {
+    # + payload - Create a new pet in the store
+    # + return - Successful operation
+    resource isolated function post pet(Pet payload) returns Pet|error {
         string resourcePath = string `/pet`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        Pet response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
+
     # Update an existing pet
     #
-    # + payload - Update an existent pet in the store 
-    # + return - Successful operation 
-    resource isolated function put pet(Pet payload, Pet payload) returns Pet|error {
+    # + payload - Update an existent pet in the store
+    # + return - Successful operation
+    resource isolated function put pet(Pet payload) returns Pet|error {
         string resourcePath = string `/pet`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        Pet response = check self.clientEp->put(resourcePath, request);
-        return response;
+        return self.clientEp->put(resourcePath, request);
     }
 }

@@ -10,9 +10,9 @@ public isolated client class Client {
     final readonly & ApiKeysConfig? apiKeyConfig;
     # Gets invoked to initialize the `connector`.
     #
-    # + config - The configurations to be used when initializing the `connector` 
-    # + serviceUrl - URL of the target service 
-    # + return - An error if connector initialization failed 
+    # + config - The configurations to be used when initializing the `connector`
+    # + serviceUrl - URL of the target service
+    # + return - An error if connector initialization failed
     public isolated function init(ConnectionConfig config, string serviceUrl = "https://petstore.swagger.io/v2") returns error? {
         http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
@@ -48,92 +48,84 @@ public isolated client class Client {
     }
     # Add a new pet to the store
     #
-    # + payload - Pet object that needs to be added to the store 
-    # + return - Invalid input 
+    # + payload - Pet object that needs to be added to the store
+    # + return - Invalid input
     remote isolated function addPet(Pet payload) returns http:Response|error {
         string resourcePath = string `/pet`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        http:Response response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
     # Create user
     #
-    # + request - Created user object 
-    # + return - successful operation 
+    # + request - Created user object
+    # + return - successful operation
     remote isolated function createUser(http:Request request) returns http:Response|error {
         string resourcePath = string `/user`;
         // TODO: Update the request as needed;
-        http:Response response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
     # Creates list of users with given input array
     #
-    # + request - List of user object 
-    # + return - successful operation 
+    # + request - List of user object
+    # + return - successful operation
     remote isolated function createUsersWithArrayInput(http:Request request) returns http:Response|error {
         string resourcePath = string `/user/createWithArray`;
         // TODO: Update the request as needed;
-        http:Response response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
     # Creates list of users with given input array
     #
-    # + request - List of user object 
-    # + return - successful operation 
+    # + request - List of user object
+    # + return - successful operation
     remote isolated function createUsersWithListInput(http:Request request) returns http:Response|error {
         string resourcePath = string `/user/createWithList`;
         // TODO: Update the request as needed;
-        http:Response response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
     # Delete purchase order by ID
     #
     # + orderId - ID of the order that needs to be deleted
-    # + return - Invalid ID supplied 
+    # + return - Invalid ID supplied
     remote isolated function deleteOrder(int orderId) returns http:Response|error {
         string resourcePath = string `/store/order/${getEncodedUri(orderId)}`;
-        http:Response response = check self.clientEp->delete(resourcePath);
-        return response;
+        return self.clientEp->delete(resourcePath);
     }
     # Deletes a pet
     #
     # + petId - Pet id to delete
-    # + return - Invalid ID supplied 
+    # + return - Invalid ID supplied
     remote isolated function deletePet(int petId, string? api_key = ()) returns http:Response|error {
         string resourcePath = string `/pet/${getEncodedUri(petId)}`;
         map<any> headerValues = {"api_key": api_key};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        http:Response response = check self.clientEp->delete(resourcePath, headers = httpHeaders);
-        return response;
+        return self.clientEp->delete(resourcePath, headers = httpHeaders);
     }
     # Delete user
     #
     # + username - The name that needs to be deleted
-    # + return - Invalid username supplied 
+    # + return - Invalid username supplied
     remote isolated function deleteUser(string username) returns http:Response|error {
         string resourcePath = string `/user/${getEncodedUri(username)}`;
-        http:Response response = check self.clientEp->delete(resourcePath);
-        return response;
+        return self.clientEp->delete(resourcePath);
     }
     # Finds Pets by status
     #
     # + status - Status values that need to be considered for filter
-    # + return - successful operation 
+    # + return - successful operation
     remote isolated function findPetsByStatus(("available"|"pending"|"sold")[] status) returns Pet[]|error {
         string resourcePath = string `/pet/findByStatus`;
         map<anydata> queryParam = {"status": status};
         map<Encoding> queryParamEncoding = {"status": {style: FORM, explode: true}};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam, queryParamEncoding);
-        Pet[] response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # Finds Pets by tags
     #
     # + tags - Tags to filter by
-    # + return - successful operation 
-    # 
+    # + return - successful operation
+    #
     # # Deprecated
     @deprecated
     remote isolated function findPetsByTags(string[] tags) returns Pet[]|error {
@@ -141,12 +133,11 @@ public isolated client class Client {
         map<anydata> queryParam = {"tags": tags};
         map<Encoding> queryParamEncoding = {"tags": {style: FORM, explode: true}};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam, queryParamEncoding);
-        Pet[] response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # Returns pet inventories by status
     #
-    # + return - successful operation 
+    # + return - successful operation
     remote isolated function getInventory() returns record {|int:Signed32...;|}|error {
         string resourcePath = string `/store/inventory`;
         map<any> headerValues = {};
@@ -154,22 +145,20 @@ public isolated client class Client {
             headerValues["api_key"] = self.apiKeyConfig?.api_key;
         }
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        record{|int:Signed32...;|} response = check self.clientEp->get(resourcePath, httpHeaders);
-        return response;
+        return self.clientEp->get(resourcePath, httpHeaders);
     }
     # Find purchase order by ID
     #
     # + orderId - ID of pet that needs to be fetched
-    # + return - successful operation 
+    # + return - successful operation
     remote isolated function getOrderById(int orderId) returns Order|error {
         string resourcePath = string `/store/order/${getEncodedUri(orderId)}`;
-        Order response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # Find pet by ID
     #
     # + petId - ID of pet to return
-    # + return - successful operation 
+    # + return - successful operation
     remote isolated function getPetById(int petId) returns Pet|error {
         string resourcePath = string `/pet/${getEncodedUri(petId)}`;
         map<any> headerValues = {};
@@ -177,71 +166,64 @@ public isolated client class Client {
             headerValues["api_key"] = self.apiKeyConfig?.api_key;
         }
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        Pet response = check self.clientEp->get(resourcePath, httpHeaders);
-        return response;
+        return self.clientEp->get(resourcePath, httpHeaders);
     }
     # Get user by user name
     #
-    # + username - The name that needs to be fetched. Use user1 for testing. 
-    # + return - successful operation 
+    # + username - The name that needs to be fetched. Use user1 for testing.
+    # + return - successful operation
     remote isolated function getUserByName(string username) returns User|error {
         string resourcePath = string `/user/${getEncodedUri(username)}`;
-        User response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # Logs user into the system
     #
     # + username - The user name for login
     # + password - The password for login in clear text
-    # + return - successful operation 
+    # + return - successful operation
     remote isolated function loginUser(string username, string password) returns string|error {
         string resourcePath = string `/user/login`;
         map<anydata> queryParam = {"username": username, "password": password};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        string response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # Logs out current logged in user session
     #
-    # + return - successful operation 
+    # + return - successful operation
     remote isolated function logoutUser() returns http:Response|error {
         string resourcePath = string `/user/logout`;
-        http:Response response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # Place an order for a pet
     #
-    # + request - order placed for purchasing the pet 
-    # + return - successful operation 
+    # + request - order placed for purchasing the pet
+    # + return - successful operation
     remote isolated function placeOrder(http:Request request) returns Order|error {
         string resourcePath = string `/store/order`;
         // TODO: Update the request as needed;
-        Order response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
     # Update an existing pet
     #
-    # + payload - Pet object that needs to be added to the store 
-    # + return - Invalid ID supplied 
+    # + payload - Pet object that needs to be added to the store
+    # + return - Invalid ID supplied
     remote isolated function updatePet(Pet payload) returns http:Response|error {
         string resourcePath = string `/pet`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        http:Response response = check self.clientEp->put(resourcePath, request);
-        return response;
+        return self.clientEp->put(resourcePath, request);
     }
     # Updates a pet in the store with form data
     #
     # + petId - ID of pet that needs to be updated
-    # + return - Invalid input 
+    # + return - Invalid input
     remote isolated function updatePetWithForm(int petId, Pet_petId_body payload) returns http:Response|error {
         string resourcePath = string `/pet/${getEncodedUri(petId)}`;
         http:Request request = new;
         string encodedRequestBody = createFormURLEncodedRequestBody(payload);
         request.setPayload(encodedRequestBody, "application/x-www-form-urlencoded");
-        http:Response response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
     # Updated user
     #
@@ -251,8 +233,7 @@ public isolated client class Client {
     remote isolated function updateUser(string username, http:Request request) returns http:Response|error {
         string resourcePath = string `/user/${getEncodedUri(username)}`;
         // TODO: Update the request as needed;
-        http:Response response = check self.clientEp->put(resourcePath, request);
-        return response;
+        return self.clientEp->put(resourcePath, request);
     }
     # uploads an image
     #
@@ -263,7 +244,6 @@ public isolated client class Client {
         http:Request request = new;
         mime:Entity[] bodyParts = check createBodyParts(payload);
         request.setBodyParts(bodyParts);
-        ApiResponse response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
 }

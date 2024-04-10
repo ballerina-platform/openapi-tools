@@ -64,10 +64,14 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.servers.ServerVariable;
@@ -515,6 +519,10 @@ public class GeneratorUtils {
         } else {
             return true;
         }
+    }
+
+    public static boolean hasRequestBinding(String mediaType) {
+        return getBallerinaMediaType(mediaType, true).equals(HTTP_REQUEST);
     }
 
     /**
@@ -989,7 +997,7 @@ public class GeneratorUtils {
         for (Map.Entry<String, Header> headerEntry : headers.entrySet()) {
             String headerName = headerEntry.getKey();
             Header header = headerEntry.getValue();
-            Schema headerTypeSchema = header.getSchema();
+            Schema headerTypeSchema = getValidatedHeaderSchema(header.getSchema());
             properties.put(headerName, headerTypeSchema);
             if (header.getRequired() != null && header.getRequired()) {
                 requiredField.add(headerName);
@@ -1005,6 +1013,25 @@ public class GeneratorUtils {
         headersSchema.setRequired(requiredField);
         headersSchema.setAdditionalProperties(false);
         return headersSchema;
+    }
+
+    private static  Schema getValidatedHeaderSchema(Schema headerSchema) {
+        return getValidatedHeaderSchema(headerSchema, headerSchema);
+    }
+
+    private static Schema getValidatedHeaderSchema(Schema targetSchema, Schema originalSchema) {
+        // Only supporting string, integer, boolean and the array types of the above types
+        if (targetSchema instanceof StringSchema || targetSchema instanceof IntegerSchema ||
+                targetSchema instanceof BooleanSchema) {
+            return originalSchema;
+        }
+        if (targetSchema instanceof ArraySchema arraySchema) {
+            Schema items = arraySchema.getItems();
+            return getValidatedHeaderSchema(items, originalSchema);
+        }
+        // Returning a string schema as the default type
+        // TODO: Add support for reference, oneof schemas
+        return new StringSchema();
     }
 
     public static String replaceContentWithinBrackets(String input, String replacement) {
@@ -1033,23 +1060,22 @@ public class GeneratorUtils {
 
     }
 
-    public static TypeDescriptorNode generateStatusCodeTypeInclusionRecord(Map.Entry<String, ApiResponse> response,
-                                                                           OpenAPI openAPI, String path,
+    public static TypeDescriptorNode generateStatusCodeTypeInclusionRecord(String code, ApiResponse response,
+                                                                           String method, OpenAPI openAPI, String path,
                                                                            List<Diagnostic> diagnosticList)
             throws InvalidReferenceException {
-        String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
-        Content responseContent = response.getValue().getContent();
+        Content responseContent = response.getContent();
         Set<Map.Entry<String, MediaType>> bodyTypeSchema;
         if (Objects.nonNull(responseContent)) {
             bodyTypeSchema = responseContent.entrySet();
-        } else if (response.getValue().get$ref() != null) {
-            String referenceType = GeneratorUtils.extractReferenceType(response.getValue().get$ref());
+        } else if (response.get$ref() != null) {
+            String referenceType = GeneratorUtils.extractReferenceType(response.get$ref());
             ApiResponse apiResponse = openAPI.getComponents().getResponses().get(referenceType);
             bodyTypeSchema = apiResponse.getContent().entrySet();
         } else {
             bodyTypeSchema = new LinkedHashSet<>();
         }
-        Schema headersTypeSchema = getHeadersTypeSchema(response.getValue());
+        Schema headersTypeSchema = getHeadersTypeSchema(response);
 
         HashMap<String, TypeDescriptorNode> generatedTypes = new LinkedHashMap<>();
         if (!code.equals("NoContent")) {
@@ -1061,11 +1087,11 @@ public class GeneratorUtils {
         } else {
             diagnosticList.add(new CommonDiagnostic(OAS_COMMON_101));
             return TypeHandler.getInstance().createTypeInclusionRecord(code, null,
-                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
+                    TypeHandler.getInstance().generateHeaderType(headersTypeSchema), method);
         }
         TypeDescriptorNode typeDescriptorNode = getUnionTypeDescriptorNodeFromTypeDescNodes(generatedTypes);
         return TypeHandler.getInstance().createTypeInclusionRecord(code, typeDescriptorNode,
-                TypeHandler.getInstance().generateHeaderType(headersTypeSchema));
+                TypeHandler.getInstance().generateHeaderType(headersTypeSchema), method);
     }
 
     public static TypeDescriptorNode generateTypeDescForMediaType(OpenAPI openAPI, String path, boolean isRequest,

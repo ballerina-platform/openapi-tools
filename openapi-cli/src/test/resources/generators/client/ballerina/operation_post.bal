@@ -41,19 +41,16 @@ public isolated client class Client {
         json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
-        http:Response  response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
     remote isolated function getPetId(string petId, string payload) returns http:Response | error {
         string resourcePath = string `/pets/${getEncodedUri(petId)}`;
         http:Request request = new;
         request.setPayload(payload);
-        http:Response  response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
     remote isolated function  ImageByimageId(int petId, string imageId) returns http:Response | error {
         string resourcePath = string `/pets/${getEncodedUri(petId)}/Image/${getEncodedUri(imageId)}`;
-        http:Response  response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp-> get(resourcePath);
     }
 }

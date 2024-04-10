@@ -55,8 +55,7 @@ public isolated client class Client {
         string resourcePath = string `/weather`;
         map<anydata> queryParam = {"q": q, "id": id, "lat": lat, "lon": lon, "zip": zip, "units": units, "lang": lang, "mode": mode, "appid": self.apiKeyConfig.appid};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        CurrentWeatherData response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # Provide weather forecast for any geographical coordinates
     #
@@ -71,7 +70,6 @@ public isolated client class Client {
         string resourcePath = string `/onecall`;
         map<anydata> queryParam = {"lat": lat, "lon": lon, "exclude": exclude, "units": units, "lang": lang, "appid": self.apiKeyConfig.appid};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        WeatherForecast response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
 }

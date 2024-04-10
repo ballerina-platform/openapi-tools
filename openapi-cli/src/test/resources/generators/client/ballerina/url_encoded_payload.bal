@@ -41,8 +41,7 @@ public isolated client class Client {
     # + return - Successful response.
     remote isolated function getPaymentMethodsPaymentMethod(string payment_method) returns json|error {
         string resourcePath = string `/v1/payment_methods/${getEncodedUri(payment_method)}`;
-        json response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # <p>Creates a new customer object.</p>
     #
@@ -54,7 +53,6 @@ public isolated client class Client {
         http:Request request = new;
         string encodedRequestBody = createFormURLEncodedRequestBody(payload);
         request.setPayload(encodedRequestBody, "application/x-www-form-urlencoded");
-        Customer response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
 }

@@ -39,8 +39,7 @@ public isolated client class Client {
     # + return - Ok
     resource isolated function get .() returns string|error {
         string resourcePath = string `/`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # Retrieves a single customer.
     #
@@ -56,8 +55,7 @@ public isolated client class Client {
     # + return - Ok
     resource isolated function get v1/[int age]/v2/[string name]() returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(age)}/v2/${getEncodedUri(name)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # op2
     #
@@ -65,26 +63,22 @@ public isolated client class Client {
     # + return - Ok
     resource isolated function get v1/[int id]() returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(id)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # + return - Ok
     resource isolated function get v1/[int version]/v2/[int 'limit]() returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri('limit)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # + return - Ok
     resource isolated function get v1/[int version]/v2/[string name]() returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri(name)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     # + return - Ok
     resource isolated function post .() returns string|error {
         string resourcePath = string `/`;
         http:Request request = new;
-        string response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request);
     }
 }

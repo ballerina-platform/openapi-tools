@@ -59,7 +59,6 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam, queryParamEncoding);
         map<any> headerValues = {"X-Date-Format": xDateFormat};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        MeetingList response = check self.clientEp->get(resourcePath, httpHeaders);
-        return response;
+        return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

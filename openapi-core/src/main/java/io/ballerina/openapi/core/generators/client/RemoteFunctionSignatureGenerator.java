@@ -53,19 +53,55 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extract
 public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenerator {
     OpenAPI openAPI;
     Operation operation;
-    List<ClientDiagnostic> diagnostics = new ArrayList<>();
+    String httpMethod;
+    List<ClientDiagnostic> diagnostics  = new ArrayList<>();
+    boolean treatDefaultableAsRequired = false;
 
-    public RemoteFunctionSignatureGenerator(Operation operation, OpenAPI openAPI) {
+    public RemoteFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod) {
         this.operation = operation;
         this.openAPI = openAPI;
+        this.httpMethod = httpMethod;
     }
 
     @Override
     public Optional<FunctionSignatureNode> generateFunctionSignature() {
+        List<Parameter> parameters = operation.getParameters();
+        ParametersInfo parametersInfo = getParametersInfo(parameters);
+
+        if (parametersInfo == null) {
+            return Optional.empty();
+        }
+
+        List<Node> defaultable = parametersInfo.defaultable();
+        List<Node> parameterList = parametersInfo.parameterList();
+
+        // filter defaultable parameters
+        if (!defaultable.isEmpty()) {
+            parameterList.addAll(defaultable);
+        }
+        // Remove the last comma
+        if (!parameterList.isEmpty()) {
+            parameterList.remove(parameterList.size() - 1);
+        }
+        SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(parameterList);
+
+        // 3. return statements
+        FunctionReturnTypeGeneratorImp functionReturnType = getFunctionReturnTypeGenerator();
+        Optional<ReturnTypeDescriptorNode> returnType = functionReturnType.getReturnType();
+        if (returnType.isEmpty()) {
+            diagnostics.addAll(functionReturnType.getDiagnostics());
+            return Optional.empty();
+        }
+
+        return returnType.map(returnTypeDescriptorNode -> NodeFactory.createFunctionSignatureNode(
+                createToken(OPEN_PAREN_TOKEN), parameterNodes,
+                createToken(CLOSE_PAREN_TOKEN), returnTypeDescriptorNode));
+    }
+
+    protected ParametersInfo getParametersInfo(List<Parameter> parameters) {
         List<String> paramName = new ArrayList<>();
         // 1. parameters - path , query, requestBody, headers
         List<Node> parameterList = new ArrayList<>();
-        List<Parameter> parameters = operation.getParameters();
         List<Node> defaultable = new ArrayList<>();
         Token comma = createToken(COMMA_TOKEN);
         if (parameters != null) {
@@ -87,10 +123,11 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                 switch (in) {
                     case "path":
                         PathParameterGenerator paramGenerator = new PathParameterGenerator(parameter, openAPI);
-                        Optional<ParameterNode> param = paramGenerator.generateParameterNode();
+                        Optional<ParameterNode> param = paramGenerator.generateParameterNode(
+                                treatDefaultableAsRequired);
                         if (param.isEmpty()) {
                             diagnostics.addAll(paramGenerator.getDiagnostics());
-                            return Optional.empty();
+                            return null;
                         }
                         // Path parameters are always required.
                         parameterList.add(param.get());
@@ -100,10 +137,11 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                     case "query":
                         QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(parameter,
                                 openAPI);
-                        Optional<ParameterNode> queryParam = queryParameterGenerator.generateParameterNode();
+                        Optional<ParameterNode> queryParam = queryParameterGenerator.generateParameterNode(
+                                treatDefaultableAsRequired);
                         if (queryParam.isEmpty()) {
                             diagnostics.addAll(queryParameterGenerator.getDiagnostics());
-                            return Optional.empty();
+                            return null;
                         }
 
                         paramName.add(queryParam.get().toString());
@@ -118,10 +156,11 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                     case "header":
                         HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator(parameter,
                                 openAPI);
-                        Optional<ParameterNode> headerParam = headerParameterGenerator.generateParameterNode();
+                        Optional<ParameterNode> headerParam = headerParameterGenerator.generateParameterNode(
+                                treatDefaultableAsRequired);
                         if (headerParam.isEmpty()) {
                             diagnostics.addAll(headerParameterGenerator.getDiagnostics());
-                            return Optional.empty();
+                            return null;
                         }
                         paramName.add(headerParam.get().toString());
 
@@ -141,10 +180,11 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
         // 2. requestBody
         if (operation.getRequestBody() != null) {
             RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(operation.getRequestBody(), openAPI);
-            Optional<ParameterNode> requestBody = requestBodyGenerator.generateParameterNode();
+            Optional<ParameterNode> requestBody = requestBodyGenerator.generateParameterNode(
+                    treatDefaultableAsRequired);
             if (requestBody.isEmpty()) {
                 diagnostics.addAll(requestBodyGenerator.getDiagnostics());
-                return Optional.empty();
+                return null;
             }
             List<ParameterNode> rBheaderParameters = requestBodyGenerator.getHeaderParameters();
             parameterList.add(requestBody.get());
@@ -164,29 +204,11 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                 });
             }
         }
+        return new ParametersInfo(parameterList, defaultable);
+    }
 
-        // filter defaultable parameters
-        if (!defaultable.isEmpty()) {
-            parameterList.addAll(defaultable);
-        }
-        // Remove the last comma
-        if (!parameterList.isEmpty()) {
-            parameterList.remove(parameterList.size() - 1);
-        }
-        SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(parameterList);
-
-        // 3. return statements
-        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(operation, openAPI);
-        Optional<ReturnTypeDescriptorNode> returnType = functionReturnType.getReturnType();
-        if (returnType.isEmpty()) {
-            diagnostics.addAll(functionReturnType.getDiagnostics());
-            return Optional.empty();
-        }
-
-        return returnType.map(returnTypeDescriptorNode -> NodeFactory.createFunctionSignatureNode(
-                createToken(OPEN_PAREN_TOKEN), parameterNodes,
-                createToken(CLOSE_PAREN_TOKEN), returnTypeDescriptorNode));
-
+    protected FunctionReturnTypeGeneratorImp getFunctionReturnTypeGenerator() {
+        return new FunctionReturnTypeGeneratorImp(operation, openAPI, httpMethod);
     }
 
     public List<ClientDiagnostic> getDiagnostics() {

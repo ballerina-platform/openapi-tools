@@ -55,7 +55,6 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<any> headerValues = {"exclude": exclude, "units": units, "idList": idList, "locationList": locationList};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        WeatherForecast response = check self.clientEp->get(resourcePath, httpHeaders);
-        return response;
+        return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

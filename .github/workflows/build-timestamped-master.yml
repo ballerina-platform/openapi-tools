@@ -30,6 +30,8 @@ jobs:
         env:
           packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
           packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
+          nexusUser: ${{ secrets.NEXUS_USERNAME }}
+          nexusPassword: ${{ secrets.NEXUS_PASSWORD }}
         run: |
           ./gradlew clean build publish codeCoverageReport --stacktrace --scan --console=plain 
       - name: Generate CodeCov Report

@@ -45,7 +45,7 @@ public class AllOfResponsesTests {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_allof_reference.yaml"));
         TypeHandler.createInstance(response, false);
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
-                response.getPaths().get("/products").getGet(), response);
+                response.getPaths().get("/products").getGet(), response, "get");
         assertEquals(functionReturnType.getReturnType().get().type().toString(), "Inline_response_200|error");
     }
 
@@ -54,7 +54,7 @@ public class AllOfResponsesTests {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/inline_all_of_response.yaml"));
         TypeHandler.createInstance(response, false);
         Operation post = response.getPaths().get("/users/{userId}/meetings").getPost();
-        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(post, response);
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(post, response, "post");
         assertEquals(functionReturnType.getReturnType().get().type().toString(), "Inline_response_201|error");
     }
 
@@ -64,7 +64,7 @@ public class AllOfResponsesTests {
                 "response_without_properties_with_additional.yaml"));
         TypeHandler.createInstance(response, false);
         Operation get = response.getPaths().get("/products").getGet();
-        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(get, response);
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(get, response, "get");
 
         String returnType = functionReturnType.getReturnType().get().type().toString();
         Assert.assertEquals(returnType, "record{|string...;|}|error");
@@ -76,7 +76,7 @@ public class AllOfResponsesTests {
                 ".yaml"));
         TypeHandler.createInstance(response, false);
         Operation get = response.getPaths().get("/products").getGet();
-        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(get, response);
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(get, response, "get");
 
         String returnType = functionReturnType.getReturnType().get().type().toString();
         Assert.assertEquals(returnType, "Inline_response_200|error");
@@ -88,7 +88,7 @@ public class AllOfResponsesTests {
                 "/response_without_properties_without_additional.yaml"));
         TypeHandler.createInstance(response, false);
         Operation get = response.getPaths().get("/products").getGet();
-        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(get, response);
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(get, response, "get");
         String returnType = functionReturnType.getReturnType().get().type().toString();
         Assert.assertEquals(returnType, "record{}|error");
     }
@@ -99,7 +99,7 @@ public class AllOfResponsesTests {
                 "response_with_properties_without_additional.yaml"));
         TypeHandler.createInstance(response, false);
         Operation get = response.getPaths().get("/products").getGet();
-        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(get, response);
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(get, response, "get");
         String returnType = functionReturnType.getReturnType().get().type().toString();
         Assert.assertEquals(returnType, "Inline_response_200|error");
     }
