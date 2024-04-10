@@ -29,7 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static io.ballerina.openapi.generators.common.TestUtils.getStringFromGivenBalFile;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.getStringFromGivenBalFile;
 import static io.ballerina.openapi.generators.openapi.TestUtils.compareWithGeneratedFile;
 
 /**

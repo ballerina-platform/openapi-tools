@@ -19,11 +19,13 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
 
@@ -33,7 +35,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils
+        .compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
 /**
  * Client generation with filters.
@@ -46,7 +49,7 @@ public class FilterTests {
 
 
     @Test(description = "With tag filter")
-    public void testWithTag() throws IOException, BallerinaOpenApiException {
+    public void testWithTag() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/tag.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/tag.bal");
         list1.clear();
@@ -59,13 +62,14 @@ public class FilterTests {
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
+        TypeHandler.createInstance(openAPI, false);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "With Operation filter")
-    public void testWithOperation() throws IOException, BallerinaOpenApiException {
+    public void testWithOperation() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/operation.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/operation.bal");
         list1.clear();
@@ -78,6 +82,7 @@ public class FilterTests {
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
+        TypeHandler.createInstance(openAPI, false);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);

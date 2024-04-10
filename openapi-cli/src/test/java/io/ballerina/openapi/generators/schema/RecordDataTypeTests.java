@@ -19,48 +19,77 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
-import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.service.ServiceGenerationHandler;
+import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static io.ballerina.openapi.TestUtils.FILTER;
+
 /**
  * Tests related to the record data structure.
  */
 public class RecordDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    SyntaxTree syntaxTree;
+    SyntaxTree syntaxTree = null;
 
     @Test(description = "Generate record with record type filed record")
-    public void generateRecordWithRecordField() throws IOException, BallerinaOpenApiException {
+    public void generateRecordWithRecordField() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario05.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema05.bal", syntaxTree);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema05.bal",
+                syntaxTree);
     }
 
     @Test(description = "Generate record with nested record type filed record")
-    public void generateNestedRecord() throws IOException, BallerinaOpenApiException {
+    public void generateNestedRecord() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario07.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema07.bal", syntaxTree);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema07.bal",
+                syntaxTree);
     }
 
     @Test(description = "Generate empty record when no properties are given")
-    public void generateEmptyRecord() throws IOException, BallerinaOpenApiException {
+    public void generateEmptyRecord() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/empty_record.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/empty_record.bal", syntaxTree);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/empty_record.bal",
+                syntaxTree);
     }
 }

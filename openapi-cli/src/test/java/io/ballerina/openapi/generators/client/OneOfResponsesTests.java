@@ -18,9 +18,9 @@
 
 package io.ballerina.openapi.generators.client;
 
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.FunctionReturnTypeGenerator;
-import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.client.FunctionReturnTypeGeneratorImp;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -28,9 +28,8 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 
-import static io.ballerina.openapi.generators.common.TestUtils.getOpenAPI;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.getOpenAPI;
 
 /**
  * All the tests related to the functionSignatureNode  Return type tests as oneOf typein
@@ -41,21 +40,12 @@ public class OneOfResponsesTests {
 
     @Test(description = "Tests for returnType when response has array oneOf")
     public void getReturnTypeOneOfArray() throws IOException, BallerinaOpenApiException {
-        OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/inline_oneOf_response.yaml"));
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
-        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
-                ballerinaSchemaGenerator,  new ArrayList<>());
-        Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/pet").getGet(),
-                true), "Inline_response_2XX|error");
+        OpenAPI openapi = getOpenAPI(RES_DIR.resolve("swagger/return_type/inline_oneOf_response.yaml"));
+        TypeHandler.createInstance(openapi, false);
+        FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
+                openapi.getPaths().get("/pet").getGet(), openapi);
+        Assert.assertEquals(functionReturnType.getReturnType().get().type().toString(),
+                "Inline_response_2XX|error");
     }
 
-    @Test(description = "Tests for returnType when response has array oneOf when it has function body")
-    public void getReturnTypeOneOfArrayInTargetType() throws IOException, BallerinaOpenApiException {
-        OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/inline_oneOf_response.yaml"));
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
-        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
-                ballerinaSchemaGenerator, new ArrayList<>());
-        Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/pet").getGet(),
-                false), "Inline_response_2XX|error");
-    }
 }

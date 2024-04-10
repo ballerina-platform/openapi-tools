@@ -19,23 +19,31 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils;
-import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.TypeGenerator;
-import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.UnionTypeGenerator;
-import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
-import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.service.ServiceGenerationHandler;
+import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
+import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.type.generators.TypeGenerator;
+import io.ballerina.openapi.core.generators.type.generators.UnionTypeGenerator;
+import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+
+import static io.ballerina.openapi.TestUtils.FILTER;
 
 /**
  * Test implementation to verify the `oneOf` property related scenarios in openAPI schema generation, handled by
@@ -43,70 +51,96 @@ import java.nio.file.Paths;
  */
 public class OneOfDataTypeTests {
 
+    SyntaxTree syntaxTree = null;
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
 
     @Test(description = "Generate record for schema has oneOF")
-    public void generateForSchemaHasOneOf() throws IOException, BallerinaOpenApiException {
+    public void generateForSchemaHasOneOf() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario12.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
-        GeneratorMetaData.createInstance(openAPI, false, false);
-        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error");
+        GeneratorMetaData.createInstance(openAPI, false);
+        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error", false,
+                new HashMap<>(), new HashMap<>());
         String oneOfUnionType = unionTypeGenerator.generateTypeDescriptorNode().toString().trim();
 
         Assert.assertEquals(oneOfUnionType, "Activity|Profile");
     }
 
     @Test(description = "Generate record for schema has object type with OneOf")
-    public void generateForSchemaObjectType() throws IOException, BallerinaOpenApiException {
+    public void generateForSchemaObjectType() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario13.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
-        GeneratorMetaData.createInstance(openAPI, false, false);
-        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error");
+        GeneratorMetaData.createInstance(openAPI, false);
+        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error", false,
+                new HashMap<>(), new HashMap<>());
         String oneOfUnionType = unionTypeGenerator.generateTypeDescriptorNode().toString().trim();
         Assert.assertEquals(oneOfUnionType, "Activity|Profile01");
     }
 
     @Test(description = "Generate union type when nullable is true")
-    public void generateUnionTypeWhenNullableTrue() throws IOException, BallerinaOpenApiException {
+    public void generateUnionTypeWhenNullableTrue() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario12.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
-        GeneratorMetaData.createInstance(openAPI, true, false);
-        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, "Error", null);
+        GeneratorMetaData.createInstance(openAPI, true);
+        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, "Error", null, false,
+                new HashMap<>(), new HashMap<>());
         String oneOfUnionType = typeGenerator.generateTypeDescriptorNode().toString().trim();
         Assert.assertEquals(oneOfUnionType, "Activity|Profile?");
     }
 
-    @Test(description = "Tests full schema genrations with oneOf type")
-    public void generateOneOFTests() throws IOException, BallerinaOpenApiException {
+    @Test(description = "Tests full schema generations with oneOf type")
+    public void generateOneOFTests() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/oneOf.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/oneOf.bal", syntaxTree);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/oneOf.bal",
+                syntaxTree);
     }
 
     @Test(description = "Tests record generation for oneOf schemas with inline object schemas")
-    public void oneOfWithInlineObject() throws IOException, BallerinaOpenApiException {
+    public void oneOfWithInlineObject() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/oneOf_with_inline_schemas.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/oneOf_with_inline_schemas.bal", syntaxTree);
     }
 
     @Test(description = "Tests record generation for nested OneOf schema inside AllOf schema")
-    public void oneOfWithNestedAllOf() throws IOException, BallerinaOpenApiException {
+    public void oneOfWithNestedAllOf() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/nested_oneOf_with_allOf.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/nested_oneOf_with_allOf.bal", syntaxTree);
     }
 }

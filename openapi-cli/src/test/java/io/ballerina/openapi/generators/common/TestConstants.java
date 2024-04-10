@@ -83,8 +83,8 @@ public class TestConstants {
             "   # Configurations related to client authentication\n" +
             "   http:BearerTokenConfig|http:CredentialsConfig auth;\n" + commonClientConfigurationFields;
     public static final String HTTP_CLIENT_CONFIG_PARAM =
-            "ConnectionConfig config, string serviceUrl = \"https:localhost/8080\"";
-    public static final String HTTP_CLIENT_CONFIG_PARAM_NO_URL = "ConnectionConfig config, string serviceUrl";
+            "ConnectionConfig config";
+    public static final String HTTP_CLIENT_CONFIG_PARAM_NO_URL = "ConnectionConfig config";
     public static final String HTTP_CLIENT_DECLARATION = "" +
             "http:Client httpEp = check new (serviceUrl, httpClientConfig);";
     public static final String OAUTH2_AUTHORIZATION_CODE_CONFIG_REC = "" +
@@ -131,13 +131,11 @@ public class TestConstants {
     public static final String API_KEY_CONFIG_VAR = "final readonly & ApiKeysConfig apiKeyConfig;";
     public static final String API_KEY_CONFIG_NILLABLE_VAR = "final readonly & ApiKeysConfig? apiKeyConfig;";
     public static final String API_KEY_CONFIG_PARAM = "" +
-            "ApiKeysConfig apiKeyConfig, ConnectionConfig config = {}, " +
-            "string serviceUrl = \"https:localhost/8080\"";
+            "ApiKeysConfig apiKeyConfig, ConnectionConfig config = {}";
     public static final String AUTH_CONFIG_PARAM = "" +
-            "ConnectionConfig config, " +
-            "string serviceUrl = \"https:localhost/8080\"";
+            "ConnectionConfig config";
     public static final String API_KEY_CONFIG_PARAM_NO_URL = "" +
-            "ApiKeysConfig apiKeyConfig, string serviceUrl,ConnectionConfig config =  {}";
+            "ApiKeysConfig apiKeyConfig ConnectionConfig config =  {}";
     public static final String API_KEYS_CONFIG_RECORD = "# Provides API key configurations needed when communicating " +
             "with a remote HTTP endpoint.\n" +
             "public type ApiKeysConfig record {|\n" +

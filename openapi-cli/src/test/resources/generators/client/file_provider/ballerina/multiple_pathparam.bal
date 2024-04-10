@@ -35,7 +35,6 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    #
     # + version - test
     # + name - test
     # + return - Ok

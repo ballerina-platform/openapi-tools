@@ -1,6 +1,6 @@
-import  ballerina/http;
+import ballerina/http;
 
-#Here you can find documentation for COVID-19 REST API.
+# Here you can find documentation for COVID-19 REST API.
 public isolated client class Client {
     final http:Client clientEp;
     # Gets invoked to initialize the `connector`.
@@ -37,10 +37,10 @@ public isolated client class Client {
     }
     # Returns information about all countries
     #
-    #+return-A list of countries with all informtion included.
+    # + return - A list of countries with all informtion included.
     remote isolated function getCovidinAllCountries() returns Countries[]|error {
         string resourcePath = string `/api`;
-        Countries[] response = check self.clientEp-> get(resourcePath);
+        Countries[] response = check self.clientEp->get(resourcePath);
         return response;
     }
 }

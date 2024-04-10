@@ -35,22 +35,10 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    # Request body has object schema content without the properties field
-    #
-    # + payload - A JSON object containing pet information
-    # + return - Ok
-    resource isolated function put greeting(record{} payload) returns Person|error {
-        string resourcePath = string `/greeting`;
-        http:Request request = new;
-        json jsonBody = payload.toJson();
-        request.setPayload(jsonBody, "application/json");
-        Person response = check self.clientEp->put(resourcePath, request);
-        return response;
-    }
     # The Request body is with reference to the reusable requestBody with content type has object without properties
     #
     # + return - Ok
-    resource isolated function post greeting(record{} payload) returns string|error {
+    remote isolated function op01(record {} payload) returns string|error {
         string resourcePath = string `/greeting`;
         http:Request request = new;
         json jsonBody = payload.toJson();
@@ -58,21 +46,22 @@ public isolated client class Client {
         string response = check self.clientEp->post(resourcePath, request);
         return response;
     }
-    # RequestBody has object content without properties with vendor-specific media type vnd.petstore.v3.diff+json
+    # Request body has object schema content without the properties field
     #
+    # + payload - A JSON object containing pet information
     # + return - Ok
-    resource isolated function put greeting02(record{} payload) returns string|error {
-        string resourcePath = string `/greeting02`;
+    remote isolated function op02(record {} payload) returns string|error {
+        string resourcePath = string `/greeting`;
         http:Request request = new;
         json jsonBody = payload.toJson();
-        request.setPayload(jsonBody, "application/vnd.petstore.v3.diff+json");
+        request.setPayload(jsonBody, "application/json");
         string response = check self.clientEp->put(resourcePath, request);
         return response;
     }
     # RequestBody has object content without properties with application/xml
     #
     # + return - Ok
-    resource isolated function post greeting02(record{} payload) returns string|error {
+    remote isolated function op03(record {} payload) returns string|error {
         string resourcePath = string `/greeting02`;
         http:Request request = new;
         json jsonBody = payload.toJson();
@@ -81,10 +70,21 @@ public isolated client class Client {
         string response = check self.clientEp->post(resourcePath, request);
         return response;
     }
+    # RequestBody has object content without properties with vendor-specific media type vnd.petstore.v3.diff+json
+    #
+    # + return - Ok
+    remote isolated function op04(record {} payload) returns string|error {
+        string resourcePath = string `/greeting02`;
+        http:Request request = new;
+        json jsonBody = payload.toJson();
+        request.setPayload(jsonBody, "application/vnd.petstore.v3.diff+json");
+        string response = check self.clientEp->put(resourcePath, request);
+        return response;
+    }
     # Request body has properties with {} value
     #
     # + return - Ok
-    resource isolated function put greeting03(record{} payload) returns error? {
+    remote isolated function op05(record {} payload) returns error? {
         string resourcePath = string `/greeting03`;
         http:Request request = new;
         json jsonBody = payload.toJson();
@@ -94,7 +94,7 @@ public isolated client class Client {
     # Request body has non-standard media type application/zip with object content without properties
     #
     # + return - Ok
-    resource isolated function post greeting03(http:Request request) returns error? {
+    remote isolated function op06(http:Request request) returns error? {
         string resourcePath = string `/greeting03`;
         // TODO: Update the request as needed;
         return self.clientEp->post(resourcePath, request);

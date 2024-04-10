@@ -106,7 +106,8 @@ paths:
             text/plain:
               schema:
                 type: string
-  /admin/api/2021-10/customers/{customer_id}.json:
+  #/admin/api/2021-10/customers/{customer_id}/abc.json:
+  /admin/api/2021-10/customers/{customer_id}:
     get:
       summary: "Retrieves a single customer."
       description: "https://shopify.dev/docs/admin-api/rest/reference/customers/customer#show-2021-10"

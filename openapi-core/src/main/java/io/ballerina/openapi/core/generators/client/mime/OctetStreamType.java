@@ -20,15 +20,15 @@ package io.ballerina.openapi.core.generators.client.mime;
 
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.openapi.core.GeneratorConstants;
-import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.GeneratorConstants;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
 import java.util.Map;
 
-import static io.ballerina.openapi.core.GeneratorConstants.BYTE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BYTE;
 
 /**
  * Defines the payload structure of "application/octet-stream" mime type.

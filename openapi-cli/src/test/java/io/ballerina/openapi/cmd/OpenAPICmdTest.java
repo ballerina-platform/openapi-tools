@@ -19,8 +19,8 @@ package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.launcher.BLauncherException;
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
@@ -468,7 +468,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             cmd.execute();
         } catch (BLauncherException e) {
         }
-        Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema.bal"));
+        Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema_2.bal"));
         String expectedSchemaContent = "";
         try (Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile)) {
             expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
@@ -563,7 +563,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             generatedService = (generatedService.trim()).replaceAll("\\s+", "");
             expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
             if (expectedServiceContent.equals(generatedService)) {
-                SemanticModel semanticModel = TestUtils.getSemanticModel(
+                SemanticModel semanticModel = GeneratorTestUtils.getSemanticModel(
                         projectDir.resolve("petstore_service.bal"));
                 boolean hasErrors = semanticModel.diagnostics().stream()
                         .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
@@ -583,7 +583,8 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     @Test(description = "Test for service generation with yaml contract without operationID")
     public void testForYamlContractWithoutOperationID() throws IOException {
         Path yamlContract = resourceDir.resolve(Paths.get("without_operationID.yaml"));
-        String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString(), "--mode", "service"};
+        String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString(), "--mode",
+                "service"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
@@ -664,8 +665,8 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         OpenApiCmd cmd = new OpenApiCmd(standardOut, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
-        String expectedOutput = "service generation can not be done due to the given" +
-                " openapi definition contains following complex path(s):" + System.lineSeparator() +
+        String expectedOutput = "service generation can not be done as the" +
+                " openapi definition contain following complex path(s):" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
@@ -686,8 +687,8 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         OpenApiCmd cmd = new OpenApiCmd(standardOut, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
-        Assert.assertTrue(outputStream.toString().contains("service generation can not be done due to the " +
-                "given openapi definition contains following complex path(s):" + System.lineSeparator() +
+        Assert.assertTrue(outputStream.toString().contains("service generation can not be done as the " +
+                "openapi definition contain following complex path(s):" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
@@ -706,12 +707,12 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Assert.assertTrue(outputStream.toString().contains("WARNING: remote function(s) will be generated for client " +
-                "due to the given openapi definition contains following complex path(s):" + System.lineSeparator() +
+                "as the given openapi definition contains following complex path(s):" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
-                "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/" +
-                "{imageId}.{imageExtension}" + System.lineSeparator() +
+                "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/{imageId}." +
+                "{imageExtension}" + System.lineSeparator() +
                 "/v3/ClientGroups/GetClientGroupByUserDefinedIdentifier(UserDefinedIdentifier=" +
                 "'{userDefinedIdentifier}')" + System.lineSeparator() +
                 "/companies({company_id})/items({item_id})" + System.lineSeparator() +
@@ -726,7 +727,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Assert.assertTrue(outputStream.toString().contains("WARNING: remote function(s) will be generated for client" +
-                " and the service generation can not be proceed due to the given openapi definition contains" +
+                " and the service generation can not proceed due to the openapi definition contain" +
                 " following complex path(s):" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
                 "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +

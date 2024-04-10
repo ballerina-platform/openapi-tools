@@ -18,11 +18,13 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
 
@@ -32,7 +34,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils
+        .compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
 /**
  * All the tests related to the Header sections in the swagger file.
@@ -45,91 +48,71 @@ public class HeadersTests {
     Filter filter = new Filter(list1, list2);
 
     @Test(description = "Test for header that comes under the parameter section")
-    public void getHeaderTests() throws IOException, BallerinaOpenApiException {
+    public void getHeaderTests() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/header_parameter.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_parameter.bal");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
-        OASClientConfig oasClientConfig = clientMetaDataBuilder
-                .withFilters(filter)
-                .withOpenAPI(openAPI)
-                .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "Test for header that comes under the parameter section")
-    public void getHeaderTestsWithoutParameter() throws IOException, BallerinaOpenApiException {
+    public void getHeaderTestsWithoutParameter() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/header_without_parameter.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_without_parameter.bal");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
-        OASClientConfig oasClientConfig = clientMetaDataBuilder
-                .withFilters(filter)
-                .withOpenAPI(openAPI)
-                .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
+
+
     @Test(description = "Test for header with default values")
-    public void getHeaderTestsWithDefaultValues() throws IOException, BallerinaOpenApiException {
+    public void getHeaderTestsWithDefaultValues() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/header_param_with_default_value.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_param_with_default_value.bal");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
-        OASClientConfig oasClientConfig = clientMetaDataBuilder
-                .withFilters(filter)
-                .withOpenAPI(openAPI)
-                .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "Test for optional headers without default values")
-    public void getOptionalHeaderTestsWithoutDefaultValues() throws IOException, BallerinaOpenApiException {
+    public void getOptionalHeaderTestsWithoutDefaultValues() throws IOException, BallerinaOpenApiException,
+            ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/header_optional.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_optional.bal");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
-        OASClientConfig oasClientConfig = clientMetaDataBuilder
-                .withFilters(filter)
-                .withOpenAPI(openAPI)
-                .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "Test for headers with delete values")
-    public void getHeaderWithDeleteOperation() throws IOException, BallerinaOpenApiException {
+    public void getHeaderWithDeleteOperation() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/delete_with_header.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/delete_with_header.bal");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
-        OASClientConfig oasClientConfig = clientMetaDataBuilder
-                .withFilters(filter)
-                .withOpenAPI(openAPI)
-                .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "Tests for integer type headers")
-    public void testIntegerTypeHeaders() throws IOException, BallerinaOpenApiException {
+    public void testIntegerTypeHeaders() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/header_integer_signed32.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_integer_signed32.bal");
+        BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
+    private BallerinaClientGenerator getBallerinaClientGenerator(Path definitionPath) throws IOException,
+            BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
-        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        return ballerinaClientGenerator;
     }
 }

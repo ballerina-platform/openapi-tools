@@ -19,11 +19,11 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.BallerinaAuthConfigGenerator;
+import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
-import io.ballerina.openapi.core.generators.client.FunctionBodyGenerator;
-import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.client.FunctionBodyGeneratorImp;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -39,9 +39,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-import static io.ballerina.openapi.generators.common.TestUtils.getOpenAPI;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.getOpenAPI;
 
 /**
  * All the tests related to the FunctionBodyNode generation in {
@@ -57,17 +58,18 @@ public class FunctionBodyNodeTests {
     public void getFunctionBodyNodes(String yamlFile, String path, String content) throws IOException,
             BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve(yamlFile);
-        OpenAPI display = getOpenAPI(definitionPath);
-        Set<Map.Entry<PathItem.HttpMethod, Operation>> operation =
-                display.getPaths().get(path).readOperationsMap().entrySet();
-        Iterator<Map.Entry<PathItem.HttpMethod, Operation>> iterator = operation.iterator();
-        FunctionBodyGenerator functionBodyGenerator = new FunctionBodyGenerator(new ArrayList<>(),
-                new ArrayList<>(), display, new BallerinaTypesGenerator(display),
-                new BallerinaAuthConfigGenerator(false, false), new BallerinaUtilGenerator(),
-                false);
-        FunctionBodyNode bodyNode = functionBodyGenerator.getFunctionBodyNode(path, iterator.next());
+        OpenAPI openapi = getOpenAPI(definitionPath);
+        Set<Map.Entry<PathItem.HttpMethod, Operation>> pathItem =
+                openapi.getPaths().get(path).readOperationsMap().entrySet();
+        Iterator<Map.Entry<PathItem.HttpMethod, Operation>> iterator = pathItem.iterator();
+        Map.Entry<PathItem.HttpMethod, Operation> operation = iterator.next();
+        TypeHandler.createInstance(openapi, false);
+        FunctionBodyGeneratorImp functionBodyGeneratorImp = new FunctionBodyGeneratorImp(path, operation, openapi,
+                new AuthConfigGeneratorImp(false, false),
+                new BallerinaUtilGenerator(), new ArrayList<>());
+        Optional<FunctionBodyNode> bodyNode = functionBodyGeneratorImp.getFunctionBodyNode();
         content = content.trim().replaceAll("\n", "").replaceAll("\\s+", "");
-        String bodyNodeContent = bodyNode.toString().trim().replaceAll("\n", "")
+        String bodyNodeContent = bodyNode.get().toString().trim().replaceAll("\n", "")
                 .replaceAll("\\s+", "");
         Assert.assertEquals(bodyNodeContent, content);
     }
@@ -111,7 +113,7 @@ public class FunctionBodyNodeTests {
                         "http:Request request = new;" +
                         "json jsonBody = payload.toJson();" +
                         "request.setPayload(jsonBody, \"text/json\");" +
-                        "json response = check self.clientEp->post(resourcePath, request);" +
+                        "record{} response = check self.clientEp->post(resourcePath, request);" +
                         "return response;}"},
                 {"client/swagger/pdf_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
                         "// TODO: Update the request as needed;\n" +
@@ -131,11 +133,12 @@ public class FunctionBodyNodeTests {
                         " return  self.clientEp->post(resourcePath, request);\n}"},
                 {"client/swagger/empty_object_responnse.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +
-                        "        json response = check self.clientEp->post(resourcePath, request);\n" +
+                        "        record{} response = check self.clientEp->post(resourcePath, request);\n" +
                         "        return response;}"},
                 {"client/swagger/map_schema_response.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +
-                        "        json response = check self.clientEp->post(resourcePath, request);\n" +
+                        "        record{|Inline_response_map200...;|} response = check self.clientEp->post(" +
+                        "resourcePath, request);\n" +
                         "        return response;}"},
                 {"client/swagger/array_response_pdf.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +

@@ -48,22 +48,22 @@ public isolated client class Client {
         Pets response = check self.clientEp->get(resourcePath);
         return response;
     }
+    # Info for a specific pet
+    #
+    # + petId - The id of the pet to retrieve
+    # + return - Expected response to a valid request
+    resource isolated function get pets/[string petId]() returns Dog|error {
+        string resourcePath = string `/pets/${getEncodedUri(petId)}`;
+        Dog response = check self.clientEp->get(resourcePath);
+        return response;
+    }
     # Create a pet
     #
     # + return - Null response
     resource isolated function post pets() returns http:Response|error {
         string resourcePath = string `/pets`;
         http:Request request = new;
-        http:Response response = check self.clientEp-> post(resourcePath, request);
-        return response;
-    }
-    # Info for a specific pet
-    #
-    # + petId - The id of the pet to retrieve
-    # + return - Expected response to a valid request
-    resource isolated function get pets/[string petId]() returns Pets|error {
-        string resourcePath = string `/pets/${getEncodedUri(petId)}`;
-        Pets response = check self.clientEp->get(resourcePath);
+        http:Response response = check self.clientEp->post(resourcePath, request);
         return response;
     }
 }

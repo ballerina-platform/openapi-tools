@@ -50,9 +50,9 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
-import io.ballerina.openapi.core.GeneratorConstants;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.GeneratorConstants;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import org.apache.commons.io.IOUtils;
@@ -99,14 +99,14 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.openapi.core.GeneratorConstants.API_KEY;
-import static io.ballerina.openapi.core.GeneratorConstants.API_KEY_CONFIG_PARAM;
-import static io.ballerina.openapi.core.GeneratorConstants.BASIC;
-import static io.ballerina.openapi.core.GeneratorConstants.BEARER;
-import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_CRED;
-import static io.ballerina.openapi.core.GeneratorConstants.CONNECTION_CONFIG;
-import static io.ballerina.openapi.core.GeneratorConstants.PASSWORD;
-import static io.ballerina.openapi.core.GeneratorConstants.REFRESH_TOKEN;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.API_KEY;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.API_KEY_CONFIG_PARAM;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BASIC;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BEARER;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLIENT_CRED;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CONNECTION_CONFIG;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PASSWORD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REFRESH_TOKEN;
 
 /**
  * This class use for generating boilerplate codes for test cases.

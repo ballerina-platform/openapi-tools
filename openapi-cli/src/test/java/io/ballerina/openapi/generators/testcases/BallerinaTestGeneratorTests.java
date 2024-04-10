@@ -21,14 +21,15 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.model.Filter;
-import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.model.Filter;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
@@ -39,12 +40,10 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import static io.ballerina.openapi.cmd.CmdConstants.OAS_PATH_SEPARATOR;
@@ -67,13 +66,14 @@ public class BallerinaTestGeneratorTests {
     Filter filter = new Filter(list1, list2);
 
     @Test(description = "Generate Client with test skelotins", dataProvider = "httpAuthIOProvider")
-    public void generateclientWithTestSkel(String yamlFile) throws IOException, BallerinaOpenApiException,
-            FormatterException, BallerinaOpenApiException, URISyntaxException {
+    public void generateclientWithTestSkel(String yamlFile) throws IOException, FormatterException,
+            BallerinaOpenApiException, ClientException {
         Files.createDirectories(Paths.get(PROJECT_DIR + OAS_PATH_SEPARATOR + TEST_DIR));
         Path definitionPath = RES_DIR.resolve("sample_yamls/" + yamlFile);
         BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         codeGenerator.setIncludeTestFiles(true);
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
@@ -81,31 +81,30 @@ public class BallerinaTestGeneratorTests {
                 .withResourceMode(false).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree syntaxTreeClient = ballerinaClientGenerator.generateSyntaxTree();
-        List<TypeDefinitionNode> preGeneratedTypeDefinitionNodes = new LinkedList<>();
-        preGeneratedTypeDefinitionNodes.addAll(ballerinaClientGenerator.
-                getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
-        preGeneratedTypeDefinitionNodes.addAll(ballerinaClientGenerator.getTypeDefinitionNodeList());
-        BallerinaTypesGenerator schemaGenerator = new BallerinaTypesGenerator(
-                openAPI, false, preGeneratedTypeDefinitionNodes);
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
+        for (TypeDefinitionNode typeDef: authNodes) {
+            TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
+        }
+        SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
         SyntaxTree syntaxTreeTest = ballerinaTestGenerator.generateSyntaxTree();
-        SyntaxTree syntaxTreeSchema = schemaGenerator.generateSyntaxTree();
         SyntaxTree utilSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
         String configFile = ballerinaTestGenerator.getConfigTomlFile();
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTreeClient, syntaxTreeTest,
-                syntaxTreeSchema, configFile, utilSyntaxTree);
+                schemaSyntaxTree, configFile, utilSyntaxTree);
         Assert.assertTrue(diagnostics.isEmpty());
     }
 
     public List<Diagnostic> getDiagnostics(SyntaxTree clientSyntaxTree, SyntaxTree testSyntaxTree,
                                            SyntaxTree schemaSyntaxTree, String configContent, SyntaxTree utilSyntaxTree)
             throws FormatterException, IOException {
-        TestUtils.writeFile(clientPath, Formatter.format(clientSyntaxTree).toSourceCode());
-        TestUtils.writeFile(utilPath, Formatter.format(utilSyntaxTree).toSourceCode());
-        TestUtils.writeFile(schemaPath, Formatter.format(schemaSyntaxTree).toSourceCode());
-        TestUtils.writeFile(testPath, Formatter.format(testSyntaxTree).toSourceCode());
-        TestUtils.writeFile(configPath, configContent);
-        SemanticModel semanticModel = TestUtils.getSemanticModel(clientPath);
+        GeneratorTestUtils.writeFile(clientPath, Formatter.format(clientSyntaxTree).toSourceCode());
+        GeneratorTestUtils.writeFile(utilPath, Formatter.format(utilSyntaxTree).toSourceCode());
+        GeneratorTestUtils.writeFile(schemaPath, Formatter.format(schemaSyntaxTree).toSourceCode());
+        GeneratorTestUtils.writeFile(testPath, Formatter.format(testSyntaxTree).toSourceCode());
+        GeneratorTestUtils.writeFile(configPath, configContent);
+        SemanticModel semanticModel = GeneratorTestUtils.getSemanticModel(clientPath);
         return semanticModel.diagnostics();
     }
 

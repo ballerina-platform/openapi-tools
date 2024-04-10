@@ -16,11 +16,13 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
 
@@ -30,7 +32,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
 /**
  * Test for the resource function generation.
@@ -42,72 +44,60 @@ public class ResourceFunctionTests {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
     @Test(description = "Generate Client for all methods with resource function")
-    public void generateForAllMethods() throws IOException, BallerinaOpenApiException {
+    public void generateForAllMethods() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/all_methods.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/all_methods.bal");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
-        OASClientConfig oasClientConfig = clientMetaDataBuilder
-                .withFilters(filter)
-                .withOpenAPI(openAPI).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "Generate Client for headers")
-    public void generateForHeaders() throws IOException, BallerinaOpenApiException {
+    public void generateForHeaders() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/header.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/header.bal");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
-        OASClientConfig oasClientConfig = clientMetaDataBuilder
-                .withFilters(filter)
-                .withOpenAPI(openAPI).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "Generate Client for pathParameters")
-    public void generateForPathParameters() throws IOException, BallerinaOpenApiException {
+    public void generateForPathParameters() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/pathParameters.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/pathParameters.bal");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
-        OASClientConfig oasClientConfig = clientMetaDataBuilder
-                .withFilters(filter)
-                .withOpenAPI(openAPI).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "Generate Client for request body")
-    public void generateForRequestBody() throws IOException, BallerinaOpenApiException {
+    public void generateForRequestBody() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/request_body.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/request_body.bal");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
-        OASClientConfig oasClientConfig = clientMetaDataBuilder
-                .withFilters(filter)
-                .withOpenAPI(openAPI).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "Generate Client for reference path parameters")
-    public void generateReferenceResolvePath() throws IOException, BallerinaOpenApiException {
+    public void generateReferenceResolvePath() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("swagger/reference_path.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/reference_path.bal");
+        BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
+    private BallerinaClientGenerator getBallerinaClientGenerator(Path definitionPath) throws IOException,
+            BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        TypeHandler.createInstance(openAPI, true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
-                .withOpenAPI(openAPI).build();
+                .withOpenAPI(openAPI)
+                .withResourceMode(true).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
-        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        return ballerinaClientGenerator;
     }
 }

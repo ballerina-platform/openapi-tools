@@ -7,7 +7,7 @@ service /v1 on ep0 {
     #
     # + petId - The id of the pet to retrieve
     # + return - Expected response to a valid request
-    resource function get pet(string petId) returns http:Ok {
+    resource function get [string petId]() returns Pets {
     }
     # Info for a specific pet
     #
@@ -20,6 +20,6 @@ service /v1 on ep0 {
     #
     # + petId - The id of the pet to retrieve
     # + return - Expected response to a valid request
-    resource function get [string petId]() returns Pets {
+    resource function get pet(string petId) returns http:Ok {
     }
 }

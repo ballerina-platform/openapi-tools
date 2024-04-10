@@ -19,13 +19,12 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
-import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.model.Filter;
+import io.ballerina.openapi.core.generators.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
 
@@ -54,7 +53,8 @@ public class RequestBodyTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_01_rb.bal",
                 syntaxTree);
@@ -68,7 +68,8 @@ public class RequestBodyTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_0102_rb.bal",
                 syntaxTree);
@@ -82,7 +83,8 @@ public class RequestBodyTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_02_rb.bal",
                 syntaxTree);
@@ -96,7 +98,8 @@ public class RequestBodyTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_03_rb.bal",
                 syntaxTree);
@@ -110,7 +113,8 @@ public class RequestBodyTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/refactor_record_name.bal", syntaxTree);
@@ -124,7 +128,8 @@ public class RequestBodyTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/scenario_04_rb.bal", syntaxTree);
@@ -137,17 +142,15 @@ public class RequestBodyTests {
                 .withOpenAPI(GeneratorUtils.normalizeOpenAPI(definitionPath, false))
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator serviceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
-        syntaxTree = serviceGenerator.generateSyntaxTree();
-        //Generate records according to schemas
-        List<TypeDefinitionNode> typeInclusionRecords = serviceGenerator.getTypeInclusionRecords();
-        BallerinaTypesGenerator recordGenerator = new BallerinaTypesGenerator(
-                oasServiceMetadata.getOpenAPI(), oasServiceMetadata.isNullable(), typeInclusionRecords);
-        SyntaxTree typeSyntaxTree = recordGenerator.generateSyntaxTree();
+        TypeHandler.createInstance(oasServiceMetadata.getOpenAPI(), false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        SyntaxTree typeSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/oneof_requestBody.bal", syntaxTree);
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/oneof_request_body_types.bal", typeSyntaxTree);
+        // todo : check for the warning of json type for text/plain mediatype
 
     }
 
@@ -159,7 +162,8 @@ public class RequestBodyTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(oasServiceMetadata.getOpenAPI(), false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/url_encode.bal", syntaxTree);
@@ -173,7 +177,8 @@ public class RequestBodyTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(oasServiceMetadata.getOpenAPI(), false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/reference_rb.bal", syntaxTree);
@@ -188,7 +193,8 @@ public class RequestBodyTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(oasServiceMetadata.getOpenAPI(), false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/multipart_form_data.bal", syntaxTree);
@@ -203,7 +209,8 @@ public class RequestBodyTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(oasServiceMetadata.getOpenAPI(), false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/unhandled_media_type.bal", syntaxTree);
@@ -217,7 +224,8 @@ public class RequestBodyTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(oasServiceMetadata.getOpenAPI(), false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/any_of.bal", syntaxTree);
@@ -231,11 +239,10 @@ public class RequestBodyTests {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(oasServiceMetadata.getOpenAPI(), false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        BallerinaTypesGenerator ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI, false,
-                ballerinaServiceGenerator.getTypeInclusionRecords());
-        SyntaxTree typeSyntaxTree = ballerinaTypesGenerator.generateSyntaxTree();
+        SyntaxTree typeSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/additional_property.bal", syntaxTree);
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(

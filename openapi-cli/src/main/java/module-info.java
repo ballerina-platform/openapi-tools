@@ -24,6 +24,9 @@ module io.ballerina.openapi {
     requires io.ballerina.toml;
     requires io.ballerina.tools.api;
     requires io.ballerina.formatter.core;
+    requires io.ballerina.openapi.core;
+//    requires io.ballerina.openapi.core.service;
+//    requires io.ballerina.openapi.core.typegenerator;
     requires io.ballerina.openapi.service;
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
@@ -35,7 +38,6 @@ module io.ballerina.openapi {
     requires swagger.parser.core;
     requires swagger.parser.v3;
     requires org.apache.commons.lang3;
-    requires io.ballerina.openapi.core;
     exports io.ballerina.openapi.cmd;
 }
 

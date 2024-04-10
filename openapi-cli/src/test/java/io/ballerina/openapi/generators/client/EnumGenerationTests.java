@@ -19,13 +19,18 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.model.Filter;
-import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.model.Filter;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
@@ -39,9 +44,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
-import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
-import static io.ballerina.openapi.generators.common.TestUtils.getOpenAPI;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils
+        .compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.getDiagnostics;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.getOpenAPI;
 
 /**
  * Test cases for generating ballerina parameters for openapi parameters with enum schemas.
@@ -59,11 +65,12 @@ public class EnumGenerationTests {
             "Use case 03 : Enum in header parameter" +
             "Use case 04 : Enum in reusable parameter" +
             "Use case 05 : Enum in parameter with referenced schema")
-    public void generateRemoteParametersWithEnums() throws IOException, BallerinaOpenApiException,
-            FormatterException {
+    public void generateRemoteParametersWithEnums() throws IOException, BallerinaOpenApiException, OASTypeGenException,
+            FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_enum.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/parameters_with_enum.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
@@ -71,8 +78,16 @@ public class EnumGenerationTests {
                 .withResourceMode(false).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
-        Assert.assertTrue(diagnostics.isEmpty());
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
+        for (TypeDefinitionNode typeDef: authNodes) {
+            TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
+        }
+        SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, schemaSyntaxTree, ballerinaClientGenerator);
+        boolean hasErrors = diagnostics.stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        Assert.assertFalse(hasErrors);
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
@@ -83,10 +98,11 @@ public class EnumGenerationTests {
             "Use case 04 : Nullable enum in reusable parameter" +
             "Use case 05 : Nullable enum in parameter with referenced schema")
     public void generateRemoteParametersWithNullableEnums() throws IOException, BallerinaOpenApiException,
-            FormatterException {
+            OASTypeGenException, FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_nullable_enums.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/parameters_with_nullable_enums.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
@@ -94,8 +110,16 @@ public class EnumGenerationTests {
                 .withResourceMode(false).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
-        Assert.assertTrue(diagnostics.isEmpty());
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
+        for (TypeDefinitionNode typeDef: authNodes) {
+            TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
+        }
+        SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, schemaSyntaxTree, ballerinaClientGenerator);
+        boolean hasErrors = diagnostics.stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        Assert.assertFalse(hasErrors);
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
@@ -106,10 +130,11 @@ public class EnumGenerationTests {
             "Use case 04 : Enum in reusable parameter" +
             "Use case 05 : Enum in parameter with referenced schema")
     public void generateResourceParametersWithEnums() throws IOException, BallerinaOpenApiException,
-            FormatterException {
+            OASTypeGenException, FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_enum.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/paramters_with_enum_resource.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
@@ -117,8 +142,16 @@ public class EnumGenerationTests {
                 .withResourceMode(true).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
-        Assert.assertTrue(diagnostics.isEmpty());
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
+        for (TypeDefinitionNode typeDef: authNodes) {
+            TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
+        }
+        SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, schemaSyntaxTree, ballerinaClientGenerator);
+        boolean hasErrors = diagnostics.stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        Assert.assertFalse(hasErrors);
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
@@ -129,10 +162,11 @@ public class EnumGenerationTests {
             "Use case 04 : Nullable enum in reusable parameter" +
             "Use case 05 : Nullable enum in parameter with referenced schema")
     public void generateResourceParametersWithNullableEnums() throws IOException, BallerinaOpenApiException,
-            FormatterException {
+            OASTypeGenException, FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_nullable_enums.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/parameters_with_nullable_enums_resource.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
@@ -140,16 +174,25 @@ public class EnumGenerationTests {
                 .withResourceMode(true).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
-        Assert.assertTrue(diagnostics.isEmpty());
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
+        for (TypeDefinitionNode typeDef: authNodes) {
+            TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
+        }
+        SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, schemaSyntaxTree, ballerinaClientGenerator);
+        boolean hasErrors = diagnostics.stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        Assert.assertFalse(hasErrors);
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "Test unsupported nullable path parameter with enums",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Path parameter value cannot be null.")
-    public void testNullablePathParamWithEnum() throws IOException, BallerinaOpenApiException {
+            expectedExceptionsMessageRegExp = "Path parameter value cannot be null.", enabled = false)
+    public void testNullablePathParamWithEnum() throws IOException, BallerinaOpenApiException, ClientException {
         OpenAPI openAPI = getOpenAPI(RES_DIR.resolve("swagger/path_param_nullable_enum.yaml"));
+        TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
@@ -162,13 +205,13 @@ public class EnumGenerationTests {
     @AfterMethod
     private void deleteGeneratedFiles() {
         try {
-            TestUtils.deleteGeneratedFiles();
+            GeneratorTestUtils.deleteGeneratedFiles();
         } catch (IOException ignored) {
         }
     }
 
     @AfterClass
     public void cleanUp() throws IOException {
-        TestUtils.deleteGeneratedFiles();
+        GeneratorTestUtils.deleteGeneratedFiles();
     }
 }

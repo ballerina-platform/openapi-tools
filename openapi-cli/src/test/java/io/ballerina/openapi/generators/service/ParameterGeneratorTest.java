@@ -19,13 +19,15 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
+import io.ballerina.openapi.TestUtils;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.model.Filter;
+import io.ballerina.openapi.core.generators.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -46,14 +48,15 @@ public class ParameterGeneratorTest {
     SyntaxTree syntaxTree;
 
     @Test(description = "Generate serviceDeclaration")
-    public void generateService() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateService() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_service.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("service_gen.bal", syntaxTree);
     }
@@ -66,7 +69,8 @@ public class ParameterGeneratorTest {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("service_gen_special_characters.bal",
                 syntaxTree);
@@ -80,7 +84,8 @@ public class ParameterGeneratorTest {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("multi_operations.bal", syntaxTree);
     }
@@ -93,7 +98,8 @@ public class ParameterGeneratorTest {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("multi_paths.bal", syntaxTree);
     }
@@ -107,7 +113,8 @@ public class ParameterGeneratorTest {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("path_parameters.bal", syntaxTree);
     }
@@ -121,7 +128,8 @@ public class ParameterGeneratorTest {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("path_parameters02.bal", syntaxTree);
     }
@@ -134,15 +142,14 @@ public class ParameterGeneratorTest {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("path_parameters03.bal", syntaxTree);
     }
 
     //Scenario 02 - Query parameters.
-    @Test(description = "Generate functionDefinitionNode for Query parameters",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Query parameters with nested array types are not supported in.*")
+    @Test(description = "Generate functionDefinitionNode for Query parameters")
     public void generateQueryParameter() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/multiQueryParam.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -150,17 +157,15 @@ public class ParameterGeneratorTest {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query_parameters.bal", syntaxTree);
-
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+                "Query parameters with nested array types are not supported in Ballerina.");
     }
 
-    @Test(description = "Generate functionDefinitionNode for paramter for content instead of schema",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Type 'json' is not a valid query parameter type in Ballerina. " +
-                    "The supported types are string, int, float, boolean, decimal, " +
-                    "array types of the aforementioned types and map<json>.")
+    @Test(description = "Generate functionDefinitionNode for paramter for content instead of schema")
     public void generateParameterHasContent() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameterTypehasContent.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -168,9 +173,14 @@ public class ParameterGeneratorTest {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("param_type_with_content.bal", syntaxTree);
+        TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
+                "Type 'json' is not a valid query parameter type in Ballerina. The supported " +
+                        "types are string, int, float, boolean, decimal, array types of the " +
+                        "aforementioned types and map<json>.");
     }
 
     @Test(description = "Tests when query parameter(s) having a keyword as the parameter name")
@@ -181,7 +191,8 @@ public class ParameterGeneratorTest {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("keywords.bal", syntaxTree);
     }
@@ -199,7 +210,8 @@ public class ParameterGeneratorTest {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("parameters_with_enum.bal", syntaxTree);
     }
@@ -216,15 +228,14 @@ public class ParameterGeneratorTest {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "parameters_with_nullable_enums.bal", syntaxTree);
     }
 
-    @Test(description = "Test unsupported nullable path parameter with enums",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Path parameter value cannot be null.")
+    @Test(description = "Test unsupported nullable path parameter with enums")
     public void testNullablePathParamWithEnum() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/path_param_nullable.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -232,8 +243,11 @@ public class ParameterGeneratorTest {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        List<Diagnostic> diagnostics = ballerinaServiceGenerator.getDiagnostics();
+        TestUtils.compareDiagnosticWarnings(diagnostics, "Path parameter value cannot be null.");
     }
 
     @Test(description = "Tests int32, int64, and invalid integer path parameters")
@@ -244,7 +258,8 @@ public class ParameterGeneratorTest {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("intPathParam.bal", syntaxTree);
     }
@@ -257,7 +272,8 @@ public class ParameterGeneratorTest {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "parameter_with_ref_v31.bal", syntaxTree);
@@ -271,7 +287,8 @@ public class ParameterGeneratorTest {
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
                 .build();
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "multiPathParamWithExtensionType.bal", syntaxTree);

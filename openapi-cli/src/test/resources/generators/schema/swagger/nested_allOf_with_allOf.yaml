@@ -50,6 +50,21 @@ paths:
       responses:
         '200':
           description: An paged array of pets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user"
+    put:
+      summary: List all pets
+      description: Show a list of pets in the system
+      operationId: putPets
+      responses:
+        '200':
+          description: An paged array of pets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Address"
 components:
   schemas:
     Address:

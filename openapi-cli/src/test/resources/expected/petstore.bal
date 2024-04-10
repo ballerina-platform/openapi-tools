@@ -14,19 +14,19 @@ service /v1 on ep0 {
     # http:Response (unexpected error)
     resource function get pets(int? 'limit) returns Pets|http:Response {
     }
-    # Create a pet
-    #
-    # + return - returns can be any of following types
-    # http:Created (Null response)
-    # http:Response (unexpected error)
-    resource function post pets() returns http:Created|http:Response {
-    }
     # Info for a specific pet
     #
     # + petId - The id of the pet to retrieve
     # + return - returns can be any of following types
     # Pets (Expected response to a valid request)
     # http:Response (unexpected error)
-    resource function get pets/[string petId]() returns Pets|http:Response {
+    resource function get pets/[string petId]() returns Dog|http:Response {
+    }
+    # Create a pet
+    #
+    # + return - returns can be any of following types
+    # http:Created (Null response)
+    # http:Response (unexpected error)
+    resource function post pets() returns http:Created|http:Response {
     }
 }

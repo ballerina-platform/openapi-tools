@@ -42,12 +42,21 @@ public isolated client class Client {
         string response = check self.clientEp->get(resourcePath);
         return response;
     }
+    # Retrieves a single customer.
     #
+    # + customer_id - Customer ID
+    # + fields - Show only certain fields, specified by a comma-separated list of field names.
+    # + return - Requested customer
+    resource isolated function get admin/api/'2021\-10/customers/[string customer_id](string? fields = ()) returns error? {
+        string resourcePath = string `/admin/api/2021-10/customers/${getEncodedUri(customer_id)}`;
+        map<anydata> queryParam = {"fields": fields};
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        return self.clientEp->get(resourcePath);
+    }
     # + return - Ok
-    resource isolated function post .() returns string|error {
-        string resourcePath = string `/`;
-        http:Request request = new;
-        string response = check self.clientEp-> post(resourcePath, request);
+    resource isolated function get v1/[int age]/v2/[string name]() returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(age)}/v2/${getEncodedUri(name)}`;
+        string response = check self.clientEp->get(resourcePath);
         return response;
     }
     # op2
@@ -59,40 +68,23 @@ public isolated client class Client {
         string response = check self.clientEp->get(resourcePath);
         return response;
     }
-    #
-    # + return - Ok
-    resource isolated function get v1/[int version]/v2/[string name]() returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri(name)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
-    }
-    #
     # + return - Ok
     resource isolated function get v1/[int version]/v2/[int 'limit]() returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri('limit)}`;
         string response = check self.clientEp->get(resourcePath);
         return response;
     }
-    #
     # + return - Ok
-    resource isolated function get v1/[int age]/v2/[string name]() returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri(age)}/v2/${getEncodedUri(name)}`;
+    resource isolated function get v1/[int version]/v2/[string name]() returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri(name)}`;
         string response = check self.clientEp->get(resourcePath);
         return response;
     }
-    # Retrieves a single customer.
-    #
-    # + customer_id - Customer ID
-    # + fields - Show only certain fields, specified by a comma-separated list of field names.
-    # + return - Requested customer
-    resource isolated function get admin/api/'2021\-10/customers/[string customer_idJson](string? fields = ()) returns error? {
-        if !customer_idJson.endsWith(".json") {
-            return error("bad URL");
-        }
-        string customer_id = customer_idJson.substring(0, customer_idJson.length() - 4);
-        string resourcePath = string `/admin/api/2021-10/customers/${getEncodedUri(customer_id)}.json`;
-        map<anydata> queryParam = {"fields": fields};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        return self.clientEp->get(resourcePath);
+    # + return - Ok
+    resource isolated function post .() returns string|error {
+        string resourcePath = string `/`;
+        http:Request request = new;
+        string response = check self.clientEp->post(resourcePath, request);
+        return response;
     }
 }

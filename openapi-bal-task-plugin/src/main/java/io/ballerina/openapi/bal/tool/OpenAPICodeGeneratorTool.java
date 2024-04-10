@@ -19,14 +19,14 @@ package io.ballerina.openapi.bal.tool;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.model.Filter;
+import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
-import io.ballerina.openapi.core.model.Filter;
-import io.ballerina.openapi.core.model.GenSrcFile;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.buildtools.CodeGeneratorTool;
 import io.ballerina.projects.buildtools.ToolConfig;
@@ -49,7 +49,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -64,15 +63,15 @@ import static io.ballerina.openapi.bal.tool.Constants.NULLABLE;
 import static io.ballerina.openapi.bal.tool.Constants.OPERATIONS;
 import static io.ballerina.openapi.bal.tool.Constants.TAGS;
 import static io.ballerina.openapi.bal.tool.Constants.TRUE;
-import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
-import static io.ballerina.openapi.core.GeneratorConstants.JSON_EXTENSION;
-import static io.ballerina.openapi.core.GeneratorConstants.RESOURCE;
-import static io.ballerina.openapi.core.GeneratorConstants.TYPE_FILE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.UTIL_FILE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.YAML_EXTENSION;
-import static io.ballerina.openapi.core.GeneratorConstants.YML_EXTENSION;
-import static io.ballerina.openapi.core.GeneratorUtils.normalizeOpenAPI;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLIENT_FILE_NAME;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.JSON_EXTENSION;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RESOURCE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TYPE_FILE_NAME;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UTIL_FILE_NAME;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YAML_EXTENSION;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YML_EXTENSION;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.normalizeOpenAPI;
 
 /**
  * This class includes the implementation of the {@code BuildToolRunner} for the OpenAPI tool.
@@ -133,7 +132,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         } catch (BallerinaOpenApiException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.PARSER_ERROR;
             createDiagnostics(toolContext, error, location);
-        } catch (IOException | FormatterException e) {
+        } catch (ClientException | IOException | FormatterException e) {
             Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_GENERATING_CLIENT;
             createDiagnostics(toolContext, error, location);
         }
@@ -160,7 +159,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     private void handleCodeGenerationMode(ToolContext toolContext,
                                           ImmutablePair<OASClientConfig, OASServiceMetadata> codeGeneratorConfig,
                                           TomlNodeLocation location, String mode)
-            throws BallerinaOpenApiException, IOException, FormatterException {
+            throws BallerinaOpenApiException, IOException, FormatterException, ClientException {
         if (mode.equals(CLIENT)) {
             // Create client for the given OAS
             generateClient(toolContext, codeGeneratorConfig);
@@ -277,7 +276,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
      * This method uses to generate the client module for the given openapi contract.
      */
     private void generateClient(ToolContext toolContext, ImmutablePair<OASClientConfig,
-            OASServiceMetadata> codeGeneratorConfig) throws BallerinaOpenApiException, IOException, FormatterException {
+            OASServiceMetadata> codeGeneratorConfig) throws BallerinaOpenApiException, IOException,
+            FormatterException, ClientException {
         OASClientConfig clientConfig = codeGeneratorConfig.getLeft();
         List<GenSrcFile> sources = generateClientFiles(clientConfig);
         Path outputPath = toolContext.outputPath();
@@ -303,12 +303,12 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 .append(clientConfig.isResourceMode())
                 .append(clientConfig.getLicense())
                 .append(clientConfig.isNullable());
-        List<String> tags = clientConfig.getFilters().getTags();
+        List<String> tags = clientConfig.getFilter().getTags();
         tags.sort(String.CASE_INSENSITIVE_ORDER);
         for (String str : tags) {
             summaryOfCodegen.append(str);
         }
-        List<String> operations = clientConfig.getFilters().getOperations();
+        List<String> operations = clientConfig.getFilter().getOperations();
         operations.sort(String.CASE_INSENSITIVE_ORDER);
         for (String str : operations) {
             summaryOfCodegen.append(str);
@@ -321,11 +321,12 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
      * This will return list of (client.bal, util.bal, types.bal) {@code GenSrcFile}.
      */
     private static List<GenSrcFile> generateClientFiles(OASClientConfig oasClientConfig) throws
-            BallerinaOpenApiException, IOException, FormatterException {
+            BallerinaOpenApiException, IOException, FormatterException, ClientException {
 
         List<GenSrcFile> sourceFiles = new ArrayList<>();
 
         // Generate ballerina client files.
+        TypeHandler.createInstance(oasClientConfig.getOpenAPI(), oasClientConfig.isNullable());
         String licenseContent = oasClientConfig.getLicense();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
@@ -341,21 +342,15 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                             licenseContent + System.lineSeparator() + utilContent));
         }
 
-        // Generate ballerina records to represent schemas.
-        List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
-        typeDefinitionNodeList.addAll(ballerinaClientGenerator.getTypeDefinitionNodeList());
-        typeDefinitionNodeList.addAll(ballerinaClientGenerator
-                .getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(oasClientConfig.getOpenAPI(),
-                oasClientConfig.isNullable(), typeDefinitionNodeList);
-        SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .getAuthRelatedTypeDefinitionNodes();
+        for (TypeDefinitionNode typeDef: authNodes) {
+            TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
+        }
+
+        SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
 
-        if (oasClientConfig.getFilters().getTags().isEmpty()) {
-            // Remove unused records and enums when generating the client by the tags given.
-            schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent,
-                    null);
-        }
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, null, TYPE_FILE_NAME,
                     licenseContent == null || licenseContent.isBlank() ? schemaContent :

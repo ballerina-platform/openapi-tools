@@ -65,14 +65,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-    post:
+    put:
       summary: Create a pet
       operationId: createPet
       tags:
         - pets
       responses:
-        '201':
-          description: Null response
+        '200':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         default:
           description: unexpected error
           content:
@@ -98,13 +102,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Pets"
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/Dog"
   /action:
     x-MULTI:
       operationId: getAction

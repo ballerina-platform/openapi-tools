@@ -1,8 +1,5 @@
 import ballerina/constraint;
 
-@constraint:String {maxLength: 23}
-public type HobbyItemsString string;
-
 @constraint:String {minLength: 7}
 public type PersonDetailsItemsString string;
 
@@ -14,6 +11,9 @@ public type PersonLimitItemsInteger int;
 
 @constraint:Array {maxLength: 5, minLength: 2}
 public type Hobby HobbyItemsString[];
+
+@constraint:String {maxLength: 23}
+public type HobbyItemsString string;
 
 public type Person record {
     Hobby hobby?;

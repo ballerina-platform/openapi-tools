@@ -21,13 +21,16 @@ package io.ballerina.openapi.generators.client;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
-import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.model.Filter;
+import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -39,8 +42,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
-import static io.ballerina.openapi.generators.common.TestUtils.getOpenAPI;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils
+        .compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.getOpenAPI;
 
 /**
  * All the tests related to the Display Annotation in the generated code related to the
@@ -53,13 +57,14 @@ public class AnnotationTests {
     public void extractDisplayAnnotationTests() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/openapi_display_annotation.yaml");
         OpenAPI display = getOpenAPI(definitionPath);
+        TypeHandler.createInstance(display, false);
         Map<String, Object> param01 =
                 display.getPaths().get("/weather").getGet().getParameters().get(0).getExtensions();
         Map<String, Object> param02 =
                 display.getPaths().get("/weather").getGet().getParameters().get(1).getExtensions();
         List<AnnotationNode> annotationNodes  = new ArrayList<>();
-        DocCommentsGenerator.extractDisplayAnnotation(param01, annotationNodes);
-        DocCommentsGenerator.extractDisplayAnnotation(param02, annotationNodes);
+        DocCommentsGeneratorUtil.extractDisplayAnnotation(param01, annotationNodes);
+        DocCommentsGeneratorUtil.extractDisplayAnnotation(param02, annotationNodes);
         Assert.assertEquals(annotationNodes.get(0).annotValue().orElseThrow().toString().trim(),
                 "{label:\"City name\"}");
         Assert.assertEquals(annotationNodes.size(), 1);
@@ -69,11 +74,12 @@ public class AnnotationTests {
     public void extractDisplayAnnotationInParametersWithReasonTest() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/deprecated_parameter.yaml");
         OpenAPI openAPI = getOpenAPI(definitionPath);
+        TypeHandler.createInstance(openAPI, false);
         Map<String, Object> param01 =
                 openAPI.getPaths().get("/pets").getGet().getParameters().get(0).getExtensions();
         List<AnnotationNode> annotationNodes  = new ArrayList<>();
         List<Node> documentaion = new ArrayList<>();
-        DocCommentsGenerator.extractDeprecatedAnnotation(param01, documentaion, annotationNodes);
+        DocCommentsGeneratorUtil.extractDeprecatedAnnotation(param01, documentaion, annotationNodes);
         Assert.assertEquals(annotationNodes.get(0).annotReference().toString(), "deprecated");
     }
 
@@ -81,24 +87,26 @@ public class AnnotationTests {
     public void extractDisplayAnnotationInParametersTest() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/deprecated_parameter.yaml");
         OpenAPI openAPI = getOpenAPI(definitionPath);
+        TypeHandler.createInstance(openAPI, false);
         Map<String, Object> param01 =
                 openAPI.getPaths().get("/pets").getGet().getParameters().get(1).getExtensions();
         List<AnnotationNode> annotationNodes  = new ArrayList<>();
         List<Node> documentaion = new ArrayList<>();
-        DocCommentsGenerator.extractDeprecatedAnnotation(param01, documentaion, annotationNodes);
+        DocCommentsGeneratorUtil.extractDeprecatedAnnotation(param01, documentaion, annotationNodes);
         Assert.assertEquals(annotationNodes.get(0).annotReference().toString(), "deprecated");
     }
 
     @Test(description = "Test openAPI definition to ballerina client source code generation with deprecated annotation",
             dataProvider = "fileProviderForFilesComparison")
     public void  openApiToBallerinaClientGenWithAnnotation(String yamlFile, String expectedFile)
-            throws IOException, BallerinaOpenApiException {
+            throws IOException, BallerinaOpenApiException, ClientException, FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/" + yamlFile);
         Path expectedPath = RESDIR.resolve("ballerina/" + expectedFile);
         List<String> list1 = new ArrayList<>();
         List<String> list2 = new ArrayList<>();
         Filter filter = new Filter(list1, list2);
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)

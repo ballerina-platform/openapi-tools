@@ -10,17 +10,8 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-     public isolated function init(ApiKeysConfig apiKeyConfig, string serviceUrl, ConnectionConfig config = {}) returns error? {
-        http:ClientConfiguration httpClientConfig = {
-                    httpVersion: config.httpVersion,
-                    timeout: config.timeout,
-                    forwarded: config.forwarded,
-                    poolConfig: config.poolConfig,
-                    compression: config.compression,
-                    circuitBreaker: config.circuitBreaker,
-                    retryConfig: config.retryConfig,
-                    validation: config.validation
-        };
+    public isolated function init(ApiKeysConfig apiKeyConfig, string serviceUrl, ConnectionConfig config =  {}) returns error? {
+        http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
                 ClientHttp1Settings settings = check config.http1Settings.ensureType(ClientHttp1Settings);
@@ -70,7 +61,7 @@ public isolated client class Client {
         string resourcePath = string `/chrome/url`;
         map<anydata> queryParam = {"url": url, "output": output, "apikey": self.apiKeyConfig.apikey};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        ApiResponseSuccess response = check self.clientEp-> get(resourcePath);
+        ApiResponseSuccess response = check self.clientEp->get(resourcePath);
         return response;
     }
     # Convert URL to PDF
@@ -138,7 +129,7 @@ public isolated client class Client {
         string resourcePath = string `/wkhtmltopdf/url`;
         map<anydata> queryParam = {"url": url, "output": output, "apikey": self.apiKeyConfig.apikey};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        ApiResponseSuccess response = check self.clientEp-> get(resourcePath);
+        ApiResponseSuccess response = check self.clientEp->get(resourcePath);
         return response;
     }
     # Convert URL to PDF
@@ -167,7 +158,7 @@ public isolated client class Client {
         string resourcePath = string `/zebra`;
         map<anydata> queryParam = {"format": format, "value": value, "showlabel": showlabel, "height": height, "width": width, "apikey": self.apiKeyConfig.apikey};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        byte[] response = check self.clientEp-> get(resourcePath);
+        byte[] response = check self.clientEp->get(resourcePath);
         return response;
     }
 }

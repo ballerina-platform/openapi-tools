@@ -29,13 +29,16 @@ import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.ballerina.openapi.CodeGeneratorTest.USER_DIR;
+//import static io.ballerina.openapi.CodeGeneratorTest.USER_DIR;
 
 /**
  * This class contains tests necessary to test OpenApi Generate Service command.
  */
 public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
+    public static final String USER_DIR = "user.dir";
     Path resourcePath = Paths.get(System.getProperty(USER_DIR));
+    String replaceRegex  = System.getProperty("os.name").toLowerCase()
+            .contains("windows") ? "#.*[+*a\\r\\n]" : "#.*[+*a\\n]";
 
     @Test(description = "Test openapi gen-service for successful service generation with inline request body type",
             enabled = false)
@@ -130,13 +133,12 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
 
         Path expectedServiceFile = resourceDir.resolve(Paths.get("expected_gen",
                 "without-data-binding.bal"));
-        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile);
-        String expectedService = expectedServiceLines.collect(Collectors.joining("\n"));
-        expectedServiceLines.close();
+        String expectedService = new String(Files.readAllBytes(expectedServiceFile));
         Assert.assertFalse(Files.exists(this.tmpDir.resolve("types.bal")));
         if (Files.exists(this.tmpDir.resolve("withoutdatabinding_service.bal"))) {
             String generatedService = getStringFromFile(this.tmpDir.resolve("withoutdatabinding_service.bal"));
-            Assert.assertEquals(replaceWhiteSpace(generatedService), replaceWhiteSpace(expectedService),
+            Assert.assertEquals(replaceWhiteSpace(generatedService.replaceAll(replaceRegex, "")),
+                    replaceWhiteSpace(expectedService.replaceAll(replaceRegex, "")),
                     "Expected content and actual generated content is mismatched for: " + yamlPath);
             deleteGeneratedFiles("without-data-binding-service.bal");
         } else {

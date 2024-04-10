@@ -9,17 +9,8 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-        public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config = {}, string serviceUrl = "https://petstore.swagger.io:443/v2") returns error? {
-        http:ClientConfiguration httpClientConfig = {
-            httpVersion: config.httpVersion,
-            timeout: config.timeout,
-            forwarded: config.forwarded,
-            poolConfig: config.poolConfig,
-            compression: config.compression,
-            circuitBreaker: config.circuitBreaker,
-            retryConfig: config.retryConfig,
-            validation: config.validation
-        };
+    public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config =  {}, string serviceUrl = "https://petstore.swagger.io:443/v2") returns error? {
+        http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
                 ClientHttp1Settings settings = check config.http1Settings.ensureType(ClientHttp1Settings);
@@ -46,6 +37,15 @@ public isolated client class Client {
         self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
         return;
     }
+    # Delete a pet
+    #
+    # + return - Ok response
+    resource isolated function delete pets() returns error? {
+        string resourcePath = string `/pets`;
+        map<anydata> queryParam = {"appid1": self.apiKeyConfig.appid1, "appid2": self.apiKeyConfig.appid2};
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        return self.clientEp->delete(resourcePath);
+    }
     # List all pets
     #
     # + 'limit - How many items to return at one time (max 100)
@@ -57,16 +57,6 @@ public isolated client class Client {
         Pets response = check self.clientEp->get(resourcePath);
         return response;
     }
-    # Update a pet
-    #
-    # + return - Null response
-    resource isolated function put pets() returns error? {
-        string resourcePath = string `/pets`;
-        map<anydata> queryParam = {"appid1": self.apiKeyConfig.appid1, "appid2": self.apiKeyConfig.appid2};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        http:Request request = new;
-        return self.clientEp-> put(resourcePath, request);
-    }
     # Create a pet
     #
     # + return - Null response
@@ -75,15 +65,16 @@ public isolated client class Client {
         map<anydata> queryParam = {"appid1": self.apiKeyConfig.appid1, "appid2": self.apiKeyConfig.appid2};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
-        return self.clientEp-> post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request);
     }
-    # Delete a pet
+    # Update a pet
     #
-    # + return - Ok response
-    resource isolated function delete pets() returns error? {
+    # + return - Null response
+    resource isolated function put pets() returns error? {
         string resourcePath = string `/pets`;
         map<anydata> queryParam = {"appid1": self.apiKeyConfig.appid1, "appid2": self.apiKeyConfig.appid2};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        return self.clientEp->delete(resourcePath);
+        http:Request request = new;
+        return self.clientEp->put(resourcePath, request);
     }
 }
