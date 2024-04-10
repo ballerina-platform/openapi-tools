@@ -15,7 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.mapper.interceptor;
+package io.ballerina.openapi.service.mapper.interceptor.pipeline;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
@@ -28,7 +28,16 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
-import io.ballerina.openapi.service.mapper.interceptor.Interceptor.InterceptorType;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.interceptor.InterceptorMapperException;
+import io.ballerina.openapi.service.mapper.interceptor.model.RequestParameterInfo;
+import io.ballerina.openapi.service.mapper.interceptor.model.ResponseInfo;
+import io.ballerina.openapi.service.mapper.interceptor.types.Interceptor;
+import io.ballerina.openapi.service.mapper.interceptor.types.Interceptor.InterceptorType;
+import io.ballerina.openapi.service.mapper.interceptor.types.RequestErrorInterceptor;
+import io.ballerina.openapi.service.mapper.interceptor.types.RequestInterceptor;
+import io.ballerina.openapi.service.mapper.interceptor.types.ResponseErrorInterceptor;
+import io.ballerina.openapi.service.mapper.interceptor.types.ResponseInterceptor;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 
@@ -53,16 +62,18 @@ public class InterceptorPipeline {
     private Interceptor initReqInterceptor = null;
     private Interceptor initResInterceptor = null;
     private final SemanticModel semanticModel;
+    private final List<OpenAPIMapperDiagnostic> diagnostics;
 
-    private InterceptorPipeline(SemanticModel semanticModel) {
-        this.semanticModel = semanticModel;
+    private InterceptorPipeline(AdditionalData additionalData) {
+        semanticModel = additionalData.semanticModel();
+        diagnostics = additionalData.diagnostics();
     }
 
     public static InterceptorPipeline build(ServiceDeclarationNode serviceDefinition, AdditionalData additionalData) {
         List<Interceptor> interceptors = buildInterceptors(serviceDefinition, additionalData);
 
         if (!interceptors.isEmpty()) {
-            InterceptorPipeline pipeline = new InterceptorPipeline(additionalData.semanticModel());
+            InterceptorPipeline pipeline = new InterceptorPipeline(additionalData);
             Interceptor prevInterceptor = interceptors.get(0);
             if (prevInterceptor.getType().equals(InterceptorType.REQUEST)) {
                 pipeline.initReqInterceptor = prevInterceptor;
@@ -176,155 +187,27 @@ public class InterceptorPipeline {
         return typeSymbol.subtypeOf(typeDef.typeDescriptor());
     }
 
-    public InfoFromInterceptors getEffectiveReturnType(ResourceMethodSymbol targetResource, boolean hasDataBinding) {
-        return getReturnTypes(targetResource, hasDataBinding);
+    protected SemanticModel getSemanticModel() {
+        return semanticModel;
     }
 
-    private InfoFromInterceptors getReturnTypes(ResourceMethodSymbol targetResource, boolean hasDataBinding) {
-        InfoFromInterceptors infoFromInterceptors = new InfoFromInterceptors();
-        TargetResource target = new TargetResource(targetResource, hasDataBinding, semanticModel);
-        if (Objects.isNull(initReqInterceptor)) {
-            updateReturnTypeForTarget(infoFromInterceptors, target);
-        } else {
-            updateReturnTypeForReqInterceptor(initReqInterceptor, infoFromInterceptors, target);
-        }
-        return infoFromInterceptors;
+    protected List<OpenAPIMapperDiagnostic> getDiagnostics() {
+        return diagnostics;
     }
 
-    private void updateReturnTypeForReqInterceptor(Interceptor interceptor, InfoFromInterceptors infoFromInterceptors,
-                                                   TargetResource targetResource) {
-        if (Objects.isNull(interceptor)) {
-            updateReturnTypeForTarget(infoFromInterceptors, targetResource);
-            return;
-        }
-
-        if (interceptor.isContinueExecution() || !interceptor.isInvokable(targetResource)) {
-            updateReturnTypeForReqInterceptor(interceptor.getNextInReqPath(), infoFromInterceptors, targetResource);
-            if (!interceptor.isInvokable(targetResource)) {
-                return;
-            }
-        }
-
-        if (interceptor.hasErrorReturn()) {
-            updateErrorReturnTypeInReqPath(interceptor, infoFromInterceptors, targetResource);
-        }
-
-        TypeSymbol nonErrorReturnType = interceptor.getNonErrorReturnType();
-        updateNonErrorReturnTypeForInterceptor(interceptor, nonErrorReturnType, infoFromInterceptors, false);
+    protected Interceptor getInitReqInterceptor() {
+        return initReqInterceptor;
     }
 
-    private void updateErrorReturnTypeInReqPath(Interceptor interceptor, InfoFromInterceptors infoFromInterceptors,
-                                                TargetResource targetResource) {
-        Interceptor nextErrorInterceptor = interceptor.getNextInReqErrorPath();
-        if (Objects.nonNull(nextErrorInterceptor) &&
-                nextErrorInterceptor.isInvokable(targetResource)) {
-            updateReturnTypeForReqInterceptor(nextErrorInterceptor, infoFromInterceptors, targetResource);
-        } else {
-            nextErrorInterceptor = getNextErrorInterceptor();
-            updateErrorReturnTypeForInterceptor(interceptor, infoFromInterceptors, nextErrorInterceptor);
-        }
+    protected Interceptor getInitResInterceptor() {
+        return initResInterceptor;
     }
 
-    private Interceptor getNextErrorInterceptor() {
-        Interceptor nextErrorInterceptor = null;
-        if (Objects.nonNull(initResInterceptor)) {
-            if (initResInterceptor.getType().equals(InterceptorType.RESPONSE_ERROR)) {
-                nextErrorInterceptor = initResInterceptor;
-            } else {
-                nextErrorInterceptor = initResInterceptor.getNextInResErrorPath();
-            }
-        }
-        return nextErrorInterceptor;
+    public ResponseInfo getInfoFromInterceptors(ResourceMethodSymbol targetResource) {
+        return ResponseCollector.getResponseInfo(this, targetResource);
     }
 
-    private void updateErrorReturnTypeForInterceptor(Interceptor interceptor, InfoFromInterceptors infoFromInterceptors,
-                                                     Interceptor nextErrorInterceptor) {
-        if (Objects.nonNull(nextErrorInterceptor)) {
-            updateReturnTypeForResInterceptor(nextErrorInterceptor, infoFromInterceptors, null, false);
-        } else {
-            infoFromInterceptors.addReturnTypeFromInterceptors(interceptor.getErrorReturnType());
-        }
-    }
-
-    private void updateNonErrorReturnTypeForInterceptor(Interceptor interceptor, TypeSymbol nonErrorReturnType,
-                                                        InfoFromInterceptors infoFromInterceptors, boolean fromTarget) {
-        if (Objects.nonNull(nonErrorReturnType)) {
-            Interceptor nextResInterceptor = interceptor.getNextInResPath();
-            if (Objects.nonNull(nextResInterceptor)) {
-                updateReturnTypeForResInterceptor(nextResInterceptor, infoFromInterceptors, nonErrorReturnType,
-                        fromTarget);
-            } else {
-                updateReturnType(infoFromInterceptors, nonErrorReturnType, fromTarget);
-            }
-        }
-    }
-
-    private void updateReturnTypeForResInterceptor(Interceptor interceptor, InfoFromInterceptors infoFromInterceptors,
-                                                   TypeSymbol prevReturnType, boolean fromTarget) {
-        if (interceptor.isContinueExecution() && Objects.nonNull(prevReturnType)) {
-            updateNonErrorReturnTypeForInterceptor(interceptor, prevReturnType, infoFromInterceptors, fromTarget);
-        }
-
-        if (interceptor.hasErrorReturn()) {
-            Interceptor nextErrorInterceptor = interceptor.getNextInResErrorPath();
-            updateErrorReturnTypeForInterceptor(interceptor, infoFromInterceptors, nextErrorInterceptor);
-        }
-
-        TypeSymbol nonErrorReturnType = interceptor.getNonErrorReturnType();
-        updateNonErrorReturnTypeForInterceptor(interceptor, nonErrorReturnType, infoFromInterceptors, false);
-    }
-
-    private static void updateReturnType(InfoFromInterceptors infoFromInterceptors, TypeSymbol prevReturnType,
-                                         boolean fromTarget) {
-        if (fromTarget) {
-            infoFromInterceptors.addReturnTypeFromTargetResource(prevReturnType);
-        } else {
-            infoFromInterceptors.addReturnTypeFromInterceptors(prevReturnType);
-        }
-    }
-
-    private void updateReturnTypeForTarget(InfoFromInterceptors infoFromInterceptors, TargetResource targetResource) {
-        TypeSymbol returnType = targetResource.getEffectiveReturnType();
-        if (Objects.isNull(initResInterceptor)) {
-            infoFromInterceptors.addReturnTypeFromTargetResource(returnType);
-            return;
-        }
-        if (targetResource.hasErrorReturn()) {
-            updateErrorReturnTypeForTarget(infoFromInterceptors, targetResource);
-        }
-        TypeSymbol nonErrorReturnType = targetResource.getNonErrorReturnType();
-        if (Objects.nonNull(nonErrorReturnType)) {
-            updateNonErrorReturnTypeForTarget(infoFromInterceptors, nonErrorReturnType);
-        }
-    }
-
-    private void updateNonErrorReturnTypeForTarget(InfoFromInterceptors infoFromInterceptors,
-                                                   TypeSymbol nonErrorReturnType) {
-        if (initResInterceptor.getType().equals(InterceptorType.RESPONSE)) {
-            updateReturnTypeForResInterceptor(initResInterceptor, infoFromInterceptors, nonErrorReturnType, true);
-        } else {
-            Interceptor nextResponseErrorInterceptor = initResInterceptor.getNextInResPath();
-            if (Objects.nonNull(nextResponseErrorInterceptor)) {
-                updateReturnTypeForResInterceptor(nextResponseErrorInterceptor, infoFromInterceptors,
-                        nonErrorReturnType, true);
-            } else {
-                infoFromInterceptors.addReturnTypeFromTargetResource(nonErrorReturnType);
-            }
-        }
-    }
-
-    private void updateErrorReturnTypeForTarget(InfoFromInterceptors infoFromInterceptors, TargetResource target) {
-        if (initResInterceptor.getType().equals(InterceptorType.RESPONSE_ERROR)) {
-            infoFromInterceptors.markErrorsHandledByInterceptors();
-            updateReturnTypeForResInterceptor(initResInterceptor, infoFromInterceptors, null, true);
-        } else {
-            Interceptor nextResponseErrorInterceptor = initResInterceptor.getNextInResErrorPath();
-            if (Objects.nonNull(nextResponseErrorInterceptor)) {
-                infoFromInterceptors.markErrorsHandledByInterceptors();
-                updateReturnTypeForResInterceptor(nextResponseErrorInterceptor, infoFromInterceptors, null, true);
-            } else if (Objects.nonNull(target.getErrorReturnType())) {
-                infoFromInterceptors.addReturnTypeFromTargetResource(target.getErrorReturnType());
-            }
-        }
+    public RequestParameterInfo getRequestParameterInfo(ResourceMethodSymbol targetResource) {
+        return RequestParameterCollector.getRequestParameterInfo(this, targetResource);
     }
 }

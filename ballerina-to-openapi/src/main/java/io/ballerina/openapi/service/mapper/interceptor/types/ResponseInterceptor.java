@@ -15,14 +15,18 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.mapper.interceptor;
+package io.ballerina.openapi.service.mapper.interceptor.types;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.MethodSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.openapi.service.mapper.interceptor.InterceptorMapperException;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -72,5 +76,23 @@ public class ResponseInterceptor extends Interceptor {
     @Override
     public void setNextInReqPath(Interceptor nextInReqPath) {
         super.setNextInReqPath(null);
+    }
+
+    @Override
+    protected FunctionDefinitionNode getFunctionDefinitionNode() {
+        return (FunctionDefinitionNode) serviceClassNode.members().stream().filter(
+                node -> node instanceof FunctionDefinitionNode functionNode &&
+                        functionNode.functionName().toString().equals(getRemoteMethodName())
+        ).findFirst().orElse(null);
+    }
+
+    @Override
+    public Iterable<ParameterNode> getParameterNodes() {
+        return List.of();
+    }
+
+    @Override
+    public boolean hasDataBinding() {
+        return false;
     }
 }
