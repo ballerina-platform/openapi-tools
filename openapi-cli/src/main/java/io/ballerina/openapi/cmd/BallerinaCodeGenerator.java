@@ -147,8 +147,7 @@ public class BallerinaCodeGenerator {
         }
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME,
                 (licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER : licenseHeader) + clientContent));
-        String utilContent = Formatter.format(clientGenerator
-                .getBallerinaUtilGenerator()
+        String utilContent = Formatter.format(clientGenerator.getBallerinaUtilGenerator()
                 .generateUtilSyntaxTree()).toString();
         if (!utilContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, srcPackage, UTIL_FILE_NAME,
@@ -177,10 +176,6 @@ public class BallerinaCodeGenerator {
         TypeHandler typeHandler = TypeHandler.getInstance();
         SyntaxTree schemaSyntaxTree = typeHandler.generateTypeSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
-
-        // Remove unused records and enums when generating the client and service.
-        schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, clientContent, schemaContent,
-                serviceContent);
 
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
@@ -418,11 +413,6 @@ public class BallerinaCodeGenerator {
         SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
 
         String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
-        if (filter.getTags().size() > 0) {
-            // Remove unused records and enums when generating the client by the tags given.
-            schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent,
-                    null);
-        }
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
                     licenseHeader + schemaContent));

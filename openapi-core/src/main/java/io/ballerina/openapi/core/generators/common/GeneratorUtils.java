@@ -18,37 +18,23 @@
 
 package io.ballerina.openapi.core.generators.common;
 
-import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
-import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
-import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.api.symbols.SymbolKind;
-import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
-import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
-import io.ballerina.compiler.syntax.tree.ChildNodeEntry;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
 import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Minutiae;
 import io.ballerina.compiler.syntax.tree.MinutiaeList;
-import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
-import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.RecordFieldNode;
-import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
@@ -56,9 +42,7 @@ import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxInfo;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
@@ -73,15 +57,7 @@ import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.generators.EnumGenerator;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
-import io.ballerina.projects.DocumentId;
-import io.ballerina.projects.Module;
-import io.ballerina.projects.Package;
-import io.ballerina.projects.Project;
-import io.ballerina.projects.ProjectException;
-import io.ballerina.projects.ProjectKind;
-import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.tools.diagnostics.Diagnostic;
-import io.ballerina.tools.diagnostics.Location;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -102,31 +78,24 @@ import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import org.apache.commons.io.FileUtils;
-import org.ballerinalang.formatter.core.Formatter;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -165,20 +134,15 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APP
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_OCTET_STREAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BALLERINA;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BALLERINA_TOML;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BALLERINA_TOML_CONTENT;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CATCH_ALL_PATH;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLOSE_CURLY_BRACE;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CONSTRAINT;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_PARAM_COMMENT;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.GET;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_REQUEST;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_RESPONSE;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.IDENTIFIER;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.IMAGE_PNG;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.INTEGER;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.JSON_EXTENSION;
@@ -194,14 +158,11 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REG
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REGEX_WITHOUT_SPECIAL_CHARACTERS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REGEX_WORDS_STARTING_WITH_NUMBERS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RESPONSE_RECORD_NAME;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SERVICE_FILE_NAME;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SPECIAL_CHARACTERS_REGEX;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STYLE;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TYPE_FILE_NAME;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TYPE_NAME;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YML_EXTENSION;
@@ -905,214 +866,6 @@ public class GeneratorUtils {
                 errorMessage.append(message).append(LINE_SEPARATOR);
             }
             throw new BallerinaOpenApiException(errorMessage.toString());
-        }
-    }
-
-    public static String removeUnusedEntities(SyntaxTree schemaSyntaxTree, String clientContent, String schemaContent,
-                                              String serviceContent) throws IOException, FormatterException {
-        Map<String, String> tempSourceFiles = new HashMap<>();
-        tempSourceFiles.put(CLIENT_FILE_NAME, clientContent);
-        tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);
-        if (serviceContent != null) {
-            tempSourceFiles.put(SERVICE_FILE_NAME, serviceContent);
-        }
-        List<String> unusedTypeDefinitionNameList = getUnusedTypeDefinitionNameList(tempSourceFiles);
-        while (unusedTypeDefinitionNameList.size() > 0) {
-            ModulePartNode modulePartNode = schemaSyntaxTree.rootNode();
-            NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
-            List<ModuleMemberDeclarationNode> unusedTypeDefinitionNodeList = new ArrayList<>();
-            for (ModuleMemberDeclarationNode node : members) {
-                if (node.kind().equals(SyntaxKind.TYPE_DEFINITION)) {
-                    for (ChildNodeEntry childNodeEntry : node.childEntries()) {
-                        if (childNodeEntry.name().equals(TYPE_NAME)) {
-                            if (unusedTypeDefinitionNameList.contains(childNodeEntry.node().get().toString())) {
-                                unusedTypeDefinitionNodeList.add(node);
-                            }
-                        }
-                    }
-                } else if (node.kind().equals(SyntaxKind.ENUM_DECLARATION)) {
-                    for (ChildNodeEntry childNodeEntry : node.childEntries()) {
-                        if (childNodeEntry.name().equals(IDENTIFIER)) {
-                            if (unusedTypeDefinitionNameList.contains(childNodeEntry.node().get().toString())) {
-                                unusedTypeDefinitionNodeList.add(node);
-                            }
-                        }
-                    }
-                }
-            }
-            NodeList<ModuleMemberDeclarationNode> modifiedMembers = members.removeAll
-                    (unusedTypeDefinitionNodeList);
-            ModulePartNode modiedModulePartNode = modulePartNode.modify(modulePartNode.imports(),
-                    modifiedMembers, modulePartNode.eofToken());
-            schemaSyntaxTree = schemaSyntaxTree.modifyWith(modiedModulePartNode);
-            schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
-            tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);
-            unusedTypeDefinitionNameList = getUnusedTypeDefinitionNameList(tempSourceFiles);
-        }
-        ModulePartNode rootNode = schemaSyntaxTree.rootNode();
-        NodeList<ImportDeclarationNode> imports = rootNode.imports();
-        imports = removeUnusedImports(rootNode, imports);
-
-        ModulePartNode modiedModulePartNode = rootNode.modify(imports, rootNode.members(), rootNode.eofToken());
-        schemaSyntaxTree = schemaSyntaxTree.modifyWith(modiedModulePartNode);
-        schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
-        return schemaContent;
-    }
-
-    private static NodeList<ImportDeclarationNode> removeUnusedImports(ModulePartNode rootNode,
-                                                                       NodeList<ImportDeclarationNode> imports) {
-        //TODO: This function can be extended to check all the unused imports, for this time only handle constraint
-        // imports
-        boolean hasConstraint = false;
-        NodeList<ModuleMemberDeclarationNode> members = rootNode.members();
-        for (ModuleMemberDeclarationNode member:members) {
-            if (member.kind().equals(SyntaxKind.TYPE_DEFINITION)) {
-                TypeDefinitionNode typeDefNode = (TypeDefinitionNode) member;
-                if (typeDefNode.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
-                    RecordTypeDescriptorNode record = (RecordTypeDescriptorNode) typeDefNode.typeDescriptor();
-                    NodeList<Node> fields = record.fields();
-                    //Traverse record fields to check for constraints
-                    for (Node node: fields) {
-                        if (node instanceof RecordFieldNode) {
-                            RecordFieldNode recField = (RecordFieldNode) node;
-                            if (recField.metadata().isPresent()) {
-                                hasConstraint = traverseAnnotationNode(recField.metadata(), hasConstraint);
-                            }
-                        }
-                        if (hasConstraint) {
-                            break;
-                        }
-                    }
-                }
-
-                if (typeDefNode.metadata().isPresent()) {
-                    hasConstraint = traverseAnnotationNode(typeDefNode.metadata(), hasConstraint);
-                }
-            }
-            if (hasConstraint) {
-                break;
-            }
-        }
-        if (!hasConstraint) {
-            for (ImportDeclarationNode importNode: imports) {
-                if (importNode.orgName().isPresent()) {
-                    if (importNode.orgName().get().toString().equals("ballerina/") &&
-                            importNode.moduleName().get(0).text().equals(CONSTRAINT)) {
-                        imports = imports.remove(importNode);
-                    }
-                }
-            }
-        }
-        return imports;
-    }
-
-    private static boolean traverseAnnotationNode(Optional<MetadataNode> recField, boolean hasConstraint) {
-        MetadataNode metadata = recField.get();
-        for (AnnotationNode annotation : metadata.annotations()) {
-            String annotationRef = annotation.annotReference().toString();
-            if (annotationRef.startsWith(CONSTRAINT)) {
-                hasConstraint = true;
-                break;
-            }
-        }
-        return hasConstraint;
-    }
-
-    private static List<String> getUnusedTypeDefinitionNameList(Map<String, String> srcFiles) throws IOException {
-        List<String> unusedTypeDefinitionNameList = new ArrayList<>();
-        Path tmpDir = Files.createTempDirectory(".openapi-tmp" + System.nanoTime());
-        writeFilesTemp(srcFiles, tmpDir);
-        if ((Files.exists(tmpDir.resolve(CLIENT_FILE_NAME)) || Files.exists(tmpDir.resolve(SERVICE_FILE_NAME)))
-                && Files.exists(tmpDir.resolve(TYPE_FILE_NAME)) &&
-                Files.exists(tmpDir.resolve(BALLERINA_TOML))) {
-            SemanticModel semanticModel = Files.exists(tmpDir.resolve(CLIENT_FILE_NAME)) ?
-                    getSemanticModel(tmpDir.resolve(CLIENT_FILE_NAME)) :
-                    getSemanticModel(tmpDir.resolve(SERVICE_FILE_NAME));
-            List<Symbol> symbols = semanticModel.moduleSymbols();
-            for (Symbol symbol : symbols) {
-                if ((symbol.kind().equals(SymbolKind.TYPE_DEFINITION) &&
-                        !((TypeDefinitionSymbol) symbol).typeDescriptor().subtypeOf(semanticModel.types().ERROR))
-                        || symbol.kind().equals(SymbolKind.ENUM)) {
-                    List<Location> references = semanticModel.references(symbol);
-                    if (references.size() == 1) {
-                        unusedTypeDefinitionNameList.add(symbol.getName().get());
-                    } else if (references.size() == 2) {
-                        if (symbol.kind().equals(SymbolKind.TYPE_DEFINITION)) {
-                            TypeDefinitionSymbol typeDef = (TypeDefinitionSymbol) symbol;
-                            handleCyclicType(unusedTypeDefinitionNameList, typeDef);
-                        }
-                    }
-                }
-            }
-        }
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                FileUtils.deleteDirectory(tmpDir.toFile());
-            } catch (IOException ex) {
-                LOGGER.error("Unable to delete the temporary directory : " + tmpDir, ex);
-            }
-        }));
-        return unusedTypeDefinitionNameList;
-    }
-
-    private static void handleCyclicType(List<String> unusedTypeDefinitionNameList, TypeDefinitionSymbol symbol) {
-        TypeDescKind typeDescKind = symbol.typeDescriptor().typeKind();
-        if (typeDescKind.equals(TypeDescKind.RECORD)) {
-            RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) symbol.typeDescriptor();
-            Map<String, RecordFieldSymbol> fields = recordTypeSymbol.fieldDescriptors();
-            Collection<RecordFieldSymbol> values = fields.values();
-            boolean isCyclic = false;
-            for (RecordFieldSymbol field: values) {
-                if (field.typeDescriptor().getName().isPresent()) {
-                    if (field.typeDescriptor().getName().get().trim().equals(symbol.getName().get().trim())) {
-                        isCyclic = true;
-                        break;
-                    }
-                }
-            }
-            if (isCyclic) {
-                unusedTypeDefinitionNameList.add(symbol.getName().get());
-            }
-        }
-        //TODO: Handle cyclic type for other ex: array after this fix
-        //https://github.com/ballerina-platform/ballerina-lang/issues/36442
-    }
-
-    private static void writeFilesTemp(Map<String, String> srcFiles, Path tmpDir) throws IOException {
-        srcFiles.put(BALLERINA_TOML, BALLERINA_TOML_CONTENT);
-        PrintWriter writer = null;
-        for (Map.Entry<String, String> entry : srcFiles.entrySet()) {
-            String key = entry.getKey();
-            Path filePath = tmpDir.resolve(key);
-            try {
-                writer = new PrintWriter(filePath.toString(), "UTF-8");
-                writer.print(entry.getValue());
-            } finally {
-                if (writer != null) {
-                    writer.close();
-                }
-            }
-        }
-    }
-
-    private static SemanticModel getSemanticModel(Path clientPath) throws ProjectException {
-        // Load project instance for single ballerina file
-        try {
-            Project project = ProjectLoader.loadProject(clientPath);
-            Package packageName = project.currentPackage();
-            DocumentId docId;
-
-            if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
-                docId = project.documentId(clientPath);
-            } else {
-                // Take module instance for traversing the syntax tree
-                Module currentModule = packageName.getDefaultModule();
-                Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
-                docId = documentIterator.next();
-            }
-            return project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
-        } catch (ProjectException e) {
-            throw new ProjectException(e.getMessage());
         }
     }
 
