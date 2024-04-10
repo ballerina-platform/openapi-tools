@@ -1,0 +1,13 @@
+[package]
+org = "openapi_client_test"
+name = "project"
+version = "0.1.0"
+
+[build-options]
+observabilityIncluded = true
+
+# This dependency is added automatically by the OpenAPI tool. DO NOT REMOVE UNLESS REQUIRED
+[[platform.java17.dependency]]
+groupId = "io.ballerina.openapi"
+artifactId = "client-native"
+version = "1.0.0-SNAPSHOT"
