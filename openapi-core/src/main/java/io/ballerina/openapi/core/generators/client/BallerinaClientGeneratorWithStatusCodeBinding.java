@@ -203,9 +203,10 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
         }
         functionBodyNode = functionBodyNodeResult.get();
 
-        return Optional.of(NodeFactory.createFunctionDefinitionNode(OBJECT_METHOD_DEFINITION, null,
-                qualifierList, functionKeyWord, functionName, createEmptyNodeList(),
-                signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
+        Optional<FunctionSignatureNode> functionSignatureNode = signatureGenerator.generateFunctionSignature();
+        return functionSignatureNode.map(signatureNode ->
+                NodeFactory.createFunctionDefinitionNode(OBJECT_METHOD_DEFINITION, null, qualifierList,
+                        functionKeyWord, functionName, createEmptyNodeList(), signatureNode, functionBodyNode));
     }
 
     /**

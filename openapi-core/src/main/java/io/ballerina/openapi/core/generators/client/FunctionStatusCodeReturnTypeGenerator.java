@@ -29,7 +29,10 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.generateStatusCodeTypeInclusionRecord;
 
 /**
@@ -52,10 +55,16 @@ public class FunctionStatusCodeReturnTypeGenerator extends FunctionReturnTypeGen
         boolean noContentResponseFoundSuper = super.populateReturnType(statusCode, response, returnTypes,
                 returnTypesSet);
         try {
-            List<Diagnostic> newDiagnostics = new ArrayList<>();
-            returnTypes.add(generateStatusCodeTypeInclusionRecord(GeneratorConstants.HTTP_CODES_DES.get(statusCode),
-                    response, httpMethod, openAPI, path, newDiagnostics));
-            diagnostics.addAll(newDiagnostics.stream().map(ClientDiagnosticImp::new).toList());
+            String code = GeneratorConstants.HTTP_CODES_DES.get(statusCode);
+            if (Objects.isNull(code)) {
+                // TODO: only support default and return warning for others
+                returnTypes.add(createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE)));
+            } else {
+                List<Diagnostic> newDiagnostics = new ArrayList<>();
+                returnTypes.add(generateStatusCodeTypeInclusionRecord(code, response, httpMethod, openAPI, path,
+                        newDiagnostics));
+                diagnostics.addAll(newDiagnostics.stream().map(ClientDiagnosticImp::new).toList());
+            }
         } catch (InvalidReferenceException e) {
             diagnostics.add(new ClientDiagnosticImp(e.getDiagnostic()));
         }
