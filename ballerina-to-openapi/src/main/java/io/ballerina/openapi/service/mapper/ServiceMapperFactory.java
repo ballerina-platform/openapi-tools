@@ -18,7 +18,9 @@
 package io.ballerina.openapi.service.mapper;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -31,12 +33,15 @@ import io.ballerina.openapi.service.mapper.constraint.ConstraintMapperImpl;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapper;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapperImpl;
-import io.ballerina.openapi.service.mapper.interceptor.InterceptorPipeline;
+import io.ballerina.openapi.service.mapper.interceptor.model.RequestParameterInfo;
+import io.ballerina.openapi.service.mapper.interceptor.model.ResponseInfo;
+import io.ballerina.openapi.service.mapper.interceptor.pipeline.InterceptorPipeline;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
+import io.ballerina.openapi.service.mapper.parameter.DefaultParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
-import io.ballerina.openapi.service.mapper.parameter.ParameterMapperImpl;
+import io.ballerina.openapi.service.mapper.parameter.ParameterMapperWithInterceptors;
 import io.ballerina.openapi.service.mapper.response.DefaultResponseMapper;
 import io.ballerina.openapi.service.mapper.response.ResponseMapper;
 import io.ballerina.openapi.service.mapper.response.ResponseMapperWithInterceptors;
@@ -99,7 +104,13 @@ public class ServiceMapperFactory {
 
     public ParameterMapper getParameterMapper(FunctionDefinitionNode resourceNode, Map<String, String> apiDocs,
                                               OperationInventory opInventory) {
-        return new ParameterMapperImpl(resourceNode, opInventory, apiDocs, additionalData, treatNilableAsOptional,
+        if (Objects.nonNull(interceptorPipeline)) {
+            RequestParameterInfo reqParamInfoFromInterceptors = getRequestParameterInfoFromInterceptors(resourceNode,
+                    additionalData, interceptorPipeline);
+            return new ParameterMapperWithInterceptors(resourceNode, opInventory, apiDocs, additionalData,
+                    treatNilableAsOptional, reqParamInfoFromInterceptors, this);
+        }
+        return new DefaultParameterMapper(resourceNode, opInventory, apiDocs, additionalData, treatNilableAsOptional,
                 this);
     }
 
@@ -109,10 +120,38 @@ public class ServiceMapperFactory {
 
     public ResponseMapper getResponseMapper(FunctionDefinitionNode resourceNode, OperationInventory opInventory) {
         if (Objects.nonNull(interceptorPipeline)) {
+            ResponseInfo responseInfoFromInterceptors = getResponseInfoFromInterceptors(resourceNode,
+                    additionalData, interceptorPipeline);
             return new ResponseMapperWithInterceptors(resourceNode, opInventory, additionalData,
-                    interceptorPipeline, this);
+                    responseInfoFromInterceptors, this);
         }
         return new DefaultResponseMapper(resourceNode, opInventory, additionalData, this);
+    }
+
+    private ResponseInfo getResponseInfoFromInterceptors(FunctionDefinitionNode resourceNode,
+                                                         AdditionalData additionalData,
+                                                         InterceptorPipeline interceptorPipeline) {
+        final ResponseInfo responseInfoFromInterceptors;
+        Optional<Symbol> symbol = additionalData.semanticModel().symbol(resourceNode);
+        if (symbol.isPresent() && symbol.get() instanceof ResourceMethodSymbol resourceMethodSymbol) {
+            responseInfoFromInterceptors = interceptorPipeline.getInfoFromInterceptors(resourceMethodSymbol);
+        } else {
+            responseInfoFromInterceptors = new ResponseInfo(false);
+        }
+        return responseInfoFromInterceptors;
+    }
+
+    private RequestParameterInfo getRequestParameterInfoFromInterceptors(FunctionDefinitionNode resourceNode,
+                                                                         AdditionalData additionalData,
+                                                                         InterceptorPipeline interceptorPipeline) {
+        final RequestParameterInfo requestParameterInfoFromInterceptors;
+        Optional<Symbol> symbol = additionalData.semanticModel().symbol(resourceNode);
+        if (symbol.isPresent() && symbol.get() instanceof ResourceMethodSymbol resourceMethodSymbol) {
+            requestParameterInfoFromInterceptors = interceptorPipeline.getRequestParameterInfo(resourceMethodSymbol);
+        } else {
+            requestParameterInfoFromInterceptors = new RequestParameterInfo(additionalData.semanticModel());
+        }
+        return requestParameterInfoFromInterceptors;
     }
 
     public ConstraintMapper getConstraintMapper() {

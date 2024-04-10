@@ -15,7 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.mapper.interceptor;
+package io.ballerina.openapi.service.mapper.interceptor.model;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
@@ -25,28 +25,32 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * This {@link InfoFromInterceptors} class represents the information collected from the interceptors.
+ * This {@link ResponseInfo} class represents the response information collected from the interceptors.
  *
  * @since 1.9.0
  */
-public class InfoFromInterceptors {
+public class ResponseInfo {
 
     private final Set<TypeSymbol> returnTypesFromInterceptors;
     private final Set<TypeSymbol> returnTypesFromTargetResource;
-    private boolean handleErrorsFromTargetResource;
+    private boolean hasUnhandledDataBindingErrors;
 
-    public InfoFromInterceptors() {
+    public ResponseInfo(boolean hasDataBinding) {
         returnTypesFromInterceptors = new LinkedHashSet<>();
         returnTypesFromTargetResource = new LinkedHashSet<>();
-        handleErrorsFromTargetResource = false;
+        hasUnhandledDataBindingErrors = hasDataBinding;
     }
 
-    public void markErrorsHandledByInterceptors() {
-        handleErrorsFromTargetResource = true;
+    public void markDataBindingError() {
+        hasUnhandledDataBindingErrors = true;
     }
 
-    public boolean isErrorsHandledByInterceptors() {
-        return handleErrorsFromTargetResource;
+    public void markDataBindingErrorHandled() {
+        hasUnhandledDataBindingErrors = false;
+    }
+
+    public boolean hasUnhandledDataBindingErrors() {
+        return hasUnhandledDataBindingErrors;
     }
 
     public void addReturnTypeFromInterceptors(TypeSymbol typeSymbol) {
