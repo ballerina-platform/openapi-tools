@@ -22,7 +22,6 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
@@ -352,11 +351,6 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
 
-        if (oasClientConfig.getFilter().getTags().isEmpty()) {
-            // Remove unused records and enums when generating the client by the tags given.
-            schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent,
-                    null);
-        }
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, null, TYPE_FILE_NAME,
                     licenseContent == null || licenseContent.isBlank() ? schemaContent :
