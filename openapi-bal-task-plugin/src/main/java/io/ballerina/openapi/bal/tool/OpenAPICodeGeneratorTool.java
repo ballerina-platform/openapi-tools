@@ -23,6 +23,7 @@ import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGeneratorWithStatusCodeBinding;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
