@@ -146,11 +146,14 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
     }
 
     @Override
-    protected void addRemoteFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
-                                     Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
-                                     List<FunctionDefinitionNode> remoteFunctionNodes) {
-        super.addRemoteFunction(operation, operationEntry, remoteFunctionNodes);
-        addClientFunctionImpl(operation, operationEntry, remoteFunctionNodes);
+    protected boolean addRemoteFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
+                                        Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
+                                        List<FunctionDefinitionNode> remoteFunctionNodes) {
+        boolean result = super.addRemoteFunction(operation, operationEntry, remoteFunctionNodes);
+        if (result) {
+            addClientFunctionImpl(operation, operationEntry, remoteFunctionNodes);
+        }
+        return result;
     }
 
     @Override
@@ -175,11 +178,14 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
     }
 
     @Override
-    protected void addResourceFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
-                                       Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
-                                       List<FunctionDefinitionNode> resourceFunctionNodes) {
-        super.addResourceFunction(operation, operationEntry, resourceFunctionNodes);
-        addClientFunctionImpl(operation, operationEntry, resourceFunctionNodes);
+    protected boolean addResourceFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
+                                          Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
+                                          List<FunctionDefinitionNode> resourceFunctionNodes) {
+        boolean result = super.addResourceFunction(operation, operationEntry, resourceFunctionNodes);
+        if (result) {
+            addClientFunctionImpl(operation, operationEntry, resourceFunctionNodes);
+        }
+        return result;
     }
 
     @Override

@@ -574,14 +574,18 @@ public class BallerinaClientGenerator {
         return remoteFunctionNodes;
     }
 
-    protected void addRemoteFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
-                                     Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
-                                     List<FunctionDefinitionNode> remoteFunctionNodes) {
+    protected boolean addRemoteFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
+                                        Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
+                                        List<FunctionDefinitionNode> remoteFunctionNodes) {
         remoteFunctionNameList.add(operationEntry.getValue().getOperationId());
         RemoteFunctionGenerator remoteFunctionGenerator = getRemoteFunctionGenerator(operation, operationEntry);
         Optional<FunctionDefinitionNode> remoteFunction = remoteFunctionGenerator.generateFunction();
-        remoteFunction.ifPresent(remoteFunctionNodes::add);
         diagnostics.addAll(remoteFunctionGenerator.getDiagnostics());
+        if (remoteFunction.isPresent()) {
+            remoteFunctionNodes.add(remoteFunction.get());
+            return true;
+        }
+        return false;
     }
 
     protected RemoteFunctionGenerator getRemoteFunctionGenerator(Map.Entry<String,
@@ -601,14 +605,18 @@ public class BallerinaClientGenerator {
         return resourceFunctionNodes;
     }
 
-    protected void addResourceFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
-                                       Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
-                                       List<FunctionDefinitionNode> resourceFunctionNodes) {
+    protected boolean addResourceFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
+                                          Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
+                                          List<FunctionDefinitionNode> resourceFunctionNodes) {
         remoteFunctionNameList.add(operationEntry.getValue().getOperationId());
         ResourceFunctionGenerator resourceFunctionGenerator = getResourceFunctionGenerator(operation, operationEntry);
         Optional<FunctionDefinitionNode> resourceFunction = resourceFunctionGenerator.generateFunction();
-        resourceFunction.ifPresent(resourceFunctionNodes::add);
         diagnostics.addAll(resourceFunctionGenerator.getDiagnostics());
+        if (resourceFunction.isPresent()) {
+            resourceFunctionNodes.add(resourceFunction.get());
+            return true;
+        }
+        return false;
     }
 
     protected ResourceFunctionGenerator getResourceFunctionGenerator(Map.Entry<String,
