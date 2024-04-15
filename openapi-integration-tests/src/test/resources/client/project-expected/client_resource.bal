@@ -55,29 +55,29 @@ public isolated client class Client {
 
     # + return - Ok 
     @MethodImpl {name: "getAlbumsIdImpl"}
-    resource isolated function get albums/[string id](typedesc<Album|OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+    resource isolated function get albums/[string id](typedesc<OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
 
-    # + return - Ok 
+    # + return - Ok
     @MethodImpl {name: "getAlbumsImpl"}
-    resource isolated function get albums(string genre, typedesc<Album[]|OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
+    resource isolated function get albums(string genre, typedesc<OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
 
-    # + return - Created 
+    # + return - Created
     @MethodImpl {name: "postAlbumsImpl"}
-    resource isolated function post albums(Album payload, typedesc<Album|CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
+    resource isolated function post albums(Album payload, typedesc<CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
 
-    private isolated function getAlbumsIdImpl(string id, typedesc<Album|OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload> targetType) returns Album|OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload|error {
+    private isolated function getAlbumsIdImpl(string id, typedesc<OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload> targetType) returns OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload|error {
         string resourcePath = string `/albums/${getEncodedUri(id)}`;
         return self.clientEp->get(resourcePath, targetType = targetType);
     }
 
-    private isolated function getAlbumsImpl(string genre, typedesc<Album[]|OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType) returns Album[]|OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload|error {
+    private isolated function getAlbumsImpl(string genre, typedesc<OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType) returns OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload|error {
         string resourcePath = string `/albums`;
         map<anydata> queryParam = {"genre": genre};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         return self.clientEp->get(resourcePath, targetType = targetType);
     }
 
-    private isolated function postAlbumsImpl(Album payload, typedesc<Album|CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload> targetType) returns Album|CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload|error {
+    private isolated function postAlbumsImpl(Album payload, typedesc<CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload> targetType) returns CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload|error {
         string resourcePath = string `/albums`;
         http:Request request = new;
         json jsonBody = payload.toJson();
