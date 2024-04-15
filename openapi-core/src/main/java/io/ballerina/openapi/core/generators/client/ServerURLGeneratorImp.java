@@ -74,7 +74,7 @@ public class ServerURLGeneratorImp implements ServerURLGenerator {
         } else if (selectedServer.getVariables() != null) {
             ServerVariables variables = selectedServer.getVariables();
             for (ServerVariable variable : variables.values()) {
-                if (variable.getDefault().isBlank() && variable.getEnum().size() == 0) {
+                if (variable.getDefault().isBlank() && variable.getEnum() == null) {
                     DiagnosticMessages diagnosticMessages = DiagnosticMessages.OAS_CLIENT_105;
                     ClientDiagnosticImp diagnostic = new ClientDiagnosticImp(diagnosticMessages);
                     diagnostics.add(diagnostic);
