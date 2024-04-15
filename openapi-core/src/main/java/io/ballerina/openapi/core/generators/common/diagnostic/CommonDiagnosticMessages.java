@@ -34,7 +34,9 @@ public enum CommonDiagnosticMessages {
     OAS_COMMON_201("OAS_COMMON_201", "Invalid reference value : %s\nBallerina " +
             "only supports local reference values.", DiagnosticSeverity.ERROR),
     OAS_COMMON_202("OAS_COMMON_202", "Unsupported OAS data type `%s`", DiagnosticSeverity.ERROR),
-    OAS_COMMON_203("OAS_COMMON_203", "Path parameter value cannot be null.", DiagnosticSeverity.ERROR);
+    OAS_COMMON_203("OAS_COMMON_203", "Path parameter value cannot be null.", DiagnosticSeverity.ERROR),
+    OAS_COMMON_204("OAS_COMMON_204", "unsupported path parameter type found in the parameter `%s`. " +
+            "hence the parameter type is set to `string`.", DiagnosticSeverity.WARNING);
 
     private final String code;
     private final String description;
