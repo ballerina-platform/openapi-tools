@@ -12,6 +12,7 @@ SYNOPSIS
                        [-n | --nullable]
                        [--license] <license-file-path>
                        [--client-methods] <resource|remote>
+                       [--with-status-code-binding]
 
 DESCRIPTION
        Update the `Ballerina.toml` file with the OpenAPI tool configuration details for generating a Ballerina source
@@ -62,6 +63,9 @@ OPTIONS
 
         --client-methods <resource|remote>
             Optional. This option can be used in client generation to select the client method type, which can be `resource` or `remote`. The default option is `resource`.
+
+        --with-status-code-binding
+            Optional. This option can be used to generate the Ballerina client methods with the status code response binding.
 
 EXAMPLES
        Update the `Ballerina.toml` file for generating a Ballerina client using a `hello.yaml` OpenAPI contract to generate a directory named `hello`.
