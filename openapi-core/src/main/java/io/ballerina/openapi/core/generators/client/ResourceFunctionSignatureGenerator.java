@@ -194,6 +194,6 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
 
     @Override
     public List<ClientDiagnostic> getDiagnostics() {
-        return null;
+        return diagnostics;
     }
 }

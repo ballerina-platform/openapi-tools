@@ -2,6 +2,7 @@ package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -88,6 +89,11 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
                 return Optional.empty();
             }
             FunctionBodyNode functionBodyNode = functionBodyNodeResult.get();
+            Optional<FunctionSignatureNode> signatureNodeOptional = signatureGenerator.generateFunctionSignature();
+            if (signatureNodeOptional.isEmpty()) {
+                diagnostics.addAll(signatureGenerator.getDiagnostics());
+                return Optional.empty();
+            }
             return getFunctionDefinitionNode(qualifierList, functionKeyWord, functionName, relativeResourcePath,
                     signatureGenerator, functionBodyNode);
         } catch (BallerinaOpenApiException e) {

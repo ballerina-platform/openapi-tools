@@ -103,6 +103,15 @@ public class QueryParameterTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
+    @Test(description = "Generate Client for query parameter has content types")
+    public void testContentTypeQueryParam() throws IOException, BallerinaOpenApiException, ClientException {
+        Path definitionPath = RES_DIR.resolve("swagger/query_param_with_content_value.yaml");
+        Path expectedPath = RES_DIR.resolve("ballerina/query_param_with_content_value.bal");
+        BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
     private BallerinaClientGenerator getBallerinaClientGenerator(Path definitionPath) throws IOException,
             BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
@@ -111,7 +120,7 @@ public class QueryParameterTests {
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
-                .withResourceMode(false).build();
+                .withResourceMode(true).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         return ballerinaClientGenerator;
     }
