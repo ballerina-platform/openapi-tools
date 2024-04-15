@@ -46,8 +46,8 @@ public enum DiagnosticMessages {
             DiagnosticSeverity.WARNING),
     OAS_CLIENT_110("OAS_CLIENT_110", "failed to generate implementation function for the operation: '%s'",
             DiagnosticSeverity.ERROR),
-    OAS_CLIENT_111("OAS_CLIENT_111", "HTTP status code '%s' is not supported in Ballerina",
-            DiagnosticSeverity.ERROR);
+    OAS_CLIENT_111("OAS_CLIENT_111", "HTTP status code '%s' is not supported in Ballerina HTTP status code responses",
+            DiagnosticSeverity.WARNING);
     private final String code;
     private final String description;
     private final DiagnosticSeverity severity;

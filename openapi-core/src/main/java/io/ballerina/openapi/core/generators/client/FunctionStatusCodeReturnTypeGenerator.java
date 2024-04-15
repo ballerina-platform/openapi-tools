@@ -53,15 +53,11 @@ public class FunctionStatusCodeReturnTypeGenerator extends FunctionReturnTypeGen
     @Override
     protected boolean populateReturnType(String statusCode, ApiResponse response, List<TypeDescriptorNode> returnTypes,
                                          HashSet<String> returnTypesSet) {
-        boolean noContentResponseFoundSuper = super.populateReturnType(statusCode, response, returnTypes,
-                returnTypesSet);
         try {
             String code = GeneratorConstants.HTTP_CODES_DES.get(statusCode);
             if (Objects.isNull(code)) {
-                if (statusCode.equals(GeneratorConstants.DEFAULT)) {
-                    returnTypes.add(createSimpleNameReferenceNode(
-                            createIdentifierToken(GeneratorConstants.HTTP_RESPONSE)));
-                } else {
+                returnTypes.add(createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE)));
+                if (!statusCode.equals(GeneratorConstants.DEFAULT)) {
                     diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_111, statusCode));
                 }
             } else {
@@ -73,6 +69,6 @@ public class FunctionStatusCodeReturnTypeGenerator extends FunctionReturnTypeGen
         } catch (InvalidReferenceException e) {
             diagnostics.add(new ClientDiagnosticImp(e.getDiagnostic()));
         }
-        return noContentResponseFoundSuper;
+        return false;
     }
 }
