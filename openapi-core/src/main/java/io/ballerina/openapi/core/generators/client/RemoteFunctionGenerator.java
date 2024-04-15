@@ -61,9 +61,9 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         // Create function signature
         RemoteFunctionSignatureGenerator signatureGenerator = getSignatureGenerator();
         Optional<FunctionSignatureNode> signatureNodeOptional = signatureGenerator.generateFunctionSignature();
+        diagnostics.addAll(signatureGenerator.getDiagnostics());
 
         if (signatureNodeOptional.isEmpty()) {
-            diagnostics.addAll(signatureGenerator.getDiagnostics());
             return Optional.empty();
         }
         FunctionSignatureNode functionSignatureNode = signatureNodeOptional.get();

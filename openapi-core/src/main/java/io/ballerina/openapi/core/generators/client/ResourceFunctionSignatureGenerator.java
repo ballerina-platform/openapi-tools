@@ -54,7 +54,7 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
     protected final Operation operation;
     protected final OpenAPI openAPI;
     protected final String httpMethod;
-    private final List<ClientDiagnostic> diagnostics = new ArrayList<>();
+    protected final List<ClientDiagnostic> diagnostics = new ArrayList<>();
 
     public ResourceFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod) {
         this.operation = operation;
@@ -88,8 +88,8 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
         // 3. return statements
         FunctionReturnTypeGeneratorImp functionReturnType = getFunctionReturnTypeGenerator();
         Optional<ReturnTypeDescriptorNode> returnType = functionReturnType.getReturnType();
+        diagnostics.addAll(functionReturnType.getDiagnostics());
         if (returnType.isEmpty()) {
-            diagnostics.addAll(functionReturnType.getDiagnostics());
             return Optional.empty();
         }
         return returnType.map(returnTypeDescriptorNode -> NodeFactory.createFunctionSignatureNode(
@@ -194,6 +194,6 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
 
     @Override
     public List<ClientDiagnostic> getDiagnostics() {
-        return null;
+        return diagnostics;
     }
 }

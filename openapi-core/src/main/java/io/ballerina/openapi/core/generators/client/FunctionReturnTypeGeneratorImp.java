@@ -80,7 +80,7 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
         ReturnTypesInfo returnTypesInfo = getReturnTypeInfo();
         List<TypeDescriptorNode> returnTypes = returnTypesInfo.types();
         boolean noContentResponseFound = returnTypesInfo.noContentResponseFound();
-        if (!returnTypes.isEmpty()) {
+        if (!returnTypes.isEmpty()){
             if (noContentResponseFound) {
                 returnTypesInfo.types().add(createSimpleNameReferenceNode(createIdentifierToken(ERROR + NILLABLE)));
             } else {
