@@ -120,7 +120,7 @@ public class QueryParameterTests {
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
-                .withResourceMode(true).build();
+                .withResourceMode(false).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         return ballerinaClientGenerator;
     }
