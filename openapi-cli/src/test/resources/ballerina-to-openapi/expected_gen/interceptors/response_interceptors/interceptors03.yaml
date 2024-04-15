@@ -22,9 +22,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Order'
-            text/plain:
-              schema:
-                type: string
         "202":
           description: Accepted
         "404":
