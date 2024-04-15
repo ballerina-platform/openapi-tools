@@ -19,6 +19,7 @@ package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
+import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -57,8 +58,12 @@ public class FunctionStatusCodeReturnTypeGenerator extends FunctionReturnTypeGen
         try {
             String code = GeneratorConstants.HTTP_CODES_DES.get(statusCode);
             if (Objects.isNull(code)) {
-                // TODO: only support default and return warning for others
-                returnTypes.add(createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE)));
+                if (statusCode.equals(GeneratorConstants.DEFAULT)) {
+                    returnTypes.add(createSimpleNameReferenceNode(
+                            createIdentifierToken(GeneratorConstants.HTTP_RESPONSE)));
+                } else {
+                    diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_111, statusCode));
+                }
             } else {
                 List<Diagnostic> newDiagnostics = new ArrayList<>();
                 returnTypes.add(generateStatusCodeTypeInclusionRecord(code, response, httpMethod, openAPI, path,

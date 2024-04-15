@@ -132,7 +132,7 @@ public class BallerinaClientGenerator {
     private final List<String> remoteFunctionNameList;
     protected final AuthConfigGeneratorImp authConfigGeneratorImp;
     private final boolean resourceMode;
-    private final List<ClientDiagnostic> diagnostics = new ArrayList<>();
+    protected final List<ClientDiagnostic> diagnostics = new ArrayList<>();
 
     /**
      * Return a Diagnostic list.

@@ -43,7 +43,11 @@ public enum DiagnosticMessages {
             "type for the header: '%s'",
             DiagnosticSeverity.WARNING),
     OAS_CLIENT_109("OAS_CLIENT_109", "encounter issue while resolving reference: '%s'",
-            DiagnosticSeverity.WARNING);
+            DiagnosticSeverity.WARNING),
+    OAS_CLIENT_110("OAS_CLIENT_110", "failed to generate implementation function for the operation: '%s'",
+            DiagnosticSeverity.ERROR),
+    OAS_CLIENT_111("OAS_CLIENT_111", "HTTP status code '%s' is not supported in Ballerina",
+            DiagnosticSeverity.ERROR);
     private final String code;
     private final String description;
     private final DiagnosticSeverity severity;
