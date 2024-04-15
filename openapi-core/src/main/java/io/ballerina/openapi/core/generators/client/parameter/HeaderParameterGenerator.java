@@ -69,6 +69,11 @@ public class HeaderParameterGenerator implements ParameterGenerator {
     @Override
     public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
         //supported types string, int, boolean, decimal, float , primitive array
+        if (parameter.getName().isBlank()) {
+            ClientDiagnosticImp diagnostic = new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_111);
+            diagnostics.add(diagnostic);
+            return Optional.empty();
+        }
         IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
         Optional<TypeDescriptorNode> typeNodeResult = TypeHandler.getInstance()
                 .getTypeNodeFromOASSchema(parameter.getSchema(), true);

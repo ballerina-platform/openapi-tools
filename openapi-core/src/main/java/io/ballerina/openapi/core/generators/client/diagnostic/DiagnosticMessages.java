@@ -46,6 +46,8 @@ public enum DiagnosticMessages {
             DiagnosticSeverity.WARNING),
     OAS_CLIENT_110("OAS_CLIENT_110", "encounter unsupported path parameter data type, " +
             "therefore resource function generation is skipped for given path `%s` , method `%s`",
+            DiagnosticSeverity.WARNING),
+    OAS_CLIENT_111("OAS_CLIENT_111", "header parameter name can not be empty",
             DiagnosticSeverity.WARNING);
     private final String code;
     private final String description;
