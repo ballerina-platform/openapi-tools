@@ -83,6 +83,7 @@ public class EnumGenerator extends TypeGenerator {
                 }
             }
             if (enumBuilder.length() > 0) {
+                isNull = !isNull ? schema.getNullable() != null && schema.getNullable() : isNull;
                 enumBuilder.deleteCharAt(enumBuilder.length() - 1);
                 String enumString = isNull ? enumBuilder + GeneratorConstants.NILLABLE : enumBuilder.toString();
                 return NodeParser.parseTypeDescriptor(enumString);
