@@ -316,12 +316,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
 
             if (parameter.getIn().equals("path") || parameter.getIn().equals("header") ||
                     (parameter.getIn().equals("query"))) {
-                if (parameter.getIn().equals("query")) {
-                    parameterName = escapeIdentifier(parameter.getName());
-                } else {
-                    parameterName = getValidName(parameter.getName(), false);
-                }
-//                parameterName = getValidName(parameter.getName(), false);
+                parameterName = escapeIdentifier(parameter.getName());
                 // add deprecated annotation
                 if (parameter.getDeprecated() != null && parameter.getDeprecated()) {
                     extractDeprecatedAnnotationDetails(deprecatedParamDocComments, parameter, paramAnnot);

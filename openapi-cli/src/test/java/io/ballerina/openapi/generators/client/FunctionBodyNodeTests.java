@@ -78,15 +78,16 @@ public class FunctionBodyNodeTests {
         return new Object[][]{
                 {"diagnostic_files/header_parameter.yaml", "/pets", "{string resourcePath=string`/pets`;" +
                         "map<any>headerValues=" +
-                        "{\"X-Request-ID\":xRequestId,\"X-Request-Client\":xRequestClient};map<string|string[]>" +
+                        "{\"X-Request-ID\":X\\-Request\\-ID,\"X-Request-Client\":X\\-Request\\-Client};" +
+                        "map<string|string[]>" +
                         "httpHeaders=getMapForHeaders(headerValues);return self.clientEp->" +
                         "get(resourcePath,httpHeaders);}"},
                 {"diagnostic_files/head_operation.yaml", "/{filesystem}",
                         "{string resourcePath=string`/${getEncodedUri(filesystem)}`;" +
                         "map<anydata>queryParam={\"resource\":'resource,\"timeout\":timeout};" +
                         "resourcePath = resourcePath + check getPathForQueryParam(queryParam);" +
-                        "map<any>headerValues={\"x-ms-client-request-id\":xMsClientRequestId," +
-                        "\"x-ms-date\":xMsDate,\"x-ms-version\":xMsVersion};map<string|string[]> " +
+                        "map<any>headerValues={\"x-ms-client-request-id\":x\\-ms\\-client\\-request\\-id," +
+                        "\"x-ms-date\":x\\-ms\\-date,\"x-ms-version\":x\\-ms\\-version};map<string|string[]> " +
                         "httpHeaders = getMapForHeaders(headerValues);" +
                         "return self.clientEp-> head(resourcePath, httpHeaders);}"},
                 {"diagnostic_files/operation_delete.yaml", "/pets/{petId}", "{string resourcePath = " +

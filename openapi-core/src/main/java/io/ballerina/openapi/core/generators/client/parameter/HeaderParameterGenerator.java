@@ -50,6 +50,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_TYPE_DESC;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 public class HeaderParameterGenerator implements ParameterGenerator {
@@ -74,7 +75,7 @@ public class HeaderParameterGenerator implements ParameterGenerator {
             diagnostics.add(diagnostic);
             return Optional.empty();
         }
-        IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
+        IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
         Optional<TypeDescriptorNode> typeNodeResult = TypeHandler.getInstance()
                 .getTypeNodeFromOASSchema(parameter.getSchema(), true);
         if (typeNodeResult.isEmpty()) {

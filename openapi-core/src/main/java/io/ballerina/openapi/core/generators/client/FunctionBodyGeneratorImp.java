@@ -615,7 +615,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                 String pathVariable = path.substring(m.start(), m.end());
                 if (pathVariable.startsWith("{") && pathVariable.endsWith("}")) {
                     String d = pathVariable.replace("{", "").replace("}", "");
-                    String replaceVariable = "{getEncodedUri(" + getValidName(d, false) + ")}";
+                    String replaceVariable = "{getEncodedUri(" + escapeIdentifier(d) + ")}";
                     refinedPath = refinedPath.replace(pathVariable, replaceVariable);
                 }
             }
@@ -720,7 +720,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             IdentifierToken fieldName = createIdentifierToken('"' + (parameter.getName().trim()) + '"');
             Token colon = createToken(COLON_TOKEN);
             SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(
-                    createIdentifierToken(getValidName(parameter.getName().trim(), false)));
+                    createIdentifierToken(escapeIdentifier(parameter.getName().trim())));
             SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
                     fieldName, colon, valueExpr);
             filedOfMap.add(specificFieldNode);
