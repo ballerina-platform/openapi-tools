@@ -31,7 +31,9 @@ public enum TypeGenerationDiagnosticMessages {
             "Maximum item count (%s) defined in the definition exceeds the maximum ballerina array length.",
             DiagnosticSeverity.WARNING),
     OAS_TYPE_102("OAS_TYPE_102", "Unsupported nested AllOf schema is found inside a AllOf schema.",
-                 DiagnosticSeverity.WARNING);
+                 DiagnosticSeverity.WARNING),
+    OAS_TYPE_103("OAS_TYPE_103", "Invalid reference found %s in the schema.", DiagnosticSeverity.ERROR);
+
 
     private final String code;
     private final String description;

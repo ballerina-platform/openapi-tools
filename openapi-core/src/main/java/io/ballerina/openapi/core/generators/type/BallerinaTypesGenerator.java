@@ -25,7 +25,9 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
+import io.ballerina.openapi.core.generators.type.diagnostic.TypeGenerationDiagnosticMessages;
+import io.ballerina.openapi.core.generators.type.diagnostic.TypeGeneratorDiagnostic;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.generators.AllOfRecordTypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.ArrayTypeGenerator;
@@ -85,9 +87,11 @@ public class BallerinaTypesGenerator {
         try {
             typeDescriptorNode = generateTypeDescriptorNodeForOASSchema(schema, overrideNullable,
                     subtypesMap, new HashMap<>());
-        } catch (BallerinaOpenApiException | OASTypeGenException e) {
-            // todo : diagnostic this exception
-            return new TypeGeneratorResult(null, subtypesMap);
+        } catch (InvalidReferenceException | OASTypeGenException e) {
+            TypeGeneratorDiagnostic diagnostic = new TypeGeneratorDiagnostic(
+                    TypeGenerationDiagnosticMessages.OAS_TYPE_103, e.getMessage());
+            diagnostics.add(diagnostic);
+            return new TypeGeneratorResult(Optional.empty(), subtypesMap);
         }
         return new TypeGeneratorResult(typeDescriptorNode, subtypesMap);
     }
@@ -97,8 +101,8 @@ public class BallerinaTypesGenerator {
      */
     private Optional<TypeDescriptorNode> generateTypeDescriptorNodeForOASSchema(
             Schema<?> schema, boolean overrideNullable, HashMap<String, TypeDefinitionNode> subTypesMap,
-            HashMap<String, NameReferenceNode> pregeneratedTypeMap)
-            throws BallerinaOpenApiException, OASTypeGenException {
+            HashMap<String, NameReferenceNode> pregeneratedTypeMap) throws InvalidReferenceException,
+            OASTypeGenException {
         if (schema == null) {
             return Optional.empty();
         }
@@ -186,7 +190,7 @@ public class BallerinaTypesGenerator {
     private TypeDescriptorNode getUnionNodeForOneOf(Schema<?> schema, boolean overrideNullable,
                                                     HashMap<String, TypeDefinitionNode> subTypesMap,
                                                     HashMap<String, NameReferenceNode> pregeneratedTypeMap)
-            throws OASTypeGenException, BallerinaOpenApiException {
+            throws OASTypeGenException, InvalidReferenceException {
         Iterator<Schema> iterator = schema.getOneOf().iterator();
         List<TypeDescriptorNode> qualifiedNodes = new ArrayList<>();
         Token pipeToken = createIdentifierToken("|");

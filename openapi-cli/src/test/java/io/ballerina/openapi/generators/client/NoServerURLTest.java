@@ -81,4 +81,22 @@ public class NoServerURLTest {
         String generatedParamsStr = (generatedParams.toString().trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedParams, generatedParamsStr);
     }
+
+    @Test(description = "Test for no server url with blank default value")
+    public void getClientForBlankDefaultValueServerURL() throws IOException, BallerinaOpenApiException,
+            ClientException {
+        Path definitionPath = RES_DIR.resolve("swagger/blank_value_server_url.yaml");
+        Path expectedPath = RES_DIR.resolve("ballerina/blank_value_server_url.bal");
+
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        TypeHandler.createInstance(openAPI, false);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI)
+                .withResourceMode(false).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
 }

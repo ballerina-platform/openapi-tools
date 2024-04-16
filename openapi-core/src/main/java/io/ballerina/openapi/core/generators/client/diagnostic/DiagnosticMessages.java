@@ -26,10 +26,10 @@ public enum DiagnosticMessages {
             DiagnosticSeverity.ERROR),
     OAS_CLIENT_101("OAS_CLIENT_101",
             "encounter unsupported path parameter data type for the parameter: '%s'",
-            DiagnosticSeverity.ERROR),
+            DiagnosticSeverity.WARNING),
     OAS_CLIENT_102("OAS_CLIENT_102",
             "encounter unsupported query parameter data type for the parameter: '%s'",
-            DiagnosticSeverity.ERROR),
+            DiagnosticSeverity.WARNING),
     OAS_CLIENT_103("OAS_CLIENT_103", "please define the array item type of the parameter : '%s'",
             DiagnosticSeverity.ERROR),
     OAS_CLIENT_104("OAS_CLIENT_104", "error occurred while generating query parameter node: '%s'",
@@ -44,9 +44,14 @@ public enum DiagnosticMessages {
             DiagnosticSeverity.WARNING),
     OAS_CLIENT_109("OAS_CLIENT_109", "encounter issue while resolving reference: '%s'",
             DiagnosticSeverity.WARNING),
-    OAS_CLIENT_110("OAS_CLIENT_110", "failed to generate implementation function for the operation: '%s'",
+    OAS_CLIENT_110("OAS_CLIENT_110", "encounter unsupported path parameter data type, " +
+            "therefore resource function generation is skipped for given path `%s` , method `%s`",
+            DiagnosticSeverity.WARNING),
+    OAS_CLIENT_111("OAS_CLIENT_111", "header parameter name can not be empty",
+            DiagnosticSeverity.WARNING),
+    OAS_CLIENT_112("OAS_CLIENT_112", "failed to generate implementation function for the operation: '%s'",
             DiagnosticSeverity.ERROR),
-    OAS_CLIENT_111("OAS_CLIENT_111", "HTTP status code '%s' is not supported in Ballerina HTTP status code responses",
+    OAS_CLIENT_113("OAS_CLIENT_113", "HTTP status code '%s' is not supported in Ballerina HTTP status code responses",
             DiagnosticSeverity.WARNING);
     private final String code;
     private final String description;

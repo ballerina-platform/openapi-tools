@@ -73,10 +73,10 @@ public class QueryParameterGenerator implements ParameterGenerator {
         TypeDescriptorNode typeNode;
 
         Schema<?> parameterSchema = parameter.getSchema();
-        if (parameterSchema.getType() != null && !isQueryParamTypeSupported(parameterSchema.getType())) {
+        if (parameter.getSchema() == null || parameterSchema.getType() != null &&
+                !isQueryParamTypeSupported(parameterSchema.getType())) {
             DiagnosticMessages unsupportedType = DiagnosticMessages.OAS_CLIENT_102;
-            ClientDiagnostic diagnostic = new ClientDiagnosticImp(unsupportedType,
-                    unsupportedType.getDescription(), parameter.getName());
+            ClientDiagnostic diagnostic = new ClientDiagnosticImp(unsupportedType, parameter.getName());
             diagnostics.add(diagnostic);
             return Optional.empty();
         }

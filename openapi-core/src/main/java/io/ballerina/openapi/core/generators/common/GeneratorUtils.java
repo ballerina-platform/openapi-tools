@@ -27,7 +27,6 @@ import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
-import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.Minutiae;
 import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -48,12 +47,12 @@ import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.core.generators.common.diagnostic.CommonDiagnostic;
+import io.ballerina.openapi.core.generators.common.diagnostic.CommonDiagnosticMessages;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
 import io.ballerina.openapi.core.generators.common.exception.NullPathParameterException;
 import io.ballerina.openapi.core.generators.common.exception.UnsupportedOASDataTypeException;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
-import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.generators.EnumGenerator;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
@@ -137,7 +136,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BAL
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CATCH_ALL_PATH;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLOSE_CURLY_BRACE;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_PARAM_COMMENT;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.GET;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEAD;
@@ -217,9 +215,8 @@ public class GeneratorUtils {
      * @return - node lists
      * @throws BallerinaOpenApiException
      */
-    public static NodeList<Node> getRelativeResourcePath(String path, Operation operation,
-                                                         List<Node> resourceFunctionDocs,
-                                                     Components components, boolean isWithoutDataBinding)
+    public static NodeList<Node> getRelativeResourcePath(String path, Operation operation, Components components,
+                                                         boolean isWithoutDataBinding, List<Diagnostic> diagnostics)
             throws BallerinaOpenApiException {
 
         List<Node> functionRelativeResourcePath = new ArrayList<>();
@@ -239,7 +236,7 @@ public class GeneratorUtils {
                      */
                     if (operation.getParameters() != null) {
                         extractPathParameterDetails(operation, functionRelativeResourcePath, pathNode,
-                                pathParam, resourceFunctionDocs, components, isWithoutDataBinding);
+                                pathParam, components, isWithoutDataBinding, diagnostics);
                     }
                 } else if (!pathNode.isBlank()) {
                     IdentifierToken idToken = createIdentifierToken(escapeIdentifier(pathNode.trim()));
@@ -259,9 +256,8 @@ public class GeneratorUtils {
     }
 
     private static void extractPathParameterDetails(Operation operation, List<Node> functionRelativeResourcePath,
-                                                    String pathNode, String pathParam,
-                                                    List<Node> resourceFunctionDocs,
-                                                    Components components, boolean isWithoutDataBinding)
+                                                    String pathNode, String pathParam, Components components,
+                                                    boolean isWithoutDataBinding, List<Diagnostic> diagnostics)
             throws BallerinaOpenApiException {
         // check whether path parameter segment has special character
         String[] split = pathNode.split(CLOSE_CURLY_BRACE, 2);
@@ -282,9 +278,9 @@ public class GeneratorUtils {
                 String paramType;
                 if (parameter.getSchema().get$ref() != null) {
                     paramType = resolveReferenceType(parameter.getSchema(), components, isWithoutDataBinding,
-                            pathParam);
+                            pathParam, diagnostics);
                 } else {
-                    paramType = getPathParameterType(parameter.getSchema(), pathParam);
+                    paramType = getPathParameterType(parameter.getSchema(), pathParam, diagnostics);
                     if (paramType.endsWith(NILLABLE)) {
                         throw new NullPathParameterException();
                     }
@@ -309,16 +305,6 @@ public class GeneratorUtils {
                                 createToken(CLOSE_BRACKET_TOKEN));
                 functionRelativeResourcePath.add(resourcePathParameterNode);
                 functionRelativeResourcePath.add(createToken(SLASH_TOKEN));
-
-                // Add documentation
-                if (resourceFunctionDocs != null) {
-                    String parameterName = paramName.text();
-                    String paramComment = parameter.getDescription() != null && !parameter.getDescription().isBlank() ?
-                            parameter.getDescription() : DEFAULT_PARAM_COMMENT;
-                    MarkdownParameterDocumentationLineNode paramAPIDoc =
-                            DocCommentsGeneratorUtil.createAPIParamDoc(parameterName, paramComment);
-                    resourceFunctionDocs.add(paramAPIDoc);
-                }
                 break;
             }
         }
@@ -918,17 +904,18 @@ public class GeneratorUtils {
     }
 
     public static String resolveReferenceType(Schema<?> schema, Components components, boolean isWithoutDataBinding,
-                                              String pathParam) throws InvalidReferenceException,
-            UnsupportedOASDataTypeException {
+                                              String pathParam, List<Diagnostic> diagnostics)
+            throws InvalidReferenceException, UnsupportedOASDataTypeException {
         String type = GeneratorUtils.extractReferenceType(schema.get$ref());
 
         if (isWithoutDataBinding) {
             Schema<?> referencedSchema = components.getSchemas().get(getValidName(type, true));
             if (referencedSchema != null) {
                 if (referencedSchema.get$ref() != null) {
-                    type = resolveReferenceType(referencedSchema, components, isWithoutDataBinding, pathParam);
+                    type = resolveReferenceType(referencedSchema, components, isWithoutDataBinding, pathParam,
+                            diagnostics);
                 } else {
-                    type = getPathParameterType(referencedSchema, pathParam);
+                    type = getPathParameterType(referencedSchema, pathParam, diagnostics);
                 }
             }
         } else {
@@ -938,14 +925,15 @@ public class GeneratorUtils {
         return type;
     }
 
-    private static String getPathParameterType(Schema<?> typeSchema, String pathParam)
+    private static String getPathParameterType(Schema<?> typeSchema, String pathParam, List<Diagnostic> diagnostics)
             throws UnsupportedOASDataTypeException {
         String type = null;
         if (!(isStringSchema(typeSchema) || isNumberSchema(typeSchema) || isBooleanSchema(typeSchema)
                 || isIntegerSchema(typeSchema))) {
             type = STRING;
-            LOGGER.warn("unsupported path parameter type found in the parameter `" + pathParam + "`. hence the " +
-                    "parameter type is set to string.");
+            CommonDiagnosticMessages unsupportedPath = CommonDiagnosticMessages.OAS_COMMON_204;
+            CommonDiagnostic diagnostic = new CommonDiagnostic(unsupportedPath, pathParam);
+            diagnostics.add(diagnostic);
         } else {
             type = GeneratorUtils.convertOpenAPITypeToBallerina(typeSchema, true);
         }
