@@ -429,7 +429,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
 
         for (Parameter parameter : queryParameters) {
             Schema paramSchema = parameter.getSchema();
-            if (paramSchema.get$ref() != null) {
+            if (paramSchema != null && paramSchema.get$ref() != null) {
                 paramSchema = openAPI.getComponents().getSchemas().get(
                         getValidName(extractReferenceType(paramSchema.get$ref()), true));
             }

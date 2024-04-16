@@ -2,6 +2,7 @@ package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -9,8 +10,11 @@ import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
+import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -59,23 +63,41 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
         //Create qualifier list
         NodeList<Token> qualifierList = createNodeList(createToken(RESOURCE_KEYWORD), createToken(ISOLATED_KEYWORD));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
-        IdentifierToken functionName = createIdentifierToken(operation.getKey().toString().toLowerCase(Locale.ROOT));
+        String method = operation.getKey().toString().toLowerCase(Locale.ROOT);
+        IdentifierToken functionName = createIdentifierToken(method);
         // create relative path
         try {
+            //TODO: this will be replace with the common diagnostic approach.
+            List<Diagnostic> pathDiagnostics = new ArrayList<>();
             NodeList<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
-                    null, openAPI.getComponents(), false);
+                    openAPI.getComponents(), false, pathDiagnostics);
+            if (!pathDiagnostics.isEmpty()) {
+                pathDiagnostics.forEach(diagnostic -> {
+                    if (diagnostic.diagnosticInfo().code().equals("OAS_COMMON_204")) {
+                        DiagnosticMessages message = DiagnosticMessages.OAS_CLIENT_110;
+                        ClientDiagnosticImp clientDiagnostic = new ClientDiagnosticImp(message, path, method);
+                        diagnostics.add(clientDiagnostic);
+                    }
+                });
+                return Optional.empty();
+            }
             // Create function signature
             ResourceFunctionSignatureGenerator signatureGenerator = getSignatureGenerator();
+            Optional<FunctionSignatureNode> signatureNodeOptional = signatureGenerator.generateFunctionSignature();
+            if (signatureNodeOptional.isEmpty()) {
+                diagnostics.addAll(signatureGenerator.getDiagnostics());
+                return Optional.empty();
+            }
             //Create function body
             Optional<FunctionBodyNode> functionBodyNodeResult = getFunctionBodyNode(diagnostics);
             if (functionBodyNodeResult.isEmpty()) {
                 return Optional.empty();
             }
             FunctionBodyNode functionBodyNode = functionBodyNodeResult.get();
+
             return getFunctionDefinitionNode(qualifierList, functionKeyWord, functionName, relativeResourcePath,
                     signatureGenerator, functionBodyNode);
         } catch (BallerinaOpenApiException e) {
-            //todo diagnostic
             return Optional.empty();
         }
     }

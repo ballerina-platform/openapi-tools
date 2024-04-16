@@ -133,6 +133,7 @@ public class BallerinaClientGenerator {
     protected final AuthConfigGeneratorImp authConfigGeneratorImp;
     private final boolean resourceMode;
     private final List<ClientDiagnostic> diagnostics = new ArrayList<>();
+    private String serverURL;
 
     /**
      * Return a Diagnostic list.
@@ -156,13 +157,12 @@ public class BallerinaClientGenerator {
     }
 
     /**
-     * //todo: add changes
      * Returns server URL.
      *
      * @return {@link String}
      */
     public String getServerUrl() {
-        return "serverURL";
+        return serverURL;
     }
 
     public BallerinaClientGenerator(OASClientConfig oasClientConfig) {
@@ -423,6 +423,14 @@ public class BallerinaClientGenerator {
         List<ParameterNode> parameterNodes  = new ArrayList<>();
         ServerURLGeneratorImp serverURLGeneratorImp = new ServerURLGeneratorImp(openAPI.getServers());
         ParameterNode serverURLNode = serverURLGeneratorImp.generateServerURL();
+        if (serverURLNode instanceof DefaultableParameterNode defNode) {
+            if (defNode.paramName().get().toString().equals("serviceUrl")) {
+                serverURL = defNode.expression().toSourceCode().replace('"', ' ').trim();
+            }
+        } else {
+            serverURL = "/";
+
+        }
         diagnostics.addAll(serverURLGeneratorImp.getDiagnostics());
         parameterNodes.add(serverURLNode);
         // get auth config details
