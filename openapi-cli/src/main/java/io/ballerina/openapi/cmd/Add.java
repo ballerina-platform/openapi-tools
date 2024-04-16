@@ -222,18 +222,19 @@ public class Add implements BLauncherCmd {
             KeyValueNode tagNodes = NodeFactory.createKeyValueNode(getKeyNode("options.tags"), getAssignToken(),
                     arrayNode);
             moduleMembers = moduleMembers.add(tagNodes);
-        }
-        if (optionsBuilder.getOperations() != null && !optionsBuilder.getOperations().isEmpty()) {
-            if (optionsBuilder.getTags() != null && !optionsBuilder.getTags().isEmpty()) {
+            if (optionsBuilder.getOperations() != null && !optionsBuilder.getOperations().isEmpty()) {
                 moduleMembers = CmdUtils.addNewLine(moduleMembers, 1);
             }
+        }
+        if (optionsBuilder.getOperations() != null && !optionsBuilder.getOperations().isEmpty()) {
             Node[] arrayItems = getArrayItemNodes(getOperations());
             SeparatedNodeList<ValueNode> value = createSeparatedNodeList(arrayItems);
             ArrayNode arrayNode = NodeFactory.createArrayNode(createToken(SyntaxKind.OPEN_BRACKET_TOKEN), value,
                     createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-            KeyValueNode tagNodes = NodeFactory.createKeyValueNode(getKeyNode("options.operations"),
+            KeyValueNode opsNodes = NodeFactory.createKeyValueNode(getKeyNode("options.operations"),
                     getAssignToken(), arrayNode);
-            moduleMembers = moduleMembers.add(tagNodes);
+            moduleMembers = moduleMembers.add(opsNodes);
+            moduleMembers = CmdUtils.addNewLine(moduleMembers, 1);
         }
         if (optionsBuilder.isNullable()) {
             moduleMembers = moduleMembers.add(SampleNodeGenerator.createBooleanKV("options.nullable",
