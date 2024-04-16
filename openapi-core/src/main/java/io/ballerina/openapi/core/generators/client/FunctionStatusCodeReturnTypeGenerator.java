@@ -32,8 +32,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.generateStatusCodeTypeInclusionRecord;
 
 /**
@@ -56,9 +54,8 @@ public class FunctionStatusCodeReturnTypeGenerator extends FunctionReturnTypeGen
         try {
             String code = GeneratorConstants.HTTP_CODES_DES.get(statusCode);
             if (Objects.isNull(code)) {
-                returnTypes.add(createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE)));
                 if (!statusCode.equals(GeneratorConstants.DEFAULT)) {
-                    diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_111, statusCode));
+                    diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_113, statusCode));
                 }
             } else {
                 List<Diagnostic> newDiagnostics = new ArrayList<>();

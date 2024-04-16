@@ -21,7 +21,8 @@ import io.ballerina.compiler.syntax.tree.InferredTypedescDefaultNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeParameterNode;
-import io.ballerina.openapi.core.generators.common.GeneratorConstants;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
+import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -34,7 +35,6 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultableParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createInferredTypedescDefaultNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createParameterizedTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeParameterNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
@@ -77,7 +77,8 @@ public class RemoteExternalFunctionSignatureGenerator extends RemoteFunctionSign
         diagnostics.addAll(functionReturnTypeGenerator.getDiagnostics());
         TypeDescriptorNode returnType;
         if (returnTypes.isEmpty()) {
-            returnType = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
+            diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_114, operation.getOperationId()));
+            return null;
         } else {
             returnType = FunctionReturnTypeGeneratorImp.createUnionReturnType(returnTypes);
         }
