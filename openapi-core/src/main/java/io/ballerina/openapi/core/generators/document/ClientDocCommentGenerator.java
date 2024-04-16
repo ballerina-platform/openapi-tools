@@ -61,6 +61,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSepara
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getBallerinaMediaType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
@@ -315,7 +316,12 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
 
             if (parameter.getIn().equals("path") || parameter.getIn().equals("header") ||
                     (parameter.getIn().equals("query"))) {
-                parameterName = getValidName(parameter.getName(), false);
+                if (parameter.getIn().equals("query")) {
+                    parameterName = escapeIdentifier(parameter.getName());
+                } else {
+                    parameterName = getValidName(parameter.getName(), false);
+                }
+//                parameterName = getValidName(parameter.getName(), false);
                 // add deprecated annotation
                 if (parameter.getDeprecated() != null && parameter.getDeprecated()) {
                     extractDeprecatedAnnotationDetails(deprecatedParamDocComments, parameter, paramAnnot);

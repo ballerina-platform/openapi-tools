@@ -49,6 +49,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
@@ -95,11 +96,11 @@ public class QueryParameterGenerator implements ParameterGenerator {
         // required parameter
         if (parameter.getRequired() || treatDefaultableAsRequired) {
             IdentifierToken paramName =
-                    createIdentifierToken(getValidName(parameter.getName().trim(), false));
+                    createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
             return Optional.of(createRequiredParameterNode(createEmptyNodeList(), typeNode, paramName));
         } else {
             IdentifierToken paramName =
-                    createIdentifierToken(getValidName(parameter.getName().trim(), false));
+                    createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
             // Handle given default values in query parameter.
             if (parameterSchema.get$ref() != null) {
                 Schema<?> schema = openAPI.getComponents().getSchemas().get(parameterSchema.get$ref().split("/")[3]);
