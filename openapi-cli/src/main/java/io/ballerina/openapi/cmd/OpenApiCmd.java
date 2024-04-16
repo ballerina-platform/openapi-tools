@@ -528,7 +528,7 @@ public class OpenApiCmd implements BLauncherCmd {
 
     @Override
     public void printLongDesc(StringBuilder out) {
-        InputStream inputStream = ClassLoader.getSystemResourceAsStream("ballerina-openapi.help");
+        InputStream inputStream = ClassLoader.getSystemResourceAsStream("cli-help/ballerina-openapi.help");
         try (InputStreamReader inputStreamREader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
              BufferedReader br = new BufferedReader(inputStreamREader)) {
             String content = br.readLine();

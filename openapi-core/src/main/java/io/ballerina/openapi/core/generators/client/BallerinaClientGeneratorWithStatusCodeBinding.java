@@ -171,7 +171,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
         if (implFunction.isPresent()) {
             clientFunctionNodes.add(implFunction.get());
         } else {
-            diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_110,
+            diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_112,
                     operationEntry.getValue().getOperationId()));
             clientFunctionNodes.remove(clientFunctionNodes.size() - 1);
         }
