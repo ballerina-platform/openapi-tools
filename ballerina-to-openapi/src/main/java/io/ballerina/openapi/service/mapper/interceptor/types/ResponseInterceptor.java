@@ -64,11 +64,6 @@ public class ResponseInterceptor extends Interceptor {
         return InterceptorType.RESPONSE;
     }
 
-    @Override
-    public boolean isContinueExecution() {
-        return continueExecution || hasNilReturn;
-    }
-
     protected String getRemoteMethodName() {
         return "interceptResponse";
     }

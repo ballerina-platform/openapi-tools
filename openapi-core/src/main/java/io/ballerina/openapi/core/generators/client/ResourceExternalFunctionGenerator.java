@@ -21,6 +21,7 @@ import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
@@ -104,9 +105,11 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
         SimpleNameReferenceNode annotationRef = createSimpleNameReferenceNode(createIdentifierToken("MethodImpl"));
         AnnotationNode implAnnotation = createAnnotationNode(createToken(AT_TOKEN), annotationRef, implFunctionMap);
         MetadataNode metadataNode = createMetadataNode(null, createNodeList(implAnnotation));
-        return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, metadataNode,
-                qualifierList, functionKeyWord, functionName, relativeResourcePath,
-                signatureGenerator.generateFunctionSignature().get(), functionBodyNode));
+        Optional<FunctionSignatureNode> functionSignatureNode = signatureGenerator.generateFunctionSignature();
+        diagnostics.addAll(signatureGenerator.getDiagnostics());
+        return functionSignatureNode.map(signatureNode -> NodeFactory.createFunctionDefinitionNode(
+                RESOURCE_ACCESSOR_DEFINITION, metadataNode, qualifierList, functionKeyWord, functionName,
+                relativeResourcePath, signatureNode, functionBodyNode));
     }
 
     @Override

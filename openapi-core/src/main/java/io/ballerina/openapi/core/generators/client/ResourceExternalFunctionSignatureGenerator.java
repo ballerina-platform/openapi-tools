@@ -21,6 +21,7 @@ import io.ballerina.compiler.syntax.tree.InferredTypedescDefaultNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeParameterNode;
+import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -32,14 +33,13 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultableParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createInferredTypedescDefaultNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createParameterizedTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeParameterNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.GT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.LT_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPEDESC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPEDESC_TYPE_DESC;
 
@@ -73,13 +73,13 @@ public class ResourceExternalFunctionSignatureGenerator extends ResourceFunction
         FunctionReturnTypeGeneratorImp functionReturnTypeGenerator = getFunctionReturnTypeGenerator();
         FunctionReturnTypeGeneratorImp.ReturnTypesInfo returnTypeInfo = functionReturnTypeGenerator.getReturnTypeInfo();
         List<TypeDescriptorNode> returnTypes = returnTypeInfo.types();
-        boolean noContentResponseFound = returnTypeInfo.noContentResponseFound();
-        if (noContentResponseFound) {
-            TypeDescriptorNode lastReturnType = returnTypes.remove(returnTypes.size() - 1);
-            createOptionalTypeDescriptorNode(lastReturnType, createToken(QUESTION_MARK_TOKEN));
-            returnTypes.add(lastReturnType);
+        diagnostics.addAll(functionReturnTypeGenerator.getDiagnostics());
+        TypeDescriptorNode returnType;
+        if (returnTypes.isEmpty()) {
+            returnType = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
+        } else {
+            returnType = FunctionReturnTypeGeneratorImp.createUnionReturnType(returnTypes);
         }
-        TypeDescriptorNode returnType = FunctionReturnTypeGeneratorImp.createUnionReturnType(returnTypes);
 
         TypeParameterNode returnTypeParam = createTypeParameterNode(createToken(LT_TOKEN), returnType,
                 createToken(GT_TOKEN));

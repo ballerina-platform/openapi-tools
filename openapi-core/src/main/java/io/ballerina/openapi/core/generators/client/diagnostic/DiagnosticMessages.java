@@ -48,6 +48,10 @@ public enum DiagnosticMessages {
             "therefore resource function generation is skipped for given path `%s` , method `%s`",
             DiagnosticSeverity.WARNING),
     OAS_CLIENT_111("OAS_CLIENT_111", "header parameter name can not be empty",
+            DiagnosticSeverity.WARNING),
+    OAS_CLIENT_112("OAS_CLIENT_112", "failed to generate implementation function for the operation: '%s'",
+            DiagnosticSeverity.ERROR),
+    OAS_CLIENT_113("OAS_CLIENT_113", "HTTP status code '%s' is not supported in Ballerina HTTP status code responses",
             DiagnosticSeverity.WARNING);
     private final String code;
     private final String description;

@@ -55,7 +55,6 @@ public abstract class Interceptor extends Resource {
     protected final ClassSymbol serviceClass;
     protected final ClassDefinitionNode serviceClassNode;
     protected boolean continueExecution = false;
-    protected boolean hasNilReturn = false;
     private Interceptor nextInReqPath = null;
     protected Interceptor nextInResPath = null;
 
@@ -87,7 +86,6 @@ public abstract class Interceptor extends Resource {
     public abstract boolean isInvokable(TargetResource targetResource);
 
     protected void setReturnType(TypeSymbol returnType) {
-        hasNilReturn = semanticModel.types().NIL.subtypeOf(returnType);
         TypeSymbol effectiveReturnType;
         if (isSubTypeOfDefaultInterceptorReturnType(returnType, semanticModel)) {
             continueExecution = true;
