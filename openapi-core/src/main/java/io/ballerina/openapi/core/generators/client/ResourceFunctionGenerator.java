@@ -84,8 +84,8 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
             // Create function signature
             ResourceFunctionSignatureGenerator signatureGenerator = getSignatureGenerator();
             Optional<FunctionSignatureNode> signatureNodeOptional = signatureGenerator.generateFunctionSignature();
+            diagnostics.addAll(signatureGenerator.getDiagnostics());
             if (signatureNodeOptional.isEmpty()) {
-                diagnostics.addAll(signatureGenerator.getDiagnostics());
                 return Optional.empty();
             }
             //Create function body
@@ -93,10 +93,8 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
             if (functionBodyNodeResult.isEmpty()) {
                 return Optional.empty();
             }
-            FunctionBodyNode functionBodyNode = functionBodyNodeResult.get();
-
             return getFunctionDefinitionNode(qualifierList, functionKeyWord, functionName, relativeResourcePath,
-                    signatureGenerator, functionBodyNode);
+                    signatureNodeOptional.get(), functionBodyNodeResult.get());
         } catch (BallerinaOpenApiException e) {
             return Optional.empty();
         }
@@ -121,14 +119,10 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
                                                                          Token functionKeyWord,
                                                                          IdentifierToken functionName,
                                                                          NodeList<Node> relativeResourcePath,
-                                                                         ResourceFunctionSignatureGenerator
-                                                                                 signatureGenerator,
+                                                                         FunctionSignatureNode signatureNode,
                                                                          FunctionBodyNode functionBodyNode) {
-        Optional<FunctionSignatureNode> functionSignatureNode = signatureGenerator.generateFunctionSignature();
-        diagnostics.addAll(signatureGenerator.getDiagnostics());
-        return functionSignatureNode.map(signatureNode -> NodeFactory.createFunctionDefinitionNode(
-                RESOURCE_ACCESSOR_DEFINITION, null, qualifierList, functionKeyWord, functionName,
-                relativeResourcePath, signatureNode, functionBodyNode));
+        return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, null, qualifierList,
+                functionKeyWord, functionName, relativeResourcePath, signatureNode, functionBodyNode));
     }
 
     @Override
