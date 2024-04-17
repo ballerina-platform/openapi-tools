@@ -44,7 +44,9 @@ public enum ServiceDiagnosticMessages {
             "not be mapped to the Ballerina headers.", DiagnosticSeverity.WARNING),
     OAS_SERVICE_107("OAS_SERVICE_107", "Query parameters with OneOf & AnyOf can not be mapped " +
             "to Ballerina resource query parameters.", DiagnosticSeverity.WARNING),
-    OAS_SERVICE_108("OAS_SERVICE_108", "HTTP status code '%s' is not supported in Ballerina.",
+    OAS_SERVICE_108("OAS_SERVICE_108", "header parameter name can not be empty",
+            DiagnosticSeverity.WARNING),
+    OAS_SERVICE_201("OAS_SERVICE_201", "HTTP status code '%s' is not supported in Ballerina.",
             DiagnosticSeverity.ERROR);
 
     private final String code;
