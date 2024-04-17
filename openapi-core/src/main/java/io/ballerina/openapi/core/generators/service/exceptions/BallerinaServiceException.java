@@ -21,6 +21,10 @@ package io.ballerina.openapi.core.generators.service.exceptions;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.tools.diagnostics.Diagnostic;
 
+/**
+ * Exception defined for service level errors.
+ *
+ */
 public class BallerinaServiceException extends BallerinaOpenApiException {
 
     public BallerinaServiceException(Diagnostic diagnostic) {

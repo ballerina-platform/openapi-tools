@@ -21,6 +21,10 @@ package io.ballerina.openapi.core.generators.service.exceptions;
 import io.ballerina.openapi.core.generators.service.diagnostic.ServiceDiagnostic;
 import io.ballerina.openapi.core.generators.service.diagnostic.ServiceDiagnosticMessages;
 
+/**
+ * Exception to depict the headers with empty names.
+ *
+ */
 public class InvalidHeaderNameException extends BallerinaServiceException {
     public InvalidHeaderNameException() {
         super(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_108));
