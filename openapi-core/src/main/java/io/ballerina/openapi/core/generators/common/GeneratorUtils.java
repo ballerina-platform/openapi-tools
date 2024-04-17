@@ -396,6 +396,9 @@ public class GeneratorUtils {
      * @return string with new generated name
      */
     public static String getValidName(String identifier, boolean isSchema) {
+        if (identifier.isBlank()) {
+            return "\\" + identifier;
+        }
         //For the flatten enable we need to remove first Part of valid name check
         // this - > !identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
         if (!identifier.matches("\\b[0-9]*\\b")) {

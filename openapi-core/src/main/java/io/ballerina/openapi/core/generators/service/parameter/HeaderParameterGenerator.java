@@ -37,6 +37,7 @@ import io.ballerina.openapi.core.generators.common.exception.UnsupportedOASDataT
 import io.ballerina.openapi.core.generators.service.ServiceGenerationUtils;
 import io.ballerina.openapi.core.generators.service.diagnostic.ServiceDiagnostic;
 import io.ballerina.openapi.core.generators.service.diagnostic.ServiceDiagnosticMessages;
+import io.ballerina.openapi.core.generators.service.exceptions.InvalidHeaderNameException;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -80,10 +81,13 @@ public class HeaderParameterGenerator extends ParameterGenerator {
      */
     @Override
     public ParameterNode generateParameterNode(Parameter parameter) throws UnsupportedOASDataTypeException,
-            InvalidReferenceException {
+            InvalidReferenceException, InvalidHeaderNameException {
         Schema<?> schema = parameter.getSchema();
         String headerType = GeneratorConstants.STRING;
         TypeDescriptorNode headerTypeName;
+        if (parameter.getName().isBlank()) {
+            throw new InvalidHeaderNameException();
+        }
         IdentifierToken parameterName = createIdentifierToken(GeneratorUtils.escapeIdentifier(parameter.getName()
                         .toLowerCase(Locale.ENGLISH)), AbstractNodeFactory.createEmptyMinutiaeList(),
                 GeneratorUtils.SINGLE_WS_MINUTIAE);

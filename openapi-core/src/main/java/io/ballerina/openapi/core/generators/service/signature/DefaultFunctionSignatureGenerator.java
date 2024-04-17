@@ -31,6 +31,7 @@ import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiExc
 import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
 import io.ballerina.openapi.core.generators.common.exception.UnsupportedOASDataTypeException;
 import io.ballerina.openapi.core.generators.service.diagnostic.ServiceDiagnostic;
+import io.ballerina.openapi.core.generators.service.exceptions.InvalidHeaderNameException;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.generators.service.parameter.HeaderParameterGenerator;
 import io.ballerina.openapi.core.generators.service.parameter.QueryParameterGenerator;
@@ -101,7 +102,8 @@ public class DefaultFunctionSignatureGenerator extends FunctionSignatureGenerato
      *
      * @param operation OAS operation
      */
-    public ParametersGeneratorResult generateParameters(Map.Entry<PathItem.HttpMethod, Operation> operation) {
+    public ParametersGeneratorResult generateParameters(Map.Entry<PathItem.HttpMethod, Operation> operation) throws
+            InvalidHeaderNameException {
         List<Node> requiredParams = new ArrayList<>();
         List<Node> defaultableParams = new ArrayList<>();
         Token comma = createToken(SyntaxKind.COMMA_TOKEN);
