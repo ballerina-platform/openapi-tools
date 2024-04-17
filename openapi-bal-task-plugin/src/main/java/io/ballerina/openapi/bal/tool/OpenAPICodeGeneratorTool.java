@@ -426,7 +426,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 .append(targetPath)
                 .append(clientConfig.isResourceMode())
                 .append(clientConfig.getLicense())
-                .append(clientConfig.isNullable());
+                .append(clientConfig.isNullable())
+                .append(clientConfig.isStatusCodeBinding());
         List<String> tags = clientConfig.getFilter().getTags();
         tags.sort(String.CASE_INSENSITIVE_ORDER);
         for (String str : tags) {
