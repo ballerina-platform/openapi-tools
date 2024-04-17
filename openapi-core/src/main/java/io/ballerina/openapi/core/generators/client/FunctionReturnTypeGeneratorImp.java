@@ -62,6 +62,7 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
     protected Operation operation;
     protected String httpMethod;
     List<ClientDiagnostic> diagnostics = new ArrayList<>();
+    private ReturnTypesInfo returnTypesInfo;
 
     public FunctionReturnTypeGeneratorImp(Operation operation, OpenAPI openAPI, String httpMethod) {
         this.openAPI = openAPI;
@@ -112,7 +113,12 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
                 noContentResponseFound = populateReturnType(statusCode, response, returnTypes, returnTypesSet);
             }
         }
-        return new ReturnTypesInfo(returnTypes, noContentResponseFound);
+        returnTypesInfo = new ReturnTypesInfo(returnTypes, noContentResponseFound);
+        return returnTypesInfo;
+    }
+
+    public ReturnTypesInfo getAlreadyDefinedReturnTypeInfo() {
+        return returnTypesInfo;
     }
 
     protected boolean populateReturnType(String statusCode, ApiResponse response, List<TypeDescriptorNode> returnTypes,

@@ -54,9 +54,10 @@ public class FunctionStatusCodeReturnTypeGenerator extends FunctionReturnTypeGen
         try {
             String code = GeneratorConstants.HTTP_CODES_DES.get(statusCode);
             if (Objects.isNull(code)) {
-                if (!statusCode.equals(GeneratorConstants.DEFAULT)) {
-                    diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_113, statusCode));
-                }
+                ClientDiagnosticImp diagnostic = statusCode.equals(GeneratorConstants.DEFAULT)
+                        ? new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_115, operation.getOperationId())
+                        : new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_113, statusCode);
+                diagnostics.add(diagnostic);
             } else {
                 List<Diagnostic> newDiagnostics = new ArrayList<>();
                 returnTypes.add(generateStatusCodeTypeInclusionRecord(code, response, httpMethod, openAPI, path,
