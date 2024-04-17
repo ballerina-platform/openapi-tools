@@ -84,7 +84,7 @@ public class HeaderParameterGenerator extends ParameterGenerator {
         Schema<?> schema = parameter.getSchema();
         String headerType = GeneratorConstants.STRING;
         TypeDescriptorNode headerTypeName;
-        if (parameter.getName().isEmpty() || parameter.getName().isBlank()) {
+        if (parameter.getName().isBlank()) {
             diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_108));
         }
         IdentifierToken parameterName = createIdentifierToken(GeneratorUtils.escapeIdentifier(parameter.getName()
