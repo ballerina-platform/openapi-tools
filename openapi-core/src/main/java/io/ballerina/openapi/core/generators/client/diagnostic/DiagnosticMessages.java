@@ -55,7 +55,9 @@ public enum DiagnosticMessages {
             DiagnosticSeverity.WARNING),
     OAS_CLIENT_114("OAS_CLIENT_114", "failed to generate client method for operation: '%s' with status code binding" +
             " option. Ensure that the operation has at least one response with a status code other than 'default'",
-            DiagnosticSeverity.ERROR);
+            DiagnosticSeverity.ERROR),
+    OAS_CLIENT_115("OAS_CLIENT_115", "the 'default' response for the operation: '%s' is skipped in the client " +
+            "generation since it is not supported with status code binding option", DiagnosticSeverity.WARNING);
     private final String code;
     private final String description;
     private final DiagnosticSeverity severity;
