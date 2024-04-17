@@ -53,14 +53,14 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extract
 public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenerator {
     OpenAPI openAPI;
     Operation operation;
-    String httpMethod;
     List<ClientDiagnostic> diagnostics  = new ArrayList<>();
     boolean treatDefaultableAsRequired = false;
+    FunctionReturnTypeGeneratorImp functionReturnTypeGenerator;
 
     public RemoteFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod) {
         this.operation = operation;
         this.openAPI = openAPI;
-        this.httpMethod = httpMethod;
+        this.functionReturnTypeGenerator = new FunctionReturnTypeGeneratorImp(operation, openAPI, httpMethod);
     }
 
     @Override
@@ -86,9 +86,9 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
         SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(parameterList);
 
         // 3. return statements
-        FunctionReturnTypeGeneratorImp functionReturnType = getFunctionReturnTypeGenerator();
-        Optional<ReturnTypeDescriptorNode> returnType = functionReturnType.getReturnType();
-        diagnostics.addAll(functionReturnType.getDiagnostics());
+        FunctionReturnTypeGeneratorImp returnTypeGenerator = getFunctionReturnTypeGenerator();
+        Optional<ReturnTypeDescriptorNode> returnType = returnTypeGenerator.getReturnType();
+        diagnostics.addAll(returnTypeGenerator.getDiagnostics());
         if (returnType.isEmpty()) {
             return Optional.empty();
         }
@@ -208,7 +208,7 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
     }
 
     protected FunctionReturnTypeGeneratorImp getFunctionReturnTypeGenerator() {
-        return new FunctionReturnTypeGeneratorImp(operation, openAPI, httpMethod);
+        return functionReturnTypeGenerator;
     }
 
     public List<ClientDiagnostic> getDiagnostics() {
