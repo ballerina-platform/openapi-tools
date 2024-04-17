@@ -969,7 +969,7 @@ public class GeneratorUtils {
 
     public static String selectMediaType(String mediaTypeContent) {
         String[] contentTypes = mediaTypeContent.split(";");
-        if (mediaTypeContent.length()> 1) {
+        if (mediaTypeContent.length() > 1) {
             mediaTypeContent = contentTypes[0];
         }
         if (mediaTypeContent.matches("application/.*\\+json") || mediaTypeContent.matches(".*/json")) {
