@@ -494,6 +494,10 @@ public class GeneratorUtils {
      */
     public static boolean isSupportedMediaType(Map.Entry<String, MediaType> mediaTypeEntry) {
         String mediaType = mediaTypeEntry.getKey();
+        String[] contentTypes = mediaType.split(";");
+        if (mediaType.length() > 1) {
+            mediaType = contentTypes[0];
+        }
         String defaultBallerinaType = getBallerinaMediaType(mediaType, true);
         Schema<?> schema = mediaTypeEntry.getValue().getSchema();
 
@@ -515,6 +519,10 @@ public class GeneratorUtils {
      * Generate BallerinaMediaType for all the return mediaTypes.
      */
     public static String getBallerinaMediaType(String mediaType, boolean isRequest) {
+        String[] contentTypes = mediaType.split(";");
+        if (mediaType.length() > 1) {
+            mediaType = contentTypes[0];
+        }
         if (mediaType.matches(".*/json") || mediaType.matches("application/.*\\+json")) {
             return SyntaxKind.JSON_KEYWORD.stringValue();
         } else if (mediaType.matches(".*/xml") || mediaType.matches("application/.*\\+xml")) {
@@ -960,6 +968,10 @@ public class GeneratorUtils {
     }
 
     public static String selectMediaType(String mediaTypeContent) {
+        String[] contentTypes = mediaTypeContent.split(";");
+        if (mediaTypeContent.length()> 1) {
+            mediaTypeContent = contentTypes[0];
+        }
         if (mediaTypeContent.matches("application/.*\\+json") || mediaTypeContent.matches(".*/json")) {
             mediaTypeContent = GeneratorConstants.APPLICATION_JSON;
         } else if (mediaTypeContent.matches("application/.*\\+xml") || mediaTypeContent.matches(".*/xml")) {
