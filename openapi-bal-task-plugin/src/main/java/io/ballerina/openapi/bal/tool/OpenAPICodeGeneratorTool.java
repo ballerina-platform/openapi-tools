@@ -398,7 +398,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
 
     private String getVersion() throws IOException {
         try (InputStream inputStream = OpenAPICodeGeneratorTool.class.getClassLoader().getResourceAsStream(
-                "openapi-tool-version.properties")) {
+                "openapi-client-native-version.properties")) {
             Properties properties = new Properties();
             properties.load(inputStream);
             return properties.getProperty("version");

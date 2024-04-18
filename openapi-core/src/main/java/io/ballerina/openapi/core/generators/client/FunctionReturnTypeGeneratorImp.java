@@ -62,6 +62,7 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
     protected Operation operation;
     protected String httpMethod;
     List<ClientDiagnostic> diagnostics = new ArrayList<>();
+    private ReturnTypesInfo returnTypesInfo;
 
     public FunctionReturnTypeGeneratorImp(Operation operation, OpenAPI openAPI, String httpMethod) {
         this.openAPI = openAPI;
@@ -112,7 +113,12 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
                 noContentResponseFound = populateReturnType(statusCode, response, returnTypes, returnTypesSet);
             }
         }
-        return new ReturnTypesInfo(returnTypes, noContentResponseFound);
+        returnTypesInfo = new ReturnTypesInfo(returnTypes, noContentResponseFound);
+        return returnTypesInfo;
+    }
+
+    public ReturnTypesInfo getAlreadyDefinedReturnTypeInfo() {
+        return returnTypesInfo;
     }
 
     protected boolean populateReturnType(String statusCode, ApiResponse response, List<TypeDescriptorNode> returnTypes,
@@ -172,7 +178,13 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
      */
     private Optional<TypeDescriptorNode> getDataType(Map.Entry<String, MediaType> media, Schema<?> schema) {
         //add regex to check all JSON types
-        if (media.getKey().trim().matches(".*/json") && schema != null) {
+        String mediaType = media.getKey().trim();
+        String[] contentTypes = mediaType.split(";");
+        if (mediaType.length() > 1) {
+            mediaType = contentTypes[0];
+        }
+        if ((mediaType.matches(".*/json") || mediaType.matches("application/.*\\+json")) &&
+                schema != null) {
             return TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
         } else {
             String type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);

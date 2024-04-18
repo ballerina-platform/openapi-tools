@@ -132,7 +132,7 @@ public class OpenApiCmd implements BLauncherCmd {
 
     private String getVersion() throws IOException {
         try (InputStream inputStream = OpenApiCmd.class.getClassLoader().getResourceAsStream(
-                "openapi-tool-version.properties")) {
+                "openapi-client-native-version.properties")) {
             Properties properties = new Properties();
             properties.load(inputStream);
             return properties.getProperty("version");
@@ -268,6 +268,10 @@ public class OpenApiCmd implements BLauncherCmd {
             ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_108,
                     e.getLocalizedMessage());
             mapperDiagnostics.add(error);
+        }
+        if (balFilePath == null || !Files.exists(balFilePath)) {
+            outStream.println("given Ballerina file does not exist: " + fileName);
+            exitError(this.exitWhenFinish);
         }
         getTargetOutputPath();
         // Check service name it is mandatory
@@ -447,10 +451,12 @@ public class OpenApiCmd implements BLauncherCmd {
             generator.generateClientAndService(resourcePath.toString(), fileName, targetOutputPath.toString(), filter,
                     baseCmd.nullable, generateClientResourceFunctions, generateServiceType, generateWithoutDataBinding,
                     statusCodeBinding);
-        } catch (IOException | BallerinaOpenApiException | FormatterException |
-                 OASTypeGenException | ClientException e) {
-            outStream.println("Error occurred when generating service for openAPI contract at " + argList.get(0) + "." +
-                    " " + e.getMessage() + ".");
+        } catch (BallerinaOpenApiException e) {
+            outStream.println(e.getMessage());
+            exitError(this.exitWhenFinish);
+        } catch (IOException | FormatterException | OASTypeGenException | ClientException e) {
+            outStream.println("Error occurred when generating service for openAPI contract at " + baseCmd.inputPath +
+                    "." + e.getMessage() + ".");
             exitError(this.exitWhenFinish);
         }
     }
