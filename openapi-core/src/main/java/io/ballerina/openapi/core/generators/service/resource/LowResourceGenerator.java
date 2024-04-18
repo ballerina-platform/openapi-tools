@@ -52,6 +52,7 @@ public class LowResourceGenerator extends ResourceGenerator {
     @Override
     public FunctionDefinitionNode generateResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                            String path) throws BallerinaOpenApiException {
+        GeneratorUtils.addCommonParamsToOperationParams(operation, oasServiceMetadata.getOpenAPI(), path);
         NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(GeneratorConstants.RESOURCE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
         Token functionKeyWord = createIdentifierToken(GeneratorConstants.FUNCTION, GeneratorUtils.SINGLE_WS_MINUTIAE,
@@ -59,11 +60,6 @@ public class LowResourceGenerator extends ResourceGenerator {
         IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
                 .toLowerCase(Locale.ENGLISH), GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
         NodeList<Node> relativeResourcePath;
-        // adding parameters that are defined in the common section to the operation parameters
-        if (oasServiceMetadata.getOpenAPI().getPaths().get(path).getParameters() != null) {
-            operation.getValue().getParameters().addAll(oasServiceMetadata.getOpenAPI()
-                    .getPaths().get(path).getParameters());
-        }
         relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
                 oasServiceMetadata.getOpenAPI().getComponents(), oasServiceMetadata.generateWithoutDataBinding(),
                 diagnostics);
