@@ -28,6 +28,8 @@ paths:
           description: NonAuthoritativeInformation
         "204":
           description: NoContent
+        "205":
+          description: ResetContent
         "206":
           description: PartialContent
         "300":
