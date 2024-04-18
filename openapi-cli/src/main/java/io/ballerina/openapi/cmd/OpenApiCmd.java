@@ -269,6 +269,10 @@ public class OpenApiCmd implements BLauncherCmd {
                     e.getLocalizedMessage());
             mapperDiagnostics.add(error);
         }
+        if (balFilePath == null || !Files.exists(balFilePath)) {
+            outStream.println("given Ballerina file does not exist: " + fileName);
+            exitError(this.exitWhenFinish);
+        }
         getTargetOutputPath();
         // Check service name it is mandatory
         OASContractGenerator openApiConverter = new OASContractGenerator();
@@ -447,10 +451,12 @@ public class OpenApiCmd implements BLauncherCmd {
             generator.generateClientAndService(resourcePath.toString(), fileName, targetOutputPath.toString(), filter,
                     baseCmd.nullable, generateClientResourceFunctions, generateServiceType, generateWithoutDataBinding,
                     statusCodeBinding);
-        } catch (IOException | BallerinaOpenApiException | FormatterException |
-                 OASTypeGenException | ClientException e) {
-            outStream.println("Error occurred when generating service for openAPI contract at " + argList.get(0) + "." +
-                    " " + e.getMessage() + ".");
+        } catch (BallerinaOpenApiException e) {
+            outStream.println(e.getMessage());
+            exitError(this.exitWhenFinish);
+        } catch (IOException | FormatterException | OASTypeGenException | ClientException e) {
+            outStream.println("Error occurred when generating service for openAPI contract at " + baseCmd.inputPath +
+                    "." + e.getMessage() + ".");
             exitError(this.exitWhenFinish);
         }
     }

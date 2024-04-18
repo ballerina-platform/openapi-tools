@@ -178,7 +178,13 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
      */
     private Optional<TypeDescriptorNode> getDataType(Map.Entry<String, MediaType> media, Schema<?> schema) {
         //add regex to check all JSON types
-        if (media.getKey().trim().matches(".*/json") && schema != null) {
+        String mediaType = media.getKey().trim();
+        String[] contentTypes = mediaType.split(";");
+        if (mediaType.length() > 1) {
+            mediaType = contentTypes[0];
+        }
+        if ((mediaType.matches(".*/json") || mediaType.matches("application/.*\\+json")) &&
+                schema != null) {
             return TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
         } else {
             String type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
