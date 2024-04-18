@@ -128,7 +128,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 content = responseValue.getContent();
             }
             if (code == null && !responseCode.equals(GeneratorConstants.DEFAULT)) {
-                diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_108, responseCode));
+                diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_201, responseCode));
                 type = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
             } else if (responseCode.equals(GeneratorConstants.DEFAULT)) {
                 type = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));

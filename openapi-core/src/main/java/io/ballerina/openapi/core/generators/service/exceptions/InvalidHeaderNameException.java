@@ -16,32 +16,17 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.core.generators.common.exception;
+package io.ballerina.openapi.core.generators.service.exceptions;
 
-import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.openapi.core.generators.service.diagnostic.ServiceDiagnostic;
+import io.ballerina.openapi.core.generators.service.diagnostic.ServiceDiagnosticMessages;
 
 /**
- * Exception type definition for OpenAPI to Ballerina parsing related errors.
+ * Exception to depict the headers with empty names.
  *
- * @since 1.3.0
  */
-public class BallerinaOpenApiException extends Exception {
-
-    Diagnostic diagnostic;
-
-    public BallerinaOpenApiException(String message, Throwable e) {
-        super(message, e);
-    }
-
-    public BallerinaOpenApiException(String message) {
-        super(message);
-    }
-
-    public BallerinaOpenApiException(Diagnostic diagnostic) {
-        this.diagnostic = diagnostic;
-    }
-
-    public Diagnostic getDiagnostic() {
-        return diagnostic;
+public class InvalidHeaderNameException extends BallerinaServiceException {
+    public InvalidHeaderNameException() {
+        super(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_108));
     }
 }

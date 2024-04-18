@@ -270,7 +270,7 @@ public class BallerinaCodeGenerator {
             return;
         }
         diagnostics.forEach(diagnostic -> {
-            outStream.println(String.format("%s: $s", diagnostic.diagnosticInfo().severity(), diagnostic.message()));
+            outStream.println(String.format("%s: %s", diagnostic.diagnosticInfo().severity(), diagnostic.message()));
         });
         writeGeneratedSources(genFiles, srcPath, implPath, GEN_SERVICE);
     }
