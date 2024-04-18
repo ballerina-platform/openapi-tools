@@ -293,4 +293,19 @@ public class ParameterGeneratorTest {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "multiPathParamWithExtensionType.bal", syntaxTree);
     }
+
+    @Test(description = "Tests for path parameters in the common section for v3.1.0")
+    public void testsForPathParametersInCommonSectionForV310() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/commonPathParamsV310.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "commonPathParamsV310.bal", syntaxTree);
+    }
 }

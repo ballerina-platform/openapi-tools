@@ -93,7 +93,7 @@ public class ListenerGeneratorImpl implements ListenerGenerator {
                     port = isHttps ? HTTPS_PORT : HTTP_PORT;
                 }
             } catch (MalformedURLException e) {
-                diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_109));
+                diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_109, server.getUrl()));
             }
         }
         return getListenerDeclarationNode(port, host, "ep0");

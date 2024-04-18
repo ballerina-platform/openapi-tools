@@ -1,0 +1,26 @@
+openapi: 3.1.0
+info:
+  title: Storage Space
+  version: 1.0.0
+paths:
+  /pet/{petId}:
+    parameters:
+      - name: petId
+        in: path
+        description: ID of pet to return
+        required: true
+        schema:
+          type: integer
+          format: int64
+    post:
+      summary: Updates a pet in the store with form data
+      operationId: updatePetWithForm
+      parameters:
+        - name: name
+          in: query
+          description: Name of pet that needs to be updated
+          schema:
+            type: string
+      responses:
+        '405':
+          description: Invalid input

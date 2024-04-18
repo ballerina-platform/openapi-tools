@@ -1,0 +1,18 @@
+openapi: 3.0.1
+info:
+  title: Resource Registry
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/resource-registry"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: config:servicePort
+paths:
+  /path:
+    get:
+      operationId: getPath
+      responses:
+        "202":
+          description: Accepted

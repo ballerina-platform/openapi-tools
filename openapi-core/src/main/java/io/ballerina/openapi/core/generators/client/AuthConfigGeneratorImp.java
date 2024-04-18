@@ -65,10 +65,12 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -292,11 +294,11 @@ public class AuthConfigGeneratorImp {
             // set auth types
             if (openAPI.getComponents().getSecuritySchemes() != null) {
                 Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
-                setAuthTypes(securitySchemeMap);
+                setAuthTypes(securitySchemeMap, openAPI);
             }
 
-            // TODO: Handle the scenarion when invalid http version is given.
-            //  No diagnosics available at this level to send a warning.
+            // TODO: Handle the scenario when invalid http version is given.
+            //  No diagnostics available at this level to send a warning.
             //  Currently ignore the values and gen with default.
             if (openAPI.getExtensions() != null &&
                     openAPI.getExtensions().containsKey(X_BALLERINA_HTTP_CONFIGURATIONS)) {
@@ -1562,9 +1564,14 @@ public class AuthConfigGeneratorImp {
      * Store api key names which needs to send in the query string and as a request header separately.
      *
      * @param securitySchemeMap Map of security schemas of the given open api spec
+     * @param openAPI
      */
-    public void setAuthTypes(Map<String, SecurityScheme> securitySchemeMap) throws ClientException {
-
+    public void setAuthTypes(Map<String, SecurityScheme> securitySchemeMap, OpenAPI openAPI) throws ClientException {
+        List<Server> servers = openAPI.getServers();
+        String url = "";
+        if (servers.size() > 0) {
+            url = GeneratorUtils.buildUrl(servers.get(0).getUrl(), servers.get(0).getVariables());
+        }
         for (Map.Entry<String, SecurityScheme> securitySchemeEntry : securitySchemeMap.entrySet()) {
             SecurityScheme schemaValue = securitySchemeEntry.getValue();
             if (schemaValue != null && schemaValue.getType() != null) {
@@ -1584,18 +1591,27 @@ public class AuthConfigGeneratorImp {
                         if (schemaValue.getFlows().getClientCredentials() != null) {
                             if (schemaValue.getFlows().getClientCredentials().getTokenUrl() != null) {
                                 clientCredGrantTokenUrl = schemaValue.getFlows().getClientCredentials().getTokenUrl();
+                                if (clientCredGrantTokenUrl.startsWith("/")) {
+                                    clientCredGrantTokenUrl = url + clientCredGrantTokenUrl;
+                                }
                             }
                             authTypes.add(CLIENT_CRED);
                         }
                         if (schemaValue.getFlows().getPassword() != null) {
                             if (schemaValue.getFlows().getPassword().getTokenUrl() != null) {
                                 passwordGrantTokenUrl = schemaValue.getFlows().getPassword().getTokenUrl();
+                                if (passwordGrantTokenUrl.startsWith("/")) {
+                                    passwordGrantTokenUrl = url + passwordGrantTokenUrl;
+                                }
                             }
                             authTypes.add(PASSWORD);
                         }
                         if (schemaValue.getFlows().getAuthorizationCode() != null) {
                             if (schemaValue.getFlows().getAuthorizationCode().getTokenUrl() != null) {
                                 refreshTokenUrl = schemaValue.getFlows().getAuthorizationCode().getTokenUrl();
+                                if (refreshTokenUrl.startsWith("/")) {
+                                    refreshTokenUrl = url + refreshTokenUrl;
+                                }
                             }
                             authTypes.addAll(Arrays.asList(BEARER, REFRESH_TOKEN));
                         }
@@ -1698,7 +1714,7 @@ public class AuthConfigGeneratorImp {
     /**
      * This method is used concat the config record authConfig field type.
      *
-     * @param fieldtypes Type name set from {@link #setAuthTypes(Map)} method.
+     * @param fieldtypes Type name set from {@link #setAuthTypes(Map, OpenAPI)} method.
      * @return {@link String}   Pipe concatenated list of type names
      */
     private StringBuilder buildConfigRecordFieldTypes(Set<String> fieldtypes) {

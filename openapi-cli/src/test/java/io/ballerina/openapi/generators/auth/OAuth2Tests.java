@@ -20,6 +20,7 @@ package io.ballerina.openapi.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
@@ -38,6 +39,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * All the tests related to the auth related code snippet generation for http or oauth 2.0 mechanisms.
@@ -54,7 +56,7 @@ public class OAuth2Tests {
         Path definitionPath = RES_DIR.resolve("scenarios/oauth2/" + yamlFile);
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
-        ballerinaAuthConfigGenerator.setAuthTypes(securitySchemeMap);
+        ballerinaAuthConfigGenerator.setAuthTypes(securitySchemeMap, openAPI);
         String expectedConfigRecord = configRecord;
         String generatedConfigRecord = Objects.requireNonNull(
                 ballerinaAuthConfigGenerator.generateConnectionConfigRecord()).toString();
@@ -90,6 +92,31 @@ public class OAuth2Tests {
         expectedParam = (expectedParam.trim()).replaceAll("\\s+", "");
         String generatedParamsStr = (generatedInitParamNode.toString().trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedParam, generatedParamsStr);
+    }
+
+    @Test(description = "Generate OAuth2Record record for openweathermap api")
+    public void testOAuth2ConfigRecordWithRelativeUrl() throws IOException,
+            BallerinaOpenApiException, ClientException {
+        Path definitionPath = RES_DIR.resolve(
+                "scenarios/oauth2/oauth2_client_credential_with_relative_token_url.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(true, false);
+        ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI);
+        List<TypeDefinitionNode> authRelatedTypeDefinitionNodes =
+                ballerinaAuthConfigGenerator.getAuthRelatedTypeDefinitionNodes();
+        Optional<TypeDefinitionNode> connectionConfig = authRelatedTypeDefinitionNodes.stream()
+                .filter(typeDefinitionNode -> typeDefinitionNode.typeName()
+                        .text().equals("OAuth2ClientCredentialsGrantConfig"))
+                .findFirst();
+        if (connectionConfig.isPresent()) {
+            String expectedRecord = TestConstants.OAUTH2_REFRESH_TOKEN_GRANT_CONFIG_RECORD;
+            String generatedRecord = connectionConfig.get().toString();
+            generatedRecord = (generatedRecord.trim()).replaceAll("\\s+", "");
+            expectedRecord = (expectedRecord.trim()).replaceAll("\\s+", "");
+            Assert.assertEquals(generatedRecord, expectedRecord);
+        } else {
+            Assert.fail();
+        }
     }
 
     @DataProvider(name = "oAuth2IOProvider")

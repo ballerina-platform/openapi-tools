@@ -306,4 +306,18 @@ public class HeaderParameterTests {
         TestUtils.compareDiagnosticWarnings(ballerinaServiceGenerator.getDiagnostics(),
                 "Header 'X-User' with type 'object' can not be mapped as a valid Ballerina header parameter.");
     }
+
+    @Test(description = "13. Header parameter order")
+    public void blankHeaderParameterName() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/headers/header_13.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_13.bal", syntaxTree);
+    }
 }

@@ -61,13 +61,7 @@ public class DefaultResourceGenerator extends ResourceGenerator {
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
         IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
                 .toLowerCase(Locale.ENGLISH), GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
-        NodeList<Node> relativeResourcePath;
-        // adding parameters that are defined in the common section to the operation parameters
-        if (oasServiceMetadata.getOpenAPI().getPaths().get(path).getParameters() != null) {
-            operation.getValue().getParameters().addAll(oasServiceMetadata.getOpenAPI()
-                    .getPaths().get(path).getParameters());
-        }
-        relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
+        NodeList<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
                 oasServiceMetadata.getOpenAPI().getComponents(), oasServiceMetadata.generateWithoutDataBinding(),
                 diagnostics);
         FunctionSignatureGenerator functionSignatureGenerator = FunctionSignatureGenerator
