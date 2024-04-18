@@ -48,10 +48,10 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameRefe
  */
 public class AnyDataTypeGenerator extends TypeGenerator {
 
-    public AnyDataTypeGenerator(Schema schema, String typeName, boolean overrideNullable,
+    public AnyDataTypeGenerator(Schema schema, String typeName, boolean ignoreNullableFlag,
                                 HashMap<String, TypeDefinitionNode> subTypesMap,
                                 HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
-        super(schema, typeName, overrideNullable, subTypesMap, pregeneratedTypeMap);
+        super(schema, typeName, ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
     }
 
     /**
@@ -60,6 +60,6 @@ public class AnyDataTypeGenerator extends TypeGenerator {
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws OASTypeGenException {
         return TypeGeneratorUtils.getNullableType(schema, createSimpleNameReferenceNode(
-                createIdentifierToken(GeneratorConstants.ANY_DATA)), overrideNullable);
+                createIdentifierToken(GeneratorConstants.ANY_DATA)), ignoreNullableFlag);
     }
 }

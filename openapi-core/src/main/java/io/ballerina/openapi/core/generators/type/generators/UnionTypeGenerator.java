@@ -20,10 +20,12 @@ package io.ballerina.openapi.core.generators.type.generators;
 
 import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
+import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
@@ -61,10 +63,10 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
  */
 public class UnionTypeGenerator extends TypeGenerator {
 
-    public UnionTypeGenerator(Schema<?> schema, String typeName, boolean overrideNullable,
+    public UnionTypeGenerator(Schema<?> schema, String typeName, boolean ignoreNullableFlag,
                               HashMap<String, TypeDefinitionNode> subTypesMap,
                               HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
-        super(schema, typeName, overrideNullable, subTypesMap, pregeneratedTypeMap);
+        super(schema, typeName, ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
     }
 
     @Override
@@ -76,7 +78,7 @@ public class UnionTypeGenerator extends TypeGenerator {
             schemas = schema.getAnyOf();
         }
         TypeDescriptorNode unionTypeDesc = getUnionType(schemas, typeName);
-        return TypeGeneratorUtils.getNullableType(schema, unionTypeDesc, overrideNullable);
+        return TypeGeneratorUtils.getNullableType(schema, unionTypeDesc, ignoreNullableFlag);
     }
 
     /**
@@ -91,7 +93,7 @@ public class UnionTypeGenerator extends TypeGenerator {
         List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
         for (Schema<?> schema : schemas) {
             TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, typeName, null,
-                    overrideNullable, subTypesMap, pregeneratedTypeMap);
+                    ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
             TypeDescriptorNode typeDescNode = typeGenerator.generateTypeDescriptorNode();
             imports.addAll(typeGenerator.getImports());
             if (typeDescNode instanceof OptionalTypeDescriptorNode && GeneratorMetaData.getInstance().isNullable()) {
@@ -136,7 +138,9 @@ public class UnionTypeGenerator extends TypeGenerator {
             unionTypeDescNode = createUnionTypeDescriptorNode(leftTypeDesc, createToken(PIPE_TOKEN), rightTypeDesc);
             leftTypeDesc = unionTypeDescNode;
         }
-
+        if (unionTypeDescNode.toSourceCode().contains(GeneratorConstants.ANYDATA)) {
+            return NodeParser.parseTypeDescriptor(GeneratorConstants.ANYDATA);
+        }
         return unionTypeDescNode;
     }
 }

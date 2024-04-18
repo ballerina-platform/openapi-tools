@@ -52,10 +52,10 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convert
  */
 public class PrimitiveTypeGenerator extends TypeGenerator {
 
-    public PrimitiveTypeGenerator(Schema schema, String typeName, boolean overrideNullable,
+    public PrimitiveTypeGenerator(Schema schema, String typeName, boolean ignoreNullableFlag,
                                   HashMap<String, TypeDefinitionNode> subTypesMap,
                                   HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
-        super(schema, typeName, overrideNullable, subTypesMap, pregeneratedTypeMap);
+        super(schema, typeName, ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
     }
 
     /**
@@ -66,13 +66,13 @@ public class PrimitiveTypeGenerator extends TypeGenerator {
     public TypeDescriptorNode generateTypeDescriptorNode() throws OASTypeGenException {
         String typeDescriptorName;
         try {
-            typeDescriptorName = convertOpenAPITypeToBallerina(schema, overrideNullable);
+            typeDescriptorName = convertOpenAPITypeToBallerina(schema, ignoreNullableFlag);
         } catch (UnsupportedOASDataTypeException e) {
             throw new OASTypeGenException(e.getDiagnostic().message());
         }
         // TODO: Need to the format of other primitive types too
         if (schema.getEnum() != null && schema.getEnum().size() > 0) {
-            EnumGenerator enumGenerator = new EnumGenerator(schema, typeName, overrideNullable,
+            EnumGenerator enumGenerator = new EnumGenerator(schema, typeName, ignoreNullableFlag,
                     subTypesMap, pregeneratedTypeMap);
             return enumGenerator.generateTypeDescriptorNode();
         } else if (GeneratorUtils.getOpenAPIType(schema).equals(GeneratorConstants.STRING) &&
@@ -81,6 +81,6 @@ public class PrimitiveTypeGenerator extends TypeGenerator {
             typeDescriptorName = "record {byte[] fileContent; string fileName;}";
         }
         TypeDescriptorNode typeDescriptorNode = NodeParser.parseTypeDescriptor(typeDescriptorName);
-        return TypeGeneratorUtils.getNullableType(schema, typeDescriptorNode, overrideNullable);
+        return TypeGeneratorUtils.getNullableType(schema, typeDescriptorNode, ignoreNullableFlag);
     }
 }
