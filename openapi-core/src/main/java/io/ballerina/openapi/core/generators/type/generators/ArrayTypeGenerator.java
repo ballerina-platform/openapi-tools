@@ -74,10 +74,10 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convert
 public class ArrayTypeGenerator extends TypeGenerator {
     private String parentType;
 
-    public ArrayTypeGenerator(Schema schema, String typeName, boolean overrideNullable,
+    public ArrayTypeGenerator(Schema schema, String typeName, boolean ignoreNullableFlag,
                               String parentType, HashMap<String, TypeDefinitionNode> subTypesMap,
                               HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
-        super(schema, typeName, overrideNullable, subTypesMap, pregeneratedTypeMap);
+        super(schema, typeName, ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
         this.parentType = parentType;
     }
 
@@ -98,7 +98,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
                             parentType + "-" + normalizedTypeName + "-Items-" + GeneratorUtils.getOpenAPIType(items) :
                             normalizedTypeName + "-Items-" + GeneratorUtils.getOpenAPIType(items),
                     true);
-            typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null, overrideNullable,
+            typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null, ignoreNullableFlag,
                     subTypesMap, pregeneratedTypeMap);
             if (!pregeneratedTypeMap.containsKey(typeName)) {
                 pregeneratedTypeMap.put(typeName, createSimpleNameReferenceNode(createIdentifierToken(typeName)));
@@ -108,7 +108,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
                 subTypesMap.put(typeName, arrayItemWithConstraint);
             }
         } else {
-            typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null, overrideNullable,
+            typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null, ignoreNullableFlag,
                     subTypesMap, pregeneratedTypeMap);
         }
 
@@ -150,7 +150,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         ArrayTypeDescriptorNode arrayTypeDescriptorNode = createArrayTypeDescriptorNode(typeDescriptorNode,
                 arrayDimensions);
         imports.addAll(typeGenerator.getImports());
-        return TypeGeneratorUtils.getNullableType(schema, arrayTypeDescriptorNode, overrideNullable);
+        return TypeGeneratorUtils.getNullableType(schema, arrayTypeDescriptorNode, ignoreNullableFlag);
     }
 
     /**
@@ -172,7 +172,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
             String validTypeName = GeneratorUtils.escapeIdentifier(typeName);
             TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(
                     GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(typeName),
-                    validTypeName, null, overrideNullable, subTypesMap, pregeneratedTypeMap);
+                    validTypeName, null, ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
             if (!pregeneratedTypeMap.containsKey(validTypeName)) {
                 pregeneratedTypeMap.put(validTypeName, createSimpleNameReferenceNode(
                         createIdentifierToken(validTypeName)));
@@ -192,7 +192,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
                 schemaType.equals(GeneratorConstants.STRING))) {
             try {
                 member = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
-                        convertOpenAPITypeToBallerina(schema.getItems(), overrideNullable)));
+                        convertOpenAPITypeToBallerina(schema.getItems(), ignoreNullableFlag)));
             } catch (UnsupportedOASDataTypeException e) {
                 throw new OASTypeGenException(e.getDiagnostic().message());
             }
@@ -200,7 +200,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
             member = getTypeDescNodeForArraySchema(schema.getItems(), subTypesMap).orElse(null);
         } else if (schema.getItems() != null) {
             TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema.getItems(), typeName,
-                    parentType, overrideNullable, subTypesMap, pregeneratedTypeMap);
+                    parentType, ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
             member = typeGenerator.generateTypeDescriptorNode();
         } else {
             return Optional.empty();
