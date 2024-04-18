@@ -442,21 +442,10 @@ public class BallerinaCodeGenerator {
 
     private static BallerinaClientGenerator getBallerinaClientGenerator(OASClientConfig oasClientConfig,
                                                                         boolean statusCodeBinding) {
-        if (!statusCodeBinding || hasRequestBinding(oasClientConfig.getOpenAPI())) {
-            if (statusCodeBinding) {
-                outStream.println("WARNING: the generated client will not have status code response binding since " +
-                        "the OpenAPI definition contains unsupported media-type for request payload binding.");
-            }
+        if (!statusCodeBinding) {
             return new BallerinaClientGenerator(oasClientConfig);
         }
         return new BallerinaClientGeneratorWithStatusCodeBinding(oasClientConfig);
-    }
-
-    private static boolean hasRequestBinding(OpenAPI openAPI) {
-        return openAPI.getPaths().values().stream().anyMatch(pathItem -> pathItem.readOperations().stream()
-                .anyMatch(operation -> operation.getRequestBody() != null &&
-                        operation.getRequestBody().getContent().keySet().stream()
-                                .anyMatch(GeneratorUtils::hasRequestBinding)));
     }
 
 
