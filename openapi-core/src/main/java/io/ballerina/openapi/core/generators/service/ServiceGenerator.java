@@ -43,7 +43,7 @@ public abstract class ServiceGenerator {
     boolean isNullableRequired;
     List<Node> functionsList;
 
-    private final List<Diagnostic> diagnostics = new ArrayList<>();
+    final List<Diagnostic> diagnostics = new ArrayList<>();
 
     public ServiceGenerator(OASServiceMetadata oasServiceMetadata) {
         this.oasServiceMetadata = oasServiceMetadata;

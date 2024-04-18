@@ -432,8 +432,8 @@ public class OpenApiCmd implements BLauncherCmd {
             generator.generateService(resourcePath.toString(), serviceName, targetOutputPath.toString(), filter,
                     baseCmd.nullable, generateServiceType, generateWithoutDataBinding);
         } catch (IOException | FormatterException | BallerinaOpenApiException e) {
-            outStream.println("Error occurred when generating service for OpenAPI contract at " + argList.get(0) +
-                    ". " + e.getMessage() + ".");
+            outStream.println("Error occurred when generating service for openAPI contract at " + baseCmd.inputPath +
+                    "." + e.getMessage() + ".");
             exitError(this.exitWhenFinish);
         }
     }
@@ -455,8 +455,8 @@ public class OpenApiCmd implements BLauncherCmd {
             outStream.println(e.getMessage());
             exitError(this.exitWhenFinish);
         } catch (IOException | FormatterException | OASTypeGenException | ClientException e) {
-            outStream.println("Error occurred when generating service for openAPI contract at " + baseCmd.inputPath +
-                    "." + e.getMessage() + ".");
+            outStream.println("Error occurred when generating service and client for openAPI contract at " +
+                    baseCmd.inputPath + "." + e.getMessage() + ".");
             exitError(this.exitWhenFinish);
         }
     }

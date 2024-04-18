@@ -36,13 +36,16 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.service.diagnostic.ServiceDiagnostic;
+import io.ballerina.openapi.core.generators.service.diagnostic.ServiceDiagnosticMessages;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,6 +56,7 @@ import java.util.List;
 public class ListenerGeneratorImpl implements ListenerGenerator {
 
     private String basePath = "/";
+    private List<Diagnostic> diagnostics = new ArrayList<>();
 
     public ListenerGeneratorImpl() {
     }
@@ -68,10 +72,10 @@ public class ListenerGeneratorImpl implements ListenerGenerator {
      * @return {@link ListenerDeclarationNode} for server.
      * @throws OASTypeGenException when process break with exception
      */
-    public ListenerDeclarationNode getListenerDeclarationNodes(List<Server> servers) throws BallerinaOpenApiException {
+    public ListenerDeclarationNode getListenerDeclarationNodes(List<Server> servers) {
         // Assign host port value to listeners
-        String host;
-        int port;
+        String host = "localhost";
+        int port = 9090;
         Server server = servers.get(0);
         if (!server.getUrl().isBlank() && !"/".equals(server.getUrl())) {
             ServerVariables variables = server.getVariables();
@@ -89,12 +93,8 @@ public class ListenerGeneratorImpl implements ListenerGenerator {
                     port = isHttps ? HTTPS_PORT : HTTP_PORT;
                 }
             } catch (MalformedURLException e) {
-                throw new BallerinaOpenApiException("Failed to read endpoint details of the server: " +
-                        server.getUrl(), e);
+                diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_109));
             }
-        } else {
-            host = "localhost";
-            port = 9090;
         }
         return getListenerDeclarationNode(port, host, "ep0");
     }
@@ -153,5 +153,9 @@ public class ListenerGeneratorImpl implements ListenerGenerator {
         return NodeFactory.createListenerDeclarationNode(null, null, listenerKeyword,
                 typeDescriptor, variableName, AbstractNodeFactory.createToken(SyntaxKind.EQUAL_TOKEN), initializer,
                 AbstractNodeFactory.createToken(SyntaxKind.SEMICOLON_TOKEN));
+    }
+
+    public List<Diagnostic> getDiagnostics() {
+        return diagnostics;
     }
 }

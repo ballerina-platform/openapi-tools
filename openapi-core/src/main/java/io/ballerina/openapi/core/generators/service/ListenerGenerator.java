@@ -19,7 +19,6 @@
 package io.ballerina.openapi.core.generators.service;
 
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
-import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.servers.Server;
 
 import java.util.List;
@@ -31,5 +30,5 @@ public interface ListenerGenerator {
 
     String getBasePath();
 
-    ListenerDeclarationNode getListenerDeclarationNodes(List<Server> servers) throws BallerinaOpenApiException;
+    ListenerDeclarationNode getListenerDeclarationNodes(List<Server> servers);
 }

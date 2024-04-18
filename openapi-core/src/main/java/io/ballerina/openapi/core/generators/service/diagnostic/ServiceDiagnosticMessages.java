@@ -46,6 +46,8 @@ public enum ServiceDiagnosticMessages {
             "to Ballerina resource query parameters.", DiagnosticSeverity.WARNING),
     OAS_SERVICE_108("OAS_SERVICE_108", "header parameter name can not be empty",
             DiagnosticSeverity.WARNING),
+    OAS_SERVICE_109("OAS_SERVICE_109", "Failed to read endpoint details of the server: %s",
+            DiagnosticSeverity.WARNING),
     OAS_SERVICE_201("OAS_SERVICE_201", "HTTP status code '%s' is not supported in Ballerina.",
             DiagnosticSeverity.ERROR);
 
