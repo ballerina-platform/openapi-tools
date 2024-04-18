@@ -41,12 +41,43 @@ service /api on new http:Listener(9999) {
         Album[] albumsArr = albums.toArray();
         if albumsArr.length() == 0 {
             return {
-                body: {"message": "No albums found"},
+                body: {message: "No albums found"},
                 headers: {user\-id: "user-1", req\-id: 1}
             };
         }
         return {
             body: albumsArr,
+            headers: {user\-id: "user-1", req\-id: 1}
+        };
+    }
+
+    resource function post albums(Album album) returns CreatedAlbum|ConflictAlbum {
+        if (albums.hasKey(album.id)) {
+            return {
+                body: {message: "Album already exists", "albumId": album.id},
+                headers: {user\-id: "user-1", req\-id: 1}
+            };
+        }
+        albums.add(album);
+        return {
+            body: album,
+            headers: {user\-id: "user-1", req\-id: 1}
+        };
+    }
+
+    resource function post albums\-all(Album[] albumArr, string? query = ()) returns CreatedAlbumArray|ConflictAlbum {
+        foreach Album album in albumArr {
+            if (albums.hasKey(album.id)) {
+                return {
+                    body: {message: "Album already exists", "albumId": album.id},
+                    headers: {user\-id: "user-1", req\-id: 1}
+                };
+            } else {
+                albums.add(album);
+            }
+        }
+        return {
+            body: albumArr,
             headers: {user\-id: "user-1", req\-id: 1}
         };
     }
