@@ -89,7 +89,8 @@ public class TypeGeneratorUtils {
             return new PrimitiveTypeGenerator(schemaValue, typeName, ignoreNullableFlag,
                     subTypesMap, pregeneratedTypeMap);
         } else { // when schemaValue.type == null
-            return new AnyDataTypeGenerator(schemaValue, typeName, ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
+            return new AnyDataTypeGenerator(schemaValue, typeName, ignoreNullableFlag, subTypesMap,
+                    pregeneratedTypeMap);
         }
     }
 
