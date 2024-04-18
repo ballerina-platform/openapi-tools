@@ -34,6 +34,24 @@ public type OkAlbum record {|
     record {|int req\-id; string user\-id;|} headers;
 |};
 
+public type CreatedAlbum record {|
+    *http:Created;
+    Album body;
+    record {|int req\-id; string user\-id;|} headers;
+|};
+
+public type CreatedAlbumArray record {|
+    *http:Created;
+    Album[] body;
+    record {|int req\-id; string user\-id;|} headers;
+|};
+
+public type ConflictAlbum record {|
+    *http:Conflict;
+    ErrorMessage body;
+    record {|int req\-id; string user\-id;|} headers;
+|};
+
 public type ErrorMessage record {|
     string message;
     string...;
