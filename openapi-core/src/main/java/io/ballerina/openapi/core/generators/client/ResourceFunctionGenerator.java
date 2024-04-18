@@ -69,6 +69,10 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
         try {
             //TODO: this will be replace with the common diagnostic approach.
             List<Diagnostic> pathDiagnostics = new ArrayList<>();
+            // adding parameters that are defined in the common section to the operation parameters
+            if (openAPI.getPaths().get(path).getParameters() != null) {
+                operation.getValue().getParameters().addAll(openAPI.getPaths().get(path).getParameters());
+            }
             NodeList<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
                     openAPI.getComponents(), false, pathDiagnostics);
             if (!pathDiagnostics.isEmpty()) {
