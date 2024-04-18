@@ -61,35 +61,36 @@ public class TypeGeneratorUtils {
      * @return Relevant SchemaType object
      */
     public static TypeGenerator getTypeGenerator(Schema<?> schemaValue, String typeName, String parentName,
-                                                 boolean overrideNullable,
+                                                 boolean ignoreNullableFlag,
                                                  HashMap<String, TypeDefinitionNode> subTypesMap,
                                                  HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
         if (schemaValue.get$ref() != null) {
-            return new ReferencedTypeGenerator(schemaValue, typeName, overrideNullable,
+            return new ReferencedTypeGenerator(schemaValue, typeName, ignoreNullableFlag,
                     subTypesMap, pregeneratedTypeMap);
         } else if (GeneratorUtils.isComposedSchema(schemaValue)) {
             if (schemaValue.getAllOf() != null) {
-                return new AllOfRecordTypeGenerator(schemaValue, typeName, overrideNullable,
+                return new AllOfRecordTypeGenerator(schemaValue, typeName, ignoreNullableFlag,
                         subTypesMap, pregeneratedTypeMap);
             } else {
-                return new UnionTypeGenerator(schemaValue, typeName, overrideNullable,
+                return new UnionTypeGenerator(schemaValue, typeName, ignoreNullableFlag,
                         subTypesMap, pregeneratedTypeMap);
             }
         } else if ((GeneratorUtils.getOpenAPIType(schemaValue) != null &&
                 GeneratorUtils.getOpenAPIType(schemaValue).equals(GeneratorConstants.OBJECT)) ||
                 GeneratorUtils.isObjectSchema(schemaValue) || schemaValue.getProperties() != null ||
                 GeneratorUtils.isMapSchema(schemaValue)) {
-            return new RecordTypeGenerator(schemaValue, typeName, overrideNullable,
+            return new RecordTypeGenerator(schemaValue, typeName, ignoreNullableFlag,
                     subTypesMap, pregeneratedTypeMap);
         } else if (GeneratorUtils.isArraySchema(schemaValue)) {
-            return new ArrayTypeGenerator(schemaValue, typeName, overrideNullable, parentName, subTypesMap,
+            return new ArrayTypeGenerator(schemaValue, typeName, ignoreNullableFlag, parentName, subTypesMap,
                     pregeneratedTypeMap);
         } else if (GeneratorUtils.getOpenAPIType(schemaValue) != null &&
                 PRIMITIVE_TYPE_LIST.contains(GeneratorUtils.getOpenAPIType(schemaValue))) {
-            return new PrimitiveTypeGenerator(schemaValue, typeName, overrideNullable,
+            return new PrimitiveTypeGenerator(schemaValue, typeName, ignoreNullableFlag,
                     subTypesMap, pregeneratedTypeMap);
         } else { // when schemaValue.type == null
-            return new AnyDataTypeGenerator(schemaValue, typeName, overrideNullable, subTypesMap, pregeneratedTypeMap);
+            return new AnyDataTypeGenerator(schemaValue, typeName, ignoreNullableFlag, subTypesMap,
+                    pregeneratedTypeMap);
         }
     }
 
@@ -107,7 +108,7 @@ public class TypeGeneratorUtils {
      * @return Final type of the field
      */
     public static TypeDescriptorNode getNullableType(Schema schema, TypeDescriptorNode originalTypeDesc,
-                                                     boolean overrideNullable) {
+                                                     boolean ignoreNullableFlag) {
         TypeDescriptorNode nillableType = originalTypeDesc;
         boolean nullable = GeneratorMetaData.getInstance().isNullable();
         if (schema.getNullable() != null) {
@@ -116,7 +117,7 @@ public class TypeGeneratorUtils {
             }
         } else if (schema.getTypes() != null && schema.getTypes().contains(GeneratorConstants.NULL)) {
             nillableType = createOptionalTypeDescriptorNode(originalTypeDesc, createToken(QUESTION_MARK_TOKEN));
-        } else if (!overrideNullable && nullable) {
+        } else if (!ignoreNullableFlag && nullable) {
             nillableType = createOptionalTypeDescriptorNode(originalTypeDesc, createToken(QUESTION_MARK_TOKEN));
         }
         return nillableType;

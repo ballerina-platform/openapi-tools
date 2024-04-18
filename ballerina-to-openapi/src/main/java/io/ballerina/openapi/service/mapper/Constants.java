@@ -132,7 +132,7 @@ public final class Constants {
         httpCodeMap.put("Accepted", "202");
         httpCodeMap.put("NonAuthoritativeInformation", "203");
         httpCodeMap.put("NoContent", "204");
-        httpCodeMap.put("RestContent", "205");
+        httpCodeMap.put("ResetContent", "205");
         httpCodeMap.put("PartialContent", "206");
         httpCodeMap.put("MultiStatus", "207");
         httpCodeMap.put("AlreadyReported", "208");

@@ -316,11 +316,11 @@ public class GeneratorUtils {
      * @param schema OpenApi schema
      * @return ballerina type
      */
-    public static String convertOpenAPITypeToBallerina(Schema<?> schema, boolean overrideNullable)
+    public static String convertOpenAPITypeToBallerina(Schema<?> schema, boolean ignoreNullableFlag)
             throws UnsupportedOASDataTypeException {
         String type = getOpenAPIType(schema);
         if (schema.getEnum() != null && !schema.getEnum().isEmpty() && primitiveTypeList.contains(type)) {
-            EnumGenerator enumGenerator = new EnumGenerator(schema, null, overrideNullable,
+            EnumGenerator enumGenerator = new EnumGenerator(schema, null, ignoreNullableFlag,
                     new HashMap<>(), new HashMap<>());
             try {
                 return enumGenerator.generateTypeDescriptorNode().toString();

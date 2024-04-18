@@ -60,10 +60,10 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
  */
 public class ReferencedTypeGenerator extends TypeGenerator {
 
-    public ReferencedTypeGenerator(Schema schema, String typeName, boolean overrideNullable,
+    public ReferencedTypeGenerator(Schema schema, String typeName, boolean ignoreNullableFlag,
                                    HashMap<String, TypeDefinitionNode> subTypesMap,
                                    HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
-        super(schema, typeName, overrideNullable, subTypesMap, pregeneratedTypeMap);
+        super(schema, typeName, ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
     }
 
     /**
@@ -83,7 +83,7 @@ public class ReferencedTypeGenerator extends TypeGenerator {
                 GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(extractName) : refSchema;
         SimpleNameReferenceNode nameReferenceNode = createSimpleNameReferenceNode(createIdentifierToken(typeName));
         TypeGenerator reffredTypeGenerator = TypeGeneratorUtils.getTypeGenerator(refSchema, extractName,
-                null,  overrideNullable, subTypesMap, pregeneratedTypeMap);
+                null,  ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
         if (!pregeneratedTypeMap.containsKey(typeName)) {
             pregeneratedTypeMap.put(typeName, createSimpleNameReferenceNode(createIdentifierToken(typeName)));
             TypeDescriptorNode typeDescriptorNode = reffredTypeGenerator.generateTypeDescriptorNode();
@@ -98,6 +98,6 @@ public class ReferencedTypeGenerator extends TypeGenerator {
             throw new OASTypeGenException(String.format("Undefined $ref: '%s' in openAPI contract.",
                     schema.get$ref()));
         }
-        return TypeGeneratorUtils.getNullableType(refSchema, nameReferenceNode, overrideNullable);
+        return TypeGeneratorUtils.getNullableType(refSchema, nameReferenceNode, ignoreNullableFlag);
     }
 }
