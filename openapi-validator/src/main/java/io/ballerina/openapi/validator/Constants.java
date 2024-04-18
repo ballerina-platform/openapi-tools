@@ -86,7 +86,7 @@ public class Constants {
         httpCodes.put("Accepted", "202");
         httpCodes.put("NonAuthoritativeInformation", "203");
         httpCodes.put("NoContent", "204");
-        httpCodes.put("RestContent", "205");
+        httpCodes.put("ResetContent", "205");
         httpCodes.put("PartialContent", "206");
         httpCodes.put("MultiStatus", "207");
         httpCodes.put("AlreadyReported", "208");
