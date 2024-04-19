@@ -197,7 +197,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SEC
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SELF;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SETTINGS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SSL_FIELD_NAME;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STATUS_CODE_CLIENT;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.VALIDATION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.X_BALLERINA_HTTP_CONFIGURATIONS;
