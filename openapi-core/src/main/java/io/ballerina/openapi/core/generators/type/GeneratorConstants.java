@@ -159,7 +159,7 @@ public class GeneratorConstants {
         httpCodeMap.put("202", "Accepted");
         httpCodeMap.put("203", "NonAuthoritativeInformation");
         httpCodeMap.put("204", "NoContent");
-        httpCodeMap.put("205", "RestContent");
+        httpCodeMap.put("205", "ResetContent");
         httpCodeMap.put("206", "PartialContent");
         httpCodeMap.put("207", "MultiStatus");
         httpCodeMap.put("208", "AlreadyReported");
