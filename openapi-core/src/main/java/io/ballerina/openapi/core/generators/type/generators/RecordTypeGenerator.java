@@ -275,10 +275,15 @@ public class RecordTypeGenerator extends TypeGenerator {
 
         if (required != null) {
             setRequiredFields(required, recordFieldList, field, fieldSchema, fieldName, fieldTypeName);
-        } else if (fieldSchema.getDefault() != null) {
+        } else if (fieldSchema.getDefault() != null && !fieldSchema.getDefault().toString().isBlank()) {
+            String defaultValue = fieldSchema.getDefault().toString();
+            if ((fieldSchema.getEnum() != null && "string".equals(fieldSchema.getType()))
+                    || fieldTypeName.toSourceCode().equals("string")) {
+                defaultValue = "\"" + defaultValue.replaceAll("\"", "\\\\\"") + "\"";
+            }
             RecordFieldWithDefaultValueNode recordFieldNode = NodeFactory.createRecordFieldWithDefaultValueNode(
                     null, null, fieldTypeName, fieldName, createToken(EQUAL_TOKEN), createSimpleNameReferenceNode(
-                            createIdentifierToken(fieldSchema.getDefault().toString())), createToken(SEMICOLON_TOKEN));
+                            createIdentifierToken(defaultValue)), createToken(SEMICOLON_TOKEN));
             recordFieldList.add(recordFieldNode);
         } else {
             RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
