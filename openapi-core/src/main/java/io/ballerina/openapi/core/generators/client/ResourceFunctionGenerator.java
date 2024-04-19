@@ -59,7 +59,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
 
     @Override
     public Optional<FunctionDefinitionNode> generateFunction() {
-
+        GeneratorUtils.addCommonParamsToOperationParams(operation, openAPI, path);
         //Create qualifier list
         NodeList<Token> qualifierList = createNodeList(createToken(RESOURCE_KEYWORD), createToken(ISOLATED_KEYWORD));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);

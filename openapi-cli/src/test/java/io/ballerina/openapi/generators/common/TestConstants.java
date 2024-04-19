@@ -285,4 +285,7 @@ public class TestConstants {
             "    Enabled by default\n" +
             "    boolean validation = true;\n" +
             "|};";
+    public static final String OAUTH2_REFRESH_TOKEN_GRANT_CONFIG_RECORD = "#OAuth2ClientCredentialsGrantConfigs" +
+            "publictypeOAuth2ClientCredentialsGrantConfigrecord{|*http:OAuth2ClientCredentialsGrantConfig;" +
+            "#TokenURLstringtokenUrl=\"https://domain/services/data/oauth2/token\";|};";
 }

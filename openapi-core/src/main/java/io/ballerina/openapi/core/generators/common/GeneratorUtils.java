@@ -572,7 +572,6 @@ public class GeneratorUtils {
      * @return resolved url
      */
     public static String buildUrl(String absUrl, ServerVariables variables) {
-
         String url = absUrl;
         if (variables != null) {
             for (Map.Entry<String, ServerVariable> entry : variables.entrySet()) {
@@ -1196,5 +1195,21 @@ public class GeneratorUtils {
                     rightTypeDesc);
         }
         return unionTypeDescriptorNode;
+    }
+
+    public static void addCommonParamsToOperationParams(Map.Entry<PathItem.HttpMethod, Operation> operation,
+                                                        OpenAPI openAPI, String path) {
+        List<Parameter> parameters = operation.getValue().getParameters();
+        List<Parameter> commonParameters = openAPI.getPaths().get(path).getParameters();
+        if (parameters == null) {
+            operation.getValue().setParameters(commonParameters);
+        } else if (commonParameters != null) {
+            parameters.forEach(parameter -> {
+                if (commonParameters.contains(parameter)) {
+                    commonParameters.remove(parameter);
+                }
+            });
+            parameters.addAll(commonParameters);
+        }
     }
 }

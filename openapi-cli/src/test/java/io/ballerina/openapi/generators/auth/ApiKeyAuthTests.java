@@ -130,7 +130,7 @@ public class ApiKeyAuthTests {
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/multiple_apikey_descriptions.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
-        ballerinaAuthConfigGenerator.setAuthTypes(securitySchemeMap);
+        ballerinaAuthConfigGenerator.setAuthTypes(securitySchemeMap, openAPI);
         String expectedConfigRecord = TestConstants.MULTIPLE_API_KEY_RECORD;
         String generatedConfigRecord = Objects.requireNonNull(
                 ballerinaAuthConfigGenerator.generateApiKeysConfig()).toString();
@@ -148,7 +148,7 @@ public class ApiKeyAuthTests {
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/multiple_api_keys.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
-        ballerinaAuthConfigGenerator.setAuthTypes(securitySchemeMap);
+        ballerinaAuthConfigGenerator.setAuthTypes(securitySchemeMap, openAPI);
         String generatedConfigRecord = Objects.requireNonNull(
                 ballerinaAuthConfigGenerator.generateApiKeysConfig()).toString();
         Assert.assertFalse(generatedConfigRecord.isBlank());
@@ -166,7 +166,7 @@ public class ApiKeyAuthTests {
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/multiline_api_key_desc.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
-        ballerinaAuthConfigGenerator.setAuthTypes(securitySchemeMap);
+        ballerinaAuthConfigGenerator.setAuthTypes(securitySchemeMap, openAPI);
         String generatedConfigRecord = Objects.requireNonNull(
                 ballerinaAuthConfigGenerator.generateApiKeysConfig()).toString();
         Assert.assertFalse(generatedConfigRecord.isBlank());

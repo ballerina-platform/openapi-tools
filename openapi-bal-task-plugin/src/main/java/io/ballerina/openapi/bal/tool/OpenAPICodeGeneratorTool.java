@@ -23,7 +23,6 @@ import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGeneratorWithStatusCodeBinding;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
@@ -454,8 +453,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         // Generate ballerina client files.
         TypeHandler.createInstance(oasClientConfig.getOpenAPI(), oasClientConfig.isNullable());
         String licenseContent = oasClientConfig.getLicense();
-        BallerinaClientGenerator ballerinaClientGenerator = getClientGenerator(oasClientConfig, statusCodeBinding,
-                toolContext, location);
+        BallerinaClientGenerator ballerinaClientGenerator = getClientGenerator(oasClientConfig, statusCodeBinding);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
                 licenseContent == null || licenseContent.isBlank() ? mainContent :
@@ -489,23 +487,11 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     }
 
     private static BallerinaClientGenerator getClientGenerator(OASClientConfig oasClientConfig,
-                                                               boolean statusCodeBinding, ToolContext toolContext,
-                                                               Location location) {
-        if (!statusCodeBinding || hasRequestBinding(oasClientConfig.getOpenAPI())) {
-            if (statusCodeBinding) {
-                createDiagnostics(toolContext, DiagnosticMessages.WARNING_FOR_UNSUPPORTED_MEDIA_TYPE,
-                        location);
-            }
+                                                               boolean statusCodeBinding) {
+        if (!statusCodeBinding) {
             return new BallerinaClientGenerator(oasClientConfig);
         }
         return new BallerinaClientGeneratorWithStatusCodeBinding(oasClientConfig);
-    }
-
-    private static boolean hasRequestBinding(OpenAPI openAPI) {
-        return openAPI.getPaths().values().stream().anyMatch(pathItem -> pathItem.readOperations().stream()
-                .anyMatch(operation -> operation.getRequestBody() != null &&
-                        operation.getRequestBody().getContent().keySet().stream()
-                                .anyMatch(GeneratorUtils::hasRequestBinding)));
     }
 
     /**
