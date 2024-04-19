@@ -77,11 +77,11 @@ public class ServiceDeclarationGenerator extends ServiceGenerator {
         // Create imports http and openapi
         NodeList<ImportDeclarationNode> imports = ServiceGenerationUtils.createImportDeclarationNodes();
         // Need to Generate Base path
-        ListenerGenerator listener = new ListenerGeneratorImpl();
-        ListenerDeclarationNode listenerDeclarationNode = null;
-        listenerDeclarationNode = listener.getListenerDeclarationNodes(oasServiceMetadata.getOpenAPI().getServers());
-        NodeList<Node> absoluteResourcePath = createBasePathNodeList(listener);
-
+        ListenerGeneratorImpl listenerGenerator = new ListenerGeneratorImpl();
+        ListenerDeclarationNode listenerDeclarationNode = listenerGenerator
+                .getListenerDeclarationNodes(oasServiceMetadata.getOpenAPI().getServers());
+        diagnostics.addAll(listenerGenerator.getDiagnostics());
+        NodeList<Node> absoluteResourcePath = createBasePathNodeList(listenerGenerator);
         SimpleNameReferenceNode listenerName = createSimpleNameReferenceNode(listenerDeclarationNode.variableName());
         SeparatedNodeList<ExpressionNode> expressions = createSeparatedNodeList(listenerName);
 

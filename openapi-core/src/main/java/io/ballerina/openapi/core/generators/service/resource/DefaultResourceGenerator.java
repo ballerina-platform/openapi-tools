@@ -54,14 +54,14 @@ public class DefaultResourceGenerator extends ResourceGenerator {
     @Override
     public FunctionDefinitionNode generateResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                            String path) throws BallerinaOpenApiException {
+        GeneratorUtils.addCommonParamsToOperationParams(operation, oasServiceMetadata.getOpenAPI(), path);
         NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(GeneratorConstants.RESOURCE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
         Token functionKeyWord = createIdentifierToken(GeneratorConstants.FUNCTION, GeneratorUtils.SINGLE_WS_MINUTIAE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
         IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
                 .toLowerCase(Locale.ENGLISH), GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
-        NodeList<Node> relativeResourcePath;
-        relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
+        NodeList<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
                 oasServiceMetadata.getOpenAPI().getComponents(), oasServiceMetadata.generateWithoutDataBinding(),
                 diagnostics);
         FunctionSignatureGenerator functionSignatureGenerator = FunctionSignatureGenerator
