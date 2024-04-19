@@ -29,7 +29,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STA
  * This class is used to generate authentication related nodes of the ballerina connector client syntax tree
  * with status code binding client.
  *
- * @since 1.3.0
+ * @since 1.9.0
  */
 public class AuthConfigGeneratorWithStatusCodeBinding extends AuthConfigGeneratorImp {
 
