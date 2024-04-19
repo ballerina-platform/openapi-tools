@@ -4,4 +4,5 @@ public type Pet record {
     string name = "Name";
     int age = 1;
     string 'type?;
+    boolean isOld = true;
 };

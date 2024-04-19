@@ -78,3 +78,6 @@ components:
           default: 1
         type:
           type: string
+        isOld:
+          type: boolean
+          default: true
