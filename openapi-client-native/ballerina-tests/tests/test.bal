@@ -47,11 +47,7 @@ function testResourceMethod3() returns error? {
         genre: "Progressive Rock"
     };
     Album body = res.body;
-    if body is Album {
-        test:assertEquals(body, expected, "response did not match");
-    } else {
-        test:assertFail("invalid response type");
-    }
+    test:assertEquals(body, expected, "response did not match");
 }
 
 @test:Config {}
@@ -61,11 +57,7 @@ function testResourceMethod4() returns error? {
         {id: "2", name: "Back in Black", artist: "AC/DC", genre: "Hard Rock"}
     ];
     Album[] body = res.body;
-    if body is Album[] {
-        test:assertEquals(body, expected, "response did not match");
-    } else {
-        test:assertFail("invalid response type");
-    }
+    test:assertEquals(body, expected, "response did not match");
 }
 
 @test:Config {}
@@ -446,11 +438,7 @@ function testRemoteMethod3() returns error? {
         genre: "Progressive Rock"
     };
     Album body = res.body;
-    if body is Album {
-        test:assertEquals(body, expected, "response did not match");
-    } else {
-        test:assertFail("invalid response type");
-    }
+    test:assertEquals(body, expected, "response did not match");
 }
 
 @test:Config {}
@@ -460,11 +448,7 @@ function testRemoteMethod4() returns error? {
         {id: "2", name: "Back in Black", artist: "AC/DC", genre: "Hard Rock"}
     ];
     Album[] body = res.body;
-    if body is Album[] {
-        test:assertEquals(body, expected, "response did not match");
-    } else {
-        test:assertFail("invalid response type");
-    }
+    test:assertEquals(body, expected, "response did not match");
 }
 
 @test:Config {}
