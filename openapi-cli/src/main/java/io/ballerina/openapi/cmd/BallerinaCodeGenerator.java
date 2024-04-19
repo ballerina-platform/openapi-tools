@@ -513,7 +513,7 @@ public class BallerinaCodeGenerator {
     private void printDiagnostic(List<Diagnostic> diagnostics) {
         if (!diagnostics.isEmpty()) {
             for (Diagnostic diagnostic : diagnostics) {
-                outStream.println(diagnostic);
+                outStream.println(diagnostic.message());
             }
         }
     }
