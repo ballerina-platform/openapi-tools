@@ -273,8 +273,12 @@ public class RecordTypeGenerator extends TypeGenerator {
             Schema<?> fieldSchema, IdentifierToken fieldName, TypeDescriptorNode fieldTypeName) {
         Set<String> imports = new HashSet<>();
 
-        if (required != null) {
+        if (required != null && required.contains(field.getKey().trim())) {
             setRequiredFields(required, recordFieldList, field, fieldSchema, fieldName, fieldTypeName);
+        } else if (fieldSchema.getDefault() != null) {
+            RecordFieldWithDefaultValueNode recordFieldWithDefaultValueNode =
+                    getRecordFieldWithDefaultValueNode(fieldSchema, fieldName, fieldTypeName);
+            recordFieldList.add(recordFieldWithDefaultValueNode);
         } else {
             RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
                     fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
@@ -311,13 +315,8 @@ public class RecordTypeGenerator extends TypeGenerator {
         Token defaultValueToken;
         String defaultValue = fieldSchema.getDefault().toString().trim();
         if (GeneratorUtils.isStringSchema(fieldSchema)) {
-            if (defaultValue.equals("\"")) {
-                defaultValueToken = AbstractNodeFactory.createIdentifierToken("\"" + "\\" +
-                        fieldSchema.getDefault().toString() + "\"");
-            } else {
-                defaultValueToken = AbstractNodeFactory.createIdentifierToken("\"" +
-                        fieldSchema.getDefault().toString() + "\"");
-            }
+            defaultValue = "\"" + defaultValue.replaceAll("\"", "\\\\\"") + "\"";
+            defaultValueToken = AbstractNodeFactory.createIdentifierToken(defaultValue);
         } else if (!defaultValue.matches("^[0-9]*$") && !defaultValue.matches("^(\\d*\\.)?\\d+$")
                 && !(defaultValue.startsWith("[") && defaultValue.endsWith("]")) &&
                 !GeneratorUtils.isBooleanSchema(fieldSchema)) {
