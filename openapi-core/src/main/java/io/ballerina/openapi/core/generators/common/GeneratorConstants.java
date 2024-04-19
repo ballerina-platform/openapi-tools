@@ -99,7 +99,8 @@ public class GeneratorConstants {
     public static final String URL = "url";
     public static final String MODULE_TEST = "test";
     public static final String BALLERINA = "ballerina";
-    public static final String CLIENT_CLASS = "Client";
+    public static final String CLIENT = "Client";
+    public static final String STATUS_CODE_CLIENT = "StatusCodeClient";
     public static final String CLIENT_EP = "clientEp";
     public static final String EQUAL = "=";
     public static final String CONFIG = "config";

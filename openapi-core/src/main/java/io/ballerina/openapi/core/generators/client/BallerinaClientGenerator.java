@@ -171,8 +171,12 @@ public class BallerinaClientGenerator {
         this.openAPI = oasClientConfig.getOpenAPI();
         this.ballerinaUtilGenerator = new BallerinaUtilGenerator();
         this.remoteFunctionNameList = new ArrayList<>();
-        this.authConfigGeneratorImp = new AuthConfigGeneratorImp(false, false);
+        this.authConfigGeneratorImp = getAuthConfigGeneratorImp();
         this.resourceMode = oasClientConfig.isResourceMode();
+    }
+
+    protected AuthConfigGeneratorImp getAuthConfigGeneratorImp() {
+        return new AuthConfigGeneratorImp(false, false);
     }
 
     /**
@@ -257,7 +261,7 @@ public class BallerinaClientGenerator {
         memberNodeList.addAll(functionDefinitionNodeList);
         // Generate the class combining members
         MetadataNode metadataNode = getClassMetadataNode();
-        IdentifierToken className = createIdentifierToken(GeneratorConstants.CLIENT_CLASS);
+        IdentifierToken className = createIdentifierToken(GeneratorConstants.CLIENT);
         NodeList<Token> classTypeQualifiers = createNodeList(
                 createToken(ISOLATED_KEYWORD), createToken(CLIENT_KEYWORD));
         return createClassDefinitionNode(metadataNode, createToken(PUBLIC_KEYWORD), classTypeQualifiers,
@@ -549,8 +553,7 @@ public class BallerinaClientGenerator {
         List<ObjectFieldNode> fieldNodeList = new ArrayList<>();
         Token finalKeywordToken = createToken(FINAL_KEYWORD);
         NodeList<Token> qualifierList = createNodeList(finalKeywordToken);
-        QualifiedNameReferenceNode typeName = createQualifiedNameReferenceNode(createIdentifierToken(HTTP),
-                createToken(COLON_TOKEN), createIdentifierToken(GeneratorConstants.CLIENT_CLASS));
+        QualifiedNameReferenceNode typeName = getHttpClientTypeName();
         IdentifierToken fieldName = createIdentifierToken(GeneratorConstants.CLIENT_EP);
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
         ObjectFieldNode httpClientField = createObjectFieldNode(metadataNode, null,
@@ -562,6 +565,11 @@ public class BallerinaClientGenerator {
             fieldNodeList.add(apiKeyFieldNode);
         }
         return fieldNodeList;
+    }
+
+    protected QualifiedNameReferenceNode getHttpClientTypeName() {
+        return createQualifiedNameReferenceNode(createIdentifierToken(HTTP), createToken(COLON_TOKEN),
+                createIdentifierToken(GeneratorConstants.CLIENT));
     }
 
     private static boolean isaFilteredOperation(List<String> filterTags, List<String> filterOperations,
