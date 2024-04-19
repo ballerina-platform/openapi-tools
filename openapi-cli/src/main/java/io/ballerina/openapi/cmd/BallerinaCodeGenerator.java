@@ -170,12 +170,13 @@ public class BallerinaCodeGenerator {
             ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
             sourceFiles.addAll(serviceGenerationHandler.generateServiceFiles(oasServiceMetadata));
             this.diagnostics.addAll(serviceGenerationHandler.getDiagnostics());
-            this.diagnostics.addAll(TypeHandler.getInstance().getDiagnostics());
         }
 
         TypeHandler typeHandler = TypeHandler.getInstance();
         SyntaxTree schemaSyntaxTree = typeHandler.generateTypeSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
+        this.diagnostics.addAll(TypeHandler.getInstance().getDiagnostics());
+
 
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
@@ -207,7 +208,7 @@ public class BallerinaCodeGenerator {
                 outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
             }
         }
-
+        printDiagnostic(diagnostics);
         writeGeneratedSources(newGenFiles, srcPath, implPath, GEN_BOTH);
     }
 
@@ -416,7 +417,8 @@ public class BallerinaCodeGenerator {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
                     licenseHeader + schemaContent));
         }
-
+        //Type diagnostic
+        List<Diagnostic> diagnosticList = TypeHandler.getInstance().getDiagnostics();
         // Generate test boilerplate code for test cases
         if (this.includeTestFiles) {
             BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(clientGenerator);
@@ -437,6 +439,7 @@ public class BallerinaCodeGenerator {
                 outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
             }
         }
+        printDiagnostic(diagnosticList);
         return sourceFiles;
     }
 
@@ -503,7 +506,14 @@ public class BallerinaCodeGenerator {
         }
         this.diagnostics.addAll(serviceGenerationHandler.getDiagnostics());
         this.diagnostics.addAll(TypeHandler.getInstance().getDiagnostics());
+        printDiagnostic(diagnostics);
         return sourceFiles;
+    }
+
+    private void printDiagnostic(List<Diagnostic> diagnostics) {
+        for (Diagnostic diagnostic : diagnostics) {
+            outStream.printf("%s: %s%n", diagnostic.diagnosticInfo().severity(), diagnostic.message());
+        }
     }
 
     /**

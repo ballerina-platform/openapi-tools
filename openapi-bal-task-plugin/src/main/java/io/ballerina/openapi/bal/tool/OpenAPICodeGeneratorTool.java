@@ -34,6 +34,7 @@ import io.ballerina.projects.Project;
 import io.ballerina.projects.buildtools.CodeGeneratorTool;
 import io.ballerina.projects.buildtools.ToolConfig;
 import io.ballerina.projects.buildtools.ToolContext;
+import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.toml.semantic.diagnostics.TomlNodeLocation;
 import io.ballerina.toml.syntax.tree.AbstractNodeFactory;
 import io.ballerina.toml.syntax.tree.DocumentMemberDeclarationNode;
@@ -361,6 +362,11 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     private boolean clientNativeDependencyAlreadyExist(String version, ToolContext toolContext, Location location)
             throws BallerinaOpenApiException {
         Project project = toolContext.currentPackage().project();
+        //TODO : This is a workaround to get an updated project and this will be removed once this lang issue will be
+        // fixed https://github.com/ballerina-platform/ballerina-lang/issues/42599
+        Path path = project.sourceRoot();
+        project = BuildProject.load(path);
+
         Map<String, PackageManifest.Platform> platforms = project.currentPackage().manifest().platforms();
         if (Objects.nonNull(platforms) && platforms.containsKey("java17")) {
             Optional<Map<String, Object>> nativeDependency = platforms.get("java17").dependencies().stream().filter(

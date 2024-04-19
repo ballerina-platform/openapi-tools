@@ -44,7 +44,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -72,12 +71,16 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getVali
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isArraySchema;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isComposedSchema;
 
+/**
+ * This class is to generate constraints for the type definitions.
+ * @since 1.9.0
+ */
 public class ConstraintGeneratorImp implements ConstraintGenerator {
     OpenAPI openAPI;
     HashMap<String, TypeDefinitionNode> typeDefinitions;
     boolean isConstraint = false;
     List<Diagnostic> diagnostics = new ArrayList<>();
-    public static final PrintStream OUT_STREAM = System.err;
+//    public static final PrintStream OUT_STREAM = System.err;
 
     public ConstraintGeneratorImp(OpenAPI openAPI, HashMap<String, TypeDefinitionNode> typeDefinitions) {
         this.openAPI = openAPI;
@@ -140,12 +143,11 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                                 if (nullable) {
                                     constraintNode = null;
                                 } else if (isConstraintSupport) {
-                                    //todo diagnostic
-//                                    outStream.printf("WARNING: constraints in the OpenAPI contract will be
-//                                    ignored for the " +
-//                                                    "field `%s`, as constraints are not supported on
-//                                                    Ballerina union types%n",
-//                                            fieldName.toString().trim());
+                                    ConstraintDiagnosticMessages diagnostic =
+                                            ConstraintDiagnosticMessages.OAS_CONSTRAINT_101;
+                                    ConstraintGeneratorDiagnostic constraintDiagnostic =
+                                            new ConstraintGeneratorDiagnostic(diagnostic, fieldName.trim());
+                                    diagnostics.add(constraintDiagnostic);
                                     constraintNode = null;
                                 }
                                 if (constraintNode == null) {
@@ -185,14 +187,8 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                             //when the items has constraints then we define separate type for it.
                             if (fieldSchema instanceof ArraySchema arraySchema) {
                                 updateConstraintWithArrayItems(key, fieldName, arraySchema);
-                            } else if (fieldSchema != null && fieldSchema.getOneOf() != null) {
-                                //todo handle object schema
-                                List oneOf = fieldSchema.getOneOf();
-                                for (Schema schema : (List<Schema>) oneOf) {
-
-                                }
-
                             }
+                            //todo handle the composed schema
                         }
                         RecordTypeDescriptorNode updatedRecord = record.modify(
                                 record.recordKeyword(),
@@ -227,12 +223,11 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                             if (nullable) {
                                 constraintNode = null;
                             } else if (isConstraintSupport) {
-                                //todo diagnostic
-//                                    outStream.printf("WARNING: constraints in the OpenAPI contract will
-//                                    be ignored for the " +
-//                                                    "field `%s`, as constraints are not supported on Ballerina
-//                                                    union types%n",
-//                                            fieldName.toString().trim());
+                                ConstraintDiagnosticMessages diagnostic =
+                                        ConstraintDiagnosticMessages.OAS_CONSTRAINT_101;
+                                ConstraintGeneratorDiagnostic constraintDiagnostic =
+                                        new ConstraintGeneratorDiagnostic(diagnostic, key.trim());
+                                diagnostics.add(constraintDiagnostic);
                                 constraintNode = null;
                             }
                             if (constraintNode == null) {
@@ -300,12 +295,11 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                     if (nullable) {
                         constraintNode = null;
                     } else if (isConstraintSupport) {
-                        //todo diagnostic
-//                                    outStream.printf("WARNING: constraints in the OpenAPI contract
-//                                    will be ignored for the " +
-//                                                    "field `%s`, as constraints are not supported on
-//                                                    Ballerina union types%n",
-//                                            fieldName.toString().trim());
+                        ConstraintDiagnosticMessages diagnostic =
+                                ConstraintDiagnosticMessages.OAS_CONSTRAINT_101;
+                        ConstraintGeneratorDiagnostic constraintDiagnostic =
+                                new ConstraintGeneratorDiagnostic(diagnostic, fieldName.trim());
+                        diagnostics.add(constraintDiagnostic);
                         constraintNode = null;
                     }
                     if (constraintNode == null) {
@@ -391,7 +385,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
      * @param fieldSchema Schema for data type
      * @return {@link MetadataNode}
      */
-    public static AnnotationNode generateConstraintNode(String typeName, Schema<?> fieldSchema)
+    public AnnotationNode generateConstraintNode(String typeName, Schema<?> fieldSchema)
             throws BallerinaOpenApiException {
         if (isConstraintAllowed(typeName, fieldSchema)) {
             String ballerinaType = convertOpenAPITypeToBallerina(fieldSchema, true);
@@ -415,7 +409,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
         return null;
     }
 
-    public static boolean isConstraintAllowed(String typeName, Schema schema) {
+    public boolean isConstraintAllowed(String typeName, Schema schema) {
 
         boolean isConstraintNotAllowed = schema.getNullable() != null && schema.getNullable() ||
                 (schema.getOneOf() != null || schema.getAnyOf() != null) || getOpenAPIType(schema) == null;
@@ -423,10 +417,10 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
         if (nullable) {
             return false;
         } else if (isConstraintNotAllowed) {
-            //todo diagnostic
-//            OUT_STREAM.printf("WARNING: constraints in the OpenAPI contract will be ignored for the " +
-//                            "type `%s`, as constraints are not supported on Ballerina union types%n",
-//                    typeName.trim());
+            ConstraintDiagnosticMessages diagnostic = ConstraintDiagnosticMessages.OAS_CONSTRAINT_101;
+            ConstraintGeneratorDiagnostic constraintDiagnostic = new ConstraintGeneratorDiagnostic(diagnostic,
+                    typeName);
+            diagnostics.add(constraintDiagnostic);
             return false;
         }
         return true;
@@ -460,7 +454,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
     /**
      * Generate constraint for string.
      */
-    private static AnnotationNode generateStringConstraint(Schema<?> stringSchema) {
+    private AnnotationNode generateStringConstraint(Schema<?> stringSchema) {
 
         List<String> fields = getStringAnnotFields(stringSchema);
         if (fields.isEmpty()) {
@@ -538,7 +532,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
         return fields;
     }
 
-    private static List<String> getStringAnnotFields(Schema stringSchema) {
+    private List<String> getStringAnnotFields(Schema stringSchema) {
 
         List<String> fields = new ArrayList<>();
         if (stringSchema.getMaxLength() != null && stringSchema.getMaxLength() != 0) {
@@ -566,11 +560,17 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
             } catch (BError err) {
                 //TODO
                 //This handle a case which Ballerina doesn't support
-                OUT_STREAM.printf("WARNING: skipped generation for unsupported pattern in ballerina: %s %n", value);
+                ConstraintDiagnosticMessages diagnostic = ConstraintDiagnosticMessages.OAS_CONSTRAINT_102;
+                ConstraintGeneratorDiagnostic constraintDiagnostic = new ConstraintGeneratorDiagnostic(diagnostic,
+                        value);
+                diagnostics.add(constraintDiagnostic);
             } catch (Exception e) {
                 // This try catch is to check whether the pattern is valid or not. Swagger parser doesn't provide any
                 // error for invalid patterns. Therefore, we need to check it within code. (ex: syntax errors)
-                OUT_STREAM.printf("WARNING: skipped generation for non-ECMA flavoured pattern: %s %n", value);
+                ConstraintDiagnosticMessages diagnostic = ConstraintDiagnosticMessages.OAS_CONSTRAINT_103;
+                ConstraintGeneratorDiagnostic constraintDiagnostic = new ConstraintGeneratorDiagnostic(diagnostic,
+                        value);
+                diagnostics.add(constraintDiagnostic);
             }
         }
         return fields;
