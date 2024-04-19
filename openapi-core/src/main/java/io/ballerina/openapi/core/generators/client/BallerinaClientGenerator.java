@@ -130,7 +130,7 @@ public class BallerinaClientGenerator {
     protected final OpenAPI openAPI;
     protected final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final List<String> remoteFunctionNameList;
-    protected final AuthConfigGeneratorImp authConfigGeneratorImp;
+    protected AuthConfigGeneratorImp authConfigGeneratorImp;
     private final boolean resourceMode;
     protected final List<ClientDiagnostic> diagnostics = new ArrayList<>();
     private String serverURL;
@@ -171,12 +171,8 @@ public class BallerinaClientGenerator {
         this.openAPI = oasClientConfig.getOpenAPI();
         this.ballerinaUtilGenerator = new BallerinaUtilGenerator();
         this.remoteFunctionNameList = new ArrayList<>();
-        this.authConfigGeneratorImp = getAuthConfigGeneratorImp();
+        this.authConfigGeneratorImp = new AuthConfigGeneratorImp(false, false);
         this.resourceMode = oasClientConfig.isResourceMode();
-    }
-
-    protected AuthConfigGeneratorImp getAuthConfigGeneratorImp() {
-        return new AuthConfigGeneratorImp(false, false);
     }
 
     /**

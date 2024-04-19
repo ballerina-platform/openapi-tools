@@ -116,6 +116,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.J_B
 public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClientGenerator {
     public BallerinaClientGeneratorWithStatusCodeBinding(OASClientConfig oasClientConfig) {
         super(oasClientConfig);
+        authConfigGeneratorImp = new AuthConfigGeneratorWithStatusCodeBinding(false, false);
     }
 
     /**
@@ -169,11 +170,6 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
     protected QualifiedNameReferenceNode getHttpClientTypeName() {
         return createQualifiedNameReferenceNode(createIdentifierToken(HTTP), createToken(COLON_TOKEN),
                 createIdentifierToken(GeneratorConstants.STATUS_CODE_CLIENT));
-    }
-
-    @Override
-    protected AuthConfigGeneratorImp getAuthConfigGeneratorImp() {
-        return new AuthConfigGeneratorWithStatusCodeBinding(false, false);
     }
 
     private void addClientFunctionImpl(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
