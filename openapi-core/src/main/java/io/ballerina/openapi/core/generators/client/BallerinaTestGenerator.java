@@ -351,7 +351,7 @@ public class BallerinaTestGenerator {
         String serverURL = ballerinaClientGenerator.getServerUrl();
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
         BuiltinSimpleNameReferenceNode typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken(GeneratorConstants.CLIENT_CLASS));
+                createIdentifierToken(GeneratorConstants.CLIENT));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
                 createIdentifierToken("baseClient"));
         TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(typeBindingPattern,
@@ -374,7 +374,7 @@ public class BallerinaTestGenerator {
         ParenthesizedArgList parenthesizedArgList = createParenthesizedArgList(openParenArg, arguments,
                 closeParenArg);
         TypeDescriptorNode clientClassType = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken
-                (GeneratorConstants.CLIENT_CLASS));
+                (GeneratorConstants.CLIENT));
 
         ExplicitNewExpressionNode explicitNewExpressionNode = createExplicitNewExpressionNode(newKeyWord,
                 clientClassType, parenthesizedArgList);
@@ -395,7 +395,7 @@ public class BallerinaTestGenerator {
         String serverURL = ballerinaClientGenerator.getServerUrl();
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
         BuiltinSimpleNameReferenceNode typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken(GeneratorConstants.CLIENT_CLASS));
+                createIdentifierToken(GeneratorConstants.CLIENT));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
                 createIdentifierToken("baseClient"));
         TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(typeBindingPattern,
@@ -413,7 +413,7 @@ public class BallerinaTestGenerator {
         ParenthesizedArgList parenthesizedArgList = createParenthesizedArgList(openParenArg, arguments,
                 closeParenArg);
         TypeDescriptorNode clientClassType = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken
-                (GeneratorConstants.CLIENT_CLASS));
+                (GeneratorConstants.CLIENT));
 
         ExplicitNewExpressionNode explicitNewExpressionNode = createExplicitNewExpressionNode(newKeyWord,
                 clientClassType, parenthesizedArgList);

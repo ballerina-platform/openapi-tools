@@ -47,6 +47,7 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
+import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -104,6 +105,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BALLERINA;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.J_BALLERINA;
 
 /**
@@ -114,6 +116,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.J_B
 public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClientGenerator {
     public BallerinaClientGeneratorWithStatusCodeBinding(OASClientConfig oasClientConfig) {
         super(oasClientConfig);
+        authConfigGeneratorImp = new AuthConfigGeneratorWithStatusCodeBinding(false, false);
     }
 
     /**
@@ -161,6 +164,12 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
             Map<PathItem.HttpMethod, Operation>> operation, Map.Entry<PathItem.HttpMethod, Operation> operationEntry) {
         return new RemoteExternalFunctionGenerator(operation.getKey(), operationEntry, openAPI, authConfigGeneratorImp,
                 ballerinaUtilGenerator, imports);
+    }
+
+    @Override
+    protected QualifiedNameReferenceNode getHttpClientTypeName() {
+        return createQualifiedNameReferenceNode(createIdentifierToken(HTTP), createToken(COLON_TOKEN),
+                createIdentifierToken(GeneratorConstants.STATUS_CODE_CLIENT));
     }
 
     private void addClientFunctionImpl(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,

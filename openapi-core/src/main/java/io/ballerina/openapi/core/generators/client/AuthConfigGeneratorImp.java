@@ -169,9 +169,11 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BOO
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CACHE_CONFIG;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CACHE_CONFIG_FIELD;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CHUNKING;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLIENT;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLIENT_CRED;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLIENT_HTTP1_SETTINGS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLIENT_HTTP1_SETTINGS_FIELD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.COLON;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CONFIG;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CONNECTION_CONFIG;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_HTTP_VERSION;
@@ -1055,8 +1057,7 @@ public class AuthConfigGeneratorImp {
 
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         // http:Client variable declaration
-        BuiltinSimpleNameReferenceNode typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken("http:Client"));
+        BuiltinSimpleNameReferenceNode typeBindingPattern = getHttpClientName();
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
                 createIdentifierToken("httpEp"));
         TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(typeBindingPattern,
@@ -1085,6 +1086,10 @@ public class AuthConfigGeneratorImp {
         return createVariableDeclarationNode(annotationNodes,
                 null, typedBindingPatternNode, createToken(EQUAL_TOKEN), initializer,
                 createToken(SEMICOLON_TOKEN));
+    }
+
+    protected BuiltinSimpleNameReferenceNode getHttpClientName() {
+        return createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(HTTP + COLON + CLIENT));
     }
 
     /**
