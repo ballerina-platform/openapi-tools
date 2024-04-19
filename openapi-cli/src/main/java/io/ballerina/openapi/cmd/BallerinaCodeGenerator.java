@@ -511,10 +511,8 @@ public class BallerinaCodeGenerator {
     }
 
     private void printDiagnostic(List<Diagnostic> diagnostics) {
-        if (!diagnostics.isEmpty()) {
-            for (Diagnostic diagnostic : diagnostics) {
-                outStream.println(diagnostic.message());
-            }
+        for (Diagnostic diagnostic : diagnostics) {
+            outStream.printf("%s: %s%n", diagnostic.diagnosticInfo().severity(), diagnostic.message());
         }
     }
 

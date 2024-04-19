@@ -31,9 +31,9 @@ public enum ConstraintDiagnosticMessages {
             "WARNING: constraints in the OpenAPI contract will be ignored for the " +
                     "field `%s`, as constraints are not supported on Ballerina union types.",
             DiagnosticSeverity.WARNING),
-    OAS_CONSTRAINT_102("OAS_CONSTRAINT_102", "WARNING: skipped generation for unsupported pattern" +
+    OAS_CONSTRAINT_102("OAS_CONSTRAINT_102", "skipped generation for unsupported pattern" +
             " in ballerina: %s", DiagnosticSeverity.WARNING),
-    OAS_CONSTRAINT_103("OAS_CONSTRAINT_103", "WARNING: skipped generation for non-ECMA flavoured" +
+    OAS_CONSTRAINT_103("OAS_CONSTRAINT_103", "skipped generation for non-ECMA flavoured" +
             " pattern: %s", DiagnosticSeverity.WARNING);
     private final String code;
     private final String description;
