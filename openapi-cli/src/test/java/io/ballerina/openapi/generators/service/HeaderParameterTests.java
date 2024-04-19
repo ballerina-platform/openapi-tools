@@ -307,7 +307,7 @@ public class HeaderParameterTests {
                 "Header 'X-User' with type 'object' can not be mapped as a valid Ballerina header parameter.");
     }
 
-    @Test(description = "13. Header parameter order")
+    @Test(description = "19. Header with blank name")
     public void blankHeaderParameterName() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_13.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
