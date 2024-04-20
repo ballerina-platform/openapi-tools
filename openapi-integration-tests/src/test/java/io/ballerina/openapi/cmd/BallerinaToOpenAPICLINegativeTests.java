@@ -36,7 +36,7 @@ import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
 import static io.ballerina.openapi.TestUtil.assertOnErrorStream;
 
 /**
- * This {@code BallerinaToOpenAPITests} contains all the ballerina to openapi command negative.
+ * This class contains all the ballerina to OpenAPI command related negative tests.
  */
 public class BallerinaToOpenAPICLINegativeTests extends OpenAPITest {
     public static final String DISTRIBUTION_FILE_NAME = DISTRIBUTIONS_DIR.toString();
@@ -59,7 +59,8 @@ public class BallerinaToOpenAPICLINegativeTests extends OpenAPITest {
 
         Process process = getProcess(buildArgs, TEST_RESOURCE);
 
-        String out = "OpenAPI contract generation failed due to Ballerina code has compilation errors.:\n" +
+        String out = "openapi contract generation is skipped because of the Ballerina file/package has the " +
+                " following compilation error(s):\n" +
                 "ERROR [service.bal:(11:1,11:2)] invalid token '}'";
         //Thread for wait out put generate
         Thread.sleep(5000);
