@@ -1,9 +1,9 @@
 openapi: 3.0.1
 info:
-  title: Greeting
-  version: 0.1.0
+  title: Mock Yaml
+  version: 2.0.0
 servers:
-  - url: "{server}:{port}/greeting"
+  - url: "{server}:{port}/"
     variables:
       server:
         default: http://localhost
@@ -20,3 +20,4 @@ paths:
             text/plain:
               schema:
                 type: string
+components: {}

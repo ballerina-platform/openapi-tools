@@ -108,7 +108,12 @@ public class OASContractGenerator {
                 .diagnostics().stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         if (hasCompilationErrors || hasErrorsFromCodeGenAndModify) {
-            // if there are any compilation errors, do not proceed
+            // if there are any compilation errors, do not proceed and those diagnostic will display to user
+            outStream.println("openapi contract generation is skipped because of the Ballerina file/package has the" +
+                    " following compilation error(s):");
+            compilation.diagnosticResult().diagnostics().forEach(diagnostic -> {
+                outStream.println(diagnostic.toString());
+            });
             return;
         }
         semanticModel = compilation.getSemanticModel(docId.moduleId());

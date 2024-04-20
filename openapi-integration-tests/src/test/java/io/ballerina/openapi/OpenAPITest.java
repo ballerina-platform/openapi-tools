@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi;
 
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterTest;
@@ -30,8 +31,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.ballerina.openapi.TestUtil.OUT;
+import static io.ballerina.openapi.TestUtil.TEST_DISTRIBUTION_PATH;
+import static io.ballerina.openapi.extension.build.BuildExtensionTests.DISTRIBUTION_FILE_NAME;
 
 /**
  * This is abstract class for containing the main common test methods for the other subclasses.
@@ -94,5 +100,18 @@ public class OpenAPITest {
         generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedFile.contains(expectedBallerinaContent));
+    }
+
+    public Process getProcess(List<String> buildArgs, Path testResourcePath) throws IOException {
+        String balFile = "bal";
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            balFile = "bal.bat";
+        }
+        buildArgs.add(0, TEST_DISTRIBUTION_PATH.resolve(DISTRIBUTION_FILE_NAME).resolve("bin")
+                .resolve(balFile).toString());
+        OUT.println("Executing: " + StringUtils.join(buildArgs, ' '));
+        ProcessBuilder pb = new ProcessBuilder(buildArgs);
+        pb.directory(testResourcePath.toFile());
+        return pb.start();
     }
 }

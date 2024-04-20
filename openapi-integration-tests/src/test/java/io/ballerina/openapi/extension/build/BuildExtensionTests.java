@@ -37,7 +37,7 @@ import static io.ballerina.openapi.TestUtil.executeBuild;
 /**
  * These tests are for capture the `--export-openapi` flag in distribution.
  */
-public class BuildExtensionTests {
+public class  BuildExtensionTests {
     public static final String DISTRIBUTION_FILE_NAME = DISTRIBUTIONS_DIR.toString();
     public static final Path TEST_RESOURCE = Paths.get(RESOURCES_PATH.toString() + "/build");
 
