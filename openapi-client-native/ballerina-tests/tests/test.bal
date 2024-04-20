@@ -38,32 +38,26 @@ function testResourceMethod2() {
 }
 
 @test:Config {}
-function testResourceMethod3() {
-    Album|error res = albumClient->/albums/'1();
+function testResourceMethod3() returns error? {
+    OkAlbum res = check albumClient->/albums/'1();
     Album expected = {
         id: "1",
         name: "The Dark Side of the Moon",
         artist: "Pink Floyd",
         genre: "Progressive Rock"
     };
-    if res is Album {
-        test:assertEquals(res, expected, "response did not match");
-    } else {
-        test:assertFail("invalid response type");
-    }
+    Album body = res.body;
+    test:assertEquals(body, expected, "response did not match");
 }
 
 @test:Config {}
-function testResourceMethod4() {
-    Album[]|error res = albumClient->/albums.get("Hard Rock");
+function testResourceMethod4() returns error? {
+    OkAlbumArray res = check albumClient->/albums.get("Hard Rock");
     Album[] expected = [
         {id: "2", name: "Back in Black", artist: "AC/DC", genre: "Hard Rock"}
     ];
-    if res is Album[] {
-        test:assertEquals(res, expected, "response did not match");
-    } else {
-        test:assertFail("invalid response type");
-    }
+    Album[] body = res.body;
+    test:assertEquals(body, expected, "response did not match");
 }
 
 @test:Config {}
@@ -435,32 +429,26 @@ function testRemoteMethod2() {
 }
 
 @test:Config {}
-function testRemoteMethod3() {
-    Album|error res = albumClient->getAlbumsId("1");
+function testRemoteMethod3() returns error? {
+    OkAlbum res = check albumClient->getAlbumsId("1");
     Album expected = {
         id: "1",
         name: "The Dark Side of the Moon",
         artist: "Pink Floyd",
         genre: "Progressive Rock"
     };
-    if res is Album {
-        test:assertEquals(res, expected, "response did not match");
-    } else {
-        test:assertFail("invalid response type");
-    }
+    Album body = res.body;
+    test:assertEquals(body, expected, "response did not match");
 }
 
 @test:Config {}
-function testRemoteMethod4() {
-    Album[]|error res = albumClient->getAlbums("Hard Rock");
+function testRemoteMethod4() returns error? {
+    OkAlbumArray res = check albumClient->getAlbums("Hard Rock");
     Album[] expected = [
         {id: "2", name: "Back in Black", artist: "AC/DC", genre: "Hard Rock"}
     ];
-    if res is Album[] {
-        test:assertEquals(res, expected, "response did not match");
-    } else {
-        test:assertFail("invalid response type");
-    }
+    Album[] body = res.body;
+    test:assertEquals(body, expected, "response did not match");
 }
 
 @test:Config {}

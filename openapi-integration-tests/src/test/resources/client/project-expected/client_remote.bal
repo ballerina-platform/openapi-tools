@@ -54,16 +54,12 @@ public isolated client class Client {
     }
 
     # + return - Ok 
-    @MethodImpl {name: "getAlbumsIdImpl"}
-    resource isolated function get albums/[string id](typedesc<OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+    @MethodImpl {name: "getAlbumsImpl"}
+    remote isolated function getAlbums(string genre, typedesc<OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
 
     # + return - Ok
-    @MethodImpl {name: "getAlbumsImpl"}
-    resource isolated function get albums(string genre, typedesc<OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
-
-    # + return - Created
-    @MethodImpl {name: "postAlbumsImpl"}
-    resource isolated function post albums(Album payload, typedesc<CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
+    @MethodImpl {name: "getAlbumsIdImpl"}
+    remote isolated function getAlbumsId(string id, typedesc<OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
 
     private isolated function getAlbumsIdImpl(string id, typedesc<OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload> targetType) returns OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload|error {
         string resourcePath = string `/albums/${getEncodedUri(id)}`;
@@ -76,6 +72,10 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         return self.clientEp->get(resourcePath, targetType = targetType);
     }
+
+    # + return - Created
+    @MethodImpl {name: "postAlbumsImpl"}
+    remote isolated function postAlbums(Album payload, typedesc<CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
 
     private isolated function postAlbumsImpl(Album payload, typedesc<CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload> targetType) returns CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload|error {
         string resourcePath = string `/albums`;
