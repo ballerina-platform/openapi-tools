@@ -995,24 +995,26 @@ public class GeneratorUtils {
         }
 
         Map<String, Schema> properties = new HashMap<>();
-        List<String> requiredField = new ArrayList<>();
+        List<String> requiredFields = new ArrayList<>();
         for (Map.Entry<String, Header> headerEntry : headers.entrySet()) {
             String headerName = headerEntry.getKey();
             Header header = headerEntry.getValue();
             Schema headerTypeSchema = getValidatedHeaderSchema(header.getSchema());
             properties.put(headerName, headerTypeSchema);
             if (header.getRequired() != null && header.getRequired()) {
-                requiredField.add(headerName);
+                requiredFields.add(headerName);
             }
         }
 
-        if (properties.isEmpty() || requiredField.isEmpty()) {
+        if (properties.isEmpty()) {
             return null;
         }
 
         ObjectSchema headersSchema = new ObjectSchema();
         headersSchema.setProperties(properties);
-        headersSchema.setRequired(requiredField);
+        if (!requiredFields.isEmpty()) {
+            headersSchema.setRequired(requiredFields);
+        }
         headersSchema.setAdditionalProperties(false);
         return headersSchema;
     }
