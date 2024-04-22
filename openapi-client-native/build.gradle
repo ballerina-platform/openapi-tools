@@ -119,7 +119,8 @@ publishing {
 tasks.withType(PublishToMavenRepository) {
     onlyIf {
         (repository == publishing.repositories.GitHub && publication == publishing.publications.GitHub) ||
-                (repository == publishing.repositories.WSO2Nexus && publication == publishing.publications.WSO2Nexus)
+                (repository == publishing.repositories.WSO2Nexus && publication == publishing.publications.WSO2Nexus
+                 && (clientNativeVersion.endsWith('-SNAPSHOT') || !skipClientNativePublish))
     }
 }
 
