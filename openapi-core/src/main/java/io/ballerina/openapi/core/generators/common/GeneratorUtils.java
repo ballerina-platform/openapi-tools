@@ -1089,7 +1089,9 @@ public class GeneratorUtils {
                 generatedTypes.put(mediaTypeToken.toString(), mediaTypeToken);
             }
         } else {
-            diagnosticList.add(new CommonDiagnostic(OAS_COMMON_101));
+            if (!bodyTypeSchema.isEmpty()) {
+                diagnosticList.add(new CommonDiagnostic(OAS_COMMON_101));
+            }
             return TypeHandler.getInstance().createTypeInclusionRecord(code, null,
                     TypeHandler.getInstance().generateHeaderType(headersTypeSchema), method);
         }
