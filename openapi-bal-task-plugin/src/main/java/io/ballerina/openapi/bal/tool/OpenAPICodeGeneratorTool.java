@@ -466,16 +466,14 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
 
         List<ClientDiagnostic> clientDiagnostic = ballerinaClientGenerator.getDiagnostics();
 
-        if (!clientDiagnostic.isEmpty()) {
-            for (ClientDiagnostic diagnostic : clientDiagnostic) {
-                createDiagnostics(toolContext, diagnostic.getMessage(), diagnostic.getCode(),
-                        diagnostic.getDiagnosticSeverity(), location);
-            }
+        for (ClientDiagnostic diagnostic : clientDiagnostic) {
+            createDiagnostics(toolContext, diagnostic.getMessage(), diagnostic.getCode(),
+                    diagnostic.getDiagnosticSeverity(), location);
+        }
 
-            if (clientDiagnostic.stream().anyMatch(
-                    diagnostic -> diagnostic.getDiagnosticSeverity() == DiagnosticSeverity.ERROR)) {
-                throw new ClientException("Error occurred while generating client");
-            }
+        if (clientDiagnostic.stream().anyMatch(
+                diagnostic -> diagnostic.getDiagnosticSeverity() == DiagnosticSeverity.ERROR)) {
+            throw new ClientException("Error occurred while generating client");
         }
 
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,

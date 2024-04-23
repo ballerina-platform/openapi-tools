@@ -32,7 +32,7 @@ apply plugin: "org.javamodularity.moduleplugin"
 apply from: "$rootDir/gradle/javaProject.gradle"
 
 ext.clientNativeVersion = project.clientNativeVersion
-ext.skipClientNativePublish = project.skipClientNativePublish
+ext.clientNativePublish = project.clientNativePublish
 ext.ballerinaLangVersion = project.ballerinaLangVersion
 ext.testngVersion = project.testngVersion
 ext.commonsLang3Version = project.commonsLang3Version
