@@ -19,7 +19,7 @@ annotation ClientMethodImpl MethodImpl on function;
 type ClientMethodInvocationError http:ClientError;
 
 public isolated client class Client {
-    final http:Client clientEp;
+    final http:StatusCodeClient clientEp;
     # Gets invoked to initialize the `connector`.
     #
     # + config - The configurations to be used when initializing the `connector` 
@@ -48,7 +48,7 @@ public isolated client class Client {
                 httpClientConfig.proxy = check config.proxy.ensureType(http:ProxyConfig);
             }
         }
-        http:Client httpEp = check new (serviceUrl, httpClientConfig);
+        http:StatusCodeClient httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
         return;
     }

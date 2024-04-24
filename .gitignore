@@ -40,4 +40,4 @@ velocity.log*
 .project
 
 # Client Native Jar Dependency Version
-openapi-tool-version.properties
+openapi-client-native-version.properties

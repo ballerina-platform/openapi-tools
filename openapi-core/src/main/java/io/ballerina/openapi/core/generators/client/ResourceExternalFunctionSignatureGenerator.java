@@ -28,6 +28,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.List;
+import java.util.Objects;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -49,17 +50,12 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPEDESC_TYPE_DESC;
  * @since 1.9.0
  */
 public class ResourceExternalFunctionSignatureGenerator extends ResourceFunctionSignatureGenerator {
-    private final String path;
 
     public ResourceExternalFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod,
                                                       String path) {
         super(operation, openAPI, httpMethod);
-        this.path = path;
-    }
-
-    @Override
-    protected FunctionReturnTypeGeneratorImp getFunctionReturnTypeGenerator() {
-        return new FunctionExternalReturnTypeGenerator(operation, openAPI, httpMethod, path);
+        this.functionReturnTypeGenerator = new FunctionExternalReturnTypeGenerator(operation, openAPI, httpMethod,
+                path);
     }
 
     @Override
@@ -71,9 +67,14 @@ public class ResourceExternalFunctionSignatureGenerator extends ResourceFunction
         }
 
         FunctionReturnTypeGeneratorImp functionReturnTypeGenerator = getFunctionReturnTypeGenerator();
-        FunctionReturnTypeGeneratorImp.ReturnTypesInfo returnTypeInfo = functionReturnTypeGenerator.getReturnTypeInfo();
+        FunctionReturnTypeGeneratorImp.ReturnTypesInfo returnTypeInfo = functionReturnTypeGenerator.
+                getAlreadyDefinedReturnTypeInfo();
+
+        if (Objects.isNull(returnTypeInfo)) {
+            returnTypeInfo = functionReturnTypeGenerator.getReturnTypeInfo();
+        }
+
         List<TypeDescriptorNode> returnTypes = returnTypeInfo.types();
-        diagnostics.addAll(functionReturnTypeGenerator.getDiagnostics());
         TypeDescriptorNode returnType;
         if (returnTypes.isEmpty()) {
             diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_114, operation.getOperationId()));

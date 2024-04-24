@@ -1,7 +1,7 @@
 /*
- *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com).
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License.
  *  You may obtain a copy of the License at
@@ -17,7 +17,9 @@
  */
 package io.ballerina.openapi.cmd;
 
+import io.ballerina.openapi.OpenAPITest;
 import io.ballerina.openapi.TestUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -29,18 +31,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.ballerina.openapi.TestUtil.DISTRIBUTIONS_DIR;
+import static io.ballerina.openapi.TestUtil.OUT;
 import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
+import static io.ballerina.openapi.TestUtil.TEST_DISTRIBUTION_PATH;
 
 /**
  * This {@code BallerinaToOpenAPITests} contains all the ballerina to openapi command with compiler annotation.
  */
-public class BallerinaToOpenAPITests {
+public class BallerinaToOpenAPITests extends OpenAPITest {
     public static final String DISTRIBUTION_FILE_NAME = DISTRIBUTIONS_DIR.toString();
     public static final Path TEST_RESOURCE = Paths.get(RESOURCES_PATH.toString() + "/ballerina_sources");
 
@@ -149,20 +151,6 @@ public class BallerinaToOpenAPITests {
         TestUtil.cleanDistribution();
     }
 
-    //Replace contract file path in generated service file with common URL.
-    public String replaceContractPath(Stream<String> expectedServiceLines, String expectedService,
-                                      String generatedService) {
-
-        Pattern pattern = Pattern.compile("\\bcontract\\b: \"(.*?)\"");
-        Matcher matcher = pattern.matcher(generatedService);
-        matcher.find();
-        String contractPath = "contract: " + "\"" + matcher.group(1) + "\"";
-        expectedService = expectedService.replaceAll("\\bcontract\\b: \"(.*?)\"",
-                Matcher.quoteReplacement(contractPath));
-        expectedServiceLines.close();
-        return expectedService;
-    }
-
     private String getStringFromGivenBalFile(Path expectedServiceFile) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile);
         String expectedServiceContent = expectedServiceLines.collect(Collectors.joining(System.lineSeparator()));
@@ -180,5 +168,26 @@ public class BallerinaToOpenAPITests {
         String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve(generatedFile));
         String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve(expectedPath));
         Assert.assertEquals(expectedYaml, generatedOpenAPI);
+    }
+
+    public Process getProcessForOpenAPISpecGeneration(String ballerinaFilePath) throws IOException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add(0, "openapi");
+        buildArgs.add("-i");
+        buildArgs.add(ballerinaFilePath);
+        buildArgs.add("-o");
+        buildArgs.add(tmpDir.toString());
+
+        String balFile = "bal";
+
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            balFile = "bal.bat";
+        }
+        buildArgs.add(0, TEST_DISTRIBUTION_PATH.resolve(DISTRIBUTION_FILE_NAME).resolve("bin")
+                .resolve(balFile).toString());
+        OUT.println("Executing: " + StringUtils.join(buildArgs, ' '));
+        ProcessBuilder pb = new ProcessBuilder(buildArgs);
+        pb.directory(TEST_RESOURCE.toFile());
+        return pb.start();
     }
 }

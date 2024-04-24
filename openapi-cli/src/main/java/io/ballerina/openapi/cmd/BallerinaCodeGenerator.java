@@ -170,12 +170,13 @@ public class BallerinaCodeGenerator {
             ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
             sourceFiles.addAll(serviceGenerationHandler.generateServiceFiles(oasServiceMetadata));
             this.diagnostics.addAll(serviceGenerationHandler.getDiagnostics());
-            this.diagnostics.addAll(TypeHandler.getInstance().getDiagnostics());
         }
 
         TypeHandler typeHandler = TypeHandler.getInstance();
         SyntaxTree schemaSyntaxTree = typeHandler.generateTypeSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
+        this.diagnostics.addAll(TypeHandler.getInstance().getDiagnostics());
+
 
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
@@ -202,13 +203,10 @@ public class BallerinaCodeGenerator {
         //display diagnostics- client
         List<ClientDiagnostic> clientDiagnostic = clientGenerator.getDiagnostics();
 
-        if (!clientDiagnostic.isEmpty()) {
-            outStream.println("error occurred while generating the client: ");
-            for (ClientDiagnostic diagnostic : clientDiagnostic) {
-                outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
-            }
+        for (ClientDiagnostic diagnostic : clientDiagnostic) {
+            outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
         }
-
+        printDiagnostic(diagnostics);
         writeGeneratedSources(newGenFiles, srcPath, implPath, GEN_BOTH);
     }
 
@@ -270,7 +268,7 @@ public class BallerinaCodeGenerator {
             return;
         }
         diagnostics.forEach(diagnostic -> {
-            outStream.println(String.format("%s: $s", diagnostic.diagnosticInfo().severity(), diagnostic.message()));
+            outStream.println(String.format("%s: %s", diagnostic.diagnosticInfo().severity(), diagnostic.message()));
         });
         writeGeneratedSources(genFiles, srcPath, implPath, GEN_SERVICE);
     }
@@ -417,7 +415,8 @@ public class BallerinaCodeGenerator {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
                     licenseHeader + schemaContent));
         }
-
+        //Type diagnostic
+        List<Diagnostic> diagnosticList = TypeHandler.getInstance().getDiagnostics();
         // Generate test boilerplate code for test cases
         if (this.includeTestFiles) {
             BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(clientGenerator);
@@ -433,32 +432,19 @@ public class BallerinaCodeGenerator {
         }
 
         List<ClientDiagnostic> clientDiagnostic = clientGenerator.getDiagnostics();
-        if (!clientDiagnostic.isEmpty()) {
-            outStream.println("error occurred while generating the client: ");
-            for (ClientDiagnostic diagnostic : clientDiagnostic) {
-                outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
-            }
+        for (ClientDiagnostic diagnostic : clientDiagnostic) {
+            outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
         }
+        printDiagnostic(diagnosticList);
         return sourceFiles;
     }
 
     private static BallerinaClientGenerator getBallerinaClientGenerator(OASClientConfig oasClientConfig,
                                                                         boolean statusCodeBinding) {
-        if (!statusCodeBinding || hasRequestBinding(oasClientConfig.getOpenAPI())) {
-            if (statusCodeBinding) {
-                outStream.println("WARNING: the generated client will not have status code response binding since " +
-                        "the OpenAPI definition contains unsupported media-type for request payload binding.");
-            }
+        if (!statusCodeBinding) {
             return new BallerinaClientGenerator(oasClientConfig);
         }
         return new BallerinaClientGeneratorWithStatusCodeBinding(oasClientConfig);
-    }
-
-    private static boolean hasRequestBinding(OpenAPI openAPI) {
-        return openAPI.getPaths().values().stream().anyMatch(pathItem -> pathItem.readOperations().stream()
-                .anyMatch(operation -> operation.getRequestBody() != null &&
-                        operation.getRequestBody().getContent().keySet().stream()
-                                .anyMatch(GeneratorUtils::hasRequestBinding)));
     }
 
 
@@ -516,7 +502,14 @@ public class BallerinaCodeGenerator {
         }
         this.diagnostics.addAll(serviceGenerationHandler.getDiagnostics());
         this.diagnostics.addAll(TypeHandler.getInstance().getDiagnostics());
+        printDiagnostic(diagnostics);
         return sourceFiles;
+    }
+
+    private void printDiagnostic(List<Diagnostic> diagnostics) {
+        for (Diagnostic diagnostic : diagnostics) {
+            outStream.printf("%s: %s%n", diagnostic.diagnosticInfo().severity(), diagnostic.message());
+        }
     }
 
     /**

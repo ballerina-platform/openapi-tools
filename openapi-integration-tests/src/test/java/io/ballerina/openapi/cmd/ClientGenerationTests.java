@@ -87,15 +87,15 @@ public class ClientGenerationTests extends OpenAPITest {
         Assert.assertTrue(Files.exists(Paths.get(tmpDir.toString()).resolve("openapi_service.bal")));
     }
 
-    @Test(description = "`--with-status-code-binding` option with client")
-    public void clientWithStatusCodeBinding() throws IOException, InterruptedException {
+    @Test(description = "`--status-code-binding` option with client")
+    public void resourceClientWithStatusCodeBinding() throws IOException, InterruptedException {
         String openapiFilePath = "openapi.yaml";
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("-i");
         buildArgs.add(openapiFilePath);
         buildArgs.add("--mode");
         buildArgs.add("client");
-        buildArgs.add("--with-status-code-binding");
+        buildArgs.add("--status-code-binding");
         Path projectGenPath = Paths.get(TEST_RESOURCE + "/project-01");
         Path projectExpectedPath = Paths.get(EXPECTED_RESOURCE + "/project-expected");
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, projectGenPath, buildArgs);
@@ -111,7 +111,33 @@ public class ClientGenerationTests extends OpenAPITest {
                 projectExpectedPath.resolve("utils.bal").toFile(), "UTF-8");
     }
 
-    @Test(description = "`--with-status-code-binding` option with service")
+    @Test(description = "`--status-code-binding` and `--client-methods remote` options with client")
+    public void remoteClientWithStatusCodeBinding() throws IOException, InterruptedException {
+        String openapiFilePath = "openapi.yaml";
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("-i");
+        buildArgs.add(openapiFilePath);
+        buildArgs.add("--mode");
+        buildArgs.add("client");
+        buildArgs.add("--client-methods");
+        buildArgs.add("remote");
+        buildArgs.add("--status-code-binding");
+        Path projectGenPath = Paths.get(TEST_RESOURCE + "/project-04");
+        Path projectExpectedPath = Paths.get(EXPECTED_RESOURCE + "/project-expected");
+        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, projectGenPath, buildArgs);
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("Ballerina.toml")));
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("client.bal")));
+        FileUtils.contentEqualsIgnoreEOL(projectGenPath.resolve("client.bal").toFile(),
+                projectExpectedPath.resolve("client_resource.bal").toFile(), "UTF-8");
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("types.bal")));
+        FileUtils.contentEqualsIgnoreEOL(projectGenPath.resolve("types.bal").toFile(),
+                projectExpectedPath.resolve("types.bal").toFile(), "UTF-8");
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("utils.bal")));
+        FileUtils.contentEqualsIgnoreEOL(projectGenPath.resolve("utils.bal").toFile(),
+                projectExpectedPath.resolve("utils.bal").toFile(), "UTF-8");
+    }
+
+    @Test(description = "`--status-code-binding` option with service")
     public void serviceWithStatusCodeBinding() throws IOException, InterruptedException {
         String openapiFilePath = "openapi.yaml";
         List<String> buildArgs = new LinkedList<>();
@@ -119,7 +145,7 @@ public class ClientGenerationTests extends OpenAPITest {
         buildArgs.add(openapiFilePath);
         buildArgs.add("--mode");
         buildArgs.add("service");
-        buildArgs.add("--with-status-code-binding");
+        buildArgs.add("--status-code-binding");
         Path projectGenPath = Paths.get(TEST_RESOURCE + "/project-01");
         Path projectExpectedPath = Paths.get(EXPECTED_RESOURCE + "/project-01");
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, projectGenPath, buildArgs);
@@ -129,13 +155,13 @@ public class ClientGenerationTests extends OpenAPITest {
                 projectExpectedPath.resolve("Ballerina.toml").toFile(), "UTF-8");
     }
 
-    @Test(description = "`--with-status-code-binding` option without any mode")
+    @Test(description = "`--status-code-binding` option without any mode")
     public void commonWithStatusCodeBinding() throws IOException, InterruptedException {
         String openapiFilePath = "openapi.yaml";
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("-i");
         buildArgs.add(openapiFilePath);
-        buildArgs.add("--with-status-code-binding");
+        buildArgs.add("--status-code-binding");
         Path projectGenPath = Paths.get(TEST_RESOURCE + "/project-02");
         Path projectExpectedPath = Paths.get(EXPECTED_RESOURCE + "/project-expected");
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, projectGenPath, buildArgs);
@@ -154,13 +180,13 @@ public class ClientGenerationTests extends OpenAPITest {
                 projectExpectedPath.resolve("openapi_service.bal").toFile(), "UTF-8");
     }
 
-    @Test(description = "`--with-status-code-binding` without `Ballerina.toml`")
+    @Test(description = "`--status-code-binding` without `Ballerina.toml`")
     public void nonBallerinaPackageWithStatusCodeBinding() throws IOException, InterruptedException {
         String openapiFilePath = "openapi.yaml";
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("-i");
         buildArgs.add(openapiFilePath);
-        buildArgs.add("--with-status-code-binding");
+        buildArgs.add("--status-code-binding");
         Path projectGenPath = Paths.get(TEST_RESOURCE + "/project-03");
         Path projectExpectedPath = Paths.get(EXPECTED_RESOURCE + "/project-expected");
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, projectGenPath, buildArgs);

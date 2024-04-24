@@ -99,7 +99,8 @@ public class GeneratorConstants {
     public static final String URL = "url";
     public static final String MODULE_TEST = "test";
     public static final String BALLERINA = "ballerina";
-    public static final String CLIENT_CLASS = "Client";
+    public static final String CLIENT = "Client";
+    public static final String STATUS_CODE_CLIENT = "StatusCodeClient";
     public static final String CLIENT_EP = "clientEp";
     public static final String EQUAL = "=";
     public static final String CONFIG = "config";
@@ -241,7 +242,7 @@ public class GeneratorConstants {
         httpCodeMap.put("202", "Accepted");
         httpCodeMap.put("203", "NonAuthoritativeInformation");
         httpCodeMap.put("204", "NoContent");
-        httpCodeMap.put("205", "RestContent");
+        httpCodeMap.put("205", "ResetContent");
         httpCodeMap.put("206", "PartialContent");
         httpCodeMap.put("207", "MultiStatus");
         httpCodeMap.put("208", "AlreadyReported");

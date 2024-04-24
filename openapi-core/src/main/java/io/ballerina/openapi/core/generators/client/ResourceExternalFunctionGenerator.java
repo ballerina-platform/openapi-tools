@@ -89,8 +89,7 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
                                                                          Token functionKeyWord,
                                                                          IdentifierToken functionName,
                                                                          NodeList<Node> relativeResourcePath,
-                                                                         ResourceFunctionSignatureGenerator
-                                                                                 signatureGenerator,
+                                                                         FunctionSignatureNode signatureNode,
                                                                          FunctionBodyNode functionBodyNode) {
         BasicLiteralNode implFuncName = createBasicLiteralNode(STRING_LITERAL,
                 createLiteralValueToken(SyntaxKind.STRING_LITERAL_TOKEN,
@@ -105,11 +104,8 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
         SimpleNameReferenceNode annotationRef = createSimpleNameReferenceNode(createIdentifierToken("MethodImpl"));
         AnnotationNode implAnnotation = createAnnotationNode(createToken(AT_TOKEN), annotationRef, implFunctionMap);
         MetadataNode metadataNode = createMetadataNode(null, createNodeList(implAnnotation));
-        Optional<FunctionSignatureNode> functionSignatureNode = signatureGenerator.generateFunctionSignature();
-        diagnostics.addAll(signatureGenerator.getDiagnostics());
-        return functionSignatureNode.map(signatureNode -> NodeFactory.createFunctionDefinitionNode(
-                RESOURCE_ACCESSOR_DEFINITION, metadataNode, qualifierList, functionKeyWord, functionName,
-                relativeResourcePath, signatureNode, functionBodyNode));
+        return Optional.of(NodeFactory.createFunctionDefinitionNode(RESOURCE_ACCESSOR_DEFINITION, metadataNode,
+                qualifierList, functionKeyWord, functionName, relativeResourcePath, signatureNode, functionBodyNode));
     }
 
     @Override

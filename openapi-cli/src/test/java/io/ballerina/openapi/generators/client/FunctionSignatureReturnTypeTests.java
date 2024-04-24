@@ -168,4 +168,21 @@ public class FunctionSignatureReturnTypeTests {
         SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
+
+    @Test(description = "Tests for the response which has some encoding details in media type")
+    public void getReturnTypeWithEncodingMediaType() throws IOException, BallerinaOpenApiException, ClientException {
+        OpenAPI openAPI = getOpenAPI(RES_DIR.resolve("swagger/return_type" +
+                "/return_type_encoding.yaml"));
+        Path expectedPath = RES_DIR.resolve("ballerina/return/return_type_encode.bal");
+        TypeHandler.createInstance(openAPI, false);
+        List<String> list1 = new ArrayList<>();
+        Filter filter = new Filter(list1, list1);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
 }

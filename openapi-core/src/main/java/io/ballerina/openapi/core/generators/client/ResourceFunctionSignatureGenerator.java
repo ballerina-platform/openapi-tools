@@ -53,13 +53,13 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extract
 public class ResourceFunctionSignatureGenerator implements FunctionSignatureGenerator {
     protected final Operation operation;
     protected final OpenAPI openAPI;
-    protected final String httpMethod;
     protected final List<ClientDiagnostic> diagnostics = new ArrayList<>();
+    protected FunctionReturnTypeGeneratorImp functionReturnTypeGenerator;
 
     public ResourceFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod) {
         this.operation = operation;
         this.openAPI = openAPI;
-        this.httpMethod = httpMethod;
+        this.functionReturnTypeGenerator = new FunctionReturnTypeGeneratorImp(operation, openAPI, httpMethod);
     }
 
     @Override
@@ -189,7 +189,7 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
     }
 
     protected FunctionReturnTypeGeneratorImp getFunctionReturnTypeGenerator() {
-        return new FunctionReturnTypeGeneratorImp(operation, openAPI, httpMethod);
+        return functionReturnTypeGenerator;
     }
 
     @Override

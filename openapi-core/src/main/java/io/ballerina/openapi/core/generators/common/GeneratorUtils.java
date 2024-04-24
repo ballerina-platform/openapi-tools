@@ -316,11 +316,11 @@ public class GeneratorUtils {
      * @param schema OpenApi schema
      * @return ballerina type
      */
-    public static String convertOpenAPITypeToBallerina(Schema<?> schema, boolean overrideNullable)
+    public static String convertOpenAPITypeToBallerina(Schema<?> schema, boolean ignoreNullableFlag)
             throws UnsupportedOASDataTypeException {
         String type = getOpenAPIType(schema);
         if (schema.getEnum() != null && !schema.getEnum().isEmpty() && primitiveTypeList.contains(type)) {
-            EnumGenerator enumGenerator = new EnumGenerator(schema, null, overrideNullable,
+            EnumGenerator enumGenerator = new EnumGenerator(schema, null, ignoreNullableFlag,
                     new HashMap<>(), new HashMap<>());
             try {
                 return enumGenerator.generateTypeDescriptorNode().toString();
@@ -396,6 +396,9 @@ public class GeneratorUtils {
      * @return string with new generated name
      */
     public static String getValidName(String identifier, boolean isSchema) {
+        if (identifier.isBlank()) {
+            return "\\" + identifier;
+        }
         //For the flatten enable we need to remove first Part of valid name check
         // this - > !identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
         if (!identifier.matches("\\b[0-9]*\\b")) {
@@ -494,6 +497,10 @@ public class GeneratorUtils {
      */
     public static boolean isSupportedMediaType(Map.Entry<String, MediaType> mediaTypeEntry) {
         String mediaType = mediaTypeEntry.getKey();
+        String[] contentTypes = mediaType.split(";");
+        if (mediaType.length() > 1) {
+            mediaType = contentTypes[0];
+        }
         String defaultBallerinaType = getBallerinaMediaType(mediaType, true);
         Schema<?> schema = mediaTypeEntry.getValue().getSchema();
 
@@ -515,6 +522,10 @@ public class GeneratorUtils {
      * Generate BallerinaMediaType for all the return mediaTypes.
      */
     public static String getBallerinaMediaType(String mediaType, boolean isRequest) {
+        String[] contentTypes = mediaType.split(";");
+        if (mediaType.length() > 1) {
+            mediaType = contentTypes[0];
+        }
         if (mediaType.matches(".*/json") || mediaType.matches("application/.*\\+json")) {
             return SyntaxKind.JSON_KEYWORD.stringValue();
         } else if (mediaType.matches(".*/xml") || mediaType.matches("application/.*\\+xml")) {
@@ -561,7 +572,6 @@ public class GeneratorUtils {
      * @return resolved url
      */
     public static String buildUrl(String absUrl, ServerVariables variables) {
-
         String url = absUrl;
         if (variables != null) {
             for (Map.Entry<String, ServerVariable> entry : variables.entrySet()) {
@@ -960,6 +970,10 @@ public class GeneratorUtils {
     }
 
     public static String selectMediaType(String mediaTypeContent) {
+        String[] contentTypes = mediaTypeContent.split(";");
+        if (mediaTypeContent.length() > 1) {
+            mediaTypeContent = contentTypes[0];
+        }
         if (mediaTypeContent.matches("application/.*\\+json") || mediaTypeContent.matches(".*/json")) {
             mediaTypeContent = GeneratorConstants.APPLICATION_JSON;
         } else if (mediaTypeContent.matches("application/.*\\+xml") || mediaTypeContent.matches(".*/xml")) {
@@ -981,24 +995,26 @@ public class GeneratorUtils {
         }
 
         Map<String, Schema> properties = new HashMap<>();
-        List<String> requiredField = new ArrayList<>();
+        List<String> requiredFields = new ArrayList<>();
         for (Map.Entry<String, Header> headerEntry : headers.entrySet()) {
             String headerName = headerEntry.getKey();
             Header header = headerEntry.getValue();
             Schema headerTypeSchema = getValidatedHeaderSchema(header.getSchema());
             properties.put(headerName, headerTypeSchema);
             if (header.getRequired() != null && header.getRequired()) {
-                requiredField.add(headerName);
+                requiredFields.add(headerName);
             }
         }
 
-        if (properties.isEmpty() || requiredField.isEmpty()) {
+        if (properties.isEmpty()) {
             return null;
         }
 
         ObjectSchema headersSchema = new ObjectSchema();
         headersSchema.setProperties(properties);
-        headersSchema.setRequired(requiredField);
+        if (!requiredFields.isEmpty()) {
+            headersSchema.setRequired(requiredFields);
+        }
         headersSchema.setAdditionalProperties(false);
         return headersSchema;
     }
@@ -1073,7 +1089,9 @@ public class GeneratorUtils {
                 generatedTypes.put(mediaTypeToken.toString(), mediaTypeToken);
             }
         } else {
-            diagnosticList.add(new CommonDiagnostic(OAS_COMMON_101));
+            if (!bodyTypeSchema.isEmpty()) {
+                diagnosticList.add(new CommonDiagnostic(OAS_COMMON_101));
+            }
             return TypeHandler.getInstance().createTypeInclusionRecord(code, null,
                     TypeHandler.getInstance().generateHeaderType(headersTypeSchema), method);
         }
@@ -1181,5 +1199,21 @@ public class GeneratorUtils {
                     rightTypeDesc);
         }
         return unionTypeDescriptorNode;
+    }
+
+    public static void addCommonParamsToOperationParams(Map.Entry<PathItem.HttpMethod, Operation> operation,
+                                                        OpenAPI openAPI, String path) {
+        List<Parameter> parameters = operation.getValue().getParameters();
+        List<Parameter> commonParameters = openAPI.getPaths().get(path).getParameters();
+        if (parameters == null) {
+            operation.getValue().setParameters(commonParameters);
+        } else if (commonParameters != null) {
+            parameters.forEach(parameter -> {
+                if (commonParameters.contains(parameter)) {
+                    commonParameters.remove(parameter);
+                }
+            });
+            parameters.addAll(commonParameters);
+        }
     }
 }

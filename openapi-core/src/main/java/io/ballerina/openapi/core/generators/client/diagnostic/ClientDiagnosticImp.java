@@ -33,7 +33,7 @@ public class ClientDiagnosticImp implements ClientDiagnostic {
     public ClientDiagnosticImp(DiagnosticMessages message, String... args) {
         this.code = message.getCode();
         this.message = String.format(message.getDescription(), (Object[]) args);
-        this.diagnosticSeverity = DiagnosticSeverity.ERROR;
+        this.diagnosticSeverity = message.getSeverity();
 //        this.location = location;
     }
 

@@ -29,8 +29,6 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 public enum CommonDiagnosticMessages {
     OAS_COMMON_101("OAS_COMMON_101", "Responses with 204 status code cannot have a body.",
             DiagnosticSeverity.WARNING),
-    OAS_COMMON_102("OAS_COMMON_102", "Responses with 204 cannot have a body.",
-            DiagnosticSeverity.WARNING),
     OAS_COMMON_201("OAS_COMMON_201", "Invalid reference value : %s\nBallerina " +
             "only supports local reference values.", DiagnosticSeverity.ERROR),
     OAS_COMMON_202("OAS_COMMON_202", "Unsupported OAS data type `%s`", DiagnosticSeverity.ERROR),

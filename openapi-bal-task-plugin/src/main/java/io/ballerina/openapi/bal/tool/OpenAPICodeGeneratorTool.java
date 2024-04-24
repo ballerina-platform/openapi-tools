@@ -21,9 +21,9 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.bal.tool.Constants.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGeneratorWithStatusCodeBinding;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
@@ -35,6 +35,7 @@ import io.ballerina.projects.Project;
 import io.ballerina.projects.buildtools.CodeGeneratorTool;
 import io.ballerina.projects.buildtools.ToolConfig;
 import io.ballerina.projects.buildtools.ToolContext;
+import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.toml.semantic.diagnostics.TomlNodeLocation;
 import io.ballerina.toml.syntax.tree.AbstractNodeFactory;
 import io.ballerina.toml.syntax.tree.DocumentMemberDeclarationNode;
@@ -46,6 +47,7 @@ import io.ballerina.toml.syntax.tree.Token;
 import io.ballerina.toml.validator.SampleNodeGenerator;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
@@ -362,6 +364,11 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     private boolean clientNativeDependencyAlreadyExist(String version, ToolContext toolContext, Location location)
             throws BallerinaOpenApiException {
         Project project = toolContext.currentPackage().project();
+        //TODO : This is a workaround to get an updated project and this will be removed once this lang issue will be
+        // fixed https://github.com/ballerina-platform/ballerina-lang/issues/42599
+        Path path = project.sourceRoot();
+        project = BuildProject.load(path);
+
         Map<String, PackageManifest.Platform> platforms = project.currentPackage().manifest().platforms();
         if (Objects.nonNull(platforms) && platforms.containsKey("java17")) {
             Optional<Map<String, Object>> nativeDependency = platforms.get("java17").dependencies().stream().filter(
@@ -398,7 +405,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
 
     private String getVersion() throws IOException {
         try (InputStream inputStream = OpenAPICodeGeneratorTool.class.getClassLoader().getResourceAsStream(
-                "openapi-tool-version.properties")) {
+                "openapi-client-native-version.properties")) {
             Properties properties = new Properties();
             properties.load(inputStream);
             return properties.getProperty("version");
@@ -426,7 +433,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 .append(targetPath)
                 .append(clientConfig.isResourceMode())
                 .append(clientConfig.getLicense())
-                .append(clientConfig.isNullable());
+                .append(clientConfig.isNullable())
+                .append(clientConfig.isStatusCodeBinding());
         List<String> tags = clientConfig.getFilter().getTags();
         tags.sort(String.CASE_INSENSITIVE_ORDER);
         for (String str : tags) {
@@ -453,9 +461,21 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         // Generate ballerina client files.
         TypeHandler.createInstance(oasClientConfig.getOpenAPI(), oasClientConfig.isNullable());
         String licenseContent = oasClientConfig.getLicense();
-        BallerinaClientGenerator ballerinaClientGenerator = getClientGenerator(oasClientConfig, statusCodeBinding,
-                toolContext, location);
+        BallerinaClientGenerator ballerinaClientGenerator = getClientGenerator(oasClientConfig, statusCodeBinding);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
+
+        List<ClientDiagnostic> clientDiagnostic = ballerinaClientGenerator.getDiagnostics();
+
+        for (ClientDiagnostic diagnostic : clientDiagnostic) {
+            createDiagnostics(toolContext, diagnostic.getMessage(), diagnostic.getCode(),
+                    diagnostic.getDiagnosticSeverity(), location);
+        }
+
+        if (clientDiagnostic.stream().anyMatch(
+                diagnostic -> diagnostic.getDiagnosticSeverity() == DiagnosticSeverity.ERROR)) {
+            throw new ClientException("Error occurred while generating client");
+        }
+
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
                 licenseContent == null || licenseContent.isBlank() ? mainContent :
                         licenseContent + System.lineSeparator() + mainContent));
@@ -488,23 +508,11 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     }
 
     private static BallerinaClientGenerator getClientGenerator(OASClientConfig oasClientConfig,
-                                                               boolean statusCodeBinding, ToolContext toolContext,
-                                                               Location location) {
-        if (!statusCodeBinding || hasRequestBinding(oasClientConfig.getOpenAPI())) {
-            if (statusCodeBinding) {
-                createDiagnostics(toolContext, DiagnosticMessages.WARNING_FOR_UNSUPPORTED_MEDIA_TYPE,
-                        location);
-            }
+                                                               boolean statusCodeBinding) {
+        if (!statusCodeBinding) {
             return new BallerinaClientGenerator(oasClientConfig);
         }
         return new BallerinaClientGeneratorWithStatusCodeBinding(oasClientConfig);
-    }
-
-    private static boolean hasRequestBinding(OpenAPI openAPI) {
-        return openAPI.getPaths().values().stream().anyMatch(pathItem -> pathItem.readOperations().stream()
-                .anyMatch(operation -> operation.getRequestBody() != null &&
-                        operation.getRequestBody().getContent().keySet().stream()
-                                .anyMatch(GeneratorUtils::hasRequestBinding)));
     }
 
     /**
@@ -574,6 +582,12 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         String message = String.format(error.getDescription(), (Object[]) args);
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), message,
                 error.getSeverity());
+        toolContext.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, location));
+    }
+
+    private static void createDiagnostics(ToolContext toolContext, String diagnosticMessage, String diagnosticCode,
+                                          DiagnosticSeverity severity, Location location) {
+        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(diagnosticCode, diagnosticMessage, severity);
         toolContext.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, location));
     }
 

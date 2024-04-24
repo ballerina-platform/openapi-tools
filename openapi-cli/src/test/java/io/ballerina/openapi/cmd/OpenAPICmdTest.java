@@ -746,7 +746,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path packagePath = resourceDir.resolve(Paths.get("cmd/bal-task-client"));
         String[] addArgs = {"--input", "petstore.yaml", "-p", packagePath.toString(),
                 "--module", "delivery", "--nullable", "--license", "license.txt", "--mode", "client",
-                "--client-methods", "resource", "--with-status-code-binding"};
+                "--client-methods", "resource", "--status-code-binding"};
         Add add = new Add(printStream,  false);
         new CommandLine(add).parseArgs(addArgs);
         add.execute();

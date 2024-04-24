@@ -91,10 +91,10 @@ import static io.ballerina.openapi.core.generators.type.diagnostic.TypeGeneratio
 public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
     private final List<Schema<?>> restSchemas = new LinkedList<>();
 
-    public AllOfRecordTypeGenerator(Schema schema, String typeName, boolean overrideNullable,
+    public AllOfRecordTypeGenerator(Schema schema, String typeName, boolean ignoreNullableFlag,
                                     HashMap<String, TypeDefinitionNode> subTypesMap,
                                     HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
-        super(schema, typeName, overrideNullable, subTypesMap, pregeneratedTypeMap);
+        super(schema, typeName, ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
     }
 
     /**
@@ -110,7 +110,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
         RecordRestDescriptorNode restDescriptorNode = recordMetadata.getRestDescriptorNode();
         if (allOfSchemas.size() == 1 && allOfSchemas.get(0).get$ref() != null) {
             ReferencedTypeGenerator referencedTypeGenerator = new ReferencedTypeGenerator(allOfSchemas.get(0),
-                    typeName, overrideNullable, subTypesMap, pregeneratedTypeMap);
+                    typeName, ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
             TypeDescriptorNode typeDescriptorNode = referencedTypeGenerator.generateTypeDescriptorNode();
             return typeDescriptorNode;
         } else {
@@ -119,12 +119,12 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
             List<Schema<?>> validSchemas = recordFlist.getRight();
             if (validSchemas.isEmpty()) {
                 AnyDataTypeGenerator anyDataTypeGenerator = new AnyDataTypeGenerator(schema, typeName,
-                        overrideNullable, subTypesMap, pregeneratedTypeMap);
+                        ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
                 TypeDescriptorNode typeDescriptorNode = anyDataTypeGenerator.generateTypeDescriptorNode();
                 return typeDescriptorNode;
             } else if (validSchemas.size() == 1) {
                 TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(validSchemas.get(0), typeName,
-                        null, overrideNullable, subTypesMap, pregeneratedTypeMap);
+                        null, ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
                 TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
                 return typeDescriptorNode;
             } else {
@@ -170,7 +170,8 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                     pregeneratedTypeMap.put(modifiedSchemaName, createSimpleNameReferenceNode(
                             createIdentifierToken(modifiedSchemaName)));
                     TypeGenerator reffredTypeGenerator = TypeGeneratorUtils.getTypeGenerator(refSchema,
-                            modifiedSchemaName, modifiedSchemaName, overrideNullable, subTypesMap, pregeneratedTypeMap);
+                            modifiedSchemaName, modifiedSchemaName, ignoreNullableFlag,
+                            subTypesMap, pregeneratedTypeMap);
                     TypeDescriptorNode typeDescriptorNode1 = reffredTypeGenerator.generateTypeDescriptorNode();
                     subTypesMap.put(extractedSchemaName, createTypeDefinitionNode(null,
                             createToken(PUBLIC_KEYWORD),
@@ -232,7 +233,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
         List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
         for (Schema schema : schemas) {
             TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, null, null,
-                    overrideNullable, subTypesMap, pregeneratedTypeMap);
+                    ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
             TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
             imports.addAll(typeGenerator.getImports());
             typeDescriptorNodes.add(typeDescriptorNode);

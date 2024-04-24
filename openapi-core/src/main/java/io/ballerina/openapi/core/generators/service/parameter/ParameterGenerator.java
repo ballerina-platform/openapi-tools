@@ -21,6 +21,7 @@ package io.ballerina.openapi.core.generators.service.parameter;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
 import io.ballerina.openapi.core.generators.common.exception.UnsupportedOASDataTypeException;
+import io.ballerina.openapi.core.generators.service.exceptions.InvalidHeaderNameException;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -40,7 +41,7 @@ public abstract class ParameterGenerator {
     }
 
     public abstract ParameterNode generateParameterNode(Parameter parameter) throws UnsupportedOASDataTypeException,
-            InvalidReferenceException;
+            InvalidReferenceException, InvalidHeaderNameException;
 
     public boolean isNullableRequired() {
         return isNullableRequired;

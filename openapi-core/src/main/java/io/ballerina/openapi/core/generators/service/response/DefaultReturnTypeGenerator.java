@@ -120,15 +120,16 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             Content content = responseValue != null ? responseValue.getContent() : null;
             TypeDescriptorNode type = null;
 
-            if (responseValue != null && responseValue.get$ref() != null) {
+            Map<String, ApiResponse> responseComponents = oasServiceMetadata.getOpenAPI()
+                    .getComponents().getResponses();
+            if (responseValue != null && responseValue.get$ref() != null && responseComponents != null) {
                 String[] splits = responseValue.get$ref().split("/");
                 String extractReferenceType = splits[splits.length - 1];
-                responseValue = oasServiceMetadata.getOpenAPI().getComponents().getResponses()
-                        .get(extractReferenceType);
+                responseValue = responseComponents.get(extractReferenceType);
                 content = responseValue.getContent();
             }
             if (code == null && !responseCode.equals(GeneratorConstants.DEFAULT)) {
-                diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_108, responseCode));
+                diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_201, responseCode));
                 type = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
             } else if (responseCode.equals(GeneratorConstants.DEFAULT)) {
                 type = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));

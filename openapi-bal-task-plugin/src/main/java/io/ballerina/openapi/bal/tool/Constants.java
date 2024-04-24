@@ -66,10 +66,7 @@ public class Constants {
                 " updated with the OpenAPI client native dependency but the version is different from the current " +
                 "version. Please remove the existing dependency and try again.", DiagnosticSeverity.ERROR),
         ERROR_WHILE_UPDATING_TOML("OAS_CLIENT_11", "error occurred when updating Ballerina.toml " +
-                "file with the client native dependency.", DiagnosticSeverity.ERROR),
-        WARNING_FOR_UNSUPPORTED_MEDIA_TYPE("OAS_CLIENT_12", "the generated client will not have status code" +
-                " response binding since the OpenAPI definition contains unsupported media-type for request " +
-                "payload binding.", DiagnosticSeverity.WARNING);
+                "file with the client native dependency.", DiagnosticSeverity.ERROR);
 
         private final String code;
         private final String description;

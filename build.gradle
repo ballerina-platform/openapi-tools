@@ -32,6 +32,7 @@ apply plugin: "org.javamodularity.moduleplugin"
 apply from: "$rootDir/gradle/javaProject.gradle"
 
 ext.clientNativeVersion = project.clientNativeVersion
+ext.clientNativePublish = project.clientNativePublish
 ext.ballerinaLangVersion = project.ballerinaLangVersion
 ext.testngVersion = project.testngVersion
 ext.commonsLang3Version = project.commonsLang3Version
@@ -141,7 +142,7 @@ subprojects {
 
 task createProperties(dependsOn: processResources) {
     doLast {
-        def file = new File("$project.rootDir/openapi-cli/src/main/resources/openapi-tool-version.properties")
+        def file = new File("$project.rootDir/openapi-cli/src/main/resources/openapi-client-native-version.properties")
         file.text = "version=${clientNativeVersion}"
     }
 }

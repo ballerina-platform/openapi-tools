@@ -16,20 +16,18 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.core.generators.service.parameter;
+package io.ballerina.openapi.core.generators.service.exceptions;
 
-import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
-import io.swagger.v3.oas.models.parameters.Parameter;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.tools.diagnostics.Diagnostic;
 
-public class PathParameterGenerator extends ParameterGenerator {
+/**
+ * Exception defined for service level errors.
+ *
+ */
+public class BallerinaServiceException extends BallerinaOpenApiException {
 
-    public PathParameterGenerator(OASServiceMetadata oasServiceMetadata) {
-        super(oasServiceMetadata);
-    }
-
-    @Override
-    public ParameterNode generateParameterNode(Parameter parameter) {
-        return null;
+    public BallerinaServiceException(Diagnostic diagnostic) {
+        super(diagnostic);
     }
 }

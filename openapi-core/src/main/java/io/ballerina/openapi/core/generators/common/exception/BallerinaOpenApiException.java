@@ -27,7 +27,7 @@ import io.ballerina.tools.diagnostics.Diagnostic;
  */
 public class BallerinaOpenApiException extends Exception {
 
-    private Diagnostic diagnostic;
+    Diagnostic diagnostic;
 
     public BallerinaOpenApiException(String message, Throwable e) {
         super(message, e);

@@ -90,12 +90,15 @@ public class TypeHandler {
     private static BallerinaTypesGenerator ballerinaTypesGenerator;
     public HashMap<String, TypeDefinitionNode> typeDefinitionNodes = new HashMap<>();
     private final Set<String> imports = new LinkedHashSet<>();
+    private static List<Diagnostic> constraintDiagnostics;
+
 
     private TypeHandler() {}
 
     public static void createInstance(OpenAPI openAPI, boolean isNullable) {
         typeHandlerInstance = new TypeHandler();
         ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI, isNullable);
+        constraintDiagnostics = new ArrayList<>();
     }
 
     public static TypeHandler getInstance() {
@@ -103,7 +106,8 @@ public class TypeHandler {
     }
 
     public List<Diagnostic> getDiagnostics() {
-        return ballerinaTypesGenerator.getDiagnostics();
+        constraintDiagnostics.addAll(ballerinaTypesGenerator.getDiagnostics());
+        return constraintDiagnostics;
     }
 
     public void addTypeDefinitionNode(String key, TypeDefinitionNode typeDefinitionNode) {
@@ -111,13 +115,16 @@ public class TypeHandler {
     }
 
     public SyntaxTree generateTypeSyntaxTree() {
-        ConstraintGeneratorImp constraintGenerator = new ConstraintGeneratorImp(GeneratorMetaData
-                .getInstance().getOpenAPI(), typeDefinitionNodes);
-        ConstraintResult constraintResult = constraintGenerator.updateTypeDefinitionsWithConstraints();
-        typeDefinitionNodes = constraintResult.typeDefinitionNodeHashMap();
-        boolean isConstraintAvailable = constraintResult.isConstraintAvailable();
-        if (isConstraintAvailable) {
-            imports.add("import ballerina/constraint;");
+        if (!GeneratorMetaData.getInstance().isNullable()) {
+            ConstraintGeneratorImp constraintGenerator = new ConstraintGeneratorImp(GeneratorMetaData
+                    .getInstance().getOpenAPI(), typeDefinitionNodes);
+            ConstraintResult constraintResult = constraintGenerator.updateTypeDefinitionsWithConstraints();
+            typeDefinitionNodes = constraintResult.typeDefinitionNodeHashMap();
+            boolean isConstraintAvailable = constraintResult.isConstraintAvailable();
+            if (isConstraintAvailable) {
+                imports.add("import ballerina/constraint;");
+            }
+            constraintDiagnostics.addAll(constraintResult.diagnostics());
         }
         NodeList<ModuleMemberDeclarationNode> typeMembers = AbstractNodeFactory.createNodeList(
                 typeDefinitionNodes.values().toArray(new TypeDefinitionNode[typeDefinitionNodes.size()]));
@@ -188,9 +195,9 @@ public class TypeHandler {
         return getTypeNodeFromOASSchema(schema, false);
     }
 
-    public Optional<TypeDescriptorNode> getTypeNodeFromOASSchema(Schema schema, boolean overrideNullable) {
+    public Optional<TypeDescriptorNode> getTypeNodeFromOASSchema(Schema schema, boolean ignoreNullableFlag) {
         TypeGeneratorResult typeGeneratorResult = ballerinaTypesGenerator
-                .generateTypeDescriptorNodeForOASSchema(schema, overrideNullable);
+                .generateTypeDescriptorNodeForOASSchema(schema, ignoreNullableFlag);
         handleSubtypes(typeGeneratorResult.subtypeDefinitions());
         return typeGeneratorResult.typeDescriptorNode();
     }
