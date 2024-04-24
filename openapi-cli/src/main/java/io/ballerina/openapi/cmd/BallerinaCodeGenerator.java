@@ -203,10 +203,8 @@ public class BallerinaCodeGenerator {
         //display diagnostics- client
         List<ClientDiagnostic> clientDiagnostic = clientGenerator.getDiagnostics();
 
-        if (!clientDiagnostic.isEmpty()) {
-            for (ClientDiagnostic diagnostic : clientDiagnostic) {
-                outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
-            }
+        for (ClientDiagnostic diagnostic : clientDiagnostic) {
+            outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
         }
         printDiagnostic(diagnostics);
         writeGeneratedSources(newGenFiles, srcPath, implPath, GEN_BOTH);
@@ -434,10 +432,8 @@ public class BallerinaCodeGenerator {
         }
 
         List<ClientDiagnostic> clientDiagnostic = clientGenerator.getDiagnostics();
-        if (!clientDiagnostic.isEmpty()) {
-            for (ClientDiagnostic diagnostic : clientDiagnostic) {
-                outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
-            }
+        for (ClientDiagnostic diagnostic : clientDiagnostic) {
+            outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
         }
         printDiagnostic(diagnosticList);
         return sourceFiles;

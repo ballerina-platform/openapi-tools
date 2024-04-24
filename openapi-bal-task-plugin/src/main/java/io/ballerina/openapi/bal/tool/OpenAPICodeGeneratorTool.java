@@ -21,6 +21,7 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.bal.tool.Constants.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGeneratorWithStatusCodeBinding;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
@@ -46,6 +47,7 @@ import io.ballerina.toml.syntax.tree.Token;
 import io.ballerina.toml.validator.SampleNodeGenerator;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
@@ -461,6 +463,19 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         String licenseContent = oasClientConfig.getLicense();
         BallerinaClientGenerator ballerinaClientGenerator = getClientGenerator(oasClientConfig, statusCodeBinding);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
+
+        List<ClientDiagnostic> clientDiagnostic = ballerinaClientGenerator.getDiagnostics();
+
+        for (ClientDiagnostic diagnostic : clientDiagnostic) {
+            createDiagnostics(toolContext, diagnostic.getMessage(), diagnostic.getCode(),
+                    diagnostic.getDiagnosticSeverity(), location);
+        }
+
+        if (clientDiagnostic.stream().anyMatch(
+                diagnostic -> diagnostic.getDiagnosticSeverity() == DiagnosticSeverity.ERROR)) {
+            throw new ClientException("Error occurred while generating client");
+        }
+
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
                 licenseContent == null || licenseContent.isBlank() ? mainContent :
                         licenseContent + System.lineSeparator() + mainContent));
@@ -567,6 +582,12 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         String message = String.format(error.getDescription(), (Object[]) args);
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), message,
                 error.getSeverity());
+        toolContext.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, location));
+    }
+
+    private static void createDiagnostics(ToolContext toolContext, String diagnosticMessage, String diagnosticCode,
+                                          DiagnosticSeverity severity, Location location) {
+        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(diagnosticCode, diagnosticMessage, severity);
         toolContext.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, location));
     }
 
