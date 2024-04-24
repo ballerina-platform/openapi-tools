@@ -28,7 +28,7 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
  */
 public enum ConstraintDiagnosticMessages {
     OAS_CONSTRAINT_101("OAS_CONSTRAINT_101",
-            "WARNING: constraints in the OpenAPI contract will be ignored for the " +
+            "constraints in the OpenAPI contract will be ignored for the " +
                     "field `%s`, as constraints are not supported on Ballerina union types.",
             DiagnosticSeverity.WARNING),
     OAS_CONSTRAINT_102("OAS_CONSTRAINT_102", "skipped generation for unsupported pattern" +
