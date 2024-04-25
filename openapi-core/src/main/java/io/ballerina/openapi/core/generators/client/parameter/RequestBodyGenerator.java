@@ -50,7 +50,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeI
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getBallerinaMediaType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 public class RequestBodyGenerator implements ParameterGenerator {
     OpenAPI openAPI;

@@ -51,7 +51,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_TYPE_DESC;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 public class HeaderParameterGenerator implements ParameterGenerator {
     Parameter parameter;

@@ -39,7 +39,6 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages.OAS_CLIENT_101;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 public class PathParameterGenerator implements ParameterGenerator {
     Parameter parameter;
