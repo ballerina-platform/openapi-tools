@@ -141,11 +141,11 @@ public class FunctionSignatureNodeTests {
         Assert.assertEquals(param01.typeName().toString(), "Pets_body");
 
         RequiredParameterNode param02 = (RequiredParameterNode) parameters.get(1);
-        Assert.assertEquals(param02.paramName().orElseThrow().text(), "xAddressHeader");
+        Assert.assertEquals(param02.paramName().orElseThrow().text(), "X\\-Address\\-Header");
         Assert.assertEquals(param02.typeName().toString(), "string");
 
         DefaultableParameterNode param03 = (DefaultableParameterNode) parameters.get(2);
-        Assert.assertEquals(param03.paramName().orElseThrow().text(), "xCustomHeader");
+        Assert.assertEquals(param03.paramName().orElseThrow().text(), "X\\-Custom\\-Header");
         Assert.assertEquals(param03.typeName().toString(), "string?");
 
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();

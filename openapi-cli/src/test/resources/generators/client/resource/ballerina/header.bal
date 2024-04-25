@@ -39,6 +39,7 @@ public isolated client class Client {
         self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
         return;
     }
+
     # Provide weather forecast for any geographical coordinates
     #
     # + lat - Latitude
@@ -55,17 +56,18 @@ public isolated client class Client {
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
+
     # Info for a specific pet
     #
-    # + xRequestId - Tests header 01
-    # + xRequestClient - Tests header 02
-    # + xRequestPet - Tests header 03
+    # + X\-Request\-ID - Tests header 01
+    # + X\-Request\-Client - Tests header 02
+    # + X\-Request\-Pet - Tests header 03
     # + return - Expected response to a valid request
-    resource isolated function get weather(string xRequestId, string[] xRequestClient, WeatherForecast[] xRequestPet) returns error? {
+    resource isolated function get weather(string X\-Request\-ID, string[] X\-Request\-Client, WeatherForecast[] X\-Request\-Pet) returns error? {
         string resourcePath = string `/weather`;
         map<anydata> queryParam = {"appid": self.apiKeyConfig.appid};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<any> headerValues = {"X-Request-ID": xRequestId, "X-Request-Client": xRequestClient, "X-Request-Pet": xRequestPet};
+        map<any> headerValues = {"X-Request-ID": X\-Request\-ID, "X-Request-Client": X\-Request\-Client, "X-Request-Pet": X\-Request\-Pet};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }

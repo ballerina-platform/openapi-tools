@@ -43,7 +43,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParame
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 
 public class RequestBodyHeaderParameter implements ParameterGenerator {
     Map.Entry<String, Header> header;
@@ -76,13 +76,13 @@ public class RequestBodyHeaderParameter implements ParameterGenerator {
         }
         if (required || treatDefaultableAsRequired) {
             RequiredParameterNode requiredParameterNode = createRequiredParameterNode(createEmptyNodeList(),
-                    typeNodeResult.get(), createIdentifierToken(getValidName(header.getKey(), false)));
+                    typeNodeResult.get(), createIdentifierToken(escapeIdentifier(header.getKey())));
             return Optional.of(requiredParameterNode);
         } else {
             NilLiteralNode nilLiteralNode =
                     createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
             return Optional.of(createDefaultableParameterNode(createEmptyNodeList(), typeNodeResult.get(),
-                    createIdentifierToken(getValidName(header.getKey(), false)), createToken(EQUAL_TOKEN),
+                    createIdentifierToken(escapeIdentifier(header.getKey())), createToken(EQUAL_TOKEN),
                     nilLiteralNode));
         }
     }

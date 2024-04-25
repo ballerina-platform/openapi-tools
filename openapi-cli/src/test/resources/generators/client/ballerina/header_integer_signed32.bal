@@ -9,17 +9,8 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config = {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
-        http:ClientConfiguration httpClientConfig = {
-            httpVersion: config.httpVersion,
-            timeout: config.timeout,
-            forwarded: config.forwarded,
-            poolConfig: config.poolConfig,
-            compression: config.compression,
-            circuitBreaker: config.circuitBreaker,
-            retryConfig: config.retryConfig,
-            validation: config.validation
-        };
+    public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
+        http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
                 ClientHttp1Settings settings = check config.http1Settings.ensureType(ClientHttp1Settings);
@@ -46,16 +37,17 @@ public isolated client class Client {
         self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
         return;
     }
+
     # Info for a specific pet
     #
-    # + xRequestId - Tests header 01
-    # + xRequestClient - Tests header 02
-    # + xRequestPet - Tests header 03
-    # + xRequestHeader - Tests header 04
+    # + X\-Request\-ID - Tests header 01
+    # + X\-Request\-Client - Tests header 02
+    # + X\-Request\-Pet - Tests header 03
+    # + X\-Request\-Header - Tests header 04
     # + return - Expected response to a valid request
-    remote isolated function showPetById(int:Signed32 xRequestId, int:Signed32[] xRequestClient, Pet[] xRequestPet, int? xRequestHeader=()) returns http:Response|error {
+    remote isolated function showPetById(int:Signed32 X\-Request\-ID, int:Signed32[] X\-Request\-Client, Pet[] X\-Request\-Pet, int? X\-Request\-Header = ()) returns http:Response|error {
         string resourcePath = string `/pets`;
-        map<any> headerValues = {"X-Request-ID": xRequestId, "X-Request-Client": xRequestClient, "X-Request-Pet": xRequestPet, "X-Request-Header": xRequestHeader, "X-API-KEY": self.apiKeyConfig.xApiKey};
+        map<any> headerValues = {"X-Request-ID": X\-Request\-ID, "X-Request-Client": X\-Request\-Client, "X-Request-Pet": X\-Request\-Pet, "X-Request-Header": X\-Request\-Header, "X-API-KEY": self.apiKeyConfig.xApiKey};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }

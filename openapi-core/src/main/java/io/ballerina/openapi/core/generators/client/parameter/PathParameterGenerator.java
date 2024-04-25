@@ -38,7 +38,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyN
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages.OAS_CLIENT_101;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 
 public class PathParameterGenerator implements ParameterGenerator {
     Parameter parameter;
@@ -55,7 +55,7 @@ public class PathParameterGenerator implements ParameterGenerator {
 
     @Override
     public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
-        IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName(), false));
+        IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName()));
         // type should be a any type node.
         Schema parameterSchema = parameter.getSchema();
         // Reference type resolve

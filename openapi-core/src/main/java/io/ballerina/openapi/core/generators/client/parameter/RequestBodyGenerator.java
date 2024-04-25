@@ -46,10 +46,10 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParame
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_OCTET_STREAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_REQUEST;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getBallerinaMediaType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 public class RequestBodyGenerator implements ParameterGenerator {
     OpenAPI openAPI;
@@ -176,13 +176,13 @@ public class RequestBodyGenerator implements ParameterGenerator {
             Map<String, Header> headers = entry.getValue().getHeaders();
             if (headers != null) {
                 for (Map.Entry<String, Header> header : headers.entrySet()) {
-                    if (!headerList.contains(getValidName(header.getKey(), false))) {
+                    if (!headerList.contains(escapeIdentifier(header.getKey()))) {
                         RequestBodyHeaderParameter requestBodyHeaderParameter = new RequestBodyHeaderParameter(header);
                         Optional<ParameterNode> parameterNode = requestBodyHeaderParameter.generateParameterNode();
 
                         parameterNode.ifPresent(node -> headerParameters.add(node));
                         diagnostics.addAll(requestBodyHeaderParameter.getDiagnostics());
-                        headerList.add(getValidName(header.getKey(), false));
+                        headerList.add(escapeIdentifier(header.getKey()));
                     }
                 }
             }

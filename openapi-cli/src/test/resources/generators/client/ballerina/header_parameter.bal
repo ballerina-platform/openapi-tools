@@ -37,15 +37,16 @@ public isolated client class Client {
         self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
         return;
     }
+
     # Info for a specific pet
     #
-    # + xRequestId - Tests header 01
-    # + xRequestClient - Tests header 02
-    # + xRequestPet - Tests header 03
+    # + X\-Request\-ID - Tests header 01
+    # + X\-Request\-Client - Tests header 02
+    # + X\-Request\-Pet - Tests header 03
     # + return - Expected response to a valid request
-    remote isolated function showPetById(string xRequestId, string[] xRequestClient, Pet[] xRequestPet) returns http:Response|error {
+    remote isolated function showPetById(string X\-Request\-ID, string[] X\-Request\-Client, Pet[] X\-Request\-Pet) returns http:Response|error {
         string resourcePath = string `/pets`;
-        map<any> headerValues = {"X-Request-ID": xRequestId, "X-Request-Client": xRequestClient, "X-Request-Pet": xRequestPet, "X-API-KEY": self.apiKeyConfig.xApiKey};
+        map<any> headerValues = {"X-Request-ID": X\-Request\-ID, "X-Request-Client": X\-Request\-Client, "X-Request-Pet": X\-Request\-Pet, "X-API-KEY": self.apiKeyConfig.xApiKey};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
