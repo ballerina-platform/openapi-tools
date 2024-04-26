@@ -226,7 +226,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 createDiagnostics(toolContext, error, location);
             }
 
-        } catch (BallerinaOpenApiException exp){
+        } catch (BallerinaOpenApiException exp) {
             DiagnosticMessages error = DiagnosticMessages.OPENAPI_EXCEPTION;
             createDiagnostics(toolContext, error, location, exp.getMessage());
         } catch (IOException e) {
