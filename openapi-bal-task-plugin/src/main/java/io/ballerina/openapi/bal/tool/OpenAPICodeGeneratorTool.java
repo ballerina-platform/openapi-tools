@@ -220,17 +220,36 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 relativePath = Paths.get(openapiContract.getCanonicalPath());
             }
             if (Files.exists(relativePath)) {
-                return Optional.of(normalizeOpenAPI(relativePath, true));
+                return Optional.of(normalizeOpenAPI(relativePath, operationIdValidationRequired(toolContext)));
             } else {
                 DiagnosticMessages error = DiagnosticMessages.INVALID_CONTRACT_PATH;
                 createDiagnostics(toolContext, error, location);
             }
 
-        } catch (IOException | BallerinaOpenApiException e) {
+        } catch (BallerinaOpenApiException exp){
+            DiagnosticMessages error = DiagnosticMessages.OPENAPI_EXCEPTION;
+            createDiagnostics(toolContext, error, location, exp.getMessage());
+        } catch (IOException e) {
             DiagnosticMessages error = DiagnosticMessages.UNEXPECTED_EXCEPTIONS;
             createDiagnostics(toolContext, error, location);
         }
         return Optional.empty();
+    }
+
+    private static boolean operationIdValidationRequired(ToolContext toolContext) {
+        Map<String, ToolContext.Option> options = toolContext.options();
+        if (Objects.isNull(options)) {
+            return false;
+        }
+        for (Map.Entry<String, ToolContext.Option> field : options.entrySet()) {
+            String value = field.getValue().value().toString().trim();
+            String fieldName = field.getKey();
+            if ((fieldName.equals(CLIENT_METHODS) && !value.contains(RESOURCE)) ||
+                    (fieldName.equals(STATUS_CODE_BINDING) && value.contains(TRUE))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
