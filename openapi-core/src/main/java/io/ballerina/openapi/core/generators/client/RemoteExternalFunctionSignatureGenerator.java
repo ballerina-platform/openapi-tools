@@ -49,7 +49,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPEDESC_TYPE_DESC;
  *
  * @since 1.9.0
  */
-public class RemoteExternalFunctionSignatureGenerator extends RemoteFunctionSignatureGeneratorNew {
+public class RemoteExternalFunctionSignatureGenerator extends RemoteFunctionSignatureGenerator {
 
     public RemoteExternalFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod,
                                                     String path) {

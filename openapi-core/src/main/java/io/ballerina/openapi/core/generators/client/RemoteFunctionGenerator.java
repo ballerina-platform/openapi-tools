@@ -61,7 +61,7 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
         // Create function signature
-        RemoteFunctionSignatureGeneratorNew signatureGenerator = getSignatureGenerator();
+        RemoteFunctionSignatureGenerator signatureGenerator = getSignatureGenerator();
         Optional<FunctionSignatureNode> signatureNodeOptional = signatureGenerator.generateFunctionSignature();
         diagnostics.addAll(signatureGenerator.getDiagnostics());
 
@@ -70,7 +70,9 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         }
         FunctionSignatureNode functionSignatureNode = signatureNodeOptional.get();
         //Create function body
-        Optional<FunctionBodyNode> functionBodyNodeResult = getFunctionBodyNode(diagnostics);
+        Optional<FunctionBodyNode> functionBodyNodeResult = getFunctionBodyNode(diagnostics,
+                signatureGenerator.hasHeaders(), signatureGenerator.hasDefaultHeaders(),
+                signatureGenerator.hasQueries());
         if (functionBodyNodeResult.isEmpty()) {
             return Optional.empty();
         }
@@ -80,9 +82,10 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
                 functionBodyNode);
     }
 
-    protected Optional<FunctionBodyNode> getFunctionBodyNode(List<ClientDiagnostic> diagnostics) {
+    protected Optional<FunctionBodyNode> getFunctionBodyNode(List<ClientDiagnostic> diagnostics, boolean hasHeaders,
+                                                             boolean hasDefaultHeaders, boolean hasQueries) {
         FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
-                authConfigGeneratorImp, ballerinaUtilGenerator, imports);
+                authConfigGeneratorImp, ballerinaUtilGenerator, imports, hasHeaders, hasDefaultHeaders, hasQueries);
         Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
         if (functionBodyNodeResult.isEmpty()) {
             diagnostics.addAll(functionBodyGenerator.getDiagnostics());
@@ -90,8 +93,8 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         return functionBodyNodeResult;
     }
 
-    protected RemoteFunctionSignatureGeneratorNew getSignatureGenerator() {
-        return new RemoteFunctionSignatureGeneratorNew(operation.getValue(), openAPI,
+    protected RemoteFunctionSignatureGenerator getSignatureGenerator() {
+        return new RemoteFunctionSignatureGenerator(operation.getValue(), openAPI,
                 operation.getKey().toString().toLowerCase(Locale.ROOT), path);
     }
 

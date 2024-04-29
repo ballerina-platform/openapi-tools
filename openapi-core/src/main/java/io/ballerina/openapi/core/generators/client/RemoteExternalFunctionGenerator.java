@@ -109,7 +109,8 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
     }
 
     @Override
-    protected Optional<FunctionBodyNode> getFunctionBodyNode(List<ClientDiagnostic> diagnostics) {
+    protected Optional<FunctionBodyNode> getFunctionBodyNode(List<ClientDiagnostic> diagnostics, boolean hasHeaders,
+                                                             boolean hasDefaultHeaders, boolean hasQueries) {
         QualifiedNameReferenceNode javaMethodToken = createQualifiedNameReferenceNode(
                 createIdentifierToken("java"), createToken(COLON_TOKEN), createIdentifierToken("Method"));
         BasicLiteralNode classValueExp = createBasicLiteralNode(STRING_LITERAL,
@@ -136,7 +137,7 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
     }
 
     @Override
-    protected RemoteFunctionSignatureGeneratorNew getSignatureGenerator() {
+    protected RemoteFunctionSignatureGenerator getSignatureGenerator() {
         return new RemoteExternalFunctionSignatureGenerator(operation.getValue(), openAPI,
                 operation.getKey().toString().toLowerCase(Locale.ROOT), path);
     }

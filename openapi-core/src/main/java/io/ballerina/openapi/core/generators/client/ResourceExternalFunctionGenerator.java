@@ -143,7 +143,7 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
     }
 
     @Override
-    protected ResourceFunctionSignatureGeneratorNew getSignatureGenerator() {
+    protected ResourceFunctionSignatureGenerator getSignatureGenerator() {
         return new ResourceExternalFunctionSignatureGenerator(operation.getValue(), openAPI,
                 operation.getKey().toString().toLowerCase(Locale.ROOT), path);
     }

@@ -24,6 +24,7 @@ import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.IncludedRecordParameterNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
@@ -61,6 +62,8 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSepara
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADERS;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERIES;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getBallerinaMediaType;
@@ -204,10 +207,12 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                 SeparatedNodeList<ParameterNode> parameters = functionSignatureNode.parameters();
                 List<Node> updatedParamsRequired = new ArrayList<>();
                 List<Node> updatedParamsDefault = new ArrayList<>();
+                List<Node> updatedIncludedParam = new ArrayList<>();
 
                 HashMap<String, ParameterNode> collection = getParameterNodeHashMap(parameters);
                 //todo parameter reference
-                updateParameterNodes(docs, operation, updatedParamsRequired, updatedParamsDefault, collection);
+                updateParameterNodes(isResource, docs, operation, updatedParamsRequired, updatedParamsDefault, 
+                        collection);
                 if (collection.size() > 0) {
                     collection.forEach((keyParam, value) -> {
                         if (value instanceof RequiredParameterNode reParam) {
@@ -216,10 +221,14 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                         } else if (value instanceof DefaultableParameterNode deParam) {
                             updatedParamsDefault.add(deParam);
                             updatedParamsDefault.add(createToken(SyntaxKind.COMMA_TOKEN));
+                        } else if (value instanceof IncludedRecordParameterNode incParam) {
+                            updatedIncludedParam.add(incParam);
+                            updatedIncludedParam.add(createToken(SyntaxKind.COMMA_TOKEN));
                         }
                     });
                 }
                 updatedParamsRequired.addAll(updatedParamsDefault);
+                updatedParamsRequired.addAll(updatedIncludedParam);
                 if (!updatedParamsRequired.isEmpty()) {
                     if (updatedParamsRequired.get(updatedParamsRequired.size() - 1) instanceof Token) {
                         updatedParamsRequired.remove(updatedParamsRequired.size() - 1);
@@ -304,17 +313,21 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
         }
     }
 
-    private static void updateParameterNodes(List<Node> docs, Operation operation, List<Node> updatedParamsRequired,
-                                             List<Node> updatedParamsDefault, HashMap<String,
-            ParameterNode> collection) {
+    private static void updateParameterNodes(boolean isResource, List<Node> docs, Operation operation, 
+                                             List<Node> updatedParamsRequired, List<Node> updatedParamsDefault, 
+                                             HashMap<String, ParameterNode> collection) {
         List<Node> deprecatedParamDocComments = new ArrayList<>();
         operation.getParameters().forEach(parameter -> {
+            if (isResource && (parameter.getIn().equals("header") || parameter.getIn().equals("query"))) {
+                return;
+            }
+
             List<AnnotationNode> paramAnnot = new ArrayList<>();
             String parameterDescription;
             String parameterName = parameter.getName();
 
-            if (parameter.getIn().equals("path") || parameter.getIn().equals("header") ||
-                    (parameter.getIn().equals("query"))) {
+            if (parameter.getIn().equals("path") || parameter.getIn().equals("header")
+                    || parameter.getIn().equals("query")) {
                 parameterName = escapeIdentifier(parameter.getName());
                 // add deprecated annotation
                 if (parameter.getDeprecated() != null && parameter.getDeprecated()) {
@@ -334,6 +347,14 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                 docs.add(createAPIParamDocFromString(parameterName, parameterDescription));
             }
         });
+        if (isResource) {
+            if (collection.containsKey(HEADERS)) {
+                docs.add(createAPIParamDoc(HEADERS, "Headers to be sent with the request"));
+            }
+            if (collection.containsKey(QUERIES)) {
+                docs.add(createAPIParamDoc(QUERIES, "Queries to be sent with the request"));
+            }
+        }
         docs.addAll(deprecatedParamDocComments);
     }
 
@@ -345,6 +366,8 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                 collection.put(reParam.paramName().get().toString(), reParam);
             } else if (node instanceof DefaultableParameterNode deParam) {
                 collection.put(deParam.paramName().get().toString(), deParam);
+            } else if (node instanceof IncludedRecordParameterNode incParam) {
+                collection.put(incParam.paramName().get().toString(), incParam);
             }
         }
         return collection;

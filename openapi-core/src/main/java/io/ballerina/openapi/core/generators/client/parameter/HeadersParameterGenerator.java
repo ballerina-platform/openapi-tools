@@ -66,12 +66,7 @@ public class HeadersParameterGenerator implements ParameterGenerator {
 
     @Override
     public Optional<ParameterNode> generateParameterNode() {
-        return generateParameterNode(false);
-    }
-
-    @Override
-    public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
-        ObjectSchema headersSchema = getHeadersSchema(treatDefaultableAsRequired);
+        ObjectSchema headersSchema = getHeadersSchema();
         String operationId = GeneratorUtils.generateOperationUniqueId(operation, path, httpMethod);
         headersSchema.setDescription("Represents the Headers record for the operation id: " + operationId);
         String headersName = GeneratorUtils.getValidName(operationId + "Headers", true);
@@ -86,7 +81,7 @@ public class HeadersParameterGenerator implements ParameterGenerator {
             return Optional.empty();
         }
 
-        boolean isDefaultable = !treatDefaultableAsRequired && isDefaultable(headersSchema);
+        boolean isDefaultable = isDefaultable(headersSchema);
         ParameterNode parameterNode = createParameterNode(headersType.get(), isDefaultable);
 
         return Optional.of(parameterNode);
@@ -113,11 +108,7 @@ public class HeadersParameterGenerator implements ParameterGenerator {
         }
     }
 
-    public Optional<ParameterNode> getDefaultParameterNode() {
-        return getDefaultParameterNode(false);
-    }
-
-    public Optional<ParameterNode> getDefaultParameterNode(boolean treatDefaultableAsRequired) {
+    public static Optional<ParameterNode> getDefaultParameterNode() {
         TypeDescriptorNode stringType = createSimpleNameReferenceNode(
                 createIdentifierToken(GeneratorConstants.STRING));
 
@@ -133,11 +124,6 @@ public class HeadersParameterGenerator implements ParameterGenerator {
                 createToken(SyntaxKind.GT_TOKEN));
         TypeDescriptorNode defaultHeadersType = createMapTypeDescriptorNode(createToken(MAP_KEYWORD), headerParamNode);
 
-        if (treatDefaultableAsRequired) {
-            return Optional.of(createRequiredParameterNode(createEmptyNodeList(), defaultHeadersType,
-                    createIdentifierToken(HEADERS)));
-        }
-
         LiteralValueToken defaultMapVal = createLiteralValueToken(null, "{}", createEmptyMinutiaeList(),
                 createEmptyMinutiaeList());
         BasicLiteralNode defaultMapExp = createBasicLiteralNode(null, defaultMapVal);
@@ -150,11 +136,11 @@ public class HeadersParameterGenerator implements ParameterGenerator {
         return diagnostics;
     }
 
-    private ObjectSchema getHeadersSchema(boolean treatDefaultableAsRequired) {
+    private ObjectSchema getHeadersSchema() {
         Map<String, Schema> properties = parameters.stream()
                 .collect(Collectors.toMap(
                         parameter -> escapeIdentifier(parameter.getName()),
-                        parameter -> getSchemaWithDescription(parameter, treatDefaultableAsRequired))
+                        parameter -> getSchemaWithDescription(parameter))
                 );
 
         List<String> requiredFields = parameters.stream()
@@ -170,12 +156,9 @@ public class HeadersParameterGenerator implements ParameterGenerator {
         return headersSchema;
     }
 
-    private Schema getSchemaWithDescription(Parameter parameter, boolean treatDefaultableAsRequired) {
+    private Schema getSchemaWithDescription(Parameter parameter) {
         Schema schema = parameter.getSchema();
         schema.setDescription(parameter.getDescription());
-        if (treatDefaultableAsRequired) {
-            schema.setDefault(null);
-        }
         if (!Boolean.TRUE.equals(parameter.getRequired())) {
             schema.setNullable(true);
         }

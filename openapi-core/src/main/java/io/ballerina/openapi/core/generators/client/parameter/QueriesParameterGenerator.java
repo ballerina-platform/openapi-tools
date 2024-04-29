@@ -62,11 +62,6 @@ public class QueriesParameterGenerator implements ParameterGenerator {
 
     @Override
     public Optional<ParameterNode> generateParameterNode() {
-        return generateParameterNode(false);
-    }
-
-    @Override
-    public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
         if (parameters.isEmpty()) {
             return Optional.empty();
         }

@@ -82,7 +82,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
                 return Optional.empty();
             }
             // Create function signature
-            ResourceFunctionSignatureGeneratorNew signatureGenerator = getSignatureGenerator();
+            ResourceFunctionSignatureGenerator signatureGenerator = getSignatureGenerator();
             Optional<FunctionSignatureNode> signatureNodeOptional = signatureGenerator.generateFunctionSignature();
             diagnostics.addAll(signatureGenerator.getDiagnostics());
             if (signatureNodeOptional.isEmpty()) {
@@ -104,7 +104,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
 
     protected Optional<FunctionBodyNode> getFunctionBodyNode(List<ClientDiagnostic> diagnostics, boolean hasHeaders,
                                                              boolean hasDefaultHeaders, boolean hasQueries) {
-        FunctionBodyGeneratorImpNew functionBodyGenerator = new FunctionBodyGeneratorImpNew(path, operation, openAPI,
+        FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
                 authConfigGeneratorImp, ballerinaUtilGenerator, imports, hasHeaders, hasDefaultHeaders, hasQueries);
         Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
         if (functionBodyNodeResult.isEmpty()) {
@@ -113,8 +113,8 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
         return functionBodyNodeResult;
     }
 
-    protected ResourceFunctionSignatureGeneratorNew getSignatureGenerator() {
-        return new ResourceFunctionSignatureGeneratorNew(operation.getValue(), openAPI,
+    protected ResourceFunctionSignatureGenerator getSignatureGenerator() {
+        return new ResourceFunctionSignatureGenerator(operation.getValue(), openAPI,
                 operation.getKey().toString().toLowerCase(Locale.ROOT), path);
     }
 

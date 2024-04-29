@@ -216,10 +216,12 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId() + "Impl");
         // Create function signature
-        ImplFunctionSignatureGeneratorNew signatureGenerator = new ImplFunctionSignatureGeneratorNew(clientExternFunction);
+        ImplFunctionSignatureGenerator signatureGenerator = new ImplFunctionSignatureGenerator(operation.getValue(),
+                openAPI, operation.getKey().toString().toLowerCase(Locale.ROOT), path, clientExternFunction);
         //Create function body
         FunctionBodyGeneratorImp functionBodyGenerator = new ImplFunctionBodyGenerator(path, operation, openAPI,
-                authConfigGeneratorImp, ballerinaUtilGenerator, imports);
+                authConfigGeneratorImp, ballerinaUtilGenerator, imports, signatureGenerator.hasHeaders(),
+                signatureGenerator.hasDefaultHeaders(), signatureGenerator.hasQueries());
         FunctionBodyNode functionBodyNode;
         Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
         if (functionBodyNodeResult.isEmpty()) {

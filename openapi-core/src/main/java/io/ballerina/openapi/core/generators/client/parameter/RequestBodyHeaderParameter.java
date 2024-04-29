@@ -18,34 +18,17 @@
 
 package io.ballerina.openapi.core.generators.client.parameter;
 
-import io.ballerina.compiler.syntax.tree.NilLiteralNode;
-import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
-import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
-import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultableParameterNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createNilLiteralNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
-
-public class RequestBodyHeaderParameter implements ParameterGenerator {
+public class RequestBodyHeaderParameter {
     Map.Entry<String, Header> header;
     List<ClientDiagnostic> diagnostics = new ArrayList<>();
 
@@ -53,41 +36,25 @@ public class RequestBodyHeaderParameter implements ParameterGenerator {
         this.header = header;
     }
 
-    @Override
-    public Optional<ParameterNode> generateParameterNode() {
-        return generateParameterNode(false);
+    public Optional<Parameter> generateParameterSchema() {
+        Schema schema = getSchemaWithDescription(header.getValue());
+        Parameter parameter = new Parameter();
+        parameter.setSchema(schema);
+        parameter.setName(header.getKey());
+        parameter.setIn("header");
+        parameter.setRequired(header.getValue().getRequired());
+        return Optional.of(parameter);
     }
 
-    @Override
-    public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
-        Schema<?> schema = header.getValue().getSchema();
-        Boolean required = header.getValue().getRequired();
-        if (required == null) {
-            required = false;
+    private Schema getSchemaWithDescription(Header header) {
+        Schema schema = header.getSchema();
+        schema.setDescription(header.getDescription());
+        if (!Boolean.TRUE.equals(header.getRequired())) {
             schema.setNullable(true);
         }
-        Optional<TypeDescriptorNode> typeNodeResult = TypeHandler.getInstance()
-                .getTypeNodeFromOASSchema(schema, true);
-        if (typeNodeResult.isEmpty()) {
-            ClientDiagnosticImp diagnosticImp = new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_108,
-                    header.getKey());
-            diagnostics.add(diagnosticImp);
-            return Optional.empty();
-        }
-        if (required || treatDefaultableAsRequired) {
-            RequiredParameterNode requiredParameterNode = createRequiredParameterNode(createEmptyNodeList(),
-                    typeNodeResult.get(), createIdentifierToken(escapeIdentifier(header.getKey())));
-            return Optional.of(requiredParameterNode);
-        } else {
-            NilLiteralNode nilLiteralNode =
-                    createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
-            return Optional.of(createDefaultableParameterNode(createEmptyNodeList(), typeNodeResult.get(),
-                    createIdentifierToken(escapeIdentifier(header.getKey())), createToken(EQUAL_TOKEN),
-                    nilLiteralNode));
-        }
+        return schema;
     }
 
-    @Override
     public List<ClientDiagnostic> getDiagnostics() {
         return diagnostics;
     }
