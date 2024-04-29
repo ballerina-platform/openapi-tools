@@ -89,8 +89,8 @@ public class QueryParameterGenerator extends ParameterGenerator {
         //Todo: will enable when header parameter support objects
         //paramSupportedTypes.add(GeneratorConstants.OBJECT);
         if (schema != null && schema.get$ref() != null) {
-            String type = escapeIdentifier(extractReferenceType(schema.get$ref()));
-            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type);
+            String refType = extractReferenceType(schema.get$ref());
+            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(refType);
             return handleReferencedQueryParameter(parameter, refSchema, parameterName);
         } else if (parameter.getContent() != null) {
             Content content = parameter.getContent();

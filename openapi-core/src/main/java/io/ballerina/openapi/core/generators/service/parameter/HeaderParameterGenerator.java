@@ -101,11 +101,11 @@ public class HeaderParameterGenerator extends ParameterGenerator {
             //  </pre>
             diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_106, parameter.getName()));
         } else if (schema.get$ref() != null) {
-            String type = escapeIdentifier(extractReferenceType(schema.get$ref()));
+            String type = extractReferenceType(schema.get$ref());
             Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
             if (paramSupportedTypes.contains(getOpenAPIType(refSchema)) || isArraySchema(refSchema)) {
                 TypeHandler.getInstance().getTypeNodeFromOASSchema(schema, false);
-                headerType = type;
+                headerType = escapeIdentifier(type);
             } else {
                 diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_105, parameter.getName(),
                         getOpenAPIType(refSchema)));
@@ -124,10 +124,10 @@ public class HeaderParameterGenerator extends ParameterGenerator {
             if (getOpenAPIType(items) == null && items.get$ref() == null) {
                 diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_104, parameter.getName()));
             } else if (items.get$ref() != null) {
-                String type = escapeIdentifier(extractReferenceType(items.get$ref()));
+                String type = extractReferenceType(items.get$ref());
                 Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type.trim());
                 if (paramSupportedTypes.contains(getOpenAPIType(refSchema))) {
-                    arrayType = type;
+                    arrayType = escapeIdentifier(type);
                 } else {
                     diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_103,
                             parameter.getName(), type));
