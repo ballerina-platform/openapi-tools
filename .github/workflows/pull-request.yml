@@ -21,9 +21,10 @@ jobs:
           packagePAT: ${{ secrets.GITHUB_TOKEN }}
         run: |
             ./gradlew build codeCoverageReport --stacktrace --scan --console=plain --no-daemon
-      - name: Generate Codecov Report
-        if:  github.event_name == 'pull_request'
-        uses: codecov/codecov-action@v1
+#      - name: Generate Codecov Report
+#        if:  github.event_name == 'pull_request'
+#        uses: codecov/codecov-action@v1
+# todo: disable the above step until the code cove issue is resolved
 
   windows-build:
 
