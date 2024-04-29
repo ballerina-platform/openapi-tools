@@ -271,8 +271,8 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
     private void updateConstraintWithArrayItems(String key, String fieldName, ArraySchema arraySchema) {
         Schema<?> itemSchema = arraySchema.getItems();
         if (hasConstraints(itemSchema)) {
-            String normalizedTypeName = StringUtils.capitalize(fieldName.replaceAll(GeneratorConstants.SPECIAL_CHARACTER_REGEX,
-                    "").trim());
+            String normalizedTypeName = StringUtils.capitalize(fieldName.replaceAll(
+                    GeneratorConstants.SPECIAL_CHARACTER_REGEX, "").trim());
             String itemTypeName = key  + normalizedTypeName + "Items" + StringUtils.capitalize(itemSchema.getType());
             if (typeDefinitions.containsKey(itemTypeName)) {
                 TypeDefinitionNode itemTypeDefNode = typeDefinitions.get(itemTypeName);

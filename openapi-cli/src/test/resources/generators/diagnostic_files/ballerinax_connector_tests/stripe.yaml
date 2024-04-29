@@ -8336,7 +8336,7 @@ components:
           "$ref": "#/components/schemas/invoice_line_item_period"
         price:
           anyOf:
-            - "$ref": "#/components/schemas/price"
+            - "$ref": "#/components/schemas/Price"
           description: The price of the invoice item.
           nullable: true
         proration:
@@ -12222,7 +12222,7 @@ components:
           type: string
         price:
           anyOf:
-            - "$ref": "#/components/schemas/price"
+            - "$ref": "#/components/schemas/Price"
           description: The price used to generate the line item.
           nullable: true
         quantity:
@@ -12631,7 +12631,7 @@ components:
           "$ref": "#/components/schemas/invoice_line_item_period"
         price:
           anyOf:
-            - "$ref": "#/components/schemas/price"
+            - "$ref": "#/components/schemas/Price"
           description: The price of the line item.
           nullable: true
         proration:
@@ -17761,7 +17761,7 @@ components:
       title: PortalSubscriptionUpdateProduct
       type: object
       x-expandableFields: []
-    price:
+    Price:
       description: |-
         Prices define the unit cost, currency, and (optional) billing cycle for both recurring and one-time purchases of products.
         [Products](https://stripe.com/docs/api#products) help you track inventory or provisioning, and prices help you track payment terms. Different physical goods or levels of service should be represented by products, and pricing options should be represented by prices. This approach lets you change prices without having to change your provisioning scheme.
@@ -22441,7 +22441,7 @@ components:
             - subscription_item
           type: string
         price:
-          "$ref": "#/components/schemas/price"
+          "$ref": "#/components/schemas/Price"
         quantity:
           description: The [quantity](https://stripe.com/docs/subscriptions/quantities)
             of the plan to which the customer should be subscribed.
@@ -22646,12 +22646,12 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/price"
+            - "$ref": "#/components/schemas/Price"
             - "$ref": "#/components/schemas/deleted_price"
           description: ID of the price used to generate the invoice item.
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/price"
+              - "$ref": "#/components/schemas/Price"
               - "$ref": "#/components/schemas/deleted_price"
         quantity:
           description: The quantity of the invoice item.
@@ -22684,12 +22684,12 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/price"
+            - "$ref": "#/components/schemas/Price"
             - "$ref": "#/components/schemas/deleted_price"
           description: ID of the price to which the customer should be subscribed.
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/price"
+              - "$ref": "#/components/schemas/Price"
               - "$ref": "#/components/schemas/deleted_price"
         quantity:
           description: Quantity of the plan to which the customer should be subscribed.
@@ -28095,7 +28095,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/price"
+                "$ref": "#/components/schemas/Price"
           description: Successful response.
         default:
           content:
@@ -28184,7 +28184,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/price"
+                "$ref": "#/components/schemas/Price"
           description: Successful response.
         default:
           content:

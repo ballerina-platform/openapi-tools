@@ -112,7 +112,6 @@ public class BallerinaDiagnosticTests {
         Assert.assertFalse(hasErrors);
     }
 
-    //todo
     @Test(description = "Test OpenAPI 3.1 definition to ballerina client source code generation with remote functions",
             dataProvider = "fileProviderForOpenAPI31DiagnosticCheck", enabled = false)
     public void checkDiagnosticIssuesWithRemoteFunctionsOpenAPIV31(String yamlFile) throws IOException,

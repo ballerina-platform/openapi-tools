@@ -119,8 +119,8 @@ public class BallerinaTypesGenerator {
                     schema = GeneratorMetaData.getInstance()
                             .getOpenAPI().getComponents().getSchemas().get(schemaName);
                 }
-                TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, GeneratorUtils.escapeIdentifier(
-                        typeName.trim()), null, ignoreNullableFlag,
+                TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema,
+                        GeneratorUtils.escapeIdentifier(typeName.trim()), null, ignoreNullableFlag,
                         subTypesMap, pregeneratedTypeMap);
                 TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
                 TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
