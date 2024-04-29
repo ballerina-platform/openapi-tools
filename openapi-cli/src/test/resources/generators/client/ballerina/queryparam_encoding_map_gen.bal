@@ -45,7 +45,7 @@ public isolated client class Client {
     remote isolated function listInvoices("charge_automatically"|"send_invoice"? collection_method = (), created? created = (), due_date? due_date = (), string[]? subscriptions = ()) returns json|error {
         string resourcePath = string `/v1/invoices`;
         map<anydata> queryParam = {"collection_method": collection_method, "created": created, "due_date": due_date, "subscriptions": subscriptions};
-        map<Encoding> queryParamEncoding = {"subscriptions": {style: FORM, explode: true}};
+        map<Encoding> queryParamEncoding = {"created": {style: DEEPOBJECT, explode: true}, "due_date": {style: DEEPOBJECT, explode: true}, "subscriptions": {style: FORM, explode: true}};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam, queryParamEncoding);
         return self.clientEp->get(resourcePath);
     }

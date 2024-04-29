@@ -46,7 +46,7 @@ public isolated client class Client {
     # + return - Expected response to a valid request
     remote isolated function showPetById(string X\-Request\-ID, string[] X\-Request\-Client, Pet[] X\-Request\-Pet) returns http:Response|error {
         string resourcePath = string `/pets`;
-        map<any> headerValues = {"X-Request-ID": X\-Request\-ID, "X-Request-Client": X\-Request\-Client, "X-Request-Pet": X\-Request\-Pet, "X-API-KEY": self.apiKeyConfig.xApiKey};
+        map<any> headerValues = {"X-Request-ID": X\-Request\-ID, "X-Request-Client": X\-Request\-Client, "X-Request-Pet": X\-Request\-Pet, "X-API-KEY": self.apiKeyConfig.X\-API\-KEY};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }

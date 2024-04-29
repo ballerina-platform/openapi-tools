@@ -1,14 +1,15 @@
-import  ballerina/http;
-
+import ballerina/http;
 
 public isolated client class Client {
     final http:Client clientEp;
+    final readonly & ApiKeysConfig apiKeyConfig;
     # Gets invoked to initialize the `connector`.
     #
+    # + apiKeyConfig - API keys for authorization
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "localhost:9090/payloadV") returns error? {
+    public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
         http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
@@ -33,15 +34,21 @@ public isolated client class Client {
         }
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
+        self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
         return;
     }
-    # op1
+
+    # Info for a specific pet
     #
-    # + id - id value
-    # + payloadId - payload id value
-    # + return - Ok
-    remote isolated function operationId01(int:Signed32 id, int payloadId) returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri(id)}/payload/${getEncodedUri(payloadId)}`;
-        return self.clientEp-> get(resourcePath);
+    # + X\-Request\-ID - Tests header 01
+    # + X\-Request\-Client - Tests header 02
+    # + X\-Request\-Pet - Tests header 03
+    # + X\-Request\-Header - Tests header 04
+    # + return - Expected response to a valid request
+    remote isolated function showPetById(int:Signed32 X\-Request\-ID, int:Signed32[] X\-Request\-Client, Pet[] X\-Request\-Pet, int? X\-Request\-Header = ()) returns http:Response|error {
+        string resourcePath = string `/pets`;
+        map<any> headerValues = {"X-Request-ID": X\-Request\-ID, "X-Request-Client": X\-Request\-Client, "X-Request-Pet": X\-Request\-Pet, "X-Request-Header": X\-Request\-Header, "X-API-KEY": self.apiKeyConfig.X\-API\-KEY};
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        return self.clientEp->get(resourcePath, httpHeaders);
     }
 }
