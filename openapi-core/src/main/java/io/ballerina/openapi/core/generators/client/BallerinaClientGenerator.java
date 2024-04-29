@@ -54,7 +54,7 @@ import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
-import io.ballerina.openapi.core.generators.document.ClientDocCommentGenerator;
+import io.ballerina.openapi.core.generators.document.ClientDocCommentGeneratorNew;
 import io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
@@ -198,7 +198,7 @@ public class BallerinaClientGenerator {
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
         syntaxTree = syntaxTree.modifyWith(modulePartNode);
         //Add comments
-        ClientDocCommentGenerator clientDocCommentGenerator = new ClientDocCommentGenerator(syntaxTree, openAPI,
+        ClientDocCommentGeneratorNew clientDocCommentGenerator = new ClientDocCommentGeneratorNew(syntaxTree, openAPI,
                 resourceMode);
         return clientDocCommentGenerator.updateSyntaxTreeWithDocComments();
     }

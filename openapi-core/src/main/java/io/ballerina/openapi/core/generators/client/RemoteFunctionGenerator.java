@@ -61,7 +61,7 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
         // Create function signature
-        RemoteFunctionSignatureGenerator signatureGenerator = getSignatureGenerator();
+        RemoteFunctionSignatureGeneratorNew signatureGenerator = getSignatureGenerator();
         Optional<FunctionSignatureNode> signatureNodeOptional = signatureGenerator.generateFunctionSignature();
         diagnostics.addAll(signatureGenerator.getDiagnostics());
 
@@ -90,9 +90,9 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         return functionBodyNodeResult;
     }
 
-    protected RemoteFunctionSignatureGenerator getSignatureGenerator() {
-        return new RemoteFunctionSignatureGenerator(operation.getValue(), openAPI,
-                operation.getKey().toString().toLowerCase(Locale.ROOT));
+    protected RemoteFunctionSignatureGeneratorNew getSignatureGenerator() {
+        return new RemoteFunctionSignatureGeneratorNew(operation.getValue(), openAPI,
+                operation.getKey().toString().toLowerCase(Locale.ROOT), path);
     }
 
     protected Optional<FunctionDefinitionNode> getFunctionDefinitionNode(NodeList<Token> qualifierList,

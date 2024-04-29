@@ -33,10 +33,13 @@ import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -79,51 +82,24 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
             if (schema != null) {
                 if (finalTypeDef.typeDescriptor().kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
                     List<Node> updatedFields = new ArrayList<>();
-
                     RecordTypeDescriptorNode record = (RecordTypeDescriptorNode) finalTypeDef.typeDescriptor();
                     NodeList<Node> fields = record.fields();
-                    if (schema.getProperties() != null) {
-                        schema.getProperties().forEach((key, value) -> {
-                            fields.forEach(field -> {
-                                if (field instanceof RecordFieldNode recordFieldNode) {
-                                    if (recordFieldNode.fieldName().text().replace("'", "")
-                                            .trim().equals(key)) {
-                                        if (value.getDescription() != null) {
-                                            Optional<MetadataNode> metadata = recordFieldNode.metadata();
-                                            MetadataNode metadataNode = updateMetadataNode(metadata, value);
-                                            recordFieldNode = recordFieldNode.modify(metadataNode,
-                                                    recordFieldNode.readonlyKeyword().orElse(null),
-                                                    recordFieldNode.typeName(),
-                                                    recordFieldNode.fieldName(),
-                                                    recordFieldNode.questionMarkToken().orElse(null),
-                                                    recordFieldNode.semicolonToken());
-                                        }
-                                        updatedFields.add(recordFieldNode);
-                                    }
-                                } else if (field instanceof RecordFieldWithDefaultValueNode
-                                        recordFieldWithDefaultValueNode) {
-                                    if (recordFieldWithDefaultValueNode.fieldName().text()
-                                            .replace("'", "")
-                                            .trim().equals(key)) {
-                                        if (value.getDescription() != null) {
-                                            Optional<MetadataNode> metadata = recordFieldWithDefaultValueNode
-                                                    .metadata();
-                                            MetadataNode metadataNode = updateMetadataNode(metadata, value);
-                                            recordFieldWithDefaultValueNode = recordFieldWithDefaultValueNode
-                                                    .modify(metadataNode,
-                                                    recordFieldWithDefaultValueNode.readonlyKeyword().orElse(null),
-                                                    recordFieldWithDefaultValueNode.typeName(),
-                                                    recordFieldWithDefaultValueNode.fieldName(),
-                                                    recordFieldWithDefaultValueNode.equalsToken(),
-                                                    recordFieldWithDefaultValueNode.expression(),
-                                                    recordFieldWithDefaultValueNode.semicolonToken());
-                                        }
-                                        updatedFields.add(recordFieldWithDefaultValueNode);
-                                    }
+                    if (schema instanceof ComposedSchema composedSchema) {
+                        List<Schema> allOf = composedSchema.getAllOf();
+                        //handle special scenarios which allOf has inline objects
+                        Map<String, Schema> properties = new HashMap<>();
+                        if (allOf != null) {
+                            for (Schema<?> allOfSchema: allOf) {
+                                if (allOfSchema.getProperties() != null) {
+                                    properties.putAll(allOfSchema.getProperties());
                                 }
-                            });
-                        });
+                            }
+                        }
+                        schema.setProperties(properties);
                     }
+
+                    updateRecordFields(schema, updatedFields, fields);
+
                     typeDef = typeDef.modify(typeDef.metadata().orElse(null),
                             typeDef.visibilityQualifier().get(),
                             typeDef.typeKeyword(),
@@ -156,6 +132,63 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
 
         modulePartNode = modulePartNode.modify(modulePartNode.imports(), typeMembers, modulePartNode.eofToken());
         return syntaxTree.modifyWith(modulePartNode);
+    }
+
+    private static void updateRecordFields(Schema<?> schema, List<Node> updatedFields, NodeList<Node> fields) {
+        if (schema.getProperties() != null) {
+            for (Node field : fields) {
+                boolean isUpdated = false;
+                for (Map.Entry<String, Schema> entry : schema.getProperties().entrySet()) {
+                    String key = GeneratorUtils.escapeIdentifier(entry.getKey());
+                    Schema<?> value = entry.getValue();
+                    if (field instanceof RecordFieldNode recordFieldNode) {
+                        if (recordFieldNode.fieldName().text().trim().equals(key)) {
+                            if (value.getDescription() != null) {
+                                Optional<MetadataNode> metadata = recordFieldNode.metadata();
+                                MetadataNode metadataNode = updateMetadataNode(metadata, value);
+                                recordFieldNode = recordFieldNode.modify(metadataNode,
+                                        recordFieldNode.readonlyKeyword().orElse(null),
+                                        recordFieldNode.typeName(),
+                                        recordFieldNode.fieldName(),
+                                        recordFieldNode.questionMarkToken().orElse(null),
+                                        recordFieldNode.semicolonToken());
+                                updatedFields.add(recordFieldNode);
+                                isUpdated = true;
+                            }
+                        }
+
+                    } else if (field instanceof RecordFieldWithDefaultValueNode
+                            recordFieldWithDefaultValueNode) {
+                        if (recordFieldWithDefaultValueNode.fieldName().text()
+                                .replace("'", "")
+                                .trim().equals(key)) {
+                            if (value.getDescription() != null) {
+                                Optional<MetadataNode> metadata = recordFieldWithDefaultValueNode
+                                        .metadata();
+                                MetadataNode metadataNode = updateMetadataNode(metadata, value);
+                                recordFieldWithDefaultValueNode = recordFieldWithDefaultValueNode
+                                        .modify(metadataNode,
+                                                recordFieldWithDefaultValueNode.readonlyKeyword().orElse(null),
+                                                recordFieldWithDefaultValueNode.typeName(),
+                                                recordFieldWithDefaultValueNode.fieldName(),
+                                                recordFieldWithDefaultValueNode.equalsToken(),
+                                                recordFieldWithDefaultValueNode.expression(),
+                                                recordFieldWithDefaultValueNode.semicolonToken());
+
+                                updatedFields.add(recordFieldWithDefaultValueNode);
+                                isUpdated = true;
+                            }
+                        }
+                    }
+                    if (isUpdated) {
+                        break;
+                    }
+                }
+                if (!isUpdated) {
+                    updatedFields.add(field);
+                }
+            }
+        }
     }
 
     private static MetadataNode updateMetadataNode(Optional<MetadataNode> metadata, Schema<?> schema) {

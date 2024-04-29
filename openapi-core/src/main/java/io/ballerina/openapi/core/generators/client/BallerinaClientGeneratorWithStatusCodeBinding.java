@@ -175,8 +175,9 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
     private void addClientFunctionImpl(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
                                        Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
                                        List<FunctionDefinitionNode> clientFunctionNodes) {
+        FunctionDefinitionNode clientExternFunction = clientFunctionNodes.get(clientFunctionNodes.size() - 1);
         Optional<FunctionDefinitionNode> implFunction = createImplFunction(operation.getKey(), operationEntry, openAPI,
-                authConfigGeneratorImp, ballerinaUtilGenerator);
+                authConfigGeneratorImp, ballerinaUtilGenerator, clientExternFunction);
         if (implFunction.isPresent()) {
             clientFunctionNodes.add(implFunction.get());
         } else {
@@ -208,14 +209,14 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
                                                                 Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                                 OpenAPI openAPI,
                                                                 AuthConfigGeneratorImp authConfigGeneratorImp,
-                                                                BallerinaUtilGenerator ballerinaUtilGenerator) {
+                                                                BallerinaUtilGenerator ballerinaUtilGenerator,
+                                                                FunctionDefinitionNode clientExternFunction) {
         //Create qualifier list
         NodeList<Token> qualifierList = createNodeList(createToken(PRIVATE_KEYWORD), createToken(ISOLATED_KEYWORD));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId() + "Impl");
         // Create function signature
-        RemoteFunctionSignatureGenerator signatureGenerator = new ImplFunctionSignatureGenerator(operation.getValue(),
-                openAPI, operation.getKey().toString().toLowerCase(Locale.ROOT), path);
+        ImplFunctionSignatureGeneratorNew signatureGenerator = new ImplFunctionSignatureGeneratorNew(clientExternFunction);
         //Create function body
         FunctionBodyGeneratorImp functionBodyGenerator = new ImplFunctionBodyGenerator(path, operation, openAPI,
                 authConfigGeneratorImp, ballerinaUtilGenerator, imports);

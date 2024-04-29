@@ -109,7 +109,8 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
     }
 
     @Override
-    protected Optional<FunctionBodyNode> getFunctionBodyNode(List<ClientDiagnostic> diagnostics) {
+    protected Optional<FunctionBodyNode> getFunctionBodyNode(List<ClientDiagnostic> diagnostics, boolean hasHeaders,
+                                                             boolean hasDefaultHeaders, boolean hasQueries) {
         QualifiedNameReferenceNode javaMethodToken = createQualifiedNameReferenceNode(
                 createIdentifierToken("java"), createToken(COLON_TOKEN), createIdentifierToken("Method"));
         BasicLiteralNode classValueExp = createBasicLiteralNode(STRING_LITERAL,
@@ -142,7 +143,7 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
     }
 
     @Override
-    protected ResourceFunctionSignatureGenerator getSignatureGenerator() {
+    protected ResourceFunctionSignatureGeneratorNew getSignatureGenerator() {
         return new ResourceExternalFunctionSignatureGenerator(operation.getValue(), openAPI,
                 operation.getKey().toString().toLowerCase(Locale.ROOT), path);
     }

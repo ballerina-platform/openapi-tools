@@ -43,7 +43,7 @@ public class DocCommentGeneratorImp {
         switch (type) {
             case GEN_CLIENT:
                 //generate client doc comments
-                ClientDocCommentGenerator clientDocCommentGenerator = new ClientDocCommentGenerator(syntaxTree,
+                ClientDocCommentGeneratorNew clientDocCommentGenerator = new ClientDocCommentGeneratorNew(syntaxTree,
                         openAPI, true);
                 syntaxTree = clientDocCommentGenerator.updateSyntaxTreeWithDocComments();
                 break;

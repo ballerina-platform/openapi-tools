@@ -136,7 +136,7 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
     }
 
     @Override
-    protected RemoteFunctionSignatureGenerator getSignatureGenerator() {
+    protected RemoteFunctionSignatureGeneratorNew getSignatureGenerator() {
         return new RemoteExternalFunctionSignatureGenerator(operation.getValue(), openAPI,
                 operation.getKey().toString().toLowerCase(Locale.ROOT), path);
     }
