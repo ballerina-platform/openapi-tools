@@ -46,6 +46,7 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+
     # Add a new pet to the store
     #
     # + payload - Pet object that needs to be added to the store
@@ -57,6 +58,7 @@ public isolated client class Client {
         request.setPayload(jsonBody, "application/json");
         return self.clientEp->post(resourcePath, request);
     }
+
     # Create user
     #
     # + request - Created user object
@@ -66,6 +68,7 @@ public isolated client class Client {
         // TODO: Update the request as needed;
         return self.clientEp->post(resourcePath, request);
     }
+
     # Creates list of users with given input array
     #
     # + request - List of user object
@@ -75,6 +78,7 @@ public isolated client class Client {
         // TODO: Update the request as needed;
         return self.clientEp->post(resourcePath, request);
     }
+
     # Creates list of users with given input array
     #
     # + request - List of user object
@@ -84,6 +88,7 @@ public isolated client class Client {
         // TODO: Update the request as needed;
         return self.clientEp->post(resourcePath, request);
     }
+
     # Delete purchase order by ID
     #
     # + orderId - ID of the order that needs to be deleted
@@ -92,6 +97,7 @@ public isolated client class Client {
         string resourcePath = string `/store/order/${getEncodedUri(orderId)}`;
         return self.clientEp->delete(resourcePath);
     }
+
     # Deletes a pet
     #
     # + petId - Pet id to delete
@@ -102,6 +108,7 @@ public isolated client class Client {
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         return self.clientEp->delete(resourcePath, headers = httpHeaders);
     }
+
     # Delete user
     #
     # + username - The name that needs to be deleted
@@ -110,6 +117,7 @@ public isolated client class Client {
         string resourcePath = string `/user/${getEncodedUri(username)}`;
         return self.clientEp->delete(resourcePath);
     }
+
     # Finds Pets by status
     #
     # + status - Status values that need to be considered for filter
@@ -121,6 +129,7 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam, queryParamEncoding);
         return self.clientEp->get(resourcePath);
     }
+
     # Finds Pets by tags
     #
     # + tags - Tags to filter by
@@ -135,6 +144,7 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam, queryParamEncoding);
         return self.clientEp->get(resourcePath);
     }
+
     # Returns pet inventories by status
     #
     # + return - successful operation
@@ -147,6 +157,7 @@ public isolated client class Client {
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
+
     # Find purchase order by ID
     #
     # + orderId - ID of pet that needs to be fetched
@@ -155,6 +166,7 @@ public isolated client class Client {
         string resourcePath = string `/store/order/${getEncodedUri(orderId)}`;
         return self.clientEp->get(resourcePath);
     }
+
     # Find pet by ID
     #
     # + petId - ID of pet to return
@@ -168,6 +180,7 @@ public isolated client class Client {
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
+
     # Get user by user name
     #
     # + username - The name that needs to be fetched. Use user1 for testing.
@@ -176,6 +189,7 @@ public isolated client class Client {
         string resourcePath = string `/user/${getEncodedUri(username)}`;
         return self.clientEp->get(resourcePath);
     }
+
     # Logs user into the system
     #
     # + username - The user name for login
@@ -187,6 +201,7 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         return self.clientEp->get(resourcePath);
     }
+
     # Logs out current logged in user session
     #
     # + return - successful operation
@@ -194,6 +209,7 @@ public isolated client class Client {
         string resourcePath = string `/user/logout`;
         return self.clientEp->get(resourcePath);
     }
+
     # Place an order for a pet
     #
     # + request - order placed for purchasing the pet
@@ -203,6 +219,7 @@ public isolated client class Client {
         // TODO: Update the request as needed;
         return self.clientEp->post(resourcePath, request);
     }
+
     # Update an existing pet
     #
     # + payload - Pet object that needs to be added to the store
@@ -214,17 +231,19 @@ public isolated client class Client {
         request.setPayload(jsonBody, "application/json");
         return self.clientEp->put(resourcePath, request);
     }
+
     # Updates a pet in the store with form data
     #
     # + petId - ID of pet that needs to be updated
     # + return - Invalid input
-    remote isolated function updatePetWithForm(int petId, Pet_petId_body payload) returns http:Response|error {
+    remote isolated function updatePetWithForm(int petId, pet_petId_body payload) returns http:Response|error {
         string resourcePath = string `/pet/${getEncodedUri(petId)}`;
         http:Request request = new;
         string encodedRequestBody = createFormURLEncodedRequestBody(payload);
         request.setPayload(encodedRequestBody, "application/x-www-form-urlencoded");
         return self.clientEp->post(resourcePath, request);
     }
+
     # Updated user
     #
     # + username - name that need to be updated
@@ -235,11 +254,12 @@ public isolated client class Client {
         // TODO: Update the request as needed;
         return self.clientEp->put(resourcePath, request);
     }
+
     # uploads an image
     #
     # + petId - ID of pet to update
     # + return - successful operation
-    remote isolated function uploadFile(int petId, PetId_uploadImage_body payload) returns ApiResponse|error {
+    remote isolated function uploadFile(int petId, petId_uploadImage_body payload) returns ApiResponse|error {
         string resourcePath = string `/pet/${getEncodedUri(petId)}/uploadImage`;
         http:Request request = new;
         mime:Entity[] bodyParts = check createBodyParts(payload);

@@ -95,7 +95,7 @@ public class FunctionSignatureReturnTypeTests {
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
                 openapi.getPaths().get("/products").getGet(), openapi, "get");
         String returnType = functionReturnType.getReturnType().get().type().toString();
-        Assert.assertEquals(returnType, "Inline_response_200|error");
+        Assert.assertEquals(returnType, "inline_response_200|error");
     }
 
     @Test(description = "Tests for the object response without property and without additional properties")
@@ -118,7 +118,7 @@ public class FunctionSignatureReturnTypeTests {
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
                 openapi.getPaths().get("/products").getGet(), openapi, "get");
         String returnType = functionReturnType.getReturnType().get().type().toString();
-        Assert.assertEquals(returnType, "Inline_response_200|error");
+        Assert.assertEquals(returnType, "inline_response_200|error");
     }
 
     @Test(description = "Tests for the response with no schema")

@@ -49,7 +49,7 @@ public isolated client class Client {
     # # Deprecated parameters
     # + offset -
     # + return - Success
-    remote isolated function getCommentsOnTrack(int track_id, int 'limit = 50, @deprecated int offset = 0, boolean? linked_partitioning = ()) returns Inline_response_200|error {
+    remote isolated function getCommentsOnTrack(int track_id, int 'limit = 50, @deprecated int offset = 0, boolean? linked_partitioning = ()) returns inline_response_200|error {
         string resourcePath = string `/tracks/${getEncodedUri(track_id)}/comments`;
         map<anydata> queryParam = {"limit": 'limit, "offset": offset, "linked_partitioning": linked_partitioning};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);

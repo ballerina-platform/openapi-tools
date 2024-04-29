@@ -63,9 +63,9 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownCodeLineNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getBallerinaMediaType;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.replaceContentWithinBrackets;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.createAPIDescriptionDoc;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.createAPIParamDoc;
@@ -301,7 +301,7 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
             String parameterName = parameter.getName();
             if (parameter.getIn() != null && (parameter.getIn().equals("path") || parameter.getIn().equals("header") ||
                     (parameter.getIn().equals("query")))) {
-                parameterName = getValidName(parameter.getName(), false);
+                parameterName = escapeIdentifier(parameter.getName());
                 // add deprecated annotation
                 if (parameter.getDeprecated() != null && parameter.getDeprecated()) {
                     extractDeprecatedAnnotationDetails(deprecatedParamDocComments, parameter, paramAnnot);

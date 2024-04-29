@@ -1,6 +1,6 @@
-public type GetActivitiesResponse200 record {
+public type getActivitiesResponse200 record {
     boolean success?;
-    record { *ActivityResponseObject; *EmployeeDetails; }[] data?;
+    record {*ActivityResponseObject; *EmployeeDetails;}[] data?;
 };
 
 public type ActivityResponseObject record {

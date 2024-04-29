@@ -1,5 +1,22 @@
+public type Address record {
+    string streetNo?;
+    string houseNo?;
+    string streatName?;
+    string country?;
+    int zipCode?;
+};
+
+# Nested allOf with reference
+public type user record {
+    *account;
+    # Indicates whether the user represents staff
+    boolean is_staff?;
+    # The user's Atlassian account ID
+    string account_id?;
+};
+
 # Make this object schema name with simple case because the tool will convert it to camel case.
-public type Account record {
+public type account record {
     # Username of the account
     string username?;
     string nickname?;
@@ -15,21 +32,4 @@ public type Account record {
     string uuid?;
     # Indicates whether two factor authentication is on
     boolean has_2fa_enabled?;
-};
-
-# Nested allOf with reference
-public type User record {
-    *Account;
-    # Indicates whether the user represents staff
-    boolean is_staff?;
-    # The user's Atlassian account ID
-    string account_id?;
-};
-
-public type Address record {
-    string streetNo?;
-    string houseNo?;
-    string streatName?;
-    string country?;
-    int zipCode?;
 };

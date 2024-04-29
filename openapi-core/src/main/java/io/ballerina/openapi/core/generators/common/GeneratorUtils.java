@@ -227,7 +227,7 @@ public class GeneratorUtils {
                     String pathParam = pathNode;
                     pathParam = pathParam.substring(pathParam.indexOf(OPEN_CURLY_BRACE) + 1);
                     pathParam = pathParam.substring(0, pathParam.indexOf(CLOSE_CURLY_BRACE));
-                    pathParam = getValidName(pathParam, false);
+                    pathParam = escapeIdentifier(pathParam);
 
                     /**
                      * TODO -> `onCall/[string id]\.json` type of url won't support from syntax
@@ -273,7 +273,7 @@ public class GeneratorUtils {
             if (parameter.getIn() == null) {
                 continue;
             }
-            if (pathParam.trim().equals(getValidName(parameter.getName().trim(), false))
+            if (pathParam.trim().equals(escapeIdentifier(parameter.getName().trim()))
                     && parameter.getIn().equals("path")) {
                 String paramType;
                 if (parameter.getSchema().get$ref() != null) {
@@ -292,7 +292,7 @@ public class GeneratorUtils {
                                 createIdentifierToken(paramType));
                 IdentifierToken paramName = createIdentifierToken(
                         hasSpecialCharacter ?
-                                getValidName(pathNode, false) :
+                                escapeIdentifier(pathNode) :
                                 pathParam);
                 ResourcePathParameterNode resourcePathParameterNode =
                         createResourcePathParameterNode(
@@ -687,46 +687,6 @@ public class GeneratorUtils {
     }
 
     /**
-     * Add function statements for handle complex URL ex: /admin/api/2021-10/customers/{customer_id}.json.
-     *
-     * <pre>
-     *     if !customerIdDotJson.endsWith(".json") { return error("bad URL"); }
-     *     string customerId = customerIdDotJson.substring(0, customerIdDotJson.length() - 4);
-     * </pre>
-     */
-    public static List<StatementNode> generateBodyStatementForComplexUrl(String path) {
-
-        String[] subPathSegment = path.split(SLASH);
-        Pattern pattern = Pattern.compile(SPECIAL_CHARACTERS_REGEX);
-        List<StatementNode> bodyStatements = new ArrayList<>();
-        for (String subPath : subPathSegment) {
-            if (subPath.contains(OPEN_CURLY_BRACE) &&
-                    pattern.matcher(subPath.split(CLOSE_CURLY_BRACE, 2)[1]).find()) {
-                String pathParam = subPath;
-                pathParam = pathParam.substring(pathParam.indexOf(OPEN_CURLY_BRACE) + 1);
-                pathParam = pathParam.substring(0, pathParam.indexOf(CLOSE_CURLY_BRACE));
-                pathParam = getValidName(pathParam, false);
-
-                String[] subPathSplit = subPath.split(CLOSE_CURLY_BRACE, 2);
-                String pathParameter = getValidName(subPath, false);
-                String restSubPath = subPathSplit[1];
-                String resSubPathLength = String.valueOf(restSubPath.length() - 1);
-
-                String ifBlock = "if !" + pathParameter + ".endsWith(\"" + restSubPath + "\") { return error(\"bad " +
-                        "URL\"); }";
-                StatementNode ifBlockStatement = NodeParser.parseStatement(ifBlock);
-
-                String pathParameterState = "string " + pathParam + " = " + pathParameter + ".substring(0, " +
-                        pathParameter + ".length() - " + resSubPathLength + ");";
-                StatementNode pathParamStatement = NodeParser.parseStatement(pathParameterState);
-                bodyStatements.add(ifBlockStatement);
-                bodyStatements.add(pathParamStatement);
-            }
-        }
-        return bodyStatements;
-    }
-
-    /**
      * This util is to check if the given schema contains any constraints.
      */
     public static boolean hasConstraints(Schema<?> value) {
@@ -791,19 +751,19 @@ public class GeneratorUtils {
         }
         validateRequestBody(openAPIPaths.entrySet());
 
-        if (openAPI.getComponents() != null) {
-            // Refactor schema name with valid name
-            Components components = openAPI.getComponents();
-            Map<String, Schema> componentsSchemas = components.getSchemas();
-            if (componentsSchemas != null) {
-                Map<String, Schema> refacSchema = new HashMap<>();
-                for (Map.Entry<String, Schema> schemaEntry : componentsSchemas.entrySet()) {
-                    String name = getValidName(schemaEntry.getKey(), true);
-                    refacSchema.put(name, schemaEntry.getValue());
-                }
-                openAPI.getComponents().setSchemas(refacSchema);
-            }
-        }
+//        if (openAPI.getComponents() != null) {
+//            // Refactor schema name with valid name
+//            Components components = openAPI.getComponents();
+//            Map<String, Schema> componentsSchemas = components.getSchemas();
+//            if (componentsSchemas != null) {
+//                Map<String, Schema> refacSchema = new HashMap<>();
+//                for (Map.Entry<String, Schema> schemaEntry : componentsSchemas.entrySet()) {
+//                    String name = getValidName(schemaEntry.getKey(), true);
+//                    refacSchema.put(name, schemaEntry.getValue());
+//                }
+//                openAPI.getComponents().setSchemas(refacSchema);
+//            }
+//        }
         return openAPI;
     }
 
@@ -919,7 +879,7 @@ public class GeneratorUtils {
         String type = GeneratorUtils.extractReferenceType(schema.get$ref());
 
         if (isWithoutDataBinding) {
-            Schema<?> referencedSchema = components.getSchemas().get(getValidName(type, true));
+            Schema<?> referencedSchema = components.getSchemas().get(escapeIdentifier(type));
             if (referencedSchema != null) {
                 if (referencedSchema.get$ref() != null) {
                     type = resolveReferenceType(referencedSchema, components, isWithoutDataBinding, pathParam,
@@ -929,7 +889,8 @@ public class GeneratorUtils {
                 }
             }
         } else {
-            type = getValidName(type, true);
+            type = escapeIdentifier(type
+            );
             TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);
         }
         return type;

@@ -45,7 +45,7 @@ public type Pet02 record {|
     Pet?...;
 |};
 
-public type Store_inventory_body record {
+public type store_inventory_body record {
     Pet? pet?;
     Pet02? pet2?;
     User01? user1?;

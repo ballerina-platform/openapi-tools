@@ -1504,13 +1504,13 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: The ID of the customer associated with this Alipay Account.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         fingerprint:
           description: Uniquely identifies the account and will be the same across
@@ -1614,7 +1614,7 @@ components:
         payment_intent:
           "$ref": "#/components/schemas/payment_intent"
         payment_method:
-          "$ref": "#/components/schemas/payment_method"
+          "$ref": "#/components/schemas/Payment_method"
         payment_method_type:
           description: If the error is specific to the type of payment method, the
             payment method type that had a problem. This field is only populated for
@@ -2228,14 +2228,14 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: The ID of the customer that the bank account is associated
             with.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         default_for_currency:
           description: Whether this bank account is the default external account for
@@ -2886,7 +2886,7 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: The customer that this card belongs to. This attribute will
             not be in the card object if the card belongs to an account or recipient
@@ -2894,7 +2894,7 @@ components:
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         cvc_check:
           description: 'If a CVC was provided, results of the check: `pass`, `fail`,
@@ -3130,13 +3130,13 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: ID of the customer this charge is for if one exists.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         description:
           description: An arbitrary string attached to the object. Often useful for
@@ -3173,12 +3173,12 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/invoice"
+            - "$ref": "#/components/schemas/Invoice"
           description: ID of the invoice this charge is for if one exists.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/invoice"
+              - "$ref": "#/components/schemas/Invoice"
         livemode:
           description: Has the value `true` if the object exists in live mode or the
             value `false` if the object exists in test mode.
@@ -3582,7 +3582,7 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: |-
             The ID of the customer for this Session.
@@ -3593,7 +3593,7 @@ components:
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         customer_details:
           anyOf:
@@ -4069,7 +4069,7 @@ components:
       x-expandableFields:
         - company
         - individual
-    coupon:
+    Coupon:
       description: |-
         A coupon contains information about a percent-off or amount-off discount you
         might want to apply to a customer. Coupons may be applied to [invoices](https://stripe.com/docs/api#invoices) or
@@ -4208,12 +4208,12 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: ID of the customer.
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         customer_balance_transaction:
           anyOf:
@@ -4243,11 +4243,11 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/invoice"
+            - "$ref": "#/components/schemas/Invoice"
           description: ID of the invoice.
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/invoice"
+              - "$ref": "#/components/schemas/Invoice"
         lines:
           description: Line items that make up the credit note
           properties:
@@ -4517,7 +4517,7 @@ components:
       type: object
       x-expandableFields:
         - tax_rate
-    customer:
+    Customer:
       description: |-
         `Customer` objects allow you to perform recurring charges, and to track
         multiple charges, that are associated with the same customer. The API allows
@@ -4843,11 +4843,11 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
           description: The ID of the customer the transaction belongs to.
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
         description:
           description: An arbitrary string attached to the object. Often useful for
             displaying to users.
@@ -4867,12 +4867,12 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/invoice"
+            - "$ref": "#/components/schemas/Invoice"
           description: The ID of the invoice (if any) related to the transaction.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/invoice"
+              - "$ref": "#/components/schemas/Invoice"
         livemode:
           description: Has the value `true` if the object exists in live mode or the
             value `false` if the object exists in test mode.
@@ -5208,18 +5208,18 @@ components:
           nullable: true
           type: string
         coupon:
-          "$ref": "#/components/schemas/coupon"
+          "$ref": "#/components/schemas/Coupon"
         customer:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: The ID of the customer associated with this discount.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         deleted:
           description: Always true for a deleted object
@@ -5731,18 +5731,18 @@ components:
           nullable: true
           type: string
         coupon:
-          "$ref": "#/components/schemas/coupon"
+          "$ref": "#/components/schemas/Coupon"
         customer:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: The ID of the customer associated with this discount.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         end:
           description: If the coupon has a duration of `repeating`, the date that
@@ -7424,7 +7424,7 @@ components:
         - redaction
         - verified_outputs
       x-resourceId: identity.verification_session
-    invoice:
+    Invoice:
       description: |-
         Invoices are statements of amounts owed by a customer, and are either
         generated one-off, or generated periodically from a subscription.
@@ -7587,13 +7587,13 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: The ID of the customer who will be billed.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         customer_address:
           anyOf:
@@ -7652,7 +7652,7 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: ID of the default payment method for the invoice. It must belong
             to the customer associated with the invoice. If not set, defaults to the
             subscription's default payment method, if any, or to the default payment
@@ -7660,7 +7660,7 @@ components:
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
         default_source:
           anyOf:
             - maxLength: 5000
@@ -8129,14 +8129,14 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: ID of a payment method that's attached to the customer, to
             be used as the customer's default payment method for subscriptions and
             invoices.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
         footer:
           description: Default footer to be displayed on invoices for this customer.
           maxLength: 5000
@@ -8262,13 +8262,13 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: The ID of the customer who will be billed when this invoice
             item is billed.
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         date:
           description: Time at which the object was created. Measured in seconds since
@@ -8307,12 +8307,12 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/invoice"
+            - "$ref": "#/components/schemas/Invoice"
           description: The ID of the invoice this invoice item belongs to.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/invoice"
+              - "$ref": "#/components/schemas/Invoice"
         livemode:
           description: Has the value `true` if the object exists in live mode or the
             value `false` if the object exists in test mode.
@@ -12772,11 +12772,11 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: ID of the payment method associated with this mandate.
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
         payment_method_details:
           "$ref": "#/components/schemas/mandate_payment_method_details"
         single_use:
@@ -13084,13 +13084,13 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: The customer used for the order.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         email:
           description: The email address of the customer placing the order.
@@ -13543,7 +13543,7 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: |-
             ID of the Customer this PaymentIntent belongs to, if one exists.
@@ -13554,7 +13554,7 @@ components:
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         description:
           description: An arbitrary string attached to the object. Often useful for
@@ -13570,12 +13570,12 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/invoice"
+            - "$ref": "#/components/schemas/Invoice"
           description: ID of the invoice that created this PaymentIntent, if it exists.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/invoice"
+              - "$ref": "#/components/schemas/Invoice"
         last_payment_error:
           anyOf:
             - "$ref": "#/components/schemas/api_errors"
@@ -13625,12 +13625,12 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: ID of the payment method used in this PaymentIntent.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
         payment_method_options:
           anyOf:
             - "$ref": "#/components/schemas/payment_intent_payment_method_options"
@@ -14131,7 +14131,7 @@ components:
       type: object
       x-expandableFields:
         - mandate_options
-    payment_method:
+    Payment_method:
       description: |-
         PaymentMethod objects represent your customer's payment instruments.
         They can be used with [PaymentIntents](https://stripe.com/docs/payments/payment-intents) to collect payments or saved to
@@ -14168,13 +14168,13 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
           description: The ID of the Customer to which this PaymentMethod is saved.
             This will not be set when the PaymentMethod has not been saved to a Customer.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
         eps:
           "$ref": "#/components/schemas/payment_method_eps"
         fpx:
@@ -14947,13 +14947,13 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: The ID of the SEPA Direct Debit PaymentMethod which was generated
             by this Charge.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
         generated_sepa_debit_mandate:
           anyOf:
             - maxLength: 5000
@@ -15621,13 +15621,13 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: The ID of the SEPA Direct Debit PaymentMethod which was generated
             by this Charge.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
         generated_sepa_debit_mandate:
           anyOf:
             - maxLength: 5000
@@ -15964,13 +15964,13 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: The ID of the SEPA Direct Debit PaymentMethod which was generated
             by this Charge.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
         generated_sepa_debit_mandate:
           anyOf:
             - maxLength: 5000
@@ -18077,7 +18077,7 @@ components:
           maxLength: 5000
           type: string
         coupon:
-          "$ref": "#/components/schemas/coupon"
+          "$ref": "#/components/schemas/Coupon"
         created:
           description: Time at which the object was created. Measured in seconds since
             the Unix epoch.
@@ -18087,13 +18087,13 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: The customer that this promotion code can be used by.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         expires_at:
           description: Date at which the promotion code can no longer be redeemed.
@@ -18226,14 +18226,14 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: The customer which this quote belongs to. A customer is required
             before finalizing the quote. Once specified, it cannot be changed.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         default_tax_rates:
           description: The tax rates applied to this quote.
@@ -18291,13 +18291,13 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/invoice"
+            - "$ref": "#/components/schemas/Invoice"
             - "$ref": "#/components/schemas/deleted_invoice"
           description: The invoice that was created from this quote.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/invoice"
+              - "$ref": "#/components/schemas/Invoice"
               - "$ref": "#/components/schemas/deleted_invoice"
         invoice_settings:
           anyOf:
@@ -19795,14 +19795,14 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: The value of [customer](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-customer)
             on the SetupIntent at the time of this confirmation.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         id:
           description: Unique identifier for the object.
@@ -19833,11 +19833,11 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: ID of the payment method used with this SetupAttempt.
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
         payment_method_details:
           "$ref": "#/components/schemas/setup_attempt_payment_method_details"
         setup_error:
@@ -19969,13 +19969,13 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: The ID of the SEPA Direct Debit PaymentMethod which was generated
             by this SetupAttempt.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
         generated_sepa_debit_mandate:
           anyOf:
             - maxLength: 5000
@@ -20034,13 +20034,13 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: The ID of the Card PaymentMethod which was generated by this
             SetupAttempt.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
       title: setup_attempt_payment_method_details_card_present
       type: object
       x-expandableFields:
@@ -20090,13 +20090,13 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: The ID of the SEPA Direct Debit PaymentMethod which was generated
             by this SetupAttempt.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
         generated_sepa_debit_mandate:
           anyOf:
             - maxLength: 5000
@@ -20153,13 +20153,13 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: The ID of the SEPA Direct Debit PaymentMethod which was generated
             by this SetupAttempt.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
         generated_sepa_debit_mandate:
           anyOf:
             - maxLength: 5000
@@ -20260,7 +20260,7 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: |-
             ID of the Customer this SetupIntent belongs to, if one exists.
@@ -20269,7 +20269,7 @@ components:
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         description:
           description: An arbitrary string attached to the object. Often useful for
@@ -20345,12 +20345,12 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: ID of the payment method used with this SetupIntent.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
         payment_method_options:
           anyOf:
             - "$ref": "#/components/schemas/setup_intent_payment_method_options"
@@ -22104,12 +22104,12 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: ID of the customer who owns the subscription.
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         days_until_due:
           description: Number of days a customer has to pay invoices generated by
@@ -22120,7 +22120,7 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: ID of the default payment method for the subscription. It must
             belong to the customer associated with the subscription. This takes precedence
             over `default_source`. If neither are set, invoices will use the customer's
@@ -22129,7 +22129,7 @@ components:
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
         default_source:
           anyOf:
             - maxLength: 5000
@@ -22212,12 +22212,12 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/invoice"
+            - "$ref": "#/components/schemas/Invoice"
           description: The most recent invoice this subscription has generated.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/invoice"
+              - "$ref": "#/components/schemas/Invoice"
         livemode:
           description: Has the value `true` if the object exists in live mode or the
             value `false` if the object exists in test mode.
@@ -22539,12 +22539,12 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
             - "$ref": "#/components/schemas/deleted_customer"
           description: ID of the customer who owns the subscription schedule.
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
               - "$ref": "#/components/schemas/deleted_customer"
         default_settings:
           "$ref": "#/components/schemas/subscription_schedules_resource_default_settings"
@@ -22777,20 +22777,20 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/coupon"
+            - "$ref": "#/components/schemas/Coupon"
             - "$ref": "#/components/schemas/deleted_coupon"
           description: ID of the coupon to use during this phase of the subscription
             schedule.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/coupon"
+              - "$ref": "#/components/schemas/Coupon"
               - "$ref": "#/components/schemas/deleted_coupon"
         default_payment_method:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: ID of the default payment method for the subscription schedule.
             It must belong to the customer associated with the subscription schedule.
             If not set, invoices will use the default payment method in the customer's
@@ -22798,7 +22798,7 @@ components:
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
         default_tax_rates:
           description: The default tax rates to apply to the subscription during this
             phase of the subscription schedule.
@@ -22906,14 +22906,14 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/payment_method"
+            - "$ref": "#/components/schemas/Payment_method"
           description: ID of the default payment method for the subscription schedule.
             If not set, invoices will use the default payment method in the customer's
             invoice settings.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/payment_method"
+              - "$ref": "#/components/schemas/Payment_method"
         invoice_settings:
           anyOf:
             - "$ref": "#/components/schemas/invoice_setting_subscription_schedule_setting"
@@ -23189,12 +23189,12 @@ components:
           anyOf:
             - maxLength: 5000
               type: string
-            - "$ref": "#/components/schemas/customer"
+            - "$ref": "#/components/schemas/Customer"
           description: ID of the customer.
           nullable: true
           x-expansionResources:
             oneOf:
-              - "$ref": "#/components/schemas/customer"
+              - "$ref": "#/components/schemas/Customer"
         id:
           description: Unique identifier for the object.
           maxLength: 5000
@@ -24553,7 +24553,7 @@ paths:
                 properties:
                   data:
                     items:
-                      "$ref": "#/components/schemas/coupon"
+                      "$ref": "#/components/schemas/Coupon"
                     type: array
                   has_more:
                     description: True if this list has another page of items after
@@ -24605,7 +24605,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/coupon"
+                "$ref": "#/components/schemas/Coupon"
           description: Successful response.
         default:
           content:
@@ -24849,7 +24849,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/customer"
+                "$ref": "#/components/schemas/Customer"
           description: Successful response.
         default:
           content:
@@ -24890,7 +24890,7 @@ paths:
             application/json:
               schema:
                 anyOf:
-                  - "$ref": "#/components/schemas/customer"
+                  - "$ref": "#/components/schemas/Customer"
                   - "$ref": "#/components/schemas/deleted_customer"
           description: Successful response.
         default:
@@ -25137,7 +25137,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/customer"
+                "$ref": "#/components/schemas/Customer"
           description: Successful response.
         default:
           content:
@@ -25299,7 +25299,7 @@ paths:
                 properties:
                   data:
                     items:
-                      "$ref": "#/components/schemas/invoice"
+                      "$ref": "#/components/schemas/Invoice"
                     type: array
                   has_more:
                     description: True if this list has another page of items after
@@ -25605,7 +25605,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/invoice"
+                "$ref": "#/components/schemas/Invoice"
           description: Successful response.
         default:
           content:
@@ -25674,7 +25674,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/invoice"
+                "$ref": "#/components/schemas/Invoice"
           description: Successful response.
         default:
           content:
@@ -25960,7 +25960,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/invoice"
+                "$ref": "#/components/schemas/Invoice"
           description: Successful response.
         default:
           content:
@@ -26043,7 +26043,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/invoice"
+                "$ref": "#/components/schemas/Invoice"
           description: Successful response.
         default:
           content:
@@ -26093,7 +26093,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/invoice"
+                "$ref": "#/components/schemas/Invoice"
           description: Successful response.
         default:
           content:
@@ -26143,7 +26143,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/invoice"
+                "$ref": "#/components/schemas/Invoice"
           description: Successful response.
         default:
           content:
@@ -26191,7 +26191,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/invoice"
+                "$ref": "#/components/schemas/Invoice"
           description: Successful response.
         default:
           content:
@@ -26630,7 +26630,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/invoice"
+                "$ref": "#/components/schemas/Invoice"
           description: Successful response.
         default:
           content:
@@ -27136,7 +27136,7 @@ paths:
                 properties:
                   data:
                     items:
-                      "$ref": "#/components/schemas/payment_method"
+                      "$ref": "#/components/schemas/Payment_method"
                     type: array
                   has_more:
                     description: True if this list has another page of items after
@@ -27607,7 +27607,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/payment_method"
+                "$ref": "#/components/schemas/Payment_method"
           description: Successful response.
         default:
           content:
@@ -27647,7 +27647,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/payment_method"
+                "$ref": "#/components/schemas/Payment_method"
           description: Successful response.
         default:
           content:
@@ -27746,7 +27746,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/payment_method"
+                "$ref": "#/components/schemas/Payment_method"
           description: Successful response.
         default:
           content:
@@ -27806,7 +27806,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/payment_method"
+                "$ref": "#/components/schemas/Payment_method"
           description: Successful response.
         default:
           content:
@@ -27853,7 +27853,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/payment_method"
+                "$ref": "#/components/schemas/Payment_method"
           description: Successful response.
         default:
           content:

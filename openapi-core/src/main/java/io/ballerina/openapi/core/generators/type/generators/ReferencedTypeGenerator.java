@@ -77,7 +77,7 @@ public class ReferencedTypeGenerator extends TypeGenerator {
         } catch (BallerinaOpenApiException e) {
             throw new OASTypeGenException(e.getMessage());
         }
-        String typeName = GeneratorUtils.getValidName(extractName, true);
+        String typeName = GeneratorUtils.escapeIdentifier(extractName);
         Schema<?> refSchema = GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(typeName);
         refSchema = refSchema == null ?
                 GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(extractName) : refSchema;

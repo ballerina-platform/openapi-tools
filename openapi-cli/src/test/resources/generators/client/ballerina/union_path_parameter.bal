@@ -34,15 +34,17 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+
     # + id - id anyOf
     # + return - Ok
-    remote isolated function operationId03(Id id) returns string|error {
+    remote isolated function operationId03(id id) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(id)}`;
         return self.clientEp->get(resourcePath);
     }
+
     # + id - id oneOf
     # + return - Ok
-    remote isolated function post(Id_1 id) returns string|error {
+    remote isolated function post(id_1 id) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(id)}`;
         http:Request request = new;
         return self.clientEp->post(resourcePath, request);

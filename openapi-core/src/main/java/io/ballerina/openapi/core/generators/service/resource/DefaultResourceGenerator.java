@@ -73,13 +73,10 @@ public class DefaultResourceGenerator extends ResourceGenerator {
         diagnostics.addAll(functionSignatureGenerator.getDiagnostics());
         // Function Body Node
         // If path parameter has some special characters, extra body statements are added to handle the complexity.
-        List<StatementNode> bodyStatements = GeneratorUtils.generateBodyStatementForComplexUrl(path);
         FunctionBodyBlockNode functionBodyBlockNode = createFunctionBodyBlockNode(
                 createToken(SyntaxKind.OPEN_BRACE_TOKEN),
                 null,
-                bodyStatements.isEmpty() ?
-                        createEmptyNodeList() :
-                        createNodeList(bodyStatements),
+                createEmptyNodeList(),
                 createToken(SyntaxKind.CLOSE_BRACE_TOKEN), null);
         return createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, null,
                 qualifiersList, functionKeyWord, functionName, relativeResourcePath, functionSignatureNode,

@@ -157,7 +157,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                 } catch (BallerinaOpenApiException e) {
                     throw new OASTypeGenException(e.getMessage());
                 }
-                String modifiedSchemaName = GeneratorUtils.getValidName(extractedSchemaName, true);
+                String modifiedSchemaName = GeneratorUtils.escapeIdentifier(extractedSchemaName);
                 Token typeRef = AbstractNodeFactory.createIdentifierToken(modifiedSchemaName);
                 TypeReferenceNode recordField = NodeFactory.createTypeReferenceNode(createToken(ASTERISK_TOKEN),
                         typeRef, createToken(SEMICOLON_TOKEN));

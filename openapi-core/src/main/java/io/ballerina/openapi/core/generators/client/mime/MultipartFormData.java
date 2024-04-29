@@ -66,7 +66,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.MIME;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.addImport;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 /**
  * Defines the payload structure of multipart form-data mime type.
@@ -172,7 +171,7 @@ public class MultipartFormData extends MimeType {
         for (Map.Entry<String, Header> header : entry.getValue().getHeaders().entrySet()) {
             IdentifierToken headerName = createIdentifierToken('"' + header.getKey() + '"');
             SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(
-                    createIdentifierToken(escapeIdentifier(getValidName(header.getKey(), false))));
+                    createIdentifierToken(escapeIdentifier(header.getKey())));
             SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
                     headerName, createToken(COLON_TOKEN), valueExpr);
             headerMap.add(specificFieldNode);
