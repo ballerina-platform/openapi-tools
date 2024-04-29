@@ -122,7 +122,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SEL
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isComposedSchema;
 
 /**
@@ -349,7 +348,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                         createSimpleNameReferenceNode(createIdentifierToken(API_KEY_CONFIG_PARAM +
                                 QUESTION_MARK_TOKEN.stringValue())));
                 SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(createIdentifierToken(
-                        getValidName(getValidName(apiKey, false), false)));
+                        escapeIdentifier(apiKey)));
                 ExpressionNode apiKeyExpr = createFieldAccessExpressionNode(
                         fieldExpr, createToken(DOT_TOKEN), valueExpr);
                 statementNodeList.add(createAssignmentStatementNode(fieldName, equal, apiKeyExpr, createToken(
@@ -432,7 +431,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             Schema paramSchema = parameter.getSchema();
             if (paramSchema != null && paramSchema.get$ref() != null) {
                 paramSchema = openAPI.getComponents().getSchemas().get(
-                        getValidName(extractReferenceType(paramSchema.get$ref()), true));
+                        escapeIdentifier(extractReferenceType(paramSchema.get$ref())));
             }
             if (paramSchema != null && (paramSchema.getProperties() != null ||
                     (getOpenAPIType(paramSchema) != null && getOpenAPIType(paramSchema).equals("array")) ||
@@ -742,7 +741,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                         createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
                         apiKeyConfigParamNode);
                 SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(createIdentifierToken(
-                        getValidName(apiKey, false)));
+                        escapeIdentifier(apiKey)));
                 SpecificFieldNode specificFieldNode;
                 ExpressionNode apiKeyExpr = createFieldAccessExpressionNode(
                         fieldExpr, createToken(DOT_TOKEN), valueExpr);

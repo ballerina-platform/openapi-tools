@@ -68,7 +68,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.INT
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isArraySchema;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isComposedSchema;
 

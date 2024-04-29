@@ -750,20 +750,6 @@ public class GeneratorUtils {
             validateOperationIds(openAPIPaths.entrySet());
         }
         validateRequestBody(openAPIPaths.entrySet());
-
-//        if (openAPI.getComponents() != null) {
-//            // Refactor schema name with valid name
-//            Components components = openAPI.getComponents();
-//            Map<String, Schema> componentsSchemas = components.getSchemas();
-//            if (componentsSchemas != null) {
-//                Map<String, Schema> refacSchema = new HashMap<>();
-//                for (Map.Entry<String, Schema> schemaEntry : componentsSchemas.entrySet()) {
-//                    String name = getValidName(schemaEntry.getKey(), true);
-//                    refacSchema.put(name, schemaEntry.getValue());
-//                }
-//                openAPI.getComponents().setSchemas(refacSchema);
-//            }
-//        }
         return openAPI;
     }
 
