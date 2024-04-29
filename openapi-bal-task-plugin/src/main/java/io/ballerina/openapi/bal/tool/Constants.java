@@ -66,7 +66,9 @@ public class Constants {
                 " updated with the OpenAPI client native dependency but the version is different from the current " +
                 "version. Please remove the existing dependency and try again.", DiagnosticSeverity.ERROR),
         ERROR_WHILE_UPDATING_TOML("OAS_CLIENT_11", "error occurred when updating Ballerina.toml " +
-                "file with the client native dependency.", DiagnosticSeverity.ERROR);
+                "file with the client native dependency.", DiagnosticSeverity.ERROR),
+        OPENAPI_EXCEPTION("OAS_CLIENT_12", "exception occurred while reading the openapi contract: %s",
+                DiagnosticSeverity.ERROR);
 
         private final String code;
         private final String description;

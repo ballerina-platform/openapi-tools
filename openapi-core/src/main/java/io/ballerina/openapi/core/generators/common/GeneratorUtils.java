@@ -742,11 +742,11 @@ public class GeneratorUtils {
      * @throws IOException
      * @throws BallerinaOpenApiException
      */
-    public static OpenAPI normalizeOpenAPI(Path openAPIPath, boolean isClient) throws IOException,
+    public static OpenAPI normalizeOpenAPI(Path openAPIPath, boolean validateOpIds) throws IOException,
             BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPIFromOpenAPIV3Parser(openAPIPath);
         io.swagger.v3.oas.models.Paths openAPIPaths = openAPI.getPaths();
-        if (isClient) {
+        if (validateOpIds) {
             validateOperationIds(openAPIPaths.entrySet());
         }
         validateRequestBody(openAPIPaths.entrySet());
@@ -769,14 +769,14 @@ public class GeneratorUtils {
                     String operationId = getValidName(operation.getValue().getOperationId(), false);
                     operation.getValue().setOperationId(operationId);
                 } else {
-                    errorList.add(String.format("OperationId is missing in the resource path: %s(%s)", entry.getKey(),
+                    errorList.add(String.format("OperationId is missing in the resource path: '%s(%s)'", entry.getKey(),
                             operation.getKey()));
                 }
             }
         }
         if (!errorList.isEmpty()) {
-            throw new BallerinaOpenApiException(
-                    "OpenAPI definition has errors: " + LINE_SEPARATOR + String.join(LINE_SEPARATOR, errorList));
+            throw new BallerinaOpenApiException("the configured generation mode requires operation ids for all " +
+                    "operations: " + LINE_SEPARATOR + String.join(LINE_SEPARATOR, errorList));
         }
     }
 
