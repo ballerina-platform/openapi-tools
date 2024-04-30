@@ -49,7 +49,7 @@ public isolated client class Client {
         string resourcePath = string `/weather`;
         map<anydata> queryParam = {...queries};
         queryParam["appid"] = self.apiKeyConfig.appid;
-        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         return self.clientEp->get(resourcePath, headers);
     }
     # Provide weather forecast for any geographical coordinates
@@ -62,7 +62,7 @@ public isolated client class Client {
         string resourcePath = string `/onecall`;
         map<anydata> queryParam = {...queries};
         queryParam["appid"] = self.apiKeyConfig.appid;
-        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         return self.clientEp->get(resourcePath, headers);
     }
 }

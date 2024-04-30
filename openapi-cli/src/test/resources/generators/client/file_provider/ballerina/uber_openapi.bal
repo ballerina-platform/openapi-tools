@@ -57,7 +57,7 @@ public isolated client class Client {
         string resourcePath = string `/products`;
         map<anydata> queryParam = {...queries};
         queryParam["server_token"] = self.apiKeyConfig.server_token;
-        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         return self.clientEp->get(resourcePath, headers);
     }
     # Time Estimates

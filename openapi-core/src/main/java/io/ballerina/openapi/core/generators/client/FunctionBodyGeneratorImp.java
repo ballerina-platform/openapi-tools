@@ -129,6 +129,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
 
     public static final String MAP_ANYDATA = "map<anydata> ";
     public static final String MAP_STRING_STRING_ARRAY = "map<string|string[]> ";
+    public static final String GET_MAP_FOR_HEADERS = " = getMapForHeaders(";
     private final List<ImportDeclarationNode> imports;
     private final String path;
     private final Map.Entry<PathItem.HttpMethod, Operation> operation;
@@ -251,8 +252,9 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                     statementsList.add(queryMapCreation);
                     addApiKeysToMap(QUERY_PARAM, queryApiKeyNameList, statementsList);
                 }
+                getUpdatedPathHandlingQueryParamEncoding(statementsList, queryParameters,
+                        queryApiKeyNameList.isEmpty() ? QUERIES : QUERY_PARAM);
                 ballerinaUtilGenerator.setQueryParamsFound(true);
-                getUpdatedPathHandlingQueryParamEncoding(statementsList, queryParameters);
             }
             if (hasHeaders || !headerApiKeyNameList.isEmpty()) {
                 if (!headerApiKeyNameList.isEmpty()) {
@@ -267,11 +269,11 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                     statementsList.add(headerMapCreation);
                     addApiKeysToMap(HEADER_VALUES, headerApiKeyNameList, statementsList);
                     statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
-                            MAP_STRING_STRING_ARRAY + HTTP_HEADERS + " = getMapForHeaders(" + HEADERS + ")"));
+                            MAP_STRING_STRING_ARRAY + HTTP_HEADERS + GET_MAP_FOR_HEADERS + HEADER_VALUES + ")"));
                     ballerinaUtilGenerator.setHeadersFound(true);
                 } else if (!hasDefaultHeaders) {
                     statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
-                            MAP_STRING_STRING_ARRAY + HTTP_HEADERS + " = getMapForHeaders(" + HEADERS + ")"));
+                            MAP_STRING_STRING_ARRAY + HTTP_HEADERS + GET_MAP_FOR_HEADERS + HEADERS + ")"));
                     ballerinaUtilGenerator.setHeadersFound(true);
                 }
             }
@@ -328,11 +330,12 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
         generateIfBlockToAddApiKeysToMaps(statementsList, ifBodyStatementsList);
 
         if (hasQueries || !queryApiKeyNameList.isEmpty()) {
-            getUpdatedPathHandlingQueryParamEncoding(statementsList, queryParameters);
+            getUpdatedPathHandlingQueryParamEncoding(statementsList, queryParameters,
+                    queryApiKeyNameList.isEmpty() ? QUERIES : QUERY_PARAM);
         }
         if (hasHeaders || !headerApiKeyNameList.isEmpty()) {
             statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
-                    MAP_STRING_STRING_ARRAY + HTTP_HEADERS + " = getMapForHeaders(headerValues)"));
+                    MAP_STRING_STRING_ARRAY + HTTP_HEADERS + GET_MAP_FOR_HEADERS + HEADER_VALUES + ")"));
         }
     }
 
@@ -369,18 +372,17 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
      * Get updated path considering queryParamEncodingMap.
      */
     private void getUpdatedPathHandlingQueryParamEncoding(List<StatementNode> statementsList, List<Parameter>
-            queryParameters) throws BallerinaOpenApiException {
-
+            queryParameters, String queryVarName) throws BallerinaOpenApiException {
         VariableDeclarationNode queryParamEncodingMap = getQueryParameterEncodingMap(queryParameters);
         if (queryParamEncodingMap != null) {
             statementsList.add(queryParamEncodingMap);
             ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
-                    RESOURCE_PATH + " = " + RESOURCE_PATH + " + check getPathForQueryParam(" + QUERIES + ", " +
+                    RESOURCE_PATH + " = " + RESOURCE_PATH + " + check getPathForQueryParam(" + queryVarName + ", " +
                             "queryParamEncoding)");
             statementsList.add(updatedPath);
         } else {
             ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
-                    RESOURCE_PATH + " = " + RESOURCE_PATH + " + check getPathForQueryParam(" + QUERIES + ")");
+                    RESOURCE_PATH + " = " + RESOURCE_PATH + " + check getPathForQueryParam(" + queryVarName + ")");
             statementsList.add(updatedPath);
         }
     }

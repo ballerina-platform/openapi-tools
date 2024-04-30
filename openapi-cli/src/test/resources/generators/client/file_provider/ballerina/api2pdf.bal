@@ -48,7 +48,7 @@ public isolated client class Client {
         string resourcePath = string `/chrome/html`;
         map<anydata> headerValues = {...headers};
         headerValues["Authorization"] = self.apiKeyConfig.Authorization;
-        map<string|string[]> httpHeaders = getMapForHeaders(headers);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
@@ -64,7 +64,7 @@ public isolated client class Client {
         string resourcePath = string `/chrome/url`;
         map<anydata> queryParam = {...queries};
         queryParam["apikey"] = self.apiKeyConfig.apikey;
-        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         return self.clientEp->get(resourcePath, headers);
     }
 
@@ -77,7 +77,7 @@ public isolated client class Client {
         string resourcePath = string `/chrome/url`;
         map<anydata> headerValues = {...headers};
         headerValues["Authorization"] = self.apiKeyConfig.Authorization;
-        map<string|string[]> httpHeaders = getMapForHeaders(headers);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
@@ -93,7 +93,7 @@ public isolated client class Client {
         string resourcePath = string `/libreoffice/convert`;
         map<anydata> headerValues = {...headers};
         headerValues["Authorization"] = self.apiKeyConfig.Authorization;
-        map<string|string[]> httpHeaders = getMapForHeaders(headers);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
@@ -109,7 +109,7 @@ public isolated client class Client {
         string resourcePath = string `/merge`;
         map<anydata> headerValues = {...headers};
         headerValues["Authorization"] = self.apiKeyConfig.Authorization;
-        map<string|string[]> httpHeaders = getMapForHeaders(headers);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
@@ -125,7 +125,7 @@ public isolated client class Client {
         string resourcePath = string `/wkhtmltopdf/html`;
         map<anydata> headerValues = {...headers};
         headerValues["Authorization"] = self.apiKeyConfig.Authorization;
-        map<string|string[]> httpHeaders = getMapForHeaders(headers);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
@@ -141,7 +141,7 @@ public isolated client class Client {
         string resourcePath = string `/wkhtmltopdf/url`;
         map<anydata> queryParam = {...queries};
         queryParam["apikey"] = self.apiKeyConfig.apikey;
-        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         return self.clientEp->get(resourcePath, headers);
     }
 
@@ -154,7 +154,7 @@ public isolated client class Client {
         string resourcePath = string `/wkhtmltopdf/url`;
         map<anydata> headerValues = {...headers};
         headerValues["Authorization"] = self.apiKeyConfig.Authorization;
-        map<string|string[]> httpHeaders = getMapForHeaders(headers);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
@@ -170,7 +170,7 @@ public isolated client class Client {
         string resourcePath = string `/zebra`;
         map<anydata> queryParam = {...queries};
         queryParam["apikey"] = self.apiKeyConfig.apikey;
-        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         return self.clientEp->get(resourcePath, headers);
     }
 }
