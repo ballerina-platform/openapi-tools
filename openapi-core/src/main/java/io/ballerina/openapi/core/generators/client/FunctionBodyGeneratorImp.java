@@ -127,7 +127,9 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isCompo
  */
 public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
 
-    private List<ImportDeclarationNode> imports = new ArrayList<>();
+    public static final String MAP_ANYDATA = "map<anydata> ";
+    public static final String MAP_STRING_STRING_ARRAY = "map<string|string[]> ";
+    private final List<ImportDeclarationNode> imports;
     private final String path;
     private final Map.Entry<PathItem.HttpMethod, Operation> operation;
     private final OpenAPI openAPI;
@@ -163,7 +165,6 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
      * Generate function body node for the remote function.
      *
      * @return - {@link FunctionBodyNode}
-     * @throws BallerinaOpenApiException - throws exception if generating FunctionBodyNode fails.
      */
     @Override
     public Optional<FunctionBodyNode> getFunctionBodyNode() {
@@ -210,7 +211,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
 
         Set<String> securitySchemesAvailable = getSecurityRequirementForOperation(operation.getValue());
 
-        if (securitySchemesAvailable.size() > 0) {
+        if (!securitySchemesAvailable.isEmpty()) {
             Map<String, String> queryApiKeyMap = ballerinaAuthConfigGeneratorImp.getQueryApiKeyNameList();
             Map<String, String> headerApiKeyMap = ballerinaAuthConfigGeneratorImp.getHeaderApiKeyNameList();
             for (String schemaName : securitySchemesAvailable) {
@@ -222,19 +223,15 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             }
         }
 
-        List<Parameter> queryParameters = new ArrayList<>();
-        List<Parameter> headerParameters = new ArrayList<>();
-
-        handleQueryParamsAndHeaders(queryParameters, headerParameters, statementsList, queryApiKeyNameList,
-                headerApiKeyNameList);
+        handleQueryParamsAndHeaders(new ArrayList<>(), statementsList, queryApiKeyNameList, headerApiKeyNameList);
     }
 
     /**
      * Handle query parameters and headers within a remote function.
      */
-    public void handleQueryParamsAndHeaders(List<Parameter> queryParameters, List<Parameter> headerParameters,
-                                            List<StatementNode> statementsList, List<String> queryApiKeyNameList,
-                                            List<String> headerApiKeyNameList) throws BallerinaOpenApiException {
+    public void handleQueryParamsAndHeaders(List<Parameter> queryParameters, List<StatementNode> statementsList,
+                                            List<String> queryApiKeyNameList, List<String> headerApiKeyNameList)
+            throws BallerinaOpenApiException {
 
         boolean combinationOfApiKeyAndHTTPOAuth = ballerinaAuthConfigGeneratorImp.isHttpOROAuth() &&
                 ballerinaAuthConfigGeneratorImp.isApiKey();
@@ -243,13 +240,38 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                     headerApiKeyNameList);
         } else {
             if (hasQueries || !queryApiKeyNameList.isEmpty()) {
+                if (!queryApiKeyNameList.isEmpty()) {
+                    String defaultValue = "{}";
+                    if (hasQueries) {
+                        defaultValue = "{..." + QUERIES + "}";
+                    }
+
+                    ExpressionStatementNode queryMapCreation = GeneratorUtils.getSimpleExpressionStatementNode(
+                            MAP_ANYDATA + QUERY_PARAM + " = " + defaultValue);
+                    statementsList.add(queryMapCreation);
+                    addApiKeysToMap(QUERY_PARAM, queryApiKeyNameList, statementsList);
+                }
                 ballerinaUtilGenerator.setQueryParamsFound(true);
                 getUpdatedPathHandlingQueryParamEncoding(statementsList, queryParameters);
             }
             if (hasHeaders || !headerApiKeyNameList.isEmpty()) {
-                if (!hasDefaultHeaders) {
+                if (!headerApiKeyNameList.isEmpty()) {
+                    String defaultValue = "{}";
+                    if (hasHeaders) {
+                        defaultValue = "{..." + HEADERS + "}";
+                    }
+                    hasDefaultHeaders = false;
+
+                    ExpressionStatementNode headerMapCreation = GeneratorUtils.getSimpleExpressionStatementNode(
+                            MAP_ANYDATA + HEADER_VALUES + " = " + defaultValue);
+                    statementsList.add(headerMapCreation);
+                    addApiKeysToMap(HEADER_VALUES, headerApiKeyNameList, statementsList);
                     statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
-                            "map<string|string[]> " + HTTP_HEADERS + " = getMapForHeaders(" + HEADERS + ")"));
+                            MAP_STRING_STRING_ARRAY + HTTP_HEADERS + " = getMapForHeaders(" + HEADERS + ")"));
+                    ballerinaUtilGenerator.setHeadersFound(true);
+                } else if (!hasDefaultHeaders) {
+                    statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
+                            MAP_STRING_STRING_ARRAY + HTTP_HEADERS + " = getMapForHeaders(" + HEADERS + ")"));
                     ballerinaUtilGenerator.setHeadersFound(true);
                 }
             }
@@ -274,7 +296,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             hasDefaultHeaders = false;
 
             ExpressionStatementNode headerMapCreation = GeneratorUtils.getSimpleExpressionStatementNode(
-                    "map<anydata> " + HEADER_VALUES + " = " + defaultValue);
+                    MAP_ANYDATA + HEADER_VALUES + " = " + defaultValue);
             statementsList.add(headerMapCreation);
 
             if (!headerApiKeyNameList.isEmpty()) {
@@ -292,7 +314,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             }
 
             ExpressionStatementNode queryParamMapCreation = GeneratorUtils.getSimpleExpressionStatementNode(
-                    "map<anydata> " + QUERY_PARAM + " = " + defaultValue);
+                    MAP_ANYDATA + QUERY_PARAM + " = " + defaultValue);
             statementsList.add(queryParamMapCreation);
 
             if (!queryApiKeyNameList.isEmpty()) {
@@ -310,7 +332,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
         }
         if (hasHeaders || !headerApiKeyNameList.isEmpty()) {
             statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
-                    "map<string|string[]> " + HTTP_HEADERS + " = getMapForHeaders(headerValues)"));
+                    MAP_STRING_STRING_ARRAY + HTTP_HEADERS + " = getMapForHeaders(headerValues)"));
         }
     }
 
@@ -326,10 +348,13 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             for (String apiKey : apiKeyNames) {
                 IdentifierToken fieldName = createIdentifierToken(mapName + "[" + '"' + apiKey.trim() + '"' + "]");
                 Token equal = createToken(EQUAL_TOKEN);
+                String apiKeyConfigToken = API_KEY_CONFIG_PARAM;
+                if (ballerinaAuthConfigGeneratorImp.isHttpOROAuth() && ballerinaAuthConfigGeneratorImp.isApiKey()) {
+                    apiKeyConfigToken += QUESTION_MARK_TOKEN.stringValue();
+                }
                 FieldAccessExpressionNode fieldExpr = createFieldAccessExpressionNode(
                         createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
-                        createSimpleNameReferenceNode(createIdentifierToken(API_KEY_CONFIG_PARAM +
-                                QUESTION_MARK_TOKEN.stringValue())));
+                        createSimpleNameReferenceNode(createIdentifierToken(apiKeyConfigToken)));
                 SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(createIdentifierToken(
                         escapeIdentifier(apiKey)));
                 ExpressionNode apiKeyExpr = createFieldAccessExpressionNode(
@@ -454,7 +479,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             securityRequirements = openAPI.getSecurity();
         }
 
-        if (securityRequirements.size() > 0) {
+        if (!securityRequirements.isEmpty()) {
             for (SecurityRequirement requirement : securityRequirements) {
                 securitySchemasAvailable.addAll(requirement.keySet());
             }
