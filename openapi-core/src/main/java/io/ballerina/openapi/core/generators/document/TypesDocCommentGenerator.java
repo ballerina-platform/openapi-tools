@@ -97,8 +97,9 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
                         }
                         schema.setProperties(properties);
                     }
-
-                    updateRecordFields(schema, updatedFields, fields);
+                    if (schema.getProperties() != null) {
+                        updateRecordFields(schema, updatedFields, fields);
+                    }
 
                     typeDef = typeDef.modify(typeDef.metadata().orElse(null),
                             typeDef.visibilityQualifier().get(),
@@ -135,56 +136,53 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
     }
 
     private static void updateRecordFields(Schema<?> schema, List<Node> updatedFields, NodeList<Node> fields) {
-        if (schema.getProperties() != null) {
-            for (Node field : fields) {
-                boolean isUpdated = false;
-                for (Map.Entry<String, Schema> entry : schema.getProperties().entrySet()) {
-                    String key = GeneratorUtils.escapeIdentifier(entry.getKey());
-                    Schema<?> value = entry.getValue();
-                    if (field instanceof RecordFieldNode recordFieldNode) {
-                        if (recordFieldNode.fieldName().text().trim().equals(key)) {
-                            if (value.getDescription() != null) {
-                                Optional<MetadataNode> metadata = recordFieldNode.metadata();
-                                MetadataNode metadataNode = updateMetadataNode(metadata, value);
-                                recordFieldNode = recordFieldNode.modify(metadataNode,
-                                        recordFieldNode.readonlyKeyword().orElse(null),
-                                        recordFieldNode.typeName(),
-                                        recordFieldNode.fieldName(),
-                                        recordFieldNode.questionMarkToken().orElse(null),
-                                        recordFieldNode.semicolonToken());
-                                updatedFields.add(recordFieldNode);
-                                isUpdated = true;
-                            }
-                        }
-
-                    } else if (field instanceof RecordFieldWithDefaultValueNode
-                            recordFieldWithDefaultValueNode) {
-                        if (recordFieldWithDefaultValueNode.fieldName().text().trim().equals(key)) {
-                            if (value.getDescription() != null) {
-                                Optional<MetadataNode> metadata = recordFieldWithDefaultValueNode
-                                        .metadata();
-                                MetadataNode metadataNode = updateMetadataNode(metadata, value);
-                                recordFieldWithDefaultValueNode = recordFieldWithDefaultValueNode
-                                        .modify(metadataNode,
-                                                recordFieldWithDefaultValueNode.readonlyKeyword().orElse(null),
-                                                recordFieldWithDefaultValueNode.typeName(),
-                                                recordFieldWithDefaultValueNode.fieldName(),
-                                                recordFieldWithDefaultValueNode.equalsToken(),
-                                                recordFieldWithDefaultValueNode.expression(),
-                                                recordFieldWithDefaultValueNode.semicolonToken());
-
-                                updatedFields.add(recordFieldWithDefaultValueNode);
-                                isUpdated = true;
-                            }
+        for (Node field : fields) {
+            boolean isUpdated = false;
+            for (Map.Entry<String, Schema> entry : schema.getProperties().entrySet()) {
+                String key = GeneratorUtils.escapeIdentifier(entry.getKey());
+                Schema<?> value = entry.getValue();
+                if (field instanceof RecordFieldNode recordFieldNode) {
+                    if (recordFieldNode.fieldName().text().trim().equals(key)) {
+                        if (value.getDescription() != null) {
+                            Optional<MetadataNode> metadata = recordFieldNode.metadata();
+                            MetadataNode metadataNode = updateMetadataNode(metadata, value);
+                            recordFieldNode = recordFieldNode.modify(metadataNode,
+                                    recordFieldNode.readonlyKeyword().orElse(null),
+                                    recordFieldNode.typeName(),
+                                    recordFieldNode.fieldName(),
+                                    recordFieldNode.questionMarkToken().orElse(null),
+                                    recordFieldNode.semicolonToken());
+                            updatedFields.add(recordFieldNode);
+                            isUpdated = true;
                         }
                     }
-                    if (isUpdated) {
-                        break;
+                } else if (field instanceof RecordFieldWithDefaultValueNode
+                        recordFieldWithDefaultValueNode) {
+                    if (recordFieldWithDefaultValueNode.fieldName().text().trim().equals(key)) {
+                        if (value.getDescription() != null) {
+                            Optional<MetadataNode> metadata = recordFieldWithDefaultValueNode
+                                    .metadata();
+                            MetadataNode metadataNode = updateMetadataNode(metadata, value);
+                            recordFieldWithDefaultValueNode = recordFieldWithDefaultValueNode
+                                    .modify(metadataNode,
+                                            recordFieldWithDefaultValueNode.readonlyKeyword().orElse(null),
+                                            recordFieldWithDefaultValueNode.typeName(),
+                                            recordFieldWithDefaultValueNode.fieldName(),
+                                            recordFieldWithDefaultValueNode.equalsToken(),
+                                            recordFieldWithDefaultValueNode.expression(),
+                                            recordFieldWithDefaultValueNode.semicolonToken());
+
+                            updatedFields.add(recordFieldWithDefaultValueNode);
+                            isUpdated = true;
+                        }
                     }
                 }
-                if (!isUpdated) {
-                    updatedFields.add(field);
+                if (isUpdated) {
+                    break;
                 }
+            }
+            if (!isUpdated) {
+                updatedFields.add(field);
             }
         }
     }
