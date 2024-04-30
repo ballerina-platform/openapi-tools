@@ -138,14 +138,11 @@ public class HeadersParameterGenerator implements ParameterGenerator {
 
     private ObjectSchema getHeadersSchema() {
         Map<String, Schema> properties = parameters.stream()
-                .collect(Collectors.toMap(
-                        parameter -> escapeIdentifier(parameter.getName()),
-                        parameter -> getSchemaWithDetails(parameter))
-                );
+                .collect(Collectors.toMap(Parameter::getName, this::getSchemaWithDetails));
 
         List<String> requiredFields = parameters.stream()
                 .filter(parameter -> Boolean.TRUE.equals(parameter.getRequired()))
-                .map(parameter -> escapeIdentifier(parameter.getName()))
+                .map(Parameter::getName)
                 .toList();
 
         ObjectSchema headersSchema = new ObjectSchema();
