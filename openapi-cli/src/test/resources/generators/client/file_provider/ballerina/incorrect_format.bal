@@ -44,13 +44,12 @@ public isolated client class Client {
     }
     # Finds Pets by status
     #
-    # + status - Status values that need to be considered for filter
-    # + 'limit - The number of client accounts to return on each page of results. The default value is `50`. Entering a `limit` value less than the minimum (`10`) or greater than the maximum (`50`) is ignored and the system uses the default values. Depending on the `limit` you specify, the system determines the `offset` parameter to use (number of records to skip) and includes it in the link used to get the next page of results.
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - successful operation
-    remote isolated function findPetsByStatus("available"|"pending"|"sold" status = "available", string 'limit = "50") returns Pet[]|error {
+    remote isolated function findPetsByStatus(map<string|string[]> headers = {}, *FindPetsByStatusQueries queries) returns Pet[]|error {
         string resourcePath = string `/pet/findByStatus`;
-        map<anydata> queryParam = {"status": status, "limit": 'limit};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        return self.clientEp->get(resourcePath);
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        return self.clientEp->get(resourcePath, headers);
     }
 }

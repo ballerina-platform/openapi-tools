@@ -43,18 +43,15 @@ public isolated client class Client {
     # Events are created when the job status changes, e.g. running or complete, and when results are uploaded.
     #
     # + fine\-tune\-id - The identifier of the fine-tune job.
-    # + 'stream - A flag indicating whether to stream events for the fine-tune job. If set to true,
-    # events will be sent as data-only server-sent events as they become available. The stream will terminate with
-    # a data: [DONE] message when the job is finished (succeeded, cancelled, or failed).
-    # If set to false, only events generated so far will be returned..
-    # + api\-version - The requested API version.
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - Success
-    remote isolated function fineTunes_GetEvents(string fine\-tune\-id, string api\-version, boolean? 'stream = ()) returns EventList|error {
+    remote isolated function fineTunes_GetEvents(string fine\-tune\-id, map<string|string[]> headers = {}, *FineTunes_GetEventsQueries queries) returns EventList|error {
         string resourcePath = string `/fine-tunes/${getEncodedUri(fine\-tune\-id)}/events`;
-        map<anydata> queryParam = {"stream": 'stream, "api-version": api\-version};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<any> headerValues = {"api-key": self.apiKeyConfig.api\-key};
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        map<anydata> headerValues = {...headers};
+        headerValues["api-key"] = self.apiKeyConfig.api\-key;
+        map<string|string[]> httpHeaders = getMapForHeaders(headers);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 }
