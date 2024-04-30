@@ -45,7 +45,7 @@ public class OneOfResponsesTests {
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
                 openapi.getPaths().get("/pet").getGet(), openapi, "get");
         Assert.assertEquals(functionReturnType.getReturnType().get().type().toString(),
-                "Inline_response_2XX|error");
+                "inline_response_2XX|error");
     }
 
 }

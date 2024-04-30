@@ -1,5 +1,4 @@
-import  ballerina/http;
-
+import ballerina/http;
 
 public isolated client class Client {
     final http:Client clientEp;
@@ -35,6 +34,7 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+
     # op1
     #
     # + id - id value
@@ -42,6 +42,6 @@ public isolated client class Client {
     # + return - Ok
     remote isolated function operationId01(int:Signed32 id, int payloadId) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(id)}/payload/${getEncodedUri(payloadId)}`;
-        return self.clientEp-> get(resourcePath);
+        return self.clientEp->get(resourcePath);
     }
 }

@@ -35,11 +35,12 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+
     # Request Body has nested allOf.
     #
     # + payload - A JSON object containing pet information
     # + return - OK
-    remote isolated function postXMLUser(Path01_body payload) returns error? {
+    remote isolated function postXMLUser(path01_body payload) returns error? {
         string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = payload.toJson();

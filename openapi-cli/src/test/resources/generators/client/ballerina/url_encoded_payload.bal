@@ -35,6 +35,7 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+
     # <p>Retrieves a PaymentMethod object.</p>
     #
     # + payment_method - Payment Method
@@ -43,12 +44,13 @@ public isolated client class Client {
         string resourcePath = string `/v1/payment_methods/${getEncodedUri(payment_method)}`;
         return self.clientEp->get(resourcePath);
     }
+
     # <p>Creates a new customer object.</p>
     #
     # + customer - Customer ID
     # + payload - Customer Details
     # + return - Successful response.
-    remote isolated function postCustomers(string customer, Customer_customer_body payload) returns Customer|error {
+    remote isolated function postCustomers(string customer, customer_customer_body payload) returns Customer|error {
         string resourcePath = string `/v1/customer/${getEncodedUri(customer)}`;
         http:Request request = new;
         string encodedRequestBody = createFormURLEncodedRequestBody(payload);

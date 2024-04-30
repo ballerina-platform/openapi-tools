@@ -174,7 +174,7 @@ paths:
             application/vnd.vimeo.category+json:
               schema:
                 items:
-                  $ref: "#/components/schemas/category"
+                  $ref: "#/components/schemas/Category"
                 type: array
           description: The categories were returned.
       summary: Get all categories
@@ -196,7 +196,7 @@ paths:
           content:
             application/vnd.vimeo.category+json:
               schema:
-                $ref: "#/components/schemas/category"
+                $ref: "#/components/schemas/Category"
           description: The category was returned.
         "404":
           content:
@@ -732,7 +732,7 @@ paths:
             application/vnd.vimeo.category+json:
               schema:
                 items:
-                  $ref: "#/components/schemas/category"
+                  $ref: "#/components/schemas/Category"
                 type: array
           description: The categories were returned.
         "404":
@@ -776,7 +776,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 2205: There was no request body, or the request body is malformed.
             * Error code 2204: You exceeded the maximum number of channel categories.
@@ -784,13 +784,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8003: The user credentials are invalid."
         "403":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user can't add categories to the channel."
         "404":
           content:
@@ -827,13 +827,13 @@ paths:
           content:
             application/vnd.vimeo.category+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8003: The user credentials are invalid."
         "403":
           content:
             application/vnd.vimeo.category+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user doesn't own the channel or isn't a channel moderator."
         "404":
           content:
@@ -872,19 +872,19 @@ paths:
           content:
             application/vnd.vimeo.category+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2204: You exceeded the maximum number of channel categories."
         "401":
           content:
             application/vnd.vimeo.category+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8003: The user credentials are invalid."
         "403":
           content:
             application/vnd.vimeo.category+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user doesn't own the channel or isn't a channel moderator."
         "404":
           content:
@@ -1032,7 +1032,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2908: The list contains more than 100 users."
         "403":
           content:
@@ -1082,7 +1082,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2908: The list contains more than 100 users."
         "403":
           content:
@@ -1253,19 +1253,19 @@ paths:
           content:
             application/vnd.vimeo.user+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8003: The user credentials are invalid."
         "403":
           content:
             application/vnd.vimeo.user+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user doesn't own this channel."
         "404":
           content:
             application/vnd.vimeo.user+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2204: You can't add this user to a channel of this type."
       summary: Get all the users who can view a private channel
       tags:
@@ -1308,7 +1308,7 @@ paths:
           content:
             application/vnd.vimeo.user+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 2205: There was no request body, or the request body is malformed.
             * Error code 2900: At least one of the specified user accounts doesn't exist.
@@ -1316,19 +1316,19 @@ paths:
           content:
             application/vnd.vimeo.user+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8003: The user credentials are invalid."
         "403":
           content:
             application/vnd.vimeo.user+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user doesn't own this channel."
         "404":
           content:
             application/vnd.vimeo.user+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2204: You can't add one or more of these users to a channel of this type."
       security:
         - oauth2:
@@ -1362,19 +1362,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8003: The user credentials are invalid."
         "403":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user doesn't own this channel."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2204: You can't add this user to a channel of this type."
       security:
         - oauth2:
@@ -1407,19 +1407,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8003: The user credentials are invalid."
         "403":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user doesn't own this channel."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2204: You can't add this user to a channel of this type."
       security:
         - oauth2:
@@ -1504,13 +1504,13 @@ paths:
           content:
             application/vnd.vimeo.tag+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8003: The user credentials are invalid."
         "403":
           content:
             application/vnd.vimeo.tag+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user can't add tags to this channel."
       security:
         - oauth2:
@@ -1550,13 +1550,13 @@ paths:
           content:
             application/vnd.vimeo.tag+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8003: The user credentials are invalid."
         "403":
           content:
             application/vnd.vimeo.tag+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user can't remove tags from this channel."
       security:
         - oauth2:
@@ -1595,7 +1595,7 @@ paths:
           content:
             application/vnd.vimeo.tag+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: The tag exists, but the channel isn't tagged by it."
       summary: Check if a tag has been added to a channel
       tags:
@@ -1633,13 +1633,13 @@ paths:
           content:
             application/vnd.vimeo.tag+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8003: The user credentials are invalid."
         "403":
           content:
             application/vnd.vimeo.tag+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user can't add tags to this channel."
       security:
         - oauth2:
@@ -2116,19 +2116,19 @@ paths:
           content:
             application/vnd.vimeo.comment+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2207: The comment text is missing."
         "401":
           content:
             application/vnd.vimeo.comment+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8003: The user credentials are invalid."
         "403":
           content:
             application/vnd.vimeo.comment+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 3413: Comments are disabled for this video.
             * Error code 3411: The authenticated user is unverified.
@@ -3862,19 +3862,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3429: The authenticated user can't edit the album."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such album, or user, or video exists."
         "500":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 4016: Unexpected error while setting thumbnail."
       security:
         - oauth2:
@@ -4001,14 +4001,14 @@ paths:
             application/vnd.vimeo.category+json:
               schema:
                 items:
-                  $ref: "#/components/schemas/category"
+                  $ref: "#/components/schemas/Category"
                 type: array
           description: The categories were returned.
         "403":
           content:
             application/vnd.vimeo.category+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: You can't view another user."
       security:
         - oauth2:
@@ -4490,7 +4490,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 2205: The request body is empty.
             * Error code 2205: The `users` array is invalid.
@@ -4501,25 +4501,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user access token is invalid."
         "403":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3417: The current user can't follow other users."
         "429":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 9006: The current user is rate-limited from following other users."
         "500":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 4005: An unexpected error occurred."
       security:
         - oauth2:
@@ -5905,7 +5905,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
       security:
         - oauth2:
@@ -5940,7 +5940,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 2205: The input is empty.
             * Error code 2204: The input is invalid.
@@ -5948,13 +5948,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "403":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user can't create projects."
       security:
         - oauth2:
@@ -5988,19 +5988,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "403":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user can't delete the project."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such project exists."
       security:
         - oauth2:
@@ -6030,13 +6030,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such project exists."
       security:
         - oauth2:
@@ -6079,7 +6079,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 2204: The input is invalid.
             * Error code 2205: The input is empty.
@@ -6087,19 +6087,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "403":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user can't edit the project."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such project exists."
       security:
         - oauth2:
@@ -6140,19 +6140,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2204: The input is invalid."
         "401":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such project exists."
       security:
         - oauth2:
@@ -6220,13 +6220,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such project exists."
       security:
         - oauth2:
@@ -6259,19 +6259,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2204: The input is invalid."
         "401":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such project or video exists."
       security:
         - oauth2:
@@ -6305,19 +6305,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2204: The input is invalid."
         "401":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such video exists in the project."
       security:
         - oauth2:
@@ -6350,7 +6350,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such user, project, or video exists."
       security:
         - oauth2:
@@ -6763,7 +6763,7 @@ paths:
           content:
             application/vnd.vimeo.video+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 2205: The body of the request isn't formatted properly.
             * Error code 2204: The request contains invalid parameters.
@@ -6774,13 +6774,13 @@ paths:
           content:
             application/vnd.vimeo.video+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8002: No user is associated with the authentication token."
         "403":
           content:
             application/vnd.vimeo.video+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 4102: The user's allotted quota has been reached.
             * Error code 4101: The user's maximum disk space has been reached.
@@ -6788,7 +6788,7 @@ paths:
           content:
             application/vnd.vimeo.video+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 4003: There is a problem initiating the upload."
       summary: Upload a video
       tags:
@@ -7122,7 +7122,7 @@ paths:
           content:
             application/vnd.vimeo.auth+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8001: No such client secret exists."
       summary: Authorize a client with OAuth
       tags:
@@ -10649,19 +10649,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3429: The authenticated user can't edit the album."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such album, or user, or video exists."
         "500":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 4016: Unexpected error while setting thumbnail."
       security:
         - oauth2:
@@ -10802,14 +10802,14 @@ paths:
             application/vnd.vimeo.category+json:
               schema:
                 items:
-                  $ref: "#/components/schemas/category"
+                  $ref: "#/components/schemas/Category"
                 type: array
           description: The categories were returned.
         "403":
           content:
             application/vnd.vimeo.category+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: You can't view another user."
       security:
         - oauth2:
@@ -11392,7 +11392,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 2205: The request body is empty.
             * Error code 2205: The `users` array is invalid.
@@ -11403,25 +11403,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user access token is invalid."
         "403":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3417: The current user can't follow other users."
         "429":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 9006: The current user is rate-limited from following other users."
         "500":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 4005: An unexpected error occurred."
       security:
         - oauth2:
@@ -12928,7 +12928,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
       security:
         - oauth2:
@@ -12971,7 +12971,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 2205: The input is empty.
             * Error code 2204: The input is invalid.
@@ -12979,13 +12979,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "403":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user can't create projects."
       security:
         - oauth2:
@@ -13026,19 +13026,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "403":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user can't delete the project."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such project exists."
       security:
         - oauth2:
@@ -13075,13 +13075,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such project exists."
       security:
         - oauth2:
@@ -13131,7 +13131,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 2204: The input is invalid.
             * Error code 2205: The input is empty.
@@ -13139,19 +13139,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "403":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3200: The authenticated user can't edit the project."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such project exists."
       security:
         - oauth2:
@@ -13199,19 +13199,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2204: The input is invalid."
         "401":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such project exists."
       security:
         - oauth2:
@@ -13286,13 +13286,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such project exists."
       security:
         - oauth2:
@@ -13332,19 +13332,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2204: The input is invalid."
         "401":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such project or video exists."
       security:
         - oauth2:
@@ -13385,19 +13385,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2204: The input is invalid."
         "401":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8000: The user credentials are invalid."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such video exists in the project."
       security:
         - oauth2:
@@ -13437,7 +13437,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 5000: No such user, project, or video exists."
       security:
         - oauth2:
@@ -13484,13 +13484,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2502: The format of the video file is invalid."
         "404":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 5006: The video file doesn't exist.
             * Error code 5007: The signature doesn't exist.
@@ -13499,7 +13499,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 4011: The upload server returns an HTTP status code other than 200."
       security:
         - oauth2:
@@ -13957,7 +13957,7 @@ paths:
           content:
             application/vnd.vimeo.video+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 2205: The body of the request isn't formatted properly.
             * Error code 2204: The request contains invalid parameters.
@@ -13968,13 +13968,13 @@ paths:
           content:
             application/vnd.vimeo.video+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8002: No user is associated with the authentication token."
         "403":
           content:
             application/vnd.vimeo.video+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 4102: The user's allotted quota has been reached.
             * Error code 4101: The user's maximum disk space has been reached.
@@ -13982,7 +13982,7 @@ paths:
           content:
             application/vnd.vimeo.video+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 4003: There is a problem initiating the upload."
       summary: Upload a video
       tags:
@@ -14294,7 +14294,7 @@ paths:
           content:
             application/vnd.vimeo.video+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 2101: Either the `uris` or `links` parameter has filtering or sorting arguments.
             * Error code 2204: There is a problem with the batch request.
@@ -14719,7 +14719,7 @@ paths:
             application/vnd.vimeo.category+json:
               schema:
                 items:
-                  $ref: "#/components/schemas/category"
+                  $ref: "#/components/schemas/Category"
                 type: array
           description: The categories were returned.
         "404":
@@ -14763,7 +14763,7 @@ paths:
           content:
             application/vnd.vimeo.category+json:
               schema:
-                $ref: "#/components/schemas/category"
+                $ref: "#/components/schemas/Category"
           description: The categories were suggested.
         "403":
           content:
@@ -14864,19 +14864,19 @@ paths:
           content:
             application/vnd.vimeo.comment+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2207: The comment text is missing."
         "401":
           content:
             application/vnd.vimeo.comment+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 8003: The user credentials are invalid."
         "403":
           content:
             application/vnd.vimeo.comment+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 3413: Comments are disabled for this video.
             * Error code 3411: The authenticated user is unverified.
@@ -14913,7 +14913,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3415: The authenticated user didn't write this comment and can't delete it."
         "404":
           content:
@@ -15003,13 +15003,13 @@ paths:
           content:
             application/vnd.vimeo.comment+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2207: The comment text is missing."
         "403":
           content:
             application/vnd.vimeo.comment+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 3411: The authenticated user is unverified.
             * Error code 3412: The authenticated user can't post comments.
@@ -15112,13 +15112,13 @@ paths:
           content:
             application/vnd.vimeo.comment+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 2207: The comment text is missing."
         "403":
           content:
             application/vnd.vimeo.comment+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 3413: Comments are disabled on this video.
             * Error code 3411: The authenticated user is unverified.
@@ -16282,7 +16282,7 @@ paths:
           content:
             application/vnd.vimeo.video.texttrack+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 3430: You don't have permission to access this text track.
             * Error code 3431: This text track is disabled.
@@ -16330,7 +16330,7 @@ paths:
           content:
             application/vnd.vimeo.video.texttrack+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 3430: You don't have permission to access this text track.
             * Error code 3431: This text track is disabled.
@@ -16554,7 +16554,7 @@ paths:
           content:
             application/vnd.vimeo.video.version+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 2204: If the request input contains invalid upload data.
             * Error code 2204: If the request input contains invalid versions data.
@@ -16562,13 +16562,13 @@ paths:
           content:
             application/vnd.vimeo.video.version+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: "Error code 3427: If a user isn't permitted to edit the video"
         "404":
           content:
             application/vnd.vimeo.video.version+json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
           description: |-
             * Error code 5011: If an upload associated with the version isn't found.
             * Error code 5012: If a video associated with the upload isn't found.
@@ -16633,7 +16633,7 @@ components:
       properties:
         category:
           allOf:
-            - $ref: "#/components/schemas/category"
+            - $ref: "#/components/schemas/Category"
           description: The category that this event occurred for. This will be preset for only "category" activity types.
         channel:
           allOf:
@@ -17081,7 +17081,7 @@ components:
         - error_description
       title: Auth Error
       type: object
-    category:
+    Category:
       properties:
         icon:
           allOf:
@@ -17302,7 +17302,7 @@ components:
         categories:
           description: The categories to which this channel belongs as specified by the channel moderators.
           items:
-            $ref: "#/components/schemas/category"
+            $ref: "#/components/schemas/Category"
           type: array
         created_time:
           description: The time in ISO 8601 format when the channel was created.
@@ -17923,7 +17923,7 @@ components:
         - path
       title: Endpoint
       type: object
-    error:
+    Error:
       properties:
         developer_message:
           description: The error message that developers receive.
@@ -20743,7 +20743,7 @@ components:
         categories:
           description: The categories to which this video belongs.
           items:
-            $ref: "#/components/schemas/category"
+            $ref: "#/components/schemas/Category"
           type: array
         content_rating:
           description: The content ratings of this video.

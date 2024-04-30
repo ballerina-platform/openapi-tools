@@ -46,7 +46,7 @@ public type User09 record {|
     record {}?...;
 |};
 
-public type Store_inventory_body record {
+public type store_inventory_body record {
     User? user?;
     User01? user1?;
     User02? user2?;

@@ -39,6 +39,7 @@ import io.ballerina.openapi.core.generators.type.diagnostic.TypeGeneratorDiagnos
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -93,11 +94,12 @@ public class ArrayTypeGenerator extends TypeGenerator {
         TypeGenerator typeGenerator;
         if (isConstraintsAvailable) {
             String normalizedTypeName = typeName.replaceAll(GeneratorConstants.SPECIAL_CHARACTER_REGEX, "").trim();
-            typeName = GeneratorUtils.getValidName(
+            String itemType = StringUtils.capitalize(GeneratorUtils.getOpenAPIType(items));
+            String fieldName = StringUtils.capitalize(normalizedTypeName);
+            typeName = GeneratorUtils.escapeIdentifier(
                     parentType != null ?
-                            parentType + "-" + normalizedTypeName + "-Items-" + GeneratorUtils.getOpenAPIType(items) :
-                            normalizedTypeName + "-Items-" + GeneratorUtils.getOpenAPIType(items),
-                    true);
+                            parentType + fieldName + "Items" + itemType :
+                            fieldName + "Items" + itemType);
             typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null, ignoreNullableFlag,
                     subTypesMap, pregeneratedTypeMap);
             if (!pregeneratedTypeMap.containsKey(typeName)) {
@@ -164,8 +166,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         if (schema.getItems().get$ref() != null) {
             String typeName = null;
             try {
-                typeName = GeneratorUtils.getValidName(GeneratorUtils
-                        .extractReferenceType(schema.getItems().get$ref()), true);
+                typeName = GeneratorUtils.extractReferenceType(schema.getItems().get$ref());
             } catch (BallerinaOpenApiException e) {
                 throw new OASTypeGenException(e.getMessage());
             }
@@ -182,8 +183,8 @@ public class ArrayTypeGenerator extends TypeGenerator {
             }
             try {
                 member = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(GeneratorUtils.escapeIdentifier(GeneratorUtils.getValidName(
-                                GeneratorUtils.extractReferenceType(schema.getItems().get$ref()), true))));
+                        createIdentifierToken(GeneratorUtils.escapeIdentifier(GeneratorUtils.
+                                extractReferenceType(schema.getItems().get$ref()))));
             } catch (BallerinaOpenApiException e) {
                 throw new OASTypeGenException(e.getMessage());
             }

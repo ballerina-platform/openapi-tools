@@ -46,7 +46,7 @@ public class AllOfResponsesTests {
         TypeHandler.createInstance(response, false);
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(
                 response.getPaths().get("/products").getGet(), response, "get");
-        assertEquals(functionReturnType.getReturnType().get().type().toString(), "Inline_response_200|error");
+        assertEquals(functionReturnType.getReturnType().get().type().toString(), "inline_response_200|error");
     }
 
     @Test(description = "Tests for returnType")
@@ -55,7 +55,7 @@ public class AllOfResponsesTests {
         TypeHandler.createInstance(response, false);
         Operation post = response.getPaths().get("/users/{userId}/meetings").getPost();
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(post, response, "post");
-        assertEquals(functionReturnType.getReturnType().get().type().toString(), "Inline_response_201|error");
+        assertEquals(functionReturnType.getReturnType().get().type().toString(), "inline_response_201|error");
     }
 
     @Test(description = "Tests for the object response without property")
@@ -79,7 +79,7 @@ public class AllOfResponsesTests {
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(get, response, "get");
 
         String returnType = functionReturnType.getReturnType().get().type().toString();
-        Assert.assertEquals(returnType, "Inline_response_200|error");
+        Assert.assertEquals(returnType, "inline_response_200|error");
     }
 
     @Test(description = "Tests for the object response without property and without additional properties")
@@ -101,7 +101,7 @@ public class AllOfResponsesTests {
         Operation get = response.getPaths().get("/products").getGet();
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(get, response, "get");
         String returnType = functionReturnType.getReturnType().get().type().toString();
-        Assert.assertEquals(returnType, "Inline_response_200|error");
+        Assert.assertEquals(returnType, "inline_response_200|error");
     }
     // 1. nested allof
     // 2. allof with reference

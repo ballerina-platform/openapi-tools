@@ -38,19 +38,21 @@ public isolated client class Client {
         self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
         return;
     }
+
     # Convert raw HTML to PDF
     #
     # + payload - A JSON object as a payload is required within the body of the request. The following attributes of the JSON object are detailed below:
     # + return - A JSON object containing the url to the PDF and other meta data
     remote isolated function chromeFromHtmlPost(ChromeHtmlToPdfRequest payload) returns ApiResponseSuccess|error {
         string resourcePath = string `/chrome/html`;
-        map<any> headerValues = {"Authorization": self.apiKeyConfig.authorization};
+        map<any> headerValues = {"Authorization": self.apiKeyConfig.Authorization};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         return self.clientEp->post(resourcePath, request, httpHeaders);
     }
+
     # Convert URL to PDF
     #
     # + url - Url of the page to convert to PDF. Must start with http:// or https://.
@@ -62,58 +64,63 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         return self.clientEp->get(resourcePath);
     }
+
     # Convert URL to PDF
     #
     # + payload - A JSON object as a payload is required within the body of the request. The following attributes of the JSON object are detailed below:
     # + return - A JSON object containing the url to the PDF and other meta data
     remote isolated function chromeFromUrlPost(ChromeUrlToPdfRequest payload) returns ApiResponseSuccess|error {
         string resourcePath = string `/chrome/url`;
-        map<any> headerValues = {"Authorization": self.apiKeyConfig.authorization};
+        map<any> headerValues = {"Authorization": self.apiKeyConfig.Authorization};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         return self.clientEp->post(resourcePath, request, httpHeaders);
     }
+
     # Convert office document or image to PDF
     #
     # + payload - A JSON object as a payload is required within the body of the request. The following attributes of the JSON object are detailed below:
     # + return - A JSON object containing the url to the PDF and other meta data
     remote isolated function libreConvertPost(LibreOfficeConvertRequest payload) returns ApiResponseSuccess|error {
         string resourcePath = string `/libreoffice/convert`;
-        map<any> headerValues = {"Authorization": self.apiKeyConfig.authorization};
+        map<any> headerValues = {"Authorization": self.apiKeyConfig.Authorization};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         return self.clientEp->post(resourcePath, request, httpHeaders);
     }
+
     # Merge multiple PDFs together
     #
     # + payload - A JSON object as a payload is required within the body of the request. The following attributes of the JSON object are detailed below:
     # + return - A JSON object containing the url to the PDF and other meta data
     remote isolated function mergePost(MergeRequest payload) returns ApiResponseSuccess|error {
         string resourcePath = string `/merge`;
-        map<any> headerValues = {"Authorization": self.apiKeyConfig.authorization};
+        map<any> headerValues = {"Authorization": self.apiKeyConfig.Authorization};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         return self.clientEp->post(resourcePath, request, httpHeaders);
     }
+
     # Convert raw HTML to PDF
     #
     # + payload - A JSON object as a payload is required within the body of the request. The following attributes of the JSON object are detailed below:
     # + return - A JSON object containing the url to the PDF and other meta data
     remote isolated function wkhtmltopdfFromHtmlPost(WkHtmlToPdfHtmlToPdfRequest payload) returns ApiResponseSuccess|error {
         string resourcePath = string `/wkhtmltopdf/html`;
-        map<any> headerValues = {"Authorization": self.apiKeyConfig.authorization};
+        map<any> headerValues = {"Authorization": self.apiKeyConfig.Authorization};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         return self.clientEp->post(resourcePath, request, httpHeaders);
     }
+
     # Convert URL to PDF
     #
     # + url - Url of the page to convert to PDF. Must start with http:// or https://.
@@ -125,19 +132,21 @@ public isolated client class Client {
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         return self.clientEp->get(resourcePath);
     }
+
     # Convert URL to PDF
     #
     # + payload - A JSON object as a payload is required within the body of the request. The following attributes of the JSON object are detailed below:
     # + return - A JSON object containing the url to the PDF and other meta data
     remote isolated function wkhtmltopdfFromUrlPost(WkHtmlToPdfUrlToPdfRequest payload) returns ApiResponseSuccess|error {
         string resourcePath = string `/wkhtmltopdf/url`;
-        map<any> headerValues = {"Authorization": self.apiKeyConfig.authorization};
+        map<any> headerValues = {"Authorization": self.apiKeyConfig.Authorization};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         return self.clientEp->post(resourcePath, request, httpHeaders);
     }
+
     # Generate bar codes and QR codes with ZXING.
     #
     # + format - Most common is CODE_39 or QR_CODE

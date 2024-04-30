@@ -1,4 +1,4 @@
-public type GetActivitiesResponse200 record {
+public type getActivitiesResponse200 record {
     boolean success?;
     (ActivityResponseObject|EmployeeDetails)[] data?;
 };

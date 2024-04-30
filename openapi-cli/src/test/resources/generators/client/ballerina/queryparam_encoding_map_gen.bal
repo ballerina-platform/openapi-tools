@@ -34,6 +34,7 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+
     # <p>You can list all invoices, or list the invoices for a specific customer. The invoices are returned sorted by creation date, with the most recently created invoices appearing first.</p>
     #
     # + collection_method - The collection method of the invoice to retrieve. Either `charge_automatically` or `send_invoice`.
@@ -41,7 +42,7 @@ public isolated client class Client {
     # + due_date - A filter on the list based on the object due_date field. The value can be an integer Unix timestamp, or it can be a dictionary
     # + subscriptions - Only return invoices for the subscription specified by this subscription ID.
     # + return - Response
-    remote isolated function listInvoices("charge_automatically"|"send_invoice"? collection_method = (), Created? created = (), Due_date? due_date = (), string[]? subscriptions = ()) returns json|error {
+    remote isolated function listInvoices("charge_automatically"|"send_invoice"? collection_method = (), created? created = (), due_date? due_date = (), string[]? subscriptions = ()) returns json|error {
         string resourcePath = string `/v1/invoices`;
         map<anydata> queryParam = {"collection_method": collection_method, "created": created, "due_date": due_date, "subscriptions": subscriptions};
         map<Encoding> queryParamEncoding = {"created": {style: DEEPOBJECT, explode: true}, "due_date": {style: DEEPOBJECT, explode: true}, "subscriptions": {style: FORM, explode: true}};

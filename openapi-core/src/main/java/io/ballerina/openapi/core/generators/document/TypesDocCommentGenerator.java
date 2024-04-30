@@ -159,9 +159,7 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
 
                     } else if (field instanceof RecordFieldWithDefaultValueNode
                             recordFieldWithDefaultValueNode) {
-                        if (recordFieldWithDefaultValueNode.fieldName().text()
-                                .replace("'", "")
-                                .trim().equals(key)) {
+                        if (recordFieldWithDefaultValueNode.fieldName().text().trim().equals(key)) {
                             if (value.getDescription() != null) {
                                 Optional<MetadataNode> metadata = recordFieldWithDefaultValueNode
                                         .metadata();
