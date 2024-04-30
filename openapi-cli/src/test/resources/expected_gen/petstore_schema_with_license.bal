@@ -2,6 +2,12 @@
 
 import ballerina/http;
 
+# Represents the Queries record for the operation: listPets
+public type ListPetsQueries record {
+    # How many items to return at one time (max 100)
+    int 'limit?;
+};
+
 public type Pets Pet[];
 
 # Provides settings related to HTTP/1.x protocol.
@@ -27,9 +33,9 @@ public type ProxyConfig record {|
     string password = "";
 |};
 
-public type Dog record{
+public type Dog record {
     *Pet;
-    booleanbark?;
+    boolean bark?;
 };
 
 public type Pet record {
