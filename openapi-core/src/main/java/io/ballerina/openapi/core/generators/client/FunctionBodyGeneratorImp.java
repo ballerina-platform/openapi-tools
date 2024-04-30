@@ -110,6 +110,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PAT
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.POST;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PUT;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERIES;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERY;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERY_PARAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REQUEST;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RESOURCE_PATH;
@@ -224,7 +225,22 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             }
         }
 
-        handleQueryParamsAndHeaders(new ArrayList<>(), statementsList, queryApiKeyNameList, headerApiKeyNameList);
+        List<Parameter> queryParameters = new ArrayList<>();
+
+        if (operation.getValue().getParameters() != null) {
+            List<Parameter> parameters = operation.getValue().getParameters();
+            for (Parameter parameter : parameters) {
+                if (parameter.get$ref() != null) {
+                    String[] splits = parameter.get$ref().split("/");
+                    parameter = openAPI.getComponents().getParameters().get(splits[splits.length - 1]);
+                }
+                if (parameter.getIn().trim().equals(QUERY)) {
+                    queryParameters.add(parameter);
+                }
+            }
+        }
+
+        handleQueryParamsAndHeaders(queryParameters, statementsList, queryApiKeyNameList, headerApiKeyNameList);
     }
 
     /**
