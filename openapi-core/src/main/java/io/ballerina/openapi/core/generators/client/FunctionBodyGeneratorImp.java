@@ -136,7 +136,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
 
     private final boolean hasHeaders;
     private final boolean hasQueries;
-    private final boolean hasDefaultHeaders;
+    private boolean hasDefaultHeaders;
 
     public List<ImportDeclarationNode> getImports() {
         return imports;
@@ -247,14 +247,11 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                 getUpdatedPathHandlingQueryParamEncoding(statementsList, queryParameters);
             }
             if (hasHeaders || !headerApiKeyNameList.isEmpty()) {
-                if (hasDefaultHeaders) {
-                    statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
-                            "map<string|string[]> " + HTTP_HEADERS + " = " + HEADERS));
-                } else {
+                if (!hasDefaultHeaders) {
                     statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
                             "map<string|string[]> " + HTTP_HEADERS + " = getMapForHeaders(" + HEADERS + ")"));
+                    ballerinaUtilGenerator.setHeadersFound(true);
                 }
-                ballerinaUtilGenerator.setHeadersFound(true);
             }
         }
     }
@@ -274,6 +271,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             if (hasHeaders) {
                 defaultValue = "{..." + HEADERS + "}";
             }
+            hasDefaultHeaders = false;
 
             ExpressionStatementNode headerMapCreation = GeneratorUtils.getSimpleExpressionStatementNode(
                     "map<anydata> " + HEADER_VALUES + " = " + defaultValue);
@@ -505,22 +503,19 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
         boolean isEntityBodyMethods = method.equals(POST) || method.equals(PUT) || method.equals(PATCH)
                 || method.equals(EXECUTE);
         if (hasHeaders) {
+            String paramName = hasDefaultHeaders ? HEADERS : HTTP_HEADERS;
             if (isEntityBodyMethods) {
                 ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                         "http:Request request = new");
                 statementsList.add(requestStatementNode);
-                clientCallStatement = getClientCallWithRequestAndHeaders().formatted(method, RESOURCE_PATH,
-                        HTTP_HEADERS);
+                clientCallStatement = getClientCallWithRequestAndHeaders().formatted(method, RESOURCE_PATH, paramName);
 
             } else if (method.equals(DELETE)) {
-                clientCallStatement = getClientCallWithHeadersParam().formatted(method, RESOURCE_PATH,
-                        HTTP_HEADERS);
+                clientCallStatement = getClientCallWithHeadersParam().formatted(method, RESOURCE_PATH, paramName);
             } else if (method.equals(HEAD)) {
-                clientCallStatement = getClientCallWithHeaders().formatted(method, RESOURCE_PATH,
-                        HTTP_HEADERS);
+                clientCallStatement = getClientCallWithHeaders().formatted(method, RESOURCE_PATH, paramName);
             } else {
-                clientCallStatement = getClientCallWithHeaders().formatted(method, RESOURCE_PATH,
-                        HTTP_HEADERS);
+                clientCallStatement = getClientCallWithHeaders().formatted(method, RESOURCE_PATH, paramName);
             }
         } else if (method.equals(DELETE)) {
             clientCallStatement = getSimpleClientCall().formatted(method, RESOURCE_PATH);
@@ -649,7 +644,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
                     || method.equals(EXECUTE)) {
                 requestStatement = getClientCallWithRequestAndHeaders().formatted(method, RESOURCE_PATH,
-                        HTTP_HEADERS);
+                        hasDefaultHeaders ? HEADERS : HTTP_HEADERS);
                 generateReturnStatement(statementsList, requestStatement);
             }
         } else {
