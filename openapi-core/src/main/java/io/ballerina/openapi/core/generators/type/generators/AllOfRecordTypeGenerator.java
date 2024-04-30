@@ -163,7 +163,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                         typeRef, createToken(SEMICOLON_TOKEN));
                 // check whether given reference schema has additional fields.
                 OpenAPI openAPI = GeneratorMetaData.getInstance().getOpenAPI();
-                Schema<?> refSchema = openAPI.getComponents().getSchemas().get(modifiedSchemaName);
+                Schema<?> refSchema = openAPI.getComponents().getSchemas().get(extractedSchemaName);
                 addAdditionalSchemas(refSchema);
 
                 if (!pregeneratedTypeMap.containsKey(modifiedSchemaName)) {
