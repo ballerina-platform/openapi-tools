@@ -71,7 +71,6 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
 
     @Override
     public Optional<FunctionSignatureNode> generateFunctionSignature() {
-        // 1. parameters - path , query, requestBody, headers
         List<Parameter> parameters = operation.getParameters();
         ParametersInfo parametersInfo = getParametersInfo(parameters);
 
@@ -79,18 +78,8 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
             return Optional.empty();
         }
 
-        List<Node> defaultableParameters = parametersInfo.defaultable();
-        List<Node> parameterList = parametersInfo.parameterList();
-
-        //filter defaultable parameters
-        if (!defaultableParameters.isEmpty()) {
-            parameterList.addAll(defaultableParameters);
-        }
-        // Remove the last comma
-        if (!parameterList.isEmpty()) {
-            parameterList.remove(parameterList.size() - 1);
-        }
-        SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(parameterList);
+        List<Node> paramList = getParameterNodes(parametersInfo);
+        SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(paramList);
 
         // 3. return statements
         FunctionReturnTypeGeneratorImp functionReturnType = getFunctionReturnTypeGenerator();
@@ -99,15 +88,39 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
         if (returnType.isEmpty()) {
             return Optional.empty();
         }
+
+        //create function signature node
         return returnType.map(returnTypeDescriptorNode -> NodeFactory.createFunctionSignatureNode(
                 createToken(OPEN_PAREN_TOKEN), parameterNodes,
                 createToken(CLOSE_PAREN_TOKEN), returnTypeDescriptorNode));
-        //create function signature node
+    }
+
+    private static List<Node> getParameterNodes(ParametersInfo parametersInfo) {
+        List<Node> defaultableParams = parametersInfo.defaultableParams();
+        List<Node> params = parametersInfo.requiredParams();
+        List<Node> includedParam = parametersInfo.includedParam();
+
+        // Add defaultable parameters
+        if (!defaultableParams.isEmpty()) {
+            params.addAll(defaultableParams);
+        }
+
+        // Add included record parameter
+        if (!includedParam.isEmpty()) {
+            params.addAll(includedParam);
+        }
+
+        // Remove the last comma
+        if (!params.isEmpty()) {
+            params.remove(params.size() - 1);
+        }
+        return params;
     }
 
     protected ParametersInfo getParametersInfo(List<Parameter> parameters) {
-        List<Node> parameterList = new ArrayList<>();
-        List<Node> defaultable = new ArrayList<>();
+        List<Node> requiredParams = new ArrayList<>();
+        List<Node> defaultableParams = new ArrayList<>();
+        List<Node> includedParam = new ArrayList<>();
         Token comma = createToken(COMMA_TOKEN);
 
         List<Parameter> headerParameters = new ArrayList<>();
@@ -123,8 +136,8 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
                 return null;
             }
             headerParameters = requestBodyGenerator.getHeaderSchemas();
-            parameterList.add(requestBody.get());
-            parameterList.add(comma);
+            requiredParams.add(requestBody.get());
+            requiredParams.add(comma);
         }
 
         // 2. parameters - query, requestBody, headers
@@ -144,11 +157,11 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
             if (headers.isPresent()) {
                 hasHeadersParam = true;
                 if (headers.get() instanceof RequiredParameterNode headerNode) {
-                    parameterList.add(headerNode);
-                    parameterList.add(comma);
+                    requiredParams.add(headerNode);
+                    requiredParams.add(comma);
                 } else {
-                    defaultable.add(headers.get());
-                    defaultable.add(comma);
+                    defaultableParams.add(headers.get());
+                    defaultableParams.add(comma);
                 }
             } else if (!headerParameters.isEmpty()) {
                 diagnostics.addAll(headersParameterGenerator.getDiagnostics());
@@ -160,8 +173,8 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
             Optional<ParameterNode> queries = queriesParameterGenerator.generateParameterNode();
             if (queries.isPresent()) {
                 hasQueriesParam = true;
-                parameterList.add(queries.get());
-                parameterList.add(comma);
+                includedParam.add(queries.get());
+                includedParam.add(comma);
             } else if (!queryParameters.isEmpty()) {
                 diagnostics.addAll(queriesParameterGenerator.getDiagnostics());
                 return null;
@@ -170,12 +183,13 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
             ParameterNode defaultHeaderParam = HeadersParameterGenerator.getDefaultParameterNode().orElse(null);
             if (defaultHeaderParam != null) {
                 hasDefaultHeader = true;
-                defaultable.add(defaultHeaderParam);
-                defaultable.add(comma);
+                hasHeadersParam = true;
+                defaultableParams.add(defaultHeaderParam);
+                defaultableParams.add(comma);
             }
         }
 
-        return new ParametersInfo(parameterList, defaultable);
+        return new ParametersInfo(requiredParams, defaultableParams, includedParam);
     }
 
     private void populateHeaderAndQueryParameters(List<Parameter> parameters, List<Parameter> queryParameters,

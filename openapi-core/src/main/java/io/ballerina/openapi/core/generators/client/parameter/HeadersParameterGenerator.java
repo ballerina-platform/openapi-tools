@@ -68,8 +68,8 @@ public class HeadersParameterGenerator implements ParameterGenerator {
     public Optional<ParameterNode> generateParameterNode() {
         ObjectSchema headersSchema = getHeadersSchema();
         String operationId = GeneratorUtils.generateOperationUniqueId(operation, path, httpMethod);
-        headersSchema.setDescription("Represents the Headers record for the operation id: " + operationId);
-        String headersName = GeneratorUtils.getValidName(operationId + "Headers", true);
+        headersSchema.setDescription("Represents the Headers record for the operation: " + operationId);
+        String headersName = GeneratorUtils.getValidName(operationId, true) + "Headers";
         openAPI.getComponents().addSchemas(headersName, headersSchema);
 
         Schema headersRefSchema = new ObjectSchema().$ref(headersName);
@@ -140,7 +140,7 @@ public class HeadersParameterGenerator implements ParameterGenerator {
         Map<String, Schema> properties = parameters.stream()
                 .collect(Collectors.toMap(
                         parameter -> escapeIdentifier(parameter.getName()),
-                        parameter -> getSchemaWithDescription(parameter))
+                        parameter -> getSchemaWithDetails(parameter))
                 );
 
         List<String> requiredFields = parameters.stream()
@@ -156,9 +156,11 @@ public class HeadersParameterGenerator implements ParameterGenerator {
         return headersSchema;
     }
 
-    private Schema getSchemaWithDescription(Parameter parameter) {
+    private Schema getSchemaWithDetails(Parameter parameter) {
         Schema schema = parameter.getSchema();
         schema.setDescription(parameter.getDescription());
+        schema.setDeprecated(parameter.getDeprecated());
+        schema.extensions(parameter.getExtensions());
         if (!Boolean.TRUE.equals(parameter.getRequired())) {
             schema.setNullable(true);
         }

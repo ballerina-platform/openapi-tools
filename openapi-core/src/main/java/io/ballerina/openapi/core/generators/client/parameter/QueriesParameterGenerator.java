@@ -68,8 +68,8 @@ public class QueriesParameterGenerator implements ParameterGenerator {
 
         ObjectSchema queriesSchema = getQueriesSchema();
         String operationId = GeneratorUtils.generateOperationUniqueId(operation, path, httpMethod);
-        queriesSchema.setDescription("Represents the Queries record for the operation id: " + operationId);
-        String queriesName = GeneratorUtils.getValidName(operationId + "Queries", true);
+        queriesSchema.setDescription("Represents the Queries record for the operation: " + operationId);
+        String queriesName = GeneratorUtils.getValidName(operationId, true) + "Queries";
         openAPI.getComponents().addSchemas(queriesName, queriesSchema);
         Schema queriesRefSchema = new ObjectSchema().$ref(queriesName);
         Optional<TypeDescriptorNode> queriesType =  TypeHandler.getInstance().getTypeNodeFromOASSchema(queriesRefSchema,
@@ -87,7 +87,7 @@ public class QueriesParameterGenerator implements ParameterGenerator {
 
     private ObjectSchema getQueriesSchema() {
         Map<String, Schema> properties = parameters.stream()
-                .collect(Collectors.toMap(Parameter::getName, this::getSchemaWithDescription));
+                .collect(Collectors.toMap(Parameter::getName, this::getSchemaWithDetails));
 
         List<String> requiredFields = parameters.stream()
                 .filter(parameter -> Boolean.TRUE.equals(parameter.getRequired()))
@@ -102,9 +102,11 @@ public class QueriesParameterGenerator implements ParameterGenerator {
         return queriesSchema;
     }
 
-    private Schema getSchemaWithDescription(Parameter parameter) {
+    private Schema getSchemaWithDetails(Parameter parameter) {
         Schema schema = parameter.getSchema();
         schema.setDescription(parameter.getDescription());
+        schema.setDeprecated(parameter.getDeprecated());
+        schema.extensions(parameter.getExtensions());
         return schema;
     }
 }

@@ -95,8 +95,8 @@ public class RemoteExternalFunctionSignatureGenerator extends RemoteFunctionSign
                 createToken(GT_TOKEN));
         ParameterNode targetTypeParam = createDefaultableParameterNode(createEmptyNodeList(), targetType,
                 createIdentifierToken("targetType"), createToken(EQUAL_TOKEN), inferredToken);
-        parametersInfo.defaultable().add(targetTypeParam);
-        parametersInfo.defaultable().add(createToken(COMMA_TOKEN));
+        parametersInfo.defaultableParams().add(targetTypeParam);
+        parametersInfo.defaultableParams().add(createToken(COMMA_TOKEN));
         return parametersInfo;
     }
 }

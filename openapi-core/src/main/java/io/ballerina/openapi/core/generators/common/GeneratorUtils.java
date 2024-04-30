@@ -1000,6 +1000,9 @@ public class GeneratorUtils {
             String headerName = headerEntry.getKey();
             Header header = headerEntry.getValue();
             Schema headerTypeSchema = getValidatedHeaderSchema(header.getSchema());
+            headerTypeSchema.setDescription(header.getDescription());
+            headerTypeSchema.deprecated(header.getDeprecated());
+            headerTypeSchema.extensions(header.getExtensions());
             properties.put(headerName, headerTypeSchema);
             if (header.getRequired() != null && header.getRequired()) {
                 requiredFields.add(headerName);

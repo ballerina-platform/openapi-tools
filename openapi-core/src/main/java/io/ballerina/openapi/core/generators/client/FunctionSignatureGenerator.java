@@ -30,6 +30,6 @@ public interface FunctionSignatureGenerator {
     Optional<FunctionSignatureNode> generateFunctionSignature() throws FunctionSignatureGeneratorException;
     List<ClientDiagnostic> getDiagnostics();
 
-    record ParametersInfo(List<Node> parameterList, List<Node> defaultable) {
+    record ParametersInfo(List<Node> requiredParams, List<Node> defaultableParams, List<Node> includedParam) {
     }
 }
