@@ -182,7 +182,7 @@ public class BallerinaTestGenerator {
                 StringBuilder configFileContent = new StringBuilder("[" + API_KEY_CONFIG_PARAM + "]\n");
 
                 for (String apiKey : ballerinaClientGenerator.getApiKeyNameList()) {
-                    configFileContent.append(GeneratorUtils.getValidName(apiKey, false)).
+                    configFileContent.append(GeneratorUtils.escapeIdentifier(apiKey)).
                             append(" = \"<Enter Value>\"\n");
                 }
                 return configFileContent.toString();

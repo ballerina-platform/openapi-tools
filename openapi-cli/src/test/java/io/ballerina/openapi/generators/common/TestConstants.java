@@ -71,7 +71,7 @@ public class TestConstants {
             "public type ConnectionConfig record {|\n" +
             "   # Configurations related to client authentication\n" +
             "   http:CredentialsConfig auth;\n" + commonClientConfigurationFields;
-    
+
     public static final String HTTP_BEARER_AUTH_CONFIG_REC = "" +
             clientConfigRecordDoc +
             "public type ConnectionConfig record {|\n" +
@@ -144,7 +144,7 @@ public class TestConstants {
             "    string appid;\n" +
             "    # API key to authorize requests.\n" +
             "    @display {label: \"\", kind: \"password\"}\n" +
-            "    string apiXKey;\n" +
+            "    string API\\-X\\-Key;\n" +
             "|};";
 
     public static final String API_KEY_ASSIGNMENT = "self.apiKeyConfig = apiKeyConfig.cloneReadOnly();";
@@ -156,7 +156,7 @@ public class TestConstants {
             "    string appid;\n" +
             "    # API key to authorize POST requests.\n" +
             "    @display {label: \"\", kind: \"password\"}\n" +
-            "    string xApiKey;\n" +
+            "    string X\\-API\\-Key;\n" +
             "|};";
     public static final String MULTI_LINE_API_KEY_DESC = "# Provides API key configurations needed when " +
             "communicating with a remote HTTP endpoint.\n" +

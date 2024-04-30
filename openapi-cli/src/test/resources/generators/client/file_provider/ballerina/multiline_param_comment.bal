@@ -53,7 +53,7 @@ public isolated client class Client {
         string resourcePath = string `/fine-tunes/${getEncodedUri(fine\-tune\-id)}/events`;
         map<anydata> queryParam = {"stream": 'stream, "api-version": api\-version};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<any> headerValues = {"api-key": self.apiKeyConfig.apiKey};
+        map<any> headerValues = {"api-key": self.apiKeyConfig.api\-key};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }

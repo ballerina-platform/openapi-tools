@@ -58,6 +58,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParame
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
@@ -89,8 +90,8 @@ public class QueryParameterGenerator extends ParameterGenerator {
         //Todo: will enable when header parameter support objects
         //paramSupportedTypes.add(GeneratorConstants.OBJECT);
         if (schema != null && schema.get$ref() != null) {
-            String type = getValidName(extractReferenceType(schema.get$ref()), true);
-            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(type);
+            String refType = getValidName(extractReferenceType(schema.get$ref()), true);
+            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(refType);
             return handleReferencedQueryParameter(parameter, refSchema, parameterName);
         } else if (parameter.getContent() != null) {
             Content content = parameter.getContent();
@@ -135,8 +136,8 @@ public class QueryParameterGenerator extends ParameterGenerator {
             throws InvalidReferenceException {
         Schema<?> parameterSchema;
         if (mediaTypeEntry.getValue().getSchema() != null && mediaTypeEntry.getValue().getSchema().get$ref() != null) {
-            String type = getValidName(extractReferenceType(mediaTypeEntry.getValue()
-                    .getSchema().get$ref()), true);
+            String type = escapeIdentifier(extractReferenceType(mediaTypeEntry.getValue()
+                    .getSchema().get$ref()));
             parameterSchema = (Schema<?>) openAPI.getComponents().getSchemas().get(type.trim());
         } else {
             parameterSchema = mediaTypeEntry.getValue().getSchema();

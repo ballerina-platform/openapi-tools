@@ -349,7 +349,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                         createSimpleNameReferenceNode(createIdentifierToken(API_KEY_CONFIG_PARAM +
                                 QUESTION_MARK_TOKEN.stringValue())));
                 SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(createIdentifierToken(
-                        getValidName(getValidName(apiKey, false), false)));
+                        escapeIdentifier(apiKey)));
                 ExpressionNode apiKeyExpr = createFieldAccessExpressionNode(
                         fieldExpr, createToken(DOT_TOKEN), valueExpr);
                 statementNodeList.add(createAssignmentStatementNode(fieldName, equal, apiKeyExpr, createToken(
@@ -742,7 +742,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                         createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
                         apiKeyConfigParamNode);
                 SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(createIdentifierToken(
-                        getValidName(apiKey, false)));
+                        escapeIdentifier(apiKey)));
                 SpecificFieldNode specificFieldNode;
                 ExpressionNode apiKeyExpr = createFieldAccessExpressionNode(
                         fieldExpr, createToken(DOT_TOKEN), valueExpr);
