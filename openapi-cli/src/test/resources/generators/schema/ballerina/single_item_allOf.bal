@@ -1,5 +1,3 @@
-public type Description anydata;
-
 public type User record {
     int id?;
     string username?;
@@ -14,6 +12,8 @@ public type Address record {
     string city?;
 };
 
-public type Id Name;
+public type description anydata;
+
+public type id Name;
 
 public type Name string;

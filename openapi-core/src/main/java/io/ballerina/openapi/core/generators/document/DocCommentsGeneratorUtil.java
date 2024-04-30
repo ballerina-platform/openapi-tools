@@ -69,7 +69,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.MARKDOWN_DOCUMENTATIO
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.X_BALLERINA_DEPRECATED_REASON;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 
 /**
  * This class util for maintain the API doc comment related functions.
@@ -222,8 +222,8 @@ public class DocCommentsGeneratorUtil {
             }
         }
         MarkdownParameterDocumentationLineNode paramAPIDoc =
-                DocCommentsGeneratorUtil.createAPIParamDoc(getValidName(
-                        parameter.getName(), false), deprecatedDescription);
+                DocCommentsGeneratorUtil.createAPIParamDoc(escapeIdentifier(
+                        parameter.getName()), deprecatedDescription);
         deprecatedParamDocComments.add(paramAPIDoc);
         paramAnnot.add(createAnnotationNode(createToken(AT_TOKEN),
                 createSimpleNameReferenceNode(createIdentifierToken("deprecated")), null));

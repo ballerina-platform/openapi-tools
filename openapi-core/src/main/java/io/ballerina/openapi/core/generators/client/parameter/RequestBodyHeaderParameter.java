@@ -66,6 +66,7 @@ public class RequestBodyHeaderParameter implements ParameterGenerator {
             required = false;
             schema.setNullable(true);
         }
+
         Optional<TypeDescriptorNode> typeNodeResult = TypeHandler.getInstance()
                 .getTypeNodeFromOASSchema(schema, true);
         if (typeNodeResult.isEmpty()) {

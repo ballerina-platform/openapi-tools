@@ -36,16 +36,18 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+
     # Request Body has nested allOf.
     #
     # + return - OK
-    remote isolated function postXMLUser(Path01_body_1 payload) returns error? {
+    remote isolated function postXMLUser(path01_body_1 payload) returns error? {
         string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
         return self.clientEp->post(resourcePath, request);
     }
+
     # Request Body has Array type AllOf.
     #
     # + return - OK
@@ -57,10 +59,11 @@ public isolated client class Client {
         request.setPayload(xmlBody, "application/xml");
         return self.clientEp->post(resourcePath, request);
     }
+
     # Request Body has allOf with specific properties.
     #
     # + return - OK
-    remote isolated function updateXMLUser(Path01_body payload) returns error? {
+    remote isolated function updateXMLUser(path01_body payload) returns error? {
         string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = payload.toJson();

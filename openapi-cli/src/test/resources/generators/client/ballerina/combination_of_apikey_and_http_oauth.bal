@@ -41,6 +41,7 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+
     # Delete a pet
     #
     # + petId - The id of the pet to delete
@@ -50,13 +51,14 @@ public isolated client class Client {
         map<any> headerValues = {};
         map<anydata> queryParam = {"petId": petId};
         if self.apiKeyConfig is ApiKeysConfig {
-            headerValues["api-key"] = self.apiKeyConfig?.apiKey;
-            queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
+            headerValues["api-key"] = self.apiKeyConfig?.api\-key;
+            queryParam["api-key-2"] = self.apiKeyConfig?.api\-key\-2;
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         return self.clientEp->delete(resourcePath, headers = httpHeaders);
     }
+
     # Delete a pet 2
     #
     # + petId - The id of the pet to delete
@@ -66,13 +68,14 @@ public isolated client class Client {
         map<any> headerValues = {"petId": petId};
         map<anydata> queryParam = {};
         if self.apiKeyConfig is ApiKeysConfig {
-            headerValues["api-key"] = self.apiKeyConfig?.apiKey;
-            queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
+            headerValues["api-key"] = self.apiKeyConfig?.api\-key;
+            queryParam["api-key-2"] = self.apiKeyConfig?.api\-key\-2;
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         return self.clientEp->delete(resourcePath, headers = httpHeaders);
     }
+
     # Info for a specific pet
     #
     # + petId - The id of the pet to retrieve
@@ -83,13 +86,14 @@ public isolated client class Client {
         map<any> headerValues = {"headerX": headerX};
         map<anydata> queryParam = {"petId": petId};
         if self.apiKeyConfig is ApiKeysConfig {
-            headerValues["api-key"] = self.apiKeyConfig?.apiKey;
-            queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
+            headerValues["api-key"] = self.apiKeyConfig?.api\-key;
+            queryParam["api-key-2"] = self.apiKeyConfig?.api\-key\-2;
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
+
     # Vote for a pet
     #
     # + return - Expected response to a valid request
@@ -98,8 +102,8 @@ public isolated client class Client {
         map<any> headerValues = {};
         map<anydata> queryParam = {};
         if self.apiKeyConfig is ApiKeysConfig {
-            headerValues["api-key"] = self.apiKeyConfig?.apiKey;
-            queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
+            headerValues["api-key"] = self.apiKeyConfig?.api\-key;
+            queryParam["api-key-2"] = self.apiKeyConfig?.api\-key\-2;
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);

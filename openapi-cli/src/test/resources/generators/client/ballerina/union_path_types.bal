@@ -10,7 +10,7 @@ public type ClientHttp1Settings record {|
     ProxyConfig proxy?;
 |};
 
-public type Id int|string;
+public type id int|string;
 
 # Proxy server configurations to be used with the HTTP client endpoint.
 public type ProxyConfig record {|
@@ -24,6 +24,8 @@ public type ProxyConfig record {|
     @display {label: "", kind: "password"}
     string password = "";
 |};
+
+public type id_1 int|string;
 
 # Provides a set of configurations for controlling the behaviours when communicating with a remote HTTP endpoint.
 @display {label: "Connection Config"}
@@ -57,5 +59,3 @@ public type ConnectionConfig record {|
     # Enables the inbound payload validation functionality which provided by the constraint package. Enabled by default
     boolean validation = true;
 |};
-
-public type Id_1 int|string;

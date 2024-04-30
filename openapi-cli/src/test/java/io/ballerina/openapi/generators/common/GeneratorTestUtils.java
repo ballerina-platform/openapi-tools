@@ -26,7 +26,6 @@ import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.type.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -36,10 +35,8 @@ import io.ballerina.projects.ProjectException;
 import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.tools.diagnostics.Diagnostic;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.SpecVersion;
-import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
@@ -51,11 +48,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -84,9 +79,6 @@ public class GeneratorTestUtils {
         List<TypeDefinitionNode> preGeneratedTypeDefinitionNodes = new LinkedList<>();
         preGeneratedTypeDefinitionNodes.addAll(ballerinaClientGenerator.
                 getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
-//        preGeneratedTypeDefinitionNodes.addAll(ballerinaClientGenerator.getTypeDefinitionNodeList());
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
-                openAPI, false);
         TypeHandler.createInstance(openAPI, false);
         SyntaxTree schemaSyntax = TypeHandler.getInstance().generateTypeSyntaxTree();
         SyntaxTree utilSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
@@ -250,20 +242,6 @@ public class GeneratorTestUtils {
             GeneratorUtils.validateOperationIds(openAPIPaths.entrySet());
         }
         GeneratorUtils.validateRequestBody(openAPIPaths.entrySet());
-
-        if (openAPI.getComponents() != null) {
-            // Refactor schema name with valid name
-            Components components = openAPI.getComponents();
-            Map<String, Schema> componentsSchemas = components.getSchemas();
-            if (componentsSchemas != null) {
-                Map<String, Schema> refacSchema = new HashMap<>();
-                for (Map.Entry<String, Schema> schemaEntry : componentsSchemas.entrySet()) {
-                    String name = GeneratorUtils.getValidName(schemaEntry.getKey(), true);
-                    refacSchema.put(name, schemaEntry.getValue());
-                }
-                openAPI.getComponents().setSchemas(refacSchema);
-            }
-        }
         return openAPI;
     }
 }

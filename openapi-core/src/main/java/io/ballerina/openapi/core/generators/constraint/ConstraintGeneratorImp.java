@@ -43,6 +43,7 @@ import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,7 +68,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.INT
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getOpenAPIType;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isArraySchema;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.isComposedSchema;
 
@@ -80,7 +80,6 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
     HashMap<String, TypeDefinitionNode> typeDefinitions;
     boolean isConstraint = false;
     List<Diagnostic> diagnostics = new ArrayList<>();
-//    public static final PrintStream OUT_STREAM = System.err;
 
     public ConstraintGeneratorImp(OpenAPI openAPI, HashMap<String, TypeDefinitionNode> typeDefinitions) {
         this.openAPI = openAPI;
@@ -98,7 +97,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
         }
         openAPI.getComponents().getSchemas().forEach((key, value) -> {
             if (typeDefinitions.containsKey(key) && GeneratorUtils.hasConstraints(value)) {
-                key = GeneratorUtils.getValidName(key, true);
+                key = GeneratorUtils.escapeIdentifier(key);
                 if (typeDefinitions.containsKey(key)) {
                     TypeDefinitionNode typeDefinitionNode = typeDefinitions.get(key);
                     //modify the typeDefinitionNode with constraints
@@ -186,7 +185,7 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
                             //This is special scenario for array schema,
                             //when the items has constraints then we define separate type for it.
                             if (fieldSchema instanceof ArraySchema arraySchema) {
-                                updateConstraintWithArrayItems(key, fieldName, arraySchema);
+                                updateConstraintWithArrayItems(StringUtils.capitalize(key), fieldName, arraySchema);
                             }
                             //todo handle the composed schema
                         }
@@ -272,10 +271,9 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
     private void updateConstraintWithArrayItems(String key, String fieldName, ArraySchema arraySchema) {
         Schema<?> itemSchema = arraySchema.getItems();
         if (hasConstraints(itemSchema)) {
-            String normalizedTypeName = fieldName.replaceAll(GeneratorConstants.SPECIAL_CHARACTER_REGEX,
-                    "").trim();
-            String itemTypeName = getValidName(key + "-" + normalizedTypeName + "-items-" +
-                    itemSchema.getType(), true);
+            String normalizedTypeName = StringUtils.capitalize(fieldName.replaceAll(
+                    GeneratorConstants.SPECIAL_CHARACTER_REGEX, "").trim());
+            String itemTypeName = key  + normalizedTypeName + "Items" + StringUtils.capitalize(itemSchema.getType());
             if (typeDefinitions.containsKey(itemTypeName)) {
                 TypeDefinitionNode itemTypeDefNode = typeDefinitions.get(itemTypeName);
                 if (hasConstraints(itemSchema)) {

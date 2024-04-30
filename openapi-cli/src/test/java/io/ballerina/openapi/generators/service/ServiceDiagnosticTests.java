@@ -150,8 +150,8 @@ public class ServiceDiagnosticTests {
                 {"ballerinax_connector_tests/files.com.yaml"},
                 {"ballerinax_connector_tests/openweathermap.yaml"},
                 {"ballerinax_connector_tests/soundcloud.yaml"},
-                {"ballerinax_connector_tests/stripe.yaml"},
-                {"ballerinax_connector_tests/vimeo.yaml"},
+                {"ballerinax_connector_tests/stripe.yaml"}, // this yaml was modified to schema names with camel case
+                {"ballerinax_connector_tests/vimeo.yaml"}, // modified to yaml for error schema into Error
                 // todo : 209 status code is not supported in
                 //  Ballerina. Generate `http:Response` at the moment.
                 {"ballerinax_connector_tests/ynab.yaml"},

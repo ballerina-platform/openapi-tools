@@ -124,8 +124,9 @@ public class FunctionBodyNodeTests {
                 {"client/swagger/multipart_formdata_custom.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "http:Request request = new;\n" +
                         "map<Encoding> encodingMap = {\"profileImage\": {contentType: \"image/png\", headers: " +
-                        "{\"X-Custom-Header\": xCustomHeader}}, \"id\":{headers: {\"X-Custom-Header\": " +
-                        "xCustomHeader}}, \"address\": {headers:{\"X-Address-Header\":xAddressHeader}}, \"name\":" +
+                        "{\"X-Custom-Header\": X\\-Custom\\-Header}}, \"id\":{headers: {\"X-Custom-Header\": " +
+                        "X\\-Custom\\-Header}}, \"address\": {headers:{\"X-Address-Header\":X\\-Address\\-Header}}, " +
+                        "\"name\":" +
                         "{contentType:\"text/plain\"}};\n" +
                         "mime:Entity[] bodyParts = check createBodyParts(payload, encodingMap);\n" +
                         "request.setBodyParts(bodyParts);\n" +
