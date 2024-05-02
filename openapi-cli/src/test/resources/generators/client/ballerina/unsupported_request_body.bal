@@ -39,11 +39,12 @@ public isolated client class Client {
     # <p>Creates a new customer object.</p>
     #
     # + customer - Customer ID
+    # + headers - Headers to be sent with the request
     # + request - Customer Details
     # + return - Successful response.
-    remote isolated function postCustomers(string customer, http:Request request) returns customer|error {
+    remote isolated function postCustomers(string customer, http:Request request, map<string|string[]> headers = {}) returns customer|error {
         string resourcePath = string `/v1/customer/${getEncodedUri(customer)}`;
         // TODO: Update the request as needed;
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 }

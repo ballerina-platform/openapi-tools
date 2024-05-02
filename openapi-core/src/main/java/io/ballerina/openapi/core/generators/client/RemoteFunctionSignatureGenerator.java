@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.core.generators.client;
 
-import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
@@ -29,9 +28,9 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
-import io.ballerina.openapi.core.generators.client.parameter.HeaderParameterGenerator;
+import io.ballerina.openapi.core.generators.client.parameter.HeadersParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.PathParameterGenerator;
-import io.ballerina.openapi.core.generators.client.parameter.QueryParameterGenerator;
+import io.ballerina.openapi.core.generators.client.parameter.QueriesParameterGenerator;
 import io.ballerina.openapi.core.generators.client.parameter.RequestBodyGenerator;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -54,12 +53,20 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
     OpenAPI openAPI;
     Operation operation;
     List<ClientDiagnostic> diagnostics  = new ArrayList<>();
-    boolean treatDefaultableAsRequired = false;
     FunctionReturnTypeGeneratorImp functionReturnTypeGenerator;
+    private final String httpMethod;
+    private final String path;
 
-    public RemoteFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod) {
+    private boolean hasDefaultHeader = false;
+    private boolean hasHeadersParam = false;
+    private boolean hasQueriesParam = false;
+
+    public RemoteFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod,
+                                            String path) {
         this.operation = operation;
         this.openAPI = openAPI;
+        this.httpMethod = httpMethod;
+        this.path = path;
         this.functionReturnTypeGenerator = new FunctionReturnTypeGeneratorImp(operation, openAPI, httpMethod);
     }
 
@@ -72,18 +79,8 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
             return Optional.empty();
         }
 
-        List<Node> defaultable = parametersInfo.defaultable();
-        List<Node> parameterList = parametersInfo.parameterList();
-
-        // filter defaultable parameters
-        if (!defaultable.isEmpty()) {
-            parameterList.addAll(defaultable);
-        }
-        // Remove the last comma
-        if (!parameterList.isEmpty()) {
-            parameterList.remove(parameterList.size() - 1);
-        }
-        SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(parameterList);
+        List<Node> paramList = getParameterNodes(parametersInfo);
+        SeparatedNodeList<ParameterNode> parameterNodes = createSeparatedNodeList(paramList);
 
         // 3. return statements
         FunctionReturnTypeGeneratorImp returnTypeGenerator = getFunctionReturnTypeGenerator();
@@ -98,114 +95,156 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                 createToken(CLOSE_PAREN_TOKEN), returnTypeDescriptorNode));
     }
 
+    private static List<Node> getParameterNodes(ParametersInfo parametersInfo) {
+        List<Node> defaultableParams = parametersInfo.defaultableParams();
+        List<Node> params = parametersInfo.requiredParams();
+        List<Node> includedParam = parametersInfo.includedParam();
+
+        // Add defaultableParams parameters
+        if (!defaultableParams.isEmpty()) {
+            params.addAll(defaultableParams);
+        }
+
+        // Add included record parameter
+        if (!includedParam.isEmpty()) {
+            params.addAll(includedParam);
+        }
+
+        // Remove the last comma
+        if (!params.isEmpty()) {
+            params.remove(params.size() - 1);
+        }
+        return params;
+    }
+
     protected ParametersInfo getParametersInfo(List<Parameter> parameters) {
-        List<String> paramName = new ArrayList<>();
-        // 1. parameters - path , query, requestBody, headers
-        List<Node> parameterList = new ArrayList<>();
-        List<Node> defaultable = new ArrayList<>();
+        List<Node> requiredParams = new ArrayList<>();
+        List<Node> defaultableParams = new ArrayList<>();
+        List<Node> includedParam = new ArrayList<>();
         Token comma = createToken(COMMA_TOKEN);
+
+        List<Parameter> headerParameters = new ArrayList<>();
+        List<Parameter> queryParameters = new ArrayList<>();
+
+        // 1. path parameters
         if (parameters != null) {
             for (Parameter parameter : parameters) {
-                if (parameter.get$ref() != null) {
-                    String paramType = null;
-                    try {
-                        paramType = extractReferenceType(parameter.get$ref());
-                    } catch (BallerinaOpenApiException e) {
-                        ClientDiagnosticImp clientDiagnostic = new ClientDiagnosticImp(OAS_CLIENT_100,
-                                parameter.get$ref());
-                        diagnostics.add(clientDiagnostic);
+                if (parameter.getIn().equals("path")) {
+                    PathParameterGenerator paramGenerator = new PathParameterGenerator(parameter, openAPI);
+                    Optional<ParameterNode> param = paramGenerator.generateParameterNode();
+                    if (param.isEmpty()) {
+                        diagnostics.addAll(paramGenerator.getDiagnostics());
+                        return null;
                     }
-                    parameter = openAPI.getComponents().getParameters().get(paramType);
-                }
-
-                String in = parameter.getIn();
-
-                switch (in) {
-                    case "path":
-                        PathParameterGenerator paramGenerator = new PathParameterGenerator(parameter, openAPI);
-                        Optional<ParameterNode> param = paramGenerator.generateParameterNode(
-                                treatDefaultableAsRequired);
-                        if (param.isEmpty()) {
-                            diagnostics.addAll(paramGenerator.getDiagnostics());
-                            return null;
-                        }
-                        // Path parameters are always required.
-                        parameterList.add(param.get());
-                        parameterList.add(comma);
-                        paramName.add(param.get().toString());
-                        break;
-                    case "query":
-                        QueryParameterGenerator queryParameterGenerator = new QueryParameterGenerator(parameter,
-                                openAPI);
-                        Optional<ParameterNode> queryParam = queryParameterGenerator.generateParameterNode(
-                                treatDefaultableAsRequired);
-                        if (queryParam.isEmpty()) {
-                            diagnostics.addAll(queryParameterGenerator.getDiagnostics());
-                            return null;
-                        }
-
-                        paramName.add(queryParam.get().toString());
-                        if (queryParam.get() instanceof RequiredParameterNode requiredParameterNode) {
-                            parameterList.add(requiredParameterNode);
-                            parameterList.add(comma);
-                        } else {
-                            defaultable.add(queryParam.get());
-                            defaultable.add(comma);
-                        }
-                        break;
-                    case "header":
-                        HeaderParameterGenerator headerParameterGenerator = new HeaderParameterGenerator(parameter,
-                                openAPI);
-                        Optional<ParameterNode> headerParam = headerParameterGenerator.generateParameterNode(
-                                treatDefaultableAsRequired);
-                        if (headerParam.isEmpty()) {
-                            diagnostics.addAll(headerParameterGenerator.getDiagnostics());
-                            return null;
-                        }
-                        paramName.add(headerParam.get().toString());
-
-                        if (headerParam.get() instanceof RequiredParameterNode headerNode) {
-                            parameterList.add(headerNode);
-                            parameterList.add(comma);
-                        } else {
-                            defaultable.add(headerParam.get());
-                            defaultable.add(comma);
-                        }
-                        break;
-                    default:
-                        break;
+                    // Path parameters are always required.
+                    requiredParams.add(param.get());
+                    requiredParams.add(comma);
                 }
             }
         }
-        // 2. requestBody
+
+        // 1. requestBody
         if (operation.getRequestBody() != null) {
-            RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(operation.getRequestBody(), openAPI);
-            Optional<ParameterNode> requestBody = requestBodyGenerator.generateParameterNode(
-                    treatDefaultableAsRequired);
+            RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(operation.getRequestBody(),
+                    openAPI);
+            Optional<ParameterNode> requestBody = requestBodyGenerator.generateParameterNode();
             if (requestBody.isEmpty()) {
                 diagnostics.addAll(requestBodyGenerator.getDiagnostics());
                 return null;
             }
-            List<ParameterNode> rBheaderParameters = requestBodyGenerator.getHeaderParameters();
-            parameterList.add(requestBody.get());
-            parameterList.add(comma);
-            if (!rBheaderParameters.isEmpty()) {
-                rBheaderParameters.forEach(header -> {
-                    if (!paramName.contains(header.toString())) {
-                        paramName.add(header.toString());
-                        if (header instanceof DefaultableParameterNode defaultableParameterNode) {
-                            defaultable.add(defaultableParameterNode);
-                            defaultable.add(comma);
-                        } else {
-                            parameterList.add(header);
-                            parameterList.add(comma);
-                        }
-                    }
-                });
+            headerParameters = requestBodyGenerator.getHeaderSchemas();
+            requiredParams.add(requestBody.get());
+            requiredParams.add(comma);
+        }
+
+        // 2. parameters -  query, headers
+        if (parameters != null) {
+            populateQueryAndHeaderParameters(parameters, queryParameters, headerParameters);
+
+            HeadersParameterGenerator headersParameterGenerator = new HeadersParameterGenerator(headerParameters,
+                    openAPI, operation, httpMethod, path);
+            Optional<ParameterNode> headers;
+            if (headerParameters.isEmpty()) {
+                hasDefaultHeader = true;
+                headers = HeadersParameterGenerator.getDefaultParameterNode();
+            } else {
+                headers = headersParameterGenerator.generateParameterNode();
+            }
+
+            diagnostics.addAll(headersParameterGenerator.getDiagnostics());
+            if (headersParameterGenerator.hasErrors()) {
+                return null;
+            }
+
+            if (headers.isPresent()) {
+                hasHeadersParam = true;
+                if (headers.get() instanceof RequiredParameterNode headerNode) {
+                    requiredParams.add(headerNode);
+                    requiredParams.add(comma);
+                } else {
+                    defaultableParams.add(headers.get());
+                    defaultableParams.add(comma);
+                }
+            } else if (!headerParameters.isEmpty()) {
+                return null;
+            }
+
+            QueriesParameterGenerator queriesParameterGenerator = new QueriesParameterGenerator(queryParameters,
+                    openAPI, operation, httpMethod, path);
+            Optional<ParameterNode> queries = queriesParameterGenerator.generateParameterNode();
+            diagnostics.addAll(queriesParameterGenerator.getDiagnostics());
+            if (queriesParameterGenerator.hasErrors()) {
+                return null;
+            }
+
+            if (queries.isPresent()) {
+                hasQueriesParam = true;
+                includedParam.add(queries.get());
+                includedParam.add(comma);
+            } else if (!queryParameters.isEmpty()) {
+                return null;
+            }
+        } else {
+            ParameterNode defaultHeaderParam = HeadersParameterGenerator.getDefaultParameterNode().orElse(null);
+            if (defaultHeaderParam != null) {
+                hasDefaultHeader = true;
+                hasHeadersParam = true;
+                defaultableParams.add(defaultHeaderParam);
+                defaultableParams.add(comma);
             }
         }
-        return new ParametersInfo(parameterList, defaultable);
+        return new ParametersInfo(requiredParams, defaultableParams, includedParam);
     }
+
+    private void populateQueryAndHeaderParameters(List<Parameter> parameters, List<Parameter> queryParameters,
+                                                  List<Parameter> headerParameters) {
+    for (Parameter parameter : parameters) {
+        if (parameter.get$ref() != null) {
+            String paramType = null;
+            try {
+                paramType = extractReferenceType(parameter.get$ref());
+            } catch (BallerinaOpenApiException e) {
+                ClientDiagnosticImp clientDiagnostic = new ClientDiagnosticImp(OAS_CLIENT_100,
+                        parameter.get$ref());
+                diagnostics.add(clientDiagnostic);
+            }
+            parameter = openAPI.getComponents().getParameters().get(paramType);
+        }
+
+        String in = parameter.getIn();
+
+        switch (in) {
+            case "query":
+                queryParameters.add(parameter);
+                break;
+            case "header":
+                headerParameters.add(parameter);
+                break;
+            default:
+                break;
+        }
+    }
+}
 
     protected FunctionReturnTypeGeneratorImp getFunctionReturnTypeGenerator() {
         return functionReturnTypeGenerator;
@@ -213,5 +252,17 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
 
     public List<ClientDiagnostic> getDiagnostics() {
         return diagnostics;
+    }
+
+    public boolean hasDefaultHeaders() {
+        return hasDefaultHeader;
+    }
+
+    public boolean hasHeaders() {
+        return hasHeadersParam;
+    }
+
+    public boolean hasQueries() {
+        return hasQueriesParam;
     }
 }

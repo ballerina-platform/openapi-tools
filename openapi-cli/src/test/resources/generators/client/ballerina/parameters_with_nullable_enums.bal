@@ -47,19 +47,14 @@ public isolated client class Client {
 
     # List meetings
     #
-    # + 'type - The meeting types. Scheduled, live or upcoming
-    # + status - Status values that need to be considered for filter
-    # + X\-Date\-Format - Date time format (cf. [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) & [leettime.de](http://leettime.de/))
-    # + location - Meeting location
-    # + format - The response format you would like
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - HTTP Status Code:200. List of meetings returned.
-    remote isolated function listMeetings("scheduled"|"live"|"upcoming"? 'type = (), ("available"|"pending"?)[]? status = (), "UTC"|"LOCAL"|"OFFSET"|"EPOCH"|"LEET"? X\-Date\-Format = (), RoomNo location = "R5", "json"|"jsonp"|"msgpack"|"html"? format = ()) returns MeetingList|error {
+    remote isolated function listMeetings(ListMeetingsHeaders headers = {}, *ListMeetingsQueries queries) returns MeetingList|error {
         string resourcePath = string `/users/meetings`;
-        map<anydata> queryParam = {"type": 'type, "status": status, "location": location, "format": format};
         map<Encoding> queryParamEncoding = {"status": {style: FORM, explode: true}};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam, queryParamEncoding);
-        map<any> headerValues = {"X-Date-Format": X\-Date\-Format};
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        resourcePath = resourcePath + check getPathForQueryParam(queries, queryParamEncoding);
+        map<string|string[]> httpHeaders = getMapForHeaders(headers);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

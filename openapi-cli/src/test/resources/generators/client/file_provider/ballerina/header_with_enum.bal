@@ -38,11 +38,11 @@ public isolated client class Client {
 
     # Returns pet inventories by status
     #
+    # + headers - Headers to be sent with the request
     # + return - successful operation
-    remote isolated function getInventory(("X"|"Y"|"Z")[]? X\-CLIENT = ()) returns record {|int:Signed32...;|}|error {
+    remote isolated function getInventory(GetInventoryHeaders headers = {}) returns record {|int:Signed32...;|}|error {
         string resourcePath = string `/store/inventory`;
-        map<any> headerValues = {"X-CLIENT": X\-CLIENT};
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = getMapForHeaders(headers);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

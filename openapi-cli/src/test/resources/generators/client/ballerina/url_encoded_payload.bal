@@ -39,22 +39,24 @@ public isolated client class Client {
     # <p>Retrieves a PaymentMethod object.</p>
     #
     # + payment_method - Payment Method
+    # + headers - Headers to be sent with the request
     # + return - Successful response.
-    remote isolated function getPaymentMethodsPaymentMethod(string payment_method) returns json|error {
+    remote isolated function getPaymentMethodsPaymentMethod(string payment_method, map<string|string[]> headers = {}) returns json|error {
         string resourcePath = string `/v1/payment_methods/${getEncodedUri(payment_method)}`;
-        return self.clientEp->get(resourcePath);
+        return self.clientEp->get(resourcePath, headers);
     }
 
     # <p>Creates a new customer object.</p>
     #
     # + customer - Customer ID
+    # + headers - Headers to be sent with the request
     # + payload - Customer Details
     # + return - Successful response.
-    remote isolated function postCustomers(string customer, customer_customer_body payload) returns Customer|error {
+    remote isolated function postCustomers(string customer, customer_customer_body payload, map<string|string[]> headers = {}) returns Customer|error {
         string resourcePath = string `/v1/customer/${getEncodedUri(customer)}`;
         http:Request request = new;
         string encodedRequestBody = createFormURLEncodedRequestBody(payload);
         request.setPayload(encodedRequestBody, "application/x-www-form-urlencoded");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 }

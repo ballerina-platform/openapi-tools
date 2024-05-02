@@ -24,6 +24,7 @@ import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.IncludedRecordParameterNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
@@ -38,6 +39,8 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
+import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -54,6 +57,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
@@ -61,6 +65,8 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSepara
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADERS;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERIES;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getBallerinaMediaType;
@@ -204,10 +210,12 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                 SeparatedNodeList<ParameterNode> parameters = functionSignatureNode.parameters();
                 List<Node> updatedParamsRequired = new ArrayList<>();
                 List<Node> updatedParamsDefault = new ArrayList<>();
+                List<Node> updatedIncludedParam = new ArrayList<>();
 
                 HashMap<String, ParameterNode> collection = getParameterNodeHashMap(parameters);
                 //todo parameter reference
-                updateParameterNodes(docs, operation, updatedParamsRequired, updatedParamsDefault, collection);
+                updateParameterNodes(docs, operation, updatedParamsRequired, updatedParamsDefault,
+                        collection);
                 if (collection.size() > 0) {
                     collection.forEach((keyParam, value) -> {
                         if (value instanceof RequiredParameterNode reParam) {
@@ -216,10 +224,14 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                         } else if (value instanceof DefaultableParameterNode deParam) {
                             updatedParamsDefault.add(deParam);
                             updatedParamsDefault.add(createToken(SyntaxKind.COMMA_TOKEN));
+                        } else if (value instanceof IncludedRecordParameterNode incParam) {
+                            updatedIncludedParam.add(incParam);
+                            updatedIncludedParam.add(createToken(SyntaxKind.COMMA_TOKEN));
                         }
                     });
                 }
                 updatedParamsRequired.addAll(updatedParamsDefault);
+                updatedParamsRequired.addAll(updatedIncludedParam);
                 if (!updatedParamsRequired.isEmpty()) {
                     if (updatedParamsRequired.get(updatedParamsRequired.size() - 1) instanceof Token) {
                         updatedParamsRequired.remove(updatedParamsRequired.size() - 1);
@@ -231,6 +243,8 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                             functionSignatureNode.returnTypeDesc().orElse(null));
 
                 }
+            } else {
+                docs.add(createAPIParamDoc(HEADERS, "Headers to be sent with the request"));
             }
             RequestBody requestBody = operation.getRequestBody();
             if (requestBody != null) {
@@ -305,35 +319,51 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
     }
 
     private static void updateParameterNodes(List<Node> docs, Operation operation, List<Node> updatedParamsRequired,
-                                             List<Node> updatedParamsDefault, HashMap<String,
-            ParameterNode> collection) {
+                                             List<Node> updatedParamsDefault,
+                                             HashMap<String, ParameterNode> collection) {
         List<Node> deprecatedParamDocComments = new ArrayList<>();
+        boolean hasQueryParams = operation.getParameters().stream().anyMatch(
+                parameter -> parameter.getIn().equals("query"));
         operation.getParameters().forEach(parameter -> {
+            if (parameter.get$ref() != null) {
+                try {
+                    parameter = GeneratorMetaData.getInstance().getOpenAPI().getComponents()
+                            .getParameters().get(extractReferenceType(parameter.get$ref()));
+                } catch (InvalidReferenceException e) {
+                    return;
+                }
+            }
+
+            if (Objects.isNull(parameter.getIn()) || !parameter.getIn().equals("path")) {
+                return;
+            }
+
             List<AnnotationNode> paramAnnot = new ArrayList<>();
             String parameterDescription;
-            String parameterName = parameter.getName();
+            String parameterName = escapeIdentifier(parameter.getName());
 
-            if (parameter.getIn().equals("path") || parameter.getIn().equals("header") ||
-                    (parameter.getIn().equals("query"))) {
-                parameterName = escapeIdentifier(parameter.getName());
-                // add deprecated annotation
-                if (parameter.getDeprecated() != null && parameter.getDeprecated()) {
-                    extractDeprecatedAnnotationDetails(deprecatedParamDocComments, parameter, paramAnnot);
-                }
-                if (parameter.getExtensions() != null) {
-                    extractDisplayAnnotation(parameter.getExtensions(), paramAnnot);
-
-                }
-                ParameterNode parameterNode = collection.get(parameterName);
-                updatedAnnotationInParameterNode(updatedParamsRequired, updatedParamsDefault,
-                        paramAnnot, parameterNode);
-                collection.remove(parameterName);
+            // add deprecated annotation
+            if (parameter.getDeprecated() != null && parameter.getDeprecated()) {
+                extractDeprecatedAnnotationDetails(deprecatedParamDocComments, parameter, paramAnnot);
             }
+            if (parameter.getExtensions() != null) {
+                extractDisplayAnnotation(parameter.getExtensions(), paramAnnot);
+
+            }
+            ParameterNode parameterNode = collection.get(parameterName);
+            updatedAnnotationInParameterNode(updatedParamsRequired, updatedParamsDefault,
+                    paramAnnot, parameterNode);
+            collection.remove(parameterName);
+
             if (parameter.getDescription() != null) {
                 parameterDescription = parameter.getDescription();
                 docs.add(createAPIParamDocFromString(parameterName, parameterDescription));
             }
         });
+        docs.add(createAPIParamDoc(HEADERS, "Headers to be sent with the request"));
+        if (hasQueryParams) {
+            docs.add(createAPIParamDoc(QUERIES, "Queries to be sent with the request"));
+        }
         docs.addAll(deprecatedParamDocComments);
     }
 
@@ -345,6 +375,8 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                 collection.put(reParam.paramName().get().toString(), reParam);
             } else if (node instanceof DefaultableParameterNode deParam) {
                 collection.put(deParam.paramName().get().toString(), deParam);
+            } else if (node instanceof IncludedRecordParameterNode incParam) {
+                collection.put(incParam.paramName().get().toString(), incParam);
             }
         }
         return collection;

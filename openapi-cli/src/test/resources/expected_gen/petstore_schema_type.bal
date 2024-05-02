@@ -3,6 +3,12 @@
 
 import ballerina/http;
 
+# Represents the Queries record for the operation: operation_get_/pets
+public type Operation_get_PetsQueries record {
+    # Number of retriving items
+    int:Signed32 offset;
+};
+
 # Provides settings related to HTTP/1.x protocol.
 public type ClientHttp1Settings record {|
     # Specifies whether to reuse a connection for multiple requests
@@ -12,6 +18,11 @@ public type ClientHttp1Settings record {|
     # Proxy server related options
     ProxyConfig proxy?;
 |};
+
+# Represents the Queries record for the operation: operation_get_/hello
+public type Operation_get_HelloQueries record {
+    string pet?;
+};
 
 # Proxy server configurations to be used with the HTTP client endpoint.
 public type ProxyConfig record {|

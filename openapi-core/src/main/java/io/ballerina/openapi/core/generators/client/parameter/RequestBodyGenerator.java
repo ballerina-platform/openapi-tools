@@ -33,6 +33,7 @@ import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.Encoding;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
@@ -55,24 +56,19 @@ public class RequestBodyGenerator implements ParameterGenerator {
     OpenAPI openAPI;
     RequestBody requestBody;
     List<ClientDiagnostic> diagnostics = new ArrayList<>();
-    List<ParameterNode> headerParameters = new ArrayList<>();
+    List<Parameter> headerSchemas = new ArrayList<>();
 
     public RequestBodyGenerator(RequestBody requestBody, OpenAPI openAPI) {
         this.requestBody = requestBody;
         this.openAPI = openAPI;
     }
 
-    public List<ParameterNode> getHeaderParameters() {
-        return headerParameters;
+    public List<Parameter> getHeaderSchemas() {
+        return headerSchemas;
     }
 
     @Override
     public Optional<ParameterNode> generateParameterNode() {
-        return generateParameterNode(false);
-    }
-
-    @Override
-    public Optional<ParameterNode> generateParameterNode(boolean treatDefaultableAsRequired) {
         Content requestBodyContent;
         String referencedRequestBodyName;
         TypeDescriptorNode typeDescNode = null;
@@ -177,10 +173,11 @@ public class RequestBodyGenerator implements ParameterGenerator {
             if (headers != null) {
                 for (Map.Entry<String, Header> header : headers.entrySet()) {
                     if (!headerList.contains(escapeIdentifier(header.getKey()))) {
-                        RequestBodyHeaderParameter requestBodyHeaderParameter = new RequestBodyHeaderParameter(header);
-                        Optional<ParameterNode> parameterNode = requestBodyHeaderParameter.generateParameterNode();
+                        RequestBodyHeaderParameter requestBodyHeaderParameter = new RequestBodyHeaderParameter(
+                                header);
+                        Optional<Parameter> parameter = requestBodyHeaderParameter.generateParameterSchema();
 
-                        parameterNode.ifPresent(node -> headerParameters.add(node));
+                        parameter.ifPresent(param -> headerSchemas.add(param));
                         diagnostics.addAll(requestBodyHeaderParameter.getDiagnostics());
                         headerList.add(escapeIdentifier(header.getKey()));
                     }

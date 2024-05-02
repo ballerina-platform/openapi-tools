@@ -945,6 +945,9 @@ public class GeneratorUtils {
             String headerName = headerEntry.getKey();
             Header header = headerEntry.getValue();
             Schema headerTypeSchema = getValidatedHeaderSchema(header.getSchema());
+            headerTypeSchema.setDescription(header.getDescription());
+            headerTypeSchema.deprecated(header.getDeprecated());
+            headerTypeSchema.extensions(header.getExtensions());
             properties.put(headerName, headerTypeSchema);
             if (header.getRequired() != null && header.getRequired()) {
                 requiredFields.add(headerName);
@@ -964,7 +967,7 @@ public class GeneratorUtils {
         return headersSchema;
     }
 
-    private static  Schema getValidatedHeaderSchema(Schema headerSchema) {
+    public static  Schema getValidatedHeaderSchema(Schema headerSchema) {
         return getValidatedHeaderSchema(headerSchema, headerSchema);
     }
 
@@ -1167,5 +1170,10 @@ public class GeneratorUtils {
             });
             parameters.addAll(commonParameters);
         }
+    }
+
+    public static String generateOperationUniqueId(Operation operation, String path, String method) {
+        return Objects.nonNull(operation.getOperationId()) ?
+                operation.getOperationId() : method + getValidName(path, true);
     }
 }

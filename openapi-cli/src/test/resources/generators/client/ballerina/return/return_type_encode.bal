@@ -41,42 +41,39 @@ public isolated client class Client {
 
     # Product Types
     #
-    # + latitude - Latitude component of location.
-    # + longitude - Longitude component of location.
     # + country - Country name.
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - An array of products
-    resource isolated function get products/[string country](decimal latitude, decimal longitude) returns Product[]|error {
+    resource isolated function get products/[string country](map<string|string[]> headers = {}, *GetProductsCountryQueries queries) returns Product[]|error {
         string resourcePath = string `/products/${getEncodedUri(country)}`;
-        map<anydata> queryParam = {"latitude": latitude, "longitude": longitude};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        return self.clientEp->get(resourcePath);
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        return self.clientEp->get(resourcePath, headers);
     }
 
     # Product Types
     #
-    # + latitude - Latitude component of location.
-    # + longitude - Longitude component of location.
     # + country - Country name.
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - An array of products
-    resource isolated function post products/[string country](decimal latitude, decimal longitude) returns xml|error {
+    resource isolated function post products/[string country](map<string|string[]> headers = {}, *PostProductsCountryQueries queries) returns xml|error {
         string resourcePath = string `/products/${getEncodedUri(country)}`;
-        map<anydata> queryParam = {"latitude": latitude, "longitude": longitude};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
         http:Request request = new;
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 
     # Product Types
     #
-    # + latitude - Latitude component of location.
-    # + longitude - Longitude component of location.
     # + country - Country name.
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - An array of products
-    resource isolated function put products/[string country](decimal latitude, decimal longitude) returns Product[]|error {
+    resource isolated function put products/[string country](map<string|string[]> headers = {}, *PutProductsCountryQueries queries) returns Product[]|error {
         string resourcePath = string `/products/${getEncodedUri(country)}`;
-        map<anydata> queryParam = {"latitude": latitude, "longitude": longitude};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
         http:Request request = new;
-        return self.clientEp->put(resourcePath, request);
+        return self.clientEp->put(resourcePath, request, headers);
     }
 }

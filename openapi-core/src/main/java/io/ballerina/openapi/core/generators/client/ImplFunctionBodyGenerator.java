@@ -35,8 +35,10 @@ public class ImplFunctionBodyGenerator extends FunctionBodyGeneratorImp {
     public ImplFunctionBodyGenerator(String path, Map.Entry<PathItem.HttpMethod, Operation> operation, OpenAPI openAPI,
                                      AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp,
                                      BallerinaUtilGenerator ballerinaUtilGenerator,
-                                     List<ImportDeclarationNode> imports) {
-        super(path, operation, openAPI, ballerinaAuthConfigGeneratorImp, ballerinaUtilGenerator, imports);
+                                     List<ImportDeclarationNode> imports, boolean hasHeaders,
+                                     boolean hasDefaultHeaders, boolean hasQueries) {
+        super(path, operation, openAPI, ballerinaAuthConfigGeneratorImp, ballerinaUtilGenerator, imports,
+                hasHeaders, hasDefaultHeaders, hasQueries);
     }
 
     @Override

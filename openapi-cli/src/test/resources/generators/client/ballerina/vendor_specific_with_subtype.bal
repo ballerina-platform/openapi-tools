@@ -38,24 +38,26 @@ public isolated client class Client {
 
     # Create a pet
     #
+    # + headers - Headers to be sent with the request
     # + return - List of existing pets
-    remote isolated function createPet(Pet payload) returns Pets|error {
+    remote isolated function createPet(Pet payload, map<string|string[]> headers = {}) returns Pets|error {
         string resourcePath = string `/pets`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/vnd.petstore.v3.diff+json");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 
     # Create a pet
     #
+    # + headers - Headers to be sent with the request
     # + return - List of existing pets
-    remote isolated function createPetV0(Pet payload) returns xml|error {
+    remote isolated function createPetV0(Pet payload, map<string|string[]> headers = {}) returns xml|error {
         string resourcePath = string `/v0/pets`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/vnd.petstore.v3.diff+xml");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 }

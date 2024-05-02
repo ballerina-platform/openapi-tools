@@ -39,9 +39,10 @@ public isolated client class Client {
     #
     # + id - id value
     # + payloadId - payload id value
+    # + headers - Headers to be sent with the request
     # + return - Ok
-    remote isolated function operationId01(int:Signed32 id, int payloadId) returns string|error {
+    remote isolated function operationId01(int:Signed32 id, int payloadId, map<string|string[]> headers = {}) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(id)}/payload/${getEncodedUri(payloadId)}`;
-        return self.clientEp->get(resourcePath);
+        return self.clientEp->get(resourcePath, headers);
     }
 }

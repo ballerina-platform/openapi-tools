@@ -126,6 +126,7 @@ public class GeneratorConstants {
     public static final String HTTP_REQUEST = "http:Request";
     public static final String PDF = "pdf";
     public static final String QUERY_PARAM = "queryParam";
+    public static final String QUERIES = "queries";
     public static final String SELF = "self";
     public static final String TEXT_PREFIX = "text/";
     public static final String XML_DATA = "xmldata";

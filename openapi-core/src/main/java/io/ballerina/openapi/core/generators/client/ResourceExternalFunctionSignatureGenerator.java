@@ -53,7 +53,7 @@ public class ResourceExternalFunctionSignatureGenerator extends ResourceFunction
 
     public ResourceExternalFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod,
                                                       String path) {
-        super(operation, openAPI, httpMethod);
+        super(operation, openAPI, httpMethod, path);
         this.functionReturnTypeGenerator = new FunctionExternalReturnTypeGenerator(operation, openAPI, httpMethod,
                 path);
     }
@@ -95,8 +95,8 @@ public class ResourceExternalFunctionSignatureGenerator extends ResourceFunction
                 createToken(GT_TOKEN));
         ParameterNode targetTypeParam = createDefaultableParameterNode(createEmptyNodeList(), targetType,
                 createIdentifierToken("targetType"), createToken(EQUAL_TOKEN), inferredToken);
-        parametersInfo.defaultable().add(targetTypeParam);
-        parametersInfo.defaultable().add(createToken(COMMA_TOKEN));
+        parametersInfo.defaultableParams().add(targetTypeParam);
+        parametersInfo.defaultableParams().add(createToken(COMMA_TOKEN));
         return parametersInfo;
     }
 }

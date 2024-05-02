@@ -35,11 +35,13 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+
     # List of all countries with COVID-19 cases
     #
+    # + headers - Headers to be sent with the request
     # + return - Default response with array of strings
-    remote isolated function getCountryList() returns CountryInfo[]|error {
+    remote isolated function getCountryList(map<string|string[]> headers = {}) returns CountryInfo[]|error {
         string resourcePath = string `/api/v1/countries/list/`;
-        return self.clientEp->get(resourcePath);
+        return self.clientEp->get(resourcePath, headers);
     }
 }

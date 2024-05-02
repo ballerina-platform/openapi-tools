@@ -36,9 +36,10 @@ public isolated client class Client {
     }
     # Get a pet
     #
+    # + headers - Headers to be sent with the request
     # + return - The status information is returned for the requested file upload.
-    remote isolated function getPet() returns PetDetails|PetDetails02|error? {
+    remote isolated function getPet(map<string|string[]> headers = {}) returns PetDetails|PetDetails02|error? {
         string resourcePath = string `/pets`;
-        return self.clientEp->get(resourcePath);
+        return self.clientEp->get(resourcePath, headers);
     }
 }

@@ -2,6 +2,12 @@
 
 import ballerina/http;
 
+# Represents the Queries record for the operation: listPets
+public type ListPetsQueries record {
+    # How many items to return at one time (max 100)
+    int 'limit?;
+};
+
 public type Pets Pet[];
 
 # Provides settings related to HTTP/1.x protocol.

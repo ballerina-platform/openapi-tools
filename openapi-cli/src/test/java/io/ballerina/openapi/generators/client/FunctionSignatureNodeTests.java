@@ -20,6 +20,7 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.IncludedRecordParameterNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
@@ -61,26 +62,22 @@ public class FunctionSignatureNodeTests {
         Operation operation = openAPI.getPaths().get("/products/{country}").getGet();
         TypeHandler.createInstance(openAPI, false);
         RemoteFunctionSignatureGenerator functionSignatureGenerator = new RemoteFunctionSignatureGenerator(operation,
-                openAPI, "get");
+                openAPI, "get", "products/{country}");
         Optional<FunctionSignatureNode> signature = functionSignatureGenerator.generateFunctionSignature();
         SeparatedNodeList<ParameterNode> parameters = signature.get().parameters();
         Assert.assertFalse(parameters.isEmpty());
         RequiredParameterNode param01 = (RequiredParameterNode) parameters.get(0);
-        RequiredParameterNode param02 = (RequiredParameterNode) parameters.get(1);
-        RequiredParameterNode param03 = (RequiredParameterNode) parameters.get(2);
-        RequiredParameterNode param04 = (RequiredParameterNode) parameters.get(3);
+        DefaultableParameterNode param02 = (DefaultableParameterNode) parameters.get(1);
+        IncludedRecordParameterNode param03 = (IncludedRecordParameterNode) parameters.get(2);
 
-        Assert.assertEquals(param01.paramName().orElseThrow().text(), "latitude");
-        Assert.assertEquals(param01.typeName().toString(), "decimal");
+        Assert.assertEquals(param01.paramName().orElseThrow().text(), "country");
+        Assert.assertEquals(param01.typeName().toString(), "string");
 
-        Assert.assertEquals(param02.paramName().orElseThrow().text(), "longitude");
-        Assert.assertEquals(param02.typeName().toString(), "decimal");
+        Assert.assertEquals(param02.paramName().orElseThrow().text(), "headers");
+        Assert.assertEquals(param02.typeName().toString(), "map<string|string[]>");
 
-        Assert.assertEquals(param03.paramName().orElseThrow().text(), "country");
-        Assert.assertEquals(param03.typeName().toString(), "string");
-
-        Assert.assertEquals(param04.paramName().orElseThrow().text(), "pages");
-        Assert.assertEquals(param04.typeName().toString(), "decimal[]");
+        Assert.assertEquals(param03.paramName().orElseThrow().text(), "queries");
+        Assert.assertEquals(param03.typeName().toString(), "GetProductsCountryQueries");
 
         ReturnTypeDescriptorNode returnTypeNode = signature.get().returnTypeDesc().orElseThrow();
         Assert.assertEquals(returnTypeNode.type().toString(), "Product[]|error");
@@ -92,7 +89,7 @@ public class FunctionSignatureNodeTests {
         Operation operation = openAPI.getPaths().get("/pets").getPost();
         TypeHandler.createInstance(openAPI, false);
         RemoteFunctionSignatureGenerator functionSignatureGenerator = new RemoteFunctionSignatureGenerator(operation,
-                 openAPI, "post");
+                 openAPI, "post", "/pets");
         FunctionSignatureNode signature = functionSignatureGenerator.generateFunctionSignature().get();
         SeparatedNodeList<ParameterNode> parameters = signature.parameters();
         Assert.assertFalse(parameters.isEmpty());
@@ -111,7 +108,7 @@ public class FunctionSignatureNodeTests {
         Operation operation = openAPI.getPaths().get("/pets").getPost();
         TypeHandler.createInstance(openAPI, false);
         RemoteFunctionSignatureGenerator functionSignatureGenerator = new RemoteFunctionSignatureGenerator(operation,
-                openAPI, "post");
+                openAPI, "post", "/pets");
         FunctionSignatureNode signature = functionSignatureGenerator.generateFunctionSignature().get();
         SeparatedNodeList<ParameterNode> parameters = signature.parameters();
         Assert.assertFalse(parameters.isEmpty());
@@ -131,7 +128,7 @@ public class FunctionSignatureNodeTests {
         Operation operation = openAPI.getPaths().get("/pets").getPost();
         TypeHandler.createInstance(openAPI, false);
         RemoteFunctionSignatureGenerator functionSignatureGenerator = new RemoteFunctionSignatureGenerator(operation,
-                openAPI, "post");
+                openAPI, "post", "/pets");
         FunctionSignatureNode signature = functionSignatureGenerator.generateFunctionSignature().get();
         SeparatedNodeList<ParameterNode> parameters = signature.parameters();
         Assert.assertFalse(parameters.isEmpty());
@@ -140,13 +137,9 @@ public class FunctionSignatureNodeTests {
         Assert.assertEquals(param01.paramName().orElseThrow().text(), "payload");
         Assert.assertEquals(param01.typeName().toString(), "pets_body");
 
-        RequiredParameterNode param02 = (RequiredParameterNode) parameters.get(1);
-        Assert.assertEquals(param02.paramName().orElseThrow().text(), "X\\-Address\\-Header");
-        Assert.assertEquals(param02.typeName().toString(), "string");
-
-        DefaultableParameterNode param03 = (DefaultableParameterNode) parameters.get(2);
-        Assert.assertEquals(param03.paramName().orElseThrow().text(), "X\\-Custom\\-Header");
-        Assert.assertEquals(param03.typeName().toString(), "string?");
+        DefaultableParameterNode param02 = (DefaultableParameterNode) parameters.get(1);
+        Assert.assertEquals(param02.paramName().orElseThrow().text(), "headers");
+        Assert.assertEquals(param02.typeName().toString(), "map<string|string[]>");
 
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
         Assert.assertEquals(returnTypeNode.type().toString(), "error?");
@@ -157,7 +150,7 @@ public class FunctionSignatureNodeTests {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/response_nested_array.yaml"));
         TypeHandler.createInstance(openAPI, false);
         RemoteFunctionSignatureGenerator functionSignatureGenerator = new RemoteFunctionSignatureGenerator(
-                openAPI.getPaths().get("/timestags").getGet(), openAPI, "get");
+                openAPI.getPaths().get("/timestags").getGet(), openAPI, "get", "/timestags");
         FunctionSignatureNode signature = functionSignatureGenerator.generateFunctionSignature().get();
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
         Assert.assertEquals(returnTypeNode.type().toString(), "string[][]|error");
@@ -168,7 +161,7 @@ public class FunctionSignatureNodeTests {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/response_string_array.yaml"));
         TypeHandler.createInstance(openAPI, false);
         RemoteFunctionSignatureGenerator functionSignatureGenerator = new RemoteFunctionSignatureGenerator(
-                openAPI.getPaths().get("/timestags").getGet(), openAPI, "get");
+                openAPI.getPaths().get("/timestags").getGet(), openAPI, "get", "/timestags");
         FunctionSignatureNode signature = functionSignatureGenerator.generateFunctionSignature().get();
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
         Assert.assertEquals(returnTypeNode.type().toString(), "string[]|error");
@@ -179,7 +172,7 @@ public class FunctionSignatureNodeTests {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/request_body_with_ref.yaml"));
         TypeHandler.createInstance(openAPI, false);
         RemoteFunctionSignatureGenerator functionSignatureGenerator = new RemoteFunctionSignatureGenerator(
-                openAPI.getPaths().get("/pets").getPost(), openAPI, "post");
+                openAPI.getPaths().get("/pets").getPost(), openAPI, "post", "/pets");
         FunctionSignatureNode signature = functionSignatureGenerator.generateFunctionSignature().get();
         SeparatedNodeList<ParameterNode> parameters = signature.parameters();
         Assert.assertFalse(parameters.isEmpty());
@@ -193,7 +186,7 @@ public class FunctionSignatureNodeTests {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/pdf_payload.yaml"));
         TypeHandler.createInstance(openAPI, false);
         RemoteFunctionSignatureGenerator functionSignatureGenerator = new RemoteFunctionSignatureGenerator(
-                openAPI.getPaths().get("/pets").getPost(), openAPI, "post");
+                openAPI.getPaths().get("/pets").getPost(), openAPI, "post", "/pets");
         FunctionSignatureNode signature = functionSignatureGenerator.generateFunctionSignature().get();
         SeparatedNodeList<ParameterNode> parameters = signature.parameters();
         Assert.assertFalse(parameters.isEmpty());
@@ -210,7 +203,7 @@ public class FunctionSignatureNodeTests {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/invalid_array_query_params.yaml"));
         TypeHandler.createInstance(openAPI, false);
         RemoteFunctionSignatureGenerator functionSignatureGenerator = new RemoteFunctionSignatureGenerator(
-                openAPI.getPaths().get("/pets").getPost(), openAPI, "post");
+                openAPI.getPaths().get("/pets").getPost(), openAPI, "post", "/pets");
         FunctionSignatureNode signature = functionSignatureGenerator.generateFunctionSignature().get();
 
     }
@@ -223,7 +216,7 @@ public class FunctionSignatureNodeTests {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/invalid_array_query_params.yaml"));
         TypeHandler.createInstance(openAPI, false);
         RemoteFunctionSignatureGenerator functionSignatureGenerator = new RemoteFunctionSignatureGenerator(
-                openAPI.getPaths().get("/dogs").getGet(), openAPI, "get");
+                openAPI.getPaths().get("/dogs").getGet(), openAPI, "get", "/dogs");
         FunctionSignatureNode signature = functionSignatureGenerator.generateFunctionSignature().get();
 
     }
@@ -233,10 +226,10 @@ public class FunctionSignatureNodeTests {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/integer_request_payload.yaml"));
         TypeHandler.createInstance(openAPI, false);
         RemoteFunctionSignatureGenerator signature = new RemoteFunctionSignatureGenerator(openAPI.getPaths().
-                get("/pets").getPost(), openAPI, "post");
+                get("/pets").getPost(), openAPI, "post", "/pets");
         FunctionSignatureNode petSignature = signature.generateFunctionSignature().get();
         RemoteFunctionSignatureGenerator owSignature = new RemoteFunctionSignatureGenerator(openAPI.getPaths().
-                get("/owners").getPost(), openAPI, "post");
+                get("/owners").getPost(), openAPI, "post", "/owners");
         FunctionSignatureNode ownerSignature = owSignature.generateFunctionSignature().get();
         SeparatedNodeList<ParameterNode> parameters = petSignature.parameters();
         Assert.assertFalse(parameters.isEmpty());

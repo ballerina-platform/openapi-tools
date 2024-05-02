@@ -34,11 +34,13 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+
     # + id - Id of the point
+    # + headers - Headers to be sent with the request
     # + return - Accepted
-    resource isolated function post pet/[Param id]() returns error? {
+    resource isolated function post pet/[Param id](map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/pet/${getEncodedUri(id)}`;
         http:Request request = new;
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 }

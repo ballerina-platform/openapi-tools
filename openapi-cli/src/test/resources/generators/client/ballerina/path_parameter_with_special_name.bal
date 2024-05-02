@@ -37,17 +37,19 @@ public isolated client class Client {
 
     # + version - Version Id
     # + version\-name - Version Name
+    # + headers - Headers to be sent with the request
     # + return - Ok
-    remote isolated function operationId04(int version, string version\-name) returns string|error {
+    remote isolated function operationId04(int version, string version\-name, map<string|string[]> headers = {}) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri(version\-name)}`;
-        return self.clientEp->get(resourcePath);
+        return self.clientEp->get(resourcePath, headers);
     }
 
     # + version\-id - Version Id
     # + version\-limit - Version Limit
+    # + headers - Headers to be sent with the request
     # + return - Ok
-    remote isolated function operationId05(int version\-id, int version\-limit) returns string|error {
+    remote isolated function operationId05(int version\-id, int version\-limit, map<string|string[]> headers = {}) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(version\-id)}/v2/${getEncodedUri(version\-limit)}`;
-        return self.clientEp->get(resourcePath);
+        return self.clientEp->get(resourcePath, headers);
     }
 }

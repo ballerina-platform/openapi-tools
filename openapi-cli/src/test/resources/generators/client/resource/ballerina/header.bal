@@ -42,33 +42,29 @@ public isolated client class Client {
 
     # Provide weather forecast for any geographical coordinates
     #
-    # + lat - Latitude
-    # + lon - Longtitude
-    # + exclude - test
-    # + units - tests
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - Successful response
     @display {label: "Weather Forecast"}
-    resource isolated function get onecall(@display {label: "Latitude"} string lat, @display {label: "Longtitude"} string lon, @display {label: "Exclude"} string exclude = "current", @display {label: "Units"} int units = 12) returns WeatherForecast|error {
+    resource isolated function get onecall(GetWeatherForecastHeaders headers = {}, *GetWeatherForecastQueries queries) returns WeatherForecast|error {
         string resourcePath = string `/onecall`;
-        map<anydata> queryParam = {"lat": lat, "lon": lon, "appid": self.apiKeyConfig.appid};
+        map<anydata> queryParam = {...queries};
+        queryParam["appid"] = self.apiKeyConfig.appid;
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<any> headerValues = {"exclude": exclude, "units": units};
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = getMapForHeaders(headers);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 
     # Info for a specific pet
     #
-    # + X\-Request\-ID - Tests header 01
-    # + X\-Request\-Client - Tests header 02
-    # + X\-Request\-Pet - Tests header 03
+    # + headers - Headers to be sent with the request
     # + return - Expected response to a valid request
-    resource isolated function get weather(string X\-Request\-ID, string[] X\-Request\-Client, WeatherForecast[] X\-Request\-Pet) returns error? {
+    resource isolated function get weather(ShowPetByIdHeaders headers) returns error? {
         string resourcePath = string `/weather`;
-        map<anydata> queryParam = {"appid": self.apiKeyConfig.appid};
+        map<anydata> queryParam = {};
+        queryParam["appid"] = self.apiKeyConfig.appid;
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<any> headerValues = {"X-Request-ID": X\-Request\-ID, "X-Request-Client": X\-Request\-Client, "X-Request-Pet": X\-Request\-Pet};
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = getMapForHeaders(headers);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

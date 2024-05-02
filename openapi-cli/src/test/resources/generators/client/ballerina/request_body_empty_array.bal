@@ -37,12 +37,13 @@ public isolated client class Client {
     }
     # 02 Example for rb has inline requestbody.
     #
+    # + headers - Headers to be sent with the request
     # + return - OK
-    remote isolated function updateUser(json[] payload) returns error? {
+    remote isolated function updateUser(json[] payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return self.clientEp->put(resourcePath, request);
+        return self.clientEp->put(resourcePath, request, headers);
     }
 }

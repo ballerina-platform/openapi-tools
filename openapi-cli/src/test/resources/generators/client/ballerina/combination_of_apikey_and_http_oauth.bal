@@ -44,12 +44,13 @@ public isolated client class Client {
 
     # Delete a pet
     #
-    # + petId - The id of the pet to delete
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - Expected response to a valid request
-    remote isolated function deletePetInfo(string petId) returns Pet|error {
+    remote isolated function deletePetInfo(map<string|string[]> headers = {}, *DeletePetInfoQueries queries) returns Pet|error {
         string resourcePath = string `/pets/management`;
-        map<any> headerValues = {};
-        map<anydata> queryParam = {"petId": petId};
+        map<anydata> headerValues = {...headers};
+        map<anydata> queryParam = {...queries};
         if self.apiKeyConfig is ApiKeysConfig {
             headerValues["api-key"] = self.apiKeyConfig?.api\-key;
             queryParam["api-key-2"] = self.apiKeyConfig?.api\-key\-2;
@@ -61,11 +62,11 @@ public isolated client class Client {
 
     # Delete a pet 2
     #
-    # + petId - The id of the pet to delete
+    # + headers - Headers to be sent with the request
     # + return - Expected response to a valid request
-    remote isolated function deletePetInfo2(string petId) returns Pet|error {
+    remote isolated function deletePetInfo2(DeletePetInfo2Headers headers) returns Pet|error {
         string resourcePath = string `/pets/management2`;
-        map<any> headerValues = {"petId": petId};
+        map<anydata> headerValues = {...headers};
         map<anydata> queryParam = {};
         if self.apiKeyConfig is ApiKeysConfig {
             headerValues["api-key"] = self.apiKeyConfig?.api\-key;
@@ -78,13 +79,13 @@ public isolated client class Client {
 
     # Info for a specific pet
     #
-    # + petId - The id of the pet to retrieve
-    # + headerX - Header X
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - Expected response to a valid request
-    remote isolated function getPetInfo(string petId, string headerX) returns Pet|error {
+    remote isolated function getPetInfo(GetPetInfoHeaders headers, *GetPetInfoQueries queries) returns Pet|error {
         string resourcePath = string `/pets/management`;
-        map<any> headerValues = {"headerX": headerX};
-        map<anydata> queryParam = {"petId": petId};
+        map<anydata> headerValues = {...headers};
+        map<anydata> queryParam = {...queries};
         if self.apiKeyConfig is ApiKeysConfig {
             headerValues["api-key"] = self.apiKeyConfig?.api\-key;
             queryParam["api-key-2"] = self.apiKeyConfig?.api\-key\-2;
@@ -96,10 +97,11 @@ public isolated client class Client {
 
     # Vote for a pet
     #
+    # + headers - Headers to be sent with the request
     # + return - Expected response to a valid request
-    remote isolated function votePet() returns Pet|error {
+    remote isolated function votePet(map<string|string[]> headers = {}) returns Pet|error {
         string resourcePath = string `/pets/management`;
-        map<any> headerValues = {};
+        map<anydata> headerValues = {...headers};
         map<anydata> queryParam = {};
         if self.apiKeyConfig is ApiKeysConfig {
             headerValues["api-key"] = self.apiKeyConfig?.api\-key;
