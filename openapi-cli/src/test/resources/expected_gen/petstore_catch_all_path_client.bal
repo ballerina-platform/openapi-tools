@@ -46,39 +46,40 @@ public isolated client class Client {
         return;
     }
 
-    resource isolated function get \*(int petId) returns Pet|error {
+    resource isolated function get \*(map<string|string[]> headers = {}, *GetPetByIdQueries queries) returns Pet|error {
         string resourcePath = string `/*`;
-        map<any> headerValues = {};
-        map<anydata> queryParam = {"petId": petId};
+        map<anydata> headerValues = {...headers};
         if self.apiKeyConfig is ApiKeysConfig {
             headerValues["api_key"] = self.apiKeyConfig?.api_key;
         }
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 
     # Add a new pet to the store
     #
+    # + headers - Headers to be sent with the request
     # + payload - Create a new pet in the store
     # + return - Successful operation
-    resource isolated function post pet(Pet payload) returns Pet|error {
+    resource isolated function post pet(Pet payload, map<string|string[]> headers = {}) returns Pet|error {
         string resourcePath = string `/pet`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 
     # Update an existing pet
     #
+    # + headers - Headers to be sent with the request
     # + payload - Update an existent pet in the store
     # + return - Successful operation
-    resource isolated function put pet(Pet payload) returns Pet|error {
+    resource isolated function put pet(Pet payload, map<string|string[]> headers = {}) returns Pet|error {
         string resourcePath = string `/pet`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return self.clientEp->put(resourcePath, request);
+        return self.clientEp->put(resourcePath, request, headers);
     }
 }

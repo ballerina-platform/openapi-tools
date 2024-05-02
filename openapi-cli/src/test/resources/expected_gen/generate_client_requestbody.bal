@@ -35,14 +35,16 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+
     # Creates a new user.
     #
+    # + headers - Headers to be sent with the request
     # + return - OK
-    remote isolated function createUser(User payload) returns error? {
+    remote isolated function createUser(User payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/requestBody`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 }

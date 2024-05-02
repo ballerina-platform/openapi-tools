@@ -47,9 +47,10 @@ public isolated client class Client {
 
     # Get movie reviews that are critics' picks. You can either specify the reviewer name or use "all", "full-time", or "part-time".
     #
-    # + return - An array of Movie Critics 
-    remote isolated function criticsPicks() returns inline_response_200|error {
+    # + headers - Headers to be sent with the request
+    # + return - An array of Movie Critics
+    remote isolated function criticsPicks(map<string|string[]> headers = {}) returns inline_response_200|error {
         string resourcePath = string `/`;
-        return self.clientEp->get(resourcePath);
+        return self.clientEp->get(resourcePath, headers);
     }
 }
