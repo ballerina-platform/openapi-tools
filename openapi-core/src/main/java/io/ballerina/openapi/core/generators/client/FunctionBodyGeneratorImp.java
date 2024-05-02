@@ -100,7 +100,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.API
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DELETE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ENCODING;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.EXECUTE;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADERS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADER_VALUES;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_HEADERS;
@@ -327,8 +326,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             }
         }
 
-        if (hasQueries || !queryApiKeyNameList.isEmpty()) {
-            if (!queryApiKeyNameList.isEmpty()) {
+        if (!queryApiKeyNameList.isEmpty()) {
                 String defaultValue = "{}";
                 if (hasQueries) {
                     defaultValue = "{..." + QUERIES + "}";
@@ -343,7 +341,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                     // `queryParam["api-key"] = self.apiKeyConfig?.apiKey;`
                     addApiKeysToMap(QUERY_PARAM, queryApiKeyNameList, ifBodyStatementsList);
                 }
-            }
+
         }
 
         generateIfBlockToAddApiKeysToMaps(statementsList, ifBodyStatementsList);
@@ -560,8 +558,6 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
 
             } else if (method.equals(DELETE)) {
                 clientCallStatement = getClientCallWithHeadersParam().formatted(method, RESOURCE_PATH, paramName);
-            } else if (method.equals(HEAD)) {
-                clientCallStatement = getClientCallWithHeaders().formatted(method, RESOURCE_PATH, paramName);
             } else {
                 clientCallStatement = getClientCallWithHeaders().formatted(method, RESOURCE_PATH, paramName);
             }
