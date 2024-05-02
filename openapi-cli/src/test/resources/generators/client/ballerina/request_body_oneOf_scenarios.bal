@@ -38,13 +38,14 @@ public isolated client class Client {
 
     # Request Body has nested allOf.
     #
+    # + headers - Headers to be sent with the request
     # + payload - A JSON object containing pet information
     # + return - OK
-    remote isolated function postXMLUser(path01_body payload) returns error? {
+    remote isolated function postXMLUser(path01_body payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 }

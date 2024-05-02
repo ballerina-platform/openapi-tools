@@ -39,36 +39,39 @@ public isolated client class Client {
 
     # Request Body has nested allOf.
     #
+    # + headers - Headers to be sent with the request
     # + return - OK
-    remote isolated function postXMLUser(path01_body_1 payload) returns error? {
+    remote isolated function postXMLUser(path01_body_1 payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 
     # Request Body has Array type AllOf.
     #
+    # + headers - Headers to be sent with the request
     # + return - OK
-    remote isolated function postXMLUserInLineArray(record {*User; boolean? hunts?; int? age?;}[] payload) returns error? {
+    remote isolated function postXMLUserInLineArray(record {*User; boolean? hunts?; int? age?;}[] payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/path02`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 
     # Request Body has allOf with specific properties.
     #
+    # + headers - Headers to be sent with the request
     # + return - OK
-    remote isolated function updateXMLUser(path01_body payload) returns error? {
+    remote isolated function updateXMLUser(path01_body payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
-        return self.clientEp->put(resourcePath, request);
+        return self.clientEp->put(resourcePath, request, headers);
     }
 }

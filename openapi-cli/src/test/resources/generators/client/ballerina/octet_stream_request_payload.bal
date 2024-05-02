@@ -37,21 +37,23 @@ public isolated client class Client {
     }
     # Creates a new payment.
     #
+    # + headers - Headers to be sent with the request
     # + payload - Details of the pet to be purchased
     # + return - OK
-    remote isolated function addPayment(byte[] payload) returns error? {
+    remote isolated function addPayment(byte[] payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/payment`;
         http:Request request = new;
         request.setPayload(payload, "application/octet-stream");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
     # Creates a new user.
     #
+    # + headers - Headers to be sent with the request
     # + return - OK
-    remote isolated function addUser(byte[] payload) returns error? {
+    remote isolated function addUser(byte[] payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/user`;
         http:Request request = new;
         request.setPayload(payload, "application/octet-stream");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 }

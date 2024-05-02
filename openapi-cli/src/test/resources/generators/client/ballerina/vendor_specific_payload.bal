@@ -36,10 +36,11 @@ public isolated client class Client {
     }
     # Create a pet
     #
+    # + headers - Headers to be sent with the request
     # + return - Null response
-    remote isolated function createPet(http:Request request) returns error? {
+    remote isolated function createPet(http:Request request, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/pets`;
         // TODO: Update the request as needed;
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 }
