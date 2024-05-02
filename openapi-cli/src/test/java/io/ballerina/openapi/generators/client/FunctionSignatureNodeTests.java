@@ -29,7 +29,6 @@ import io.ballerina.openapi.core.generators.client.RemoteFunctionSignatureGenera
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.swagger.models.auth.In;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import org.testng.Assert;
