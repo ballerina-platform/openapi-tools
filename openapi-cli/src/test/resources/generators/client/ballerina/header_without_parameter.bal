@@ -40,10 +40,12 @@ public isolated client class Client {
 
     # Info for a specific pet
     #
+    # + headers - Headers to be sent with the request
     # + return - Expected response to a valid request
-    remote isolated function showPetById() returns http:Response|error {
+    remote isolated function showPetById(map<string|string[]> headers = {}) returns http:Response|error {
         string resourcePath = string `/pets`;
-        map<any> headerValues = {"X-API-KEY": self.apiKeyConfig.X\-API\-KEY};
+        map<anydata> headerValues = {...headers};
+        headerValues["X-API-KEY"] = self.apiKeyConfig.X\-API\-KEY;
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
