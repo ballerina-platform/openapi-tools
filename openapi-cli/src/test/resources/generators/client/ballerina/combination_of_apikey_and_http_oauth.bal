@@ -80,6 +80,7 @@ public isolated client class Client {
     # Info for a specific pet
     #
     # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - Expected response to a valid request
     remote isolated function getPetInfo(GetPetInfoHeaders headers, *GetPetInfoQueries queries) returns Pet|error {
         string resourcePath = string `/pets/management`;
