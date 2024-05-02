@@ -305,42 +305,45 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             throws BallerinaOpenApiException {
 
         List<StatementNode> ifBodyStatementsList = new ArrayList<>();
+        String headerVarName = HEADER_VALUES;
 
         if (hasHeaders || !headerApiKeyNameList.isEmpty()) {
-            String defaultValue = "{}";
-            if (hasHeaders) {
-                defaultValue = "{..." + HEADERS + "}";
-            }
-            hasDefaultHeaders = false;
-
-            ExpressionStatementNode headerMapCreation = GeneratorUtils.getSimpleExpressionStatementNode(
-                    MAP_ANYDATA + HEADER_VALUES + " = " + defaultValue);
-            statementsList.add(headerMapCreation);
-
-            if (!headerApiKeyNameList.isEmpty()) {
+            if (headerApiKeyNameList.isEmpty()) {
+                if (!hasDefaultHeaders) {
+                    headerVarName = HEADERS;
+                }
+            } else {
+                hasDefaultHeaders = false;
+                String defaultValue = "{}";
+                if (hasHeaders) {
+                    defaultValue = "{..." + HEADERS + "}";
+                }
+                ExpressionStatementNode headerMapCreation = GeneratorUtils.getSimpleExpressionStatementNode(
+                        MAP_ANYDATA + HEADER_VALUES + " = " + defaultValue);
+                statementsList.add(headerMapCreation);
                 // update headerValues Map within the if block
                 // `headerValues["api-key"] = self.apiKeyConfig?.apiKey;`
                 addApiKeysToMap(HEADER_VALUES, headerApiKeyNameList, ifBodyStatementsList);
             }
-            ballerinaUtilGenerator.setHeadersFound(true);
         }
 
         if (hasQueries || !queryApiKeyNameList.isEmpty()) {
-            String defaultValue = "{}";
-            if (hasQueries) {
-                defaultValue = "{..." + QUERIES + "}";
-            }
-
-            ExpressionStatementNode queryParamMapCreation = GeneratorUtils.getSimpleExpressionStatementNode(
-                    MAP_ANYDATA + QUERY_PARAM + " = " + defaultValue);
-            statementsList.add(queryParamMapCreation);
-
             if (!queryApiKeyNameList.isEmpty()) {
-                // update queryParam Map within the if block
-                // `queryParam["api-key"] = self.apiKeyConfig?.apiKey;`
-                addApiKeysToMap(QUERY_PARAM, queryApiKeyNameList, ifBodyStatementsList);
+                String defaultValue = "{}";
+                if (hasQueries) {
+                    defaultValue = "{..." + QUERIES + "}";
+                }
+
+                ExpressionStatementNode queryParamMapCreation = GeneratorUtils.getSimpleExpressionStatementNode(
+                        MAP_ANYDATA + QUERY_PARAM + " = " + defaultValue);
+                statementsList.add(queryParamMapCreation);
+
+                if (!queryApiKeyNameList.isEmpty()) {
+                    // update queryParam Map within the if block
+                    // `queryParam["api-key"] = self.apiKeyConfig?.apiKey;`
+                    addApiKeysToMap(QUERY_PARAM, queryApiKeyNameList, ifBodyStatementsList);
+                }
             }
-            ballerinaUtilGenerator.setQueryParamsFound(true);
         }
 
         generateIfBlockToAddApiKeysToMaps(statementsList, ifBodyStatementsList);
@@ -348,10 +351,12 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
         if (hasQueries || !queryApiKeyNameList.isEmpty()) {
             getUpdatedPathHandlingQueryParamEncoding(statementsList, queryParameters,
                     queryApiKeyNameList.isEmpty() ? QUERIES : QUERY_PARAM);
+            ballerinaUtilGenerator.setQueryParamsFound(true);
         }
-        if (hasHeaders || !headerApiKeyNameList.isEmpty()) {
+        if ((hasHeaders || !headerApiKeyNameList.isEmpty()) && !hasDefaultHeaders) {
             statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
-                    MAP_STRING_STRING_ARRAY + HTTP_HEADERS + GET_MAP_FOR_HEADERS + HEADER_VALUES + ")"));
+                    MAP_STRING_STRING_ARRAY + HTTP_HEADERS + GET_MAP_FOR_HEADERS + headerVarName + ")"));
+            ballerinaUtilGenerator.setHeadersFound(true);
         }
     }
 
