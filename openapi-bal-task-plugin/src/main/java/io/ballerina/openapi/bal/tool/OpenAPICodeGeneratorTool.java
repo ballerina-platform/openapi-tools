@@ -270,10 +270,10 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
             String fieldName = field.getKey();
             switch (fieldName) {
                 case TAGS:
-                    filter.setTags(getArrayItems(field.getValue()));
+                    filter.setTags(getArrayItems(field.getValue().value()));
                     break;
                 case OPERATIONS:
-                    filter.setOperations(getArrayItems(field.getValue()));
+                    filter.setOperations(getArrayItems(field.getValue().value()));
                     break;
                 case NULLABLE:
                     serviceMetaDataBuilder.withNullable(value.contains(TRUE));
