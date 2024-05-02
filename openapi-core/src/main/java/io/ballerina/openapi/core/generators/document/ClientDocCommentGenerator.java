@@ -322,7 +322,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                                              List<Node> updatedParamsDefault,
                                              HashMap<String, ParameterNode> collection) {
         List<Node> deprecatedParamDocComments = new ArrayList<>();
-        boolean[] hasQueryParams = {false};
+        boolean hasQueryParams = operation.getParameters().stream().anyMatch(parameter -> parameter.getIn().equals("query"));
         operation.getParameters().forEach(parameter -> {
             if (parameter.get$ref() != null) {
                 try {
@@ -334,7 +334,6 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
             }
 
             if (Objects.isNull(parameter.getIn()) || !parameter.getIn().equals("path")) {
-                hasQueryParams[0] = parameter.getIn().equals("query");
                 return;
             }
 
@@ -361,7 +360,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
             }
         });
         docs.add(createAPIParamDoc(HEADERS, "Headers to be sent with the request"));
-        if (hasQueryParams[0]) {
+        if (hasQueryParams) {
             docs.add(createAPIParamDoc(QUERIES, "Queries to be sent with the request"));
         }
         docs.addAll(deprecatedParamDocComments);
