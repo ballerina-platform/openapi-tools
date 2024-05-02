@@ -20,6 +20,7 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.IncludedRecordParameterNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
@@ -28,6 +29,7 @@ import io.ballerina.openapi.core.generators.client.RemoteFunctionSignatureGenera
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.swagger.models.auth.In;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import org.testng.Assert;
@@ -66,21 +68,17 @@ public class FunctionSignatureNodeTests {
         SeparatedNodeList<ParameterNode> parameters = signature.get().parameters();
         Assert.assertFalse(parameters.isEmpty());
         RequiredParameterNode param01 = (RequiredParameterNode) parameters.get(0);
-        RequiredParameterNode param02 = (RequiredParameterNode) parameters.get(1);
-        RequiredParameterNode param03 = (RequiredParameterNode) parameters.get(2);
-        RequiredParameterNode param04 = (RequiredParameterNode) parameters.get(3);
+        DefaultableParameterNode param02 = (DefaultableParameterNode) parameters.get(1);
+        IncludedRecordParameterNode param03 = (IncludedRecordParameterNode) parameters.get(2);
 
-        Assert.assertEquals(param01.paramName().orElseThrow().text(), "latitude");
-        Assert.assertEquals(param01.typeName().toString(), "decimal");
+        Assert.assertEquals(param01.paramName().orElseThrow().text(), "country");
+        Assert.assertEquals(param01.typeName().toString(), "string");
 
-        Assert.assertEquals(param02.paramName().orElseThrow().text(), "longitude");
-        Assert.assertEquals(param02.typeName().toString(), "decimal");
+        Assert.assertEquals(param02.paramName().orElseThrow().text(), "headers");
+        Assert.assertEquals(param02.typeName().toString(), "map<string|string[]>");
 
-        Assert.assertEquals(param03.paramName().orElseThrow().text(), "country");
-        Assert.assertEquals(param03.typeName().toString(), "string");
-
-        Assert.assertEquals(param04.paramName().orElseThrow().text(), "pages");
-        Assert.assertEquals(param04.typeName().toString(), "decimal[]");
+        Assert.assertEquals(param03.paramName().orElseThrow().text(), "queries");
+        Assert.assertEquals(param03.typeName().toString(), "GetProductsCountryQueries");
 
         ReturnTypeDescriptorNode returnTypeNode = signature.get().returnTypeDesc().orElseThrow();
         Assert.assertEquals(returnTypeNode.type().toString(), "Product[]|error");
@@ -140,13 +138,9 @@ public class FunctionSignatureNodeTests {
         Assert.assertEquals(param01.paramName().orElseThrow().text(), "payload");
         Assert.assertEquals(param01.typeName().toString(), "pets_body");
 
-        RequiredParameterNode param02 = (RequiredParameterNode) parameters.get(1);
-        Assert.assertEquals(param02.paramName().orElseThrow().text(), "X\\-Address\\-Header");
-        Assert.assertEquals(param02.typeName().toString(), "string");
-
-        DefaultableParameterNode param03 = (DefaultableParameterNode) parameters.get(2);
-        Assert.assertEquals(param03.paramName().orElseThrow().text(), "X\\-Custom\\-Header");
-        Assert.assertEquals(param03.typeName().toString(), "string?");
+        DefaultableParameterNode param02 = (DefaultableParameterNode) parameters.get(1);
+        Assert.assertEquals(param02.paramName().orElseThrow().text(), "headers");
+        Assert.assertEquals(param02.typeName().toString(), "map<string|string[]>");
 
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
         Assert.assertEquals(returnTypeNode.type().toString(), "error?");
