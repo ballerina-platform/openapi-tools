@@ -171,6 +171,11 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                 headers = headersParameterGenerator.generateParameterNode();
             }
 
+            diagnostics.addAll(headersParameterGenerator.getDiagnostics());
+            if (headersParameterGenerator.hasErrors()) {
+                return null;
+            }
+
             if (headers.isPresent()) {
                 hasHeadersParam = true;
                 if (headers.get() instanceof RequiredParameterNode headerNode) {
@@ -181,19 +186,22 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
                     defaultableParams.add(comma);
                 }
             } else if (!headerParameters.isEmpty()) {
-                diagnostics.addAll(headersParameterGenerator.getDiagnostics());
                 return null;
             }
 
             QueriesParameterGenerator queriesParameterGenerator = new QueriesParameterGenerator(queryParameters,
                     openAPI, operation, httpMethod, path);
             Optional<ParameterNode> queries = queriesParameterGenerator.generateParameterNode();
+            diagnostics.addAll(queriesParameterGenerator.getDiagnostics());
+            if (queriesParameterGenerator.hasErrors()) {
+                return null;
+            }
+
             if (queries.isPresent()) {
                 hasQueriesParam = true;
                 includedParam.add(queries.get());
                 includedParam.add(comma);
             } else if (!queryParameters.isEmpty()) {
-                diagnostics.addAll(queriesParameterGenerator.getDiagnostics());
                 return null;
             }
         } else {

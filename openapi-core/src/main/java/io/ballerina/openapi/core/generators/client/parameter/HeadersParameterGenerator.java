@@ -55,6 +55,7 @@ public class HeadersParameterGenerator implements ParameterGenerator {
     private final Operation operation;
     private final String httpMethod;
     private final String path;
+    private boolean hasErrors = false;
 
     public HeadersParameterGenerator(List<Parameter> parameters, OpenAPI openAPI, Operation operation,
                                      String httpMethod, String path) {
@@ -145,6 +146,10 @@ public class HeadersParameterGenerator implements ParameterGenerator {
         return diagnostics;
     }
 
+    public boolean hasErrors() {
+        return hasErrors;
+    }
+
     private ObjectSchema getHeadersSchema() {
         Map<String, Schema> properties = new HashMap<>();
         for (Parameter parameter : parameters) {
@@ -155,6 +160,7 @@ public class HeadersParameterGenerator implements ParameterGenerator {
             if (Objects.isNull(entry.getValue())) {
                 ClientDiagnostic diagnostic = new ClientDiagnosticImp(OAS_CLIENT_108, entry.getKey());
                 diagnostics.add(diagnostic);
+                hasErrors = true;
                 return true;
             }
             return false;

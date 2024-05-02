@@ -53,6 +53,7 @@ public class QueriesParameterGenerator implements ParameterGenerator {
     private final Operation operation;
     private final String httpMethod;
     private final String path;
+    private boolean hasErrors = false;
 
     public QueriesParameterGenerator(List<Parameter> parameters, OpenAPI openAPI, Operation operation,
                                      String httpMethod, String path) {
@@ -92,6 +93,10 @@ public class QueriesParameterGenerator implements ParameterGenerator {
         return diagnostics;
     }
 
+    public boolean hasErrors() {
+        return hasErrors;
+    }
+
     private ObjectSchema getQueriesSchema() {
         Map<String, Schema> properties = new HashMap<>();
         for (Parameter parameter : parameters) {
@@ -102,6 +107,7 @@ public class QueriesParameterGenerator implements ParameterGenerator {
             if (Objects.isNull(entry.getValue())) {
                 ClientDiagnostic diagnostic = new ClientDiagnosticImp(OAS_CLIENT_102, entry.getKey());
                 diagnostics.add(diagnostic);
+                hasErrors = true;
                 return true;
             }
             return false;
