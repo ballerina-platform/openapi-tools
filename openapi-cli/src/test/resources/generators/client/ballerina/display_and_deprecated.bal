@@ -36,41 +36,40 @@ public isolated client class Client {
     }
     # Create a pet
     #
+    # + headers - Headers to be sent with the request
     # + return - Null response
-    remote isolated function createPet() returns http:Response|error {
+    remote isolated function createPet(map<string|string[]> headers = {}) returns http:Response|error {
         string resourcePath = string `/pets`;
         http:Request request = new;
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
     # List all pets
     #
-    # + 'limit - How many items to return at one time (max 100)
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - An paged array of pets
     #
     # # Deprecated
     # This methods has deprecated since the Pet has deprecated
     @display {label: "List Pets"}
     @deprecated
-    remote isolated function listPets(int? 'limit = ()) returns Pets|error {
+    remote isolated function listPets(map<string|string[]> headers = {}, *ListPetsQueries queries) returns Pets|error {
         string resourcePath = string `/pets`;
-        map<anydata> queryParam = {"limit": 'limit};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        return self.clientEp->get(resourcePath);
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        return self.clientEp->get(resourcePath, headers);
     }
     # Info for a specific pet
     #
     # + petId - The id of the pet to retrieve
-    # + 'limit - The id of the pet to retrieve
-    # # Deprecated parameters
-    # + 'limit - Limit is deprecated from v2
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - Expected response to a valid request
     #
     # # Deprecated
     @deprecated
-    remote isolated function showPetById(string petId, @deprecated @display {label: "Result limit"} string 'limit) returns Pets|error {
+    remote isolated function showPetById(string petId, map<string|string[]> headers = {}, *ShowPetByIdQueries queries) returns Pets|error {
         string resourcePath = string `/pets/${getEncodedUri(petId)}`;
-        map<anydata> queryParam = {"limit": 'limit};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        return self.clientEp->get(resourcePath);
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        return self.clientEp->get(resourcePath, headers);
     }
 }
