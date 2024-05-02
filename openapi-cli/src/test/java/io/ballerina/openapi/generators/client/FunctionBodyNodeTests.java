@@ -55,7 +55,8 @@ public class FunctionBodyNodeTests {
 
     @Test(description = "Tests functionBodyNodes including statements according to the different scenarios",
             dataProvider = "dataProviderForFunctionBody")
-    public void getFunctionBodyNodes(String yamlFile, String path, String content) throws IOException,
+    public void getFunctionBodyNodes(String yamlFile, String path, boolean hasHeaders, boolean hasDefaultHeaders,
+                                     boolean hasQueries, String content) throws IOException,
             BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openapi = getOpenAPI(definitionPath);
@@ -66,7 +67,7 @@ public class FunctionBodyNodeTests {
         TypeHandler.createInstance(openapi, false);
         FunctionBodyGeneratorImp functionBodyGeneratorImp = new FunctionBodyGeneratorImp(path, operation, openapi,
                 new AuthConfigGeneratorImp(false, false),
-                new BallerinaUtilGenerator(), new ArrayList<>(), false, false, false);
+                new BallerinaUtilGenerator(), new ArrayList<>(), hasHeaders, hasDefaultHeaders, hasQueries);
         Optional<FunctionBodyNode> bodyNode = functionBodyGeneratorImp.getFunctionBodyNode();
         content = content.trim().replaceAll("\n", "").replaceAll("\\s+", "");
         String bodyNodeContent = bodyNode.get().toString().trim().replaceAll("\n", "")
@@ -76,52 +77,56 @@ public class FunctionBodyNodeTests {
     @DataProvider(name = "dataProviderForFunctionBody")
     public Object[][] dataProviderForFunctionBody() {
         return new Object[][]{
-                {"diagnostic_files/header_parameter.yaml", "/pets", "{string resourcePath=string`/pets`;" +
-                        "map<any>headerValues=" +
-                        "{\"X-Request-ID\":X\\-Request\\-ID,\"X-Request-Client\":X\\-Request\\-Client};" +
+                {"diagnostic_files/header_parameter.yaml", "/pets", true, false, false,
+                        "{string resourcePath=string`/pets`;" +
                         "map<string|string[]>" +
-                        "httpHeaders=getMapForHeaders(headerValues);return self.clientEp->" +
+                        "httpHeaders=getMapForHeaders(headers);return self.clientEp->" +
                         "get(resourcePath,httpHeaders);}"},
-                {"diagnostic_files/head_operation.yaml", "/{filesystem}",
+                {"diagnostic_files/head_operation.yaml", "/{filesystem}", true, false, true,
                         "{string resourcePath=string`/${getEncodedUri(filesystem)}`;" +
-                        "map<anydata>queryParam={\"resource\":'resource,\"timeout\":timeout};" +
-                        "resourcePath = resourcePath + check getPathForQueryParam(queryParam);" +
-                        "map<any>headerValues={\"x-ms-client-request-id\":x\\-ms\\-client\\-request\\-id," +
-                        "\"x-ms-date\":x\\-ms\\-date,\"x-ms-version\":x\\-ms\\-version};map<string|string[]> " +
-                        "httpHeaders = getMapForHeaders(headerValues);" +
+                        "resourcePath = resourcePath + check getPathForQueryParam(queries);" +
+                        "map<string|string[]> httpHeaders = getMapForHeaders(headers);" +
                         "return self.clientEp-> head(resourcePath, httpHeaders);}"},
-                {"diagnostic_files/operation_delete.yaml", "/pets/{petId}", "{string resourcePath = " +
+                {"diagnostic_files/operation_delete.yaml", "/pets/{petId}", false, false, false,
+                        "{string resourcePath = " +
                         "string `/pets/${getEncodedUri(petId)}`;" +
                         "return  self.clientEp-> delete(resourcePath);}"},
-                {"diagnostic_files/json_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
+                {"diagnostic_files/json_payload.yaml", "/pets", false, false, false,
+                        "{string resourcePath = string `/pets`;" +
                         "http:Request request = new; request.setPayload(payload, \"application/json\"); " +
                         "return  self.clientEp->post(resourcePath, request);}"},
-                {"diagnostic_files/xml_payload.yaml", "/pets", "{string resourcePath = string `/pets`; " +
+                {"diagnostic_files/xml_payload.yaml", "/pets", false, false, false,
+                        "{string resourcePath = string `/pets`; " +
                         "http:Request request = new;" +
                         "request.setPayload(payload, \"application/xml\"); " +
                         "return self.clientEp->post(resourcePath, request);}"},
-                {"diagnostic_files/xml_payload_with_ref.yaml", "/pets", "{string resourcePath = string `/pets`;" +
+                {"diagnostic_files/xml_payload_with_ref.yaml", "/pets", false, false, false,
+                        "{string resourcePath = string `/pets`;" +
                         "http:Request request = new;" +
                         "json jsonBody = payload.toJson();" +
                         "xml? xmlBody = check xmldata:fromJson(jsonBody);" +
                         "request.setPayload(xmlBody, \"application/xml\");" +
                         "return self.clientEp->post(resourcePath, request);}"},
-                {"client/swagger/response_type_order.yaml", "/pet/{petId}",
+                {"client/swagger/response_type_order.yaml", "/pet/{petId}", false, false, false,
                         "{string resourcePath = string `/pet/${getEncodedUri(petId)}`;" +
                         "return self.clientEp->get(resourcePath);}"},
-                {"client/swagger/text_request_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
+                {"client/swagger/text_request_payload.yaml", "/pets", false, false, false,
+                        "{string resourcePath = string `/pets`;" +
                         "http:Request request = new;" +
                         "json jsonBody = payload.toJson();" +
                         "request.setPayload(jsonBody, \"text/json\");" +
                         "return self.clientEp->post(resourcePath, request);}"},
-                {"client/swagger/pdf_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
+                {"client/swagger/pdf_payload.yaml", "/pets", false, false, false,
+                        "{string resourcePath = string `/pets`;" +
                         "// TODO: Update the request as needed;\n" +
                         " return  self.clientEp->post(resourcePath, request);}"},
-                {"client/swagger/image_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
+                {"client/swagger/image_payload.yaml", "/pets", false, false, false,
+                        "{string resourcePath = string `/pets`;" +
                         "http:Request request = new;" +
                         "request.setPayload(payload, \"image/png\");" +
                         " return  self.clientEp->post(resourcePath, request);}"},
-                {"client/swagger/multipart_formdata_custom.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
+                {"client/swagger/multipart_formdata_custom.yaml", "/pets", false, false, false,
+                        "{string resourcePath = string `/pets`;\n" +
                         "http:Request request = new;\n" +
                         "map<Encoding> encodingMap = {\"profileImage\": {contentType: \"image/png\", headers: " +
                         "{\"X-Custom-Header\": X\\-Custom\\-Header}}, \"id\":{headers: {\"X-Custom-Header\": " +
@@ -131,21 +136,25 @@ public class FunctionBodyNodeTests {
                         "mime:Entity[] bodyParts = check createBodyParts(payload, encodingMap);\n" +
                         "request.setBodyParts(bodyParts);\n" +
                         " return  self.clientEp->post(resourcePath, request);\n}"},
-                {"client/swagger/empty_object_responnse.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
+                {"client/swagger/empty_object_responnse.yaml", "/pets", false, false, false,
+                        "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +
                         "        return self.clientEp->post(resourcePath, request);}"},
-                {"client/swagger/map_schema_response.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
+                {"client/swagger/map_schema_response.yaml", "/pets", false, false, false,
+                        "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +
                         "        return self.clientEp->post(resourcePath, request);}"},
-                {"client/swagger/array_response_pdf.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
+                {"client/swagger/array_response_pdf.yaml", "/pets", false, false, false,
+                        "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +
                         "        return self.clientEp->post(resourcePath, request);}"},
-                {"client/swagger/any_type_response.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
+                {"client/swagger/any_type_response.yaml", "/pets", false, false, false,
+                        "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +
                         "        return self.clientEp->post(resourcePath, request);}"},
-                {"client/swagger/return_type/no_response.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
-                        "        map<anydata> queryParam = {\"limit\": 'limit};\n" +
-                        "        resourcePath = resourcePath + check getPathForQueryParam(queryParam);\n" +
+                {"client/swagger/return_type/no_response.yaml", "/pets", false, false, true,
+                        "{string resourcePath = string `/pets`;\n" +
+                        "        resourcePath = resourcePath + check getPathForQueryParam(queries);\n" +
                         "        return self.clientEp->get(resourcePath);}"}
         };
     }
