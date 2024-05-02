@@ -21,6 +21,7 @@ package io.ballerina.openapi.core.generators.client.parameter;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -30,16 +31,18 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIncludedRecordParameterNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ASTERISK_TOKEN;
+import static io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages.OAS_CLIENT_102;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERIES;
 
 public class QueriesParameterGenerator implements ParameterGenerator {
@@ -67,6 +70,10 @@ public class QueriesParameterGenerator implements ParameterGenerator {
         }
 
         ObjectSchema queriesSchema = getQueriesSchema();
+        if (Objects.isNull(queriesSchema)) {
+            return Optional.empty();
+        }
+
         String operationId = GeneratorUtils.generateOperationUniqueId(operation, path, httpMethod);
         queriesSchema.setDescription("Represents the Queries record for the operation: " + operationId);
         String queriesName = GeneratorUtils.getValidName(operationId, true) + "Queries";
@@ -86,13 +93,30 @@ public class QueriesParameterGenerator implements ParameterGenerator {
     }
 
     private ObjectSchema getQueriesSchema() {
-        Map<String, Schema> properties = parameters.stream()
-                .collect(Collectors.toMap(Parameter::getName, this::getSchemaWithDetails));
+        Map<String, Schema> properties = new HashMap<>();
+        for (Parameter parameter : parameters) {
+            properties.put(parameter.getName(), getSchemaWithDetails(parameter));
+        }
 
-        List<String> requiredFields = parameters.stream()
+        properties.entrySet().removeIf(entry -> {
+            if (Objects.isNull(entry.getValue())) {
+                ClientDiagnostic diagnostic = new ClientDiagnosticImp(OAS_CLIENT_102, entry.getKey());
+                diagnostics.add(diagnostic);
+                return true;
+            }
+            return false;
+        });
+
+        if (properties.isEmpty()) {
+            return null;
+        }
+
+        List<String> requiredFields = new ArrayList<>(parameters.stream()
                 .filter(parameter -> Boolean.TRUE.equals(parameter.getRequired()))
                 .map(Parameter::getName)
-                .toList();
+                .toList());
+
+        requiredFields.removeIf(field -> !properties.containsKey(field));
 
         ObjectSchema queriesSchema = new ObjectSchema();
         queriesSchema.setProperties(properties);
@@ -104,6 +128,9 @@ public class QueriesParameterGenerator implements ParameterGenerator {
 
     private Schema getSchemaWithDetails(Parameter parameter) {
         Schema schema = parameter.getSchema();
+        if (Objects.isNull(schema)) {
+            return null;
+        }
         schema.setDescription(parameter.getDescription());
         schema.setDeprecated(parameter.getDeprecated());
         schema.extensions(parameter.getExtensions());
