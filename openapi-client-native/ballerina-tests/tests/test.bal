@@ -52,7 +52,7 @@ function testResourceMethod3() returns error? {
 
 @test:Config {}
 function testResourceMethod4() returns error? {
-    OkAlbumArray res = check albumClient->/albums.get("Hard Rock");
+    OkAlbumArray res = check albumClient->/albums.get(genre = "Hard Rock");
     Album[] expected = [
         {id: "2", name: "Back in Black", artist: "AC/DC", genre: "Hard Rock"}
     ];
@@ -62,7 +62,7 @@ function testResourceMethod4() returns error? {
 
 @test:Config {}
 function testResourceMethod5() {
-    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->/albums.get("Hard Rock");
+    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->/albums.get(genre = "Hard Rock");
     OkAlbumArray expected = {
         mediaType: "application/json",
         headers: {user\-id: "user-1", req\-id: 1},
@@ -79,7 +79,7 @@ function testResourceMethod5() {
 
 @test:Config {}
 function testResourceMethod6() {
-    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->/albums.get("Rock");
+    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->/albums.get(genre = "Rock");
     NotFoundErrorMessage expected = {
         mediaType: "application/json",
         headers: {user\-id: "user-1", req\-id: 1},
@@ -96,7 +96,7 @@ function testResourceMethod6() {
 
 @test:Config {}
 function testResourceMethod7() {
-    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->/albums\-all;
+    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->/albumsAll;
     OkAlbumArray expected = {
         mediaType: "application/json",
         headers: {user\-id: "user-1", req\-id: 1},
@@ -198,7 +198,7 @@ function testResourceMethod11() {
     http:Request req = new;
     Album newAlbum = {id: "5", name: "The Wall", artist: "Pink Floyd", genre: "Progressive Rock"};
     req.setJsonPayload(newAlbum);
-    CreatedAlbum|error res = albumClient->/albums\-1/a/[3].post(req);
+    CreatedAlbum|error res = albumClient->/albums1/a/[3].post(req);
     CreatedAlbum expected = {
         mediaType: "application/json",
         headers: {user\-id: "user-1", req\-id: 1},
@@ -230,7 +230,7 @@ function testResourceMethod12() {
     http:Request req = new;
     Album existingAlbum = {id: "1", name: "The Dark Side of the Moon", artist: "Pink Floyd", genre: "Progressive Rock"};
     req.setJsonPayload(existingAlbum);
-    CreatedAlbum|ConflictAlbum|error res = albumClient->/albums\-1/a/[3].post(req);
+    CreatedAlbum|ConflictAlbum|error res = albumClient->/albums1/a/[3].post(req);
     ConflictAlbum expected = {
         mediaType: "application/json",
         headers: {user\-id: "user-1", req\-id: 1},
@@ -259,7 +259,7 @@ function testResourceMethod13() {
     http:Request req = new;
     json notAnAlbum = {id: "4", name: "The Wall", artist: "Pink Floyd"};
     req.setJsonPayload(notAnAlbum);
-    CreatedAlbum|ConflictAlbum|BadRequestErrorPayload|error res = albumClient->/albums\-1/a/[3].post(req);
+    CreatedAlbum|ConflictAlbum|BadRequestErrorPayload|error res = albumClient->/albums1/a/[3].post(req);
     test:assertTrue(res is BadRequestErrorPayload);
 
     res = albumClient->postAlbums1("a", 3, req);
@@ -269,7 +269,7 @@ function testResourceMethod13() {
 @test:Config {}
 function testResourceMethod14() {
     Album[] newAlbums = [{id: "6", name: "The Wall", artist: "Pink Floyd", genre: "Progressive Rock"}];
-    CreatedAlbumArray|error res = albumClient->/albums\-all/a.post(newAlbums, query = "q");
+    CreatedAlbumArray|error res = albumClient->/albumsAll/a.post(newAlbums, query = "q");
     CreatedAlbumArray expected = {
         mediaType: "application/json",
         headers: {user\-id: "user-1", req\-id: 1},
@@ -297,7 +297,7 @@ function testResourceMethod14() {
 
 function testResourceMethod15() {
     Album[] existingAlbums = [{id: "1", name: "The Dark Side of the Moon", artist: "Pink Floyd", genre: "Progressive Rock"}];
-    CreatedAlbumArray|ConflictAlbum|error res = albumClient->/albums\-all/a.post(existingAlbums);
+    CreatedAlbumArray|ConflictAlbum|error res = albumClient->/albumsAll/a.post(existingAlbums);
     ConflictAlbum expected = {
         mediaType: "application/json",
         headers: {user\-id: "user-1", req\-id: 1},
@@ -326,7 +326,7 @@ function testResourceMethod16() {
     http:Request req = new;
     Album[] newAlbums = [{id: "7", name: "The Wall", artist: "Pink Floyd", genre: "Progressive Rock"}];
     req.setJsonPayload(newAlbums);
-    CreatedAlbumArray|error res = albumClient->/albums\-all\-1.post(req, query = "q");
+    CreatedAlbumArray|error res = albumClient->/albumsAll1.post(req, query = "q");
     CreatedAlbumArray expected = {
         mediaType: "application/json",
         headers: {user\-id: "user-1", req\-id: 1},
@@ -358,7 +358,7 @@ function testResourceMethod17() {
     http:Request req = new;
     Album[] existingAlbums = [{id: "1", name: "The Dark Side of the Moon", artist: "Pink Floyd", genre: "Progressive Rock"}];
     req.setJsonPayload(existingAlbums);
-    CreatedAlbumArray|ConflictAlbum|error res = albumClient->/albums\-all\-1.post(req, query = "q");
+    CreatedAlbumArray|ConflictAlbum|error res = albumClient->/albumsAll1.post(req, query = "q");
     ConflictAlbum expected = {
         mediaType: "application/json",
         headers: {user\-id: "user-1", req\-id: 1},
@@ -387,7 +387,7 @@ function testResourceMethod18() {
     http:Request req = new;
     json notAnAlbum = [{id: "4", name: "The Wall", artist: "Pink Floyd"}];
     req.setJsonPayload(notAnAlbum);
-    CreatedAlbumArray|ConflictAlbum|BadRequestErrorPayload|error res = albumClient->/albums\-all\-1.post(req, query = "q");
+    CreatedAlbumArray|ConflictAlbum|BadRequestErrorPayload|error res = albumClient->/albumsAll1.post(req, query = "q");
     test:assertTrue(res is BadRequestErrorPayload);
 
     res = albumClient->postAlbumsAll1(req, query = "q");
@@ -443,7 +443,7 @@ function testRemoteMethod3() returns error? {
 
 @test:Config {}
 function testRemoteMethod4() returns error? {
-    OkAlbumArray res = check albumClient->getAlbums("Hard Rock");
+    OkAlbumArray res = check albumClient->getAlbums(genre = "Hard Rock");
     Album[] expected = [
         {id: "2", name: "Back in Black", artist: "AC/DC", genre: "Hard Rock"}
     ];
@@ -453,7 +453,7 @@ function testRemoteMethod4() returns error? {
 
 @test:Config {}
 function testRemoteMethod5() {
-    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->getAlbums("Hard Rock");
+    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->getAlbums(genre = "Hard Rock");
     OkAlbumArray expected = {
         mediaType: "application/json",
         headers: {user\-id: "user-1", req\-id: 1},
@@ -470,7 +470,7 @@ function testRemoteMethod5() {
 
 @test:Config {}
 function testRemoteMethod6() {
-    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->getAlbums("Rock");
+    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->getAlbums(genre = "Rock");
     NotFoundErrorMessage expected = {
         mediaType: "application/json",
         headers: {user\-id: "user-1", req\-id: 1},
@@ -487,7 +487,7 @@ function testRemoteMethod6() {
 
 @test:Config {}
 function testInvalidMethodInvocation() {
-    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->getAlbums1("Hard Rock");
+    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->getAlbums1(genre = "Hard Rock");
     if res is error {
         test:assertTrue(res is ClientMethodInvocationError);
         test:assertEquals(res.message(), "client method invocation failed: No such method: getAlbumsImpl1");
@@ -498,7 +498,7 @@ function testInvalidMethodInvocation() {
 
 @test:Config {}
 function testAnnotationNotFound() {
-    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->getAlbums2("Hard Rock");
+    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->getAlbums2(genre = "Hard Rock");
     if res is error {
         test:assertTrue(res is ClientMethodInvocationError);
         test:assertEquals(res.message(), "error in invoking client remote method: Method implementation annotation not found");
@@ -509,11 +509,11 @@ function testAnnotationNotFound() {
 
 @test:Config {}
 function testInvalidImplFunctionSignature() {
-    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->getAlbums3("Hard Rock");
+    OkAlbumArray|NotFoundErrorMessage|error res = albumClient->getAlbums3(genre = "Hard Rock");
     if res is error {
         test:assertTrue(res is ClientMethodInvocationError);
         test:assertTrue(res.message().includes("client method invocation failed: java.lang.ClassCastException: " +
-                "class io.ballerina.runtime.internal.values.TypedescValueImpl cannot be cast to class io.ballerina.runtime.api.values.BString"));
+                "class io.ballerina.runtime.internal.values.TypedescValueImpl cannot be cast to class io.ballerina.runtime.internal.values.MapValueImpl"));
     } else {
         test:assertFail("invalid response type");
     }
