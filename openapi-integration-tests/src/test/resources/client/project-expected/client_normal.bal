@@ -38,26 +38,29 @@ public isolated client class Client {
         return;
     }
 
-    # + return - Ok 
-    resource isolated function get albums(string genre) returns Album[]|error {
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
+    # + return - Ok
+    resource isolated function get albums(map<string|string[]> headers = {}, *GetAlbumsQueries queries) returns Album[]|error {
         string resourcePath = string `/albums`;
-        map<anydata> queryParam = {"genre": genre};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        return self.clientEp->get(resourcePath);
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        return self.clientEp->get(resourcePath, headers);
     }
 
-    # + return - Ok 
-    resource isolated function get albums/[string id]() returns Album|error {
+    # + headers - Headers to be sent with the request
+    # + return - Ok
+    resource isolated function get albums/[string id](map<string|string[]> headers = {}) returns Album|error {
         string resourcePath = string `/albums/${getEncodedUri(id)}`;
-        return self.clientEp->get(resourcePath);
+        return self.clientEp->get(resourcePath, headers);
     }
 
-    # + return - Created 
-    resource isolated function post albums(Album payload) returns Album|error {
+    # + headers - Headers to be sent with the request
+    # + return - Created
+    resource isolated function post albums(Album payload, map<string|string[]> headers = {}) returns Album|error {
         string resourcePath = string `/albums`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 }

@@ -53,35 +53,38 @@ public isolated client class Client {
         return;
     }
 
-    # + return - Ok 
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
+    # + return - Ok
     @MethodImpl {name: "getAlbumsImpl"}
-    remote isolated function getAlbums(string genre, typedesc<OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
+    remote isolated function getAlbums(map<string|string[]> headers = {}, typedesc<OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>, *GetAlbumsQueries queries) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
 
+    # + headers - Headers to be sent with the request
     # + return - Ok
     @MethodImpl {name: "getAlbumsIdImpl"}
-    remote isolated function getAlbumsId(string id, typedesc<OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
+    remote isolated function getAlbumsId(string id, map<string|string[]> headers = {}, typedesc<OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
 
-    private isolated function getAlbumsIdImpl(string id, typedesc<OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload> targetType) returns OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload|error {
+    private isolated function getAlbumsIdImpl(string id, map<string|string[]> headers, typedesc<OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload> targetType) returns OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload|error {
         string resourcePath = string `/albums/${getEncodedUri(id)}`;
-        return self.clientEp->get(resourcePath, targetType = targetType);
+        return self.clientEp->get(resourcePath, headers, targetType = targetType);
     }
 
-    private isolated function getAlbumsImpl(string genre, typedesc<OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType) returns OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload|error {
+    private isolated function getAlbumsImpl(map<string|string[]> headers, typedesc<OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType, *GetAlbumsQueries queries) returns OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload|error {
         string resourcePath = string `/albums`;
-        map<anydata> queryParam = {"genre": genre};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        return self.clientEp->get(resourcePath, targetType = targetType);
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        return self.clientEp->get(resourcePath, headers, targetType = targetType);
     }
 
+    # + headers - Headers to be sent with the request
     # + return - Created
     @MethodImpl {name: "postAlbumsImpl"}
-    remote isolated function postAlbums(Album payload, typedesc<CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
+    remote isolated function postAlbums(Album payload, map<string|string[]> headers = {}, typedesc<CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
 
-    private isolated function postAlbumsImpl(Album payload, typedesc<CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload> targetType) returns CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload|error {
+    private isolated function postAlbumsImpl(Album payload, map<string|string[]> headers, typedesc<CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload> targetType) returns CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload|error {
         string resourcePath = string `/albums`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return self.clientEp->post(resourcePath, request, targetType = targetType);
+        return self.clientEp->post(resourcePath, request, headers, targetType = targetType);
     }
 }

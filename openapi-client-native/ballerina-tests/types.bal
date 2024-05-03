@@ -62,3 +62,16 @@ public type NotFoundErrorMessage record {|
     ErrorMessage body;
     record {|int req\-id; string user\-id;|} headers;
 |};
+
+public type GetAlbumsQueries record {
+    string genre = "Rock";
+};
+
+public type GetAlbumsQueriesClosed record {|
+    string genre;
+    string 'type;
+|};
+
+public type PostAlbumsAllQueries record {
+    string query?;
+};

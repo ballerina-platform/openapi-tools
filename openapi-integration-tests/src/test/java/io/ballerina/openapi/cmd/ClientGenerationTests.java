@@ -19,7 +19,6 @@ package io.ballerina.openapi.cmd;
 
 import io.ballerina.openapi.OpenAPITest;
 import io.ballerina.openapi.TestUtil;
-import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -29,6 +28,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.ballerina.openapi.TestUtil.DISTRIBUTIONS_DIR;
 import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
@@ -40,6 +41,7 @@ public class ClientGenerationTests extends OpenAPITest {
     public static final String DISTRIBUTION_FILE_NAME = DISTRIBUTIONS_DIR.toString();
     public static final Path TEST_RESOURCE = Paths.get(RESOURCES_PATH.toString() + "/client");
     public static final Path EXPECTED_RESOURCE = Paths.get("src/test/resources/client");
+    private static final String LINE_SEPARATOR = System.lineSeparator();
 
     @Test(description = "Client generation with resource functions")
     public void clientWithResourceFunction() throws IOException, InterruptedException {
@@ -101,14 +103,11 @@ public class ClientGenerationTests extends OpenAPITest {
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, projectGenPath, buildArgs);
         Assert.assertTrue(Files.exists(projectGenPath.resolve("Ballerina.toml")));
         Assert.assertTrue(Files.exists(projectGenPath.resolve("client.bal")));
-        FileUtils.contentEqualsIgnoreEOL(projectGenPath.resolve("client.bal").toFile(),
-                projectExpectedPath.resolve("client_resource.bal").toFile(), "UTF-8");
+        compareFiles(projectGenPath, "client.bal", projectExpectedPath, "client_resource.bal");
         Assert.assertTrue(Files.exists(projectGenPath.resolve("types.bal")));
-        FileUtils.contentEqualsIgnoreEOL(projectGenPath.resolve("types.bal").toFile(),
-                projectExpectedPath.resolve("types.bal").toFile(), "UTF-8");
+        compareFiles(projectGenPath, "types.bal", projectExpectedPath, "types.bal");
         Assert.assertTrue(Files.exists(projectGenPath.resolve("utils.bal")));
-        FileUtils.contentEqualsIgnoreEOL(projectGenPath.resolve("utils.bal").toFile(),
-                projectExpectedPath.resolve("utils.bal").toFile(), "UTF-8");
+        compareFiles(projectGenPath, "utils.bal", projectExpectedPath, "utils.bal");
     }
 
     @Test(description = "`--status-code-binding` and `--client-methods remote` options with client")
@@ -127,14 +126,11 @@ public class ClientGenerationTests extends OpenAPITest {
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, projectGenPath, buildArgs);
         Assert.assertTrue(Files.exists(projectGenPath.resolve("Ballerina.toml")));
         Assert.assertTrue(Files.exists(projectGenPath.resolve("client.bal")));
-        FileUtils.contentEqualsIgnoreEOL(projectGenPath.resolve("client.bal").toFile(),
-                projectExpectedPath.resolve("client_resource.bal").toFile(), "UTF-8");
+        compareFiles(projectGenPath, "client.bal", projectExpectedPath, "client_remote.bal");
         Assert.assertTrue(Files.exists(projectGenPath.resolve("types.bal")));
-        FileUtils.contentEqualsIgnoreEOL(projectGenPath.resolve("types.bal").toFile(),
-                projectExpectedPath.resolve("types.bal").toFile(), "UTF-8");
+        compareFiles(projectGenPath, "types.bal", projectExpectedPath, "types.bal");
         Assert.assertTrue(Files.exists(projectGenPath.resolve("utils.bal")));
-        FileUtils.contentEqualsIgnoreEOL(projectGenPath.resolve("utils.bal").toFile(),
-                projectExpectedPath.resolve("utils.bal").toFile(), "UTF-8");
+        compareFiles(projectGenPath, "utils.bal", projectExpectedPath, "utils.bal");
     }
 
     @Test(description = "`--status-code-binding` option with service")
@@ -146,13 +142,12 @@ public class ClientGenerationTests extends OpenAPITest {
         buildArgs.add("--mode");
         buildArgs.add("service");
         buildArgs.add("--status-code-binding");
-        Path projectGenPath = Paths.get(TEST_RESOURCE + "/project-01");
-        Path projectExpectedPath = Paths.get(EXPECTED_RESOURCE + "/project-01");
+        Path projectGenPath = Paths.get(TEST_RESOURCE + "/project-05");
+        Path projectExpectedPath = Paths.get(EXPECTED_RESOURCE + "/project-05");
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, projectGenPath, buildArgs);
         Assert.assertFalse(Files.exists(projectGenPath.resolve("service.bal")));
         Assert.assertTrue(Files.exists(projectGenPath.resolve("Ballerina.toml")));
-        FileUtils.contentEqualsIgnoreEOL(projectGenPath.resolve("Ballerina.toml").toFile(),
-                projectExpectedPath.resolve("Ballerina.toml").toFile(), "UTF-8");
+        compareFiles(projectGenPath, "Ballerina.toml", projectExpectedPath, "Ballerina.toml");
     }
 
     @Test(description = "`--status-code-binding` option without any mode")
@@ -167,17 +162,13 @@ public class ClientGenerationTests extends OpenAPITest {
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, projectGenPath, buildArgs);
         Assert.assertTrue(Files.exists(projectGenPath.resolve("Ballerina.toml")));
         Assert.assertTrue(Files.exists(projectGenPath.resolve("client.bal")));
-        FileUtils.contentEqualsIgnoreEOL(projectGenPath.resolve("client.bal").toFile(),
-                projectExpectedPath.resolve("client_resource.bal").toFile(), "UTF-8");
+        compareFiles(projectGenPath, "client.bal", projectExpectedPath, "client_resource.bal");
         Assert.assertTrue(Files.exists(projectGenPath.resolve("types.bal")));
-        FileUtils.contentEqualsIgnoreEOL(projectGenPath.resolve("types.bal").toFile(),
-                projectExpectedPath.resolve("types.bal").toFile(), "UTF-8");
+        compareFiles(projectGenPath, "types.bal", projectExpectedPath, "types_all.bal");
         Assert.assertTrue(Files.exists(projectGenPath.resolve("utils.bal")));
-        FileUtils.contentEqualsIgnoreEOL(projectGenPath.resolve("utils.bal").toFile(),
-                projectExpectedPath.resolve("utils.bal").toFile(), "UTF-8");
+        compareFiles(projectGenPath, "utils.bal", projectExpectedPath, "utils_all.bal");
         Assert.assertTrue(Files.exists(projectGenPath.resolve("openapi_service.bal")));
-        FileUtils.contentEqualsIgnoreEOL(projectGenPath.resolve("openapi_service.bal").toFile(),
-                projectExpectedPath.resolve("openapi_service.bal").toFile(), "UTF-8");
+        compareFiles(projectGenPath, "openapi_service.bal", projectExpectedPath, "openapi_service.bal");
     }
 
     @Test(description = "`--status-code-binding` without `Ballerina.toml`")
@@ -191,7 +182,20 @@ public class ClientGenerationTests extends OpenAPITest {
         Path projectExpectedPath = Paths.get(EXPECTED_RESOURCE + "/project-expected");
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, projectGenPath, buildArgs);
         Assert.assertTrue(Files.exists(projectGenPath.resolve("client.bal")));
-        FileUtils.contentEqualsIgnoreEOL(projectGenPath.resolve("client.bal").toFile(),
-                projectExpectedPath.resolve("client_normal.bal").toFile(), "UTF-8");
+        compareFiles(projectGenPath, "client.bal", projectExpectedPath, "client_normal.bal");
+    }
+
+    /**
+     * Compare two files.
+     */
+    private void compareFiles(Path genPath, String generatedFileName, Path expectedPath, String expectedFileName)
+            throws IOException {
+        Stream<String> expectedFile = Files.lines(expectedPath.resolve(expectedFileName));
+        String expectedContent = expectedFile.collect(Collectors.joining(LINE_SEPARATOR));
+        Stream<String> generatedFile = Files.lines(genPath.resolve(generatedFileName));
+        String generatedContent = generatedFile.collect(Collectors.joining(LINE_SEPARATOR));
+        generatedContent = generatedContent.trim().replaceAll("\\s+", "");
+        expectedContent = expectedContent.trim().replaceAll("\\s+", "");
+        Assert.assertEquals(generatedContent, expectedContent);
     }
 }
