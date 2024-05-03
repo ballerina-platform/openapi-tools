@@ -19,7 +19,6 @@ package io.ballerina.openapi.cmd;
 
 import io.ballerina.openapi.OpenAPITest;
 import io.ballerina.openapi.TestUtil;
-import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
