@@ -167,6 +167,7 @@ release {
 }
 
 task buildProject {
+    dependsOn(createProperties)
     dependsOn('module-ballerina-openapi:build')
 }
 
