@@ -3,7 +3,7 @@ import ballerina/openapi;
 
 @openapi:ServiceInfo {
     contract: "hello_openapi.yaml",
-    'version: "",
+    version: "",
     title: ""
 }
 service /mTitle01 on new http:Listener(9090) {
