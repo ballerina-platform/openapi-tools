@@ -327,7 +327,7 @@ public final class Constants {
     public static final String SLASH = "/";
     public static final String HYPHEN = "-";
     public static final String CONTRACT = "contract";
-    public static final String VERSION = "'version";
+    public static final String VERSION = "version";
     public static final String TITLE = "title";
     public static final String OPENAPI_ANNOTATION = "openapi:ServiceInfo";
 

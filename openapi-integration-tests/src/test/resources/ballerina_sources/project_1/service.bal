@@ -2,7 +2,7 @@ import ballerina/http;
 import ballerina/openapi;
 
 @openapi:ServiceInfo {
-    'version: "2.0.0",
+    version: "2.0.0",
     title: "Mock Yaml"
 }
 service / on new http:Listener(9090) {

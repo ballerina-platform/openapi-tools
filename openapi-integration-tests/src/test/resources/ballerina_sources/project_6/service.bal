@@ -2,7 +2,7 @@ import ballerina/http;
 import ballerina/openapi;
 
 @openapi:ServiceInfo {
-    'version: "",
+    version: "",
     title: ""
 }
 service /bothBlank on new http:Listener(9090) {
