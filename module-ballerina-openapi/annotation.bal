@@ -33,7 +33,7 @@ public type ServiceInformation record {|
     boolean failOnErrors = true;
     boolean embed = false;
     string title?;
-    string 'version?;
+    string version?;
 |};
 
 // # Client configurations code.
