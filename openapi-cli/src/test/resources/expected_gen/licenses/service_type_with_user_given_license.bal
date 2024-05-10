@@ -2,6 +2,7 @@
 
 import ballerina/http;
 
+@http:ServiceConfig {basePath: "/v1"}
 type OASServiceType service object {
     *http:Service;
     resource function get pets(int? 'limit) returns Pets|http:Response;

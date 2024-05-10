@@ -18,14 +18,20 @@
 
 package io.ballerina.openapi.core.generators.service;
 
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MethodDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.ObjectTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
@@ -43,13 +49,17 @@ import java.util.Objects;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMethodDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createObjectTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ASTERISK_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.AT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FUNCTION_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RESOURCE_ACCESSOR_DECLARATION;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RESOURCE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
@@ -82,7 +92,12 @@ public class ServiceTypeGenerator extends ServiceGenerator {
         return syntaxTree.modifyWith(modulePartNode);
     }
 
-    private TypeDefinitionNode generateServiceObject() throws BallerinaOpenApiException {
+    private TypeDefinitionNode generateServiceObject() {
+        //create service config annotation
+        ListenerGeneratorImpl listenerGenerator = new ListenerGeneratorImpl();
+        listenerGenerator.getListenerDeclarationNodes(oasServiceMetadata.getOpenAPI().getServers());
+        AnnotationNode annotationNode = createAnnotationNode("http:ServiceConfig",
+                "basePath:\"" + listenerGenerator.getBasePath() + "\"");
         List<Node> serviceObjectMemberNodes = new ArrayList<>();
         TypeReferenceNode httpServiceTypeRefNode = createTypeReferenceNode(createToken(ASTERISK_TOKEN),
                 createIdentifierToken("http:Service"), createToken(SEMICOLON_TOKEN));
@@ -117,8 +132,33 @@ public class ServiceTypeGenerator extends ServiceGenerator {
                 members,
                 createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
-        return createTypeDefinitionNode(null, null, createToken(TYPE_KEYWORD),
+        return createTypeDefinitionNode(createMetadataNode(null, createNodeList(annotationNode)),
+                null, createToken(TYPE_KEYWORD),
                 createIdentifierToken(GeneratorConstants.SERVICE_TYPE_NAME), objectTypeDescriptorNode,
                 createToken(SEMICOLON_TOKEN));
+    }
+
+    /**
+     * This util create any annotation node by providing annotation reference and annotation body content.
+     *
+     * @param annotationReference Annotation reference value
+     * @param annotFields         Annotation body content fields with single string
+     * @return {@link AnnotationNode}
+     */
+    private static AnnotationNode createAnnotationNode(String annotationReference, String annotFields) {
+        String annotBody = GeneratorConstants.OPEN_BRACE + String.join(GeneratorConstants.COMMA, annotFields) +
+                GeneratorConstants.CLOSE_BRACE;
+
+        MappingConstructorExpressionNode annotationBody = null;
+        SimpleNameReferenceNode annotReference = createSimpleNameReferenceNode(
+                createIdentifierToken(annotationReference));
+        ExpressionNode expressionNode = NodeParser.parseExpression(annotBody);
+        if (expressionNode.kind() == MAPPING_CONSTRUCTOR) {
+            annotationBody = (MappingConstructorExpressionNode) expressionNode;
+        }
+        return NodeFactory.createAnnotationNode(
+                createToken(AT_TOKEN),
+                annotReference,
+                annotationBody);
     }
 }
