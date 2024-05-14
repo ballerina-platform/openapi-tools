@@ -61,6 +61,7 @@ public final class Constants {
     public static final String PORT = "port";
     public static final String HTTP_REQUEST = "http:Request";
     public static final String DEFAULT = "default";
+    public static final String DEFAULT_STATUS_CODE_RESPONSE = "DefaultStatusCodeResponse";
     public static final String WILD_CARD_CONTENT_KEY = "*/*";
     public static final String WILD_CARD_SUMMARY = "Any type of entity body";
     public static final String MEDIA_TYPE = "mediaType";
@@ -123,7 +124,6 @@ public final class Constants {
     public static final Map<String, String> HTTP_CODES;
     static {
         Map<String, String> httpCodeMap = new HashMap<>();
-        httpCodeMap.put("DefaultStatusCodeResponse", "default");
         httpCodeMap.put("Continue", "100");
         httpCodeMap.put("SwitchingProtocols", "101");
         httpCodeMap.put("Processing", "102");
