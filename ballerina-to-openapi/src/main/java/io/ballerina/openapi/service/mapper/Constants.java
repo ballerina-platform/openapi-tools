@@ -123,6 +123,7 @@ public final class Constants {
     public static final Map<String, String> HTTP_CODES;
     static {
         Map<String, String> httpCodeMap = new HashMap<>();
+        httpCodeMap.put("DefaultStatusCodeResponse", "default");
         httpCodeMap.put("Continue", "100");
         httpCodeMap.put("SwitchingProtocols", "101");
         httpCodeMap.put("Processing", "102");
@@ -184,8 +185,8 @@ public final class Constants {
         httpCodeMap.put("LoopDetected", "508");
         httpCodeMap.put("NotExtended", "510");
         httpCodeMap.put("NetworkAuthenticationRequired", "511");
-        httpCodeMap.put("NetworkAuthorizationRequired", "511"); //This status code was added since it is deprecated.
         // TODO: remove this after fixing https://github.com/ballerina-platform/ballerina-standard-library/issues/4245
+        httpCodeMap.put("NetworkAuthorizationRequired", "511"); //This status code was added since it is deprecated.
         HTTP_CODES = Collections.unmodifiableMap(httpCodeMap);
     }
     public static final Map<String, String> HTTP_STATUS_CODE_ERRORS;
