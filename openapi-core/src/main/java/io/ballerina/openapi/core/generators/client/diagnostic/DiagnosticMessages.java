@@ -55,9 +55,7 @@ public enum DiagnosticMessages {
             DiagnosticSeverity.WARNING),
     OAS_CLIENT_114("OAS_CLIENT_114", "the operation: '%s' is skipped in the client generation since only a default" +
             " response found for the operation which is not supported with status code binding option",
-            DiagnosticSeverity.WARNING),
-    OAS_CLIENT_115("OAS_CLIENT_115", "the 'default' response for the operation: '%s' is skipped in the client " +
-            "generation, since it is not supported with status code binding option", DiagnosticSeverity.WARNING);
+            DiagnosticSeverity.WARNING);
     private final String code;
     private final String description;
     private final DiagnosticSeverity severity;

@@ -83,6 +83,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_STATUS;
 
 public class TypeHandler {
     private static TypeHandler typeHandlerInstance;
@@ -259,6 +260,7 @@ public class TypeHandler {
 
     private static RecordTypeDescriptorNode getRecordTypeDescriptorNode(String statusCode, TypeDescriptorNode bodyType,
                                                                         TypeDescriptorNode headersType) {
+        statusCode = statusCode.equals(DEFAULT_STATUS) ? GeneratorConstants.DEFAULT_STATUS_CODE_RESPONSE : statusCode;
         Token recordKeyWord = createToken(RECORD_KEYWORD);
         Token bodyStartDelimiter = createIdentifierToken("{|");
         // Create record fields

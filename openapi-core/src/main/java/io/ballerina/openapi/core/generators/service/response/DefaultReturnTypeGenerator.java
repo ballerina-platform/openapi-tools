@@ -131,8 +131,6 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             if (code == null && !responseCode.equals(GeneratorConstants.DEFAULT)) {
                 diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_201, responseCode));
                 type = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
-            } else if (responseCode.equals(GeneratorConstants.DEFAULT)) {
-                type = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
             } else if (content == null && (responseValue == null || responseValue.get$ref() == null) ||
                     content != null && content.isEmpty()) {
                 type = GeneratorUtils.getQualifiedNameReferenceNode(

@@ -54,16 +54,14 @@ public class FunctionStatusCodeReturnTypeGenerator extends FunctionReturnTypeGen
         try {
             String code = GeneratorConstants.HTTP_CODES_DES.get(statusCode);
             if (Objects.isNull(code)) {
-                ClientDiagnosticImp diagnostic = statusCode.equals(GeneratorConstants.DEFAULT)
-                        ? new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_115, operation.getOperationId())
-                        : new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_113, statusCode);
-                diagnostics.add(diagnostic);
-            } else {
-                List<Diagnostic> newDiagnostics = new ArrayList<>();
-                returnTypes.add(generateStatusCodeTypeInclusionRecord(code, response, httpMethod, openAPI, path,
-                        newDiagnostics));
-                diagnostics.addAll(newDiagnostics.stream().map(ClientDiagnosticImp::new).toList());
+                diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_113, statusCode));
+                return false;
             }
+
+            List<Diagnostic> newDiagnostics = new ArrayList<>();
+            returnTypes.add(generateStatusCodeTypeInclusionRecord(code, response, httpMethod, openAPI, path,
+                    newDiagnostics));
+            diagnostics.addAll(newDiagnostics.stream().map(ClientDiagnosticImp::new).toList());
         } catch (InvalidReferenceException e) {
             diagnostics.add(new ClientDiagnosticImp(e.getDiagnostic()));
         }
