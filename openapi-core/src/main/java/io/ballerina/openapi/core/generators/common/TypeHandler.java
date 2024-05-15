@@ -74,6 +74,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_STATUS;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_STATUS_CODE_RESPONSE;
 
 public class TypeHandler {
     private static TypeHandler typeHandlerInstance;
@@ -200,11 +201,12 @@ public class TypeHandler {
     public SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode bodyType,
                                                              TypeDescriptorNode headersType, String method) {
         String recordName;
+        String statusCodeName = statusCode.equals(DEFAULT_STATUS_CODE_RESPONSE) ? DEFAULT_STATUS : statusCode;
         if (bodyType != null) {
             String bodyTypeStr = bodyType.toString().replaceAll("[\\[\\\\]]", "Array");
-            recordName = statusCode + GeneratorUtils.getValidName(bodyTypeStr, true);
+            recordName = statusCodeName + GeneratorUtils.getValidName(bodyTypeStr, true);
         } else {
-            recordName = statusCode;
+            recordName = statusCodeName;
         }
 
         RecordTypeDescriptorNode recordTypeDescriptorNode = getRecordTypeDescriptorNode(statusCode, bodyType,
@@ -231,7 +233,6 @@ public class TypeHandler {
 
     private static RecordTypeDescriptorNode getRecordTypeDescriptorNode(String statusCode, TypeDescriptorNode bodyType,
                                                                         TypeDescriptorNode headersType) {
-        statusCode = statusCode.equals(DEFAULT_STATUS) ? GeneratorConstants.DEFAULT_STATUS_CODE_RESPONSE : statusCode;
         Token recordKeyWord = createToken(RECORD_KEYWORD);
         Token bodyStartDelimiter = createIdentifierToken("{|");
         // Create record fields
