@@ -6,15 +6,15 @@ service / on ep0 {
     # Gets a list of users.
     #
     # + return - Unauthorized
-    resource function get users() returns UnauthorizedError {
+    resource function get users() returns ErrorUnauthorized {
     }
     # Gets a user by ID.
     #
     # + id - parameter description
     # + return - returns can be any of following types
-    # User (OK)
-    # UnauthorizedError (Unauthorized)
-    # NotFoundError (The specified resource was not found)
-    resource function get users/[int id]() returns User|UnauthorizedError|NotFoundError {
+    # http:Ok (OK)
+    # http:Unauthorized (Unauthorized)
+    # http:NotFound (The specified resource was not found)
+    resource function get users/[int id]() returns User|ErrorUnauthorized|ErrorNotFound {
     }
 }

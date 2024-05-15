@@ -7,18 +7,18 @@ service / on ep0 {
     #
     # + payload - parameter description
     # + return - Successful
-    resource function post user(@http:Payload map<string> payload) returns OkJson {
+    resource function post user(@http:Payload map<string> payload) returns JsonOk {
     }
     # Post operation for the path /user
     #
     # + payload - parameter description
     # + return - Successful
-    resource function post user02(@http:Payload map<string> payload) returns OkJson {
+    resource function post user02(@http:Payload map<string> payload) returns JsonOk {
     }
     # Post operation for the path /user
     #
     # + payload - parameter description
     # + return - Successful
-    resource function post user03(@http:Payload map<string> payload) returns OkJson {
+    resource function post user03(@http:Payload map<string> payload) returns JsonOk {
     }
 }

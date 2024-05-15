@@ -46,10 +46,9 @@ public type Snow record {
     decimal '3h?;
 };
 
-public type NotFoundString record {|
+public type StringNotFound record {|
     *http:NotFound;
     string body;
-    map<string|string[]> headers;
 |};
 
 public type '200 record {
