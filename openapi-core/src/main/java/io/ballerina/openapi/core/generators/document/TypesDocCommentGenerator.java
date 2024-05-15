@@ -56,6 +56,9 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
     }
     @Override
     public SyntaxTree updateSyntaxTreeWithDocComments() {
+        if (openAPI.getComponents() == null) {
+            return syntaxTree;
+        }
         //generate type doc comments
         Node rootNode = syntaxTree.rootNode();
         //iterate through the root node and add doc comments

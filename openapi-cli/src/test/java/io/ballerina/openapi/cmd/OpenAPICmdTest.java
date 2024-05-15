@@ -725,7 +725,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString()};
         OpenApiCmd cmd = new OpenApiCmd(standardOut, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
-        cmd.execute();
+         cmd.execute();
         Assert.assertTrue(outputStream.toString().contains("WARNING: remote function(s) will be generated for client" +
                 " and the service generation can not proceed due to the openapi definition contain" +
                 " following complex path(s):" + System.lineSeparator() +

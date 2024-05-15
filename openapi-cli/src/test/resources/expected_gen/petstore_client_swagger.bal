@@ -249,7 +249,7 @@ public isolated client class Client {
     # + petId - ID of pet that needs to be updated
     # + headers - Headers to be sent with the request
     # + return - Invalid input
-    remote isolated function updatePetWithForm(int petId, pet_petId_body payload, map<string|string[]> headers = {}) returns http:Response|error {
+    remote isolated function updatePetWithForm(int petId, record {string name?; string status?;} payload, map<string|string[]> headers = {}) returns http:Response|error {
         string resourcePath = string `/pet/${getEncodedUri(petId)}`;
         http:Request request = new;
         string encodedRequestBody = createFormURLEncodedRequestBody(payload);
@@ -274,7 +274,7 @@ public isolated client class Client {
     # + petId - ID of pet to update
     # + headers - Headers to be sent with the request
     # + return - successful operation
-    remote isolated function uploadFile(int petId, petId_uploadImage_body payload, map<string|string[]> headers = {}) returns ApiResponse|error {
+    remote isolated function uploadFile(int petId, record {string additionalMetadata?; record {byte[] fileContent; string fileName;} file?;} payload, map<string|string[]> headers = {}) returns ApiResponse|error {
         string resourcePath = string `/pet/${getEncodedUri(petId)}/uploadImage`;
         http:Request request = new;
         mime:Entity[] bodyParts = check createBodyParts(payload);
