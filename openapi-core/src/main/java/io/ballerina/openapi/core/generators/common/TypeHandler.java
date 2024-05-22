@@ -204,7 +204,7 @@ public class TypeHandler {
         String statusCodeName = statusCode.equals(DEFAULT_STATUS_CODE_RESPONSE) ? DEFAULT_STATUS : statusCode;
         if (bodyType != null) {
             String bodyTypeStr = bodyType.toString().replaceAll("[\\[\\\\]]", "Array");
-            recordName = statusCodeName + GeneratorUtils.getValidName(bodyTypeStr, true);
+            recordName = GeneratorUtils.getValidName(bodyTypeStr, true) + statusCodeName;
         } else {
             recordName = statusCodeName;
         }
