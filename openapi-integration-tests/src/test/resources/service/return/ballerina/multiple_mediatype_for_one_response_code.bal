@@ -6,8 +6,7 @@ public type User record {
     string lastName?;
 };
 
-public type BadRequestUserXmlString record {|
+public type UserXmlStringBadRequest record {|
     *http:BadRequest;
     User|xml|string body;
-    map<string|string[]> headers;
 |};

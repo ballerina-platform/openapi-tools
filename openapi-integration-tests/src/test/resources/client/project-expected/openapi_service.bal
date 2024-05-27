@@ -10,20 +10,20 @@ service /api on ep0 {
     # http:Ok (Ok)
     # http:NotFound (NotFound)
     # http:BadRequest (BadRequest)
-    resource function get albums(string genre) returns Album[]|NotFoundErrorMessage|BadRequestErrorPayload {
+    resource function get albums(string genre) returns Album[]|ErrorMessageNotFound|ErrorPayloadBadRequest {
     }
 
-    # + return - returns can be any of following types 
+    # + return - returns can be any of following types
     # http:Ok (Ok)
     # http:NotFound (NotFound)
     # http:BadRequest (BadRequest)
-    resource function get albums/[string id]() returns Album|NotFoundErrorMessage|BadRequestErrorPayload {
+    resource function get albums/[string id]() returns Album|ErrorMessageNotFound|ErrorPayloadBadRequest {
     }
 
-    # + return - returns can be any of following types 
+    # + return - returns can be any of following types
     # http:Created (Created)
     # http:Conflict (Conflict)
     # http:BadRequest (BadRequest)
-    resource function post albums(@http:Payload Album payload) returns Album|ConflictErrorMessage|BadRequestErrorPayload {
+    resource function post albums(@http:Payload Album payload) returns Album|ErrorMessageConflict|ErrorPayloadBadRequest {
     }
 }

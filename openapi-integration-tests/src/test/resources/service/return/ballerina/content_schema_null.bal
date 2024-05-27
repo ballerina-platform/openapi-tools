@@ -1,7 +1,6 @@
 import ballerina/http;
 
-public type AcceptedJson record {|
+public type JsonAccepted record {|
     *http:Accepted;
     json body;
-    map<string|string[]> headers;
 |};

@@ -11,12 +11,6 @@ public type StoreInventory03Response record {|
     record {|record {string name?; string place?;}...;|}...;
 |};
 
-public type BadRequestStoreInventory05Response record {|
-    *http:BadRequest;
-    StoreInventory05Response body;
-    map<string|string[]> headers;
-|};
-
 public type User record {
     string name?;
     int id?;
@@ -24,6 +18,11 @@ public type User record {
 
 public type StoreInventory04Response record {|
     User...;
+|};
+
+public type StoreInventory05ResponseBadRequest record {|
+    *http:BadRequest;
+    StoreInventory05Response body;
 |};
 
 public type inline_response_200 record {|
