@@ -284,7 +284,7 @@ isolated function getValidatedResponseForDefaultMapping(http:StatusCodeResponse|
     if response is error {
         if response is http:StatusCodeResponseDataBindingError {
             http:StatusCodeBindingErrorDetail detail = response.detail();
-            if nonDefaultStatusCodes.indexOf(detail.statusCode) is int && detail.fromDefaultStatusCodeResponse {
+            if nonDefaultStatusCodes.indexOf(detail.statusCode) is int && detail.fromDefaultStatusCodeMapping {
                 return createStatusCodeResponseBindingError(detail.statusCode, detail.headers, detail.body);
             }
         }
@@ -310,10 +310,10 @@ isolated function getValidatedResponseForDefaultMapping(http:StatusCodeResponse|
 isolated function createStatusCodeResponseBindingError(int statusCode, map<string[]> headers, anydata body = ()) returns http:StatusCodeResponseBindingError {
     string reasonPhrase = string `incompatible type found for the response with non-default status code: ${statusCode}`;
     if 100 <= statusCode && statusCode <= 399 {
-        return error http:StatusCodeResponseBindingError(reasonPhrase, statusCode = statusCode, headers = headers, body = body, fromDefaultStatusCodeResponse = false);
+        return error http:StatusCodeResponseBindingError(reasonPhrase, statusCode = statusCode, headers = headers, body = body, fromDefaultStatusCodeMapping = false);
     } else if 400 <= statusCode && statusCode <= 499 {
-        return error http:StatusCodeBindingClientRequestError(reasonPhrase, statusCode = statusCode, headers = headers, body = body, fromDefaultStatusCodeResponse = false);
+        return error http:StatusCodeBindingClientRequestError(reasonPhrase, statusCode = statusCode, headers = headers, body = body, fromDefaultStatusCodeMapping = false);
     } else {
-        return error http:StatusCodeBindingRemoteServerError(reasonPhrase, statusCode = statusCode, headers = headers, body = body, fromDefaultStatusCodeResponse = false);
+        return error http:StatusCodeBindingRemoteServerError(reasonPhrase, statusCode = statusCode, headers = headers, body = body, fromDefaultStatusCodeMapping = false);
     }
 }
