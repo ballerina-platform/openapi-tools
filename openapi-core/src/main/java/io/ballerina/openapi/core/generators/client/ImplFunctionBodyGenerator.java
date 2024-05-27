@@ -17,7 +17,9 @@
  */
 package io.ballerina.openapi.core.generators.client;
 
+import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
+import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -25,20 +27,27 @@ import io.swagger.v3.oas.models.PathItem;
 import java.util.List;
 import java.util.Map;
 
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getSimpleExpressionStatementNode;
+
 /**
  * This class is used to generate the function body of the client external method's implementation function.
  *
  * @since 1.9.0
  */
 public class ImplFunctionBodyGenerator extends FunctionBodyGeneratorImp {
+    private final boolean hasDefaultStatusResponse;
+    private final List<String> nonDefaultStatusCodes;
 
     public ImplFunctionBodyGenerator(String path, Map.Entry<PathItem.HttpMethod, Operation> operation, OpenAPI openAPI,
                                      AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp,
                                      BallerinaUtilGenerator ballerinaUtilGenerator,
                                      List<ImportDeclarationNode> imports, boolean hasHeaders,
-                                     boolean hasDefaultHeaders, boolean hasQueries) {
+                                     boolean hasDefaultHeaders, boolean hasQueries, boolean hasDefaultResponse,
+                                     List<String> nonDefaultStatusCodes) {
         super(path, operation, openAPI, ballerinaAuthConfigGeneratorImp, ballerinaUtilGenerator, imports,
                 hasHeaders, hasDefaultHeaders, hasQueries);
+        this.hasDefaultStatusResponse = hasDefaultResponse;
+        this.nonDefaultStatusCodes = nonDefaultStatusCodes;
     }
 
     @Override
@@ -64,6 +73,25 @@ public class ImplFunctionBodyGenerator extends FunctionBodyGeneratorImp {
     @Override
     protected String getSimpleClientCall() {
         return addTargetTypeParam(super.getSimpleClientCall());
+    }
+
+    @Override
+    protected void generateReturnStatement(List<StatementNode> statementsList, String returnStatement) {
+        if (hasDefaultStatusResponse) {
+            String responseVarExp = "var response = " + returnStatement;
+            ExpressionStatementNode responseStatement = getSimpleExpressionStatementNode(responseVarExp);
+            statementsList.add(responseStatement);
+
+            String nonDefaultStatusCodeList = nonDefaultStatusCodes.isEmpty() ? "[]" : "[" + String.join(", ",
+                    nonDefaultStatusCodes) + "]";
+            String nonDefaultStatusCodesExp = "int[] nonDefaultStatusCodes = " + nonDefaultStatusCodeList;
+            ExpressionStatementNode nonDefaultStatusCodesStatement = getSimpleExpressionStatementNode(
+                    nonDefaultStatusCodesExp);
+            statementsList.add(nonDefaultStatusCodesStatement);
+
+            returnStatement = "getValidatedResponseForDefaultMapping(response, nonDefaultStatusCodes)";
+        }
+        super.generateReturnStatement(statementsList, returnStatement);
     }
 
     private String addTargetTypeParam(String clientCall) {

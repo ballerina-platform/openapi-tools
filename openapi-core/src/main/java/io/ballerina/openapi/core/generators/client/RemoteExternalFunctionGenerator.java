@@ -82,6 +82,8 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
                                     BallerinaUtilGenerator ballerinaUtilGenerator,
                                     List<ImportDeclarationNode> imports) {
         super(path, operation, openAPI, authConfigGeneratorImp, ballerinaUtilGenerator, imports);
+        this.signatureGenerator = new RemoteExternalFunctionSignatureGenerator(operation.getValue(), openAPI,
+                operation.getKey().toString().toLowerCase(Locale.ROOT), path, ballerinaUtilGenerator);
     }
 
     @Override
@@ -134,11 +136,5 @@ public class RemoteExternalFunctionGenerator extends RemoteFunctionGenerator {
         AnnotationNode javaMethodAnnot = createAnnotationNode(createToken(AT_TOKEN), javaMethodToken, methodMapExp);
         return Optional.of(createExternalFunctionBodyNode(createToken(EQUAL_TOKEN),
                 createNodeList(javaMethodAnnot), createToken(EXTERNAL_KEYWORD), createToken(SEMICOLON_TOKEN)));
-    }
-
-    @Override
-    protected RemoteFunctionSignatureGenerator getSignatureGenerator() {
-        return new RemoteExternalFunctionSignatureGenerator(operation.getValue(), openAPI,
-                operation.getKey().toString().toLowerCase(Locale.ROOT), path);
     }
 }

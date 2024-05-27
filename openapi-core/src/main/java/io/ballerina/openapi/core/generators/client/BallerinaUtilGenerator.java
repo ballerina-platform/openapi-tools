@@ -107,6 +107,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ENC
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ENCODING_STYLE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.FORM;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.MIME;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PIPE_DELIMITED;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SPACE_DELIMITED;
@@ -125,6 +126,7 @@ public class BallerinaUtilGenerator {
     private boolean queryParamsFound = false;
     private boolean requestBodyEncodingFound = false;
     private boolean requestBodyMultipartFormDatafound = false;
+    private boolean defaultStatusCodeResponseBindingFound = false;
     private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
 
     private static final String CREATE_FORM_URLENCODED_REQUEST_BODY = "createFormURLEncodedRequestBody";
@@ -137,6 +139,8 @@ public class BallerinaUtilGenerator {
     private static final String GET_MAP_FOR_HEADERS = "getMapForHeaders";
     private static final String GET_SERIALIZED_RECORD_ARRAY = "getSerializedRecordArray";
     private static final String CREATE_MULTIPART_BODY_PARTS = "createBodyParts";
+    private static final String GET_VALIDATED_RESPONSE_FOR_DEFAULT_MAPPING = "getValidatedResponseForDefaultMapping";
+    private static final String CREATE_STATUS_CODE_RESPONSE_BINDING_ERROR = "createStatusCodeResponseBindingError";
 
     /**
      * Set `queryParamsFound` flag to `true` when at least one query parameter found.
@@ -186,6 +190,20 @@ public class BallerinaUtilGenerator {
     }
 
     /**
+     * Set `defaultStatusCodeResponseBindingFound` flag to `true` when at least one function found with default status
+     * code response binding.
+     *
+     * @param flag Function will be called only in the occasions where value needs to be set to `true`.
+     */
+    public void setDefaultStatusCodeResponseBinding(boolean flag) {
+        this.defaultStatusCodeResponseBindingFound = flag;
+    }
+
+    public boolean hasDefaultStatusCodeResponseBinding() {
+        return defaultStatusCodeResponseBindingFound;
+    }
+
+    /**
      * Generates util file syntax tree.
      *
      * @return Syntax tree of the util.bal file
@@ -213,6 +231,12 @@ public class BallerinaUtilGenerator {
         }
         if (requestBodyMultipartFormDatafound) {
             functionNameList.add(CREATE_MULTIPART_BODY_PARTS);
+        }
+        if (defaultStatusCodeResponseBindingFound) {
+            functionNameList.addAll(Arrays.asList(
+                    GET_VALIDATED_RESPONSE_FOR_DEFAULT_MAPPING,
+                    CREATE_STATUS_CODE_RESPONSE_BINDING_ERROR
+            ));
         }
 
         List<ModuleMemberDeclarationNode> memberDeclarationNodes = new ArrayList<>();
@@ -247,6 +271,10 @@ public class BallerinaUtilGenerator {
         if (requestBodyMultipartFormDatafound) {
             ImportDeclarationNode importMime = GeneratorUtils.getImportDeclarationNode(BALLERINA, MIME);
             imports.add(importMime);
+        }
+        if (defaultStatusCodeResponseBindingFound) {
+            ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(BALLERINA, HTTP);
+            imports.add(importForHttp);
         }
 
         NodeList<ImportDeclarationNode> importsList = createNodeList(imports);

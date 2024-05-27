@@ -52,10 +52,10 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPEDESC_TYPE_DESC;
 public class ResourceExternalFunctionSignatureGenerator extends ResourceFunctionSignatureGenerator {
 
     public ResourceExternalFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod,
-                                                      String path) {
+                                                      String path, BallerinaUtilGenerator ballerinaUtilGenerator) {
         super(operation, openAPI, httpMethod, path);
         this.functionReturnTypeGenerator = new FunctionExternalReturnTypeGenerator(operation, openAPI, httpMethod,
-                path);
+                path, ballerinaUtilGenerator);
     }
 
     @Override
