@@ -115,11 +115,10 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.J_B
  * @since 1.9.0
  */
 public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClientGenerator {
-    OASClientConfig oasClientConfig;
+
     public BallerinaClientGeneratorWithStatusCodeBinding(OASClientConfig oasClientConfig) {
         super(oasClientConfig);
         authConfigGeneratorImp = new AuthConfigGeneratorWithStatusCodeBinding(false, false);
-        this.oasClientConfig = oasClientConfig;
     }
 
     /**
@@ -228,10 +227,10 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
             MockFunctionBodyGenerator bodyGenerator = new MockFunctionBodyGenerator(path, operation, openAPI,
                     true);
             Optional<FunctionBodyNode> functionBodyOptionalNode = bodyGenerator.getFunctionBodyNode();
+            diagnostics.addAll(bodyGenerator.getDiagnostics());
             if (functionBodyOptionalNode.isEmpty()) {
                 return Optional.empty();
             }
-            diagnostics.addAll(bodyGenerator.getDiagnostics());
             functionBodyNode = bodyGenerator.getFunctionBodyNode().get();
         } else {
             FunctionBodyGeneratorImp functionBodyGenerator = new ImplFunctionBodyGenerator(path, operation, openAPI,

@@ -234,14 +234,14 @@ public class BallerinaCodeGenerator {
      * @throws BallerinaOpenApiException when code generator fails
      */
     public void generateClient(String definitionPath, String outPath, Filter filter, boolean nullable,
-                               boolean isResource, boolean statusCodeBinding)
+                               boolean isResource, boolean statusCodeBinding, boolean isMock)
             throws IOException, FormatterException, BallerinaOpenApiException, OASTypeGenException {
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles = null;
         try {
             genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource, statusCodeBinding,
-                    true);
+                    isMock);
             if (!genFiles.isEmpty()) {
                 writeGeneratedSources(genFiles, srcPath, implPath, GEN_CLIENT);
             }

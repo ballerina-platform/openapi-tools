@@ -53,10 +53,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURN_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 
 public class BallerinaMockClientGenerator extends BallerinaClientGenerator {
-    OASClientConfig oasClientConfig;
     public BallerinaMockClientGenerator(OASClientConfig oasClientConfig) {
         super(oasClientConfig);
-        this.oasClientConfig = oasClientConfig;
     }
 
     //override init function generation
@@ -78,29 +76,22 @@ public class BallerinaMockClientGenerator extends BallerinaClientGenerator {
 
     //override client function generation
     public ClassDefinitionNode getClientFunction() throws BallerinaOpenApiException {
-        // Collect members for class definition node
         List<Node> memberNodeList = new ArrayList<>();
-        // Add instance variable to class definition node
         memberNodeList.addAll(createClassInstanceVariables());
-        // Add init function to class definition node
         memberNodeList.add(getInitFunction());
         Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations = filterOperations();
-        //switch resource remote
         List<FunctionDefinitionNode> functionDefinitionNodeList = new ArrayList<>();
-        //Mock cleint function generation
-
+        //Mock client function generation
         for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {
             for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : operation.getValue().entrySet()) {
                 MockClientFunctionGenerator mockClientFunctionGenerator = new MockClientFunctionGenerator(
                         operation.getKey(), operationEntry, oasClientConfig);
                 Optional<FunctionDefinitionNode> funDefOptionalNode = mockClientFunctionGenerator.generateFunction();
-                if (funDefOptionalNode.isPresent()) {
-                    functionDefinitionNodeList.add(funDefOptionalNode.get());
-                }
+                funDefOptionalNode.ifPresent(functionDefinitionNodeList::add);
+                diagnostics.addAll(mockClientFunctionGenerator.getDiagnostics());
             }
         }
         memberNodeList.addAll(functionDefinitionNodeList);
-        // Generate the class combining members
         MetadataNode metadataNode = getClassMetadataNode();
         IdentifierToken className = createIdentifierToken(GeneratorConstants.CLIENT);
         NodeList<Token> classTypeQualifiers = createNodeList(
@@ -125,14 +116,9 @@ public class BallerinaMockClientGenerator extends BallerinaClientGenerator {
      * @throws BallerinaOpenApiException When function fail in process.
      */
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException, ClientException {
-
-        // Create `ballerina/http` import declaration node
         List<ImportDeclarationNode> importForHttp = getImportDeclarationNodes();
         imports.addAll(importForHttp);
-
-        // Add authentication related records
         authConfigGeneratorImp.addAuthRelatedRecords(openAPI);
-
         List<ModuleMemberDeclarationNode> nodes = getModuleMemberDeclarationNodes();
         NodeList<ImportDeclarationNode> importsList = createNodeList(imports);
         ModulePartNode modulePartNode =
@@ -140,7 +126,6 @@ public class BallerinaMockClientGenerator extends BallerinaClientGenerator {
         TextDocument textDocument = TextDocuments.from("");
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
         syntaxTree = syntaxTree.modifyWith(modulePartNode);
-        //Add comments
         ClientDocCommentGenerator clientDocCommentGenerator = new ClientDocCommentGenerator(syntaxTree, openAPI,
                 oasClientConfig.isResourceMode());
         return clientDocCommentGenerator.updateSyntaxTreeWithDocComments();

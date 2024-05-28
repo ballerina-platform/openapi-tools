@@ -124,6 +124,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.X_B
  */
 public class BallerinaClientGenerator {
 
+    protected OASClientConfig oasClientConfig;
     private final Filter filter;
     protected List<ImportDeclarationNode> imports = new ArrayList<>();
     private List<String> apiKeyNameList = new ArrayList<>();
@@ -173,6 +174,7 @@ public class BallerinaClientGenerator {
         this.remoteFunctionNameList = new ArrayList<>();
         this.authConfigGeneratorImp = new AuthConfigGeneratorImp(false, false);
         this.resourceMode = oasClientConfig.isResourceMode();
+        this.oasClientConfig = oasClientConfig;
     }
 
     /**

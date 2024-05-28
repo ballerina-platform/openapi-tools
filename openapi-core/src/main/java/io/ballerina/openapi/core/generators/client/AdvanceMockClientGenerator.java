@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com).
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyBlockNode;
@@ -46,11 +64,13 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURN_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 
+/**
+ * This class iss contain the advance client generation when the client generation enable with status code bindings.
+ * @since 2.1.0
+ */
 public class AdvanceMockClientGenerator extends BallerinaClientGeneratorWithStatusCodeBinding {
-    OASClientConfig oasClientConfig;
     public AdvanceMockClientGenerator(OASClientConfig oasClientConfig) {
         super(oasClientConfig);
-        this.oasClientConfig = oasClientConfig;
     }
 
     @Override
@@ -69,41 +89,6 @@ public class AdvanceMockClientGenerator extends BallerinaClientGeneratorWithStat
                 createToken(FUNCTION_KEYWORD), functionName, createEmptyNodeList(), functionSignatureNode,
                 functionBodyNode);
     }
-
-//    //override client function generation
-//    public ClassDefinitionNode getClientFunction() throws BallerinaOpenApiException {
-//        // Collect members for class definition node
-//        List<Node> memberNodeList = new ArrayList<>();
-//        // Add instance variable to class definition node
-//        memberNodeList.addAll(createClassInstanceVariables());
-//        // Add init function to class definition node
-//        memberNodeList.add(getInitFunction());
-//        Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations = filterOperations();
-//        //switch resource remote
-//        List<FunctionDefinitionNode> functionDefinitionNodeList = new ArrayList<>();
-//        //Mock cleint function generation
-//
-//        for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {
-//            for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : operation.getValue().entrySet()) {
-////                Optional<FunctionDefinitionNode> funDefOptionalNode = createImplFunction(path, operationEntry,
-// openAPI, clie);
-////                if (funDefOptionalNode.isPresent()) {
-////                    functionDefinitionNodeList.add(funDefOptionalNode.get());
-////                }
-//            }
-//        }
-//        memberNodeList.addAll(functionDefinitionNodeList);
-//        // Generate the class combining members
-//        MetadataNode metadataNode = getClassMetadataNode();
-//        IdentifierToken className = createIdentifierToken(GeneratorConstants.CLIENT);
-//        NodeList<Token> classTypeQualifiers = createNodeList(
-//                createToken(ISOLATED_KEYWORD), createToken(CLIENT_KEYWORD));
-//        return createClassDefinitionNode(metadataNode, createToken(PUBLIC_KEYWORD), classTypeQualifiers,
-//                createToken(CLASS_KEYWORD), className, createToken(OPEN_BRACE_TOKEN),
-//                createNodeList(memberNodeList), createToken(CLOSE_BRACE_TOKEN), null);
-//
-//    }
-
 
     @Override
     protected List<ModuleMemberDeclarationNode> getModuleMemberDeclarationNodes() throws BallerinaOpenApiException {
@@ -132,12 +117,14 @@ public class AdvanceMockClientGenerator extends BallerinaClientGeneratorWithStat
             clientFunctionNodes.remove(clientFunctionNodes.size() - 1);
         }
     }
+
     /**
      * This method for generate the client syntax tree.
      *
      * @return return Syntax tree for the ballerina code.
      * @throws BallerinaOpenApiException When function fail in process.
      */
+    @Override
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException, ClientException {
 
         // Create `ballerina/http` import declaration node

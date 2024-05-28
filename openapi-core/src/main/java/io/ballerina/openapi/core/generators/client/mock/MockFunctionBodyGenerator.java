@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com).
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package io.ballerina.openapi.core.generators.client.mock;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyBlockNode;
@@ -9,6 +27,8 @@ import io.ballerina.openapi.core.generators.client.FunctionBodyGenerator;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -18,6 +38,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,6 +51,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 
 /**
  * Mock function body generator.
+ *
  * @since 2.1.0
  */
 public class MockFunctionBodyGenerator implements FunctionBodyGenerator {
@@ -66,29 +88,41 @@ public class MockFunctionBodyGenerator implements FunctionBodyGenerator {
             return Optional.empty();
         }
         // Get the example
-        Map<?, ?> examples = null;
+        Map<String, Example> examples = new HashMap<>();
         for (Map.Entry<String, MediaType> mediaType : successResponse.getContent().entrySet()) {
             // handle reference
             if (mediaType.getValue().getExamples() != null) {
                 examples = mediaType.getValue().getExamples();
             }
+            if (mediaType.getValue().getExample() != null) {
+                Example example = (Example) mediaType.getValue().getExample();
+                examples.put("response", example);
+            }
         }
 
-        // check ref example
-        if (examples == null) {
+        if (examples.isEmpty()) {
             ClientDiagnosticImp diagnosticImp = new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_116,
                     path, operation.getKey().toString());
             diagnostics.add(diagnosticImp);
             return Optional.empty();
         }
-        Object response = examples.get("response");
-        if (response == null) {
-            ClientDiagnosticImp diagnosticImp = new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_116,
-                    path, operation.getKey().toString());
-            diagnostics.add(diagnosticImp);
-            return Optional.empty();
+
+        Example example = examples.get("response");
+        if (example == null) {
+            //when the example has key value which is not capture via response
+            example = examples.values().iterator().next();
         }
-        String exampleValue = ((Example) response).getValue().toString();
+
+        if (example.get$ref() != null) {
+            try {
+                String exampleName = GeneratorUtils.extractReferenceType(example.get$ref());
+                Map<String, Example> exampleMap = openAPI.getComponents().getExamples();
+                 example = exampleMap.get(exampleName);
+            } catch (InvalidReferenceException e) {
+                return Optional.empty();
+            }
+        }
+        String exampleValue = example.getValue().toString();
         String statement;
         if (isAdvanceClient) {
             statement = "return {\n" +

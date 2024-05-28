@@ -410,7 +410,7 @@ public class OpenApiCmd implements BLauncherCmd {
                                      boolean resourceMode, boolean statusCodeBinding) {
         try {
             generator.generateClient(resourcePath.toString(), targetOutputPath.toString(), filter, baseCmd.nullable,
-                    resourceMode, statusCodeBinding);
+                    resourceMode, statusCodeBinding, mock);
         } catch (IOException | FormatterException | BallerinaOpenApiException |
                  OASTypeGenException e) {
             if (e.getLocalizedMessage() != null) {

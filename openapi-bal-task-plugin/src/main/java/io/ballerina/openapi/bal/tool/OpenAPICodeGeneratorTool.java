@@ -79,6 +79,7 @@ import static io.ballerina.openapi.bal.tool.Constants.CACHE_FILE;
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT;
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT_METHODS;
 import static io.ballerina.openapi.bal.tool.Constants.LICENSE;
+import static io.ballerina.openapi.bal.tool.Constants.MOCK;
 import static io.ballerina.openapi.bal.tool.Constants.MODE;
 import static io.ballerina.openapi.bal.tool.Constants.NULLABLE;
 import static io.ballerina.openapi.bal.tool.Constants.OPERATIONS;
@@ -298,7 +299,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 case STATUS_CODE_BINDING:
                     clientMetaDataBuilder.withStatusCodeBinding(value.contains(TRUE));
                     break;
-                case MODE:
+                case MOCK:
                     clientMetaDataBuilder.withMock(value.contains(TRUE));
                     break;
                 default:
