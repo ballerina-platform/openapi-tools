@@ -121,6 +121,11 @@ public class OpenApiCmd implements BLauncherCmd {
             description = "Generate service without data binding")
     private boolean generateWithoutDataBinding;
 
+    @CommandLine.Option(names = {"--mock"}, hidden = true,
+            description = "Generate service without data binding")
+    private boolean mock;
+
+
     @CommandLine.Parameters
     private List<String> argList;
 
@@ -450,7 +455,7 @@ public class OpenApiCmd implements BLauncherCmd {
             assert resourcePath != null;
             generator.generateClientAndService(resourcePath.toString(), fileName, targetOutputPath.toString(), filter,
                     baseCmd.nullable, generateClientResourceFunctions, generateServiceType, generateWithoutDataBinding,
-                    statusCodeBinding);
+                    statusCodeBinding, mock);
         } catch (BallerinaOpenApiException e) {
             outStream.println(e.getMessage());
             exitError(this.exitWhenFinish);

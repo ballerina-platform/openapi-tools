@@ -20,8 +20,10 @@ package io.ballerina.openapi.cmd;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.core.generators.client.AdvanceMockClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGeneratorWithStatusCodeBinding;
+import io.ballerina.openapi.core.generators.client.BallerinaMockClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
@@ -98,7 +100,7 @@ public class BallerinaCodeGenerator {
     public void generateClientAndService(String definitionPath, String serviceName,
                                          String outPath, Filter filter, boolean nullable,
                                          boolean isResource, boolean generateServiceType,
-                                         boolean generateWithoutDataBinding, boolean statusCodeBinding)
+                                         boolean generateWithoutDataBinding, boolean statusCodeBinding, boolean isMock)
             throws IOException, FormatterException, BallerinaOpenApiException,
             OASTypeGenException, ClientException {
         Path srcPath = Paths.get(outPath);
@@ -134,9 +136,11 @@ public class BallerinaCodeGenerator {
                 .withNullable(nullable)
                 .withPlugin(false)
                 .withOpenAPI(openAPIDef)
-                .withResourceMode(isResource).build();
+                .withResourceMode(isResource)
+                .withMock(isMock).build();
 
-        BallerinaClientGenerator clientGenerator = getBallerinaClientGenerator(oasClientConfig, statusCodeBinding);
+        BallerinaClientGenerator clientGenerator = getBallerinaClientGenerator(oasClientConfig, statusCodeBinding,
+                isMock);
         String clientContent = Formatter.format(clientGenerator.generateSyntaxTree()).toSourceCode();
 
         //Update type definition list with auth related type definitions
@@ -236,7 +240,8 @@ public class BallerinaCodeGenerator {
         Path implPath = getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles = null;
         try {
-            genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource, statusCodeBinding);
+            genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource, statusCodeBinding,
+                    true);
             if (!genFiles.isEmpty()) {
                 writeGeneratedSources(genFiles, srcPath, implPath, GEN_CLIENT);
             }
@@ -357,7 +362,7 @@ public class BallerinaCodeGenerator {
      * @throws IOException when code generation with specified templates fails
      */
     private List<GenSrcFile> generateClientFiles(Path openAPI, Filter filter, boolean nullable, boolean isResource,
-                                                 boolean statusCodeBinding)
+                                                 boolean statusCodeBinding, boolean isMock)
             throws IOException, BallerinaOpenApiException, FormatterException, ClientException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_CLIENT_PKG;
@@ -385,12 +390,13 @@ public class BallerinaCodeGenerator {
                 .withOpenAPI(openAPIDef)
                 .withResourceMode(isResource)
                 .withStatusCodeBinding(statusCodeBinding)
+                .withMock(isMock)
                 .build();
         //Take default DO NOT modify
         licenseHeader = licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER : licenseHeader;
         TypeHandler.createInstance(openAPIDef, nullable);
         BallerinaClientGenerator clientGenerator = getBallerinaClientGenerator(oasClientConfig,
-                statusCodeBinding);
+                statusCodeBinding, isMock);
         String mainContent = Formatter.format(clientGenerator.generateSyntaxTree()).toSourceCode();
         //Update type definition list with auth related type definitions
         List<TypeDefinitionNode> authNodes = clientGenerator.getBallerinaAuthConfigGenerator()
@@ -440,11 +446,17 @@ public class BallerinaCodeGenerator {
     }
 
     private static BallerinaClientGenerator getBallerinaClientGenerator(OASClientConfig oasClientConfig,
-                                                                        boolean statusCodeBinding) {
-        if (!statusCodeBinding) {
-            return new BallerinaClientGenerator(oasClientConfig);
+                                                                        boolean statusCodeBinding, boolean isMock) {
+        if (statusCodeBinding && isMock) {
+            return new AdvanceMockClientGenerator(oasClientConfig);
         }
-        return new BallerinaClientGeneratorWithStatusCodeBinding(oasClientConfig);
+        if (statusCodeBinding) {
+            return new BallerinaClientGeneratorWithStatusCodeBinding(oasClientConfig);
+        }
+        if (isMock) {
+            return new BallerinaMockClientGenerator(oasClientConfig);
+        }
+        return new BallerinaClientGenerator(oasClientConfig);
     }
 
 

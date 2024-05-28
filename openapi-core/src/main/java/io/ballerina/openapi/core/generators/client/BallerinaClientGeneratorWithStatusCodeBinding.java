@@ -46,6 +46,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
 import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.core.generators.client.mock.MockFunctionBodyGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
@@ -114,9 +115,11 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.J_B
  * @since 1.9.0
  */
 public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClientGenerator {
+    OASClientConfig oasClientConfig;
     public BallerinaClientGeneratorWithStatusCodeBinding(OASClientConfig oasClientConfig) {
         super(oasClientConfig);
         authConfigGeneratorImp = new AuthConfigGeneratorWithStatusCodeBinding(false, false);
+        this.oasClientConfig = oasClientConfig;
     }
 
     /**
@@ -172,12 +175,12 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
                 createIdentifierToken(GeneratorConstants.STATUS_CODE_CLIENT));
     }
 
-    private void addClientFunctionImpl(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
+    protected void addClientFunctionImpl(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
                                        Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
                                        List<FunctionDefinitionNode> clientFunctionNodes) {
         FunctionDefinitionNode clientExternFunction = clientFunctionNodes.get(clientFunctionNodes.size() - 1);
         Optional<FunctionDefinitionNode> implFunction = createImplFunction(operation.getKey(), operationEntry, openAPI,
-                authConfigGeneratorImp, ballerinaUtilGenerator, clientExternFunction);
+                authConfigGeneratorImp, ballerinaUtilGenerator, clientExternFunction, oasClientConfig.isMock());
         if (implFunction.isPresent()) {
             clientFunctionNodes.add(implFunction.get());
         } else {
@@ -205,12 +208,13 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
                ballerinaUtilGenerator, imports);
     }
 
-    private Optional<FunctionDefinitionNode> createImplFunction(String path,
+    protected Optional<FunctionDefinitionNode> createImplFunction(String path,
                                                                 Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                                 OpenAPI openAPI,
                                                                 AuthConfigGeneratorImp authConfigGeneratorImp,
                                                                 BallerinaUtilGenerator ballerinaUtilGenerator,
-                                                                FunctionDefinitionNode clientExternFunction) {
+                                                                FunctionDefinitionNode clientExternFunction,
+                                                                  boolean isMock) {
         //Create qualifier list
         NodeList<Token> qualifierList = createNodeList(createToken(PRIVATE_KEYWORD), createToken(ISOLATED_KEYWORD));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
@@ -219,15 +223,26 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
         ImplFunctionSignatureGenerator signatureGenerator = new ImplFunctionSignatureGenerator(operation.getValue(),
                 openAPI, operation.getKey().toString().toLowerCase(Locale.ROOT), path, clientExternFunction);
         //Create function body
-        FunctionBodyGeneratorImp functionBodyGenerator = new ImplFunctionBodyGenerator(path, operation, openAPI,
-                authConfigGeneratorImp, ballerinaUtilGenerator, imports, signatureGenerator.hasHeaders(),
-                signatureGenerator.hasDefaultHeaders(), signatureGenerator.hasQueries());
         FunctionBodyNode functionBodyNode;
-        Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
-        if (functionBodyNodeResult.isEmpty()) {
-            return Optional.empty();
+        if (isMock) {
+            MockFunctionBodyGenerator bodyGenerator = new MockFunctionBodyGenerator(path, operation, openAPI,
+                    true);
+            Optional<FunctionBodyNode> functionBodyOptionalNode = bodyGenerator.getFunctionBodyNode();
+            if (functionBodyOptionalNode.isEmpty()) {
+                return Optional.empty();
+            }
+            diagnostics.addAll(bodyGenerator.getDiagnostics());
+            functionBodyNode = bodyGenerator.getFunctionBodyNode().get();
+        } else {
+            FunctionBodyGeneratorImp functionBodyGenerator = new ImplFunctionBodyGenerator(path, operation, openAPI,
+                    authConfigGeneratorImp, ballerinaUtilGenerator, imports, signatureGenerator.hasHeaders(),
+                    signatureGenerator.hasDefaultHeaders(), signatureGenerator.hasQueries());
+            Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
+            if (functionBodyNodeResult.isEmpty()) {
+                return Optional.empty();
+            }
+            functionBodyNode = functionBodyNodeResult.get();
         }
-        functionBodyNode = functionBodyNodeResult.get();
 
         Optional<FunctionSignatureNode> functionSignatureNode = signatureGenerator.generateFunctionSignature();
         return functionSignatureNode.map(signatureNode ->
@@ -245,7 +260,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
      *
      * @return {@link FunctionDefinitionNode} FunctionDefinitionNode
      */
-    private FunctionDefinitionNode getSetModuleFunction() {
+    FunctionDefinitionNode getSetModuleFunction() {
         NodeList<Token> emptyQualifiers = createEmptyNodeList();
         NodeList<Node> emptyNodeList = createEmptyNodeList();
         SeparatedNodeList<ParameterNode> emptyParamList = createSeparatedNodeList();
@@ -280,7 +295,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
      *
      * @return {@link FunctionDefinitionNode} FunctionDefinitionNode
      */
-    private FunctionDefinitionNode getModuleInitFunction() {
+    FunctionDefinitionNode getModuleInitFunction() {
         NodeList<Token> emptyQualifiers = createEmptyNodeList();
         NodeList<Node> emptyNodeList = createEmptyNodeList();
         SeparatedNodeList<ParameterNode> emptyParamList = createSeparatedNodeList();
@@ -308,7 +323,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
      *
      * @return {@link TypeDefinitionNode} TypeDefinitionNode
      */
-    private TypeDefinitionNode getClientMethodImplType() {
+    TypeDefinitionNode getClientMethodImplType() {
         RecordFieldNode nameFieldNode = createRecordFieldNode(null, null, createIdentifierToken("string"),
                 createIdentifierToken("name"), null, createToken(SEMICOLON_TOKEN));
         RecordTypeDescriptorNode recordDescriptor = createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
@@ -326,7 +341,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
      *
      * @return {@link AnnotationDeclarationNode} AnnotationDeclarationNode
      */
-    private AnnotationDeclarationNode getMethodImplAnnotation() {
+    AnnotationDeclarationNode getMethodImplAnnotation() {
         return createAnnotationDeclarationNode(null, null, null, createToken(ANNOTATION_KEYWORD),
                 createIdentifierToken("ClientMethodImpl"), createIdentifierToken("MethodImpl"),
                 createToken(ON_KEYWORD), createSeparatedNodeList(createToken(FUNCTION_KEYWORD)),
@@ -341,7 +356,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
      *
      * @return {@link TypeDefinitionNode} TypeDefinitionNode
      */
-    private TypeDefinitionNode getClientErrorType() {
+    protected TypeDefinitionNode getClientErrorType() {
         return createTypeDefinitionNode(null, null, createToken(TYPE_KEYWORD),
                 createIdentifierToken("ClientMethodInvocationError"),
                 createQualifiedNameReferenceNode(createIdentifierToken("http"), createToken(COLON_TOKEN),

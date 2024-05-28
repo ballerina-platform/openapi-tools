@@ -60,4 +60,5 @@ module io.ballerina.openapi.core {
     exports io.ballerina.openapi.core.generators.service.response;
     exports io.ballerina.openapi.core.generators.service.diagnostic;
     exports io.ballerina.openapi.core.generators.type.diagnostic;
+    exports io.ballerina.openapi.core.generators.client.mock;
 }

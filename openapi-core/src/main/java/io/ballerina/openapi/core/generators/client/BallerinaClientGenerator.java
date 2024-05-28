@@ -268,7 +268,7 @@ public class BallerinaClientGenerator {
     /**
      * This function is to filter the operations based on the user given tags and operations.
      */
-    private Map<String, Map<PathItem.HttpMethod, Operation>> filterOperations() {
+    protected Map<String, Map<PathItem.HttpMethod, Operation>> filterOperations() {
         //todo refactor code
         Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperation = new HashMap<>();
         List<String> filterTags = filter.getTags();
@@ -308,7 +308,7 @@ public class BallerinaClientGenerator {
      *
      * @return {@link MetadataNode}    Metadata node of the client class
      */
-    private MetadataNode getClassMetadataNode() {
+    protected MetadataNode getClassMetadataNode() {
 
         List<AnnotationNode> classLevelAnnotationNodes = new ArrayList<>();
         if (openAPI.getInfo().getExtensions() != null) {
@@ -355,7 +355,7 @@ public class BallerinaClientGenerator {
      * @return {@link FunctionDefinitionNode}   Class init function
      * @throws BallerinaOpenApiException When invalid server URL is provided
      */
-    private FunctionDefinitionNode createInitFunction() {
+    protected FunctionDefinitionNode createInitFunction() {
 
         FunctionSignatureNode functionSignatureNode = getInitFunctionSignatureNode();
         FunctionBodyNode functionBodyNode = getInitFunctionBodyNode();
@@ -419,7 +419,7 @@ public class BallerinaClientGenerator {
      * @return {@link FunctionSignatureNode}
      * @throws BallerinaOpenApiException When invalid server URL is provided
      */
-    private FunctionSignatureNode getInitFunctionSignatureNode() {
+    protected FunctionSignatureNode getInitFunctionSignatureNode() {
         List<ParameterNode> parameterNodes  = new ArrayList<>();
         ServerURLGeneratorImp serverURLGeneratorImp = new ServerURLGeneratorImp(openAPI.getServers());
         ParameterNode serverURLNode = serverURLGeneratorImp.generateServerURL();
@@ -505,7 +505,7 @@ public class BallerinaClientGenerator {
      *
      * @return {@link MetadataNode}    Metadata node containing entire function documentation comment.
      */
-    private MetadataNode getInitDocComment() {
+    protected MetadataNode getInitDocComment() {
 
         List<Node> docs = new ArrayList<>();
         String clientInitDocComment = "Gets invoked to initialize the `connector`.\n";
@@ -544,7 +544,7 @@ public class BallerinaClientGenerator {
      *
      * @return {@link List<ObjectFieldNode>}    List of instance variables
      */
-    private List<ObjectFieldNode> createClassInstanceVariables() {
+    protected List<ObjectFieldNode> createClassInstanceVariables() {
 
         List<ObjectFieldNode> fieldNodeList = new ArrayList<>();
         Token finalKeywordToken = createToken(FINAL_KEYWORD);
