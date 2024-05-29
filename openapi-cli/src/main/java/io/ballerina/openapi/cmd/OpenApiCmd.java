@@ -430,8 +430,15 @@ public class OpenApiCmd implements BLauncherCmd {
 
         try {
             assert resourcePath != null;
-            generator.generateService(resourcePath.toString(), serviceName, targetOutputPath.toString(), filter,
-                    baseCmd.nullable, generateServiceType, generateWithoutDataBinding);
+            if (baseCmd.mock) {
+                //Brining some format for info message from ballerina info ex: `ballerina: `
+                outStream.println("openapi: Mock server generation is currently not supported via the ballerina " +
+                        "openapi tool.");
+                exitError(this.exitWhenFinish);
+            } else {
+                generator.generateService(resourcePath.toString(), serviceName, targetOutputPath.toString(), filter,
+                        baseCmd.nullable, generateServiceType, generateWithoutDataBinding);
+            }
         } catch (IOException | FormatterException | BallerinaOpenApiException e) {
             outStream.println("Error occurred when generating service for openAPI contract at " + baseCmd.inputPath +
                     "." + e.getMessage() + ".");
