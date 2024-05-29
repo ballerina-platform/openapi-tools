@@ -174,7 +174,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
                 createIdentifierToken(GeneratorConstants.STATUS_CODE_CLIENT));
     }
 
-    protected void addClientFunctionImpl(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
+    private void addClientFunctionImpl(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
                                        Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
                                        List<FunctionDefinitionNode> clientFunctionNodes) {
         FunctionDefinitionNode clientExternFunction = clientFunctionNodes.get(clientFunctionNodes.size() - 1);

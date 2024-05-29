@@ -70,7 +70,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURN_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 
 /**
- * This generator class for generate the mock clients.
+ * This generator class is for generate the mock clients.
  *
  * @since 2.1.0
  */
@@ -79,7 +79,6 @@ public class BallerinaMockClientGenerator extends BallerinaClientGenerator {
         super(oasClientConfig);
     }
 
-    //override init function generation
     public FunctionDefinitionNode getInitFunction() {
         FunctionSignatureNode functionSignatureNode = super.getInitFunctionSignatureNode();
         NodeList<Token> qualifierList = createNodeList(createToken(PUBLIC_KEYWORD), createToken(ISOLATED_KEYWORD));
@@ -96,7 +95,6 @@ public class BallerinaMockClientGenerator extends BallerinaClientGenerator {
                 functionBodyNode);
     }
 
-    //override client function generation
     public ClassDefinitionNode getClientFunction() throws BallerinaOpenApiException {
         List<Node> memberNodeList = new ArrayList<>();
         memberNodeList.addAll(createClassInstanceVariables());

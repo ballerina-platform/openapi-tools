@@ -49,9 +49,10 @@ import static io.ballerina.openapi.generators.common.GeneratorTestUtils.getOpenA
  */
 public class MockClientGenerationTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client/mock").toAbsolutePath();
+
     @Test
-    public void mockClientTest() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("basic_response_example.yaml");
+    public void mockClientTestForExamplesAttribute() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("basic_response_examples.yaml");
         OpenAPI openapi = getOpenAPI(definitionPath);
         TypeHandler.createInstance(openapi, false);
         String path = "/api/v1/payment_run_schedules";
@@ -73,7 +74,7 @@ public class MockClientGenerationTests {
     @Test
     public void mockClientTestWithReferenceExample() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("ref_example.json");
-        Path expectedPath = RES_DIR.resolve("file_provider/ballerina/reference_example.bal");
+        Path expectedPath = RES_DIR.resolve("reference_example.bal");
         OpenAPI openapi = getOpenAPI(definitionPath);
         TypeHandler.createInstance(openapi, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
@@ -87,9 +88,9 @@ public class MockClientGenerationTests {
     }
 
     @Test
-    public void mockClientForRemoteFunction() throws IOException, BallerinaOpenApiException, ClientException {
-        Path definitionPath = RES_DIR.resolve("basic_response_example.yaml");
-        Path expectedPath = RES_DIR.resolve("file_provider/ballerina/mock_client_for_remote.bal");
+    public void mockClientTestForRemoteFunction() throws IOException, BallerinaOpenApiException, ClientException {
+        Path definitionPath = RES_DIR.resolve("basic_response_examples.yaml");
+        Path expectedPath = RES_DIR.resolve("mock_client_for_remote.bal");
         OpenAPI openapi = getOpenAPI(definitionPath);
         TypeHandler.createInstance(openapi, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
@@ -104,9 +105,25 @@ public class MockClientGenerationTests {
     }
 
     @Test
-    public void advanceMockClientGenerator() throws IOException, BallerinaOpenApiException, ClientException {
+    public void mockClientTestForExampleAttribute() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("basic_response_example.yaml");
-        Path expectedPath = RES_DIR.resolve("file_provider/ballerina/mock_client_for_advance_return_type.bal");
+        Path expectedPath = RES_DIR.resolve("basic_response_example.bal");
+        OpenAPI openapi = getOpenAPI(definitionPath);
+        TypeHandler.createInstance(openapi, false);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withPlugin(false)
+                .withOpenAPI(openapi)
+                .withMock(true).build();
+        BallerinaMockClientGenerator mockClientGenerator = new BallerinaMockClientGenerator(oasClientConfig);
+        SyntaxTree syntaxTree = mockClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
+    @Test
+    public void advanceMockClientTest() throws IOException, BallerinaOpenApiException, ClientException {
+        Path definitionPath = RES_DIR.resolve("basic_response_examples.yaml");
+        Path expectedPath = RES_DIR.resolve("mock_client_for_advance_return_type.bal");
         OpenAPI openapi = getOpenAPI(definitionPath);
         TypeHandler.createInstance(openapi, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();

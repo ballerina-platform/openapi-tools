@@ -59,6 +59,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RESOURCE_KEYWORD;
 
 /**
  * Mock client function generator.
+ *
  * @since 2.1.0
  */
 public class MockClientFunctionGenerator implements FunctionGenerator {

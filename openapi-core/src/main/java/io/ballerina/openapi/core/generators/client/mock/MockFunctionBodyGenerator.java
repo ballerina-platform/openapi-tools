@@ -34,6 +34,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
@@ -48,6 +49,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionBodyBlockNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RESPONSE;
 
 /**
  * Mock function body generator.
@@ -73,7 +75,6 @@ public class MockFunctionBodyGenerator implements FunctionBodyGenerator {
     @Override
     public Optional<FunctionBodyNode> getFunctionBodyNode() {
 
-        //Check inline example
         ApiResponses responses = operation.getValue().getResponses();
         //Get the successful response
         ApiResponse successResponse = null;
@@ -83,20 +84,31 @@ public class MockFunctionBodyGenerator implements FunctionBodyGenerator {
                 break;
             }
         }
-        // Here only consider 2xx response
+        // Here only consider 2xx response, since this range consider for success status code
         if (successResponse == null || successResponse.getContent() == null) {
             return Optional.empty();
         }
-        // Get the example
         Map<String, Example> examples = new HashMap<>();
         for (Map.Entry<String, MediaType> mediaType : successResponse.getContent().entrySet()) {
-            // handle reference
-            if (mediaType.getValue().getExamples() != null) {
-                examples = mediaType.getValue().getExamples();
-            }
-            if (mediaType.getValue().getExample() != null) {
-                Example example = (Example) mediaType.getValue().getExample();
-                examples.put("response", example);
+            MediaType value = mediaType.getValue();
+            Schema<?> schema = value.getSchema();
+
+            if (value.getExamples() != null) {
+                examples = value.getExamples();
+            } else if (value.getExample() != null) {
+                Object exampleObject = value.getExample();
+                Example example = new Example();
+                example.setValue(exampleObject);
+                examples.put(RESPONSE, example);
+            } else {
+                try {
+                    examples = getExamplesFromSchema(schema);
+                } catch (InvalidReferenceException e) {
+                    ClientDiagnosticImp diagnosticImp = new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_117,
+                            path, operation.getKey().toString());
+                    diagnostics.add(diagnosticImp);
+                    return Optional.empty();
+                }
             }
         }
 
@@ -107,9 +119,8 @@ public class MockFunctionBodyGenerator implements FunctionBodyGenerator {
             return Optional.empty();
         }
 
-        Example example = examples.get("response");
+        Example example = examples.get(RESPONSE);
         if (example == null) {
-            //when the example has key value which is not capture via response
             example = examples.values().iterator().next();
         }
 
@@ -138,6 +149,30 @@ public class MockFunctionBodyGenerator implements FunctionBodyGenerator {
         FunctionBodyBlockNode fBodyBlock = createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
                 null, statementList, createToken(CLOSE_BRACE_TOKEN), null);
         return Optional.of(fBodyBlock);
+    }
+
+    private Map<String, Example> getExamplesFromSchema(Schema<?> schema) throws InvalidReferenceException {
+        Map<String, Example> examples = new HashMap<>();
+        if (schema.getExample() != null) {
+            Object exampleObject = schema.getExample();
+            Example example = new Example();
+            example.setValue(exampleObject);
+            examples.put(RESPONSE, example);
+        } else if (schema.getExamples() != null) {
+            List schemaExamples = schema.getExamples();
+            Object exampleObject = schemaExamples.get(0);
+            Example example = new Example();
+            example.setValue(exampleObject);
+            examples.put(RESPONSE, example);
+        } else if (schema.get$ref() != null) {
+            String ref = schema.get$ref();
+            String refName = GeneratorUtils.extractReferenceType(ref);
+            schema = openAPI.getComponents().getSchemas().get(refName);
+            if (schema != null) {
+                return getExamplesFromSchema(schema);
+            }
+        }
+        return examples;
     }
 
     @Override

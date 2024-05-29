@@ -29,12 +29,9 @@ annotation ClientMethodImpl MethodImpl on function;
 
 type ClientMethodInvocationError http:ClientError;
 
-@display {label: "Zuora Collection", iconPath: "icon.png"}
 public isolated client class Client {
     final http:StatusCodeClient clientEp;
     # Gets invoked to initialize the `connector`.
-    # The connector initialization requires setting the API credentials.
-    # Create a [Zuora account](https://www.zuora.com/) and obtain tokens by following [this guide](https://www.zuora.com/developer/collect-api/#section/Authentication).
     #
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
@@ -58,6 +55,18 @@ public isolated client class Client {
     # + queries - Queries to be sent with the request
     @MethodImpl {name: "UpdateAccountImpl"}
     resource isolated function post api/v1/accounts/[string account_id]/update_status(map<string|string[]> headers = {}, typedesc<OkInline_response_200> targetType = <>, *UpdateAccountQueries queries) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+
+    # Execute payments
+    #
+    # + headers - Headers to be sent with the request
+    @MethodImpl {name: "UpdateExecutePaymentsImpl"}
+    resource isolated function post api/v1/payments/execute_payments(payments_execute_payments_body payload, map<string|string[]> headers = {}, typedesc<OkInline_response_200_4> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
+
+    # Submit a payment to retry cycle
+    #
+    # + headers - Headers to be sent with the request
+    @MethodImpl {name: "UpdateSubmitPaymentToCycleImpl"}
+    resource isolated function post api/v1/payments/submit_failed_payment(payments_submit_failed_payment_body payload, map<string|string[]> headers = {}, typedesc<OkInline_response_200_8> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
 
     # Create an ad hoc statement run
     #
@@ -90,6 +99,18 @@ public isolated client class Client {
     @MethodImpl {name: "deletePaymentRunScheduleImpl"}
     resource isolated function delete api/v1/payment_run_schedules/[int schedule_id](map<string|string[]> headers = {}, typedesc<OkDELETEPaymentRunScheduleResponse> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
 
+    @MethodImpl {name: "executeExecuteAccountPaymentsImpl"}
+    resource isolated function put api/v1/payments/execute_account_payments/\<account_id\>(map<string|string[]> headers = {}, typedesc<OkInline_response_200_3> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+
+    @MethodImpl {name: "executeExecuteDebitMemoPaymentImpl"}
+    resource isolated function put api/v1/payments/execute_debit_memo_payment/\<debit_memo_id\>(map<string|string[]> headers = {}, typedesc<OkInline_response_200_2> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+
+    @MethodImpl {name: "executeExecuteInvoicePaymentImpl"}
+    resource isolated function put api/v1/payments/execute_invoice_payment/\<invoice_id\>(map<string|string[]> headers = {}, typedesc<OkInline_response_200_1> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+
+    @MethodImpl {name: "getAccountCycleHistoryImpl"}
+    resource isolated function get api/v1/payments/account_cycle_history/\<account_id\>(map<string|string[]> headers = {}, typedesc<OkGETAccountCycleHistoryResponse> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+
     # Get an account
     #
     # + account_id - The account ID.
@@ -102,6 +123,27 @@ public isolated client class Client {
     # + headers - Headers to be sent with the request
     @MethodImpl {name: "getAccountsImpl"}
     resource isolated function get api/v1/accounts(map<string|string[]> headers = {}, typedesc<OkGETCollectionAccountsResponse> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
+
+    @MethodImpl {name: "getActiveAccountCycleImpl"}
+    resource isolated function get api/v1/payments/active_account_cycle_information/\<account_id\>(map<string|string[]> headers = {}, typedesc<OkGETActiveAccountCycleResponse> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+
+    @MethodImpl {name: "getActiveDebitMemoCycleImpl"}
+    resource isolated function get api/v1/payments/active_debit_memo_cycle_information/\<debit_memo_id\>(map<string|string[]> headers = {}, typedesc<OkGETActiveDebitMemoCycleResponse> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+
+    @MethodImpl {name: "getActiveInvoiceCycleImpl"}
+    resource isolated function get api/v1/payments/active_invoice_cycle_information/\<invoice_id\>(map<string|string[]> headers = {}, typedesc<OkGETActiveInvoiceCycleResponse> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+
+    # Get the Amount Recovered metrics
+    #
+    # + headers - Headers to be sent with the request
+    @MethodImpl {name: "getAmountRecoveredImpl"}
+    resource isolated function get api/v1/metrics/amount_recovered(map<string|string[]> headers = {}, typedesc<OkGETAmountRecoveredResponse> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
+
+    # Get baseline metrics
+    #
+    # + headers - Headers to be sent with the request
+    @MethodImpl {name: "getBaselineMetricsImpl"}
+    resource isolated function get api/v1/metrics/baseline(map<string|string[]> headers = {}, typedesc<OkGETBaselineMetricsResponse> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
 
     # Get a collections agent by email
     #
@@ -121,6 +163,24 @@ public isolated client class Client {
     # + headers - Headers to be sent with the request
     @MethodImpl {name: "getCollectionsInfoImpl"}
     resource isolated function get api/v1/collections_info(map<string|string[]> headers = {}, typedesc<OkCollectionsInfo> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
+
+    # Get the Customer Group metrics
+    #
+    # + headers - Headers to be sent with the request
+    @MethodImpl {name: "getCustomerGroupMetricsImpl"}
+    resource isolated function get api/v1/metrics/customer_group(map<string|string[]> headers = {}, typedesc<OkGETCustomerGroupMetricsResponse> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
+
+    @MethodImpl {name: "getDebitMemoCycleHistoryImpl"}
+    resource isolated function get api/v1/payments/debit_memo_cycle_history/\<debit_memo_id\>(map<string|string[]> headers = {}, typedesc<OkGETDebitMemoCycleHistoryResponse> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+
+    # Get the Document Success Rate metrics by customer group
+    #
+    # + headers - Headers to be sent with the request
+    @MethodImpl {name: "getDocumentSuccessRateByCustomerGroupImpl"}
+    resource isolated function get api/v1/metrics/customer_group_over_time(map<string|string[]> headers = {}, typedesc<OkGETDocumentSuccessRateByCustomerGroupResponse> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
+
+    @MethodImpl {name: "getInvoiceCycleHistoryImpl"}
+    resource isolated function get api/v1/payments/invoice_cycle_history/\<invoice_id\>(map<string|string[]> headers = {}, typedesc<OkGETInvoiceCycleHistoryResponse> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
 
     # Get a payment run
     #
@@ -148,6 +208,15 @@ public isolated client class Client {
     @MethodImpl {name: "getSettingsImpl"}
     resource isolated function get api/v1/fetch_settings(map<string|string[]> headers = {}, typedesc<OkGETStatementSettingsResponse> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
 
+    @MethodImpl {name: "removeAccountFromCycleImpl"}
+    resource isolated function put api/v1/payments/remove_account_from_retry_cycle/\<account_id\>(map<string|string[]> headers = {}, typedesc<OkInline_response_200_7> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+
+    @MethodImpl {name: "removeDebitMemoFromCycleImpl"}
+    resource isolated function put api/v1/payments/remove_debit_memo_from_retry_cycle/\<debit_memo_id\>(map<string|string[]> headers = {}, typedesc<OkInline_response_200_6> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+
+    @MethodImpl {name: "removeRemoveInoviceFromCycleImpl"}
+    resource isolated function put api/v1/payments/remove_invoice_from_retry_cycle/\<invoice_id\>(map<string|string[]> headers = {}, typedesc<OkInline_response_200_5> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+
     # Update a payment run schedule
     #
     # + schedule_id - The schedule ID
@@ -165,6 +234,20 @@ public isolated client class Client {
     private isolated function UpdateAccountImpl(string account_id, map<string|string[]> headers, typedesc<OkInline_response_200> targetType, *UpdateAccountQueries queries) returns OkInline_response_200|error {
         return {
             body: {"success": true},
+            headers: {}
+        };
+    }
+
+    private isolated function UpdateExecutePaymentsImpl(payments_execute_payments_body payload, map<string|string[]> headers, typedesc<OkInline_response_200_4> targetType) returns OkInline_response_200_4|error {
+        return {
+            body: {"success": true, "message": "Payments with the following IDs enqueued for processing: [100, 101, 110, 111, 121]"},
+            headers: {}
+        };
+    }
+
+    private isolated function UpdateSubmitPaymentToCycleImpl(payments_submit_failed_payment_body payload, map<string|string[]> headers, typedesc<OkInline_response_200_8> targetType) returns OkInline_response_200_8|error {
+        return {
+            body: {"success": true, "message": "Payment entered into retry process"},
             headers: {}
         };
     }
@@ -204,6 +287,34 @@ public isolated client class Client {
         };
     }
 
+    private isolated function executeExecuteAccountPaymentsImpl(map<string|string[]> headers, typedesc<OkInline_response_200_3> targetType) returns OkInline_response_200_3|error {
+        return {
+            body: {"success": true, "message": "Payments with the following IDs enqueued for processing: [310, 311, 312]"},
+            headers: {}
+        };
+    }
+
+    private isolated function executeExecuteDebitMemoPaymentImpl(map<string|string[]> headers, typedesc<OkInline_response_200_2> targetType) returns OkInline_response_200_2|error {
+        return {
+            body: {"success": true, "message": "Payments with the following IDs enqueued for processing: [300]"},
+            headers: {}
+        };
+    }
+
+    private isolated function executeExecuteInvoicePaymentImpl(map<string|string[]> headers, typedesc<OkInline_response_200_1> targetType) returns OkInline_response_200_1|error {
+        return {
+            body: {"success": true, "message": "Payments with the following IDs enqueued for processing: [290, 291]"},
+            headers: {}
+        };
+    }
+
+    private isolated function getAccountCycleHistoryImpl(map<string|string[]> headers, typedesc<OkGETAccountCycleHistoryResponse> targetType) returns OkGETAccountCycleHistoryResponse|error {
+        return {
+            body: {"cycles": [{"account_id": "2c92c0f96bd69165016bdcbf55ad5e62", "invoice_id": "2c92c0fa7849b3ff01784bc5e8ee18b5", "payment_method_id": "2c92c0f9774f2b3e01775f6cf2fb726a", "currency": "USD", "status": "Cycle Complete", "current_attempt_number": 3, "next_attempt": "2021-03-19T18:53:39.641Z", "customer_group": "All Remaining Customers", "attempts": [{"attempt_number": 1, "zuora_payment_id": "2c92c0867849d42301784bc9ce806c31", "time_of_execution": "2021-03-19T18:42:20.103Z", "source": "PR-00000371", "cpr_generated": false, "success": false, "amount_collected": "0.0", "action_info": {"action": "Retry"}, "retry_info": {"next": "2021-03-19T09:43:28.670-09:00", "criteria": "incremental_time"}, "mapping_info": {"label": "Hard Decline", "level": "code", "customer_group_id": 1}, "gateway_info": {"id": "2c92c0f85e2d19af015e3a61d8947e5d", "code": "insufficient_funds", "response": "Your card has insufficient funds."}}, {"attempt_number": 2, "zuora_payment_id": "2c92c09c7849d3c101784bcdfc010671", "time_of_execution": "2021-03-19T18:52:24.137Z", "source": "PR-00000372", "cpr_generated": true, "success": false, "amount_collected": "0.0", "action_info": {"action": "Stop"}, "retry_info": {}, "mapping_info": {"label": "Hard Decline", "level": "code", "customer_group_id": 1}, "gateway_info": {"id": "2c92c0f85e2d19af015e3a61d8947e5d", "code": "insufficient_funds", "response": "Your card has insufficient funds."}}]}, {"account_id": "2c92c0f96bd69165016bdcbf55ad5e62", "invoice_id": "2c92c0fb78532b0f01785a38cede190a", "payment_method_id": "2c92c0f9774f2b3e01775f6cf2fb726a", "currency": "USD", "status": "Cycle Incomplete", "current_attempt_number": 1, "next_attempt": "2021-03-24T19:34:20.254Z", "customer_group": "All Remaining Customers", "attempts": [{"attempt_number": 1, "zuora_payment_id": "2c92c085785305e201785a51aae41969", "time_of_execution": "2021-03-23T16:50:18.878Z", "source": "PR-00000376", "cpr_generated": false, "success": false, "amount_collected": "0.0", "action_info": {"action": "Retry"}, "retry_info": {"next": "2021-03-23T07:51:30.316-09:00", "criteria": "incremental_time"}, "mapping_info": {"label": "Hard Decline", "level": "code", "customer_group_id": 1}, "gateway_info": {"id": "2c92c0f85e2d19af015e3a61d8947e5d", "code": "insufficient_funds", "response": "Your card has insufficient funds."}}]}]},
+            headers: {}
+        };
+    }
+
     private isolated function getAccountImpl(string account_id, map<string|string[]> headers, typedesc<OkCollectionAccount> targetType) returns OkCollectionAccount|error {
         return {
             body: {"name": "Testing Account", "zuora_id": "2c92c0f863f2b1680163f579b7e705da", "in_collections": true, "collections_agent": "2018-01-02T00:00:00.000Z", "account_currency": "CAD", "home_currency": "USD", "amount_due_account_currency": 15540, "amount_due_home_currency": 800.55, "last_open_invoice_date": "2018-06-12", "average_debt_age": "194.4 days", "statuses": {"In Collections": true, "Pending": false, "In Dispute": false, "Paid In Full": false}},
@@ -214,6 +325,41 @@ public isolated client class Client {
     private isolated function getAccountsImpl(map<string|string[]> headers, typedesc<OkGETCollectionAccountsResponse> targetType) returns OkGETCollectionAccountsResponse|error {
         return {
             body: {"accounts": [{"name": "Testing Account", "zuora_id": "2c92c0f863f2b1680163f579b7e705da", "in_collections": true, "collections_agent": "2018-01-02T00:00:00.000Z", "account_currency": "CAD", "home_currency": "USD", "amount_due_account_currency": 15540, "amount_due_home_currency": 800.55, "last_open_invoice_date": "2018-06-12", "average_debt_age": "194.4 days", "statuses": {"In Collections": 0, "Pending": 0, "In Dispute": 0, "Paid In Full": 0}}], "pagination": {"page": 1, "page_length": 20, "next_page": "https://collections-window.apps.zuora.com/api/v1/accounts?page=2&page_length=20"}},
+            headers: {}
+        };
+    }
+
+    private isolated function getActiveAccountCycleImpl(map<string|string[]> headers, typedesc<OkGETActiveAccountCycleResponse> targetType) returns OkGETActiveAccountCycleResponse|error {
+        return {
+            body: {"cycles": [{"account_id": "2c92c0f96bd69165016bdccdd6ce2f29", "debit_memo_id": "2c92c0fb78532b0001785a38f6427976", "payment_method_id": "2c92c0f9774f2b3e01775f6f06d87b61", "currency": "USD", "status": "Cycle Incomplete", "current_attempt_number": 1, "next_attempt": "2021-04-01T19:27:34.473Z", "customer_group": "All Remaining Customers", "attempts": [{"attempt_number": 1, "zuora_payment_id": "2c92c085785305e201785a5199a6192d", "time_of_execution": "2021-03-23T16:50:18.878Z", "source": "PR-00000376", "cpr_generated": false, "success": false, "amount_collected": "0.0", "action_info": {"action": "Retry"}, "retry_info": {"next": "2021-03-23T07:51:27.521-09:00", "criteria": "incremental_time"}, "mapping_info": {"label": "Hard Decline", "level": "code", "customer_group_id": 1}, "gateway_info": {"id": "2c92c0f85e2d19af015e3a61d8947e5d", "code": "insufficient_funds", "response": "Your card has insufficient funds."}}]}, {"account_id": "2c92c0f96bd69165016bdccdd6ce2f29", "invoice_id": "2c92c0fa7853052701785a38c6622473", "payment_method_id": "2c92c0f9774f2b3e01775f6f06d87b61", "currency": "USD", "status": "Cycle Incomplete", "current_attempt_number": 1, "next_attempt": "2021-04-01T19:27:34.436Z", "customer_group": "All Remaining Customers", "attempts": [{"attempt_number": 1, "zuora_payment_id": "2c92c085785305e201785a519d85193b", "time_of_execution": "2021-03-23T16:50:18.878Z", "source": "PR-00000376", "cpr_generated": false, "success": false, "amount_collected": "0.0", "action_info": {"action": "Retry"}, "retry_info": {"next": "2021-03-23T07:51:28.161-09:00", "criteria": "incremental_time"}, "mapping_info": {"label": "Hard Decline", "level": "code", "customer_group_id": 1}, "gateway_info": {"id": "2c92c0f85e2d19af015e3a61d8947e5d", "code": "insufficient_funds", "response": "Your card has insufficient funds."}}]}]},
+            headers: {}
+        };
+    }
+
+    private isolated function getActiveDebitMemoCycleImpl(map<string|string[]> headers, typedesc<OkGETActiveDebitMemoCycleResponse> targetType) returns OkGETActiveDebitMemoCycleResponse|error {
+        return {
+            body: {"cycles": [{"account_id": "2c92c0f868e161e70168e25eb51d755f", "debit_memo_id": "2c92c0fa7853052701785a38f3bb267f", "payment_method_id": "2c92c0f8774f1afe01775f6e533c4c06", "currency": "USD", "status": "Cycle Incomplete", "current_attempt_number": 2, "next_attempt": "2021-04-01T10:22:57.464Z", "customer_group": "All Remaining Customers", "attempts": [{"attempt_number": 1, "zuora_payment_id": "2c92c085785305e201785a51af791979", "time_of_execution": "2021-03-23T16:50:18.878Z", "source": "PR-00000376", "cpr_generated": false, "success": false, "amount_collected": "0.0", "action_info": {"action": "Retry"}, "retry_info": {"next": "2021-03-23T07:51:30.380-09:00", "criteria": "incremental_time"}, "mapping_info": {"label": "Hard Decline", "level": "code", "customer_group_id": 1}, "gateway_info": {"id": "2c92c0f85e2d19af015e3a61d8947e5d", "code": "insufficient_funds", "response": "Your card has insufficient funds."}}, {"attempt_number": 2, "zuora_payment_id": "2c92c0857881cf3e01788ee263b0331c", "time_of_execution": "2021-04-01T19:21:55.207Z", "source": "PR-00000380", "cpr_generated": true, "success": false, "amount_collected": "0.0", "action_info": {"action": "Retry"}, "retry_info": {"next": "2021-04-01T10:22:57.464-09:00", "criteria": "incremental_time"}, "mapping_info": {"label": "Hard Decline", "level": "code", "customer_group_id": 1}, "gateway_info": {"id": "2c92c0f85e2d19af015e3a61d8947e5d", "code": "insufficient_funds", "response": "Your card has insufficient funds."}}]}]},
+            headers: {}
+        };
+    }
+
+    private isolated function getActiveInvoiceCycleImpl(map<string|string[]> headers, typedesc<OkGETActiveInvoiceCycleResponse> targetType) returns OkGETActiveInvoiceCycleResponse|error {
+        return {
+            body: {"cycles": [{"account_id": "2c92c0f96bd69165016bdccdd6ce2f29", "invoice_id": "2c92c0f8778bf8cd017798168cb50e0b", "payment_method_id": "2c92c0f9774f2b3e01775f6f06d87b61", "currency": "USD", "status": "Cycle Incomplete", "current_attempt_number": 2, "next_attempt": "2021-04-01T19:27:34.648Z", "customer_group": "All Remaining Customers", "attempts": [{"attempt_number": 1, "zuora_payment_id": "2c92c0867849d42301784bc9ca076c21", "time_of_execution": "2021-03-19T18:42:20.103Z", "source": "PR-00000371", "cpr_generated": false, "success": false, "amount_collected": "0.0", "action_info": {"action": "Retry"}, "retry_info": {"next": "2021-04-01T19:27:34.648-09:00", "criteria": "incremental_time"}, "mapping_info": {"label": "Hard Decline", "level": "code", "customer_group_id": 1}, "gateway_info": {"id": "2c92c0f85e2d19af015e3a61d8947e5d", "code": "insufficient_funds", "response": "Your card has insufficient funds."}}, {"attempt_number": 2, "zuora_payment_id": "2c92c09c7849d3c101784bce0d0a06d5", "time_of_execution": "2021-03-19T18:52:24.137Z", "source": "PR-00000372", "cpr_generated": true, "success": false, "amount_collected": "0.0", "action_info": {"action": "Retry"}, "retry_info": {"next": "2021-03-19T09:53:39.845-09:00", "criteria": "incremental_time"}, "mapping_info": {"label": "Hard Decline", "level": "code", "customer_group_id": 1}, "gateway_info": {"id": "2c92c0f85e2d19af015e3a61d8947e5d", "code": "insufficient_funds", "response": "Your card has insufficient funds."}}]}]},
+            headers: {}
+        };
+    }
+
+    private isolated function getAmountRecoveredImpl(map<string|string[]> headers, typedesc<OkGETAmountRecoveredResponse> targetType) returns OkGETAmountRecoveredResponse|error {
+        return {
+            body: {"currency": {"USD": {"total_amount": "77515.21", "last_30_days": "1100.01"}, "EUR": {"total_amount": "337.19", "last_30_days": "17.17"}, "CAD": {"total_amount": "123954.10", "last_30_days": "5132.87"}}, "success": true},
+            headers: {}
+        };
+    }
+
+    private isolated function getBaselineMetricsImpl(map<string|string[]> headers, typedesc<OkGETBaselineMetricsResponse> targetType) returns OkGETBaselineMetricsResponse|error {
+        return {
+            body: {"retry_success_rate": "11.90", "retry_success_rate_trend": "down", "document_success_rate": "13.54", "document_success_rate_trend": "neutral", "average_days_outstanding": "4.76", "average_days_outstanding_trend": "up", "success": true},
             headers: {}
         };
     }
@@ -235,6 +381,34 @@ public isolated client class Client {
     private isolated function getCollectionsInfoImpl(map<string|string[]> headers, typedesc<OkCollectionsInfo> targetType) returns OkCollectionsInfo|error {
         return {
             body: {"accounts_in_collections": 24, "home_currency": "USD", "total_debt": "8379.78", "largest_debts": ["Test Account - 12438.00 USD", "Jimmy John - 8000.00 USD", "James Smith - 2450.55 USD", "Bob Roberts - 1000.00 USD", "Jim Reynolds - 829.00 USD"], "oldest_debts": ["Test Account - 2662 days", "Jimbo - 1494 days", "Steve Smith - 942 days", "Jason Williams - 678 days", "Will Jasons - 365 days"], "statuses": {"In Collections": 24, "Pending": 2, "In Dispute": 5, "Paid in Full": 0}},
+            headers: {}
+        };
+    }
+
+    private isolated function getCustomerGroupMetricsImpl(map<string|string[]> headers, typedesc<OkGETCustomerGroupMetricsResponse> targetType) returns OkGETCustomerGroupMetricsResponse|error {
+        return {
+            body: {"customer_groups": [{"id": 1, "name": "batch22", "smart_retry": false, "document_success_rate": "17.17", "document_success_rate_trend": "up", "retry_success_rate": "21.76", "average_attempts": "4.11"}, {"id": 2, "name": "Smart Retry", "smart_retry": true, "document_success_rate": "74.17", "document_success_rate_trend": "down", "retry_success_rate": "81.21", "average_attempts": "1.32"}, {"id": 4, "name": "All Remaining Customers", "smart_retry": false, "document_success_rate": "16.35", "document_success_rate_trend": "up", "retry_success_rate": "15.21", "average_attempts": "3.32"}], "success": true},
+            headers: {}
+        };
+    }
+
+    private isolated function getDebitMemoCycleHistoryImpl(map<string|string[]> headers, typedesc<OkGETDebitMemoCycleHistoryResponse> targetType) returns OkGETDebitMemoCycleHistoryResponse|error {
+        return {
+            body: {"cycles": [{"account_id": "2c92c0f868e161e70168e25eb51d755f", "debit_memo_id": "2c92c0fa7853052701785a38f3bb267f", "payment_method_id": "2c92c0f8774f1afe01775f6e533c4c06", "currency": "USD", "status": "Cycle Complete", "current_attempt_number": 2, "next_attempt": null, "customer_group": "All Remaining Customers", "attempts": [{"attempt_number": 1, "zuora_payment_id": "2c92c085785305e201785a51af791979", "time_of_execution": "2021-03-23T16:50:18.878Z", "source": "PR-00000376", "cpr_generated": false, "success": false, "amount_collected": "0.0", "action_info": {"action": "Retry"}, "retry_info": {"next": "2021-03-23T07:51:30.380-09:00", "criteria": "incremental_time", "api_updated_retry_time": "2021-03-26T14:27:21.107-04:00"}, "mapping_info": {"label": "Hard Decline", "level": "code", "customer_group_id": 1}, "gateway_info": {"id": "2c92c0f85e2d19af015e3a61d8947e5d", "code": "insufficient_funds", "response": "Your card has insufficient funds."}}, {"attempt_number": 2, "zuora_payment_id": "2c92c0857881cf3e01788ee263b0331c", "time_of_execution": "2021-04-01T19:21:55.207Z", "source": "PR-00000378", "cpr_generated": true, "success": false, "amount_collected": "0.0", "action_info": {"action": "Stop"}, "retry_info": {}, "mapping_info": {"label": "Hard Decline", "level": "code", "customer_group_id": 1}, "gateway_info": {"id": "2c92c0f85e2d19af015e3a61d8947e5d", "code": "insufficient_funds", "response": "Your card has insufficient funds."}}]}]},
+            headers: {}
+        };
+    }
+
+    private isolated function getDocumentSuccessRateByCustomerGroupImpl(map<string|string[]> headers, typedesc<OkGETDocumentSuccessRateByCustomerGroupResponse> targetType) returns OkGETDocumentSuccessRateByCustomerGroupResponse|error {
+        return {
+            body: {"customer_groups": {"1": {"05_21": "17.53", "04_21": "13.21", "03_21": "14.92", "02_21": "8.99", "01_21": "34.25", "12_20": "12.30"}, "2": {"05_21": "11.11", "04_21": "7.87", "03_21": "26.00", "02_21": "11.06", "01_21": "13.43", "12_20": "17.92"}, "4": {"05_21": "11.13", "04_21": "9.17", "03_21": "17.20", "02_21": "19.06", "01_21": "12.43", "12_20": "15.92"}}, "success": true},
+            headers: {}
+        };
+    }
+
+    private isolated function getInvoiceCycleHistoryImpl(map<string|string[]> headers, typedesc<OkGETInvoiceCycleHistoryResponse> targetType) returns OkGETInvoiceCycleHistoryResponse|error {
+        return {
+            body: {"cycles": [{"account_id": "2c92c0f96bd69165016bdcbf55ad5e62", "invoice_id": "2c92c0fa7849b3ff01784bc5e8ee18b5", "payment_method_id": "2c92c0f9774f2b3e01775f6cf2fb726a", "currency": "USD", "status": "Cycle Complete", "current_attempt_number": 1, "next_attempt": null, "customer_group": "Testing Group", "attempts": [{"attempt_number": 1, "zuora_payment_id": "2c92c0867849d42301784bc9ce806c31", "time_of_execution": "2021-04-01T19:11:21.639Z", "source": "PR-00000370", "cpr_generated": false, "success": false, "amount_collected": "0.0", "action_info": {"action": "Stop"}, "retry_info": {}, "mapping_info": {"label": "Hard Decline", "level": "code", "customer_group_id": 5}, "gateway_info": {"id": "2c92c0f85e2d19af015e3a61d8947e5d", "code": "insufficient_funds", "response": "Your card has insufficient funds."}}]}, {"account_id": "2c92c0f96bd69165016bdcbf55ad5e62", "invoice_id": "2c92c0fa7849b3ff01784bc5e8ee18b5", "payment_method_id": "2c92c0f9774f2b3e01775f6cf2fb726a", "currency": "USD", "status": "Cycle Complete", "current_attempt_number": 2, "next_attempt": null, "customer_group": "All Remaining Customers", "attempts": [{"attempt_number": 1, "zuora_payment_id": "2c92c0867849d42301784bc9ce806c31", "time_of_execution": "2021-03-19T18:42:20.103Z", "source": "PR-00000371", "cpr_generated": false, "success": false, "amount_collected": "0.0", "action_info": {"action": "Retry"}, "retry_info": {"next": "2021-03-19T09:43:28.670-09:00", "criteria": "incremental_time"}, "mapping_info": {"label": "Hard Decline", "level": "code", "customer_group_id": 1}, "gateway_info": {"id": "2c92c0f85e2d19af015e3a61d8947e5d", "code": "insufficient_funds", "response": "Your card has insufficient funds."}}, {"attempt_number": 2, "zuora_payment_id": "2c92c09c7849d3c101784bcdfc010671", "time_of_execution": "2021-03-19T18:52:24.137Z", "source": "PR-00000372", "cpr_generated": true, "success": false, "amount_collected": "0.0", "action_info": {"action": "Stop"}, "retry_info": {}, "mapping_info": {"label": "Hard Decline", "level": "code", "customer_group_id": 1}, "gateway_info": {"id": "2c92c0f85e2d19af015e3a61d8947e5d", "code": "insufficient_funds", "response": "Your card has insufficient funds."}}]}]},
             headers: {}
         };
     }
@@ -263,6 +437,27 @@ public isolated client class Client {
     private isolated function getSettingsImpl(map<string|string[]> headers, typedesc<OkGETStatementSettingsResponse> targetType) returns OkGETStatementSettingsResponse|error {
         return {
             body: {"success": true, "templates": [{"name": "Default Template"}, {"name": "Template for end consumers"}], "default_template": "Default Template", "default_cycle": "Month"},
+            headers: {}
+        };
+    }
+
+    private isolated function removeAccountFromCycleImpl(map<string|string[]> headers, typedesc<OkInline_response_200_7> targetType) returns OkInline_response_200_7|error {
+        return {
+            body: {"success": true, "message": "Payments with the following IDs have been removed from the retry cycle: [310, 311, 312]"},
+            headers: {}
+        };
+    }
+
+    private isolated function removeDebitMemoFromCycleImpl(map<string|string[]> headers, typedesc<OkInline_response_200_6> targetType) returns OkInline_response_200_6|error {
+        return {
+            body: {"success": true, "message": "Payments with the following IDs have been removed from the retry cycle: [301]"},
+            headers: {}
+        };
+    }
+
+    private isolated function removeRemoveInoviceFromCycleImpl(map<string|string[]> headers, typedesc<OkInline_response_200_5> targetType) returns OkInline_response_200_5|error {
+        return {
+            body: {"success": true, "message": "Payments with the following IDs have been removed from the retry cycle: [290, 291]"},
             headers: {}
         };
     }

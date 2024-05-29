@@ -298,7 +298,7 @@ public class BallerinaClientGenerator {
     }
 
     /**
-     * This includes the filtering logic.
+     * This includes the filtering logic for OAS operations.
      */
     private boolean shouldFilterOperation(List<String> filterTags, List<String> filterOperations,
                                           List<String> operationTags, String operationId) {

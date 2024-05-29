@@ -65,7 +65,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURN_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 
 /**
- * This class iss contain the advance client generation when the client generation enable with status code bindings.
+ * This class contains the advance client generation when the client generation enables with status code bindings.
+ *
  * @since 2.1.0
  */
 public class AdvanceMockClientGenerator extends BallerinaClientGeneratorWithStatusCodeBinding {
@@ -102,22 +103,6 @@ public class AdvanceMockClientGenerator extends BallerinaClientGeneratorWithStat
         return nodes;
     }
 
-    @Override
-    protected void addClientFunctionImpl(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
-                                         Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
-                                         List<FunctionDefinitionNode> clientFunctionNodes) {
-        FunctionDefinitionNode clientExternFunction = clientFunctionNodes.get(clientFunctionNodes.size() - 1);
-        Optional<FunctionDefinitionNode> implFunction = createImplFunction(operation.getKey(), operationEntry, openAPI,
-                authConfigGeneratorImp, ballerinaUtilGenerator, clientExternFunction, oasClientConfig.isMock());
-        if (implFunction.isPresent()) {
-            clientFunctionNodes.add(implFunction.get());
-        } else {
-            diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_112,
-                    operationEntry.getValue().getOperationId()));
-            clientFunctionNodes.remove(clientFunctionNodes.size() - 1);
-        }
-    }
-
     /**
      * This method for generate the client syntax tree.
      *
@@ -127,13 +112,9 @@ public class AdvanceMockClientGenerator extends BallerinaClientGeneratorWithStat
     @Override
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException, ClientException {
 
-        // Create `ballerina/http` import declaration node
         List<ImportDeclarationNode> importForHttp = getImportDeclarationNodes();
         imports.addAll(importForHttp);
-
-        // Add authentication related records
         authConfigGeneratorImp.addAuthRelatedRecords(openAPI);
-
         List<ModuleMemberDeclarationNode> nodes = getModuleMemberDeclarationNodes();
         NodeList<ImportDeclarationNode> importsList = createNodeList(imports);
         ModulePartNode modulePartNode =
@@ -141,7 +122,6 @@ public class AdvanceMockClientGenerator extends BallerinaClientGeneratorWithStat
         TextDocument textDocument = TextDocuments.from("");
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
         syntaxTree = syntaxTree.modifyWith(modulePartNode);
-        //Add comments
         ClientDocCommentGenerator clientDocCommentGenerator = new ClientDocCommentGenerator(syntaxTree, openAPI,
                 oasClientConfig.isResourceMode());
         return clientDocCommentGenerator.updateSyntaxTreeWithDocComments();

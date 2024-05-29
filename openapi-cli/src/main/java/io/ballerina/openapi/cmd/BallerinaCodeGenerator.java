@@ -449,11 +449,9 @@ public class BallerinaCodeGenerator {
                                                                         boolean statusCodeBinding, boolean isMock) {
         if (statusCodeBinding && isMock) {
             return new AdvanceMockClientGenerator(oasClientConfig);
-        }
-        if (statusCodeBinding) {
+        } else if (statusCodeBinding) {
             return new BallerinaClientGeneratorWithStatusCodeBinding(oasClientConfig);
-        }
-        if (isMock) {
+        } else if (isMock) {
             return new BallerinaMockClientGenerator(oasClientConfig);
         }
         return new BallerinaClientGenerator(oasClientConfig);
