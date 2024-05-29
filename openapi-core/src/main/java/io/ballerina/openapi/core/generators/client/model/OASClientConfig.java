@@ -84,7 +84,7 @@ public class OASClientConfig {
      */
     public static class Builder {
         private OpenAPI openAPI;
-        private Filter filter;
+        private Filter filter = new Filter();
         private boolean nullable = false;
         private boolean resourceMode = true;
         private boolean isPlugin = false;
