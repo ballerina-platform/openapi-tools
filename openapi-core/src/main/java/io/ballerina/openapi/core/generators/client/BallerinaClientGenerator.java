@@ -271,36 +271,50 @@ public class BallerinaClientGenerator {
      * This function is to filter the operations based on the user given tags and operations.
      */
     protected Map<String, Map<PathItem.HttpMethod, Operation>> filterOperations() {
-        //todo refactor code
-        Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperation = new HashMap<>();
+        Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations = new HashMap<>();
         List<String> filterTags = filter.getTags();
         List<String> filterOperations = filter.getOperations();
-        Set<Map.Entry<String, PathItem>> pathsItems = openAPI.getPaths().entrySet();
-        for (Map.Entry<String, PathItem> path : pathsItems) {
+        for (Map.Entry<String, PathItem> pathEntry : openAPI.getPaths().entrySet()) {
             Map<PathItem.HttpMethod, Operation> operations = new HashMap<>();
-            if (!path.getValue().readOperationsMap().isEmpty()) {
-                Map<PathItem.HttpMethod, Operation> operationMap = path.getValue().readOperationsMap();
-                for (Map.Entry<PathItem.HttpMethod, Operation> operation : operationMap.entrySet()) {
-                    List<String> operationTags = operation.getValue().getTags();
-                    String operationId = operation.getValue().getOperationId();
-                    if (!filterTags.isEmpty() || !filterOperations.isEmpty()) {
-                        // Generate remote function only if it is available in tag filter or operation filter or both
-                        if (operationTags != null || ((!filterOperations.isEmpty()) && (operationId != null))) {
-                            if (isaFilteredOperation(filterTags, filterOperations, operationTags, operationId)) {
-                                operations.put(operation.getKey(), operation.getValue());
-                            }
-                        }
-                    } else {
-                        operations.put(operation.getKey(), operation.getValue());
-                    }
-                }
-                if (!operations.isEmpty()) {
-                    filteredOperation.put(path.getKey(), operations);
+            Map<PathItem.HttpMethod, Operation> operationMap = pathEntry.getValue().readOperationsMap();
+            if (operationMap.isEmpty()) {
+                continue;
+            }
+            for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : operationMap.entrySet()) {
+                Operation operation = operationEntry.getValue();
+                List<String> operationTags = operation.getTags();
+                String operationId = operation.getOperationId();
+
+                if (shouldFilterOperation(filterTags, filterOperations, operationTags, operationId)) {
+                    operations.put(operationEntry.getKey(), operation);
                 }
             }
+            if (!operations.isEmpty()) {
+                filteredOperations.put(pathEntry.getKey(), operations);
+            }
         }
-        return filteredOperation;
+
+        return filteredOperations;
     }
+
+    /**
+     * This includes the filtering logic.
+     */
+    private boolean shouldFilterOperation(List<String> filterTags, List<String> filterOperations,
+                                          List<String> operationTags, String operationId) {
+        boolean hasFilterTags = !filterTags.isEmpty();
+        boolean hasFilterOperations = !filterOperations.isEmpty();
+        boolean hasOperationTags = operationTags != null;
+        boolean hasOperationId = operationId != null;
+
+        if (!hasFilterTags && !hasFilterOperations) {
+            return true;
+        }
+
+        return (hasFilterTags && hasOperationTags && !Collections.disjoint(filterTags, operationTags)) ||
+                (hasFilterOperations && hasOperationId && filterOperations.contains(operationId));
+    }
+
 
 
 
@@ -568,12 +582,6 @@ public class BallerinaClientGenerator {
     protected QualifiedNameReferenceNode getHttpClientTypeName() {
         return createQualifiedNameReferenceNode(createIdentifierToken(HTTP), createToken(COLON_TOKEN),
                 createIdentifierToken(GeneratorConstants.CLIENT));
-    }
-
-    private static boolean isaFilteredOperation(List<String> filterTags, List<String> filterOperations,
-                                                List<String> operationTags, String operationId) {
-        return (operationTags != null && GeneratorUtils.hasTags(operationTags, filterTags)) ||
-                ((operationId != null) && filterOperations.contains(operationId.trim()));
     }
 
     private List<FunctionDefinitionNode> createRemoteFunctions(Map<String, Map<PathItem.HttpMethod, Operation>>

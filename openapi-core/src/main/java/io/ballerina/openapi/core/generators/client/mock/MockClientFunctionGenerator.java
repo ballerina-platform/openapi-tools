@@ -79,10 +79,7 @@ public class MockClientFunctionGenerator implements FunctionGenerator {
 
     @Override
     public Optional<FunctionDefinitionNode> generateFunction() throws BallerinaOpenApiException {
-        //function signature node, remote, resource
         if (isResourceFunction) {
-            //function signature node, remote, resource
-            //Create qualifier list
             NodeList<Token> qualifierList = createNodeList(createToken(RESOURCE_KEYWORD),
                     createToken(ISOLATED_KEYWORD));
             Token functionKeyWord = createToken(FUNCTION_KEYWORD);
@@ -102,7 +99,6 @@ public class MockClientFunctionGenerator implements FunctionGenerator {
                 });
                 return Optional.empty();
             }
-
             //create function signature
             ResourceFunctionSignatureGenerator signatureGenerator = new ResourceFunctionSignatureGenerator(
                     operation.getValue(), openAPI, operation.getKey().toString(), path);
@@ -112,6 +108,7 @@ public class MockClientFunctionGenerator implements FunctionGenerator {
                 return Optional.empty();
             }
             FunctionSignatureNode signatureNode = signatureNodeOptional.get();
+            // function body generator
             MockFunctionBodyGenerator bodyGenerator = new MockFunctionBodyGenerator(path, operation, openAPI,
                     oasClientConfig.isStatusCodeBinding());
             Optional<FunctionBodyNode> functionBodyOptionalNode = bodyGenerator.getFunctionBodyNode();
@@ -128,7 +125,6 @@ public class MockClientFunctionGenerator implements FunctionGenerator {
             NodeList<Token> qualifierList = createNodeList(createToken(REMOTE_KEYWORD), createToken(ISOLATED_KEYWORD));
             Token functionKeyWord = createToken(FUNCTION_KEYWORD);
             IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
-
             RemoteFunctionSignatureGenerator signatureGenerator = new RemoteFunctionSignatureGenerator(
                     operation.getValue(), openAPI, operation.getKey().toString().toLowerCase(Locale.ENGLISH), path);
             diagnostics.addAll(signatureGenerator.getDiagnostics());

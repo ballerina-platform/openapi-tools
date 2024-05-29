@@ -65,7 +65,9 @@ public class MockClientGenerationTests {
         Optional<FunctionBodyNode> functionBodyNode = mockFunctionBodyGenerator.getFunctionBodyNode();
         FunctionBodyNode body = functionBodyNode.get();
         String node = body.toString();
-        Assert.assertEquals("{return {\"success\":true,\"size\":3,\"schedules\":[{\"id\":6,\"status\":\"Active\",\"filter\":\"Account.BillCycleDay = 8\",\"schedule\":\"At 6:00 AM, only on Monday and Tuesday\"}]};}", node);
+        Assert.assertEquals("{return {\"success\":true,\"size\":3,\"schedules\":[{\"id\":6,\"status\":\"Active\"" +
+                ",\"filter\":\"Account.BillCycleDay = 8\",\"schedule\":\"At 6:00 AM, only on Monday and" +
+                " Tuesday\"}]};}", node);
     }
 
     @Test
