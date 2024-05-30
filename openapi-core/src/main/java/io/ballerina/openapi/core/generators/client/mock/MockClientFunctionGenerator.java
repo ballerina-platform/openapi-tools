@@ -27,6 +27,7 @@ import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.client.FunctionGenerator;
+import io.ballerina.openapi.core.generators.client.FunctionSignatureGenerator;
 import io.ballerina.openapi.core.generators.client.RemoteFunctionSignatureGenerator;
 import io.ballerina.openapi.core.generators.client.ResourceFunctionSignatureGenerator;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
@@ -69,6 +70,7 @@ public class MockClientFunctionGenerator implements FunctionGenerator {
     List<ClientDiagnostic> diagnostics = new ArrayList<>();
     boolean isResourceFunction;
     OASClientConfig oasClientConfig;
+    FunctionSignatureGenerator signatureGenerator;
     public MockClientFunctionGenerator(String path, Map.Entry<PathItem.HttpMethod, Operation> operation,
                                        OASClientConfig oasClientConfig) {
         this.path = path;
@@ -76,6 +78,10 @@ public class MockClientFunctionGenerator implements FunctionGenerator {
         this.openAPI = oasClientConfig.getOpenAPI();
         this.isResourceFunction = oasClientConfig.isResourceMode();
         this.oasClientConfig = oasClientConfig;
+        this.signatureGenerator = oasClientConfig.isResourceMode() ? new ResourceFunctionSignatureGenerator(
+                operation.getValue(), openAPI, operation.getKey().toString().toLowerCase(Locale.ENGLISH), path) :
+                new RemoteFunctionSignatureGenerator(
+                        operation.getValue(), openAPI, operation.getKey().toString().toLowerCase(Locale.ENGLISH), path);
     }
 
     @Override
@@ -101,8 +107,6 @@ public class MockClientFunctionGenerator implements FunctionGenerator {
                 return Optional.empty();
             }
             //create function signature
-            ResourceFunctionSignatureGenerator signatureGenerator = new ResourceFunctionSignatureGenerator(
-                    operation.getValue(), openAPI, operation.getKey().toString(), path);
             Optional<FunctionSignatureNode> signatureNodeOptional = signatureGenerator.generateFunctionSignature();
             diagnostics.addAll(signatureGenerator.getDiagnostics());
             if (signatureNodeOptional.isEmpty()) {
@@ -126,10 +130,8 @@ public class MockClientFunctionGenerator implements FunctionGenerator {
             NodeList<Token> qualifierList = createNodeList(createToken(REMOTE_KEYWORD), createToken(ISOLATED_KEYWORD));
             Token functionKeyWord = createToken(FUNCTION_KEYWORD);
             IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
-            RemoteFunctionSignatureGenerator signatureGenerator = new RemoteFunctionSignatureGenerator(
-                    operation.getValue(), openAPI, operation.getKey().toString().toLowerCase(Locale.ENGLISH), path);
-            diagnostics.addAll(signatureGenerator.getDiagnostics());
             Optional<FunctionSignatureNode> signatureNodeOptional = signatureGenerator.generateFunctionSignature();
+            diagnostics.addAll(signatureGenerator.getDiagnostics());
             if (signatureNodeOptional.isEmpty()) {
                 return Optional.empty();
             }
@@ -151,5 +153,15 @@ public class MockClientFunctionGenerator implements FunctionGenerator {
     @Override
     public List<ClientDiagnostic> getDiagnostics() {
         return diagnostics;
+    }
+
+    @Override
+    public boolean hasDefaultStatusCodeBinding() {
+        return signatureGenerator.hasDefaultStatusCodeBinding();
+    }
+
+    @Override
+    public List<String> getNonDefaultStatusCodes() {
+        return signatureGenerator.getNonDefaultStatusCodes();
     }
 }
