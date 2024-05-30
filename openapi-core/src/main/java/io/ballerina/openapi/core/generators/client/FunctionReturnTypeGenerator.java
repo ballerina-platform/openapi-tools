@@ -28,5 +28,6 @@ public interface FunctionReturnTypeGenerator {
 
     Optional<ReturnTypeDescriptorNode> getReturnType();
     List<ClientDiagnostic> getDiagnostics();
-//    getReturnType();
+    boolean hasDefaultStatusCodeBinding();
+    List<String> getNonDefaultStatusCodes();
 }

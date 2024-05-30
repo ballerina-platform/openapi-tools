@@ -6,6 +6,6 @@ service /v1 on ep0 {
     resource function get 'field/[string \{id\}\.json]() returns http:Ok|error {
     }
 
-    resource function get v4/spreadsheets/[int spreadsheetId]/sheets/[string \{sheetId\}\:copyTo]() returns http:Ok|http:Response|error {
+    resource function get v4/spreadsheets/[int spreadsheetId]/sheets/[string \{sheetId\}\:copyTo]() returns http:Ok|ErrorDefault|error {
     }
 }

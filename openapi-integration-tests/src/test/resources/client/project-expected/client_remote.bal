@@ -57,19 +57,19 @@ public isolated client class Client {
     # + queries - Queries to be sent with the request
     # + return - Ok
     @MethodImpl {name: "getAlbumsImpl"}
-    remote isolated function getAlbums(map<string|string[]> headers = {}, typedesc<OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>, *GetAlbumsQueries queries) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
+    remote isolated function getAlbums(map<string|string[]> headers = {}, typedesc<AlbumArrayOk|ErrorMessageNotFound|ErrorPayloadBadRequest> targetType = <>, *GetAlbumsQueries queries) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
 
     # + headers - Headers to be sent with the request
     # + return - Ok
     @MethodImpl {name: "getAlbumsIdImpl"}
-    remote isolated function getAlbumsId(string id, map<string|string[]> headers = {}, typedesc<OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
+    remote isolated function getAlbumsId(string id, map<string|string[]> headers = {}, typedesc<AlbumOk|ErrorMessageNotFound|ErrorPayloadBadRequest> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
 
-    private isolated function getAlbumsIdImpl(string id, map<string|string[]> headers, typedesc<OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload> targetType) returns OkAlbum|NotFoundErrorMessage|BadRequestErrorPayload|error {
+    private isolated function getAlbumsIdImpl(string id, map<string|string[]> headers, typedesc<AlbumOk|ErrorMessageNotFound|ErrorPayloadBadRequest> targetType) returns http:StatusCodeResponse|error {
         string resourcePath = string `/albums/${getEncodedUri(id)}`;
         return self.clientEp->get(resourcePath, headers, targetType = targetType);
     }
 
-    private isolated function getAlbumsImpl(map<string|string[]> headers, typedesc<OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload> targetType, *GetAlbumsQueries queries) returns OkAlbumArray|NotFoundErrorMessage|BadRequestErrorPayload|error {
+    private isolated function getAlbumsImpl(map<string|string[]> headers, typedesc<AlbumArrayOk|ErrorMessageNotFound|ErrorPayloadBadRequest> targetType, *GetAlbumsQueries queries) returns http:StatusCodeResponse|error {
         string resourcePath = string `/albums`;
         resourcePath = resourcePath + check getPathForQueryParam(queries);
         return self.clientEp->get(resourcePath, headers, targetType = targetType);
@@ -78,9 +78,9 @@ public isolated client class Client {
     # + headers - Headers to be sent with the request
     # + return - Created
     @MethodImpl {name: "postAlbumsImpl"}
-    remote isolated function postAlbums(Album payload, map<string|string[]> headers = {}, typedesc<CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
+    remote isolated function postAlbums(Album payload, map<string|string[]> headers = {}, typedesc<AlbumCreated|ErrorMessageConflict|ErrorPayloadBadRequest> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invoke"} external;
 
-    private isolated function postAlbumsImpl(Album payload, map<string|string[]> headers, typedesc<CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload> targetType) returns CreatedAlbum|ConflictErrorMessage|BadRequestErrorPayload|error {
+    private isolated function postAlbumsImpl(Album payload, map<string|string[]> headers, typedesc<AlbumCreated|ErrorMessageConflict|ErrorPayloadBadRequest> targetType) returns http:StatusCodeResponse|error {
         string resourcePath = string `/albums`;
         http:Request request = new;
         json jsonBody = payload.toJson();

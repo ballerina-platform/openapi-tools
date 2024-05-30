@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.generateStatusCodeTypeInclusionRecord;
 
 /**
@@ -41,11 +42,16 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.generat
  */
 public class FunctionStatusCodeReturnTypeGenerator extends FunctionReturnTypeGeneratorImp {
     private final String path;
+    private final BallerinaUtilGenerator ballerinaUtilGenerator;
+    private boolean hasDefaultStatusCodeBinding = false;
+    private List<String> nonDefaultStatusCodes = new ArrayList<>();
+
 
     public FunctionStatusCodeReturnTypeGenerator(Operation operation, OpenAPI openAPI, String httpMethod,
-                                                 String path) {
+                                                 String path, BallerinaUtilGenerator ballerinaUtilGenerator) {
         super(operation, openAPI, httpMethod);
         this.path = path;
+        this.ballerinaUtilGenerator = ballerinaUtilGenerator;
     }
 
     @Override
@@ -54,19 +60,35 @@ public class FunctionStatusCodeReturnTypeGenerator extends FunctionReturnTypeGen
         try {
             String code = GeneratorConstants.HTTP_CODES_DES.get(statusCode);
             if (Objects.isNull(code)) {
-                ClientDiagnosticImp diagnostic = statusCode.equals(GeneratorConstants.DEFAULT)
-                        ? new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_115, operation.getOperationId())
-                        : new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_113, statusCode);
-                diagnostics.add(diagnostic);
-            } else {
-                List<Diagnostic> newDiagnostics = new ArrayList<>();
-                returnTypes.add(generateStatusCodeTypeInclusionRecord(code, response, httpMethod, openAPI, path,
-                        newDiagnostics));
-                diagnostics.addAll(newDiagnostics.stream().map(ClientDiagnosticImp::new).toList());
+                diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_113, statusCode));
+                return false;
             }
+
+            List<Diagnostic> newDiagnostics = new ArrayList<>();
+            returnTypes.add(generateStatusCodeTypeInclusionRecord(code, response, httpMethod, openAPI, path,
+                    newDiagnostics));
+            if (statusCode.equals(DEFAULT)) {
+                this.hasDefaultStatusCodeBinding = true;
+                if (!ballerinaUtilGenerator.hasDefaultStatusCodeResponseBinding()) {
+                    ballerinaUtilGenerator.setDefaultStatusCodeResponseBinding(true);
+                }
+            } else {
+                nonDefaultStatusCodes.add(statusCode);
+            }
+            diagnostics.addAll(newDiagnostics.stream().map(ClientDiagnosticImp::new).toList());
         } catch (InvalidReferenceException e) {
             diagnostics.add(new ClientDiagnosticImp(e.getDiagnostic()));
         }
         return false;
+    }
+
+    @Override
+    public boolean hasDefaultStatusCodeBinding() {
+        return hasDefaultStatusCodeBinding;
+    }
+
+    @Override
+    public List<String> getNonDefaultStatusCodes() {
+        return nonDefaultStatusCodes;
     }
 }

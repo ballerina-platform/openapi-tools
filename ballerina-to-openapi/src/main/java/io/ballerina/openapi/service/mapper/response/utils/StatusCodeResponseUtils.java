@@ -27,6 +27,8 @@ import io.swagger.v3.oas.models.headers.Header;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.openapi.service.mapper.Constants.DEFAULT;
+import static io.ballerina.openapi.service.mapper.Constants.DEFAULT_STATUS_CODE_RESPONSE;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_CODES;
 import static io.ballerina.openapi.service.mapper.Constants.STATUS_CODE_RESPONSE;
@@ -63,6 +65,9 @@ public final class StatusCodeResponseUtils extends StatusCodeTypeUtils {
             if (isSubTypeOfBallerinaModuleType(entry.getKey(), HTTP, typeSymbol, semanticModel)) {
                 return entry.getValue();
             }
+        }
+        if (isSubTypeOfBallerinaModuleType(DEFAULT_STATUS_CODE_RESPONSE, HTTP, typeSymbol, semanticModel)) {
+            return DEFAULT;
         }
         return defaultCode;
     }

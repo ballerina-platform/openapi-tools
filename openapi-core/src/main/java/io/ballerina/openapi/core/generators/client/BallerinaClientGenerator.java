@@ -589,30 +589,45 @@ public class BallerinaClientGenerator {
         List<FunctionDefinitionNode> remoteFunctionNodes = new ArrayList<>();
         for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {
             for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : operation.getValue().entrySet()) {
-                addRemoteFunction(operation, operationEntry, remoteFunctionNodes);
+                addRemoteFunction(operationEntry, operation.getKey(), remoteFunctionNodes);
             }
         }
         return remoteFunctionNodes;
     }
 
-    protected boolean addRemoteFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
-                                        Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
-                                        List<FunctionDefinitionNode> remoteFunctionNodes) {
+    /**
+     * Represents the result and metadata of the function generation process.
+     *
+     * @param isSuccess
+     * @param hasDefaultStatusCodeBinding
+     * @param nonDefaultStatusCodes
+     */
+    public record FunctionGeneratorResults(boolean isSuccess, boolean hasDefaultStatusCodeBinding,
+                                           List<String> nonDefaultStatusCodes) {
+
+        public FunctionGeneratorResults(boolean status) {
+            this(status, false, new ArrayList<>());
+        }
+    }
+
+    protected FunctionGeneratorResults addRemoteFunction(Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
+                                                         String path, List<FunctionDefinitionNode> functionNodes) {
         remoteFunctionNameList.add(operationEntry.getValue().getOperationId());
-        RemoteFunctionGenerator remoteFunctionGenerator = getRemoteFunctionGenerator(operation, operationEntry);
+        RemoteFunctionGenerator remoteFunctionGenerator = getRemoteFunctionGenerator(operationEntry, path);
         Optional<FunctionDefinitionNode> remoteFunction = remoteFunctionGenerator.generateFunction();
         diagnostics.addAll(remoteFunctionGenerator.getDiagnostics());
         if (remoteFunction.isPresent()) {
-            remoteFunctionNodes.add(remoteFunction.get());
-            return true;
+            functionNodes.add(remoteFunction.get());
+            return new FunctionGeneratorResults(true, remoteFunctionGenerator.hasDefaultStatusCodeBinding(),
+                    remoteFunctionGenerator.getNonDefaultStatusCodes());
         }
-        return false;
+        return new FunctionGeneratorResults(false);
     }
 
-    protected RemoteFunctionGenerator getRemoteFunctionGenerator(Map.Entry<String,
-            Map<PathItem.HttpMethod, Operation>> operation, Map.Entry<PathItem.HttpMethod, Operation> operationEntry) {
-        return new RemoteFunctionGenerator(operation.getKey(), operationEntry, openAPI, authConfigGeneratorImp,
-                ballerinaUtilGenerator, imports);
+    protected RemoteFunctionGenerator getRemoteFunctionGenerator(Map.Entry<PathItem.HttpMethod, Operation> operation,
+                                                                 String path) {
+        return new RemoteFunctionGenerator(path, operation, openAPI, authConfigGeneratorImp, ballerinaUtilGenerator,
+                imports);
     }
 
     private List<FunctionDefinitionNode> createResourceFunctions(Map<String,
@@ -620,30 +635,30 @@ public class BallerinaClientGenerator {
         List<FunctionDefinitionNode> resourceFunctionNodes = new ArrayList<>();
         for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {
             for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : operation.getValue().entrySet()) {
-                addResourceFunction(operation, operationEntry, resourceFunctionNodes);
+                addResourceFunction(operationEntry, operation.getKey(), resourceFunctionNodes);
             }
         }
         return resourceFunctionNodes;
     }
 
-    protected boolean addResourceFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
-                                          Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
-                                          List<FunctionDefinitionNode> resourceFunctionNodes) {
+    protected FunctionGeneratorResults addResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
+                                                           String path, List<FunctionDefinitionNode> functionNodes) {
         remoteFunctionNameList.add(operationEntry.getValue().getOperationId());
-        ResourceFunctionGenerator resourceFunctionGenerator = getResourceFunctionGenerator(operation, operationEntry);
+        ResourceFunctionGenerator resourceFunctionGenerator = getResourceFunctionGenerator(operationEntry, path);
         Optional<FunctionDefinitionNode> resourceFunction = resourceFunctionGenerator.generateFunction();
         diagnostics.addAll(resourceFunctionGenerator.getDiagnostics());
         if (resourceFunction.isPresent()) {
-            resourceFunctionNodes.add(resourceFunction.get());
-            return true;
+            functionNodes.add(resourceFunction.get());
+            return new FunctionGeneratorResults(true, resourceFunctionGenerator.hasDefaultStatusCodeBinding(),
+                    resourceFunctionGenerator.getNonDefaultStatusCodes());
         }
-        return false;
+        return new FunctionGeneratorResults(false);
     }
 
-    protected ResourceFunctionGenerator getResourceFunctionGenerator(Map.Entry<String,
-            Map<PathItem.HttpMethod, Operation>> operation, Map.Entry<PathItem.HttpMethod, Operation> operationEntry) {
-        return new ResourceFunctionGenerator(operationEntry, operation.getKey(), openAPI, authConfigGeneratorImp,
-                ballerinaUtilGenerator, imports);
+    protected ResourceFunctionGenerator getResourceFunctionGenerator(Map.Entry<PathItem.HttpMethod,
+            Operation> operation, String path) {
+        return new ResourceFunctionGenerator(operation, path, openAPI, authConfigGeneratorImp, ballerinaUtilGenerator,
+                imports);
     }
 
 

@@ -151,20 +151,20 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
     }
 
     @Override
-    protected boolean addRemoteFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
-                                        Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
-                                        List<FunctionDefinitionNode> remoteFunctionNodes) {
-        boolean result = super.addRemoteFunction(operation, operationEntry, remoteFunctionNodes);
-        if (result) {
-            addClientFunctionImpl(operation, operationEntry, remoteFunctionNodes);
+    protected FunctionGeneratorResults addRemoteFunction(Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
+                                                         String path, List<FunctionDefinitionNode> functionNodes) {
+        FunctionGeneratorResults result = super.addRemoteFunction(operationEntry, path, functionNodes);
+        if (result.isSuccess()) {
+            addClientFunctionImpl(operationEntry, path, functionNodes, result.hasDefaultStatusCodeBinding(),
+                    result.nonDefaultStatusCodes());
         }
         return result;
     }
 
     @Override
-    protected RemoteFunctionGenerator getRemoteFunctionGenerator(Map.Entry<String,
-            Map<PathItem.HttpMethod, Operation>> operation, Map.Entry<PathItem.HttpMethod, Operation> operationEntry) {
-        return new RemoteExternalFunctionGenerator(operation.getKey(), operationEntry, openAPI, authConfigGeneratorImp,
+    protected RemoteFunctionGenerator getRemoteFunctionGenerator(Map.Entry<PathItem.HttpMethod, Operation> operation,
+                                                                 String path) {
+        return new RemoteExternalFunctionGenerator(path, operation, openAPI, authConfigGeneratorImp,
                 ballerinaUtilGenerator, imports);
     }
 
@@ -174,12 +174,13 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
                 createIdentifierToken(GeneratorConstants.STATUS_CODE_CLIENT));
     }
 
-    private void addClientFunctionImpl(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
-                                       Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
-                                       List<FunctionDefinitionNode> clientFunctionNodes) {
+    private void addClientFunctionImpl(Map.Entry<PathItem.HttpMethod, Operation> operationEntry, String path,
+                                       List<FunctionDefinitionNode> clientFunctionNodes, boolean hasDefaultResponse,
+                                       List<String> nonDefaultStatusCodes) {
         FunctionDefinitionNode clientExternFunction = clientFunctionNodes.get(clientFunctionNodes.size() - 1);
-        Optional<FunctionDefinitionNode> implFunction = createImplFunction(operation.getKey(), operationEntry, openAPI,
-                authConfigGeneratorImp, ballerinaUtilGenerator, clientExternFunction, oasClientConfig.isMock());
+        Optional<FunctionDefinitionNode> implFunction = createImplFunction(path, operationEntry, openAPI,
+                authConfigGeneratorImp, ballerinaUtilGenerator, clientExternFunction, hasDefaultResponse,
+                nonDefaultStatusCodes, oasClientConfig.isMock());
         if (implFunction.isPresent()) {
             clientFunctionNodes.add(implFunction.get());
         } else {
@@ -190,20 +191,20 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
     }
 
     @Override
-    protected boolean addResourceFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
-                                          Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
-                                          List<FunctionDefinitionNode> resourceFunctionNodes) {
-        boolean result = super.addResourceFunction(operation, operationEntry, resourceFunctionNodes);
-        if (result) {
-            addClientFunctionImpl(operation, operationEntry, resourceFunctionNodes);
+    protected FunctionGeneratorResults addResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
+                                                           String path, List<FunctionDefinitionNode> functionNodes) {
+        FunctionGeneratorResults result = super.addResourceFunction(operationEntry, path, functionNodes);
+        if (result.isSuccess()) {
+            addClientFunctionImpl(operationEntry, path, functionNodes, result.hasDefaultStatusCodeBinding(),
+                    result.nonDefaultStatusCodes());
         }
         return result;
     }
 
     @Override
-    protected ResourceFunctionGenerator getResourceFunctionGenerator(Map.Entry<String,
-            Map<PathItem.HttpMethod, Operation>> operation, Map.Entry<PathItem.HttpMethod, Operation> operationEntry) {
-       return new ResourceExternalFunctionGenerator(operationEntry, operation.getKey(), openAPI, authConfigGeneratorImp,
+    protected ResourceFunctionGenerator getResourceFunctionGenerator(Map.Entry<PathItem.HttpMethod,
+            Operation> operation, String path) {
+       return new ResourceExternalFunctionGenerator(operation, path, openAPI, authConfigGeneratorImp,
                ballerinaUtilGenerator, imports);
     }
 
@@ -213,6 +214,8 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
                                                                 AuthConfigGeneratorImp authConfigGeneratorImp,
                                                                 BallerinaUtilGenerator ballerinaUtilGenerator,
                                                                 FunctionDefinitionNode clientExternFunction,
+                                                                boolean hasDefaultResponse,
+                                                                List<String> nonDefaultStatusCodes,
                                                                   boolean isMock) {
         //Create qualifier list
         NodeList<Token> qualifierList = createNodeList(createToken(PRIVATE_KEYWORD), createToken(ISOLATED_KEYWORD));
@@ -235,7 +238,8 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
         } else {
             FunctionBodyGeneratorImp functionBodyGenerator = new ImplFunctionBodyGenerator(path, operation, openAPI,
                     authConfigGeneratorImp, ballerinaUtilGenerator, imports, signatureGenerator.hasHeaders(),
-                    signatureGenerator.hasDefaultHeaders(), signatureGenerator.hasQueries());
+                    signatureGenerator.hasDefaultHeaders(), signatureGenerator.hasQueries(), hasDefaultResponse,
+                    nonDefaultStatusCodes);
             Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
             if (functionBodyNodeResult.isEmpty()) {
                 return Optional.empty();

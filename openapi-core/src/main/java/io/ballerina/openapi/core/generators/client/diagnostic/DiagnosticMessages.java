@@ -60,7 +60,6 @@ public enum DiagnosticMessages {
             "generation, since it is not supported with status code binding option", DiagnosticSeverity.WARNING),
     OAS_CLIENT_116("OAS_CLIENT_116", "the operation for given path `%s` , method `%s` is skipped in " +
             "the mock client function generation since it is not provided with examples", DiagnosticSeverity.WARNING),
-
     OAS_CLIENT_117("OAS_CLIENT_117", "the operation for given path `%s` , method `%s` is skipped in " +
             "the mock client function generation since it has invalid reference", DiagnosticSeverity.WARNING);
     private final String code;

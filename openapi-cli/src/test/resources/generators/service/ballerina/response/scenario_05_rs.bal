@@ -6,6 +6,6 @@ service /v1 on ep0 {
     # Creates a new user.
     #
     # + return - A User object
-    resource function post user() returns BadRequestString {
+    resource function post user() returns StringBadRequest {
     }
 }

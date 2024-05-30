@@ -41,6 +41,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
     String path;
     AuthConfigGeneratorImp authConfigGeneratorImp;
     BallerinaUtilGenerator ballerinaUtilGenerator;
+    ResourceFunctionSignatureGenerator signatureGenerator;
 
     ResourceFunctionGenerator(Map.Entry<PathItem.HttpMethod, Operation> operation, String path, OpenAPI openAPI,
                               AuthConfigGeneratorImp authConfigGeneratorImp,
@@ -51,6 +52,8 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
         this.authConfigGeneratorImp = authConfigGeneratorImp;
         this.ballerinaUtilGenerator = ballerinaUtilGenerator;
         this.imports = imports;
+        this.signatureGenerator = new ResourceFunctionSignatureGenerator(operation.getValue(), openAPI,
+                operation.getKey().toString().toLowerCase(Locale.ROOT), path);
     }
 
     public List<ImportDeclarationNode> getImports() {
@@ -82,7 +85,6 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
                 return Optional.empty();
             }
             // Create function signature
-            ResourceFunctionSignatureGenerator signatureGenerator = getSignatureGenerator();
             Optional<FunctionSignatureNode> signatureNodeOptional = signatureGenerator.generateFunctionSignature();
             diagnostics.addAll(signatureGenerator.getDiagnostics());
             if (signatureNodeOptional.isEmpty()) {
@@ -113,11 +115,6 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
         return functionBodyNodeResult;
     }
 
-    protected ResourceFunctionSignatureGenerator getSignatureGenerator() {
-        return new ResourceFunctionSignatureGenerator(operation.getValue(), openAPI,
-                operation.getKey().toString().toLowerCase(Locale.ROOT), path);
-    }
-
     protected Optional<FunctionDefinitionNode> getFunctionDefinitionNode(NodeList<Token> qualifierList,
                                                                          Token functionKeyWord,
                                                                          IdentifierToken functionName,
@@ -131,5 +128,13 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
     @Override
     public List<ClientDiagnostic> getDiagnostics() {
         return diagnostics;
+    }
+
+    public boolean hasDefaultStatusCodeBinding() {
+        return signatureGenerator.hasDefaultStatusCodeBinding();
+    }
+
+    public List<String> getNonDefaultStatusCodes() {
+        return signatureGenerator.getNonDefaultStatusCodes();
     }
 }
