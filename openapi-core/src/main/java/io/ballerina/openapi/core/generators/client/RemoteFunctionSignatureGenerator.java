@@ -265,4 +265,12 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
     public boolean hasQueries() {
         return hasQueriesParam;
     }
+
+    public boolean hasDefaultStatusCodeBinding() {
+        return functionReturnTypeGenerator.hasDefaultStatusCodeBinding();
+    }
+
+    public List<String> getNonDefaultStatusCodes() {
+        return functionReturnTypeGenerator.getNonDefaultStatusCodes();
+    }
 }

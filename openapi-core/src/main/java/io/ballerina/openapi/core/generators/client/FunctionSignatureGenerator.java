@@ -29,6 +29,8 @@ import java.util.Optional;
 public interface FunctionSignatureGenerator {
     Optional<FunctionSignatureNode> generateFunctionSignature() throws FunctionSignatureGeneratorException;
     List<ClientDiagnostic> getDiagnostics();
+    boolean hasDefaultStatusCodeBinding();
+    List<String> getNonDefaultStatusCodes();
 
     record ParametersInfo(List<Node> requiredParams, List<Node> defaultableParams, List<Node> includedParam) {
     }

@@ -6,6 +6,6 @@ service /v1 on ep0 {
     # Creates a new pets.
     #
     # + return - A list of users
-    resource function post pets() returns BadRequestUserXmlString {
+    resource function post pets() returns UserXmlStringBadRequest {
     }
 }

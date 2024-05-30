@@ -28,4 +28,6 @@ import java.util.Optional;
 public interface FunctionGenerator {
     Optional<FunctionDefinitionNode> generateFunction() throws BallerinaOpenApiException;
     List<ClientDiagnostic> getDiagnostics();
+    boolean hasDefaultStatusCodeBinding();
+    List<String> getNonDefaultStatusCodes();
 }

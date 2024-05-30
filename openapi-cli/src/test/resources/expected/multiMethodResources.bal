@@ -14,7 +14,7 @@ service / on ep0 {
     # Post operation for the path /user
     #
     # + return - Successful
-    resource function post user() returns OkJson {
+    resource function post user() returns JsonOk {
     }
     # Put operation for the path /user
     #

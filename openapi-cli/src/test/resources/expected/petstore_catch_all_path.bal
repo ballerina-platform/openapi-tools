@@ -19,9 +19,9 @@ service /api/v3 on ep0 {
     #
     # + payload - Create a new pet in the store
     # + return - returns can be any of following types
-    # OkPetXml (Successful operation)
+    # PetXmlOk (Successful operation)
     # http:MethodNotAllowed (Invalid input)
-    resource function post pet(@http:Payload Pet|xml|map<string> payload) returns OkPetXml|http:MethodNotAllowed {
+    resource function post pet(@http:Payload Pet|xml|map<string> payload) returns PetXmlOk|http:MethodNotAllowed {
     }
     # Update an existing pet
     #

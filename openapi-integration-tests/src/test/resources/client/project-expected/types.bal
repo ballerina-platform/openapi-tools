@@ -3,21 +3,9 @@
 
 import ballerina/http;
 
-public type CreatedAlbum record {|
-    *http:Created;
-    Album body;
-    record {|int req\-id; string user\-id;|} headers;
-|};
-
-public type BadRequestErrorPayload record {|
-    *http:BadRequest;
-    ErrorPayload body;
-    map<string|string[]> headers;
-|};
-
-public type OkAlbumArray record {|
-    *http:Ok;
-    Album[] body;
+public type ErrorMessageConflict record {|
+    *http:Conflict;
+    ErrorMessage body;
     record {|int req\-id; string user\-id;|} headers;
 |};
 
@@ -26,6 +14,12 @@ public type Album record {|
     string name;
     string artist;
     string genre;
+|};
+
+public type AlbumArrayOk record {|
+    *http:Ok;
+    Album[] body;
+    record {|int req\-id; string user\-id;|} headers;
 |};
 
 # Represents the Queries record for the operation: getAlbums
@@ -46,10 +40,9 @@ public type ProxyConfig record {|
     string password = "";
 |};
 
-public type NotFoundErrorMessage record {|
-    *http:NotFound;
-    ErrorMessage body;
-    record {|int req\-id; string user\-id;|} headers;
+public type ErrorPayloadBadRequest record {|
+    *http:BadRequest;
+    ErrorPayload body;
 |};
 
 public type ErrorPayload record {
@@ -61,6 +54,12 @@ public type ErrorPayload record {
     string method;
 };
 
+public type ErrorMessageNotFound record {|
+    *http:NotFound;
+    ErrorMessage body;
+    record {|int req\-id; string user\-id;|} headers;
+|};
+
 # Provides settings related to HTTP/1.x protocol.
 public type ClientHttp1Settings record {|
     # Specifies whether to reuse a connection for multiple requests
@@ -71,14 +70,14 @@ public type ClientHttp1Settings record {|
     ProxyConfig proxy?;
 |};
 
-public type ConflictErrorMessage record {|
-    *http:Conflict;
-    ErrorMessage body;
+public type AlbumOk record {|
+    *http:Ok;
+    Album body;
     record {|int req\-id; string user\-id;|} headers;
 |};
 
-public type OkAlbum record {|
-    *http:Ok;
+public type AlbumCreated record {|
+    *http:Created;
     Album body;
     record {|int req\-id; string user\-id;|} headers;
 |};

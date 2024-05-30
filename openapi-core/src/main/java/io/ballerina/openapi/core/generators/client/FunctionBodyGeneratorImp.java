@@ -132,7 +132,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
     public static final String GET_MAP_FOR_HEADERS = " = getMapForHeaders(";
     private final List<ImportDeclarationNode> imports;
     private final String path;
-    private final Map.Entry<PathItem.HttpMethod, Operation> operation;
+    protected final Map.Entry<PathItem.HttpMethod, Operation> operation;
     private final OpenAPI openAPI;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp;
@@ -702,7 +702,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
      * @param statementsList  - Previous statements list
      * @param returnStatement - Request statement
      */
-    private static void generateReturnStatement(List<StatementNode> statementsList, String returnStatement) {
+    protected void generateReturnStatement(List<StatementNode> statementsList, String returnStatement) {
         Token returnKeyWord = createIdentifierToken(RETURN);
         SimpleNameReferenceNode returns;
         returns = createSimpleNameReferenceNode(createIdentifierToken(returnStatement));

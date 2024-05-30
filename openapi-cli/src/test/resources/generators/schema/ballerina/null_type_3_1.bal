@@ -4,10 +4,9 @@ public type Category record {
     string name?;
 };
 
-public type OkPet record {|
+public type PetOk record {|
     *http:Ok;
     Pet body;
-    map<string|string[]> headers;
 |};
 
 public type Pet record {

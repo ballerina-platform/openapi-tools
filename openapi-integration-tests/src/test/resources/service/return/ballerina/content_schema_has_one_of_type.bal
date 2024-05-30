@@ -3,10 +3,9 @@
 
 import ballerina/http;
 
-public type OkInline_response_200 record {|
+public type Inline_response_200Ok record {|
     *http:Ok;
     inline_response_200 body;
-    map<string|string[]> headers;
 |};
 
 public type User record {

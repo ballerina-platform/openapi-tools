@@ -185,6 +185,71 @@ public class ClientGenerationTests extends OpenAPITest {
         compareFiles(projectGenPath, "client.bal", projectExpectedPath, "client_normal.bal");
     }
 
+    @Test(description = "`--status-code-binding` option with resource client methods and default responses")
+    public void resourceClientWithDefaultStatusCodeBinding() throws IOException, InterruptedException {
+        String openapiFilePath = "openapi.yaml";
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("-i");
+        buildArgs.add(openapiFilePath);
+        buildArgs.add("--mode");
+        buildArgs.add("client");
+        buildArgs.add("--status-code-binding");
+        Path projectGenPath = Paths.get(TEST_RESOURCE + "/project-06");
+        Path projectExpectedPath = Paths.get(EXPECTED_RESOURCE + "/project-expected");
+        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, projectGenPath, buildArgs);
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("Ballerina.toml")));
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("client.bal")));
+        compareFiles(projectGenPath, "client.bal", projectExpectedPath, "client_resource_with_default.bal");
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("types.bal")));
+        compareFiles(projectGenPath, "types.bal", projectExpectedPath, "types_with_default.bal");
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("utils.bal")));
+        compareFiles(projectGenPath, "utils.bal", projectExpectedPath, "utils_with_default.bal");
+    }
+
+    @Test(description = "`--status-code-binding` option with remote client methods and default responses")
+    public void remoteClientWithDefaultStatusCodeBinding() throws IOException, InterruptedException {
+        String openapiFilePath = "openapi.yaml";
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("-i");
+        buildArgs.add(openapiFilePath);
+        buildArgs.add("--mode");
+        buildArgs.add("client");
+        buildArgs.add("--client-methods");
+        buildArgs.add("remote");
+        buildArgs.add("--status-code-binding");
+        Path projectGenPath = Paths.get(TEST_RESOURCE + "/project-07");
+        Path projectExpectedPath = Paths.get(EXPECTED_RESOURCE + "/project-expected");
+        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, projectGenPath, buildArgs);
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("Ballerina.toml")));
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("client.bal")));
+        compareFiles(projectGenPath, "client.bal", projectExpectedPath, "client_remote_with_default.bal");
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("types.bal")));
+        compareFiles(projectGenPath, "types.bal", projectExpectedPath, "types_with_default.bal");
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("utils.bal")));
+        compareFiles(projectGenPath, "utils.bal", projectExpectedPath, "utils_with_default.bal");
+    }
+
+    @Test(description = "`--status-code-binding` option with service, client and default responses")
+    public void serviceAndClientWithDefaultStatusCodeBinding() throws IOException, InterruptedException {
+        String openapiFilePath = "openapi.yaml";
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("-i");
+        buildArgs.add(openapiFilePath);
+        buildArgs.add("--status-code-binding");
+        Path projectGenPath = Paths.get(TEST_RESOURCE + "/project-08");
+        Path projectExpectedPath = Paths.get(EXPECTED_RESOURCE + "/project-expected");
+        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, projectGenPath, buildArgs);
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("Ballerina.toml")));
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("openapi_service.bal")));
+        compareFiles(projectGenPath, "openapi_service.bal", projectExpectedPath, "openapi_service_with_default.bal");
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("client.bal")));
+        compareFiles(projectGenPath, "client.bal", projectExpectedPath, "client_resource_with_default.bal");
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("types.bal")));
+        compareFiles(projectGenPath, "types.bal", projectExpectedPath, "types_all_with_default.bal");
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("utils.bal")));
+        compareFiles(projectGenPath, "utils.bal", projectExpectedPath, "utils_all_with_default.bal");
+    }
+
     /**
      * Compare two files.
      */

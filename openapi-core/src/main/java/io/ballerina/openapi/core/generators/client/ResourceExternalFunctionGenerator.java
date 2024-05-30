@@ -82,6 +82,8 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
                                       BallerinaUtilGenerator ballerinaUtilGenerator,
                                       List<ImportDeclarationNode> imports) {
         super(operation, path, openAPI, authConfigGeneratorImp, ballerinaUtilGenerator, imports);
+        this.signatureGenerator = new ResourceExternalFunctionSignatureGenerator(operation.getValue(), openAPI,
+                operation.getKey().toString().toLowerCase(Locale.ROOT), path, ballerinaUtilGenerator);
     }
 
     @Override
@@ -140,11 +142,5 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
         return Objects.nonNull(operation.getValue().getParameters()) &&
                 operation.getValue().getParameters().stream().anyMatch(p -> p.getIn().equals("path"))
                 ? "invokeResource" : "invokeResourceWithoutPath";
-    }
-
-    @Override
-    protected ResourceFunctionSignatureGenerator getSignatureGenerator() {
-        return new ResourceExternalFunctionSignatureGenerator(operation.getValue(), openAPI,
-                operation.getKey().toString().toLowerCase(Locale.ROOT), path);
     }
 }

@@ -28,6 +28,6 @@ service / on ep0 {
     }
 
     # + return - successful operation
-    resource function get store/inventory05() returns BadRequestStoreInventory05Response {
+    resource function get store/inventory05() returns StoreInventory05ResponseBadRequest {
     }
 }

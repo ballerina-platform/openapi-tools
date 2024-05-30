@@ -37,6 +37,7 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
     AuthConfigGeneratorImp authConfigGeneratorImp;
     BallerinaUtilGenerator ballerinaUtilGenerator;
     List<ImportDeclarationNode> imports;
+    RemoteFunctionSignatureGenerator signatureGenerator;
 
     RemoteFunctionGenerator(String path, Map.Entry<PathItem.HttpMethod, Operation> operation, OpenAPI openAPI,
                             AuthConfigGeneratorImp authConfigGeneratorImp,
@@ -47,6 +48,8 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         this.authConfigGeneratorImp = authConfigGeneratorImp;
         this.ballerinaUtilGenerator = ballerinaUtilGenerator;
         this.imports = imports;
+        this.signatureGenerator = new RemoteFunctionSignatureGenerator(operation.getValue(), openAPI,
+                operation.getKey().toString().toLowerCase(Locale.ROOT), path);
     }
 
     public List<ImportDeclarationNode> getImports() {
@@ -61,7 +64,6 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
         // Create function signature
-        RemoteFunctionSignatureGenerator signatureGenerator = getSignatureGenerator();
         Optional<FunctionSignatureNode> signatureNodeOptional = signatureGenerator.generateFunctionSignature();
         diagnostics.addAll(signatureGenerator.getDiagnostics());
 
@@ -93,11 +95,6 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
         return functionBodyNodeResult;
     }
 
-    protected RemoteFunctionSignatureGenerator getSignatureGenerator() {
-        return new RemoteFunctionSignatureGenerator(operation.getValue(), openAPI,
-                operation.getKey().toString().toLowerCase(Locale.ROOT), path);
-    }
-
     protected Optional<FunctionDefinitionNode> getFunctionDefinitionNode(NodeList<Token> qualifierList,
                                                                          Token functionKeyWord,
                                                                          IdentifierToken functionName,
@@ -112,5 +109,13 @@ public class RemoteFunctionGenerator implements FunctionGenerator {
     @Override
     public List<ClientDiagnostic> getDiagnostics() {
         return diagnostics;
+    }
+
+    public boolean hasDefaultStatusCodeBinding() {
+        return signatureGenerator.hasDefaultStatusCodeBinding();
+    }
+
+    public List<String> getNonDefaultStatusCodes() {
+        return signatureGenerator.getNonDefaultStatusCodes();
     }
 }
