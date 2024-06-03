@@ -31,14 +31,20 @@ import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.client.mock.MockFunctionBodyGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.document.ClientDocCommentGenerator;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -85,18 +91,6 @@ public class AdvanceMockClientGenerator extends BallerinaClientGeneratorWithStat
                 functionBodyNode);
     }
 
-    @Override
-    protected List<ModuleMemberDeclarationNode> getModuleMemberDeclarationNodes() throws BallerinaOpenApiException {
-        List<ModuleMemberDeclarationNode> nodes = new ArrayList<>();
-        nodes.add(getSetModuleFunction());
-        nodes.add(getModuleInitFunction());
-        nodes.add(getClientMethodImplType());
-        nodes.add(getMethodImplAnnotation());
-        nodes.add(getClientErrorType());
-        nodes.addAll(super.getModuleMemberDeclarationNodes());
-        return nodes;
-    }
-
     /**
      * This method for generate the client syntax tree.
      *
@@ -119,5 +113,17 @@ public class AdvanceMockClientGenerator extends BallerinaClientGeneratorWithStat
         ClientDocCommentGenerator clientDocCommentGenerator = new ClientDocCommentGenerator(syntaxTree, openAPI,
                 oasClientConfig.isResourceMode());
         return clientDocCommentGenerator.updateSyntaxTreeWithDocComments();
+    }
+
+    @Override
+    public FunctionBodyGenerator getFunctionBodyGeneratorImp(String path,
+                                                             Map.Entry<PathItem.HttpMethod, Operation> operation,
+                                                             OpenAPI openAPI,
+                                                             AuthConfigGeneratorImp authConfigGeneratorImp,
+                                                             BallerinaUtilGenerator ballerinaUtilGenerator,
+                                                             boolean hasDefaultResponse,
+                                                             List<String> nonDefaultStatusCodes,
+                                                             ImplFunctionSignatureGenerator signatureGenerator) {
+        return new MockFunctionBodyGenerator(path, operation, openAPI, true);
     }
 }

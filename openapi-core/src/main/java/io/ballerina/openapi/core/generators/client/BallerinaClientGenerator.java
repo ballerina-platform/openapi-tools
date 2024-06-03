@@ -245,7 +245,9 @@ public class BallerinaClientGenerator {
         // Collect members for class definition node
         List<Node> memberNodeList = new ArrayList<>();
         // Add instance variable to class definition node
-        memberNodeList.addAll(createClassInstanceVariables());
+        if (!oasClientConfig.isMock()) {
+            memberNodeList.addAll(createClassInstanceVariables());
+        }
         // Add init function to class definition node
         memberNodeList.add(createInitFunction());
         Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations = filterOperations();

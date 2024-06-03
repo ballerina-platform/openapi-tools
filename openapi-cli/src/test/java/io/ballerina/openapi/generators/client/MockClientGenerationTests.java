@@ -135,5 +135,4 @@ public class MockClientGenerationTests {
         SyntaxTree syntaxTree = mockClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
-
 }
