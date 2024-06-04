@@ -53,6 +53,8 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionBodyBlockNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_201;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.POST;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.RESPONSE;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.generateStatusCodeTypeInclusionRecord;
 
@@ -80,18 +82,37 @@ public class MockFunctionBodyGenerator implements FunctionBodyGenerator {
     public Optional<FunctionBodyNode> getFunctionBodyNode() {
 
         ApiResponses responses = operation.getValue().getResponses();
+        String method = operation.getKey().toString().toLowerCase(Locale.ENGLISH);
         //Get the successful response
-        ApiResponse successResponse = null;
-        String code = null;
+        ApiResponse successResponse;
+        String code;
+        //Collect all success responses
+        Map<String, ApiResponse> successResponses = new HashMap<>();
         for (Map.Entry<String, ApiResponse> response : responses.entrySet()) {
             if (response.getKey().startsWith("2")) {
-                successResponse = response.getValue();
-                code = response.getKey().trim();
-                break;
+                successResponses.put(response.getKey(), response.getValue());
             }
         }
+        if (successResponses.isEmpty()) {
+            ClientDiagnosticImp diagnosticImp = new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_115,
+                    path, operation.getKey().toString());
+            diagnostics.add(diagnosticImp);
+            return Optional.empty();
+        }
+        if (method.equals(POST) && successResponses.containsKey(HTTP_201)) {
+            successResponse = successResponses.get(HTTP_201);
+            code = HTTP_201;
+        } else {
+            Optional<Map.Entry<String, ApiResponse>> firstRes = successResponses.entrySet().stream().findFirst();
+            successResponse = firstRes.get().getValue();
+            code = firstRes.get().getKey().toLowerCase(Locale.ENGLISH);
+        }
+
         // Here only consider 2xx response, since this range consider for success status code
-        if (successResponse == null || successResponse.getContent() == null) {
+        if (successResponse.getContent() == null) {
+            ClientDiagnosticImp diagnosticImp = new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_115,
+                    path, operation.getKey().toString());
+            diagnostics.add(diagnosticImp);
             return Optional.empty();
         }
         Map<String, Example> examples = new HashMap<>();

@@ -271,7 +271,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
      *
      * @return {@link FunctionDefinitionNode} FunctionDefinitionNode
      */
-    FunctionDefinitionNode getSetModuleFunction() {
+    private FunctionDefinitionNode getSetModuleFunction() {
         NodeList<Token> emptyQualifiers = createEmptyNodeList();
         NodeList<Node> emptyNodeList = createEmptyNodeList();
         SeparatedNodeList<ParameterNode> emptyParamList = createSeparatedNodeList();
@@ -306,7 +306,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
      *
      * @return {@link FunctionDefinitionNode} FunctionDefinitionNode
      */
-    FunctionDefinitionNode getModuleInitFunction() {
+    private FunctionDefinitionNode getModuleInitFunction() {
         NodeList<Token> emptyQualifiers = createEmptyNodeList();
         NodeList<Node> emptyNodeList = createEmptyNodeList();
         SeparatedNodeList<ParameterNode> emptyParamList = createSeparatedNodeList();
@@ -334,7 +334,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
      *
      * @return {@link TypeDefinitionNode} TypeDefinitionNode
      */
-    TypeDefinitionNode getClientMethodImplType() {
+    private TypeDefinitionNode getClientMethodImplType() {
         RecordFieldNode nameFieldNode = createRecordFieldNode(null, null, createIdentifierToken("string"),
                 createIdentifierToken("name"), null, createToken(SEMICOLON_TOKEN));
         RecordTypeDescriptorNode recordDescriptor = createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
@@ -352,7 +352,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
      *
      * @return {@link AnnotationDeclarationNode} AnnotationDeclarationNode
      */
-    AnnotationDeclarationNode getMethodImplAnnotation() {
+    private AnnotationDeclarationNode getMethodImplAnnotation() {
         return createAnnotationDeclarationNode(null, null, null, createToken(ANNOTATION_KEYWORD),
                 createIdentifierToken("ClientMethodImpl"), createIdentifierToken("MethodImpl"),
                 createToken(ON_KEYWORD), createSeparatedNodeList(createToken(FUNCTION_KEYWORD)),

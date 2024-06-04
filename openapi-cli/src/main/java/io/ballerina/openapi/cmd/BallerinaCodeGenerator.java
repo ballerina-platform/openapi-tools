@@ -139,8 +139,7 @@ public class BallerinaCodeGenerator {
                 .withResourceMode(isResource)
                 .withMock(isMock).build();
 
-        BallerinaClientGenerator clientGenerator = getBallerinaClientGenerator(oasClientConfig, statusCodeBinding,
-                isMock);
+        BallerinaClientGenerator clientGenerator = getBallerinaClientGenerator(oasClientConfig);
         String clientContent = Formatter.format(clientGenerator.generateSyntaxTree()).toSourceCode();
 
         //Update type definition list with auth related type definitions
@@ -395,8 +394,7 @@ public class BallerinaCodeGenerator {
         //Take default DO NOT modify
         licenseHeader = licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER : licenseHeader;
         TypeHandler.createInstance(openAPIDef, nullable);
-        BallerinaClientGenerator clientGenerator = getBallerinaClientGenerator(oasClientConfig,
-                statusCodeBinding, isMock);
+        BallerinaClientGenerator clientGenerator = getBallerinaClientGenerator(oasClientConfig);
         String mainContent = Formatter.format(clientGenerator.generateSyntaxTree()).toSourceCode();
         //Update type definition list with auth related type definitions
         List<TypeDefinitionNode> authNodes = clientGenerator.getBallerinaAuthConfigGenerator()
@@ -445,13 +443,17 @@ public class BallerinaCodeGenerator {
         return sourceFiles;
     }
 
-    private static BallerinaClientGenerator getBallerinaClientGenerator(OASClientConfig oasClientConfig,
-                                                                        boolean statusCodeBinding, boolean isMock) {
+    private static BallerinaClientGenerator getBallerinaClientGenerator(OASClientConfig oasClientConfig) {
+        boolean statusCodeBinding = oasClientConfig.isStatusCodeBinding();
+        boolean isMock = oasClientConfig.isMock();
+
         if (statusCodeBinding && isMock) {
             return new AdvanceMockClientGenerator(oasClientConfig);
-        } else if (statusCodeBinding) {
+        }
+        if (statusCodeBinding) {
             return new BallerinaClientGeneratorWithStatusCodeBinding(oasClientConfig);
-        } else if (isMock) {
+        }
+        if (isMock) {
             return new BallerinaMockClientGenerator(oasClientConfig);
         }
         return new BallerinaClientGenerator(oasClientConfig);

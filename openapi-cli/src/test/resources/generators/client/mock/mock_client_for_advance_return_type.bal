@@ -16,6 +16,7 @@ annotation ClientMethodImpl MethodImpl on function;
 type ClientMethodInvocationError http:ClientError;
 
 public isolated client class Client {
+    final http:StatusCodeClient clientEp;
     # Gets invoked to initialize the `connector`.
     #
     # + config - The configurations to be used when initializing the `connector`

@@ -22,12 +22,10 @@ import io.ballerina.compiler.syntax.tree.FunctionBodyBlockNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
-import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
-import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
-import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ObjectFieldNode;
 import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
@@ -37,9 +35,6 @@ import io.ballerina.openapi.core.generators.client.mock.MockClientFunctionGenera
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.document.ClientDocCommentGenerator;
-import io.ballerina.tools.text.TextDocument;
-import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 
@@ -55,12 +50,10 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createClassDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionBodyBlockNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionDefinitionNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnStatementNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLASS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLIENT_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.EOF_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FUNCTION_DEFINITION;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FUNCTION_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ISOLATED_KEYWORD;
@@ -95,7 +88,8 @@ public class BallerinaMockClientGenerator extends BallerinaClientGenerator {
                 functionBodyNode);
     }
 
-    public ClassDefinitionNode getClientFunction() throws BallerinaOpenApiException {
+    @Override
+    public ClassDefinitionNode getClassDefinitionNode() {
         List<Node> memberNodeList = new ArrayList<>();
         memberNodeList.addAll(createClassInstanceVariables());
         memberNodeList.add(getInitFunction());
@@ -123,31 +117,18 @@ public class BallerinaMockClientGenerator extends BallerinaClientGenerator {
     }
 
     @Override
-    protected List<ModuleMemberDeclarationNode> getModuleMemberDeclarationNodes() throws BallerinaOpenApiException {
-        List<ModuleMemberDeclarationNode> nodes = new ArrayList<>();
-        nodes.add(getClientFunction());
-        return nodes;
+    public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException, ClientException {
+        return getSyntaxTree();
     }
 
-    /**
-     * This method for generate the client syntax tree.
-     *
-     * @return return Syntax tree for the ballerina code.
-     * @throws BallerinaOpenApiException When function fail in process.
-     */
-    public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException, ClientException {
-        List<ImportDeclarationNode> importForHttp = getImportDeclarationNodes();
-        imports.addAll(importForHttp);
-        authConfigGeneratorImp.addAuthRelatedRecords(openAPI);
-        List<ModuleMemberDeclarationNode> nodes = getModuleMemberDeclarationNodes();
-        NodeList<ImportDeclarationNode> importsList = createNodeList(imports);
-        ModulePartNode modulePartNode =
-                createModulePartNode(importsList, createNodeList(nodes), createToken(EOF_TOKEN));
-        TextDocument textDocument = TextDocuments.from("");
-        SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
-        syntaxTree = syntaxTree.modifyWith(modulePartNode);
-        ClientDocCommentGenerator clientDocCommentGenerator = new ClientDocCommentGenerator(syntaxTree, openAPI,
-                oasClientConfig.isResourceMode());
-        return clientDocCommentGenerator.updateSyntaxTreeWithDocComments();
+    @Override
+    public List<ObjectFieldNode> createClassInstanceVariables() {
+        List<ObjectFieldNode> fieldNodeList = new ArrayList<>();
+        // add apiKey instance variable when API key security schema is given
+        ObjectFieldNode apiKeyFieldNode = authConfigGeneratorImp.getApiKeyMapClassVariable();
+        if (apiKeyFieldNode != null) {
+            fieldNodeList.add(apiKeyFieldNode);
+        }
+        return fieldNodeList;
     }
 }

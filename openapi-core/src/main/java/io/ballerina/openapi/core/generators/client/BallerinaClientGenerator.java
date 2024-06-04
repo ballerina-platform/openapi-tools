@@ -184,14 +184,13 @@ public class BallerinaClientGenerator {
      * @throws BallerinaOpenApiException When function fail in process.
      */
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException, ClientException {
+        generateHttpImport();
+        return getSyntaxTree();
+    }
 
-        // Create `ballerina/http` import declaration node
-        List<ImportDeclarationNode> importForHttp = getImportDeclarationNodes();
-        imports.addAll(importForHttp);
-
+    SyntaxTree getSyntaxTree() throws ClientException, BallerinaOpenApiException {
         // Add authentication related records
         authConfigGeneratorImp.addAuthRelatedRecords(openAPI);
-
         List<ModuleMemberDeclarationNode> nodes = getModuleMemberDeclarationNodes();
         NodeList<ImportDeclarationNode> importsList = createNodeList(imports);
         ModulePartNode modulePartNode =
@@ -203,6 +202,12 @@ public class BallerinaClientGenerator {
         ClientDocCommentGenerator clientDocCommentGenerator = new ClientDocCommentGenerator(syntaxTree, openAPI,
                 resourceMode);
         return clientDocCommentGenerator.updateSyntaxTreeWithDocComments();
+    }
+
+    private void generateHttpImport() {
+        // Create `ballerina/http` import declaration node
+        List<ImportDeclarationNode> importForHttp = getImportDeclarationNodes();
+        imports.addAll(importForHttp);
     }
 
     protected List<ModuleMemberDeclarationNode> getModuleMemberDeclarationNodes() throws BallerinaOpenApiException {
@@ -241,13 +246,11 @@ public class BallerinaClientGenerator {
      * }
      * </pre>
      */
-    private ClassDefinitionNode getClassDefinitionNode() {
+    protected ClassDefinitionNode getClassDefinitionNode() {
         // Collect members for class definition node
         List<Node> memberNodeList = new ArrayList<>();
         // Add instance variable to class definition node
-        if (!oasClientConfig.isMock()) {
-            memberNodeList.addAll(createClassInstanceVariables());
-        }
+        memberNodeList.addAll(createClassInstanceVariables());
         // Add init function to class definition node
         memberNodeList.add(createInitFunction());
         Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations = filterOperations();
@@ -373,7 +376,7 @@ public class BallerinaClientGenerator {
      * @return {@link FunctionDefinitionNode}   Class init function
      * @throws BallerinaOpenApiException When invalid server URL is provided
      */
-    protected FunctionDefinitionNode createInitFunction() {
+    FunctionDefinitionNode createInitFunction() {
 
         FunctionSignatureNode functionSignatureNode = getInitFunctionSignatureNode();
         FunctionBodyNode functionBodyNode = getInitFunctionBodyNode();
@@ -389,7 +392,7 @@ public class BallerinaClientGenerator {
      *
      * @return {@link FunctionBodyNode}
      */
-    private FunctionBodyNode getInitFunctionBodyNode() {
+    protected FunctionBodyNode getInitFunctionBodyNode() {
 
         List<StatementNode> assignmentNodes = new ArrayList<>();
 
@@ -586,8 +589,8 @@ public class BallerinaClientGenerator {
                 createIdentifierToken(GeneratorConstants.CLIENT));
     }
 
-    private List<FunctionDefinitionNode> createRemoteFunctions(Map<String, Map<PathItem.HttpMethod, Operation>>
-                                                                       filteredOperations) {
+    List<FunctionDefinitionNode> createRemoteFunctions(Map<String, Map<PathItem.HttpMethod, Operation>>
+                                                               filteredOperations) {
         List<FunctionDefinitionNode> remoteFunctionNodes = new ArrayList<>();
         for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {
             for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : operation.getValue().entrySet()) {
@@ -632,7 +635,7 @@ public class BallerinaClientGenerator {
                 imports);
     }
 
-    private List<FunctionDefinitionNode> createResourceFunctions(Map<String,
+    List<FunctionDefinitionNode> createResourceFunctions(Map<String,
             Map<PathItem.HttpMethod, Operation>> filteredOperations) {
         List<FunctionDefinitionNode> resourceFunctionNodes = new ArrayList<>();
         for (Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation : filteredOperations.entrySet()) {

@@ -60,18 +60,9 @@ public class ImplFunctionSignatureGenerator {
     List<Node> parameterNodes = new ArrayList<>();
     ReturnTypeDescriptorNode returnTypeDescriptorNode;
     ResourceFunctionSignatureGenerator resourceFunctionSignatureGenerator;
-    Operation operation;
-    OpenAPI openAPI;
-    String path;
-    String httpMethod;
 
     public ImplFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod, String path,
                                           FunctionDefinitionNode clientExternFunction) {
-        this.operation = operation;
-        this.path = path;
-        this.httpMethod = httpMethod;
-        this.openAPI = openAPI;
-
         FunctionSignatureNode functionSignatureNode = clientExternFunction.functionSignature();
         if (Objects.isNull(functionSignatureNode)) {
             return;

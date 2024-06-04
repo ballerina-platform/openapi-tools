@@ -57,6 +57,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OBJECT_METHOD_DEFINIT
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.REMOTE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RESOURCE_ACCESSOR_DEFINITION;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RESOURCE_KEYWORD;
+import static io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages.OAS_CLIENT_107;
 
 /**
  * Mock client function generator.
@@ -85,7 +86,7 @@ public class MockClientFunctionGenerator implements FunctionGenerator {
     }
 
     @Override
-    public Optional<FunctionDefinitionNode> generateFunction() throws BallerinaOpenApiException {
+    public Optional<FunctionDefinitionNode> generateFunction() {
         if (isResourceFunction) {
             NodeList<Token> qualifierList = createNodeList(createToken(RESOURCE_KEYWORD),
                     createToken(ISOLATED_KEYWORD));
@@ -94,8 +95,16 @@ public class MockClientFunctionGenerator implements FunctionGenerator {
             IdentifierToken functionName = createIdentifierToken(method);
 
             List<Diagnostic> pathDiagnostics = new ArrayList<>();
-            NodeList<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
-                    openAPI.getComponents(), false, pathDiagnostics);
+            NodeList<Node> relativeResourcePath;
+            try {
+                relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue(),
+                        openAPI.getComponents(), false, pathDiagnostics);
+            } catch (BallerinaOpenApiException e) {
+                DiagnosticMessages diagnosticMessages = OAS_CLIENT_107;
+                ClientDiagnosticImp clientDiagnosticImp = new ClientDiagnosticImp(diagnosticMessages);
+                diagnostics.add(clientDiagnosticImp);
+                return Optional.empty();
+            }
             if (!pathDiagnostics.isEmpty()) {
                 pathDiagnostics.forEach(diagnostic -> {
                     if (diagnostic.diagnosticInfo().code().equals("OAS_COMMON_204")) {
