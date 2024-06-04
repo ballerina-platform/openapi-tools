@@ -74,7 +74,8 @@ public class MockImplFunctionSignatureGenerator extends ImplFunctionSignatureGen
     public Optional<TypeDescriptorNode> populateReturnTypeDesc(String responseCode, ApiResponse response) {
         String code = GeneratorConstants.HTTP_CODES_DES.get(responseCode);
         try {
-            return Optional.of(generateStatusCodeTypeInclusionRecord(code, response, httpMethod, openAPI, path, diagnostics));
+            return Optional.of(generateStatusCodeTypeInclusionRecord(code, response, httpMethod, openAPI, path,
+                    diagnostics));
         } catch (InvalidReferenceException e) {
             return Optional.empty();
         }
