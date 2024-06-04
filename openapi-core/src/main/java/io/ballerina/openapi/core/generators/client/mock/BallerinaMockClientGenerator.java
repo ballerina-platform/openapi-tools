@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.ballerina.openapi.core.generators.client;
+package io.ballerina.openapi.core.generators.client.mock;
 
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyBlockNode;
@@ -30,8 +30,8 @@ import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
-import io.ballerina.openapi.core.generators.client.mock.MockClientFunctionGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;

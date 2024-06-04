@@ -20,9 +20,9 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.generators.client.AdvanceMockClientGenerator;
-import io.ballerina.openapi.core.generators.client.BallerinaMockClientGenerator;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.client.mock.AdvanceMockClientGenerator;
+import io.ballerina.openapi.core.generators.client.mock.BallerinaMockClientGenerator;
 import io.ballerina.openapi.core.generators.client.mock.MockFunctionBodyGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.TypeHandler;

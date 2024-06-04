@@ -188,7 +188,7 @@ public class BallerinaClientGenerator {
         return getSyntaxTree();
     }
 
-    SyntaxTree getSyntaxTree() throws ClientException, BallerinaOpenApiException {
+    protected SyntaxTree getSyntaxTree() throws ClientException, BallerinaOpenApiException {
         // Add authentication related records
         authConfigGeneratorImp.addAuthRelatedRecords(openAPI);
         List<ModuleMemberDeclarationNode> nodes = getModuleMemberDeclarationNodes();

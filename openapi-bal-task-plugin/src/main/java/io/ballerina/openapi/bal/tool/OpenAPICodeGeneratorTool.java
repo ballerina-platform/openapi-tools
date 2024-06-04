@@ -19,12 +19,12 @@ package io.ballerina.openapi.bal.tool;
 
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.bal.tool.Constants.DiagnosticMessages;
-import io.ballerina.openapi.core.generators.client.AdvanceMockClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGeneratorWithStatusCodeBinding;
-import io.ballerina.openapi.core.generators.client.BallerinaMockClientGenerator;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.client.mock.AdvanceMockClientGenerator;
+import io.ballerina.openapi.core.generators.client.mock.BallerinaMockClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;

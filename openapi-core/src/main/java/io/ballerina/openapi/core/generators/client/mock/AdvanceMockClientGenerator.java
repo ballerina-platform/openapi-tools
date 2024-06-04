@@ -16,13 +16,17 @@
  * under the License.
  */
 
-package io.ballerina.openapi.core.generators.client;
+package io.ballerina.openapi.core.generators.client.mock;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
-import io.ballerina.openapi.core.generators.client.mock.MockFunctionBodyGenerator;
+import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGeneratorWithStatusCodeBinding;
+import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
+import io.ballerina.openapi.core.generators.client.FunctionBodyGenerator;
+import io.ballerina.openapi.core.generators.client.ImplFunctionSignatureGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
