@@ -20,6 +20,7 @@ package io.ballerina.openapi.core.generators.client.mock;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ObjectFieldNode;
 import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp;
@@ -77,4 +78,16 @@ public class AdvanceMockClientGenerator extends BallerinaClientGeneratorWithStat
                                                              ImplFunctionSignatureGenerator signatureGenerator) {
         return new MockFunctionBodyGenerator(path, operation, openAPI, true);
     }
+
+    @Override
+    public List<ObjectFieldNode> createClassInstanceVariables() {
+        List<ObjectFieldNode> fieldNodeList = new ArrayList<>();
+        // add apiKey instance variable when API key security schema is given
+        ObjectFieldNode apiKeyFieldNode = authConfigGeneratorImp.getApiKeyMapClassVariable();
+        if (apiKeyFieldNode != null) {
+            fieldNodeList.add(apiKeyFieldNode);
+        }
+        return fieldNodeList;
+    }
+
 }

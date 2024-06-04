@@ -137,6 +137,7 @@ public class BallerinaCodeGenerator {
                 .withPlugin(false)
                 .withOpenAPI(openAPIDef)
                 .withResourceMode(isResource)
+                .withStatusCodeBinding(statusCodeBinding)
                 .withMock(isMock).build();
 
         BallerinaClientGenerator clientGenerator = getBallerinaClientGenerator(oasClientConfig);
