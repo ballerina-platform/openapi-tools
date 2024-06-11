@@ -24,6 +24,13 @@
 # + embed - Enable auto-inject of OpenAPI documentation to current service
 # + title - Title for generated OpenAPI contract
 # + version - Version for generated OpenAPI contract
+# + description - A brief description of the API, outlining its purpose, features, and any other relevant details that help users understand what the API does and how to use it.
+# + email - The email address to contact the API provider or support.
+# + contactName - The full name of the person or organization responsible for the API.
+# + contactURL - The URL to a web page with more information about the API, the provider, or support.
+# + termOfService - The URL to the terms of service for the API.
+# + licenseName - The name of the license under which the API is provided.
+# + licenseURL - The URL to the full text of the license.
 public type ServiceInformation record {|
     string contract = "";
     string[]? tags = [];
@@ -34,6 +41,13 @@ public type ServiceInformation record {|
     boolean embed = false;
     string title?;
     string version?;
+    string description?;
+    string email?;
+    string contactName?;
+    string contactURL?;
+    string termsOfService?;
+    string licenseName?;
+    string licenseURL?;
 |};
 
 // # Client configurations code.
