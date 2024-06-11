@@ -114,6 +114,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.J_B
  * @since 1.9.0
  */
 public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClientGenerator {
+
     public BallerinaClientGeneratorWithStatusCodeBinding(OASClientConfig oasClientConfig) {
         super(oasClientConfig);
         authConfigGeneratorImp = new AuthConfigGeneratorWithStatusCodeBinding(false, false);
@@ -206,7 +207,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
                ballerinaUtilGenerator, imports);
     }
 
-    private Optional<FunctionDefinitionNode> createImplFunction(String path,
+    protected Optional<FunctionDefinitionNode> createImplFunction(String path,
                                                                 Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                                 OpenAPI openAPI,
                                                                 AuthConfigGeneratorImp authConfigGeneratorImp,
@@ -219,24 +220,45 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId() + "Impl");
         // Create function signature
-        ImplFunctionSignatureGenerator signatureGenerator = new ImplFunctionSignatureGenerator(operation.getValue(),
-                openAPI, operation.getKey().toString().toLowerCase(Locale.ROOT), path, clientExternFunction);
+        ImplFunctionSignatureGenerator signatureGenerator = getImplFunctionSignatureGenerator(path, operation,
+                openAPI, clientExternFunction);
         //Create function body
-        FunctionBodyGeneratorImp functionBodyGenerator = new ImplFunctionBodyGenerator(path, operation, openAPI,
-                authConfigGeneratorImp, ballerinaUtilGenerator, imports, signatureGenerator.hasHeaders(),
-                signatureGenerator.hasDefaultHeaders(), signatureGenerator.hasQueries(), hasDefaultResponse,
-                nonDefaultStatusCodes);
-        FunctionBodyNode functionBodyNode;
+        FunctionBodyGenerator functionBodyGenerator = getFunctionBodyGeneratorImp(path, operation, openAPI,
+                authConfigGeneratorImp, ballerinaUtilGenerator, hasDefaultResponse, nonDefaultStatusCodes,
+                signatureGenerator);
         Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
+        diagnostics.addAll(functionBodyGenerator.getDiagnostics());
         if (functionBodyNodeResult.isEmpty()) {
             return Optional.empty();
         }
-        functionBodyNode = functionBodyNodeResult.get();
-
+        FunctionBodyNode functionBodyNode = functionBodyNodeResult.get();
         Optional<FunctionSignatureNode> functionSignatureNode = signatureGenerator.generateFunctionSignature();
         return functionSignatureNode.map(signatureNode ->
                 NodeFactory.createFunctionDefinitionNode(OBJECT_METHOD_DEFINITION, null, qualifierList,
                         functionKeyWord, functionName, createEmptyNodeList(), signatureNode, functionBodyNode));
+    }
+
+    protected ImplFunctionSignatureGenerator getImplFunctionSignatureGenerator(String path,
+                                                                               Map.Entry<PathItem.HttpMethod, Operation>
+                                                                                       operation, OpenAPI openAPI,
+                                                                               FunctionDefinitionNode
+                                                                                       clientExternFunction) {
+        return new ImplFunctionSignatureGenerator(operation.getValue(),
+                openAPI, operation.getKey().toString().toLowerCase(Locale.ROOT), path, clientExternFunction);
+    }
+
+    protected FunctionBodyGenerator getFunctionBodyGeneratorImp(String path,
+                                                                Map.Entry<PathItem.HttpMethod, Operation> operation,
+                                                                OpenAPI openAPI,
+                                                                AuthConfigGeneratorImp authConfigGeneratorImp,
+                                                                BallerinaUtilGenerator ballerinaUtilGenerator,
+                                                                boolean hasDefaultResponse,
+                                                                List<String> nonDefaultStatusCodes,
+                                                                ImplFunctionSignatureGenerator signatureGenerator) {
+        return new ImplFunctionBodyGenerator(path, operation, openAPI,
+                authConfigGeneratorImp, ballerinaUtilGenerator, imports, signatureGenerator.hasHeaders(),
+                signatureGenerator.hasDefaultHeaders(), signatureGenerator.hasQueries(), hasDefaultResponse,
+                nonDefaultStatusCodes);
     }
 
     /**
@@ -345,7 +367,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
      *
      * @return {@link TypeDefinitionNode} TypeDefinitionNode
      */
-    private TypeDefinitionNode getClientErrorType() {
+    protected TypeDefinitionNode getClientErrorType() {
         return createTypeDefinitionNode(null, null, createToken(TYPE_KEYWORD),
                 createIdentifierToken("ClientMethodInvocationError"),
                 createQualifiedNameReferenceNode(createIdentifierToken("http"), createToken(COLON_TOKEN),
