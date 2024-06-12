@@ -237,7 +237,7 @@ public final class InfoMapper {
 
     private static void populateOASInfo(OpenAPI openAPI, OpenAPIInfo openAPIInfo) {
         // Populate OpenAPI Info object
-        Info info = new Info();
+        Info info = openAPI.getInfo() == null ? new Info() : openAPI.getInfo();
         openAPIInfo.getTitle().ifPresent(title -> info.setTitle(normalizeTitle(title)));
         openAPIInfo.getVersion().ifPresent(info::setVersion);
         openAPIInfo.getEmail().ifPresent(email -> {
