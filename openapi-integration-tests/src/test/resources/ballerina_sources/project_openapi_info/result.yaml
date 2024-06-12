@@ -12,7 +12,7 @@ info:
     url: http://abc.com
   version: 1.0.0
 servers:
-  - url: "{server}:{port}/v1"
+  - url: "{server}:{port}/info"
     variables:
       server:
         default: http://localhost
