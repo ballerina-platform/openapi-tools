@@ -326,6 +326,8 @@ public final class Constants {
     public static final String FALSE = "false";
     public static final String SLASH = "/";
     public static final String HYPHEN = "-";
+
+    //`@openapi:ServiceInfo` annotation constants
     public static final String CONTRACT = "contract";
     public static final String VERSION = "version";
     public static final String TITLE = "title";
@@ -334,7 +336,6 @@ public final class Constants {
     public static final String CONTACT_NAME = "contactName";
     public static final String CONTACT_URL = "contactURL";
     public static final String LICENSE_NAME = "licenseName";
-
     public static final String LICENSE_URL = "licenseURL";
     public static final String TERMS_OF_SERVICE = "termsOfService";
     public static final String OPENAPI_ANNOTATION = "openapi:ServiceInfo";
