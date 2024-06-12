@@ -214,13 +214,13 @@ public final class InfoMapper {
 
         Location location = annotation.location();
         OpenAPI openAPI = new OpenAPI();
-        Optional<MappingConstructorExpressionNode> contentOpt = annotation.annotValue();
+        Optional<MappingConstructorExpressionNode> svcInfoAnnotationValue = annotation.annotValue();
 
-        if (contentOpt.isEmpty()) {
+        if (svcInfoAnnotationValue.isEmpty()) {
             return new OASResult(openAPI, diagnostics);
         }
 
-        SeparatedNodeList<MappingFieldNode> fields = contentOpt.get().fields();
+        SeparatedNodeList<MappingFieldNode> fields = svcInfoAnnotationValue.get().fields();
         if (fields.isEmpty()) {
             return new OASResult(openAPI, diagnostics);
         }
