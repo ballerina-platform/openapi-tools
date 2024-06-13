@@ -1,0 +1,45 @@
+openapi: 3.0.0
+info:
+  version: 2021-08
+  title: 'API Reference: Collections'
+paths:
+  /user:
+    get:
+      summary: Get user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: # Request body contents
+                $ref: "#/components/schemas/ABC"
+              example: # Sample object
+                id: 10
+                name: "Jessica Smith"
+  /users:
+    get:
+      summary: Get a user
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema: # Request body contents
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                example: # Sample object
+                  id: 10
+                  name: Sam Smith
+components:
+  schemas:
+    ABC:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string

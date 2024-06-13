@@ -55,7 +55,14 @@ public enum DiagnosticMessages {
             DiagnosticSeverity.WARNING),
     OAS_CLIENT_114("OAS_CLIENT_114", "the operation: '%s' is skipped in the client generation since only a default" +
             " response found for the operation which is not supported with status code binding option",
-            DiagnosticSeverity.WARNING);
+            DiagnosticSeverity.WARNING),
+    OAS_CLIENT_115("OAS_CLIENT_115", "the operation for given path `%s` , " +
+            "method `%s` is skipped in the mock client function generation since it is not provided success response",
+            DiagnosticSeverity.WARNING),
+    OAS_CLIENT_116("OAS_CLIENT_116", "the operation for given path `%s` , method `%s` is skipped in " +
+            "the mock client function generation since it is not provided with examples", DiagnosticSeverity.WARNING),
+    OAS_CLIENT_117("OAS_CLIENT_117", "the operation for given path `%s` , method `%s` is skipped in " +
+            "the mock client function generation since it has invalid reference", DiagnosticSeverity.WARNING);
     private final String code;
     private final String description;
     private final DiagnosticSeverity severity;

@@ -23,6 +23,8 @@ import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGeneratorWithStatusCodeBinding;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.client.mock.AdvanceMockClientGenerator;
+import io.ballerina.openapi.core.generators.client.mock.BallerinaMockClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -77,6 +79,7 @@ import static io.ballerina.openapi.bal.tool.Constants.CACHE_FILE;
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT;
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT_METHODS;
 import static io.ballerina.openapi.bal.tool.Constants.LICENSE;
+import static io.ballerina.openapi.bal.tool.Constants.MOCK;
 import static io.ballerina.openapi.bal.tool.Constants.MODE;
 import static io.ballerina.openapi.bal.tool.Constants.NULLABLE;
 import static io.ballerina.openapi.bal.tool.Constants.OPERATIONS;
@@ -296,6 +299,9 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 case STATUS_CODE_BINDING:
                     clientMetaDataBuilder.withStatusCodeBinding(value.contains(TRUE));
                     break;
+                case MOCK:
+                    clientMetaDataBuilder.withMock(value.contains(TRUE));
+                    break;
                 default:
                     break;
             }
@@ -330,8 +336,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
             }
         }
         OASClientConfig clientConfig = codeGeneratorConfig.getLeft();
-        List<GenSrcFile> sources = generateClientFiles(clientConfig, toolContext, location,
-                codeGeneratorConfig.getLeft().isStatusCodeBinding());
+        List<GenSrcFile> sources = generateClientFiles(clientConfig, toolContext, location);
         Path outputPath = toolContext.outputPath();
         writeGeneratedSources(sources, outputPath);
         // Update the cache file
@@ -453,7 +458,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 .append(clientConfig.isResourceMode())
                 .append(clientConfig.getLicense())
                 .append(clientConfig.isNullable())
-                .append(clientConfig.isStatusCodeBinding());
+                .append(clientConfig.isStatusCodeBinding())
+                .append(clientConfig.isMock());
         List<String> tags = clientConfig.getFilter().getTags();
         tags.sort(String.CASE_INSENSITIVE_ORDER);
         for (String str : tags) {
@@ -472,7 +478,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
      * This will return list of (client.bal, util.bal, types.bal) {@code GenSrcFile}.
      */
     private static List<GenSrcFile> generateClientFiles(OASClientConfig oasClientConfig, ToolContext toolContext,
-                                                        Location location, boolean statusCodeBinding) throws
+                                                        Location location) throws
             BallerinaOpenApiException, IOException, FormatterException, ClientException {
 
         List<GenSrcFile> sourceFiles = new ArrayList<>();
@@ -480,7 +486,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         // Generate ballerina client files.
         TypeHandler.createInstance(oasClientConfig.getOpenAPI(), oasClientConfig.isNullable());
         String licenseContent = oasClientConfig.getLicense();
-        BallerinaClientGenerator ballerinaClientGenerator = getClientGenerator(oasClientConfig, statusCodeBinding);
+        BallerinaClientGenerator ballerinaClientGenerator = getClientGenerator(oasClientConfig);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
 
         List<ClientDiagnostic> clientDiagnostic = ballerinaClientGenerator.getDiagnostics();
@@ -526,12 +532,20 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         return sourceFiles;
     }
 
-    private static BallerinaClientGenerator getClientGenerator(OASClientConfig oasClientConfig,
-                                                               boolean statusCodeBinding) {
-        if (!statusCodeBinding) {
-            return new BallerinaClientGenerator(oasClientConfig);
+    private static BallerinaClientGenerator getClientGenerator(OASClientConfig oasClientConfig) {
+        boolean statusCodeBinding = oasClientConfig.isStatusCodeBinding();
+        boolean isMock = oasClientConfig.isMock();
+
+        if (statusCodeBinding && isMock) {
+            return new AdvanceMockClientGenerator(oasClientConfig);
         }
-        return new BallerinaClientGeneratorWithStatusCodeBinding(oasClientConfig);
+        if (statusCodeBinding) {
+            return new BallerinaClientGeneratorWithStatusCodeBinding(oasClientConfig);
+        }
+        if (isMock) {
+            return new BallerinaMockClientGenerator(oasClientConfig);
+        }
+        return new BallerinaClientGenerator(oasClientConfig);
     }
 
     /**
