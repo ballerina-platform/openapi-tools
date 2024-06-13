@@ -14,6 +14,6 @@ service / on ep0 {
     # Description
     #
     # + return - Successful
-    resource function post user() returns OkJson {
+    resource function post user() returns JsonOk {
     }
 }

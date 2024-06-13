@@ -6260,7 +6260,7 @@ components:
       type: object
       x-expandableFields: []
       x-resourceId: ephemeral_key
-    error:
+    Error:
       description: An error response from the Stripe API
       properties:
         error:
@@ -24583,7 +24583,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/coupons/{coupon}":
     get:
@@ -24611,7 +24611,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/customers":
     post:
@@ -24855,7 +24855,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/customers/{customer}":
     get:
@@ -24897,7 +24897,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
     post:
       description: |-
@@ -25143,7 +25143,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
     delete:
       description: "<p>Permanently deletes a customer. It cannot be undone. Also immediately
@@ -25171,7 +25171,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/invoices":
     get:
@@ -25330,7 +25330,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
     post:
       description: <p>This endpoint creates a draft invoice for a given customer.
@@ -25611,7 +25611,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/invoices/{invoice}":
     delete:
@@ -25642,7 +25642,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
     get:
       description: "<p>Retrieves the invoice with the given ID.</p>"
@@ -25680,7 +25680,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
     post:
       description: |-
@@ -25966,7 +25966,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/invoices/{invoice}/pay":
     post:
@@ -26049,7 +26049,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/invoices/{invoice}/send":
     post:
@@ -26099,7 +26099,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/invoices/{invoice}/void":
     post:
@@ -26149,7 +26149,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/invoices/{invoice}/mark_uncollectible":
     post:
@@ -26197,7 +26197,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/invoices/{invoice}/lines":
     get:
@@ -26290,7 +26290,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/invoices/upcoming":
     get:
@@ -26636,7 +26636,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/invoices/upcoming/lines":
     get:
@@ -27041,7 +27041,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/payment_methods":
     get:
@@ -27167,7 +27167,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
     post:
       description: |-
@@ -27613,7 +27613,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/payment_methods/{payment_method}":
     get:
@@ -27653,7 +27653,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
     post:
       description: "<p>Updates a PaymentMethod object. A PaymentMethod must be attached
@@ -27752,7 +27752,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/payment_methods/{payment_method}/attach":
     post:
@@ -27812,7 +27812,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/payment_methods/{payment_method}/detach":
     post:
@@ -27859,7 +27859,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/prices":
     post:
@@ -28101,7 +28101,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/prices/{price}":
     post:
@@ -28190,7 +28190,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/products":
     post:
@@ -28319,7 +28319,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/products/{id}":
     post:
@@ -28451,7 +28451,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/subscription_items/{item}":
     post:
@@ -28630,7 +28630,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/subscription_items/{subscription_item}/usage_records":
     post:
@@ -28705,7 +28705,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/subscription_items/{subscription_item}/usage_record_summaries":
     get:
@@ -28816,7 +28816,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/Error'
           description: Error response.
   "/v1/subscriptions":
     get:
@@ -28989,7 +28989,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
     post:
       description: "<p>Creates a new subscription on an existing customer. Each customer
@@ -29400,7 +29400,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/subscriptions/{subscription_exposed_id}":
     get:
@@ -29439,7 +29439,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
     post:
       description: <p>Updates an existing subscription on a customer to match the
@@ -29971,7 +29971,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
     delete:
       description: |-
@@ -30016,7 +30016,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/subscription_schedules":
     get:
@@ -30147,7 +30147,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
     post:
       description: "<p>Creates a new subscription schedule object. Each customer can
@@ -30505,7 +30505,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/subscription_schedules/{schedule}":
     get:
@@ -30535,7 +30535,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
     post:
       description: "<p>Updates an existing subscription schedule.</p>"
@@ -30880,7 +30880,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/subscription_schedules/{schedule}/cancel":
     post:
@@ -30940,7 +30940,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.
   "/v1/subscription_schedules/{schedule}/release":
     post:
@@ -30997,5 +30997,5 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/error"
+                "$ref": "#/components/schemas/Error"
           description: Error response.

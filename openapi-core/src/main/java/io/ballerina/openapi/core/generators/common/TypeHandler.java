@@ -19,7 +19,6 @@
 package io.ballerina.openapi.core.generators.common;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
-import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
@@ -37,9 +36,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.TypeParameterNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
-import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.constraint.ConstraintGeneratorImp;
 import io.ballerina.openapi.core.generators.constraint.ConstraintResult;
@@ -67,22 +64,17 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMapTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordFieldNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.LT_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAP_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_STATUS;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_STATUS_CODE_RESPONSE;
 
 public class TypeHandler {
     private static TypeHandler typeHandlerInstance;
@@ -203,36 +195,18 @@ public class TypeHandler {
     }
 
     public TypeDescriptorNode generateHeaderType(Schema headersSchema) {
-        TypeDescriptorNode headersType;
-        if (headersSchema != null && getTypeNodeFromOASSchema(headersSchema).isPresent()) {
-            headersType = getTypeNodeFromOASSchema(headersSchema).get();
-        } else {
-            TypeDescriptorNode stringType = createSimpleNameReferenceNode(createIdentifierToken(
-                    GeneratorConstants.STRING));
-
-            ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
-                    createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
-                    createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-            TypeDescriptorNode stringArrType = createArrayTypeDescriptorNode(stringType,
-                    createNodeList(dimensionNode));
-
-            UnionTypeDescriptorNode unionType = createUnionTypeDescriptorNode(stringType, createToken(PIPE_TOKEN),
-                    stringArrType);
-            TypeParameterNode headerParamNode = createTypeParameterNode(createToken(LT_TOKEN), unionType,
-                    createToken(SyntaxKind.GT_TOKEN));
-            headersType = createMapTypeDescriptorNode(createToken(MAP_KEYWORD), headerParamNode);
-        }
-        return headersType;
+        return getTypeNodeFromOASSchema(headersSchema).orElse(null);
     }
 
     public SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode bodyType,
                                                              TypeDescriptorNode headersType, String method) {
         String recordName;
+        String statusCodeName = statusCode.equals(DEFAULT_STATUS_CODE_RESPONSE) ? DEFAULT_STATUS : statusCode;
         if (bodyType != null) {
             String bodyTypeStr = bodyType.toString().replaceAll("[\\[\\\\]]", "Array");
-            recordName = statusCode + GeneratorUtils.getValidName(bodyTypeStr, true);
+            recordName = GeneratorUtils.getValidName(bodyTypeStr, true) + statusCodeName;
         } else {
-            recordName = statusCode;
+            recordName = statusCodeName;
         }
 
         RecordTypeDescriptorNode recordTypeDescriptorNode = getRecordTypeDescriptorNode(statusCode, bodyType,
@@ -285,15 +259,17 @@ public class TypeHandler {
             recordFields.add(bodyFieldNode);
         }
 
-        IdentifierToken headersFieldName = createIdentifierToken(GeneratorConstants.HEADERS,
-                GeneratorUtils.SINGLE_WS_MINUTIAE,
-                GeneratorUtils.SINGLE_WS_MINUTIAE);
-        RecordFieldNode headersFieldNode = createRecordFieldNode(
-                null, null,
-                headersType,
-                headersFieldName, null,
-                createToken(SyntaxKind.SEMICOLON_TOKEN));
-        recordFields.add(headersFieldNode);
+        if (headersType != null) {
+            IdentifierToken headersFieldName = createIdentifierToken(GeneratorConstants.HEADERS,
+                    GeneratorUtils.SINGLE_WS_MINUTIAE,
+                    GeneratorUtils.SINGLE_WS_MINUTIAE);
+            RecordFieldNode headersFieldNode = createRecordFieldNode(
+                    null, null,
+                    headersType,
+                    headersFieldName, null,
+                    createToken(SyntaxKind.SEMICOLON_TOKEN));
+            recordFields.add(headersFieldNode);
+        }
 
         NodeList<Node> fieldsList = createSeparatedNodeList(recordFields);
         Token bodyEndDelimiter = createIdentifierToken("|}");

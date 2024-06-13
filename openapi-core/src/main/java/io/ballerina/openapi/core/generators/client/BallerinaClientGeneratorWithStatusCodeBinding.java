@@ -114,6 +114,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.J_B
  * @since 1.9.0
  */
 public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClientGenerator {
+
     public BallerinaClientGeneratorWithStatusCodeBinding(OASClientConfig oasClientConfig) {
         super(oasClientConfig);
         authConfigGeneratorImp = new AuthConfigGeneratorWithStatusCodeBinding(false, false);
@@ -149,20 +150,20 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
     }
 
     @Override
-    protected boolean addRemoteFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
-                                        Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
-                                        List<FunctionDefinitionNode> remoteFunctionNodes) {
-        boolean result = super.addRemoteFunction(operation, operationEntry, remoteFunctionNodes);
-        if (result) {
-            addClientFunctionImpl(operation, operationEntry, remoteFunctionNodes);
+    protected FunctionGeneratorResults addRemoteFunction(Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
+                                                         String path, List<FunctionDefinitionNode> functionNodes) {
+        FunctionGeneratorResults result = super.addRemoteFunction(operationEntry, path, functionNodes);
+        if (result.isSuccess()) {
+            addClientFunctionImpl(operationEntry, path, functionNodes, result.hasDefaultStatusCodeBinding(),
+                    result.nonDefaultStatusCodes());
         }
         return result;
     }
 
     @Override
-    protected RemoteFunctionGenerator getRemoteFunctionGenerator(Map.Entry<String,
-            Map<PathItem.HttpMethod, Operation>> operation, Map.Entry<PathItem.HttpMethod, Operation> operationEntry) {
-        return new RemoteExternalFunctionGenerator(operation.getKey(), operationEntry, openAPI, authConfigGeneratorImp,
+    protected RemoteFunctionGenerator getRemoteFunctionGenerator(Map.Entry<PathItem.HttpMethod, Operation> operation,
+                                                                 String path) {
+        return new RemoteExternalFunctionGenerator(path, operation, openAPI, authConfigGeneratorImp,
                 ballerinaUtilGenerator, imports);
     }
 
@@ -172,12 +173,13 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
                 createIdentifierToken(GeneratorConstants.STATUS_CODE_CLIENT));
     }
 
-    private void addClientFunctionImpl(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
-                                       Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
-                                       List<FunctionDefinitionNode> clientFunctionNodes) {
+    private void addClientFunctionImpl(Map.Entry<PathItem.HttpMethod, Operation> operationEntry, String path,
+                                       List<FunctionDefinitionNode> clientFunctionNodes, boolean hasDefaultResponse,
+                                       List<String> nonDefaultStatusCodes) {
         FunctionDefinitionNode clientExternFunction = clientFunctionNodes.get(clientFunctionNodes.size() - 1);
-        Optional<FunctionDefinitionNode> implFunction = createImplFunction(operation.getKey(), operationEntry, openAPI,
-                authConfigGeneratorImp, ballerinaUtilGenerator, clientExternFunction);
+        Optional<FunctionDefinitionNode> implFunction = createImplFunction(path, operationEntry, openAPI,
+                authConfigGeneratorImp, ballerinaUtilGenerator, clientExternFunction, hasDefaultResponse,
+                nonDefaultStatusCodes);
         if (implFunction.isPresent()) {
             clientFunctionNodes.add(implFunction.get());
         } else {
@@ -188,51 +190,75 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
     }
 
     @Override
-    protected boolean addResourceFunction(Map.Entry<String, Map<PathItem.HttpMethod, Operation>> operation,
-                                          Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
-                                          List<FunctionDefinitionNode> resourceFunctionNodes) {
-        boolean result = super.addResourceFunction(operation, operationEntry, resourceFunctionNodes);
-        if (result) {
-            addClientFunctionImpl(operation, operationEntry, resourceFunctionNodes);
+    protected FunctionGeneratorResults addResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operationEntry,
+                                                           String path, List<FunctionDefinitionNode> functionNodes) {
+        FunctionGeneratorResults result = super.addResourceFunction(operationEntry, path, functionNodes);
+        if (result.isSuccess()) {
+            addClientFunctionImpl(operationEntry, path, functionNodes, result.hasDefaultStatusCodeBinding(),
+                    result.nonDefaultStatusCodes());
         }
         return result;
     }
 
     @Override
-    protected ResourceFunctionGenerator getResourceFunctionGenerator(Map.Entry<String,
-            Map<PathItem.HttpMethod, Operation>> operation, Map.Entry<PathItem.HttpMethod, Operation> operationEntry) {
-       return new ResourceExternalFunctionGenerator(operationEntry, operation.getKey(), openAPI, authConfigGeneratorImp,
+    protected ResourceFunctionGenerator getResourceFunctionGenerator(Map.Entry<PathItem.HttpMethod,
+            Operation> operation, String path) {
+       return new ResourceExternalFunctionGenerator(operation, path, openAPI, authConfigGeneratorImp,
                ballerinaUtilGenerator, imports);
     }
 
-    private Optional<FunctionDefinitionNode> createImplFunction(String path,
+    protected Optional<FunctionDefinitionNode> createImplFunction(String path,
                                                                 Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                                 OpenAPI openAPI,
                                                                 AuthConfigGeneratorImp authConfigGeneratorImp,
                                                                 BallerinaUtilGenerator ballerinaUtilGenerator,
-                                                                FunctionDefinitionNode clientExternFunction) {
+                                                                FunctionDefinitionNode clientExternFunction,
+                                                                boolean hasDefaultResponse,
+                                                                List<String> nonDefaultStatusCodes) {
         //Create qualifier list
         NodeList<Token> qualifierList = createNodeList(createToken(PRIVATE_KEYWORD), createToken(ISOLATED_KEYWORD));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId() + "Impl");
         // Create function signature
-        ImplFunctionSignatureGenerator signatureGenerator = new ImplFunctionSignatureGenerator(operation.getValue(),
-                openAPI, operation.getKey().toString().toLowerCase(Locale.ROOT), path, clientExternFunction);
+        ImplFunctionSignatureGenerator signatureGenerator = getImplFunctionSignatureGenerator(path, operation,
+                openAPI, clientExternFunction);
         //Create function body
-        FunctionBodyGeneratorImp functionBodyGenerator = new ImplFunctionBodyGenerator(path, operation, openAPI,
-                authConfigGeneratorImp, ballerinaUtilGenerator, imports, signatureGenerator.hasHeaders(),
-                signatureGenerator.hasDefaultHeaders(), signatureGenerator.hasQueries());
-        FunctionBodyNode functionBodyNode;
+        FunctionBodyGenerator functionBodyGenerator = getFunctionBodyGeneratorImp(path, operation, openAPI,
+                authConfigGeneratorImp, ballerinaUtilGenerator, hasDefaultResponse, nonDefaultStatusCodes,
+                signatureGenerator);
         Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
+        diagnostics.addAll(functionBodyGenerator.getDiagnostics());
         if (functionBodyNodeResult.isEmpty()) {
             return Optional.empty();
         }
-        functionBodyNode = functionBodyNodeResult.get();
-
+        FunctionBodyNode functionBodyNode = functionBodyNodeResult.get();
         Optional<FunctionSignatureNode> functionSignatureNode = signatureGenerator.generateFunctionSignature();
         return functionSignatureNode.map(signatureNode ->
                 NodeFactory.createFunctionDefinitionNode(OBJECT_METHOD_DEFINITION, null, qualifierList,
                         functionKeyWord, functionName, createEmptyNodeList(), signatureNode, functionBodyNode));
+    }
+
+    protected ImplFunctionSignatureGenerator getImplFunctionSignatureGenerator(String path,
+                                                                               Map.Entry<PathItem.HttpMethod, Operation>
+                                                                                       operation, OpenAPI openAPI,
+                                                                               FunctionDefinitionNode
+                                                                                       clientExternFunction) {
+        return new ImplFunctionSignatureGenerator(operation.getValue(),
+                openAPI, operation.getKey().toString().toLowerCase(Locale.ROOT), path, clientExternFunction);
+    }
+
+    protected FunctionBodyGenerator getFunctionBodyGeneratorImp(String path,
+                                                                Map.Entry<PathItem.HttpMethod, Operation> operation,
+                                                                OpenAPI openAPI,
+                                                                AuthConfigGeneratorImp authConfigGeneratorImp,
+                                                                BallerinaUtilGenerator ballerinaUtilGenerator,
+                                                                boolean hasDefaultResponse,
+                                                                List<String> nonDefaultStatusCodes,
+                                                                ImplFunctionSignatureGenerator signatureGenerator) {
+        return new ImplFunctionBodyGenerator(path, operation, openAPI,
+                authConfigGeneratorImp, ballerinaUtilGenerator, imports, signatureGenerator.hasHeaders(),
+                signatureGenerator.hasDefaultHeaders(), signatureGenerator.hasQueries(), hasDefaultResponse,
+                nonDefaultStatusCodes);
     }
 
     /**
@@ -341,7 +367,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
      *
      * @return {@link TypeDefinitionNode} TypeDefinitionNode
      */
-    private TypeDefinitionNode getClientErrorType() {
+    protected TypeDefinitionNode getClientErrorType() {
         return createTypeDefinitionNode(null, null, createToken(TYPE_KEYWORD),
                 createIdentifierToken("ClientMethodInvocationError"),
                 createQualifiedNameReferenceNode(createIdentifierToken("http"), createToken(COLON_TOKEN),

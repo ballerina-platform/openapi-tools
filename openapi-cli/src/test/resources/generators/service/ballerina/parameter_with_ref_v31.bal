@@ -9,6 +9,6 @@ service /api/v3 on ep0 {
     # + name - parameter description
     # + payload - Create a new pet in the store
     # + return - Successful operation
-    resource function post pet(int id, @http:Payload Pet payload, string name = "doggie") returns OkPet {
+    resource function post pet(int id, @http:Payload Pet payload, string name = "doggie") returns PetOk {
     }
 }

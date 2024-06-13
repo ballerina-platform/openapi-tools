@@ -1,0 +1,3158 @@
+openapi: 3.0.0
+info:
+  version: 2021-08
+  title: 'API Reference: Collections'
+tags:
+  - name: Advanced Payment Manager
+  - name: Collections Window
+  - name: Configurable Payment Retry
+  - name: Notes
+  - name: Statement Generator
+security:
+  - BasicAuth: []
+paths:
+  /api/v1/subscription_payment_runs/{payment_run_id}:
+    get:
+      servers:
+        - url: https://advanced-payment-manager.apps.zuora.com
+      operationId: getPaymentRun
+      summary: Get a payment run
+      description: >
+        Gets details about a particular payment run based on a payment run id in
+        Advanced Payment Manager.
+      tags:
+        - Advanced Payment Manager
+      parameters:
+        - in: path
+          name: payment_run_id
+          required: true
+          schema:
+            type: integer
+          description: >-
+            The payment run ID. A payment run id in Advanced Payment Manager is
+            different from a payment run id in Zuora.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GETPaymentRunResponse'
+              examples:
+                response:
+                  value:
+                    success: true
+                    id: 6
+                    status: Complete
+                    target_date: 2018-01-02T00:00:00.000Z
+                    filter: Account.Currency = 'CAD'
+                    payment_run_schedule_id: Adhoc
+                    invoices_held: {}
+                    metrics:
+                      documents: 0
+                      payments: 0
+                      failed: 0
+                      skipped: 0
+                      amount: 0
+                      credit: 0
+  /api/v1/subscription_payment_runs:
+    post:
+      servers:
+        - url: https://advanced-payment-manager.apps.zuora.com
+      description: >
+        Creates a payment run to be executed immediately. You must specify the
+        **target_date** field. You can specify one or more filters to determine
+        which receivables are to be paid in the payment run.
+
+
+        If you use a custom filter, you cannot use other filters.
+      summary: Create a payment run
+      operationId: createPaymentRun
+      tags:
+        - Advanced Payment Manager
+      requestBody:
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/POSTPaymentRun'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/POSTPaymentRunResponse'
+            application/json:
+              examples:
+                response:
+                  value:
+                    id: 6
+                    success: 'true'
+  /api/v1/payment_run_schedules:
+    get:
+      servers:
+        - url: https://advanced-payment-manager.apps.zuora.com
+      operationId: getPaymentRunSchedules
+      summary: Get all payment run schedules
+      description: |
+        Retrieves all payment run schedules in Advanced Payment Manager.
+      tags:
+        - Advanced Payment Manager
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GETPaymentRunSchedulesResponse'
+              examples:
+                response:
+                  value:
+                    success: true
+                    size: 3
+                    schedules:
+                      - id: 6
+                        status: Active
+                        filter: Account.BillCycleDay = 8
+                        schedule: At 6:00 AM, only on Monday and Tuesday
+    post:
+      servers:
+        - url: https://advanced-payment-manager.apps.zuora.com
+      description: |
+        Creates a payment run schedule.
+      summary: Create a payment run schedule
+      operationId: createPaymentRunSchedule
+      tags:
+        - Advanced Payment Manager
+      requestBody:
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/POSTPaymentRunSchedule'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/POSTPaymentRunScheduleResponse'
+            application/json:
+              examples:
+                response:
+                  value:
+                    id: 6
+                    success: 'true'
+  /api/v1/payment_run_schedules/{schedule_id}:
+    get:
+      servers:
+        - url: https://advanced-payment-manager.apps.zuora.com
+      operationId: getPaymentRunSchedule
+      summary: Get a payment run schedule
+      description: |
+        Gets details about a particular payment run schedule.
+      tags:
+        - Advanced Payment Manager
+      parameters:
+        - in: path
+          name: schedule_id
+          required: true
+          schema:
+            type: integer
+          description: The schedule ID
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GETPaymentRunScheduleResponse'
+              examples:
+                response:
+                  value:
+                    success: true
+                    id: 6
+                    status: Active
+                    filter: Account.BillCycleDay = 8
+                    schedule: At 6:00 AM, only on Monday and Tuesday
+    put:
+      servers:
+        - url: https://advanced-payment-manager.apps.zuora.com
+      operationId: updatePaymentRunSchedule
+      summary: Update a payment run schedule
+      description: |
+        Updates details about a particular payment run schedule.
+      tags:
+        - Advanced Payment Manager
+      parameters:
+        - in: path
+          name: schedule_id
+          required: true
+          schema:
+            type: integer
+          description: The schedule ID
+      requestBody:
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/PUTPaymentRunSchedule'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/POSTPaymentRunScheduleResponse'
+              examples:
+                response:
+                  value:
+                    id: 6
+                    success: true
+    delete:
+      servers:
+        - url: https://advanced-payment-manager.apps.zuora.com
+      operationId: deletePaymentRunSchedule
+      summary: Cancel a payment run schedule
+      description: |
+        Cancels a payment run schedule.
+      tags:
+        - Advanced Payment Manager
+      parameters:
+        - in: path
+          name: schedule_id
+          required: true
+          schema:
+            type: integer
+          description: The schedule ID
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DELETEPaymentRunScheduleResponse'
+              examples:
+                response:
+                  value:
+                    success: true
+  /api/v1/fetch_statement?statement_number={statement_number}:
+    get:
+      servers:
+        - url: https://statement-generator.apps.zuora.com
+      operationId: getStatement
+      summary: Get a statement
+      description: >
+        Gets details about a particular statement. The statement will be
+        available for download in the response.
+      tags:
+        - Statement Generator
+      parameters:
+        - in: path
+          name: statement_number
+          required: true
+          schema:
+            type: integer
+          description: The statement number
+      responses:
+        '200':
+          description: ''
+  /api/v1/fetch_settings:
+    get:
+      servers:
+        - url: https://statement-generator.apps.zuora.com
+      operationId: getSettings
+      summary: Get Statement Generator settings
+      description: >
+        Gets several key settings of Statement Generator, including the
+        available templates, whether Invoice Settlement is enabled on the
+        tenant, the name of the default template, and the statement cycle being
+        used.
+      tags:
+        - Statement Generator
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GETStatementSettingsResponse'
+              examples:
+                response:
+                  value:
+                    success: true
+                    templates:
+                      - name: Default Template
+                      - name: Template for end consumers
+                    default_template: Default Template
+                    default_cycle: Month
+  /api/v1/run:
+    post:
+      servers:
+        - url: https://statement-generator.apps.zuora.com
+      operationId: createAdhocStatementRun
+      summary: Create an ad hoc statement run
+      description: |
+        Create an ad hoc statement run.
+      tags:
+        - Statement Generator
+      requestBody:
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/POSTAdhocStatementRun'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/POSTAdhocStatementRunResponse'
+              examples:
+                response:
+                  value:
+                    success: true
+                    code: 200
+                    message: Success
+                    statement_number: STA00000008
+  /api/v1/execute:
+    post:
+      servers:
+        - url: https://statement-generator.apps.zuora.com
+      operationId: createCustomStatementRun
+      summary: Create a custom statement run
+      description: |
+        Create a custom statement run.
+      tags:
+        - Statement Generator
+      requestBody:
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/POSTCustomStatementRun'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/POSTCustomStatementRunResponse'
+              examples:
+                response:
+                  value:
+                    success: true
+                    code: 200
+                    message: Success
+                    execution_number: '2'
+                    report_file: <aws_s3_link>
+  /api/v1/accounts/{account_id}:
+    get:
+      servers:
+        - url: https://collections-window.apps.zuora.com
+      operationId: getAccount
+      summary: Get an account
+      description: |
+        Gets details about a particular account.
+      tags:
+        - Collections Window
+      parameters:
+        - in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+          description: The account ID.
+          example: 2c92c0f86680fd090166a578754812bd
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionAccount'
+              examples:
+                response:
+                  value:
+                    name: Testing Account
+                    zuora_id: 2c92c0f863f2b1680163f579b7e705da
+                    in_collections: true
+                    collections_agent: 2018-01-02T00:00:00.000Z
+                    account_currency: CAD
+                    home_currency: USD
+                    amount_due_account_currency: 15540
+                    amount_due_home_currency: 800.55
+                    last_open_invoice_date: '2018-06-12'
+                    average_debt_age: 194.4 days
+                    statuses:
+                      In Collections: true
+                      Pending: false
+                      In Dispute: false
+                      Paid In Full: false
+  /api/v1/accounts:
+    get:
+      servers:
+        - url: https://collections-window.apps.zuora.com
+      operationId: getAccounts
+      summary: Get all accounts
+      description: |
+        Gets all accounts that are currently or have been in collection.
+      tags:
+        - Collections Window
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GETCollectionAccountsResponse'
+              examples:
+                response:
+                  value:
+                    accounts:
+                      - name: Testing Account
+                        zuora_id: 2c92c0f863f2b1680163f579b7e705da
+                        in_collections: true
+                        collections_agent: 2018-01-02T00:00:00.000Z
+                        account_currency: CAD
+                        home_currency: USD
+                        amount_due_account_currency: 15540
+                        amount_due_home_currency: 800.55
+                        last_open_invoice_date: '2018-06-12'
+                        average_debt_age: 194.4 days
+                        statuses:
+                          In Collections: 0
+                          Pending: 0
+                          In Dispute: 0
+                          Paid In Full: 0
+                    pagination:
+                      page: 1
+                      page_length: 20
+                      next_page: >-
+                        https://collections-window.apps.zuora.com/api/v1/accounts?page=2&page_length=20
+  /api/v1/users/{email}:
+    get:
+      servers:
+        - url: https://collections-window.apps.zuora.com
+      operationId: getCollectionsAgent
+      summary: Get a collections agent by email
+      description: >
+        Gets details about a collections agent, including the amount in
+        collections, and the statuses of the accounts that this agent is
+        assigned to.
+      tags:
+        - Collections Window
+      parameters:
+        - in: path
+          name: email
+          required: true
+          schema:
+            type: string
+          description: The email of the collections agent.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionAgent'
+              examples:
+                response:
+                  value:
+                    name: Testing User
+                    email: test@zuora.com
+                    zuora_identity_id: 2c92c0f96178a7a901619b10f5d12345
+                    amount_in_collections: 800.55
+                    accounts: 2
+                    account_statuses:
+                      In Collections: 1
+                      Pending: 0
+                      In Dispute: 1
+                      Paid In Full: 0
+  /api/v1/users:
+    get:
+      servers:
+        - url: https://collections-window.apps.zuora.com
+      operationId: getCollectionsAgents
+      summary: Get all collections agents
+      description: |
+        Gets the details of all collections agents.
+      tags:
+        - Collections Window
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GETCollectionAgentsResponse'
+              examples:
+                response:
+                  value:
+                    accounts:
+                      - name: Testing User
+                        email: test@zuora.com
+                        zuora_identity_id: 2c92c0f96178a7a901619b10f5d12345
+                        amount_in_collections: 800.55
+                        accounts: 2
+                        account_statuses:
+                          In Collections: 1
+                          Pending: 0
+                          In Dispute: 1
+                          Paid In Full: 0
+                    pagination:
+                      page: 1
+                      page_length: 20
+                      next_page: >-
+                        https://collections-window.apps.zuora.com/api/v1/users?page=2&page_length=20
+  /api/v1/collections_info:
+    get:
+      servers:
+        - url: https://collections-window.apps.zuora.com
+      operationId: getCollectionsInfo
+      summary: Get an overview of collections
+      description: |
+        Gets an overview of the collections.
+      tags:
+        - Collections Window
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionsInfo'
+              examples:
+                response:
+                  value:
+                    accounts_in_collections: 24
+                    home_currency: USD
+                    total_debt: '8379.78'
+                    largest_debts:
+                      - Test Account - 12438.00 USD
+                      - Jimmy John - 8000.00 USD
+                      - James Smith - 2450.55 USD
+                      - Bob Roberts - 1000.00 USD
+                      - Jim Reynolds - 829.00 USD
+                    oldest_debts:
+                      - Test Account - 2662 days
+                      - Jimbo - 1494 days
+                      - Steve Smith - 942 days
+                      - Jason Williams - 678 days
+                      - Will Jasons - 365 days
+                    statuses:
+                      In Collections: 24
+                      Pending: 2
+                      In Dispute: 5
+                      Paid in Full: 0
+  /api/v1/accounts/{account_id}/update_status:
+    post:
+      servers:
+        - url: https://collections-window.apps.zuora.com
+      operationId: UpdateAccount
+      summary: Update account status
+      description: >
+        Updates the status of an account. You must use the two query parameters
+        to specify the status that you want to update, and the new value of the
+        status.
+      tags:
+        - Collections Window
+      parameters:
+        - in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+          description: The account ID.
+          example: 2c92c0f86680fd090166a578754812bd
+        - in: query
+          name: status
+          required: true
+          schema:
+            type: string
+          description: The status that you want to update for the specified account.
+          example: in_dispute
+        - in: query
+          name: value
+          schema:
+            type: boolean
+          description: >-
+            The new value of the status. 0 indicates false, while 1 indicates
+            true.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Whether the operation is successful.
+              examples:
+                response:
+                  value:
+                    success: true
+  /api/v1/accounts/{account_id}/update_agent:
+    post:
+      servers:
+        - url: https://collections-window.apps.zuora.com
+      operationId: UpdateAccountAgent
+      summary: Update account agent
+      description: >
+        Updates the collections agent that is displayed within the UI of
+        Collections Window, and the custom field for the agent displayed in
+        account details in the Zuora UI.
+      tags:
+        - Collections Window
+      parameters:
+        - in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+          description: The account ID.
+          example: 2c92c0f86680fd090166a578754812bd
+        - in: query
+          name: agent_email
+          required: true
+          schema:
+            type: string
+          description: The email of the agent.
+          example: jdoe@company.com
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Whether the operation is successful.
+              examples:
+                response:
+                  value:
+                    success: true
+  /api/v1/payments/active_invoice_cycle_information/<invoice_id>:
+    get:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: getActiveInvoiceCycle
+      summary: Get active retry cycles for an invoice
+      description: >
+        Gets information of active retry cycles that have not been completed for
+        an invoice in Configurable Payment Retry.
+      tags:
+        - Configurable Payment Retry
+      parameters:
+        - in: path
+          name: invoice_id
+          required: true
+          schema:
+            type: string
+          description: ID of an invoice.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GETActiveInvoiceCycleResponse'
+  /api/v1/payments/active_debit_memo_cycle_information/<debit_memo_id>:
+    get:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: getActiveDebitMemoCycle
+      summary: Get active retry cycles for a debit memo
+      description: >
+        Gets information of active retry cycles that have not been completed for
+        a debit memo in Configurable Payment Retry.
+      tags:
+        - Configurable Payment Retry
+      parameters:
+        - in: path
+          name: debit_memo_id
+          required: true
+          schema:
+            type: string
+          description: ID of a debit memo.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GETActiveDebitMemoCycleResponse'
+  /api/v1/payments/active_account_cycle_information/<account_id>:
+    get:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: getActiveAccountCycle
+      summary: Get active retry cycles for an account
+      description: >
+        Gets information of active retry cycles that have not been completed for
+        an account in Configurable Payment Retry.
+      tags:
+        - Configurable Payment Retry
+      parameters:
+        - in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+          description: ID of an account.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GETActiveAccountCycleResponse'
+  /api/v1/payments/invoice_cycle_history/<invoice_id>:
+    get:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: getInvoiceCycleHistory
+      summary: Get retry cycle history for an invoice
+      description: >
+        Gets information of all retry cycles for an invoice in Configurable
+        Payment Retry.
+      tags:
+        - Configurable Payment Retry
+      parameters:
+        - in: path
+          name: invoice_id
+          required: true
+          schema:
+            type: string
+          description: ID of an invoice.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GETInvoiceCycleHistoryResponse'
+  /api/v1/payments/debit_memo_cycle_history/<debit_memo_id>:
+    get:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: getDebitMemoCycleHistory
+      summary: Get retry cycle history for a debit memo
+      description: >
+        Gets information of all retry cycles for a debit memo in Configurable
+        Payment Retry.
+      tags:
+        - Configurable Payment Retry
+      parameters:
+        - in: path
+          name: debit_memo_id
+          required: true
+          schema:
+            type: string
+          description: ID of a debit memo.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GETDebitMemoCycleHistoryResponse'
+  /api/v1/payments/account_cycle_history/<account_id>:
+    get:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: getAccountCycleHistory
+      summary: Get retry cycle history for an account
+      description: >
+        Gets information of all retry cycles for an account in Configurable
+        Payment Retry.
+      tags:
+        - Configurable Payment Retry
+      parameters:
+        - in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+          description: ID of an account.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GETAccountCycleHistoryResponse'
+  /api/v1/payments/execute_invoice_payment/<invoice_id>:
+    put:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: executeExecuteInvoicePayment
+      summary: Execute invoice payment
+      description: >
+        For all active retry cycles associated with an invoice, schedules the
+        next payment retry attempt to occur in the next hourly payment processor
+        run.
+      tags:
+        - Configurable Payment Retry
+      parameters:
+        - in: path
+          name: invoice_id
+          required: true
+          schema:
+            type: string
+          description: ID of an invoice.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation is successful.
+                  message:
+                    type: string
+                    description: The response message.
+                example:
+                  success: true
+                  message: >-
+                    Payments with the following IDs enqueued for processing:
+                    [290, 291]
+  /api/v1/payments/execute_debit_memo_payment/<debit_memo_id>:
+    put:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: executeExecuteDebitMemoPayment
+      summary: Execute debit memo payment
+      description: >
+        For all active retry cycles associated with a debit memo, schedules the
+        next payment retry attempt to occur in the next hourly payment processor
+        run.
+      tags:
+        - Configurable Payment Retry
+      parameters:
+        - in: path
+          name: debit_memo_id
+          required: true
+          schema:
+            type: string
+          description: ID of a debit memo.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation is successful.
+                  message:
+                    type: string
+                    description: The response message.
+                example:
+                  success: true
+                  message: >-
+                    Payments with the following IDs enqueued for processing:
+                    [300]
+  /api/v1/payments/execute_account_payments/<account_id>:
+    put:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: executeExecuteAccountPayments
+      summary: Execute account payments
+      description: >
+        For all active retry cycles associated with an account, schedules the
+        next payment retry attempt to occur in the next hourly payment processor
+        run.
+      tags:
+        - Configurable Payment Retry
+      parameters:
+        - in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+          description: ID of an account.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation is successful.
+                  message:
+                    type: string
+                    description: The response message.
+                example:
+                  success: true
+                  message: >-
+                    Payments with the following IDs enqueued for processing:
+                    [310, 311, 312]
+  /api/v1/payments/execute_payments:
+    post:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: UpdateExecutePayments
+      summary: Execute payments
+      description: >
+        For all active retry cycles associated with the invoice, debit memo,
+        and/or account IDs provided, schedules the next payment retry attempt to
+        occur in the next hourly payment processor run.
+      tags:
+        - Configurable Payment Retry
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                account_ids:
+                  type: array
+                  items:
+                    type: string
+                  description: IDs of accounts.
+                debit_memo_ids:
+                  description: IDs of debit memos.
+                  type: array
+                  items:
+                    type: string
+                invoice_ids:
+                  type: array
+                  items:
+                    type: string
+                  description: IDs of invoices.
+              example:
+                account_ids:
+                  - 2c92c0f96bd69165016bdcbf55ad5e62
+                invoice_ids:
+                  - 2c92c0fa7853052701785a38c6622473
+                  - 2c92c0fa7849b40a01784bc5de0f760f
+                debit_memo_ids:
+                  - 2c92c0fa7853052701785a38f3bb267f
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation is successful.
+                  message:
+                    type: string
+                    description: The response message.
+                example:
+                  success: true
+                  message: >-
+                    Payments with the following IDs enqueued for processing:
+                    [100, 101, 110, 111, 121]
+  /api/v1/payments/remove_invoice_from_retry_cycle/<invoice_id>:
+    put:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: removeRemoveInoviceFromCycle
+      summary: Remove an invoice from retry cycle
+      description: |
+        Stops any active retry cycles associated with the invoice provided.
+      tags:
+        - Configurable Payment Retry
+      parameters:
+        - in: path
+          name: invoice_id
+          required: true
+          schema:
+            type: string
+          description: ID of an invoice.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation is successful.
+                  message:
+                    type: string
+                    description: The response message.
+                example:
+                  success: true
+                  message: >-
+                    Payments with the following IDs have been removed from the
+                    retry cycle: [290, 291]
+  /api/v1/payments/remove_debit_memo_from_retry_cycle/<debit_memo_id>:
+    put:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: removeDebitMemoFromCycle
+      summary: Remove a debit memo from retry cycle
+      description: |
+        Stops any active retry cycles associated with the debit memo provided.
+      tags:
+        - Configurable Payment Retry
+      parameters:
+        - in: path
+          name: debit_memo_id
+          required: true
+          schema:
+            type: string
+          description: ID of a debit memo.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation is successful.
+                  message:
+                    type: string
+                    description: The response message.
+                example:
+                  success: true
+                  message: >-
+                    Payments with the following IDs have been removed from the
+                    retry cycle: [301]
+  /api/v1/payments/remove_account_from_retry_cycle/<account_id>:
+    put:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: removeAccountFromCycle
+      summary: Remove an account from retry cycle
+      description: |
+        Stops any active retry cycles associated with the account provided.
+      tags:
+        - Configurable Payment Retry
+      parameters:
+        - in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+          description: ID of an account.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation is successful.
+                  message:
+                    type: string
+                    description: The response message.
+                example:
+                  success: true
+                  message: >-
+                    Payments with the following IDs have been removed from the
+                    retry cycle: [310, 311, 312]
+  /api/v1/payments/submit_failed_payment:
+    post:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: UpdateSubmitPaymentToCycle
+      summary: Submit a payment to retry cycle
+      description: >
+        Submit a failed payment into the retry cycle of Configurable Payment
+        Retry.
+      tags:
+        - Configurable Payment Retry
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payment_id:
+                  type: string
+                  description: ID of a failed payment.
+              example:
+                payment_id: 2c92c0867849d42301784bc9ce806c31
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation is successful.
+                  message:
+                    type: string
+                    description: The response message.
+                example:
+                  success: true
+                  message: Payment entered into retry process
+  /api/v1/metrics/baseline:
+    get:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: getBaselineMetrics
+      summary: Get baseline metrics
+      description: >
+        Gets baseline metrics for Configurable Payment Retry, including Retry
+        Success Rate and trend, Document Success Rate and trend, and Average
+        Days Outstanding and trend. See Response Schema for detailed
+        descriptions of the metrics.
+      tags:
+        - Configurable Payment Retry
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GETBaselineMetricsResponse'
+  /api/v1/metrics/amount_recovered:
+    get:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: getAmountRecovered
+      summary: Get the Amount Recovered metrics
+      description: >
+        Gets the Amount Recovered metrics, including the total amount recovered
+        and the amount recovered over the last 30 days broken down by currency.
+      tags:
+        - Configurable Payment Retry
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GETAmountRecoveredResponse'
+  /api/v1/metrics/customer_group_over_time:
+    get:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: getDocumentSuccessRateByCustomerGroup
+      summary: Get the Document Success Rate metrics by customer group
+      description: >
+        Gets the Document Success Rate timeseries for each customer group over
+        the past 6 months. The data of the current month will not be included.
+        For example, if it is April 15th today, the data for April will not be
+        included. Data for March and earlier will be shown.
+      tags:
+        - Configurable Payment Retry
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/GETDocumentSuccessRateByCustomerGroupResponse
+  /api/v1/metrics/customer_group:
+    get:
+      servers:
+        - url: https://payment-retry.apps.zuora.com
+      operationId: getCustomerGroupMetrics
+      summary: Get the Customer Group metrics
+      description: >
+        Gets the following metrics for each customer group that is in the active
+        status:
+          - Document Success Rate and trend
+          - Retry Success Rate
+          - Average Attempts
+      tags:
+        - Configurable Payment Retry
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GETCustomerGroupMetricsResponse'
+components:
+  schemas:
+    Customer_Groups:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        smart_retry:
+          type: string
+        document_success_rate:
+          type: string
+        document_success_rate_trend:
+          type: string
+        retry_success_rate:
+          type: string
+        average_attempts:
+          type: string
+    Customer_Groups_Detail:
+      type: array
+      items:
+        type: string
+
+    GETCustomerGroupMetricsResponse:
+      type: object
+      properties:
+        customer_groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/Customer_Groups'
+          description: >
+            An array containing the following information for each customer
+            group.
+              - Customer group ID
+              - Customer group name
+              - Whether Smart Retry is enabled for this customer group
+              - Document Success Rate indicating the percentage of billing documents that are successfully collected
+              - The trend of change in Document Success Rate over the last 30 days
+              - Retry Success Rate indicating the percentage of the successful payment attempts
+              - Average Attempts indicating the average number of attempts required to recover funds
+        success:
+          type: boolean
+          description: >
+            Indicates whether the metrics are retrieved successfully.
+
+
+            If no data is loaded yet, a 200 response code will be returned with
+            the success field set to `true`. All expected fields will be present
+            but the value will be `null`.
+      example:
+        customer_groups:
+          - id: 1
+            name: batch22
+            smart_retry: false
+            document_success_rate: '17.17'
+            document_success_rate_trend: up
+            retry_success_rate: '21.76'
+            average_attempts: '4.11'
+          - id: 2
+            name: Smart Retry
+            smart_retry: true
+            document_success_rate: '74.17'
+            document_success_rate_trend: down
+            retry_success_rate: '81.21'
+            average_attempts: '1.32'
+          - id: 4
+            name: All Remaining Customers
+            smart_retry: false
+            document_success_rate: '16.35'
+            document_success_rate_trend: up
+            retry_success_rate: '15.21'
+            average_attempts: '3.32'
+        success: true
+    GETDocumentSuccessRateByCustomerGroupResponse:
+      type: object
+      properties:
+        customer_groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/Customer_Groups_Detail'
+          description: >
+            An array containing the Document Success Rate timeseries for each
+            customer group represented by the customer group ID.
+
+            A timeseries over the past 6 months is present in the format of
+            `<month_year>: <document_success_rate>`. The data of the current
+            month is not included. For example, if it is April 15th today, the
+            data for April will not be included. Data for March and earlier will
+            be shown.
+        success:
+          type: boolean
+          description: >
+            Indicates whether the metrics are retrieved successfully.
+
+
+            If no data is loaded yet, a 200 response code will be returned with
+            the success field set to `true`. All expected fields will be present
+            but the value will be `null`.
+      example:
+        customer_groups:
+          '1':
+            '05_21': '17.53'
+            '04_21': '13.21'
+            '03_21': '14.92'
+            '02_21': '8.99'
+            '01_21': '34.25'
+            '12_20': '12.30'
+          '2':
+            '05_21': '11.11'
+            '04_21': '7.87'
+            '03_21': '26.00'
+            '02_21': '11.06'
+            '01_21': '13.43'
+            '12_20': '17.92'
+          '4':
+            '05_21': '11.13'
+            '04_21': '9.17'
+            '03_21': '17.20'
+            '02_21': '19.06'
+            '01_21': '12.43'
+            '12_20': '15.92'
+        success: true
+    GETAmountRecoveredResponse:
+      type: object
+      properties:
+        currency:
+          type: array
+          items:
+            type: string
+          description: >
+            An array containing the following information for each available
+            currency.
+
+            If no payment of a given currency has been processed over the last
+            30 days, the currency will not appear in the array.
+              - The total amount recovered to date
+              - The amount recovered over the last 30 days
+        success:
+          type: boolean
+          description: >
+            Indicates whether the metrics are retrieved successfully.
+
+
+            If no data is loaded yet, a 200 response code will be returned with
+            the success field set to `true`. All expected fields will be present
+            but the value will be `null`.
+      example:
+        currency:
+          USD:
+            total_amount: '77515.21'
+            last_30_days: '1100.01'
+          EUR:
+            total_amount: '337.19'
+            last_30_days: '17.17'
+          CAD:
+            total_amount: '123954.10'
+            last_30_days: '5132.87'
+        success: true
+    GETBaselineMetricsResponse:
+      type: object
+      properties:
+        retry_success_rate:
+          type: number
+          description: >
+            The percentage of successful payment attempts for all customer
+            groups on this Configurable Payment Retry instance so far.
+
+
+            Retry Success Rate = Number of successful retry payment attempts /
+            Total number of retry payments attempted
+
+
+            Payment attempts here are any payment attempts executed by
+            Configurable Payment Retry, excluding the initial payment run.
+        retry_success_rate_trend:
+          type: string
+          description: |
+            The trend of change in Retry Success Rate over the last 30 days.
+        document_success_rate:
+          type: number
+          description: >
+            The percentage of billing documents that are successfully collected,
+            for all customer groups on this Configurable Payment Retry instance
+            so far.
+
+
+            Document Success Rate = Number of billing documents collected /
+            Total number of billing documents attempted
+
+
+            Billing documents collected are any invoices and debit memos that
+            were paid through the payment attempt initiated by Configurable
+            Payment Retry.
+        document_success_rate_trend:
+          type: string
+          description: |
+            The trend of change in Document Success Rate over the last 30 days.
+        average_days_outstanding:
+          type: number
+          description: >
+            The average number of days invoices and debit memos are unpaid
+            before collection, for all customer groups on this Configurable
+            Payment Retry instance so far.
+        average_days_outstanding_trend:
+          type: string
+          description: >
+            The trend of change in Average Days Outstanding over the last 30
+            days.
+        success:
+          type: boolean
+          description: >
+            Indicates whether the metrics are retrieved successfully.
+
+
+            If no data is loaded yet, a 200 response code will be returned with
+            the success field set to `true`. All expected fields will be present
+            but the value will be `null`.
+      example:
+        retry_success_rate: '11.90'
+        retry_success_rate_trend: down
+        document_success_rate: '13.54'
+        document_success_rate_trend: neutral
+        average_days_outstanding: '4.76'
+        average_days_outstanding_trend: up
+        success: true
+    GETActiveInvoiceCycleResponse:
+      type: object
+      properties:
+        cycles:
+          type: array
+          items:
+            $ref: '#/components/schemas/GETInvoiceCycleElementResponse'
+          description: >
+            An array containing information of all active retry cycles for an
+            invoice. See the schema and example for details.
+      example:
+        cycles:
+          - account_id: 2c92c0f96bd69165016bdccdd6ce2f29
+            invoice_id: 2c92c0f8778bf8cd017798168cb50e0b
+            payment_method_id: 2c92c0f9774f2b3e01775f6f06d87b61
+            currency: USD
+            status: Cycle Incomplete
+            current_attempt_number: 2
+            next_attempt: '2021-04-01T19:27:34.648Z'
+            customer_group: All Remaining Customers
+            attempts:
+              - attempt_number: 1
+                zuora_payment_id: 2c92c0867849d42301784bc9ca076c21
+                time_of_execution: '2021-03-19T18:42:20.103Z'
+                source: PR-00000371
+                cpr_generated: false
+                success: false
+                amount_collected: '0.0'
+                action_info:
+                  action: Retry
+                retry_info:
+                  next: '2021-04-01T19:27:34.648-09:00'
+                  criteria: incremental_time
+                mapping_info:
+                  label: Hard Decline
+                  level: code
+                  customer_group_id: 1
+                gateway_info:
+                  id: 2c92c0f85e2d19af015e3a61d8947e5d
+                  code: insufficient_funds
+                  response: Your card has insufficient funds.
+              - attempt_number: 2
+                zuora_payment_id: 2c92c09c7849d3c101784bce0d0a06d5
+                time_of_execution: '2021-03-19T18:52:24.137Z'
+                source: PR-00000372
+                cpr_generated: true
+                success: false
+                amount_collected: '0.0'
+                action_info:
+                  action: Retry
+                retry_info:
+                  next: '2021-03-19T09:53:39.845-09:00'
+                  criteria: incremental_time
+                mapping_info:
+                  label: Hard Decline
+                  level: code
+                  customer_group_id: 1
+                gateway_info:
+                  id: 2c92c0f85e2d19af015e3a61d8947e5d
+                  code: insufficient_funds
+                  response: Your card has insufficient funds.
+    GETInvoiceCycleElementResponse:
+      type: object
+      title: retry cycle object
+      properties:
+        account_id:
+          type: string
+          description: |
+            The ID of the customer account.
+        invoice_id:
+          type: string
+          description: |
+            The ID of the invoice.
+        payment_method_id:
+          type: string
+          description: |
+            The ID of the payment method.
+        currency:
+          type: string
+          description: |
+            The type of the currency used.
+        status:
+          type: string
+          description: |
+            The status of the retry cycle.
+        current_attempt_number:
+          type: number
+          description: |
+            The number of the current retry attempt.
+        next_attempt:
+          type: string
+          format: date-time
+          description: >
+            The date and time of the next retry attempt, in `yyyy-mm-dd
+            hh:mm:ss` format.
+        customer_group:
+          type: string
+          description: |
+            The name of the customer group.
+        attempts:
+          type: array
+          description: >
+            An array containing information of the retry attempts that have been
+            made. See the schema and example for details.
+          items:
+            $ref: '#/components/schemas/GETCycleElementAttemptResponse'
+    GETCycleElementAttemptResponse:
+      type: object
+      title: retry attempt object
+      properties:
+        attempt_number:
+          type: number
+          description: |
+            The number of the retry attempt.
+        zuora_payment_id:
+          type: string
+          description: |
+            The ID of the payment in Zuora Payments.
+        time_of_execution:
+          type: string
+          format: date-time
+          description: >
+            The date and time when the retry attempt was made, in `yyyy-mm-dd
+            hh:mm:ss` format.
+        source:
+          type: string
+          description: |
+            The number of the failed payment run.
+        cpr_generated:
+          type: boolean
+          description: >
+            Indicates whether the first retry attempt was generated by
+            Configurable Payment Retry. 
+
+
+            `true` for the cases of the first retry attempt generated by CPR and
+            the second or later attempt.
+
+
+            `false` for the cases that the retry attempt was made by the payment
+            run or an external source during retry cycles.
+        success:
+          type: boolean
+          description: |
+            Indicates whether the retry attempt is successful.
+        amount_collected:
+          type: number
+          description: |
+            The amount collected in this retry attempt.
+        action_info:
+          type: object
+          description: |
+            Information about the action of the retry attempt.
+          properties:
+            action:
+              type: string
+              description: |
+                The action taken in the retry attempt.
+        retry_info:
+          type: object
+          description: |
+            Information about the next retry attempt.
+          properties:
+            next:
+              type: string
+              format: date-time
+              description: >
+                The date and time of the next retry attempt as determined by
+                `criteria`, in `yyyy-mm-dd hh:mm:ss` format.
+            criteria:
+              type: string
+              description: >
+                The criteria defined in the retry configuration in the CPR UI,
+                to specify whether the next retry will occur in an incremental
+                time or at a specific time or day.
+        mapping_info:
+          type: object
+          description: |
+            Information about the response code mapping for the retry attempt.
+          properties:
+            label:
+              type: string
+              description: >
+                The response code label, can be `Hard Decline`, `Soft Decline`,
+                `System Error`, or custom labels.
+            level:
+              type: string
+              description: >
+                The response code level for the payment gateway, can be `Code`
+                or `Description`.
+            customer_group_id:
+              type: number
+              description: |
+                The ID of the customer group.
+        gateway_info:
+          type: object
+          description: |
+            Information about the payment gateway.
+          properties:
+            id:
+              type: string
+              description: |
+                The ID of the payment gateway.
+            code:
+              type: string
+              description: |
+                The response code from the gateway.
+            response:
+              type: string
+              description: |
+                The response message from the gateway.
+    GETActiveDebitMemoCycleResponse:
+      type: object
+      properties:
+        cycles:
+          type: array
+          items:
+            $ref: '#/components/schemas/GETDebitMemoCycleElementResponse'
+          description: >
+            An array containing information of all active retry cycles for a
+            debit memo. See the schema and example for details.
+      example:
+        cycles:
+          - account_id: 2c92c0f868e161e70168e25eb51d755f
+            debit_memo_id: 2c92c0fa7853052701785a38f3bb267f
+            payment_method_id: 2c92c0f8774f1afe01775f6e533c4c06
+            currency: USD
+            status: Cycle Incomplete
+            current_attempt_number: 2
+            next_attempt: '2021-04-01T10:22:57.464Z'
+            customer_group: All Remaining Customers
+            attempts:
+              - attempt_number: 1
+                zuora_payment_id: 2c92c085785305e201785a51af791979
+                time_of_execution: '2021-03-23T16:50:18.878Z'
+                source: PR-00000376
+                cpr_generated: false
+                success: false
+                amount_collected: '0.0'
+                action_info:
+                  action: Retry
+                retry_info:
+                  next: '2021-03-23T07:51:30.380-09:00'
+                  criteria: incremental_time
+                mapping_info:
+                  label: Hard Decline
+                  level: code
+                  customer_group_id: 1
+                gateway_info:
+                  id: 2c92c0f85e2d19af015e3a61d8947e5d
+                  code: insufficient_funds
+                  response: Your card has insufficient funds.
+              - attempt_number: 2
+                zuora_payment_id: 2c92c0857881cf3e01788ee263b0331c
+                time_of_execution: '2021-04-01T19:21:55.207Z'
+                source: PR-00000380
+                cpr_generated: true
+                success: false
+                amount_collected: '0.0'
+                action_info:
+                  action: Retry
+                retry_info:
+                  next: '2021-04-01T10:22:57.464-09:00'
+                  criteria: incremental_time
+                mapping_info:
+                  label: Hard Decline
+                  level: code
+                  customer_group_id: 1
+                gateway_info:
+                  id: 2c92c0f85e2d19af015e3a61d8947e5d
+                  code: insufficient_funds
+                  response: Your card has insufficient funds.
+    GETDebitMemoCycleElementResponse:
+      type: object
+      title: retry cycle object
+      properties:
+        account_id:
+          type: string
+          description: |
+            The ID of the customer account.
+        debit_memo_id:
+          type: string
+          description: |
+            The ID of the debit memo.
+        payment_method_id:
+          type: string
+          description: |
+            The ID of the payment method.
+        currency:
+          type: string
+          description: |
+            The type of the currency used.
+        status:
+          type: string
+          description: |
+            The status of the retry cycle.
+        current_attempt_number:
+          type: number
+          description: |
+            The number of the current retry attempt.
+        next_attempt:
+          type: string
+          format: date-time
+          description: >
+            The date and time of the next retry attempt, in `yyyy-mm-dd
+            hh:mm:ss` format.
+        customer_group:
+          type: string
+          description: |
+            The name of the customer group.
+        attempts:
+          type: array
+          description: >
+            An array containing information of the retry attempts that have been
+            made. See the schema and example for details.
+          items:
+            $ref: '#/components/schemas/GETCycleElementAttemptResponse'
+    GETActiveAccountCycleResponse:
+      type: object
+      properties:
+        cycles:
+          type: array
+          items:
+            $ref: '#/components/schemas/GETAccountCycleElementResponse'
+          description: >
+            An array containing information of all active retry cycles for an
+            account. See the schema and example for details.
+      example:
+        cycles:
+          - account_id: 2c92c0f96bd69165016bdccdd6ce2f29
+            debit_memo_id: 2c92c0fb78532b0001785a38f6427976
+            payment_method_id: 2c92c0f9774f2b3e01775f6f06d87b61
+            currency: USD
+            status: Cycle Incomplete
+            current_attempt_number: 1
+            next_attempt: '2021-04-01T19:27:34.473Z'
+            customer_group: All Remaining Customers
+            attempts:
+              - attempt_number: 1
+                zuora_payment_id: 2c92c085785305e201785a5199a6192d
+                time_of_execution: '2021-03-23T16:50:18.878Z'
+                source: PR-00000376
+                cpr_generated: false
+                success: false
+                amount_collected: '0.0'
+                action_info:
+                  action: Retry
+                retry_info:
+                  next: '2021-03-23T07:51:27.521-09:00'
+                  criteria: incremental_time
+                mapping_info:
+                  label: Hard Decline
+                  level: code
+                  customer_group_id: 1
+                gateway_info:
+                  id: 2c92c0f85e2d19af015e3a61d8947e5d
+                  code: insufficient_funds
+                  response: Your card has insufficient funds.
+          - account_id: 2c92c0f96bd69165016bdccdd6ce2f29
+            invoice_id: 2c92c0fa7853052701785a38c6622473
+            payment_method_id: 2c92c0f9774f2b3e01775f6f06d87b61
+            currency: USD
+            status: Cycle Incomplete
+            current_attempt_number: 1
+            next_attempt: '2021-04-01T19:27:34.436Z'
+            customer_group: All Remaining Customers
+            attempts:
+              - attempt_number: 1
+                zuora_payment_id: 2c92c085785305e201785a519d85193b
+                time_of_execution: '2021-03-23T16:50:18.878Z'
+                source: PR-00000376
+                cpr_generated: false
+                success: false
+                amount_collected: '0.0'
+                action_info:
+                  action: Retry
+                retry_info:
+                  next: '2021-03-23T07:51:28.161-09:00'
+                  criteria: incremental_time
+                mapping_info:
+                  label: Hard Decline
+                  level: code
+                  customer_group_id: 1
+                gateway_info:
+                  id: 2c92c0f85e2d19af015e3a61d8947e5d
+                  code: insufficient_funds
+                  response: Your card has insufficient funds.
+    GETAccountCycleElementResponse:
+      type: object
+      title: retry cycle object
+      properties:
+        account_id:
+          type: string
+          description: |
+            The ID of the customer account.
+        invoice_id:
+          type: string
+          description: |
+            The ID of the invoice.
+        debit_memo_id:
+          type: string
+          description: |
+            The ID of the debit memo.
+        payment_method_id:
+          type: string
+          description: |
+            The ID of the payment method.
+        currency:
+          type: string
+          description: |
+            The type of the currency used.
+        status:
+          type: string
+          description: |
+            The status of the retry cycle.
+        current_attempt_number:
+          type: number
+          description: |
+            The number of the current retry attempt.
+        next_attempt:
+          type: string
+          format: date-time
+          description: >
+            The date and time of the next retry attempt, in `yyyy-mm-dd
+            hh:mm:ss` format.
+        customer_group:
+          type: string
+          description: |
+            The name of the customer group.
+        attempts:
+          type: array
+          description: >
+            An array containing information of the retry attempts that have been
+            made. See the schema and example for details.
+          items:
+            $ref: '#/components/schemas/GETCycleElementAttemptResponse'
+    GETInvoiceCycleHistoryResponse:
+      type: object
+      properties:
+        cycles:
+          type: array
+          items:
+            $ref: '#/components/schemas/GETInvoiceCycleElementResponse'
+          description: >
+            An array containing information of all completed retry cycles for an
+            invoice. See the example for details.
+      example:
+        cycles:
+          - account_id: 2c92c0f96bd69165016bdcbf55ad5e62
+            invoice_id: 2c92c0fa7849b3ff01784bc5e8ee18b5
+            payment_method_id: 2c92c0f9774f2b3e01775f6cf2fb726a
+            currency: USD
+            status: Cycle Complete
+            current_attempt_number: 1
+            next_attempt: null
+            customer_group: Testing Group
+            attempts:
+              - attempt_number: 1
+                zuora_payment_id: 2c92c0867849d42301784bc9ce806c31
+                time_of_execution: '2021-04-01T19:11:21.639Z'
+                source: PR-00000370
+                cpr_generated: false
+                success: false
+                amount_collected: '0.0'
+                action_info:
+                  action: Stop
+                retry_info: {}
+                mapping_info:
+                  label: Hard Decline
+                  level: code
+                  customer_group_id: 5
+                gateway_info:
+                  id: 2c92c0f85e2d19af015e3a61d8947e5d
+                  code: insufficient_funds
+                  response: Your card has insufficient funds.
+          - account_id: 2c92c0f96bd69165016bdcbf55ad5e62
+            invoice_id: 2c92c0fa7849b3ff01784bc5e8ee18b5
+            payment_method_id: 2c92c0f9774f2b3e01775f6cf2fb726a
+            currency: USD
+            status: Cycle Complete
+            current_attempt_number: 2
+            next_attempt: null
+            customer_group: All Remaining Customers
+            attempts:
+              - attempt_number: 1
+                zuora_payment_id: 2c92c0867849d42301784bc9ce806c31
+                time_of_execution: '2021-03-19T18:42:20.103Z'
+                source: PR-00000371
+                cpr_generated: false
+                success: false
+                amount_collected: '0.0'
+                action_info:
+                  action: Retry
+                retry_info:
+                  next: '2021-03-19T09:43:28.670-09:00'
+                  criteria: incremental_time
+                mapping_info:
+                  label: Hard Decline
+                  level: code
+                  customer_group_id: 1
+                gateway_info:
+                  id: 2c92c0f85e2d19af015e3a61d8947e5d
+                  code: insufficient_funds
+                  response: Your card has insufficient funds.
+              - attempt_number: 2
+                zuora_payment_id: 2c92c09c7849d3c101784bcdfc010671
+                time_of_execution: '2021-03-19T18:52:24.137Z'
+                source: PR-00000372
+                cpr_generated: true
+                success: false
+                amount_collected: '0.0'
+                action_info:
+                  action: Stop
+                retry_info: {}
+                mapping_info:
+                  label: Hard Decline
+                  level: code
+                  customer_group_id: 1
+                gateway_info:
+                  id: 2c92c0f85e2d19af015e3a61d8947e5d
+                  code: insufficient_funds
+                  response: Your card has insufficient funds.
+    GETDebitMemoCycleHistoryResponse:
+      type: object
+      properties:
+        cycles:
+          type: array
+          items:
+            $ref: '#/components/schemas/GETDebitMemoCycleElementResponse'
+          description: >
+            An array containing information of all completed retry cycles for a
+            debit memo. See the example for details.
+      example:
+        cycles:
+          - account_id: 2c92c0f868e161e70168e25eb51d755f
+            debit_memo_id: 2c92c0fa7853052701785a38f3bb267f
+            payment_method_id: 2c92c0f8774f1afe01775f6e533c4c06
+            currency: USD
+            status: Cycle Complete
+            current_attempt_number: 2
+            next_attempt: null
+            customer_group: All Remaining Customers
+            attempts:
+              - attempt_number: 1
+                zuora_payment_id: 2c92c085785305e201785a51af791979
+                time_of_execution: '2021-03-23T16:50:18.878Z'
+                source: PR-00000376
+                cpr_generated: false
+                success: false
+                amount_collected: '0.0'
+                action_info:
+                  action: Retry
+                retry_info:
+                  next: '2021-03-23T07:51:30.380-09:00'
+                  criteria: incremental_time
+                  api_updated_retry_time: '2021-03-26T14:27:21.107-04:00'
+                mapping_info:
+                  label: Hard Decline
+                  level: code
+                  customer_group_id: 1
+                gateway_info:
+                  id: 2c92c0f85e2d19af015e3a61d8947e5d
+                  code: insufficient_funds
+                  response: Your card has insufficient funds.
+              - attempt_number: 2
+                zuora_payment_id: 2c92c0857881cf3e01788ee263b0331c
+                time_of_execution: '2021-04-01T19:21:55.207Z'
+                source: PR-00000378
+                cpr_generated: true
+                success: false
+                amount_collected: '0.0'
+                action_info:
+                  action: Stop
+                retry_info: {}
+                mapping_info:
+                  label: Hard Decline
+                  level: code
+                  customer_group_id: 1
+                gateway_info:
+                  id: 2c92c0f85e2d19af015e3a61d8947e5d
+                  code: insufficient_funds
+                  response: Your card has insufficient funds.
+    GETAccountCycleHistoryResponse:
+      type: object
+      properties:
+        cycles:
+          type: array
+          items:
+            $ref: '#/components/schemas/GETAccountCycleElementResponse'
+          description: >
+            An array containing information of all completed retry cycles for an
+            account. See the example for details.
+      example:
+        cycles:
+          - account_id: 2c92c0f96bd69165016bdcbf55ad5e62
+            invoice_id: 2c92c0fa7849b3ff01784bc5e8ee18b5
+            payment_method_id: 2c92c0f9774f2b3e01775f6cf2fb726a
+            currency: USD
+            status: Cycle Complete
+            current_attempt_number: 3
+            next_attempt: '2021-03-19T18:53:39.641Z'
+            customer_group: All Remaining Customers
+            attempts:
+              - attempt_number: 1
+                zuora_payment_id: 2c92c0867849d42301784bc9ce806c31
+                time_of_execution: '2021-03-19T18:42:20.103Z'
+                source: PR-00000371
+                cpr_generated: false
+                success: false
+                amount_collected: '0.0'
+                action_info:
+                  action: Retry
+                retry_info:
+                  next: '2021-03-19T09:43:28.670-09:00'
+                  criteria: incremental_time
+                mapping_info:
+                  label: Hard Decline
+                  level: code
+                  customer_group_id: 1
+                gateway_info:
+                  id: 2c92c0f85e2d19af015e3a61d8947e5d
+                  code: insufficient_funds
+                  response: Your card has insufficient funds.
+              - attempt_number: 2
+                zuora_payment_id: 2c92c09c7849d3c101784bcdfc010671
+                time_of_execution: '2021-03-19T18:52:24.137Z'
+                source: PR-00000372
+                cpr_generated: true
+                success: false
+                amount_collected: '0.0'
+                action_info:
+                  action: Stop
+                retry_info: {}
+                mapping_info:
+                  label: Hard Decline
+                  level: code
+                  customer_group_id: 1
+                gateway_info:
+                  id: 2c92c0f85e2d19af015e3a61d8947e5d
+                  code: insufficient_funds
+                  response: Your card has insufficient funds.
+          - account_id: 2c92c0f96bd69165016bdcbf55ad5e62
+            invoice_id: 2c92c0fb78532b0f01785a38cede190a
+            payment_method_id: 2c92c0f9774f2b3e01775f6cf2fb726a
+            currency: USD
+            status: Cycle Incomplete
+            current_attempt_number: 1
+            next_attempt: '2021-03-24T19:34:20.254Z'
+            customer_group: All Remaining Customers
+            attempts:
+              - attempt_number: 1
+                zuora_payment_id: 2c92c085785305e201785a51aae41969
+                time_of_execution: '2021-03-23T16:50:18.878Z'
+                source: PR-00000376
+                cpr_generated: false
+                success: false
+                amount_collected: '0.0'
+                action_info:
+                  action: Retry
+                retry_info:
+                  next: '2021-03-23T07:51:30.316-09:00'
+                  criteria: incremental_time
+                mapping_info:
+                  label: Hard Decline
+                  level: code
+                  customer_group_id: 1
+                gateway_info:
+                  id: 2c92c0f85e2d19af015e3a61d8947e5d
+                  code: insufficient_funds
+                  response: Your card has insufficient funds.
+    GETPaymentRunResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: |
+            Whether the operation is successful.
+        id:
+          type: integer
+          description: |
+            The ID of the payment run in Advanced Payment Manager.
+        status:
+          type: string
+          description: |
+            The status of the payment run.
+        target_date:
+          type: string
+          format: date
+          description: |
+            The target date of the payment run, in the format of YYYY-MM-DD.
+        filter:
+          type: string
+          description: |
+            The filter that is used for the payment run.
+        payment_run_schedule_id:
+          type: string
+          description: >
+            The ID of the payment run schedule. If this is not a scheduled
+            payment run, the value is **Adhoc**.
+        invoices_held:
+          type: object
+          description: |
+            Invoices that are held by the payment run for manual processing.
+        metrics:
+          type: object
+          description: |
+            Metrics of the payment runs after completion.
+        errors:
+          type: array
+          description: >
+            Errors that occur in the operation. Available only when **success**
+            is **false**.
+          items: {}
+    POSTPaymentRun:
+      type: object
+      properties:
+        target_date:
+          type: string
+          format: date
+          description: >
+            The target date of the payment run to be created, in the format of
+            YYYY-MM-DD.
+        billrun:
+          type: string
+          description: >
+            A bill run name that is used to determine what receivables should be
+            included in the payment run. Valid only if the custom filter is not
+            used.
+        batch:
+          type: string
+          description: >
+            A batch name that is used to determine what receivables should be
+            included in the payment run. Valid only if the custom filter is not
+            used.
+        currency:
+          type: string
+          description: >
+            A three-character currency code that is used to determine what
+            receivables should be included in the payment run. Valid only if the
+            custom filter is not used.
+        payment_gateway:
+          type: string
+          description: >
+            A payment gateway name that is used to determine what receivables
+            should be included in the payment run. Valid only if the custom
+            filter is not used.
+        bill_cycle_day:
+          type: string
+          description: >
+            A bill cycle day value that is used to determine what receivables
+            should be included in the payment run. Valid only if the custom
+            filter is not used.
+        custom:
+          type: string
+          description: >
+            A custom ZOQL query that is used to determine what receivables
+            should be included in the payment run. It cannot be used with other
+            filters.
+      example:
+        target_date: '2019-02-04'
+        currency: CAD
+    POSTPaymentRunResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: |
+            The ID of the payment run in Advanced Payment Manager.
+        success:
+          type: boolean
+          description: |
+            Whether the operation is successful.
+        errors:
+          type: array
+          items:
+            type: string
+          description: >
+            Errors that occur in the operation. Available only when **success**
+            is **false**.
+    GETPaymentRunSchedulesResponse:
+      type: object
+      properties:
+        schedules:
+          type: array
+          items:
+            type: object
+          description: |
+            An array containing all available schedules.
+        size:
+          type: integer
+          description: |
+            The number of schedules retrieved.
+        success:
+          type: boolean
+          description: |
+            Whether the operation is successful.
+        errors:
+          type: array
+          description: >
+            Errors that occur in the operation. Available only when **success**
+            is **false**.
+          items: {}
+    GETPaymentRunScheduleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: |
+            Whether the operation is successful.
+        id:
+          type: integer
+          description: |
+            The ID of the payment run schedule in Advanced Payment Manager.
+        status:
+          type: string
+          description: |
+            The status of the payment run schedule.
+        filter:
+          type: string
+          format: date
+          description: |
+            The filter that is defined in the payment run schedule.
+        schedule:
+          type: string
+          description: |
+            The schedule that is defined for this payment run schedule.
+        errors:
+          type: array
+          description: >
+            Errors that occur in the operation. Available only when **success**
+            is **false**.
+          items: {}
+    POSTPaymentRunSchedule:
+      type: object
+      properties:
+        frequency:
+          type: string
+          description: |
+            The frequency of payment runs in the schedule.
+          enum:
+            - Daily
+            - Weekly
+            - Monthly
+        day:
+          type: string
+          description: >
+            The day of a month when payment runs need to be performed. Required
+            only if **frequency** is **Monthly**. Allowed values are 1-31 or
+            **L** (the last day of a month).
+        day_of_week:
+          type: array
+          items:
+            type: integer
+          description: >
+            An array of days in a week when payment runs need to be performed.
+            Required only if **frequency** is **Weekly**. Allowed integers are
+            1-7. 1 stands for Monday. 2 stands for Tuesday, etc.
+        hour:
+          type: integer
+          description: >
+            The hour of a day when payment runs need to be performed. Allowed
+            values are 1-23.
+        billrun:
+          type: string
+          description: >
+            A bill run name that is used to determine what receivables should be
+            included in payment runs in this schedule. Valid only if the custom
+            filter is not used.
+        batch:
+          type: string
+          description: >
+            A batch name that is used to determine what receivables should be
+            included in payment runs in this schedule. Valid only if the custom
+            filter is not used.
+        currency:
+          type: string
+          description: >
+            A three-character currency code that is used to determine what
+            receivables should be included in payment runs in this schedule.
+            Valid only if the custom filter is not used.
+        payment_gateway:
+          type: string
+          description: >
+            A payment gateway name that is used to determine what receivables
+            should be included in payment runs in this schedule. Valid only if
+            the custom filter is not used.
+        bill_cycle_day:
+          type: string
+          description: >
+            A bill cycle day value that is used to determine what receivables
+            should be included in payment runs in this schedule. Valid only if
+            the custom filter is not used.
+        custom:
+          type: string
+          description: >
+            A custom ZOQL query that is used to determine what receivables
+            should be included in payment runs in this schedule. It cannot be
+            used with other filters.
+      example:
+        frequency: Weekly
+        days_of_week:
+          - 2
+          - 3
+        hour: 2
+        currency: CAD
+    PUTPaymentRunSchedule:
+      type: object
+      properties:
+        frequency:
+          type: string
+          description: |
+            The frequency of payment runs in the schedule.
+          enum:
+            - Daily
+            - Weekly
+            - Monthly
+        day:
+          type: string
+          description: >
+            The day of a month when payment runs need to be performed. Required
+            only if **frequency** is **Monthly**. Allowed values are 1-31 or
+            **L** (the last day of a month).
+        day_of_week:
+          type: array
+          items:
+            type: integer
+          description: >
+            An array of days in a week when payment runs need to be performed.
+            Required only if **frequency** is **Weekly**. Allowed integers are
+            1-7. 1 stands for Monday. 2 stands for Tuesday, etc.
+        hour:
+          type: integer
+          description: >
+            The hour of a day when payment runs need to be performed. Allowed
+            values are 1-23.
+        billrun:
+          type: string
+          description: >
+            A bill run name that is used to determine what receivables should be
+            included in payment runs in this schedule. Valid only if the custom
+            filter is not used.
+        batch:
+          type: string
+          description: >
+            A batch name that is used to determine what receivables should be
+            included in payment runs in this schedule. Valid only if the custom
+            filter is not used.
+        currency:
+          type: string
+          description: >
+            A three-character currency code that is used to determine what
+            receivables should be included in payment runs in this schedule.
+            Valid only if the custom filter is not used.
+        payment_gateway:
+          type: string
+          description: >
+            A payment gateway name that is used to determine what receivables
+            should be included in payment runs in this schedule. Valid only if
+            the custom filter is not used.
+        bill_cycle_day:
+          type: string
+          description: >
+            A bill cycle day value that is used to determine what receivables
+            should be included in payment runs in this schedule. Valid only if
+            the custom filter is not used.
+        custom:
+          type: string
+          description: >
+            A custom ZOQL query that is used to determine what receivables
+            should be included in payment runs in this schedule. It cannot be
+            used with other filters.
+      example:
+        currency: USD
+    POSTPaymentRunScheduleResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: |
+            The ID of the payment run schedule in Advanced Payment Manager.
+        success:
+          type: boolean
+          description: |
+            Whether the operation is successful.
+        errors:
+          type: array
+          items:
+            type: string
+          description: >
+            Errors that occur in the operation. Available only when **success**
+            is **false**.
+    DELETEPaymentRunScheduleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: |
+            Whether the operation is successful.
+        errors:
+          type: array
+          items:
+            type: string
+          description: >
+            Errors that occur in the operation. Available only when **success**
+            is **false**.
+    GETStatementsResponse:
+      type: object
+      properties:
+        statements:
+          type: array
+          items:
+            type: object
+          description: >
+            An array containing the requested number of statements of the
+            specified account. Every object contains an Amazon S3 link. You can
+            click the links to view and download the statements. The links will
+            expire in 10 minutes.
+        success:
+          type: boolean
+          description: |
+            Whether the operation is successful.
+        count:
+          type: integer
+          description: |
+            The number of statements retrieved.
+    GETStatementSettingsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: |
+            Whether the operation is successful.
+        templates:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the template.
+          description: |
+            An array containing all available templates.
+        advanced_ar:
+          type: boolean
+          description: |
+            Whether Invoice Settlement is enabled on the tenant.
+        default_template:
+          type: string
+          description: |
+            The name of the default template.
+        default_cycle:
+          type: string
+          description: |
+            The statement cycle being used.
+    POSTAdhocStatementRun:
+      type: object
+      properties:
+        starting_date:
+          type: string
+          format: date
+          description: >
+            The starting date of the time period for which the statement is
+            generated, in the format of MM-DD-YYYY.
+        ending_date:
+          type: string
+          format: date
+          description: >
+            The ending date of the time period for which the statement is
+            generated, in the format of MM-DD-YYYY.
+        template_name:
+          type: string
+          description: |
+            The name of the template to be used in the statement run.
+        advanced_ar:
+          type: boolean
+          description: |
+            Specifies whether Invoice Settlement is enabled on the tenant.
+        account_id:
+          type: string
+          description: |
+            The ID of the account for which the statement run is created.
+        attach_to_account:
+          type: boolean
+          description: >
+            Indicates whether the generated statement is attached to the
+            account.
+      required:
+        - starting_date
+        - ending_date
+        - template_name
+        - advanced_ar
+        - account_id
+      example:
+        starting_date: 05-01-2018
+        ending_date: 08-01-2018
+        template_name: Default Name
+        advanced_ar: false
+        account_id: 2c92c0f964eaa3ec0164fad1eab730d6
+        attach_to_account: true
+    POSTAdhocStatementRunResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: |
+            Whether the operation is successful.
+        code:
+          type: integer
+          description: |
+            The response code.
+        message:
+          type: string
+          description: |
+            The response message.
+        statement_number:
+          type: string
+          description: |
+            The number of the statement.
+    POSTCustomStatementRun:
+      type: object
+      properties:
+        starting_date:
+          type: string
+          format: date
+          description: >
+            The starting date of the time period for which the statement is
+            generated, in the format of MM-DD-YYYY.
+        ending_date:
+          type: string
+          format: date
+          description: >
+            The ending date of the time period for which the statement is
+            generated, in the format of MM-DD-YYYY.
+        batch:
+          type: string
+          description: >
+            The billing batch of accounts the statements need to be generated
+            for.
+        mode:
+          type: string
+          description: |
+            The mode in which the run has to be executed.
+          enum:
+            - open_invoices
+            - open_balance
+            - no_invoice
+            - no_invoice_w_balance
+            - custom
+      required:
+        - starting_date
+        - ending_date
+        - batch
+        - mode
+      example:
+        starting_date: 05-01-2018
+        ending_date: 08-01-2018
+        batch: Batch40
+        mode: custom
+    POSTCustomStatementRunResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: |
+            Whether the operation is successful.
+        code:
+          type: integer
+          description: |
+            The response code.
+        message:
+          type: string
+          description: |
+            The response message.
+        execution_number:
+          type: string
+          description: |
+            The serial number of the execution.
+        report_file:
+          type: string
+          description: |
+            The URL pointing to the report of the run.
+    NotesObject:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether this operation is successful or not.
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: The ID of the Notes object.
+            object:
+              type: string
+              description: >-
+                The type of the object. It can be "Accounts" or "Invoices" for
+                Collections Window.
+            notesId:
+              type: string
+              description: >-
+                The ID of the Notes object. It is an account number (32-digit
+                hex) for Accounts object type, and an invoice number for
+                Invoices object type.
+            notesParentId:
+              type: string
+              description: >-
+                The ID of the parent object. For "Accounts" object, this
+                parameter is the account name that the Notes object is created
+                for.
+            createdAt:
+              type: string
+              format: time-date
+              description: The time and date when this Notes object is created.
+            updatedAt:
+              type: string
+              format: time-date
+              description: The last time and date when the Notes object is updated.
+    NotesObjectWithComment:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether this operation is successful or not.
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: The ID of the Notes object.
+            object:
+              type: string
+              description: >-
+                The type of the object. It can be "Accounts" or "Invoices" for
+                Collections Window.
+            notesId:
+              type: string
+              description: >-
+                The ID of the notes object. It is an account number (32-digit
+                hex) for Accounts object type, and an invoice number for
+                Invoices object type.
+            notesParentId:
+              type: string
+              description: >-
+                The ID of the parent object. For "Accounts" object, this
+                parameter is the account name that the Notes object is created
+                for.
+            createdAt:
+              type: string
+              format: time-date
+              description: The time and date when this Notes object is created.
+            updatedAt:
+              type: string
+              format: time-date
+              description: The last time and date when the Notes object is updated.
+            comments:
+              type: array
+              description: The array of comments for this Notes object.
+              items:
+                $ref: '#/components/schemas/NotesComment'
+    NotesUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the Notes user.
+        username:
+          type: string
+          description: The user name.
+        connectIdentity:
+          type: string
+          description: The connect ID of the user. It must be a 32-digit hex number.
+        email:
+          type: string
+          description: The email address of the user.
+        firstName:
+          type: string
+          description: The first name.
+        lastName:
+          type: string
+          description: The last name.
+        fullName:
+          type: string
+          description: The full name of the user.
+        platformRole:
+          type: string
+          description: The Platform role of the user.
+        timeZone:
+          type: string
+          description: The time zone setting for the user.
+        createdAt:
+          type: string
+          format: time-date
+          description: The time and date when this user record is created.
+        updatedAt:
+          type: string
+          format: time-date
+          description: The last time and date when the user record is updated.
+        escalationUser:
+          type: string
+          description: >-
+            The full name of the user that is configured to handle escalations
+            for the current user.
+        escalationUserId:
+          type: string
+          description: The ID of the escalation user. It must be a 32-digit hex number.
+        approvalAmount:
+          type: number
+          description: The amount of money that this user is allowed to approve.
+        avatar:
+          type: string
+          description: The link to the avatar image file for the user.
+    NotesReply:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the reply.
+        body:
+          type: string
+          description: The body of the reply.
+        image:
+          type: string
+          description: >-
+            The link to the image file. The value is null if no image files are
+            available.
+        attachment:
+          type: string
+          description: >-
+            The link to the attachment. The value is null if no attachments are
+            available.
+        createdAt:
+          type: string
+          format: time-date
+          description: The time and date when the reply is created.
+        updatedAt:
+          type: string
+          format: time-date
+          description: The last time and date when the reply is updated.
+        user:
+          $ref: '#/components/schemas/NotesUser'
+    NotesComment:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the comment.
+        body:
+          type: string
+          description: The body of the comment.
+        image:
+          type: string
+          description: >-
+            The link to the image file. The value is null if no image files are
+            available.
+        attachment:
+          type: string
+          description: >-
+            The link to the attachment. The value is null if no attachments are
+            available.
+        createdAt:
+          type: string
+          format: time-date
+          description: The time and date when this comment is created.
+        updatedAt:
+          type: string
+          format: time-date
+          description: The last time and date when the comment is updated.
+        user:
+          description: The creator of the comment.
+          $ref: '#/components/schemas/NotesUser'
+        replies:
+          type: array
+          description: An array of replies.
+          items:
+            $ref: '#/components/schemas/NotesReply'
+    NotesTasksResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether this operation is successful.
+        data:
+          type: object
+          description: The actual tasks data.
+          properties:
+            tasks:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: The ID of the task.
+                  task:
+                    type: string
+                    description: The title of the task.
+                  description:
+                    type: string
+                    description: Additional details about the task.
+                  dueDate:
+                    type: string
+                    format: time-date
+                    description: The due date and time of the task.
+                  createdAt:
+                    type: string
+                    format: time-date
+                    description: The date and time when this task is created.
+                  updatedAt:
+                    type: string
+                    format: time-date
+                    description: The last date and time when the task is updated.
+                  reminderDate:
+                    type: string
+                    format: time-date
+                    description: >-
+                      The data and time when a reminder about this task needs to
+                      be sent.
+                  notifications:
+                    type: string
+                    description: >-
+                      The message to be sent as notifications. It can be null if
+                      no message is defined.
+                  status:
+                    type: string
+                    description: The status of the task.
+                  comment:
+                    type: string
+                    description: The comment about the task.
+                  autoEscalation:
+                    type: string
+                    description: The automatic escalation setting for the task.
+                  createdBy:
+                    $ref: '#/components/schemas/NotesUser'
+                  assignTo:
+                    $ref: '#/components/schemas/NotesUser'
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+              description: The number of the current page.
+            per_page:
+              type: integer
+              description: The number of results on each page.
+            total_filtered_records:
+              type: integer
+              description: The total number of filtered records.
+            total_records:
+              type: integer
+              description: The total number of records.
+    NotesTasks:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the task.
+        task:
+          type: string
+          description: The title of the task.
+        description:
+          type: string
+          description: Additional details about the task.
+        dueDate:
+          type: string
+          format: time-date
+          description: The due date and time of the task.
+        createdAt:
+          type: string
+          format: time-date
+          description: The date and time when this task is created.
+        updatedAt:
+          type: string
+          format: time-date
+          description: The last date and time when the task is updated.
+        reminderDate:
+          type: string
+          format: time-date
+          description: The data and time when a reminder about this task needs to be sent.
+        notifications:
+          type: string
+          description: >-
+            The message to be sent as notifications. It can be null if no
+            message is defined.
+        status:
+          type: string
+          description: The status of the task.
+        comment:
+          type: string
+          description: The comment about the task.
+        autoEscalation:
+          type: string
+          description: The automatic escalation setting for the task.
+        createdBy:
+          $ref: '#/components/schemas/NotesUser'
+        assignTo:
+          $ref: '#/components/schemas/NotesUser'
+    NotesGroup:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the Notes group.
+        name:
+          type: string
+          description: The name of the group.
+        description:
+          type: string
+          description: Additional information about the group.
+        created_at:
+          type: string
+          format: time-date
+          description: The date and time when the group was created.
+        updated_at:
+          type: string
+          format: time-date
+          description: The last date and time when the group was updated.
+        users:
+          type: array
+          description: A list of all users in the group.
+          items:
+            $ref: '#/components/schemas/NotesUser'
+    NotesGroupsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether this operation is successful.
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotesGroup'
+    NotesCreateGroupBody:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the group that you want to create.
+        description:
+          type: string
+          description: Additional information about the group.
+    NotesUpdateGroupBody:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The new name of the group.
+        description:
+          type: string
+          description: The new description about the group.
+    NotesDeleteGroupBody:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the group that has been deleted.
+        description:
+          type: string
+          description: The description of the group.
+    NotesCreateGroupResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation is successful.
+        id:
+          type: integer
+          description: The ID of the Notes group.
+        name:
+          type: string
+          description: The name of the group.
+        description:
+          type: string
+          description: Additional information about the group.
+        created_at:
+          type: string
+          format: time-date
+          description: The date and time when the group was created.
+        updated_at:
+          type: string
+          format: time-date
+          description: The last date and time when the group was updated.
+        users:
+          type: array
+          description: An array of users in the group.
+          items:
+            $ref: '#/components/schemas/NotesUser'
+    ResultsPagination:
+      type: object
+      description: The pagination information.
+      properties:
+        page:
+          type: integer
+          description: The current page.
+        page_length:
+          type: integer
+          description: The number of result on each page.
+        next_page:
+          type: string
+          description: The link to the next page of results.
+    CollectionAccount:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the account.
+        zuora_id:
+          type: string
+          description: The Zuora ID of the account.
+        in_collections:
+          type: boolean
+          description: Whether the account is in collections.
+        account_currency:
+          type: string
+          description: The currency that is currently used by the account.
+        home_currency:
+          type: string
+          description: The home currency of the tenant.
+        amount_due_account_currency:
+          type: number
+          description: The amount that is due for the account in the account currency.
+        amount_due_home_currency:
+          type: number
+          description: The amount that is due for the account in the tenant home currency.
+        last_open_invoice_date:
+          type: string
+          format: date
+          description: The last open invoice date.
+        average_debt_age:
+          type: number
+          description: The average age of all the debt of the account.
+        statuses:
+          $ref: '#/components/schemas/CollectionStatuses'
+    CollectionStatuses:
+      type: object
+      description: The status of the account.
+      properties:
+        In Collections:
+          type: boolean
+          description: Whether this account is in collections.
+        Pending:
+          type: boolean
+          description: Whether this account is pending.
+        In Dispute:
+          type: boolean
+          description: Whether this account is in dispute.
+        Paid In Full:
+          type: boolean
+          description: Whether this account has paid in full.
+    CollectionAgent:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the agent.
+        email:
+          type: string
+          description: The email of the agent.
+        zuora_identity_id:
+          type: string
+          description: The Zuora ID of the agent.
+        amount_in_collections:
+          type: number
+          description: The total amount of debt for accounts that are assigned to the user.
+        accounts:
+          type: integer
+          description: The number of accounts that are assigned to the user.
+        account_statuses:
+          type: object
+          properties:
+            In Collections:
+              type: integer
+              description: The number of accounts that are in collections.
+            Pending:
+              type: integer
+              description: The number of accounts that are pending.
+            In Disputes:
+              type: integer
+              description: The number of accounts that are in dispute.
+            Paid in Full:
+              type: integer
+              description: The number of accounts that have paid in full.
+    GETCollectionAgentsResponse:
+      type: object
+      properties:
+        accounts:
+          $ref: '#/components/schemas/CollectionAgent'
+        pagination:
+          $ref: '#/components/schemas/ResultsPagination'
+    GETCollectionAccountsResponse:
+      type: object
+      properties:
+        accounts:
+          type: array
+          description: The array of accounts.
+          items:
+            $ref: '#/components/schemas/CollectionAccount'
+        pagination:
+          $ref: '#/components/schemas/ResultsPagination'
+    CollectionsInfo:
+      type: object
+      properties:
+        accounts_in_collections:
+          type: integer
+          description: The number of accounts that are in collections.
+        home_currency:
+          type: string
+          description: The home currency of the tenant.
+        total_debt:
+          type: number
+          description: The total debt of all accounts that are in collections.
+        largest_debts:
+          type: array
+          description: The five largest debts that are in collections.
+          items:
+            type: string
+            description: An account number and the amount due for the account.
+        oldest_debts:
+          type: array
+          description: The five oldest debts that are in collections.
+          items:
+            type: string
+            description: An account number and the amount due for the account.
+        statuses:
+          type: object
+          properties:
+            In Collection:
+              type: integer
+              description: The number of accounts that are in collections.
+            Pending:
+              type: integer
+              description: The number of accounts that are in pending status.
+            In Dispute:
+              type: integer
+              description: The number of accounts that are in dispute.
+            Paid In Full:
+              type: integer
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic

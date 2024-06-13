@@ -3,10 +3,9 @@
 
 import ballerina/http;
 
-public type BadRequestInline_response_400 record {|
+public type Inline_response_400BadRequest record {|
     *http:BadRequest;
     inline_response_400 body;
-    map<string|string[]> headers;
 |};
 
 public type inline_response_400 record {

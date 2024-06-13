@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.core.generators.service.response;
 
-import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
@@ -47,7 +46,6 @@ import java.util.Set;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
@@ -131,12 +129,9 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             if (code == null && !responseCode.equals(GeneratorConstants.DEFAULT)) {
                 diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_201, responseCode));
                 type = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
-            } else if (responseCode.equals(GeneratorConstants.DEFAULT)) {
-                type = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
             } else if (content == null && (responseValue == null || responseValue.get$ref() == null) ||
                     content != null && content.isEmpty()) {
-                type = GeneratorUtils.getQualifiedNameReferenceNode(
-                        GeneratorConstants.HTTP, code);
+                type = GeneratorUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
             } else if (content != null) {
                 //Check the default behaviour for return type according to POST method.
                 boolean isWithOutStatusCode =
@@ -203,12 +198,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                 (responseContent != null && responseContent.isEmpty())) {
             // response has single response without content type or not having reference response.
             String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
-            TypeDescriptorNode statues;
-            if (response.getKey().trim().equals(GeneratorConstants.DEFAULT)) {
-                statues = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
-            } else {
-                statues = GeneratorUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
-            }
+            TypeDescriptorNode statues = GeneratorUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
             returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), statues);
         } else if (responseContent != null) {
             // when the response has content values
@@ -228,11 +218,6 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
                             false, contentEntries.iterator().next());
                 }
                 returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), returnType);
-            } else if (response.getKey().trim().equals(GeneratorConstants.DEFAULT)) {
-                // handle status code with `default`, this maps to `http:Response`
-                BuiltinSimpleNameReferenceNode type = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
-                returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), type);
             } else {
                 // handle rest of the status codes
                 String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());

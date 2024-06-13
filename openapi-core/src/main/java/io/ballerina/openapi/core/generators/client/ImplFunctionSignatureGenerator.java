@@ -23,11 +23,10 @@ import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.ParameterizedTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.TypeParameterNode;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 
@@ -59,10 +58,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 public class ImplFunctionSignatureGenerator {
 
     List<Node> parameterNodes = new ArrayList<>();
-    ReturnTypeDescriptorNode returnTypeDescriptorNode = null;
-
+    ReturnTypeDescriptorNode returnTypeDescriptorNode;
     ResourceFunctionSignatureGenerator resourceFunctionSignatureGenerator;
-
 
     public ImplFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod, String path,
                                           FunctionDefinitionNode clientExternFunction) {
@@ -72,38 +69,16 @@ public class ImplFunctionSignatureGenerator {
         }
 
         populateParameterNodes(clientExternFunction);
-        populateReturnTypeDesc(clientExternFunction);
+        TypeDescriptorNode statusCodeResponseType = createSimpleNameReferenceNode(
+                createIdentifierToken("http:StatusCodeResponse"));
+        returnTypeDescriptorNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD),
+                createEmptyNodeList(), createUnionTypeDescriptorNode(statusCodeResponseType, createToken(PIPE_TOKEN),
+                        createSimpleNameReferenceNode(createIdentifierToken("error"))));
 
         // TODO: Find a better way to get the information about parameters
         resourceFunctionSignatureGenerator = new ResourceFunctionSignatureGenerator(operation, openAPI, httpMethod,
                 path);
         resourceFunctionSignatureGenerator.generateFunctionSignature();
-    }
-
-    private void populateReturnTypeDesc(FunctionDefinitionNode clientExternFunction) {
-        FunctionSignatureNode functionSignatureNode = clientExternFunction.functionSignature();
-        Optional<ParameterNode> targetType = findTargetType(functionSignatureNode);
-        targetType.ifPresent(this::setReturnTypeDescriptor);
-    }
-
-    private Optional<ParameterNode> findTargetType(FunctionSignatureNode functionSignatureNode) {
-        return functionSignatureNode.parameters().stream().filter(
-                parameterNode -> parameterNode instanceof DefaultableParameterNode defaultableParameterNode &&
-                        defaultableParameterNode.paramName().isPresent() &&
-                        defaultableParameterNode.paramName().get().text().equals("targetType")
-        ).findFirst();
-    }
-
-    private void setReturnTypeDescriptor(ParameterNode targetType) {
-        Node node = ((DefaultableParameterNode) targetType).typeName();
-        if (node instanceof ParameterizedTypeDescriptorNode targetTypeNode) {
-            Optional<TypeParameterNode> typeParameterNode = targetTypeNode.typeParamNode();
-            typeParameterNode.ifPresent(parameterNode ->
-                    returnTypeDescriptorNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD),
-                            createEmptyNodeList(), createUnionTypeDescriptorNode(typeParameterNode.get().typeNode(),
-                                    createToken(PIPE_TOKEN),
-                                    createSimpleNameReferenceNode(createIdentifierToken("error")))));
-        }
     }
 
     private void populateParameterNodes(FunctionDefinitionNode clientExternFunction) {

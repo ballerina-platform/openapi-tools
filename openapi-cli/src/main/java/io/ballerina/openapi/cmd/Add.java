@@ -181,7 +181,9 @@ public class Add implements BLauncherCmd {
                 .withOperations(getOperations())
                 .withTags(getTags())
                 .withLicensePath(baseCmd.licenseFilePath)
-                .withStatusCodeBinding(baseCmd.statusCodeBinding).build();
+                .withStatusCodeBinding(baseCmd.statusCodeBinding)
+                .withMock(baseCmd.mock)
+                .build();
     }
 
     /**
@@ -251,6 +253,10 @@ public class Add implements BLauncherCmd {
         if (optionsBuilder.getStatusCodeBinding()) {
             moduleMembers = moduleMembers.add(SampleNodeGenerator.createBooleanKV("options.statusCodeBinding",
                     optionsBuilder.getStatusCodeBinding(), null));
+        }
+        if (optionsBuilder.getMock()) {
+            moduleMembers = moduleMembers.add(SampleNodeGenerator.createBooleanKV("options.mock",
+                    optionsBuilder.getMock(), null));
         }
         moduleMembers = CmdUtils.addNewLine(moduleMembers, 2);
         return moduleMembers;

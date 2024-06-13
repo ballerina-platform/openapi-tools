@@ -8,8 +8,8 @@ service /api on ep0 {
     # + tags - tags to filter by
     # + 'limit - maximum number of results to return
     # + return - returns can be any of following types
-    # Pet[] (pet response)
-    # http:Response (unexpected error)
-    resource function get pets(string[]? tags, int? 'limit) returns Pet[]|http:Response {
+    # http:Ok (pet response)
+    # http:DefaultStatusCodeResponse (unexpected error)
+    resource function get pets(string[]? tags, int? 'limit) returns Pet[]|ErrorDefault {
     }
 }

@@ -113,6 +113,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.openapi.NegativeResponseTests"/>
             <class name="io.ballerina.openapi.generators.common.SwaggerParserTests"/>
             <class name="io.ballerina.openapi.generators.common.DocCommenTests"/>
+            <class name="io.ballerina.openapi.generators.client.MockClientGenerationTests"/>
         </classes>
     </test>
 </suite>
