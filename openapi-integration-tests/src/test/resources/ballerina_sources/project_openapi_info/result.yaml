@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: Mock File
+  title: Pet Store
   description: API system description
   termsOfService: http://mock-api-doc
   contact:
@@ -10,22 +10,18 @@ info:
   license:
     name: ABC
     url: http://abc.com
-  version: 0.1.0
+  version: 1.0.0
 servers:
-  - url: "{server}:{port}/titleBase"
+  - url: "{server}:{port}/info"
     variables:
       server:
         default: http://localhost
       port:
         default: "9090"
 paths:
-  /title:
+  /pet:
     get:
-      operationId: getTitle
+      operationId: getPet
       responses:
-        "200":
-          description: Ok
-          content:
-            text/plain:
-              schema:
-                type: string
+        "202":
+          description: Accepted

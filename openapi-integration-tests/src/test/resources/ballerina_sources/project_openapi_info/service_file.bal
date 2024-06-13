@@ -2,7 +2,8 @@ import ballerina/http;
 import ballerina/openapi;
 
 @openapi:ServiceInfo {
-    title: "Mock file",
+    version: "1.0.0",
+    title: "Pet store",
     description: "API system description",
     email: "sumudu@abc.com",
     contactName: "sumudu",
@@ -11,8 +12,8 @@ import ballerina/openapi;
     licenseName: "ABC",
     licenseURL: "http://abc.com"
 }
-service /titleBase on new http:Listener(9090) {
-    resource function get title() returns string {
-        return "Hello, World!";
+service /info on new http:Listener(9090) {
+    resource function get pet() {
+
     }
 }
