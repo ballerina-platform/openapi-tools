@@ -346,4 +346,12 @@ public final class Constants {
     public static final String JSON_EXTENSION = ".json";
     public static final String YML_EXTENSION = ".yml";
     public static final String UNDERSCORE = "_";
+
+    //openapi:ResourceInFo annotation
+    public static final String OPENAPI_RESOURCE_INFO = "openapi:ResourceInfo";
+    public static final String TAGS = "tags";
+    public static final String SUMMARY = "summary";
+    public static final String EXAMPLES = "examples";
+    public static final String OPERATION_ID = "operationId";
+    public static final String RESPONSE_ATTRIBUTE = "response";
 }
