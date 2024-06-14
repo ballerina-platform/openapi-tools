@@ -259,8 +259,12 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
             if (userProvideOperationId != null && !userProvideOperationId.isBlank()) {
                 operation.setOperationId(userProvideOperationId);
             }
-            operation.setTags(resourceMetaInfo.getTags());
-            operation.setSummary(resourceMetaInfo.getSummary());
+            if (resourceMetaInfo.getTags() != null && !resourceMetaInfo.getTags().isEmpty()) {
+                operation.setTags(resourceMetaInfo.getTags());
+            }
+            if (resourceMetaInfo.getSummary() != null && !resourceMetaInfo.getSummary().isBlank()) {
+                operation.setSummary(resourceMetaInfo.getSummary());
+            }
             ApiResponses responses = operation.getResponses();
             Map<String, Map<String, Map<String, Object>>> responseExamples = resourceMetaInfo.getResponseExamples();
             for (Map.Entry<String, ApiResponse> response : responses.entrySet()) {

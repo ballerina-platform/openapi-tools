@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: Title
+  title: BlankTitle
   version: 0.1.0
 servers:
   - url: "{server}:{port}/blankTitle"
