@@ -28,7 +28,7 @@
 # + email - The email address to contact the API provider or support.
 # + contactName - The full name of the person or organization responsible for the API.
 # + contactURL - The URL to a web page with more information about the API, the provider, or support.
-# + termOfService - The URL to the terms of service for the API.
+# + termsOfService - The URL to the terms of service for the API.
 # + licenseName - The name of the license under which the API is provided.
 # + licenseURL - The URL to the full text of the license.
 public type ServiceInformation record {|
