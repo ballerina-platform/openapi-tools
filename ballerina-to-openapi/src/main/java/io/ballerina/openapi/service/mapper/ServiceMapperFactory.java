@@ -23,11 +23,9 @@ import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.constraint.ConstraintMapper;
 import io.ballerina.openapi.service.mapper.constraint.ConstraintMapperImpl;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
@@ -39,6 +37,8 @@ import io.ballerina.openapi.service.mapper.interceptor.pipeline.InterceptorPipel
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
+import io.ballerina.openapi.service.mapper.model.ResourceFunction;
+import io.ballerina.openapi.service.mapper.model.Service;
 import io.ballerina.openapi.service.mapper.parameter.DefaultParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapperWithInterceptors;
@@ -83,7 +83,7 @@ public class ServiceMapperFactory {
     private final InterceptorPipeline interceptorPipeline;
 
     public ServiceMapperFactory(OpenAPI openAPI, SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
-                                List<OpenAPIMapperDiagnostic> diagnostics, ServiceDeclarationNode serviceDefinition) {
+                                List<OpenAPIMapperDiagnostic> diagnostics, Service serviceDefinition) {
         this.additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
         this.treatNilableAsOptional = isTreatNilableAsOptionalParameter(serviceDefinition);
         this.openAPI = openAPI;
@@ -94,15 +94,15 @@ public class ServiceMapperFactory {
         this.hateoasMapper = new HateoasMapperImpl();
     }
 
-    public ServersMapper getServersMapper(Set<ListenerDeclarationNode> endpoints, ServiceDeclarationNode serviceNode) {
+    public ServersMapper getServersMapper(Set<ListenerDeclarationNode> endpoints, Service serviceNode) {
         return new ServersMapperImpl(openAPI, endpoints, serviceNode);
     }
 
-    public ResourceMapper getResourceMapper(List<FunctionDefinitionNode> resources) {
+    public ResourceMapper getResourceMapper(List<ResourceFunction> resources) {
         return new ResourceMapperImpl(openAPI, resources, additionalData, this);
     }
 
-    public ParameterMapper getParameterMapper(FunctionDefinitionNode resourceNode, Map<String, String> apiDocs,
+    public ParameterMapper getParameterMapper(ResourceFunction resourceNode, Map<String, String> apiDocs,
                                               OperationInventory opInventory) {
         if (Objects.nonNull(interceptorPipeline)) {
             RequestParameterInfo reqParamInfoFromInterceptors = getRequestParameterInfoFromInterceptors(resourceNode,
@@ -118,7 +118,7 @@ public class ServiceMapperFactory {
         return typeMapper;
     }
 
-    public ResponseMapper getResponseMapper(FunctionDefinitionNode resourceNode, OperationInventory opInventory) {
+    public ResponseMapper getResponseMapper(ResourceFunction resourceNode, OperationInventory opInventory) {
         if (Objects.nonNull(interceptorPipeline)) {
             ResponseInfo responseInfoFromInterceptors = getResponseInfoFromInterceptors(resourceNode,
                     additionalData, interceptorPipeline);
@@ -128,11 +128,11 @@ public class ServiceMapperFactory {
         return new DefaultResponseMapper(resourceNode, opInventory, additionalData, this);
     }
 
-    private ResponseInfo getResponseInfoFromInterceptors(FunctionDefinitionNode resourceNode,
+    private ResponseInfo getResponseInfoFromInterceptors(ResourceFunction resourceNode,
                                                          AdditionalData additionalData,
                                                          InterceptorPipeline interceptorPipeline) {
         final ResponseInfo responseInfoFromInterceptors;
-        Optional<Symbol> symbol = additionalData.semanticModel().symbol(resourceNode);
+        Optional<Symbol> symbol = resourceNode.getSymbol(additionalData.semanticModel());
         if (symbol.isPresent() && symbol.get() instanceof ResourceMethodSymbol resourceMethodSymbol) {
             responseInfoFromInterceptors = interceptorPipeline.getInfoFromInterceptors(resourceMethodSymbol);
         } else {
@@ -141,11 +141,11 @@ public class ServiceMapperFactory {
         return responseInfoFromInterceptors;
     }
 
-    private RequestParameterInfo getRequestParameterInfoFromInterceptors(FunctionDefinitionNode resourceNode,
+    private RequestParameterInfo getRequestParameterInfoFromInterceptors(ResourceFunction resourceNode,
                                                                          AdditionalData additionalData,
                                                                          InterceptorPipeline interceptorPipeline) {
         final RequestParameterInfo requestParameterInfoFromInterceptors;
-        Optional<Symbol> symbol = additionalData.semanticModel().symbol(resourceNode);
+        Optional<Symbol> symbol = resourceNode.getSymbol(additionalData.semanticModel());
         if (symbol.isPresent() && symbol.get() instanceof ResourceMethodSymbol resourceMethodSymbol) {
             requestParameterInfoFromInterceptors = interceptorPipeline.getRequestParameterInfo(resourceMethodSymbol);
         } else {
@@ -174,7 +174,7 @@ public class ServiceMapperFactory {
         return components;
     }
 
-    private static boolean isTreatNilableAsOptionalParameter(ServiceDeclarationNode serviceNode) {
+    private static boolean isTreatNilableAsOptionalParameter(Service serviceNode) {
         if (serviceNode.metadata().isEmpty()) {
             return true;
         }
@@ -192,10 +192,9 @@ public class ServiceMapperFactory {
         return true;
     }
 
-    private static boolean isInterceptableService(ServiceDeclarationNode serviceDefinition,
-                                                  SemanticModel semanticModel) {
+    private static boolean isInterceptableService(Service serviceDefinition, SemanticModel semanticModel) {
         boolean[] isInterceptable = {false};
-        semanticModel.symbol(serviceDefinition).ifPresent(symbol -> {
+        serviceDefinition.getSymbol(semanticModel).ifPresent(symbol -> {
             if (symbol instanceof ServiceDeclarationSymbol serviceSymbol) {
                 serviceSymbol.typeDescriptor().ifPresent(serviceType ->
                     semanticModel.types().getTypeByName(BALLERINA, HTTP, EMPTY, INTERCEPTABLE_SERVICE).ifPresent(
@@ -210,7 +209,7 @@ public class ServiceMapperFactory {
         return isInterceptable[0];
     }
 
-    private static InterceptorPipeline getInterceptorPipeline(ServiceDeclarationNode serviceDefinition,
+    private static InterceptorPipeline getInterceptorPipeline(Service serviceDefinition,
                                                               AdditionalData additionalData) {
         if (!isInterceptableService(serviceDefinition, additionalData.semanticModel())) {
             return null;

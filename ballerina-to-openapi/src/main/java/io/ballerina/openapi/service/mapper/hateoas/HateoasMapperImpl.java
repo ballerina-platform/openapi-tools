@@ -20,9 +20,10 @@ package io.ballerina.openapi.service.mapper.hateoas;
 
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.Constants;
+import io.ballerina.openapi.service.mapper.model.ResourceFunction;
+import io.ballerina.openapi.service.mapper.model.ResourceFunctionDefinition;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -55,7 +56,7 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getVal
 public class HateoasMapperImpl implements HateoasMapper {
 
     @Override
-    public void setOpenApiLinks(ServiceDeclarationNode serviceNode, OpenAPI openAPI) {
+    public void setOpenApiLinks(io.ballerina.openapi.service.mapper.model.Service serviceNode, OpenAPI openAPI) {
         Paths paths = openAPI.getPaths();
         Service hateoasService = extractHateoasMetaInfo(serviceNode);
         if (hateoasService.getHateoasResourceMapping().isEmpty()) {
@@ -65,7 +66,7 @@ public class HateoasMapperImpl implements HateoasMapper {
             if (!node.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
                 continue;
             }
-            FunctionDefinitionNode resource = (FunctionDefinitionNode) node;
+            ResourceFunction resource = new ResourceFunctionDefinition((FunctionDefinitionNode) node);
             Optional<ApiResponses> responses = getApiResponsesForResource(resource, paths);
             if (responses.isEmpty()) {
                 continue;
@@ -74,12 +75,12 @@ public class HateoasMapperImpl implements HateoasMapper {
         }
     }
 
-    private Service extractHateoasMetaInfo(ServiceDeclarationNode serviceNode) {
+    private Service extractHateoasMetaInfo(io.ballerina.openapi.service.mapper.model.Service serviceNode) {
         Service service = new Service();
         for (Node child : serviceNode.children()) {
             if (SyntaxKind.RESOURCE_ACCESSOR_DEFINITION.equals(child.kind())) {
-                FunctionDefinitionNode resourceFunction = (FunctionDefinitionNode) child;
-                String resourceMethod = resourceFunction.functionName().text();
+                ResourceFunction resourceFunction = new ResourceFunctionDefinition((FunctionDefinitionNode) child);
+                String resourceMethod = resourceFunction.functionName();
                 String operationId = MapperCommonUtils.getOperationId(resourceFunction);
                 Optional<String> resourceName = getResourceConfigAnnotation(resourceFunction)
                         .flatMap(resourceConfig -> getValueForAnnotationFields(resourceConfig, "name"));
@@ -94,13 +95,13 @@ public class HateoasMapperImpl implements HateoasMapper {
         return service;
     }
 
-    private Optional<ApiResponses> getApiResponsesForResource(FunctionDefinitionNode resource, Paths paths) {
+    private Optional<ApiResponses> getApiResponsesForResource(ResourceFunction resource, Paths paths) {
         String resourcePath = MapperCommonUtils.unescapeIdentifier(generateRelativePath(resource));
         if (!paths.containsKey(resourcePath)) {
             return Optional.empty();
         }
         PathItem openApiResource = paths.get(resourcePath);
-        String httpMethod = resource.functionName().toString().trim();
+        String httpMethod = resource.functionName();
         Operation operation = getOperation(httpMethod, openApiResource);
         return Objects.isNull(operation) ? Optional.empty() : Optional.ofNullable(operation.getResponses());
     }
@@ -118,7 +119,7 @@ public class HateoasMapperImpl implements HateoasMapper {
         };
     }
 
-    private void setOpenApiLinksInApiResponse(Service hateoasService, FunctionDefinitionNode resource,
+    private void setOpenApiLinksInApiResponse(Service hateoasService, ResourceFunction resource,
                                               ApiResponses apiResponses) {
         Map<String, Link> swaggerLinks = mapHateoasLinksToOpenApiLinks(hateoasService, resource);
         if (swaggerLinks.isEmpty()) {
@@ -162,7 +163,7 @@ public class HateoasMapperImpl implements HateoasMapper {
     }
 
     private Map<String, Link> mapHateoasLinksToOpenApiLinks(Service hateoasService,
-                                                            FunctionDefinitionNode resourceFunction) {
+                                                            ResourceFunction resourceFunction) {
         Optional<String> linkedTo = getResourceConfigAnnotation(resourceFunction)
                 .flatMap(resourceConfig -> getValueForAnnotationFields(resourceConfig, BALLERINA_LINKEDTO_KEYWORD));
         if (linkedTo.isEmpty()) {

@@ -36,6 +36,10 @@ import io.ballerina.openapi.service.mapper.hateoas.HateoasMapper;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
+import io.ballerina.openapi.service.mapper.model.ResourceFunction;
+import io.ballerina.openapi.service.mapper.model.ResourceFunctionDefinition;
+import io.ballerina.openapi.service.mapper.model.Service;
+import io.ballerina.openapi.service.mapper.model.ServiceDeclaration;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Project;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -77,7 +81,7 @@ public final class ServiceToOpenAPIMapper {
                                                          SemanticModel semanticModel,
                                                          String serviceName, Boolean needJson,
                                                          Path inputPath) {
-        Map<String, ServiceDeclarationNode> servicesToGenerate = new HashMap<>();
+        Map<String, Service> servicesToGenerate = new HashMap<>();
         List<String> availableService = new ArrayList<>();
         List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
         List<OASResult> outputs = new ArrayList<>();
@@ -94,11 +98,11 @@ public final class ServiceToOpenAPIMapper {
                 diagnostics.add(error);
             }
             // Generating openapi specification for selected services
-            for (Map.Entry<String, ServiceDeclarationNode> serviceNode : servicesToGenerate.entrySet()) {
+            for (Map.Entry<String, Service> serviceNode : servicesToGenerate.entrySet()) {
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNode.getKey(), needJson);
                 OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder =
                         new OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
-                builder.setServiceDeclarationNode(serviceNode.getValue())
+                builder.setServiceNode(serviceNode.getValue())
                         .setSemanticModel(semanticModel)
                         .setOpenApiFileName(openApiName)
                         .setBallerinaFilePath(inputPath)
@@ -120,7 +124,7 @@ public final class ServiceToOpenAPIMapper {
      * Filter all the end points and service nodes.
      */
     private static void extractServiceNodes(String serviceName, List<String> availableService,
-                                            Map<String, ServiceDeclarationNode> servicesToGenerate,
+                                            Map<String, Service> servicesToGenerate,
                                             ModulePartNode modulePartNode, SemanticModel semanticModel) {
         for (Node node : modulePartNode.members()) {
             SyntaxKind syntaxKind = node.kind();
@@ -131,8 +135,9 @@ public final class ServiceToOpenAPIMapper {
                     // module by checking listener type that attached to service endpoints.
                     Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
                     if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
-                        String service = ServersMapper.getServiceBasePath(serviceNode);
-                        String updateServiceName = service;
+                        Service service = new ServiceDeclaration(serviceNode);
+                        String basePath = ServersMapper.getServiceBasePath(new ServiceDeclaration(serviceNode));
+                        String updateServiceName = basePath;
                         //`String updateServiceName` used to track the service
                         // name for service file contains multiple service node.
                         //example:
@@ -151,18 +156,18 @@ public final class ServiceToOpenAPIMapper {
                         // the file, due to this suppose to use hashcode as identity factor for the file name.
                         // Generated file name for above example -> hello_openapi.yaml, hello_45673_openapi
                         //.yaml
-                        if (servicesToGenerate.containsKey(service)) {
-                            updateServiceName = service + HYPHEN + serviceSymbol.get().hashCode();
+                        if (servicesToGenerate.containsKey(basePath)) {
+                            updateServiceName = basePath + HYPHEN + serviceSymbol.get().hashCode();
                         }
                         if (serviceName != null) {
                             // Filtering by service name
-                            availableService.add(service);
-                            if (serviceName.equals(service)) {
-                                servicesToGenerate.put(updateServiceName, serviceNode);
+                            availableService.add(basePath);
+                            if (serviceName.equals(basePath)) {
+                                servicesToGenerate.put(updateServiceName, service);
                             }
                         } else {
                             // To generate for all services
-                            servicesToGenerate.put(updateServiceName, serviceNode);
+                            servicesToGenerate.put(updateServiceName, service);
                         }
                     }
                 }
@@ -179,7 +184,7 @@ public final class ServiceToOpenAPIMapper {
      * @return {@code OASResult}
      */
     public static OASResult generateOAS(OASGenerationMetaInfo oasGenerationMetaInfo) {
-        ServiceDeclarationNode serviceDefinition = oasGenerationMetaInfo.getServiceDeclarationNode();
+        Service serviceDefinition = oasGenerationMetaInfo.getServiceNode();
         SemanticModel semanticModel = oasGenerationMetaInfo.getSemanticModel();
         ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(oasGenerationMetaInfo.getProject());
         Set<ListenerDeclarationNode> listeners = moduleMemberVisitor.getListenerDeclarationNodes();
@@ -235,14 +240,13 @@ public final class ServiceToOpenAPIMapper {
         return balNodeVisitor;
     }
 
-    private static void convertServiceToOpenAPI(ServiceDeclarationNode serviceNode,
-                                                ServiceMapperFactory serviceMapperFactory) {
+    private static void convertServiceToOpenAPI(Service serviceNode, ServiceMapperFactory serviceMapperFactory) {
         NodeList<Node> functions = serviceNode.members();
-        List<FunctionDefinitionNode> resources = new ArrayList<>();
+        List<ResourceFunction> resources = new ArrayList<>();
         for (Node function: functions) {
             SyntaxKind kind = function.kind();
             if (kind.equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
-                resources.add((FunctionDefinitionNode) function);
+                resources.add(new ResourceFunctionDefinition((FunctionDefinitionNode) function));
             }
         }
         ResourceMapper resourceMapper = serviceMapperFactory.getResourceMapper(resources);

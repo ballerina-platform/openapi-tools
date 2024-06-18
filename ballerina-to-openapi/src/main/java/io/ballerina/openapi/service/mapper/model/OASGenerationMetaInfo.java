@@ -18,7 +18,6 @@
 package io.ballerina.openapi.service.mapper.model;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.projects.Project;
 
 import java.nio.file.Path;
@@ -33,14 +32,14 @@ public class OASGenerationMetaInfo {
     private final String openApiFileName;
     private final Path ballerinaFilePath;
     private final SemanticModel semanticModel;
-    private final ServiceDeclarationNode serviceDeclarationNode;
+    private final Service serviceNode;
     private final Project project;
 
     public OASGenerationMetaInfo(OASGenerationMetaInfoBuilder builder) {
         this.openApiFileName = builder.openApiFileName;
         this.ballerinaFilePath = builder.ballerinaFilePath;
         this.semanticModel = builder.semanticModel;
-        this.serviceDeclarationNode = builder.serviceDeclarationNode;
+        this.serviceNode = builder.serviceNode;
         this.project = builder.project;
     }
 
@@ -56,8 +55,8 @@ public class OASGenerationMetaInfo {
         return semanticModel;
     }
 
-    public ServiceDeclarationNode getServiceDeclarationNode() {
-        return serviceDeclarationNode;
+    public Service getServiceNode() {
+        return serviceNode;
     }
 
     public Project getProject() {
@@ -72,7 +71,7 @@ public class OASGenerationMetaInfo {
         private String openApiFileName;
         private Path ballerinaFilePath;
         private SemanticModel semanticModel;
-        private ServiceDeclarationNode serviceDeclarationNode;
+        private Service serviceNode;
         private Project project;
 
         public OASGenerationMetaInfoBuilder setBallerinaFilePath(Path ballerinaFilePath) {
@@ -85,8 +84,8 @@ public class OASGenerationMetaInfo {
             return this;
         }
 
-        public OASGenerationMetaInfoBuilder setServiceDeclarationNode(ServiceDeclarationNode serviceDeclarationNode) {
-            this.serviceDeclarationNode = serviceDeclarationNode;
+        public OASGenerationMetaInfoBuilder setServiceNode(Service serviceNode) {
+            this.serviceNode = serviceNode;
             return this;
         }
 

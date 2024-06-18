@@ -21,7 +21,6 @@ import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeLocation;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.openapi.extension.Constants;
 import io.ballerina.openapi.extension.OpenApiDiagnosticCode;
@@ -29,6 +28,7 @@ import io.ballerina.openapi.extension.context.OpenApiDocContext;
 import io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
+import io.ballerina.openapi.service.mapper.model.Service;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
@@ -68,7 +68,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
             // find the project root path
             Path projectRoot = retrieveProjectRoot(srcRoot);
 
-            ServiceDeclarationNode serviceNode = config.getServiceNode();
+            Service serviceNode = config.getServiceNode();
             Optional<AnnotationNode> serviceInfoAnnotationOpt = getServiceInfoAnnotation(serviceNode);
             if (serviceInfoAnnotationOpt.isPresent()) {
                 AnnotationNode serviceInfoAnnotation = serviceInfoAnnotationOpt.get();
@@ -114,7 +114,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
         context.reportDiagnostic(diagnostic);
     }
 
-    private Optional<AnnotationNode> getServiceInfoAnnotation(ServiceDeclarationNode serviceNode) {
+    private Optional<AnnotationNode> getServiceInfoAnnotation(Service serviceNode) {
         Optional<MetadataNode> metadata = serviceNode.metadata();
         if (metadata.isEmpty()) {
             return Optional.empty();
@@ -151,7 +151,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
         String targetFile = String.format(FILE_NAME_FORMAT, serviceId);
         OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder = new
                 OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
-        builder.setServiceDeclarationNode(config.getServiceNode())
+        builder.setServiceNode(config.getServiceNode())
                 .setSemanticModel(config.getSemanticModel())
                 .setOpenApiFileName(targetFile)
                 .setBallerinaFilePath(null)

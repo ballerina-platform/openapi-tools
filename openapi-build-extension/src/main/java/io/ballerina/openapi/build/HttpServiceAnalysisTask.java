@@ -31,6 +31,8 @@ import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
+import io.ballerina.openapi.service.mapper.model.Service;
+import io.ballerina.openapi.service.mapper.model.ServiceDeclaration;
 import io.ballerina.projects.BuildOptions;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
@@ -117,7 +119,8 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 extractServiceNodes(syntaxTree.rootNode(), services, semanticModel);
                 OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder =
                         new OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
-                builder.setServiceDeclarationNode(serviceNode).setSemanticModel(semanticModel)
+                Service service = new ServiceDeclaration(serviceNode);
+                builder.setServiceNode(service).setSemanticModel(semanticModel)
                         .setOpenApiFileName(services.get(serviceSymbol.get().hashCode()))
                         .setBallerinaFilePath(inputPath).setProject(project);
                 OASResult oasResult = ServiceToOpenAPIMapper.generateOAS(builder.build());
@@ -187,7 +190,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                     // module by checking listener type that attached to service endpoints.
                     Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
                     if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
-                        String service = ServersMapper.getServiceBasePath(serviceNode);
+                        String service = ServersMapper.getServiceBasePath(new ServiceDeclaration(serviceNode));
                         String updateServiceName = service;
                         if (allServices.contains(service)) {
                             updateServiceName = service + HYPHEN + serviceSymbol.get().hashCode();

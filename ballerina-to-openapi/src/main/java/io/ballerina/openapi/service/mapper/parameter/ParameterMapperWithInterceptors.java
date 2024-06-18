@@ -17,13 +17,13 @@
  */
 package io.ballerina.openapi.service.mapper.parameter;
 
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.openapi.service.mapper.ServiceMapperFactory;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.interceptor.model.RequestParameterInfo;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
+import io.ballerina.openapi.service.mapper.model.ResourceFunction;
 
 import java.util.List;
 import java.util.Map;
@@ -39,7 +39,7 @@ public class ParameterMapperWithInterceptors extends DefaultParameterMapper {
 
     private final RequestParameterInfo requestParameterInfo;
 
-    public ParameterMapperWithInterceptors(FunctionDefinitionNode functionDefinitionNode,
+    public ParameterMapperWithInterceptors(ResourceFunction functionDefinitionNode,
                                            OperationInventory operationInventory, Map<String, String> apiDocs,
                                            AdditionalData additionalData, Boolean treatNilableAsOptional,
                                            RequestParameterInfo requestParameterInfo,

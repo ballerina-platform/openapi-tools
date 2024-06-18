@@ -28,6 +28,8 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.extension.doc.gen.DocGeneratorManager;
 import io.ballerina.openapi.extension.doc.gen.OpenApiDocConfig;
+import io.ballerina.openapi.service.mapper.model.Service;
+import io.ballerina.openapi.service.mapper.model.ServiceDeclaration;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
@@ -65,8 +67,9 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 return;
             }
             SyntaxTree syntaxTree = context.syntaxTree();
+            Service service = new ServiceDeclaration(serviceNode);
             OpenApiDocConfig docConfig = new OpenApiDocConfig(context.currentPackage(),
-                    semanticModel, syntaxTree, serviceSymbol, serviceNode, currentProject.kind());
+                    semanticModel, syntaxTree, serviceSymbol, service, currentProject.kind());
             this.docGenerator.generate(docConfig, context, serviceNode.location());
         }
     }

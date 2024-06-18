@@ -30,9 +30,9 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.openapi.service.mapper.model.Service;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
@@ -57,10 +57,9 @@ public class ServersMapperImpl implements ServersMapper {
 
     final OpenAPI openAPI;
     final Set<ListenerDeclarationNode> endpoints;
-    final ServiceDeclarationNode service;
+    final Service service;
 
-    public ServersMapperImpl(OpenAPI openAPI, Set<ListenerDeclarationNode> endpoints,
-                             ServiceDeclarationNode service) {
+    public ServersMapperImpl(OpenAPI openAPI, Set<ListenerDeclarationNode> endpoints, Service service) {
         this.openAPI = openAPI;
         this.endpoints = endpoints;
         this.service = service;

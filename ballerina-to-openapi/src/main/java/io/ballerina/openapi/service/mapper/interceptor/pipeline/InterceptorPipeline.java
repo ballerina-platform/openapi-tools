@@ -25,7 +25,6 @@ import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
@@ -40,6 +39,7 @@ import io.ballerina.openapi.service.mapper.interceptor.types.ResponseErrorInterc
 import io.ballerina.openapi.service.mapper.interceptor.types.ResponseInterceptor;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +69,7 @@ public class InterceptorPipeline {
         diagnostics = additionalData.diagnostics();
     }
 
-    public static InterceptorPipeline build(ServiceDeclarationNode serviceDefinition, AdditionalData additionalData) {
+    public static InterceptorPipeline build(Service serviceDefinition, AdditionalData additionalData) {
         List<Interceptor> interceptors = buildInterceptors(serviceDefinition, additionalData);
 
         if (!interceptors.isEmpty()) {
@@ -96,11 +96,10 @@ public class InterceptorPipeline {
         return null;
     }
 
-    private static List<Interceptor> buildInterceptors(ServiceDeclarationNode serviceDefinition,
-                                                       AdditionalData additionalData) {
+    private static List<Interceptor> buildInterceptors(Service serviceDefinition, AdditionalData additionalData) {
         SemanticModel semanticModel = additionalData.semanticModel();
         ModuleMemberVisitor moduleMemberVisitor = additionalData.moduleMemberVisitor();
-        Optional<Symbol> optServiceSymbol = semanticModel.symbol(serviceDefinition);
+        Optional<Symbol> optServiceSymbol = serviceDefinition.getSymbol(semanticModel);
         if (optServiceSymbol.isEmpty() ||
                 !(optServiceSymbol.get() instanceof ServiceDeclarationSymbol serviceSymbol)) {
             return new ArrayList<>();

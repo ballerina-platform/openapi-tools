@@ -18,8 +18,10 @@ package io.ballerina.openapi.extension.doc.gen;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.service.mapper.model.Service;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.ProjectKind;
 
@@ -30,15 +32,15 @@ public class OpenApiDocConfig {
     private final Package currentPackage;
     private final SemanticModel semanticModel;
     private final SyntaxTree syntaxTree;
-    private final ServiceDeclarationSymbol serviceSymbol;
-    private final ServiceDeclarationNode serviceNode;
+    private final Symbol serviceSymbol;
+    private final Service serviceNode;
     private final ProjectKind projectType;
 
     public OpenApiDocConfig(Package currentPackage,
                             SemanticModel semanticModel,
                             SyntaxTree syntaxTree,
-                            ServiceDeclarationSymbol serviceSymbol,
-                            ServiceDeclarationNode serviceNode,
+                            Symbol serviceSymbol,
+                            Service serviceNode,
                             ProjectKind projectType) {
         this.currentPackage = currentPackage;
         this.semanticModel = semanticModel;
@@ -60,11 +62,11 @@ public class OpenApiDocConfig {
         return syntaxTree;
     }
 
-    public ServiceDeclarationSymbol getServiceSymbol() {
+    public Symbol getServiceSymbol() {
         return serviceSymbol;
     }
 
-    public ServiceDeclarationNode getServiceNode() {
+    public Service getServiceNode() {
         return serviceNode;
     }
 
