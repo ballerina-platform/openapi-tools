@@ -95,7 +95,7 @@ public type RequestExamples map<anydata>;
 #
 # + response - Response examples
 # + requestBody - Request examples
-public type Examples record {|
+public type Examples readonly & record {|
     map<ResponseExample> response?;
     RequestExamples requestBody?;
 |};
