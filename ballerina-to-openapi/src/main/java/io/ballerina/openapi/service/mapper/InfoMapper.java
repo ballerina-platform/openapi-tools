@@ -141,7 +141,7 @@ public final class InfoMapper {
 
     // Finalize the openAPI info section
     private static OASResult normalizeInfoSection(String openapiFileName, String currentServiceName, String version,
-                                          OASResult oasResult) {
+                                                  OASResult oasResult) {
         if (oasResult.getOpenAPI().isPresent()) {
             OpenAPI openAPI = oasResult.getOpenAPI().get();
             if (openAPI.getInfo() == null) {
@@ -288,33 +288,34 @@ public final class InfoMapper {
 
     private static OpenAPIInfo updateOpenAPIInfoModel(SeparatedNodeList<MappingFieldNode> fields) {
         OpenAPIInfo.OpenAPIInfoBuilder infoBuilder = new OpenAPIInfo.OpenAPIInfoBuilder();
-        fields.stream()
-                .filter(field -> field instanceof SpecificFieldNode)
-                .map(field -> (SpecificFieldNode) field)
-                .forEach(field -> {
-                    String fieldName = field.fieldName().toString().trim();
-                    Optional<ExpressionNode> valueOpt = field.valueExpr();
-                    valueOpt.map(ExpressionNode::toString)
-                            .map(String::trim)
-                            .filter(fieldValue -> !fieldValue.isBlank())
-                            .map(fieldValue -> fieldValue.replaceAll("\"", ""))
-                            .ifPresent(fieldValue -> {
-                                switch (fieldName) {
-                                    case CONTRACT -> infoBuilder.contractPath(fieldValue);
-                                    case TITLE -> infoBuilder.title(fieldValue);
-                                    case VERSION -> infoBuilder.version(fieldValue);
-                                    case EMAIL -> infoBuilder.email(fieldValue);
-                                    case DESCRIPTION -> infoBuilder.description(fieldValue);
-                                    case CONTACT_NAME -> infoBuilder.contactName(fieldValue);
-                                    case CONTACT_URL -> infoBuilder.contactURL(fieldValue);
-                                    case TERMS_OF_SERVICE -> infoBuilder.termsOfService(fieldValue);
-                                    case LICENSE_NAME -> infoBuilder.licenseName(fieldValue);
-                                    case LICENSE_URL -> infoBuilder.licenseURL(fieldValue);
-                                    default -> { }
-                                }
-                            });
-                });
-
+        for (MappingFieldNode field: fields) {
+            String fieldName = ((SpecificFieldNode) field).fieldName().toString().trim();
+            Optional<ExpressionNode> value = ((SpecificFieldNode) field).valueExpr();
+            String fieldValue;
+            if (value.isPresent()) {
+                ExpressionNode expressionNode = value.get();
+                if (!expressionNode.toString().trim().isBlank()) {
+                    fieldValue = expressionNode.toString().trim().replaceAll("\"", "");
+                    if (fieldValue.isBlank()) {
+                        continue;
+                    }
+                    switch (fieldName) {
+                        case CONTRACT -> infoBuilder.contractPath(fieldValue);
+                        case TITLE -> infoBuilder.title(fieldValue);
+                        case VERSION -> infoBuilder.version(fieldValue);
+                        case EMAIL -> infoBuilder.email(fieldValue);
+                        case DESCRIPTION -> infoBuilder.description(fieldValue);
+                        case CONTACT_NAME -> infoBuilder.contactName(fieldValue);
+                        case CONTACT_URL -> infoBuilder.contactURL(fieldValue);
+                        case TERMS_OF_SERVICE -> infoBuilder.termsOfService(fieldValue);
+                        case LICENSE_NAME -> infoBuilder.licenseName(fieldValue);
+                        case LICENSE_URL -> infoBuilder.licenseURL(fieldValue);
+                        default -> {
+                        }
+                    }
+                }
+            }
+        }
         return infoBuilder.build();
     }
 
