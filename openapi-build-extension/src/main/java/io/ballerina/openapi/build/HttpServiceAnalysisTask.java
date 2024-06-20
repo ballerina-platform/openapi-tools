@@ -24,15 +24,14 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.service.mapper.ServersMapper;
 import io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
-import io.ballerina.openapi.service.mapper.model.Service;
 import io.ballerina.openapi.service.mapper.model.ServiceDeclaration;
+import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.ballerina.projects.BuildOptions;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
@@ -119,7 +118,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 extractServiceNodes(syntaxTree.rootNode(), services, semanticModel);
                 OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder =
                         new OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
-                Service service = new ServiceDeclaration(serviceNode);
+                ServiceNode service = new ServiceDeclaration(serviceNode);
                 builder.setServiceNode(service).setSemanticModel(semanticModel)
                         .setOpenApiFileName(services.get(serviceSymbol.get().hashCode()))
                         .setBallerinaFilePath(inputPath).setProject(project);
@@ -190,7 +189,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                     // module by checking listener type that attached to service endpoints.
                     Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
                     if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
-                        String service = ServersMapper.getServiceBasePath(new ServiceDeclaration(serviceNode));
+                        String service = (new ServiceDeclaration(serviceNode)).absoluteResourcePath();
                         String updateServiceName = service;
                         if (allServices.contains(service)) {
                             updateServiceName = service + HYPHEN + serviceSymbol.get().hashCode();

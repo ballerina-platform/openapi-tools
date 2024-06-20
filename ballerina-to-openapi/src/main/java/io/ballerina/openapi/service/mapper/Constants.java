@@ -38,6 +38,7 @@ public final class Constants {
     public static final String HTTP = "http";
     public static final String BALLERINA = "ballerina";
     public static final String EMPTY = "";
+    public static final String HTTP_SERVICE_CONTRACT = "ServiceContract";
     public static final String INTERCEPTABLE_SERVICE = "InterceptableService";
     public static final String NEXT_SERVICE = "NextService";
     public static final String INTERCEPTOR = "Interceptor";

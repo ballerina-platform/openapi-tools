@@ -19,11 +19,14 @@
 package io.ballerina.openapi.service.mapper.hateoas;
 
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.MethodDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.Constants;
 import io.ballerina.openapi.service.mapper.model.ResourceFunction;
+import io.ballerina.openapi.service.mapper.model.ResourceFunctionDeclaration;
 import io.ballerina.openapi.service.mapper.model.ResourceFunctionDefinition;
+import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -56,43 +59,58 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getVal
 public class HateoasMapperImpl implements HateoasMapper {
 
     @Override
-    public void setOpenApiLinks(io.ballerina.openapi.service.mapper.model.Service serviceNode, OpenAPI openAPI) {
+    public void setOpenApiLinks(ServiceNode serviceNode, OpenAPI openAPI) {
         Paths paths = openAPI.getPaths();
         Service hateoasService = extractHateoasMetaInfo(serviceNode);
         if (hateoasService.getHateoasResourceMapping().isEmpty()) {
             return;
         }
         for (Node node: serviceNode.members()) {
-            if (!node.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
+            if (!node.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION) &&
+                    !node.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DECLARATION)) {
                 continue;
             }
-            ResourceFunction resource = new ResourceFunctionDefinition((FunctionDefinitionNode) node);
-            Optional<ApiResponses> responses = getApiResponsesForResource(resource, paths);
+            Optional<ResourceFunction> resource = getResourceFunction(node);
+            if (resource.isEmpty()) {
+                continue;
+            }
+            Optional<ApiResponses> responses = getApiResponsesForResource(resource.get(), paths);
             if (responses.isEmpty()) {
                 continue;
             }
-            setOpenApiLinksInApiResponse(hateoasService, resource, responses.get());
+            setOpenApiLinksInApiResponse(hateoasService, resource.get(), responses.get());
         }
     }
 
-    private Service extractHateoasMetaInfo(io.ballerina.openapi.service.mapper.model.Service serviceNode) {
+    private Service extractHateoasMetaInfo(ServiceNode serviceNode) {
         Service service = new Service();
-        for (Node child : serviceNode.children()) {
-            if (SyntaxKind.RESOURCE_ACCESSOR_DEFINITION.equals(child.kind())) {
-                ResourceFunction resourceFunction = new ResourceFunctionDefinition((FunctionDefinitionNode) child);
-                String resourceMethod = resourceFunction.functionName();
-                String operationId = MapperCommonUtils.getOperationId(resourceFunction);
-                Optional<String> resourceName = getResourceConfigAnnotation(resourceFunction)
-                        .flatMap(resourceConfig -> getValueForAnnotationFields(resourceConfig, "name"));
-                if (resourceName.isEmpty()) {
-                    continue;
-                }
-                String cleanedResourceName = resourceName.get().replaceAll("\"", "");
-                Resource hateoasResource = new Resource(resourceMethod, operationId);
-                service.addResource(cleanedResourceName, hateoasResource);
-            }
+        for (Node member : serviceNode.members()) {
+            Optional<ResourceFunction> resourceFunction = getResourceFunction(member);
+            resourceFunction.ifPresent(function -> addResourceToService(function, service));
         }
         return service;
+    }
+
+    private void addResourceToService(ResourceFunction resourceFunction, Service service) {
+        String resourceMethod = resourceFunction.functionName();
+        String operationId = MapperCommonUtils.getOperationId(resourceFunction);
+        Optional<String> resourceName = getResourceConfigAnnotation(resourceFunction)
+                .flatMap(resourceConfig -> getValueForAnnotationFields(resourceConfig, "name"));
+        if (resourceName.isEmpty()) {
+            return;
+        }
+        String cleanedResourceName = resourceName.get().replaceAll("\"", "");
+        Resource hateoasResource = new Resource(resourceMethod, operationId);
+        service.addResource(cleanedResourceName, hateoasResource);
+    }
+
+    private static Optional<ResourceFunction> getResourceFunction(Node member) {
+        if (SyntaxKind.RESOURCE_ACCESSOR_DEFINITION.equals(member.kind())) {
+            return Optional.of(new ResourceFunctionDefinition((FunctionDefinitionNode) member));
+        } else if (SyntaxKind.RESOURCE_ACCESSOR_DECLARATION.equals(member.kind())) {
+            return Optional.of(new ResourceFunctionDeclaration((MethodDeclarationNode) member));
+        }
+        return Optional.empty();
     }
 
     private Optional<ApiResponses> getApiResponsesForResource(ResourceFunction resource, Paths paths) {

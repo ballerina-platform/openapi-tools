@@ -32,7 +32,7 @@ import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.openapi.service.mapper.model.Service;
+import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
@@ -57,15 +57,21 @@ public class ServersMapperImpl implements ServersMapper {
 
     final OpenAPI openAPI;
     final Set<ListenerDeclarationNode> endpoints;
-    final Service service;
+    final ServiceNode service;
 
-    public ServersMapperImpl(OpenAPI openAPI, Set<ListenerDeclarationNode> endpoints, Service service) {
+    public ServersMapperImpl(OpenAPI openAPI, Set<ListenerDeclarationNode> endpoints, ServiceNode service) {
         this.openAPI = openAPI;
         this.endpoints = endpoints;
         this.service = service;
     }
 
     public void setServers() {
+        if (service.kind().equals(ServiceNode.Kind.SERVICE_OBJECT_TYPE)) {
+            Server defaultServer = getDefaultServerWithBasePath(service.absoluteResourcePath());
+            openAPI.setServers(Collections.singletonList(defaultServer));
+            return;
+        }
+
         extractServerForExpressionNode();
         List<Server> servers = openAPI.getServers();
         //Handle ImplicitNewExpressionNode in listener
@@ -89,12 +95,12 @@ public class ServersMapperImpl implements ServersMapper {
         if (expNode instanceof QualifiedNameReferenceNode refNode) {
             //Handle QualifiedNameReferenceNode in listener
             if (refNode.identifier().text().trim().equals(endPoint.variableName().text().trim())) {
-                String serviceBasePath = ServersMapper.getServiceBasePath(service);
+                String serviceBasePath = service.absoluteResourcePath();
                 Server server = extractServer(endPoint, serviceBasePath);
                 servers.add(server);
             }
         } else if (expNode.toString().trim().equals(endPoint.variableName().text().trim())) {
-            String serviceBasePath = ServersMapper.getServiceBasePath(service);
+            String serviceBasePath = service.absoluteResourcePath();
             Server server = extractServer(endPoint, serviceBasePath);
             servers.add(server);
         }
@@ -151,7 +157,7 @@ public class ServersMapperImpl implements ServersMapper {
     // Function to handle ExplicitNewExpressionNode in listener.
     private void extractServerForExpressionNode() {
         SeparatedNodeList<ExpressionNode> bTypeExplicit = service.expressions();
-        String serviceBasePath = ServersMapper.getServiceBasePath(service);
+        String serviceBasePath = service.absoluteResourcePath();
         Optional<ParenthesizedArgList> list;
         List<Server> servers = new ArrayList<>();
         for (ExpressionNode expressionNode: bTypeExplicit) {
@@ -264,5 +270,23 @@ public class ServersMapperImpl implements ServersMapper {
             }
         }
         return host;
+    }
+
+    private static Server getDefaultServerWithBasePath(String serviceBasePath) {
+        String serverUrl = String.format("{server}:{port}%s", serviceBasePath);
+        ServerVariables serverVariables = new ServerVariables();
+
+        ServerVariable serverUrlVariable = new ServerVariable();
+        serverUrlVariable._default("localhost");
+        serverVariables.addServerVariable(SERVER, serverUrlVariable);
+
+        ServerVariable portVariable =  new ServerVariable();
+        portVariable._default("8080");
+        serverVariables.addServerVariable(PORT, portVariable);
+
+        Server server = new Server();
+        server.setUrl(serverUrl);
+        server.setVariables(serverVariables);
+        return server;
     }
 }

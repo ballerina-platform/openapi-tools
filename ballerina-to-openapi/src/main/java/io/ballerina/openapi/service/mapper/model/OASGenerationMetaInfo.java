@@ -32,7 +32,7 @@ public class OASGenerationMetaInfo {
     private final String openApiFileName;
     private final Path ballerinaFilePath;
     private final SemanticModel semanticModel;
-    private final Service serviceNode;
+    private final ServiceNode serviceNode;
     private final Project project;
 
     public OASGenerationMetaInfo(OASGenerationMetaInfoBuilder builder) {
@@ -55,7 +55,7 @@ public class OASGenerationMetaInfo {
         return semanticModel;
     }
 
-    public Service getServiceNode() {
+    public ServiceNode getServiceNode() {
         return serviceNode;
     }
 
@@ -71,7 +71,7 @@ public class OASGenerationMetaInfo {
         private String openApiFileName;
         private Path ballerinaFilePath;
         private SemanticModel semanticModel;
-        private Service serviceNode;
+        private ServiceNode serviceNode;
         private Project project;
 
         public OASGenerationMetaInfoBuilder setBallerinaFilePath(Path ballerinaFilePath) {
@@ -84,7 +84,7 @@ public class OASGenerationMetaInfo {
             return this;
         }
 
-        public OASGenerationMetaInfoBuilder setServiceNode(Service serviceNode) {
+        public OASGenerationMetaInfoBuilder setServiceNode(ServiceNode serviceNode) {
             this.serviceNode = serviceNode;
             return this;
         }

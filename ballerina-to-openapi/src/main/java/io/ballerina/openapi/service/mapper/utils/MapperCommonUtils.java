@@ -29,6 +29,7 @@ import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.SymbolKind;
+import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
@@ -42,6 +43,7 @@ import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ObjectTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
@@ -84,7 +86,9 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.NUMERIC_LITERAL;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.service.mapper.Constants.BALLERINA;
+import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP_SERVICE_CONTRACT;
 import static io.ballerina.openapi.service.mapper.Constants.HYPHEN;
 import static io.ballerina.openapi.service.mapper.Constants.JSON_EXTENSION;
 import static io.ballerina.openapi.service.mapper.Constants.SLASH;
@@ -322,6 +326,32 @@ public class MapperCommonUtils {
             }
         }
         return false;
+    }
+
+    public static boolean isHttpServiceContract(Node typeNode, SemanticModel semanticModel) {
+        if (!(typeNode instanceof ObjectTypeDescriptorNode serviceObjType) || !isServiceObjectType(serviceObjType)) {
+            return false;
+        }
+
+        Optional<Symbol> serviceObjSymbol = semanticModel.symbol(serviceObjType.parent());
+        if (serviceObjSymbol.isEmpty() ||
+                (!(serviceObjSymbol.get() instanceof TypeDefinitionSymbol serviceObjTypeDef))) {
+            return false;
+        }
+
+        Optional<Symbol> serviceContractType = semanticModel.types().getTypeByName(BALLERINA, HTTP, EMPTY,
+                HTTP_SERVICE_CONTRACT);
+        if (serviceContractType.isEmpty() ||
+                !(serviceContractType.get() instanceof TypeDefinitionSymbol serviceContractTypeDef)) {
+            return false;
+        }
+
+        return serviceObjTypeDef.typeDescriptor().subtypeOf(serviceContractTypeDef.typeDescriptor());
+    }
+
+    private static boolean isServiceObjectType(ObjectTypeDescriptorNode typeNode) {
+        return typeNode.objectTypeQualifiers().stream().anyMatch(
+                qualifier -> qualifier.kind().equals(SyntaxKind.SERVICE_KEYWORD));
     }
 
     private static boolean isHttpListener(TypeSymbol listenerType) {

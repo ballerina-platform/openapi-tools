@@ -39,7 +39,7 @@ import io.ballerina.openapi.service.mapper.interceptor.types.ResponseErrorInterc
 import io.ballerina.openapi.service.mapper.interceptor.types.ResponseInterceptor;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
-import io.ballerina.openapi.service.mapper.model.Service;
+import io.ballerina.openapi.service.mapper.model.ServiceNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +69,7 @@ public class InterceptorPipeline {
         diagnostics = additionalData.diagnostics();
     }
 
-    public static InterceptorPipeline build(Service serviceDefinition, AdditionalData additionalData) {
+    public static InterceptorPipeline build(ServiceNode serviceDefinition, AdditionalData additionalData) {
         List<Interceptor> interceptors = buildInterceptors(serviceDefinition, additionalData);
 
         if (!interceptors.isEmpty()) {
@@ -96,7 +96,7 @@ public class InterceptorPipeline {
         return null;
     }
 
-    private static List<Interceptor> buildInterceptors(Service serviceDefinition, AdditionalData additionalData) {
+    private static List<Interceptor> buildInterceptors(ServiceNode serviceDefinition, AdditionalData additionalData) {
         SemanticModel semanticModel = additionalData.semanticModel();
         ModuleMemberVisitor moduleMemberVisitor = additionalData.moduleMemberVisitor();
         Optional<Symbol> optServiceSymbol = serviceDefinition.getSymbol(semanticModel);

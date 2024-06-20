@@ -2,7 +2,6 @@ package io.ballerina.openapi.service.mapper.model;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.syntax.tree.ChildNodeList;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -11,7 +10,12 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 
 import java.util.Optional;
 
-public interface Service {
+public interface ServiceNode {
+
+    enum Kind {
+        SERVICE_OBJECT_TYPE,
+        SERVICE_DECLARATION
+    }
 
     Optional<MetadataNode> metadata();
 
@@ -19,9 +23,9 @@ public interface Service {
 
     SeparatedNodeList<ExpressionNode> expressions();
 
-    NodeList<Node> absoluteResourcePath();
+    String absoluteResourcePath();
 
     NodeList<Node> members();
 
-    ChildNodeList children();
+    Kind kind();
 }

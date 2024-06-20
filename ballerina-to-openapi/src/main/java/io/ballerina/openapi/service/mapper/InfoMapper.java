@@ -35,7 +35,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.OASResult;
 import io.ballerina.openapi.service.mapper.model.OpenAPIInfo;
-import io.ballerina.openapi.service.mapper.model.Service;
+import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -85,12 +85,12 @@ public final class InfoMapper {
      * @param ballerinaFilePath Ballerina file path.
      * @return {@code OASResult}
      */
-    static OASResult getOASResultWithInfo(Service serviceNode, SemanticModel semanticModel, String openapiFileName,
+    static OASResult getOASResultWithInfo(ServiceNode serviceNode, SemanticModel semanticModel, String openapiFileName,
                                           Path ballerinaFilePath) {
         Optional<MetadataNode> metadata = serviceNode.metadata();
         List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
         OpenAPI openAPI = new OpenAPI();
-        String currentServiceName = ServersMapper.getServiceBasePath(serviceNode);
+        String currentServiceName = serviceNode.absoluteResourcePath();
         // 01. Set openAPI inFo section wit package details
         String version = getContractVersion(serviceNode, semanticModel);
         if (metadata.isPresent() && !metadata.get().annotations().isEmpty()) {
@@ -162,7 +162,7 @@ public final class InfoMapper {
     }
 
     // Set contract version by default using package version.
-    private static String getContractVersion(Service serviceDefinition, SemanticModel semanticModel) {
+    private static String getContractVersion(ServiceNode serviceDefinition, SemanticModel semanticModel) {
         Optional<Symbol> symbol = serviceDefinition.getSymbol(semanticModel);
         String version = "1.0.0";
         if (symbol.isPresent()) {

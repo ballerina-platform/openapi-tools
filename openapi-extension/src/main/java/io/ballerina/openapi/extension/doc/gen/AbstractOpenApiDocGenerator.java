@@ -28,7 +28,7 @@ import io.ballerina.openapi.extension.context.OpenApiDocContext;
 import io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
-import io.ballerina.openapi.service.mapper.model.Service;
+import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
@@ -68,7 +68,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
             // find the project root path
             Path projectRoot = retrieveProjectRoot(srcRoot);
 
-            Service serviceNode = config.getServiceNode();
+            ServiceNode serviceNode = config.getServiceNode();
             Optional<AnnotationNode> serviceInfoAnnotationOpt = getServiceInfoAnnotation(serviceNode);
             if (serviceInfoAnnotationOpt.isPresent()) {
                 AnnotationNode serviceInfoAnnotation = serviceInfoAnnotationOpt.get();
@@ -114,7 +114,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
         context.reportDiagnostic(diagnostic);
     }
 
-    private Optional<AnnotationNode> getServiceInfoAnnotation(Service serviceNode) {
+    private Optional<AnnotationNode> getServiceInfoAnnotation(ServiceNode serviceNode) {
         Optional<MetadataNode> metadata = serviceNode.metadata();
         if (metadata.isEmpty()) {
             return Optional.empty();
