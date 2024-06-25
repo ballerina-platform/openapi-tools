@@ -2,11 +2,14 @@ package io.ballerina.openapi.service.mapper.model;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
+import io.ballerina.tools.diagnostics.Location;
 
 import java.util.Optional;
 
@@ -28,4 +31,12 @@ public interface ServiceNode {
     NodeList<Node> members();
 
     Kind kind();
+
+    Location location();
+
+    int getServiceId();
+
+    void updateAnnotations(NodeList<AnnotationNode> newAnnotations);
+
+    ModuleMemberDeclarationNode getInternalNode();
 }

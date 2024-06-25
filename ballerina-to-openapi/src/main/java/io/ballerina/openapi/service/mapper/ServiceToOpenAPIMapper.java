@@ -149,13 +149,24 @@ public final class ServiceToOpenAPIMapper {
                 Node descriptorNode = ((TypeDefinitionNode) node).typeDescriptor();
                 if (descriptorNode.kind().equals(SyntaxKind.OBJECT_TYPE_DESC) &&
                         isHttpServiceContract(descriptorNode, semanticModel)) {
-                    ServiceNode service = new ServiceObjectType((ObjectTypeDescriptorNode) descriptorNode);
+                    ServiceNode service = new ServiceObjectType((TypeDefinitionNode) node);
                     Optional<Symbol> serviceSymbol = service.getSymbol(semanticModel);
                     serviceSymbol.ifPresent(symbol ->
                             addService(serviceName, availableService, service, servicesToGenerate, symbol));
                 }
             }
         }
+    }
+
+    public static Optional<ServiceNode> getServiceNode(Node node, SemanticModel semanticModel) {
+        if (node instanceof ServiceDeclarationNode serviceNode && isHttpService(serviceNode, semanticModel)) {
+            return Optional.of(new ServiceDeclaration(serviceNode));
+        } else if (node instanceof TypeDefinitionNode serviceTypeNode &&
+                serviceTypeNode.typeDescriptor() instanceof ObjectTypeDescriptorNode serviceNode &&
+                isHttpServiceContract(serviceNode, semanticModel)) {
+            return Optional.of(new ServiceObjectType((TypeDefinitionNode) node));
+        }
+        return Optional.empty();
     }
 
     private static void addService(String serviceName, List<String> availableService, ServiceNode service,

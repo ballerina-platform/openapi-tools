@@ -8,6 +8,7 @@ import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ObjectTypeDescriptorNode;
@@ -15,23 +16,29 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.tools.diagnostics.Location;
 
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 
 public class ServiceObjectType implements ServiceNode {
 
     private static final String DEFAULT_PATH = "/";
     ObjectTypeDescriptorNode serviceObjType;
+    TypeDefinitionNode serviceTypeDefinition;
 
-    public ServiceObjectType(ObjectTypeDescriptorNode serviceType) {
-        serviceObjType = new ObjectTypeDescriptorNode(serviceType.internalNode(), serviceType.position(),
+    public ServiceObjectType(TypeDefinitionNode serviceType) {
+        serviceTypeDefinition = new TypeDefinitionNode(serviceType.internalNode(), serviceType.position(),
                 serviceType.parent());
+        ObjectTypeDescriptorNode serviceObjTypeDesc = (ObjectTypeDescriptorNode) serviceType.typeDescriptor();
+        serviceObjType = new ObjectTypeDescriptorNode(serviceObjTypeDesc.internalNode(), serviceObjTypeDesc.position(),
+                serviceObjTypeDesc.parent());
     }
 
     public Optional<MetadataNode> metadata() {
-        return ((TypeDefinitionNode) serviceObjType.parent()).metadata();
+        return serviceTypeDefinition.metadata();
     }
 
     public Optional<Symbol> getSymbol(SemanticModel semanticModel) {
@@ -39,7 +46,6 @@ public class ServiceObjectType implements ServiceNode {
     }
 
     public SeparatedNodeList<ExpressionNode> expressions() {
-        // TODO: Need to check the usage of these expressions
         return createSeparatedNodeList();
     }
 
@@ -95,5 +101,28 @@ public class ServiceObjectType implements ServiceNode {
 
     public Kind kind() {
         return Kind.SERVICE_OBJECT_TYPE;
+    }
+
+    public Location location() {
+        return serviceObjType.location();
+    }
+
+    public int getServiceId() {
+        return serviceObjType.hashCode();
+    }
+
+    public void updateAnnotations(NodeList<AnnotationNode> newAnnotations) {
+        Optional<MetadataNode> metadataOpt = serviceTypeDefinition.metadata();
+        MetadataNode updatedMetadata;
+        if (metadataOpt.isEmpty()) {
+            updatedMetadata = createMetadataNode(null, newAnnotations);
+        } else {
+            updatedMetadata = metadataOpt.get().modify().withAnnotations(newAnnotations).apply();
+        }
+        serviceTypeDefinition = serviceTypeDefinition.modify().withMetadata(updatedMetadata).apply();
+    }
+
+    public ModuleMemberDeclarationNode getInternalNode() {
+        return serviceTypeDefinition;
     }
 }
