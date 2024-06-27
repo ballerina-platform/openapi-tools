@@ -32,10 +32,12 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.openapi.service.mapper.model.ResourceFunction;
+import io.ballerina.openapi.service.mapper.model.ResourceFunctionDefinition;
+import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.Paths;
@@ -69,7 +71,7 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpe
  */
 public class MetaInfoMapperImpl implements MetaInfoMapper {
 
-    public void setResourceMetaData(OpenAPI openAPI, ServiceDeclarationNode serviceNode) {
+    public void setResourceMetaData(OpenAPI openAPI, ServiceNode serviceNode) {
         NodeList<Node> functions = serviceNode.members();
         Map<String, ResourceMetaInfoAnnotation> resourceMetaData = new HashMap<>();
         for (Node function : functions) {
@@ -80,7 +82,8 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                 if (optMetadata.isEmpty()) {
                     continue;
                 }
-                String operationId = getOperationId(resourceNode);
+                ResourceFunction resourceFunction = new ResourceFunctionDefinition(resourceNode);
+                String operationId = getOperationId(resourceFunction);
                 ResourceMetaInfoAnnotation.Builder resMetaInfoBuilder = new ResourceMetaInfoAnnotation.Builder();
                 MetadataNode metadataNode = optMetadata.get();
                 NodeList<AnnotationNode> annotations = metadataNode.annotations();
