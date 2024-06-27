@@ -288,4 +288,11 @@ public class TestConstants {
     public static final String OAUTH2_REFRESH_TOKEN_GRANT_CONFIG_RECORD = "#OAuth2ClientCredentialsGrantConfigs" +
             "publictypeOAuth2ClientCredentialsGrantConfigrecord{|*http:OAuth2ClientCredentialsGrantConfig;" +
             "#TokenURLstringtokenUrl=\"https://domain/services/data/oauth2/token\";|};";
+    public static final String MIXED_AUTH_INIT_STATEMENTS = "if config.auth is ApiKeysConfig {\n" +
+            "            self.apiKeyConfig = (<ApiKeysConfig>config.auth).cloneReadOnly();\n" +
+            "        } else {\n" +
+            "            httpClientConfig.auth = <OAuth2ClientCredentialsGrantConfig|http:BearerTokenConfig|" +
+            "OAuth2RefreshTokenGrantConfig>config.auth;\n" +
+            "            self.apiKeyConfig = ();\n" +
+            "        }";
 }
