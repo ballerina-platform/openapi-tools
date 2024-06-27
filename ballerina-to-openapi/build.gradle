@@ -133,12 +133,20 @@ compileJava {
     }
 }
 
+def githubReleaseVersion = project.ballerinaToOpenAPIVersion
+if (githubReleaseVersion.endsWith('-SNAPSHOT')) {
+    def date = new Date()
+    def formattedDate = date.format('yyyyMMdd-HHmmss', TimeZone.getTimeZone('Asia/Kolkata'))
+    def lastCommitId = 'git rev-parse --short HEAD'.execute().text.trim()
+    githubReleaseVersion = githubReleaseVersion.replace("-SNAPSHOT", "-${formattedDate}-${lastCommitId}")
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId "io.ballerina.openapi"
             artifactId "ballerina-to-openapi"
-            version = project.ballerinaToOpenAPIVersion
+            version = githubReleaseVersion
             artifact jar
         }
     }
