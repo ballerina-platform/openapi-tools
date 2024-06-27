@@ -138,7 +138,7 @@ publishing {
         mavenJava(MavenPublication) {
             groupId "io.ballerina.openapi"
             artifactId "ballerina-to-openapi"
-            version = project.version
+            version = project.ballerinaToOpenAPIVersion
             artifact jar
         }
     }
