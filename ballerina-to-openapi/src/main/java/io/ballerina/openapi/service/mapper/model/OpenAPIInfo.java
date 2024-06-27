@@ -30,11 +30,25 @@ public class OpenAPIInfo {
     private final String title;
     private final String version;
     private final String contractPath;
+    private final String description;
+    private final String email;
+    private final String contactName;
+    private final String contactURL;
+    private final String termsOfService;
+    private final String licenseName;
+    private final String licenseURL;
 
     public OpenAPIInfo(OpenAPIInfoBuilder openAPIInfoBuilder) {
         this.title = openAPIInfoBuilder.title;
         this.version = openAPIInfoBuilder.version;
         this.contractPath = openAPIInfoBuilder.contractPath;
+        this.description = openAPIInfoBuilder.description;
+        this.email = openAPIInfoBuilder.email;
+        this.contactName = openAPIInfoBuilder.contactName;
+        this.contactURL = openAPIInfoBuilder.contactURL;
+        this.termsOfService = openAPIInfoBuilder.termsOfService;
+        this.licenseName = openAPIInfoBuilder.licenseName;
+        this.licenseURL = openAPIInfoBuilder.licenseURL;
     }
 
     public Optional<String> getTitle() {
@@ -49,6 +63,34 @@ public class OpenAPIInfo {
         return Optional.ofNullable(this.contractPath);
     }
 
+    public Optional<String> getDescription() {
+        return Optional.ofNullable(this.description);
+    }
+
+    public Optional<String> getEmail() {
+        return Optional.ofNullable(this.email);
+    }
+
+    public Optional<String> getContactName() {
+        return Optional.ofNullable(this.contactName);
+    }
+
+    public Optional<String> getContactURL() {
+        return Optional.ofNullable(this.contactURL);
+    }
+
+    public Optional<String> getTermsOfService() {
+        return Optional.ofNullable(this.termsOfService);
+    }
+
+    public Optional<String> getLicenseName() {
+        return Optional.ofNullable(this.licenseName);
+    }
+
+    public Optional<String> getLicenseURL() {
+        return Optional.ofNullable(this.licenseURL);
+    }
+
     /**
      * This is the builder class for the {@link OpenAPIInfo}.
      */
@@ -56,6 +98,13 @@ public class OpenAPIInfo {
         private String title;
         private String version;
         private String contractPath;
+        private String description;
+        private String email;
+        private String contactName;
+        private String contactURL;
+        private String termsOfService;
+        private String licenseName;
+        private String licenseURL;
 
         public OpenAPIInfoBuilder title(String title) {
             this.title = title;
@@ -67,8 +116,44 @@ public class OpenAPIInfo {
             return this;
         }
 
-        public void contractPath(String contractPath) {
+        public OpenAPIInfoBuilder contractPath(String contractPath) {
             this.contractPath = contractPath;
+            return this;
+        }
+
+        public OpenAPIInfoBuilder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public OpenAPIInfoBuilder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public OpenAPIInfoBuilder contactName(String contactName) {
+            this.contactName = contactName;
+            return this;
+        }
+
+        public OpenAPIInfoBuilder contactURL(String contactURL) {
+            this.contactURL = contactURL;
+            return this;
+        }
+
+        public OpenAPIInfoBuilder termsOfService(String termsOfService) {
+            this.termsOfService = termsOfService;
+            return this;
+        }
+
+        public OpenAPIInfoBuilder licenseName(String licenseName) {
+            this.licenseName = licenseName;
+            return this;
+        }
+
+        public OpenAPIInfoBuilder licenseURL(String licenseURL) {
+            this.licenseURL = licenseURL;
+            return this;
         }
 
         public OpenAPIInfo build() {

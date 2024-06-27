@@ -34,6 +34,8 @@ import io.ballerina.openapi.service.mapper.hateoas.HateoasMapperImpl;
 import io.ballerina.openapi.service.mapper.interceptor.model.RequestParameterInfo;
 import io.ballerina.openapi.service.mapper.interceptor.model.ResponseInfo;
 import io.ballerina.openapi.service.mapper.interceptor.pipeline.InterceptorPipeline;
+import io.ballerina.openapi.service.mapper.metainfo.MetaInfoMapper;
+import io.ballerina.openapi.service.mapper.metainfo.MetaInfoMapperImpl;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
@@ -82,6 +84,7 @@ public class ServiceMapperFactory {
     private final ConstraintMapper constraintMapper;
     private final HateoasMapper hateoasMapper;
     private final InterceptorPipeline interceptorPipeline;
+    private final MetaInfoMapper metaInfoMapper;
 
     public ServiceMapperFactory(OpenAPI openAPI, SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
                                 List<OpenAPIMapperDiagnostic> diagnostics, ServiceNode serviceDefinition) {
@@ -96,6 +99,7 @@ public class ServiceMapperFactory {
         this.typeMapper = new TypeMapperImpl(getComponents(openAPI), additionalData);
         this.constraintMapper = new ConstraintMapperImpl(openAPI, moduleMemberVisitor, diagnostics);
         this.hateoasMapper = new HateoasMapperImpl();
+        this.metaInfoMapper = new MetaInfoMapperImpl();
     }
 
     public ServersMapper getServersMapper(Set<ListenerDeclarationNode> endpoints, ServiceNode serviceNode) {
@@ -164,6 +168,10 @@ public class ServiceMapperFactory {
 
     public HateoasMapper getHateoasMapper() {
         return hateoasMapper;
+    }
+
+    public MetaInfoMapper getMetaInfoMapper() {
+            return metaInfoMapper;
     }
 
     private Components getComponents(OpenAPI openAPI) {

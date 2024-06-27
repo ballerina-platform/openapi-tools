@@ -330,9 +330,18 @@ public final class Constants {
     public static final String FALSE = "false";
     public static final String SLASH = "/";
     public static final String HYPHEN = "-";
+
+    //`@openapi:ServiceInfo` annotation constants
     public static final String CONTRACT = "contract";
     public static final String VERSION = "version";
     public static final String TITLE = "title";
+    public static final String EMAIL = "email";
+    public static final String DESCRIPTION = "description";
+    public static final String CONTACT_NAME = "contactName";
+    public static final String CONTACT_URL = "contactURL";
+    public static final String LICENSE_NAME = "licenseName";
+    public static final String LICENSE_URL = "licenseURL";
+    public static final String TERMS_OF_SERVICE = "termsOfService";
     public static final String OPENAPI_ANNOTATION = "openapi:ServiceInfo";
 
     //File extensions
@@ -340,4 +349,12 @@ public final class Constants {
     public static final String JSON_EXTENSION = ".json";
     public static final String YML_EXTENSION = ".yml";
     public static final String UNDERSCORE = "_";
+
+    //openapi:ResourceInFo annotation
+    public static final String OPENAPI_RESOURCE_INFO = "openapi:ResourceInfo";
+    public static final String TAGS = "tags";
+    public static final String SUMMARY = "summary";
+    public static final String EXAMPLES = "examples";
+    public static final String OPERATION_ID = "operationId";
+    public static final String RESPONSE_ATTRIBUTE = "response";
 }

@@ -118,7 +118,7 @@ publishing {
 
 tasks.withType(PublishToMavenRepository) {
     onlyIf {
-        (clientNativeVersion.endsWith('-SNAPSHOT') || clientNativePublish) &&
+        (clientNativeVersion.endsWith('-SNAPSHOT') || clientNativePublish.toBoolean()) &&
                 ((repository == publishing.repositories.GitHub && publication == publishing.publications.GitHub) ||
                 (repository == publishing.repositories.WSO2Nexus && publication == publishing.publications.WSO2Nexus))
     }
