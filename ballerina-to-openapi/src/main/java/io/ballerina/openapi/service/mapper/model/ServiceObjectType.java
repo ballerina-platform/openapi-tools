@@ -1,7 +1,11 @@
 package io.ballerina.openapi.service.mapper.model;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.MethodSymbol;
+import io.ballerina.compiler.api.symbols.ObjectTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -28,8 +32,10 @@ public class ServiceObjectType implements ServiceNode {
     private static final String DEFAULT_PATH = "/";
     ObjectTypeDescriptorNode serviceObjType;
     TypeDefinitionNode serviceTypeDefinition;
+    int serviceId;
 
     public ServiceObjectType(TypeDefinitionNode serviceType) {
+        serviceId = serviceType.hashCode();
         serviceTypeDefinition = new TypeDefinitionNode(serviceType.internalNode(), serviceType.position(),
                 serviceType.parent());
         ObjectTypeDescriptorNode serviceObjTypeDesc = (ObjectTypeDescriptorNode) serviceType.typeDescriptor();
@@ -42,7 +48,15 @@ public class ServiceObjectType implements ServiceNode {
     }
 
     public Optional<Symbol> getSymbol(SemanticModel semanticModel) {
-        return semanticModel.symbol(serviceObjType.parent());
+        return semanticModel.symbol(serviceTypeDefinition);
+    }
+
+    public Optional<TypeSymbol> typeDescriptor(SemanticModel semanticModel) {
+        Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceTypeDefinition);
+        if (serviceSymbol.isEmpty() || !(serviceSymbol.get() instanceof TypeDefinitionSymbol serviceType)) {
+            return Optional.empty();
+        }
+        return Optional.of(serviceType.typeDescriptor());
     }
 
     public SeparatedNodeList<ExpressionNode> expressions() {
@@ -108,7 +122,7 @@ public class ServiceObjectType implements ServiceNode {
     }
 
     public int getServiceId() {
-        return serviceObjType.hashCode();
+        return serviceId;
     }
 
     public void updateAnnotations(NodeList<AnnotationNode> newAnnotations) {
@@ -124,5 +138,23 @@ public class ServiceObjectType implements ServiceNode {
 
     public ModuleMemberDeclarationNode getInternalNode() {
         return serviceTypeDefinition;
+    }
+
+    public Optional<TypeSymbol> getInterceptorReturnType(SemanticModel semanticModel) {
+        Optional<Symbol> symbol = semanticModel.symbol(serviceTypeDefinition);
+        if (symbol.isEmpty() || !(symbol.get() instanceof TypeDefinitionSymbol serviceTypeDef)) {
+            return Optional.empty();
+        }
+
+        TypeSymbol serviceTypeSymbol = serviceTypeDef.typeDescriptor();
+        if (!(serviceTypeSymbol instanceof ObjectTypeSymbol serviceType)) {
+            return Optional.empty();
+        }
+
+        MethodSymbol methodSymbol = serviceType.methods().get("createInterceptors");
+        if (methodSymbol == null) {
+            return Optional.empty();
+        }
+        return methodSymbol.typeDescriptor().returnTypeDescriptor();
     }
 }

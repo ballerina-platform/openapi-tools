@@ -48,6 +48,8 @@ import io.ballerina.openapi.service.mapper.model.ServiceObjectType;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Project;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -139,7 +141,7 @@ public final class ServiceToOpenAPIMapper {
                 if (isHttpService(serviceNode, semanticModel)) {
                     // Here check the service is related to the http
                     // module by checking listener type that attached to service endpoints.
-                    ServiceNode service = new ServiceDeclaration(serviceNode);
+                    ServiceNode service = new ServiceDeclaration(serviceNode, semanticModel);
                     Optional<Symbol> serviceSymbol = service.getSymbol(semanticModel);
                     if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
                         addService(serviceName, availableService, service, servicesToGenerate, serviceSymbol.get());
@@ -147,6 +149,7 @@ public final class ServiceToOpenAPIMapper {
                 }
             } else if (syntaxKind.equals(SyntaxKind.TYPE_DEFINITION)) {
                 Node descriptorNode = ((TypeDefinitionNode) node).typeDescriptor();
+                // TODO: Distinct service types should work here
                 if (descriptorNode.kind().equals(SyntaxKind.OBJECT_TYPE_DESC) &&
                         isHttpServiceContract(descriptorNode, semanticModel)) {
                     ServiceNode service = new ServiceObjectType((TypeDefinitionNode) node);
@@ -160,7 +163,7 @@ public final class ServiceToOpenAPIMapper {
 
     public static Optional<ServiceNode> getServiceNode(Node node, SemanticModel semanticModel) {
         if (node instanceof ServiceDeclarationNode serviceNode && isHttpService(serviceNode, semanticModel)) {
-            return Optional.of(new ServiceDeclaration(serviceNode));
+            return Optional.of(new ServiceDeclaration(serviceNode, semanticModel));
         } else if (node instanceof TypeDefinitionNode serviceTypeNode &&
                 serviceTypeNode.typeDescriptor() instanceof ObjectTypeDescriptorNode serviceNode &&
                 isHttpServiceContract(serviceNode, semanticModel)) {
@@ -234,6 +237,11 @@ public final class ServiceToOpenAPIMapper {
                 ServersMapper serversMapperImpl = serviceMapperFactory.getServersMapper(listeners, serviceDefinition);
                 serversMapperImpl.setServers();
 
+                if (oasAvailableViaServiceContract(serviceDefinition)) {
+                    return updateOasResultWithServiceContract((ServiceDeclaration) serviceDefinition, oasResult,
+                            semanticModel, moduleMemberVisitor, listeners, serviceDefinition);
+                }
+
                 convertServiceToOpenAPI(serviceDefinition, serviceMapperFactory);
 
                 ConstraintMapper constraintMapper = serviceMapperFactory.getConstraintMapper();
@@ -252,6 +260,38 @@ public final class ServiceToOpenAPIMapper {
         } else {
             return oasResult;
         }
+    }
+
+    static boolean oasAvailableViaServiceContract(ServiceNode serviceNode) {
+        return serviceNode.kind().equals(ServiceNode.Kind.SERVICE_DECLARATION) &&
+                ((ServiceDeclaration) serviceNode).implementsServiceContract();
+    }
+
+    private static OASResult updateOasResultWithServiceContract(ServiceDeclaration serviceDeclaration,
+                                                                OASResult oasResult, SemanticModel semanticModel,
+                                                                ModuleMemberVisitor moduleMemberVisitor,
+                                                                Set<ListenerDeclarationNode> listeners,
+                                                                ServiceNode serviceDefinition) {
+        Optional<OpenAPI> openAPI = serviceDeclaration.getOpenAPIFromServiceContract(semanticModel);
+        if (openAPI.isEmpty()) {
+            return oasResult;
+        }
+
+        OpenAPI openApiFromServiceContract = openAPI.get();
+        if (oasResult.getOpenAPI().isEmpty()) {
+            oasResult.setOpenAPI(openApiFromServiceContract);
+            return oasResult;
+        }
+
+        // Copy info
+        Info existingOpenAPIInfo = oasResult.getOpenAPI().get().getInfo();
+        openApiFromServiceContract.setInfo(existingOpenAPIInfo);
+
+        // Copy servers
+        List<Server> existingServers = oasResult.getOpenAPI().get().getServers();
+        openApiFromServiceContract.setServers(existingServers);
+        oasResult.setOpenAPI(openApiFromServiceContract);
+        return oasResult;
     }
 
     /**

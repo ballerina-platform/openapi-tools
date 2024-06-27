@@ -118,7 +118,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 extractServiceNodes(syntaxTree.rootNode(), services, semanticModel);
                 OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder =
                         new OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
-                ServiceNode service = new ServiceDeclaration(serviceNode);
+                ServiceNode service = new ServiceDeclaration(serviceNode, semanticModel);
                 builder.setServiceNode(service).setSemanticModel(semanticModel)
                         .setOpenApiFileName(services.get(serviceSymbol.get().hashCode()))
                         .setBallerinaFilePath(inputPath).setProject(project);
@@ -189,7 +189,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                     // module by checking listener type that attached to service endpoints.
                     Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
                     if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
-                        String service = (new ServiceDeclaration(serviceNode)).absoluteResourcePath();
+                        String service = (new ServiceDeclaration(serviceNode, semanticModel)).absoluteResourcePath();
                         String updateServiceName = service;
                         if (allServices.contains(service)) {
                             updateServiceName = service + HYPHEN + serviceSymbol.get().hashCode();

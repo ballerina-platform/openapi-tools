@@ -19,7 +19,6 @@ package io.ballerina.openapi.service.mapper.interceptor.pipeline;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
-import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
@@ -99,14 +98,8 @@ public class InterceptorPipeline {
     private static List<Interceptor> buildInterceptors(ServiceNode serviceDefinition, AdditionalData additionalData) {
         SemanticModel semanticModel = additionalData.semanticModel();
         ModuleMemberVisitor moduleMemberVisitor = additionalData.moduleMemberVisitor();
-        Optional<Symbol> optServiceSymbol = serviceDefinition.getSymbol(semanticModel);
-        if (optServiceSymbol.isEmpty() ||
-                !(optServiceSymbol.get() instanceof ServiceDeclarationSymbol serviceSymbol)) {
-            return new ArrayList<>();
-        }
 
-        Optional<TypeSymbol> optInterceptorReturn = serviceSymbol.methods().get("createInterceptors").
-                typeDescriptor().returnTypeDescriptor();
+        Optional<TypeSymbol> optInterceptorReturn = serviceDefinition.getInterceptorReturnType(semanticModel);
         if (optInterceptorReturn.isEmpty()) {
             return new ArrayList<>();
         }

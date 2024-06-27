@@ -19,9 +19,9 @@ package io.ballerina.openapi.service.mapper;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
-import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
@@ -63,6 +63,7 @@ import static io.ballerina.openapi.service.mapper.Constants.HTTP;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_SERVICE_CONFIG;
 import static io.ballerina.openapi.service.mapper.Constants.INTERCEPTABLE_SERVICE;
 import static io.ballerina.openapi.service.mapper.Constants.TREAT_NILABLE_AS_OPTIONAL;
+import static io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper.oasAvailableViaServiceContract;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.extractServiceAnnotationDetails;
 
 /**
@@ -87,7 +88,10 @@ public class ServiceMapperFactory {
         this.additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
         this.treatNilableAsOptional = isTreatNilableAsOptionalParameter(serviceDefinition);
         this.openAPI = openAPI;
-        this.interceptorPipeline = getInterceptorPipeline(serviceDefinition, additionalData);
+        // Skip interceptor pipeline build for services implemented via service contract
+        // since the OpenAPI generation with interceptors is already handled by the service contract
+        this.interceptorPipeline = oasAvailableViaServiceContract(serviceDefinition) ? null :
+                getInterceptorPipeline(serviceDefinition, additionalData);
 
         this.typeMapper = new TypeMapperImpl(getComponents(openAPI), additionalData);
         this.constraintMapper = new ConstraintMapperImpl(openAPI, moduleMemberVisitor, diagnostics);
@@ -193,20 +197,19 @@ public class ServiceMapperFactory {
     }
 
     private static boolean isInterceptableService(ServiceNode serviceDefinition, SemanticModel semanticModel) {
-        boolean[] isInterceptable = {false};
-        serviceDefinition.getSymbol(semanticModel).ifPresent(symbol -> {
-            if (symbol instanceof ServiceDeclarationSymbol serviceSymbol) {
-                serviceSymbol.typeDescriptor().ifPresent(serviceType ->
-                    semanticModel.types().getTypeByName(BALLERINA, HTTP, EMPTY, INTERCEPTABLE_SERVICE).ifPresent(
-                        typeSymbol -> {
-                            if (typeSymbol instanceof TypeDefinitionSymbol interceptableServiceType) {
-                                isInterceptable[0] = serviceType.subtypeOf(interceptableServiceType.typeDescriptor());
-                            }
-                        }
-                    ));
-            }
-        });
-        return isInterceptable[0];
+        Optional<TypeSymbol> serviceType = serviceDefinition.typeDescriptor(semanticModel);
+        if (serviceType.isEmpty()) {
+            return false;
+        }
+
+        Optional<Symbol> interceptableServiceType = semanticModel.types().getTypeByName(BALLERINA, HTTP, EMPTY,
+                INTERCEPTABLE_SERVICE);
+        if (interceptableServiceType.isEmpty() || !(interceptableServiceType.get() instanceof TypeDefinitionSymbol
+                interceptableServiceTypeSymbol)) {
+            return false;
+        }
+
+        return serviceType.get().subtypeOf(interceptableServiceTypeSymbol.typeDescriptor());
     }
 
     private static InterceptorPipeline getInterceptorPipeline(ServiceNode serviceDefinition,

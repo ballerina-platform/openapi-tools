@@ -2,6 +2,7 @@ package io.ballerina.openapi.service.mapper.model;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
@@ -24,6 +25,8 @@ public interface ServiceNode {
 
     Optional<Symbol> getSymbol(SemanticModel semanticModel);
 
+    Optional<TypeSymbol> typeDescriptor(SemanticModel semanticModel);
+
     SeparatedNodeList<ExpressionNode> expressions();
 
     String absoluteResourcePath();
@@ -39,4 +42,6 @@ public interface ServiceNode {
     void updateAnnotations(NodeList<AnnotationNode> newAnnotations);
 
     ModuleMemberDeclarationNode getInternalNode();
+
+    Optional<TypeSymbol> getInterceptorReturnType(SemanticModel semanticModel);
 }

@@ -44,6 +44,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.ballerina.openapi.service.mapper.hateoas.Constants.BALLERINA_LINKEDTO_KEYWORD;
 import static io.ballerina.openapi.service.mapper.hateoas.Constants.OPENAPI_LINK_DEFAULT_REL;
@@ -144,11 +146,24 @@ public class HateoasMapperImpl implements HateoasMapper {
             return;
         }
         for (Map.Entry<String, ApiResponse> entry : apiResponses.entrySet()) {
+            if (!hasOnlyDigits(entry.getKey())) {
+                continue;
+            }
             int statusCode = Integer.parseInt(entry.getKey());
             if (statusCode >= 200 && statusCode < 300) {
                 entry.getValue().setLinks(swaggerLinks);
             }
         }
+    }
+
+    private static boolean hasOnlyDigits(String stringValue) {
+        String regex = "[0-9]+";
+        Pattern p = Pattern.compile(regex);
+        if (Objects.isNull(stringValue)) {
+            return false;
+        }
+        Matcher m = p.matcher(stringValue);
+        return m.matches();
     }
 
     private List<HateoasLink> getLinks(String linkedTo) {
