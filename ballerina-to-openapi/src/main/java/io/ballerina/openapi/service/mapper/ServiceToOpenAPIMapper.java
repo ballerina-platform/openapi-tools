@@ -240,7 +240,7 @@ public final class ServiceToOpenAPIMapper {
 
                 if (oasAvailableViaServiceContract(serviceDefinition)) {
                     return updateOasResultWithServiceContract((ServiceDeclaration) serviceDefinition, oasResult,
-                            semanticModel, moduleMemberVisitor, listeners, serviceDefinition);
+                            semanticModel);
                 }
 
                 convertServiceToOpenAPI(serviceDefinition, serviceMapperFactory);
@@ -272,10 +272,7 @@ public final class ServiceToOpenAPIMapper {
     }
 
     private static OASResult updateOasResultWithServiceContract(ServiceDeclaration serviceDeclaration,
-                                                                OASResult oasResult, SemanticModel semanticModel,
-                                                                ModuleMemberVisitor moduleMemberVisitor,
-                                                                Set<ListenerDeclarationNode> listeners,
-                                                                ServiceNode serviceDefinition) {
+                                                                OASResult oasResult, SemanticModel semanticModel) {
         Optional<OpenAPI> openAPI = serviceDeclaration.getOpenAPIFromServiceContract(semanticModel);
         if (openAPI.isEmpty()) {
             return oasResult;

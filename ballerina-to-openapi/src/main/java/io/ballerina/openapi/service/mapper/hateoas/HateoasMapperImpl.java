@@ -157,7 +157,7 @@ public class HateoasMapperImpl implements HateoasMapper {
     }
 
     private static boolean hasOnlyDigits(String stringValue) {
-        String regex = "[0-9]+";
+        String regex = "\\d+";
         Pattern p = Pattern.compile(regex);
         if (Objects.isNull(stringValue)) {
             return false;

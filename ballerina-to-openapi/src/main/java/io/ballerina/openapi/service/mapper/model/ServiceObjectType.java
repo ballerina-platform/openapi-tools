@@ -80,12 +80,11 @@ public class ServiceObjectType implements ServiceNode {
         }
 
         for (MappingFieldNode field : serviceConfig.get().fields()) {
-            if (field.kind() == SyntaxKind.SPECIFIC_FIELD) {
-                if (((SpecificFieldNode) field).fieldName().toString().trim().equals("basePath")) {
-                    Optional<ExpressionNode> expressionNode = ((SpecificFieldNode) field).valueExpr();
-                    if (expressionNode.isPresent() && expressionNode.get() instanceof BasicLiteralNode literalNode) {
-                        return literalNode.literalToken().text().trim().replaceAll("\"", "");
-                    }
+            if (field.kind() == SyntaxKind.SPECIFIC_FIELD &&
+                    ((SpecificFieldNode) field).fieldName().toString().trim().equals("basePath")) {
+                Optional<ExpressionNode> expressionNode = ((SpecificFieldNode) field).valueExpr();
+                if (expressionNode.isPresent() && expressionNode.get() instanceof BasicLiteralNode literalNode) {
+                    return literalNode.literalToken().text().trim().replaceAll("\"", "");
                 }
             }
         }
