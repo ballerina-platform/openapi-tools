@@ -35,7 +35,6 @@ dependencies {
     testImplementation group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
     testRuntimeOnly group: 'commons-io', name: 'commons-io', version: "${commonsIoVersion}"
     testRuntimeOnly project(':ballerina-to-openapi')
-    testRuntimeOnly project(':openapi-extension')
     testImplementation group: 'org.testng', name: 'testng', version: "${testngVersion}"
 }
 
