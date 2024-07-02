@@ -18,11 +18,11 @@
 package io.ballerina.openapi.service.mapper.response;
 
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.openapi.service.mapper.ServiceMapperFactory;
 import io.ballerina.openapi.service.mapper.interceptor.model.ResponseInfo;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
+import io.ballerina.openapi.service.mapper.model.ResourceFunction;
 
 /**
  * This {@link ResponseMapperWithInterceptors} class is the implementation of the {@link ResponseMapper} interface.
@@ -35,7 +35,7 @@ public class ResponseMapperWithInterceptors extends DefaultResponseMapper {
 
     private final ResponseInfo responseInfo;
 
-    public ResponseMapperWithInterceptors(FunctionDefinitionNode resourceNode, OperationInventory operationInventory,
+    public ResponseMapperWithInterceptors(ResourceFunction resourceNode, OperationInventory operationInventory,
                                           AdditionalData additionalData, ResponseInfo responseInfo,
                                           ServiceMapperFactory serviceMapperFactory) {
         super(resourceNode, operationInventory, additionalData, serviceMapperFactory);
@@ -43,7 +43,7 @@ public class ResponseMapperWithInterceptors extends DefaultResponseMapper {
     }
 
     @Override
-    protected TypeSymbol getReturnTypeSymbol(FunctionDefinitionNode resourceNode) {
+    protected TypeSymbol getReturnTypeSymbol(ResourceFunction resourceNode) {
         return responseInfo.getReturnTypesFromTargetResource(semanticModel);
     }
 

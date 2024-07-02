@@ -18,7 +18,7 @@
 
 package io.ballerina.openapi.service.mapper.hateoas;
 
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.swagger.v3.oas.models.OpenAPI;
 
 /**
@@ -34,5 +34,5 @@ public interface HateoasMapper {
      * @param serviceNode Specific service declaration node
      * @param openAPI Current OpenAPI context
      */
-    void setOpenApiLinks(ServiceDeclarationNode serviceNode, OpenAPI openAPI);
+    void setOpenApiLinks(ServiceNode serviceNode, OpenAPI openAPI);
 }

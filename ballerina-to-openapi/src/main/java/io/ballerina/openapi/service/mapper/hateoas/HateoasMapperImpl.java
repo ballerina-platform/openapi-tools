@@ -19,10 +19,14 @@
 package io.ballerina.openapi.service.mapper.hateoas;
 
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.MethodDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.Constants;
+import io.ballerina.openapi.service.mapper.model.ResourceFunction;
+import io.ballerina.openapi.service.mapper.model.ResourceFunctionDeclaration;
+import io.ballerina.openapi.service.mapper.model.ResourceFunctionDefinition;
+import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -40,6 +44,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.ballerina.openapi.service.mapper.hateoas.Constants.BALLERINA_LINKEDTO_KEYWORD;
 import static io.ballerina.openapi.service.mapper.hateoas.Constants.OPENAPI_LINK_DEFAULT_REL;
@@ -55,52 +61,67 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getVal
 public class HateoasMapperImpl implements HateoasMapper {
 
     @Override
-    public void setOpenApiLinks(ServiceDeclarationNode serviceNode, OpenAPI openAPI) {
+    public void setOpenApiLinks(ServiceNode serviceNode, OpenAPI openAPI) {
         Paths paths = openAPI.getPaths();
         Service hateoasService = extractHateoasMetaInfo(serviceNode);
         if (hateoasService.getHateoasResourceMapping().isEmpty()) {
             return;
         }
         for (Node node: serviceNode.members()) {
-            if (!node.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
+            if (!node.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION) &&
+                    !node.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DECLARATION)) {
                 continue;
             }
-            FunctionDefinitionNode resource = (FunctionDefinitionNode) node;
-            Optional<ApiResponses> responses = getApiResponsesForResource(resource, paths);
+            Optional<ResourceFunction> resource = getResourceFunction(node);
+            if (resource.isEmpty()) {
+                continue;
+            }
+            Optional<ApiResponses> responses = getApiResponsesForResource(resource.get(), paths);
             if (responses.isEmpty()) {
                 continue;
             }
-            setOpenApiLinksInApiResponse(hateoasService, resource, responses.get());
+            setOpenApiLinksInApiResponse(hateoasService, resource.get(), responses.get());
         }
     }
 
-    private Service extractHateoasMetaInfo(ServiceDeclarationNode serviceNode) {
+    private Service extractHateoasMetaInfo(ServiceNode serviceNode) {
         Service service = new Service();
-        for (Node child : serviceNode.children()) {
-            if (SyntaxKind.RESOURCE_ACCESSOR_DEFINITION.equals(child.kind())) {
-                FunctionDefinitionNode resourceFunction = (FunctionDefinitionNode) child;
-                String resourceMethod = resourceFunction.functionName().text();
-                String operationId = MapperCommonUtils.getOperationId(resourceFunction);
-                Optional<String> resourceName = getResourceConfigAnnotation(resourceFunction)
-                        .flatMap(resourceConfig -> getValueForAnnotationFields(resourceConfig, "name"));
-                if (resourceName.isEmpty()) {
-                    continue;
-                }
-                String cleanedResourceName = resourceName.get().replaceAll("\"", "");
-                Resource hateoasResource = new Resource(resourceMethod, operationId);
-                service.addResource(cleanedResourceName, hateoasResource);
-            }
+        for (Node member : serviceNode.members()) {
+            Optional<ResourceFunction> resourceFunction = getResourceFunction(member);
+            resourceFunction.ifPresent(function -> addResourceToService(function, service));
         }
         return service;
     }
 
-    private Optional<ApiResponses> getApiResponsesForResource(FunctionDefinitionNode resource, Paths paths) {
+    private void addResourceToService(ResourceFunction resourceFunction, Service service) {
+        String resourceMethod = resourceFunction.functionName();
+        String operationId = MapperCommonUtils.getOperationId(resourceFunction);
+        Optional<String> resourceName = getResourceConfigAnnotation(resourceFunction)
+                .flatMap(resourceConfig -> getValueForAnnotationFields(resourceConfig, "name"));
+        if (resourceName.isEmpty()) {
+            return;
+        }
+        String cleanedResourceName = resourceName.get().replaceAll("\"", "");
+        Resource hateoasResource = new Resource(resourceMethod, operationId);
+        service.addResource(cleanedResourceName, hateoasResource);
+    }
+
+    private static Optional<ResourceFunction> getResourceFunction(Node member) {
+        if (SyntaxKind.RESOURCE_ACCESSOR_DEFINITION.equals(member.kind())) {
+            return Optional.of(new ResourceFunctionDefinition((FunctionDefinitionNode) member));
+        } else if (SyntaxKind.RESOURCE_ACCESSOR_DECLARATION.equals(member.kind())) {
+            return Optional.of(new ResourceFunctionDeclaration((MethodDeclarationNode) member));
+        }
+        return Optional.empty();
+    }
+
+    private Optional<ApiResponses> getApiResponsesForResource(ResourceFunction resource, Paths paths) {
         String resourcePath = MapperCommonUtils.unescapeIdentifier(generateRelativePath(resource));
         if (!paths.containsKey(resourcePath)) {
             return Optional.empty();
         }
         PathItem openApiResource = paths.get(resourcePath);
-        String httpMethod = resource.functionName().toString().trim();
+        String httpMethod = resource.functionName();
         Operation operation = getOperation(httpMethod, openApiResource);
         return Objects.isNull(operation) ? Optional.empty() : Optional.ofNullable(operation.getResponses());
     }
@@ -118,18 +139,31 @@ public class HateoasMapperImpl implements HateoasMapper {
         };
     }
 
-    private void setOpenApiLinksInApiResponse(Service hateoasService, FunctionDefinitionNode resource,
+    private void setOpenApiLinksInApiResponse(Service hateoasService, ResourceFunction resource,
                                               ApiResponses apiResponses) {
         Map<String, Link> swaggerLinks = mapHateoasLinksToOpenApiLinks(hateoasService, resource);
         if (swaggerLinks.isEmpty()) {
             return;
         }
         for (Map.Entry<String, ApiResponse> entry : apiResponses.entrySet()) {
+            if (!hasOnlyDigits(entry.getKey())) {
+                continue;
+            }
             int statusCode = Integer.parseInt(entry.getKey());
             if (statusCode >= 200 && statusCode < 300) {
                 entry.getValue().setLinks(swaggerLinks);
             }
         }
+    }
+
+    private static boolean hasOnlyDigits(String stringValue) {
+        String regex = "\\d+";
+        Pattern p = Pattern.compile(regex);
+        if (Objects.isNull(stringValue)) {
+            return false;
+        }
+        Matcher m = p.matcher(stringValue);
+        return m.matches();
     }
 
     private List<HateoasLink> getLinks(String linkedTo) {
@@ -162,7 +196,7 @@ public class HateoasMapperImpl implements HateoasMapper {
     }
 
     private Map<String, Link> mapHateoasLinksToOpenApiLinks(Service hateoasService,
-                                                            FunctionDefinitionNode resourceFunction) {
+                                                            ResourceFunction resourceFunction) {
         Optional<String> linkedTo = getResourceConfigAnnotation(resourceFunction)
                 .flatMap(resourceConfig -> getValueForAnnotationFields(resourceConfig, BALLERINA_LINKEDTO_KEYWORD));
         if (linkedTo.isEmpty()) {

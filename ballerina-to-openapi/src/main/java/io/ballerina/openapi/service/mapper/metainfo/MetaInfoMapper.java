@@ -18,7 +18,7 @@
 
 package io.ballerina.openapi.service.mapper.metainfo;
 
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.swagger.v3.oas.models.OpenAPI;
 
 /**
@@ -27,5 +27,5 @@ import io.swagger.v3.oas.models.OpenAPI;
  * @since 2.0.1
  */
 public interface MetaInfoMapper {
-    void setResourceMetaData(OpenAPI openAPI, ServiceDeclarationNode serviceNode);
+    void setResourceMetaData(OpenAPI openAPI, ServiceNode serviceNode);
 }

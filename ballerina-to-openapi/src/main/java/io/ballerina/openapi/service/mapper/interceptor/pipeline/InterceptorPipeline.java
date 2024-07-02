@@ -19,13 +19,11 @@ package io.ballerina.openapi.service.mapper.interceptor.pipeline;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ResourceMethodSymbol;
-import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
@@ -40,6 +38,7 @@ import io.ballerina.openapi.service.mapper.interceptor.types.ResponseErrorInterc
 import io.ballerina.openapi.service.mapper.interceptor.types.ResponseInterceptor;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.ServiceNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +68,7 @@ public class InterceptorPipeline {
         diagnostics = additionalData.diagnostics();
     }
 
-    public static InterceptorPipeline build(ServiceDeclarationNode serviceDefinition, AdditionalData additionalData) {
+    public static InterceptorPipeline build(ServiceNode serviceDefinition, AdditionalData additionalData) {
         List<Interceptor> interceptors = buildInterceptors(serviceDefinition, additionalData);
 
         if (!interceptors.isEmpty()) {
@@ -96,18 +95,11 @@ public class InterceptorPipeline {
         return null;
     }
 
-    private static List<Interceptor> buildInterceptors(ServiceDeclarationNode serviceDefinition,
-                                                       AdditionalData additionalData) {
+    private static List<Interceptor> buildInterceptors(ServiceNode serviceDefinition, AdditionalData additionalData) {
         SemanticModel semanticModel = additionalData.semanticModel();
         ModuleMemberVisitor moduleMemberVisitor = additionalData.moduleMemberVisitor();
-        Optional<Symbol> optServiceSymbol = semanticModel.symbol(serviceDefinition);
-        if (optServiceSymbol.isEmpty() ||
-                !(optServiceSymbol.get() instanceof ServiceDeclarationSymbol serviceSymbol)) {
-            return new ArrayList<>();
-        }
 
-        Optional<TypeSymbol> optInterceptorReturn = serviceSymbol.methods().get("createInterceptors").
-                typeDescriptor().returnTypeDescriptor();
+        Optional<TypeSymbol> optInterceptorReturn = serviceDefinition.getInterceptorReturnType(semanticModel);
         if (optInterceptorReturn.isEmpty()) {
             return new ArrayList<>();
         }

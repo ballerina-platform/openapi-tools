@@ -24,9 +24,9 @@ import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
+import io.ballerina.openapi.service.mapper.model.ResourceFunction;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.utils.MediaTypeUtils;
 import io.swagger.v3.oas.models.media.Content;
@@ -58,7 +58,7 @@ public class RequestBodyMapper {
     private final String mediaTypeSubTypePrefix;
 
     public RequestBodyMapper(ParameterSymbol reqParameter, AnnotationNode annotation,
-                             OperationInventory operationInventory, FunctionDefinitionNode resourceNode,
+                             OperationInventory operationInventory, ResourceFunction resourceNode,
                              Map<String, String> apiDocs, AdditionalData additionalData, TypeMapper typeMapper) {
         this.typeMapper = typeMapper;
         this.semanticModel = additionalData.semanticModel();

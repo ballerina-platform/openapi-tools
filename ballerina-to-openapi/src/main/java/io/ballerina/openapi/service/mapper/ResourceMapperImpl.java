@@ -20,7 +20,6 @@ package io.ballerina.openapi.service.mapper;
 import io.ballerina.compiler.api.symbols.Documentable;
 import io.ballerina.compiler.api.symbols.Documentation;
 import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.Token;
@@ -28,6 +27,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
+import io.ballerina.openapi.service.mapper.model.ResourceFunction;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapper;
 import io.ballerina.openapi.service.mapper.parameter.ParameterMapperException;
 import io.ballerina.openapi.service.mapper.response.ResponseMapper;
@@ -56,13 +56,13 @@ public class ResourceMapperImpl implements ResourceMapper {
     private final Paths pathObject = new Paths();
     private final AdditionalData additionalData;
     private final OpenAPI openAPI;
-    private final List<FunctionDefinitionNode> resources;
+    private final List<ResourceFunction> resources;
     private final ServiceMapperFactory serviceMapperFactory;
 
     /**
      * Initializes a resource parser for openApi.
      */
-    ResourceMapperImpl(OpenAPI openAPI, List<FunctionDefinitionNode> resources, AdditionalData additionalData,
+    ResourceMapperImpl(OpenAPI openAPI, List<ResourceFunction> resources, AdditionalData additionalData,
                        ServiceMapperFactory serviceMapperFactory) {
         this.openAPI = openAPI;
         this.resources = resources;
@@ -71,15 +71,15 @@ public class ResourceMapperImpl implements ResourceMapper {
     }
 
     public void setOperation() {
-        for (FunctionDefinitionNode resource : resources) {
+        for (ResourceFunction resource : resources) {
             addResourceMapping(resource);
         }
         openAPI.setPaths(pathObject);
     }
 
-    private void addResourceMapping(FunctionDefinitionNode resource) {
+    private void addResourceMapping(ResourceFunction resource) {
         String path = MapperCommonUtils.unescapeIdentifier(generateRelativePath(resource));
-        String httpMethod = resource.functionName().toString().trim();
+        String httpMethod = resource.functionName();
         if (httpMethod.equals(String.format("'%s", DEFAULT)) || httpMethod.equals(DEFAULT)) {
             ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_100,
                     resource.location());
@@ -158,7 +158,7 @@ public class ResourceMapperImpl implements ResourceMapper {
      *
      * @return Operation Adaptor object of given resource
      */
-    private Optional<OperationInventory> convertResourceToOperation(FunctionDefinitionNode resourceFunction,
+    private Optional<OperationInventory> convertResourceToOperation(ResourceFunction resourceFunction,
                                                                     String httpMethod, String generateRelativePath) {
         OperationInventory operationInventory = new OperationInventory();
         operationInventory.setHttpOperation(httpMethod);
@@ -185,12 +185,12 @@ public class ResourceMapperImpl implements ResourceMapper {
     /**
      * Filter the API documentations from resource function node.
      */
-    private Map<String, String> listAPIDocumentations(FunctionDefinitionNode resource,
+    private Map<String, String> listAPIDocumentations(ResourceFunction resource,
                                                       OperationInventory operationInventory) {
 
         Map<String, String> apiDocs = new HashMap<>();
         if (resource.metadata().isPresent()) {
-            Optional<Symbol> resourceSymbol = additionalData.semanticModel().symbol(resource);
+            Optional<Symbol> resourceSymbol = resource.getSymbol(additionalData.semanticModel());
             if (resourceSymbol.isPresent()) {
                 Symbol symbol = resourceSymbol.get();
                 Optional<Documentation> documentation = ((Documentable) symbol).documentation();
@@ -208,7 +208,7 @@ public class ResourceMapperImpl implements ResourceMapper {
         return apiDocs;
     }
 
-    private String generateRelativePath(FunctionDefinitionNode resource) {
+    private String generateRelativePath(ResourceFunction resource) {
 
         StringBuilder relativePath = new StringBuilder();
         relativePath.append("/");
