@@ -214,7 +214,8 @@ public class OpenApiCmd implements BLauncherCmd {
 
             if (generateServiceType && generateServiceContract) {
                 // Exit the code generation process
-                outStream.println("'--with-service-type' and '--with-service-contract' options cannot be used together.");
+                outStream.println("'--with-service-type' and '--with-service-contract' options " +
+                        "cannot be used together.");
                 exitError(this.exitWhenFinish);
             }
 
