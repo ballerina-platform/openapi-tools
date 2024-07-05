@@ -273,7 +273,7 @@ public class ServersMapperImpl implements ServersMapper {
     }
 
     private static Server getDefaultServerWithBasePath(String serviceBasePath) {
-        String serverUrl = String.format("{server}:{port}%s", serviceBasePath);
+        String serverUrl = String.format("http://{server}:{port}%s", serviceBasePath);
         ServerVariables serverVariables = new ServerVariables();
 
         ServerVariable serverUrlVariable = new ServerVariable();

@@ -28,6 +28,7 @@ import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.MethodDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
@@ -36,6 +37,7 @@ import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.service.mapper.model.ResourceFunction;
+import io.ballerina.openapi.service.mapper.model.ResourceFunctionDeclaration;
 import io.ballerina.openapi.service.mapper.model.ResourceFunctionDefinition;
 import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -75,15 +77,13 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
         NodeList<Node> functions = serviceNode.members();
         Map<String, ResourceMetaInfoAnnotation> resourceMetaData = new HashMap<>();
         for (Node function : functions) {
-            SyntaxKind kind = function.kind();
-            if (kind.equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
-                FunctionDefinitionNode resourceNode = (FunctionDefinitionNode) function;
-                Optional<MetadataNode> optMetadata = resourceNode.metadata();
+            Optional<ResourceFunction> resourceFunction = getResourceFunction(function);
+            if (resourceFunction.isPresent()) {
+                Optional<MetadataNode> optMetadata = resourceFunction.get().metadata();
                 if (optMetadata.isEmpty()) {
                     continue;
                 }
-                ResourceFunction resourceFunction = new ResourceFunctionDefinition(resourceNode);
-                String operationId = getOperationId(resourceFunction);
+                String operationId = getOperationId(resourceFunction.get());
                 ResourceMetaInfoAnnotation.Builder resMetaInfoBuilder = new ResourceMetaInfoAnnotation.Builder();
                 MetadataNode metadataNode = optMetadata.get();
                 NodeList<AnnotationNode> annotations = metadataNode.annotations();
@@ -133,6 +133,15 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
 
         Paths paths = openAPI.getPaths();
         updateOASWithMetaData(resourceMetaData, paths);
+    }
+
+    private static Optional<ResourceFunction> getResourceFunction(Node node) {
+        if (node.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
+            return Optional.of(new ResourceFunctionDefinition((FunctionDefinitionNode) node));
+        } else if (node.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DECLARATION)) {
+            return Optional.of(new ResourceFunctionDeclaration((MethodDeclarationNode) node));
+        }
+        return Optional.empty();
     }
 
     private static void handleExamples(ResourceMetaInfoAnnotation.Builder resMetaInfoBuilder,

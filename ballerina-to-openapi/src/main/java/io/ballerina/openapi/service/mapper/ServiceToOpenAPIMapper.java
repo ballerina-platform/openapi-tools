@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -289,10 +290,25 @@ public final class ServiceToOpenAPIMapper {
         openApiFromServiceContract.setInfo(existingOpenAPIInfo);
 
         // Copy servers
+        String basePath = extractBasePath(openApiFromServiceContract);
         List<Server> existingServers = oasResult.getOpenAPI().get().getServers();
+        existingServers.forEach(
+                server -> {
+                    server.setUrl(server.getUrl() + basePath);
+                }
+        );
         openApiFromServiceContract.setServers(existingServers);
         oasResult.setOpenAPI(openApiFromServiceContract);
         return oasResult;
+    }
+
+    private static String extractBasePath(OpenAPI openApiFromServiceContract) {
+        List<Server> servers = openApiFromServiceContract.getServers();
+        if (Objects.isNull(servers) || servers.isEmpty()) {
+            return null;
+        }
+        String[] parts = servers.get(0).getUrl().split("\\{server}:\\{port}");
+        return servers.get(0).getUrl().split("\\{server}:\\{port}").length == 2 ? parts[1] : "";
     }
 
     /**
