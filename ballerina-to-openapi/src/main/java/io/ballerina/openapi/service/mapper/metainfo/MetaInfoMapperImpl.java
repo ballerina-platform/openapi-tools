@@ -67,6 +67,7 @@ import static io.ballerina.openapi.service.mapper.Constants.EXAMPLES;
 import static io.ballerina.openapi.service.mapper.Constants.JSON_EXTENSION;
 import static io.ballerina.openapi.service.mapper.Constants.OPENAPI_RESOURCE_INFO;
 import static io.ballerina.openapi.service.mapper.Constants.OPERATION_ID;
+import static io.ballerina.openapi.service.mapper.Constants.REQUEST_ATTRIBUTE;
 import static io.ballerina.openapi.service.mapper.Constants.RESPONSE_ATTRIBUTE;
 import static io.ballerina.openapi.service.mapper.Constants.SUMMARY;
 import static io.ballerina.openapi.service.mapper.Constants.TAGS;
@@ -174,10 +175,10 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                     } catch (JsonProcessingException e) {
                         DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_130;
                         ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, mapNode.location(),
-                                e.getMessage());
+                                e.getOriginalMessage());
                         diagnostics.add(diagnostic);
                     }
-                } else if (fName.equals("requestBody")) {
+                } else if (fName.equals(REQUEST_ATTRIBUTE)) {
                     Optional<ExpressionNode> optExamplesValue = resultField1.valueExpr();
                     if (optExamplesValue.isEmpty()) {
                         continue;
@@ -191,7 +192,7 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                     } catch (JsonProcessingException e) {
                         DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_130;
                         ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, mapNode.location(),
-                                e.getMessage());
+                                e.getOriginalMessage());
                         diagnostics.add(diagnostic);
                     }
                 }
@@ -284,7 +285,11 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                                     Map<String, Object> valueMap = new HashMap<>(objectMap);
                                     modifiedExample.put(exampleName, valueMap);
                                 } catch (IOException e) {
-                                    throw new RuntimeException(e);
+                                    DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_130;
+                                    ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, location,
+                                            e.toString());
+                                    //todo note
+                                    diagnostics.add(diagnostic);
                                 }
                             }
                         }
@@ -299,7 +304,6 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
     private static Path resolveExampleFilePath(Path ballerinaFilePath, String jsonFilePath, Location location,
                                                String exampleName) {
         if (jsonFilePath.isBlank()) {
-            //Add diagnostic
             return null;
         }
         if (!(jsonFilePath.endsWith(JSON_EXTENSION))) {
@@ -328,6 +332,9 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
         }
     }
 
+    /**
+     * Update OAS with the metadata by traversing each operation.
+     */
     private static void updateOASWithMetaData(Map<String, ResourceMetaInfoAnnotation> resourceMetaData, Paths paths) {
         if (paths != null) {
             paths.forEach((path, pathItem) -> {
@@ -375,6 +382,9 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
         }
     }
 
+    /**
+     * Update OAS operation with the given resource metadata.
+     */
     private static void updateOASOperationWithMetaData(Map<String, ResourceMetaInfoAnnotation> resourceMetaData,
                                                        Operation operation) {
         String operationId = operation.getOperationId();
@@ -425,32 +435,41 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
             }
             operation.setResponses(responses);
 
+            // Request body example payload mapping
             RequestBody requestBody = operation.getRequestBody();
-            Content requestBodyContent = requestBody.getContent();
-            Map<String, Map<String, Object>> requestExamples = resourceMetaInfo.getRequestExamples();
-
-            for (Map.Entry<String, Map<String, Object>> example: requestExamples.entrySet()) {
-                MediaType oasMediaType = requestBodyContent.get(example.getKey());
-                if (oasMediaType == null) {
-                    continue;
-                }
-                Map<String, Example> exampleMap = new HashMap<>();
-
-                for (Map.Entry<String, Object> exampleValuePair: example.getValue().entrySet()) {
-                    Object value = exampleValuePair.getValue();
-                    if (value instanceof LinkedHashMap<?, ?> exampleValue) {
-                        value = exampleValue.get(VALUE);
-                    }
-                    Example oasExample = new Example();
-                    oasExample.setValue(value);
-                    exampleMap.put(exampleValuePair.getKey(), oasExample);
-                }
-                oasMediaType.setExamples(exampleMap);
-                requestBodyContent.put(example.getKey().trim(), oasMediaType);
+            if (requestBody != null) {
+                updateRequestBodyExample(resourceMetaInfo, requestBody);
+                operation.setRequestBody(requestBody);
             }
-            requestBody.setContent(requestBodyContent);
-            operation.setRequestBody(requestBody);
         }
+    }
+
+    /**
+     * Update the OAS operation with given requestBody examples.
+     */
+    private static void updateRequestBodyExample(ResourceMetaInfoAnnotation resourceMetaInfo, RequestBody requestBody) {
+        Content requestBodyContent = requestBody.getContent();
+        Map<String, Map<String, Object>> requestExamples = resourceMetaInfo.getRequestExamples();
+
+        for (Map.Entry<String, Map<String, Object>> example: requestExamples.entrySet()) {
+            MediaType oasMediaType = requestBodyContent.get(example.getKey());
+            if (oasMediaType == null) {
+                continue;
+            }
+            Map<String, Example> exampleMap = new HashMap<>();
+            for (Map.Entry<String, Object> exampleValuePair: example.getValue().entrySet()) {
+                Object value = exampleValuePair.getValue();
+                if (value instanceof LinkedHashMap<?, ?> exampleValue) {
+                    value = exampleValue.get(VALUE);
+                }
+                Example oasExample = new Example();
+                oasExample.setValue(value);
+                exampleMap.put(exampleValuePair.getKey(), oasExample);
+            }
+            oasMediaType.setExamples(exampleMap);
+            requestBodyContent.put(example.getKey().trim(), oasMediaType);
+        }
+        requestBody.setContent(requestBodyContent);
     }
 
     private static List<String> extractListItems(ListConstructorExpressionNode list) {

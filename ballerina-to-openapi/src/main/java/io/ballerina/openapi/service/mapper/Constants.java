@@ -354,7 +354,6 @@ public final class Constants {
     public static final String EXAMPLES = "examples";
     public static final String OPERATION_ID = "operationId";
     public static final String RESPONSE_ATTRIBUTE = "response";
-
-    public static final String REQUEST_ATTRIBUTE = "response";
+    public static final String REQUEST_ATTRIBUTE = "requestBody";
     public static final String VALUE = "value";
 }
