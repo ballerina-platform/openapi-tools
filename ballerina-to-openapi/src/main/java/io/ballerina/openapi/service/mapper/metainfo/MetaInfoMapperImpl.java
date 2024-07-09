@@ -46,6 +46,7 @@ import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
@@ -176,10 +177,24 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                                 e.getMessage());
                         diagnostics.add(diagnostic);
                     }
+                } else if (fName.equals("requestBody")) {
+                    Optional<ExpressionNode> optExamplesValue = resultField1.valueExpr();
+                    if (optExamplesValue.isEmpty()) {
+                        continue;
+                    }
+                    ExpressionNode expressValue = optExamplesValue.get();
+                    String mediaType = expressValue.toSourceCode();
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    try {
+                        Map<?, ?> objectMap = objectMapper.readValue(mediaType, Map.class);
+                        setRequestExamples(resMetaInfoBuilder, objectMap, ballerinFilePath, expressValue.location());
+                    } catch (JsonProcessingException e) {
+                        DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_130;
+                        ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, mapNode.location(),
+                                e.getMessage());
+                        diagnostics.add(diagnostic);
+                    }
                 }
-//                else if (fName.equals("request")) {
-//                    //TODO
-//                }
             }
         }
     }
@@ -215,6 +230,17 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
         }
     }
 
+    /**
+     * This is for mapping request example in OAS.
+     */
+    private static void setRequestExamples(ResourceMetaInfoAnnotation.Builder resMetaInfoBuilder, Map<?, ?> objectMap,
+                                            Path ballerinaFilePath, Location location) {
+        Map<String, Map<String, Object>> mediaTypeExampleMap = extractExamples(objectMap,
+                ballerinaFilePath, location);
+            resMetaInfoBuilder.requestExamples(mediaTypeExampleMap);
+
+    }
+
     private static Map<String, Map<String, Object>> extractExamples(Object exampleValues, Path ballerinaFilePath,
                                                                     Location location) {
         //Map format: <key:mediaType ,value: <key:name, value>>
@@ -237,7 +263,6 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                             if (value instanceof LinkedHashMap<?, ?>) {
                                 modifiedExample.put(exampleName, example.getValue());
                             } else if (value instanceof String stringNode) {
-                                // need to make this path to access relative paths
                                 String jsonFilePath = stringNode.replaceAll("\"", "").trim();
                                 Path relativePath = resolveExampleFilePath(ballerinaFilePath, jsonFilePath, location,
                                         exampleName);
@@ -378,6 +403,9 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                 for (Map.Entry<String, Map<String, Object>> entry : mediaTypeExampleMap.entrySet()) {
                     String mediaTypeKey = entry.getKey();
                     MediaType oasMediaType = oasContent.get(mediaTypeKey);
+                    if (oasMediaType == null) {
+                        continue;
+                    }
                     Map<String, Example> exampleMap = new HashMap<>();
                     Map<String, Object> examples = entry.getValue();
                     for (Map.Entry<String, Object> example : examples.entrySet()) {
@@ -396,6 +424,33 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                 responses.put(response.getKey(), oasApiResponse);
             }
             operation.setResponses(responses);
+
+            RequestBody requestBody = operation.getRequestBody();
+            Content requestBodyContent = requestBody.getContent();
+            Set<Map.Entry<String, MediaType>> entriesForMediaTypes = requestBodyContent.entrySet();
+            Map<String, Map<String, Object>> requestExamples = resourceMetaInfo.getRequestExamples();
+
+            for (Map.Entry<String, Map<String, Object>> example: requestExamples.entrySet()) {
+                MediaType oasMediaType = requestBodyContent.get(example.getKey());
+                if (oasMediaType == null) {
+                    continue;
+                }
+                Map<String, Example> exampleMap = new HashMap<>();
+
+                for (Map.Entry<String, Object> exampleValuePair: example.getValue().entrySet()) {
+                    Object value = exampleValuePair.getValue();
+                    if (value instanceof LinkedHashMap<?, ?> exampleValue) {
+                        value = exampleValue.get(VALUE);
+                    }
+                    Example oasExample = new Example();
+                    oasExample.setValue(value);
+                    exampleMap.put(exampleValuePair.getKey(), oasExample);
+                }
+                oasMediaType.setExamples(exampleMap);
+                requestBodyContent.put(example.getKey().trim(), oasMediaType);
+            }
+            requestBody.setContent(requestBodyContent);
+            operation.setRequestBody(requestBody);
         }
     }
 

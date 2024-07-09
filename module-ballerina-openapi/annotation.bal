@@ -89,7 +89,7 @@ public type ResponseExample record {
 };
 
 # Represents an example of a request body for a specific media type.
-public type RequestExamples map<anydata>;
+public type RequestExamples readonly & map<map<record {|record {}|string value;|}>>;
 
 # Represents examples for resource function.
 #

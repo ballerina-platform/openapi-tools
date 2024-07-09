@@ -90,7 +90,7 @@ public enum DiagnosticMessages {
             " parameter information from the interceptor pipeline. Cause: %s", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_128("OAS_CONVERTOR_128", "Given response example path `%s` is not exist, therefore " +
             "generated yaml doesn't contain example for `%s` ", DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_129("OAS_CONVERTOR_129", "Given response example path `%s` should be JSON file for" +
+    OAS_CONVERTOR_129("OAS_CONVERTOR_129", "Given example path `%s` should be JSON file for" +
             " example `%s`", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_130("OAS_CONVERTOR_130", "Following issue occurred during the reading given example:" +
             " %s", DiagnosticSeverity.WARNING);
