@@ -64,6 +64,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.ballerina.openapi.service.mapper.Constants.EXAMPLES;
+import static io.ballerina.openapi.service.mapper.Constants.FILE_PATH;
 import static io.ballerina.openapi.service.mapper.Constants.JSON_EXTENSION;
 import static io.ballerina.openapi.service.mapper.Constants.OPENAPI_RESOURCE_INFO;
 import static io.ballerina.openapi.service.mapper.Constants.OPERATION_ID;
@@ -257,10 +258,14 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                     for (Map.Entry<?, ?> example: resExampleMaps.entrySet()) {
                         String exampleName = (String) example.getKey();
                         if (example.getValue() instanceof LinkedHashMap<?, ?> exampleValue) {
-                            if (!exampleValue.containsKey(VALUE)) {
+                            if (!exampleValue.containsKey(VALUE) && !exampleValue.containsKey(FILE_PATH)) {
                                 break;
                             }
                             Object value = exampleValue.get(VALUE);
+                            if (value == null) {
+                                value = exampleValue.get(FILE_PATH);
+                            }
+
                             if (value instanceof LinkedHashMap<?, ?>) {
                                 modifiedExample.put(exampleName, example.getValue());
                             } else if (value instanceof String stringNode) {
@@ -288,7 +293,6 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                                     DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_130;
                                     ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, location,
                                             e.toString());
-                                    //todo note
                                     diagnostics.add(diagnostic);
                                 }
                             }
@@ -304,6 +308,9 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
     private static Path resolveExampleFilePath(Path ballerinaFilePath, String jsonFilePath, Location location,
                                                String exampleName) {
         if (jsonFilePath.isBlank()) {
+            DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_131;
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, location, exampleName);
+            diagnostics.add(diagnostic);
             return null;
         }
         if (!(jsonFilePath.endsWith(JSON_EXTENSION))) {

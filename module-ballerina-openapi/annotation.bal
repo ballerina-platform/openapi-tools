@@ -82,14 +82,13 @@ public type ResourceInformation record {|
 #
 # + headers - The headers for the response.
 # + examples - Detailed examples of the response content.
-public type ResponseExample record {
+public type ResponseExample record {|
     map<string> headers?;
-    map<map<record {|record {} value;|}>> examples?;
-
-};
+    map<map<record {|record {} value;|}|record {|string filePath;|}>> examples?;
+|};
 
 # Represents an example of a request body for a specific media type.
-public type RequestExamples readonly & map<map<record {|record {}|string value;|}>>;
+public type RequestExamples readonly & map<map<record {|record {} value;|}|record {|string filePath;|}>>;
 
 # Represents examples for resource function.
 #

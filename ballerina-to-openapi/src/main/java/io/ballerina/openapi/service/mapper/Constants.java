@@ -356,4 +356,5 @@ public final class Constants {
     public static final String RESPONSE_ATTRIBUTE = "response";
     public static final String REQUEST_ATTRIBUTE = "requestBody";
     public static final String VALUE = "value";
+    public static final String FILE_PATH = "filePath";
 }
