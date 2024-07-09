@@ -427,7 +427,6 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
 
             RequestBody requestBody = operation.getRequestBody();
             Content requestBodyContent = requestBody.getContent();
-            Set<Map.Entry<String, MediaType>> entriesForMediaTypes = requestBodyContent.entrySet();
             Map<String, Map<String, Object>> requestExamples = resourceMetaInfo.getRequestExamples();
 
             for (Map.Entry<String, Map<String, Object>> example: requestExamples.entrySet()) {
