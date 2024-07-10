@@ -52,11 +52,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static io.ballerina.cli.cmd.CommandUtil.exitError;
 import static io.ballerina.openapi.cmd.CmdConstants.DEFAULT_CLIENT_ID;
 import static io.ballerina.openapi.cmd.CmdConstants.OPENAPI_ADD_CMD;
+import static io.ballerina.openapi.cmd.CmdUtils.searchEnum;
 import static io.ballerina.openapi.cmd.CmdUtils.validateBallerinaProject;
 import static io.ballerina.openapi.cmd.ErrorMessages.INVALID_BALLERINA_PACKAGE;
 import static io.ballerina.toml.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -76,6 +78,8 @@ public class Add implements BLauncherCmd {
     private static final String COMMAND_IDENTIFIER = "openapi-add";
     private final PrintStream outStream;
     private final boolean exitWhenFinish;
+    private CmdConstants.Mode mode;
+
 
     @CommandLine.Mixin
     private final BaseCmd baseCmd = new BaseCmd();
@@ -157,8 +161,16 @@ public class Add implements BLauncherCmd {
         if (id == null || id.isBlank()) {
             String file = baseCmd.inputPath.substring(baseCmd.inputPath.lastIndexOf('/') + 1,
                     baseCmd.inputPath.lastIndexOf('.'));
-            String mode = baseCmd.mode;
-            id = String.format(DEFAULT_CLIENT_ID, mode == null || mode.isBlank() ? "client" : mode, file);
+            if (baseCmd.mode != null) {
+                mode = searchEnum(CmdConstants.Mode.class, baseCmd.mode);
+                if (mode == null) {
+                    // Exit the code generation process
+                    outStream.println("ERROR:Invalid value for option '--mode': expected one of [service, client] but" +
+                            " was ' " + baseCmd.mode + "'\n");
+                    exitError(this.exitWhenFinish);
+                }
+            }
+            id = String.format(DEFAULT_CLIENT_ID, mode == null ? "client" : baseCmd.mode, file);
         }
     }
 
@@ -176,7 +188,7 @@ public class Add implements BLauncherCmd {
                 .withOutputModule(outputModule)
                 .withPackagePath(packagePath)
                 .withClientMethod(baseCmd.generateClientMethods)
-                .withMode(baseCmd.mode)
+                .withMode(mode)
                 .withNullable(baseCmd.nullable)
                 .withOperations(getOperations())
                 .withTags(getTags())
@@ -214,7 +226,7 @@ public class Add implements BLauncherCmd {
         }
         if (optionsBuilder.getMode() != null) {
             moduleMembers = moduleMembers.add(SampleNodeGenerator.createStringKV("options.mode",
-                    optionsBuilder.getMode(), null));
+                    optionsBuilder.getMode().toString().toLowerCase(Locale.ENGLISH), null));
         }
         if (optionsBuilder.getTags() != null && !optionsBuilder.getTags().isEmpty()) {
             Node[] arrayItems = getArrayItemNodes(getTags());
