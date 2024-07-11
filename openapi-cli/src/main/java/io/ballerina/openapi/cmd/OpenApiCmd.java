@@ -174,7 +174,7 @@ public class OpenApiCmd implements BLauncherCmd {
             if (mode == null) {
                 // Exit the code generation process
                 outStream.println("ERROR:Invalid value for option '--mode': expected one of [service, client] but" +
-                        " was ' " + baseCmd.mode + "'\n");
+                        " was '" + baseCmd.mode + "'");
                 exitError(this.exitWhenFinish);
             }
         }
