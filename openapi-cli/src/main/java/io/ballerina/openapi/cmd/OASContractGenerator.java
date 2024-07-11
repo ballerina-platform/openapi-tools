@@ -124,7 +124,16 @@ public class OASContractGenerator {
             List<String> fileNames = new ArrayList<>();
             for (OASResult definition : openAPIDefinitions) {
                 try {
+                    List<OpenAPIMapperDiagnostic> definitionDiagnostics = definition.getDiagnostics();
+                    boolean hasErrors = definitionDiagnostics.stream()
+                            .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.getDiagnosticSeverity()));
                     this.diagnostics.addAll(definition.getDiagnostics());
+                    if (hasErrors) {
+                        //This is only stop code generation for the given ERROR severity.
+                        outStream.println("openapi contract generation is skipped because of the following error(s) " +
+                                "occurred during the code generation:");
+                        return;
+                    }
                     if (definition.getOpenAPI().isPresent()) {
                         Optional<String> content;
                         if (needJson) {

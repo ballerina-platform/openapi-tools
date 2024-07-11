@@ -71,6 +71,42 @@ public class BallerinaToOpenAPICLINegativeTests extends OpenAPITest {
         assertOnErrorStream(process, out);
     }
 
+    @Test(description = "Test for given bal service file example value has json parser issues")
+    public void testForExamplesHasCompilerErrorse() throws IOException, InterruptedException {
+        String balFilePath = "examples/negative_test/service.bal";
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add(0, "openapi");
+        buildArgs.add("-i");
+        buildArgs.add(balFilePath);
+        buildArgs.add("-o");
+        buildArgs.add(tmpDir.toString());
+
+        Process process = getProcess(buildArgs, TEST_RESOURCE);
+
+        String out = "openapi contract generation is skipped because of the following error(s) occurred " +
+                "during the code generation:\n" +
+                "WARNING [main.bal:(12:25,25:14)] Given example path `examples01.json` " +
+                "is not exist, therefore generated yaml does not contain example for `responseExample01` \n" +
+                "ERROR [main.bal:(12:25,25:14)] Following issue occurred parsing given example: " +
+                "com.fasterxml.jackson.core.JsonParseException: Unexpected character ('f' (code 102)): was expecting" +
+                " double-quote to start field name\n" +
+                " at [Source: (String)\"{\n" +
+                "    fromCurrency: \"EUR\",\n" +
+                "    \"toCurrency\": \"LKR\",\n" +
+                "    \"fromAmount\": 200,\n" +
+                "    \"toAmount\": 60000,\n" +
+                "    \"timestamp\": \"2024-07-14\"\n" +
+                "}\"; line: 2, column: 6]\n" +
+                "ERROR [main.bal:(11:19,36:10)] Following issue occurred parsing given example: " +
+                "Unexpected character (r (code 114)): was expecting double-quote to start field name";
+        //Thread for wait out put generate
+        Thread.sleep(5000);
+        // compare generated file has not included constraint annotation for scenario record field.
+        Assert.assertFalse(Files.exists(TEST_RESOURCE.resolve("convert_openapi.yaml")));
+        process.waitFor();
+        assertOnErrorStream(process, out);
+    }
+
     @AfterClass
     public void cleanUp() throws IOException {
         TestUtil.cleanDistribution();
