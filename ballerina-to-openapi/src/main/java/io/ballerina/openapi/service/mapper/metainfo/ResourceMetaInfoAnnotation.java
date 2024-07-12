@@ -36,11 +36,15 @@ public class ResourceMetaInfoAnnotation {
     //<statusCode, <mediaType, <string, Object>>>
     Map<String, Map<String, Map<String, Object>>> responseExamples;
 
+    //<mediaType, <string, Object>>
+    Map<String, Map<String, Object>> requestExamples;
+
     private ResourceMetaInfoAnnotation(Builder builder) {
         this.summary = builder.summary;
         this.operationId = builder.operationId;
         this.tags = builder.tags;
         this.responseExamples = builder.responseExamples;
+        this.requestExamples = builder.requestExamples;
     }
 
     public String getSummary() {
@@ -59,11 +63,16 @@ public class ResourceMetaInfoAnnotation {
         return responseExamples;
     }
 
+    public Map<String, Map<String, Object>>  getRequestExamples() {
+        return requestExamples;
+    }
+
     public static class Builder {
         private String summary;
         private String operationId;
         private List<String> tags = new ArrayList<>();
         private Map<String, Map<String, Map<String, Object>>> responseExamples = new HashMap<>();
+        private Map<String, Map<String, Object>> requestExamples = new HashMap<>();
 
         public Builder summary(String summary) {
             this.summary = summary;
@@ -82,6 +91,11 @@ public class ResourceMetaInfoAnnotation {
 
         public Builder responseExamples(Map<String, Map<String, Map<String, Object>>> responseExamples) {
             this.responseExamples = responseExamples;
+            return this;
+        }
+
+        public Builder requestExamples(Map<String, Map<String, Object>> requestExamples) {
+            this.requestExamples = requestExamples;
             return this;
         }
 
