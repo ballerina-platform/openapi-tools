@@ -68,7 +68,7 @@ import static io.ballerina.openapi.service.mapper.Constants.FILE_PATH;
 import static io.ballerina.openapi.service.mapper.Constants.JSON_EXTENSION;
 import static io.ballerina.openapi.service.mapper.Constants.OPENAPI_RESOURCE_INFO;
 import static io.ballerina.openapi.service.mapper.Constants.OPERATION_ID;
-import static io.ballerina.openapi.service.mapper.Constants.REQUEST_ATTRIBUTE;
+import static io.ballerina.openapi.service.mapper.Constants.REQUEST_BODY_ATTRIBUTE;
 import static io.ballerina.openapi.service.mapper.Constants.RESPONSE_ATTRIBUTE;
 import static io.ballerina.openapi.service.mapper.Constants.SUMMARY;
 import static io.ballerina.openapi.service.mapper.Constants.TAGS;
@@ -179,7 +179,7 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                                 e.getOriginalMessage());
                         diagnostics.add(diagnostic);
                     }
-                } else if (fName.equals(REQUEST_ATTRIBUTE)) {
+                } else if (fName.equals(REQUEST_BODY_ATTRIBUTE)) {
                     Optional<ExpressionNode> optExamplesValue = resultField1.valueExpr();
                     if (optExamplesValue.isEmpty()) {
                         continue;
