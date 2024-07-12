@@ -1,5 +1,5 @@
 {
-  fromCurrency: "EUR",
+  "fromCurrency": "EUR",
   "toCurrency": "LKR",
   "fromAmount": 200,
   "toAmount": 60000,
