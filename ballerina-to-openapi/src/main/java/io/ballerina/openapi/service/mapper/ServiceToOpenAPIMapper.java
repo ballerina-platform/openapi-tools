@@ -43,10 +43,11 @@ import io.ballerina.openapi.service.mapper.model.OASResult;
 import io.ballerina.openapi.service.mapper.model.ResourceFunction;
 import io.ballerina.openapi.service.mapper.model.ResourceFunctionDeclaration;
 import io.ballerina.openapi.service.mapper.model.ResourceFunctionDefinition;
+import io.ballerina.openapi.service.mapper.model.ServiceContractType;
 import io.ballerina.openapi.service.mapper.model.ServiceDeclaration;
 import io.ballerina.openapi.service.mapper.model.ServiceNode;
-import io.ballerina.openapi.service.mapper.model.ServiceObjectType;
 import io.ballerina.projects.Module;
+import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -110,16 +111,8 @@ public final class ServiceToOpenAPIMapper {
             // Generating openapi specification for selected services
             for (Map.Entry<String, ServiceNode> serviceNode : servicesToGenerate.entrySet()) {
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNode.getKey(), needJson);
-                OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder =
-                        new OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
-                builder.setServiceNode(serviceNode.getValue())
-                        .setSemanticModel(semanticModel)
-                        .setOpenApiFileName(openApiName)
-                        .setBallerinaFilePath(inputPath)
-                        .setProject(project);
-                OASGenerationMetaInfo oasGenerationMetaInfo = builder.build();
-                OASResult oasDefinition = generateOAS(oasGenerationMetaInfo);
-                oasDefinition.setServiceName(openApiName);
+                OASResult oasDefinition = generateOasFroServiceNode(project, openApiName,
+                        semanticModel, inputPath, serviceNode.getValue());
                 outputs.add(oasDefinition);
             }
         }
@@ -128,6 +121,21 @@ public final class ServiceToOpenAPIMapper {
             outputs.add(exceptions);
         }
         return outputs;
+    }
+
+    public static OASResult generateOasFroServiceNode(Project project, String openApiName, SemanticModel semanticModel,
+                                                       Path inputPath, ServiceNode serviceNode) {
+        OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder =
+                new OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
+        builder.setServiceNode(serviceNode)
+                .setSemanticModel(semanticModel)
+                .setOpenApiFileName(openApiName)
+                .setBallerinaFilePath(inputPath)
+                .setProject(project);
+        OASGenerationMetaInfo oasGenerationMetaInfo = builder.build();
+        OASResult oasDefinition = generateOAS(oasGenerationMetaInfo);
+        oasDefinition.setServiceName(openApiName);
+        return oasDefinition;
     }
 
     /**
@@ -154,7 +162,7 @@ public final class ServiceToOpenAPIMapper {
                 // TODO: Distinct service types should work here
                 if (descriptorNode.kind().equals(SyntaxKind.OBJECT_TYPE_DESC) &&
                         isHttpServiceContract(descriptorNode, semanticModel)) {
-                    ServiceNode service = new ServiceObjectType((TypeDefinitionNode) node);
+                    ServiceNode service = new ServiceContractType((TypeDefinitionNode) node);
                     Optional<Symbol> serviceSymbol = service.getSymbol(semanticModel);
                     serviceSymbol.ifPresent(symbol ->
                             addService(serviceName, availableService, service, servicesToGenerate, symbol));
@@ -169,7 +177,7 @@ public final class ServiceToOpenAPIMapper {
         } else if (node instanceof TypeDefinitionNode serviceTypeNode &&
                 serviceTypeNode.typeDescriptor() instanceof ObjectTypeDescriptorNode serviceNode &&
                 isHttpServiceContract(serviceNode, semanticModel)) {
-            return Optional.of(new ServiceObjectType((TypeDefinitionNode) node));
+            return Optional.of(new ServiceContractType((TypeDefinitionNode) node));
         }
         return Optional.empty();
     }
@@ -222,8 +230,11 @@ public final class ServiceToOpenAPIMapper {
     public static OASResult generateOAS(OASGenerationMetaInfo oasGenerationMetaInfo) {
         ServiceNode serviceDefinition = oasGenerationMetaInfo.getServiceNode();
         SemanticModel semanticModel = oasGenerationMetaInfo.getSemanticModel();
-        ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(oasGenerationMetaInfo.getProject());
+        Package currentPackage = oasGenerationMetaInfo.getProject().currentPackage();
+        ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(oasGenerationMetaInfo.getProject(),
+                semanticModel);
         Set<ListenerDeclarationNode> listeners = moduleMemberVisitor.getListenerDeclarationNodes();
+        Set<ServiceContractType> serviceContractTypes = moduleMemberVisitor.getServiceContractTypeNodes();
         String openApiFileName = oasGenerationMetaInfo.getOpenApiFileName();
         Path ballerinaFilePath = oasGenerationMetaInfo.getBallerinaFilePath();
         // 01.Fill the openAPI info section
@@ -240,8 +251,8 @@ public final class ServiceToOpenAPIMapper {
                 serversMapperImpl.setServers();
 
                 if (oasAvailableViaServiceContract(serviceDefinition)) {
-                    return updateOasResultWithServiceContract((ServiceDeclaration) serviceDefinition, oasResult,
-                            semanticModel);
+                    return updateOasResultWithServiceContract((ServiceDeclaration) serviceDefinition, currentPackage,
+                            oasResult, semanticModel, serviceContractTypes);
                 }
 
                 convertServiceToOpenAPI(serviceDefinition, serviceMapperFactory);
@@ -272,9 +283,11 @@ public final class ServiceToOpenAPIMapper {
                 ((ServiceDeclaration) serviceNode).implementsServiceContract();
     }
 
-    private static OASResult updateOasResultWithServiceContract(ServiceDeclaration serviceDeclaration,
-                                                                OASResult oasResult, SemanticModel semanticModel) {
-        Optional<OpenAPI> openAPI = serviceDeclaration.getOpenAPIFromServiceContract(semanticModel);
+    private static OASResult updateOasResultWithServiceContract(ServiceDeclaration serviceDeclaration, Package pkg,
+                                                                OASResult oasResult, SemanticModel semanticModel,
+                                                                Set<ServiceContractType> serviceContractTypes) {
+        Optional<OpenAPI> openAPI = serviceDeclaration.getOpenAPIFromServiceContract(pkg, semanticModel,
+                serviceContractTypes, oasResult.getDiagnostics());
         if (openAPI.isEmpty()) {
             return oasResult;
         }
@@ -287,15 +300,15 @@ public final class ServiceToOpenAPIMapper {
 
         // Copy info
         Info existingOpenAPIInfo = oasResult.getOpenAPI().get().getInfo();
+        // Update title
+        existingOpenAPIInfo.setTitle(openApiFromServiceContract.getInfo().getTitle());
         openApiFromServiceContract.setInfo(existingOpenAPIInfo);
 
         // Copy servers
         String basePath = extractBasePath(openApiFromServiceContract);
         List<Server> existingServers = oasResult.getOpenAPI().get().getServers();
         existingServers.forEach(
-                server -> {
-                    server.setUrl(server.getUrl() + basePath);
-                }
+                server -> server.setUrl(server.getUrl() + basePath)
         );
         openApiFromServiceContract.setServers(existingServers);
         oasResult.setOpenAPI(openApiFromServiceContract);
@@ -316,8 +329,8 @@ public final class ServiceToOpenAPIMapper {
      *
      * @param project - current project
      */
-    public static ModuleMemberVisitor extractNodesFromProject(Project project) {
-        ModuleMemberVisitor balNodeVisitor = new ModuleMemberVisitor();
+    public static ModuleMemberVisitor extractNodesFromProject(Project project, SemanticModel semanticModel) {
+        ModuleMemberVisitor balNodeVisitor = new ModuleMemberVisitor(semanticModel);
         project.currentPackage().moduleIds().forEach(moduleId -> {
             Module module = project.currentPackage().module(moduleId);
             module.documentIds().forEach(documentId -> {

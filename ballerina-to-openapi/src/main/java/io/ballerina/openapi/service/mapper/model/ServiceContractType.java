@@ -27,20 +27,24 @@ import java.util.Optional;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 
-public class ServiceObjectType implements ServiceNode {
+public class ServiceContractType implements ServiceNode {
 
     private static final String DEFAULT_PATH = "/";
     ObjectTypeDescriptorNode serviceObjType;
     TypeDefinitionNode serviceTypeDefinition;
     int serviceId;
 
-    public ServiceObjectType(TypeDefinitionNode serviceType) {
+    public ServiceContractType(TypeDefinitionNode serviceType) {
         serviceId = serviceType.hashCode();
         serviceTypeDefinition = new TypeDefinitionNode(serviceType.internalNode(), serviceType.position(),
                 serviceType.parent());
         ObjectTypeDescriptorNode serviceObjTypeDesc = (ObjectTypeDescriptorNode) serviceType.typeDescriptor();
         serviceObjType = new ObjectTypeDescriptorNode(serviceObjTypeDesc.internalNode(), serviceObjTypeDesc.position(),
                 serviceObjTypeDesc.parent());
+    }
+
+    public boolean matchesName(String name) {
+        return serviceTypeDefinition.typeName().text().equals(name);
     }
 
     public Optional<MetadataNode> metadata() {
