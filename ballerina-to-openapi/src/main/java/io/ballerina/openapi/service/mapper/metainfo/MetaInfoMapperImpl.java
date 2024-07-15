@@ -40,15 +40,24 @@ import io.ballerina.openapi.service.mapper.model.ResourceFunction;
 import io.ballerina.openapi.service.mapper.model.ResourceFunctionDeclaration;
 import io.ballerina.openapi.service.mapper.model.ResourceFunctionDefinition;
 import io.ballerina.openapi.service.mapper.model.ServiceNode;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -59,11 +68,15 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.ballerina.openapi.service.mapper.Constants.EXAMPLES;
+import static io.ballerina.openapi.service.mapper.Constants.FILE_PATH;
+import static io.ballerina.openapi.service.mapper.Constants.JSON_EXTENSION;
 import static io.ballerina.openapi.service.mapper.Constants.OPENAPI_RESOURCE_INFO;
 import static io.ballerina.openapi.service.mapper.Constants.OPERATION_ID;
+import static io.ballerina.openapi.service.mapper.Constants.REQUEST_BODY_ATTRIBUTE;
 import static io.ballerina.openapi.service.mapper.Constants.RESPONSE_ATTRIBUTE;
 import static io.ballerina.openapi.service.mapper.Constants.SUMMARY;
 import static io.ballerina.openapi.service.mapper.Constants.TAGS;
+import static io.ballerina.openapi.service.mapper.Constants.VALUE;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOperationId;
 
 /**
@@ -72,8 +85,14 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpe
  * @since 2.0.1
  */
 public class MetaInfoMapperImpl implements MetaInfoMapper {
+    static List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
 
-    public void setResourceMetaData(OpenAPI openAPI, ServiceNode serviceNode) {
+    @Override
+    public List<OpenAPIMapperDiagnostic> getDiagnostics() {
+        return diagnostics;
+    }
+
+    public void setResourceMetaData(OpenAPI openAPI, ServiceNode serviceNode, Path ballerinaFilePath) {
         NodeList<Node> functions = serviceNode.members();
         Map<String, ResourceMetaInfoAnnotation> resourceMetaData = new HashMap<>();
         for (Node function : functions) {
@@ -120,7 +139,8 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                                             resMetaInfoBuilder.tags(values);
                                         }
                                     }
-                                    case EXAMPLES -> handleExamples(resMetaInfoBuilder, expressionNode);
+                                    case EXAMPLES -> handleExamples(resMetaInfoBuilder, expressionNode,
+                                            ballerinaFilePath);
                                     default -> { }
                                 }
                             }
@@ -145,10 +165,10 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
     }
 
     private static void handleExamples(ResourceMetaInfoAnnotation.Builder resMetaInfoBuilder,
-                                       ExpressionNode expressionNode) {
+                                       ExpressionNode expressionNode, Path ballerinFilePath) {
         if (expressionNode instanceof MappingConstructorExpressionNode mapNode) {
-            SeparatedNodeList<MappingFieldNode> fields1 = mapNode.fields();
-            for (MappingFieldNode resultField : fields1) {
+            SeparatedNodeList<MappingFieldNode> fields = mapNode.fields();
+            for (MappingFieldNode resultField : fields) {
                 //parse as json object
                 SpecificFieldNode resultField1 = (SpecificFieldNode) resultField;
                 String fName = resultField1.fieldName().toSourceCode().trim().replaceAll("\"", "");
@@ -161,60 +181,177 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                     String sourceCode = expressValue.toSourceCode();
                     ObjectMapper objectMapper = new ObjectMapper();
                     try {
-                        Map<String, Object> objectMap = objectMapper.readValue(sourceCode, Map.class);
-                        // Handle response
-                        if (objectMap instanceof LinkedHashMap<?, ?> responseSet) {
-                            //<statusCode, <MediaType, Map<name, Object>>>
-                            Map<String, Map<String, Map<String, Object>>> responseExamples = new HashMap<>();
-                            for (Map.Entry<?, ?> statusCodeValuePair : responseSet.entrySet()) {
-                                Object key = statusCodeValuePair.getKey();
-                                if (!(key instanceof String)) {
-                                    continue;
-                                }
-                                String statusCode = key.toString().trim();
-                                Object valuePairValue = statusCodeValuePair.getValue();
-                                if (valuePairValue instanceof LinkedHashMap<?, ?> responseMap) {
-                                    Set<? extends Map.Entry<? , ?>> entries = responseMap.entrySet();
-                                    for (Map.Entry<? , ?> entry : entries) {
-                                        if (entry.getKey().equals("examples")) {
-                                            extractResponseExamples(responseExamples, statusCode, entry);
-                                        }
-                                        //todo: headers
-                                    }
-                                }
-                            }
-                            resMetaInfoBuilder.responseExamples(responseExamples);
-                        }
-                        //todo: request body, parameters
+                        Map<?, ?> objectMap = objectMapper.readValue(sourceCode, Map.class);
+                        setResponseExamples(resMetaInfoBuilder, objectMap, ballerinFilePath, expressValue.location());
                     } catch (JsonProcessingException e) {
-                        //ignore;
-                        //todo will handle this with future design
+                        DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_130;
+                        ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, mapNode.location(),
+                                e.getOriginalMessage());
+                        diagnostics.add(diagnostic);
+                    }
+                } else if (fName.equals(REQUEST_BODY_ATTRIBUTE)) {
+                    Optional<ExpressionNode> optExamplesValue = resultField1.valueExpr();
+                    if (optExamplesValue.isEmpty()) {
+                        continue;
+                    }
+                    ExpressionNode expressValue = optExamplesValue.get();
+                    String mediaType = expressValue.toSourceCode();
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    try {
+                        Map<?, ?> objectMap = objectMapper.readValue(mediaType, Map.class);
+                        setRequestExamples(resMetaInfoBuilder, objectMap, ballerinFilePath, expressValue.location());
+                    } catch (JsonProcessingException e) {
+                        DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_130;
+                        ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, mapNode.location(),
+                                e.getOriginalMessage());
+                        diagnostics.add(diagnostic);
                     }
                 }
             }
         }
     }
 
-    private static void extractResponseExamples(Map<String, Map<String, Map<String, Object>>> responseExamples,
-                                                String statusCode, Map.Entry<? , ?> entry) {
-        Object exampleValues = entry.getValue();
-        if (exampleValues instanceof LinkedHashMap<?, ?> exampleValueMap) {
-            Set<? extends Map.Entry<?, ?>> sets = exampleValueMap.entrySet();
-            //<mediaType , <name, value>>
-            Map<String, Map<String, Object>> mediaTypeExampleMap = new HashMap<>();
-
-            for (Map.Entry<?, ?> valuePair : sets) {
-                String mediaType = valuePair.getKey().toString();
-                Object responesExamples = valuePair.getValue();
-                if (responesExamples instanceof LinkedHashMap<?, ?> resExampleMaps) {
-                    Map<String, Object> examples = (Map<String, Object>) resExampleMaps;
-                    mediaTypeExampleMap.put(mediaType, examples);
+    /**
+     * This is for mapping response example in OAS.
+     */
+    private static void setResponseExamples(ResourceMetaInfoAnnotation.Builder resMetaInfoBuilder, Map<?, ?> objectMap,
+                                            Path ballerinaFilePath, Location location) {
+        if (objectMap instanceof LinkedHashMap<?, ?> responseSet) {
+            //<statusCode, <MediaType, Map<name, Object>>>
+            Map<String, Map<String, Map<String, Object>>> responseExamples = new HashMap<>();
+            for (Map.Entry<?, ?> statusCodeValuePair : responseSet.entrySet()) {
+                Object key = statusCodeValuePair.getKey();
+                if (!(key instanceof String)) {
+                    continue;
+                }
+                String statusCode = key.toString().trim();
+                Object valuePairForMediaType = statusCodeValuePair.getValue();
+                if (valuePairForMediaType instanceof LinkedHashMap<?, ?> responseMap) {
+                    Set<? extends Map.Entry<? , ?>> mediaTypeExampleEntries = responseMap.entrySet();
+                    for (Map.Entry<? , ?> entry : mediaTypeExampleEntries) {
+                        if (entry.getKey().equals("examples")) {
+                            Map<String, Map<String, Object>> mediaTypeExampleMap = extractExamples(entry.getValue(),
+                                    ballerinaFilePath, location);
+                            responseExamples.put(statusCode, mediaTypeExampleMap);
+                        }
+                        //todo: headers with response
+                    }
                 }
             }
-            responseExamples.put(statusCode, mediaTypeExampleMap);
+            resMetaInfoBuilder.responseExamples(responseExamples);
         }
     }
 
+    /**
+     * This is for mapping request example in OAS.
+     */
+    private static void setRequestExamples(ResourceMetaInfoAnnotation.Builder resMetaInfoBuilder, Map<?, ?> objectMap,
+                                            Path ballerinaFilePath, Location location) {
+        Map<String, Map<String, Object>> mediaTypeExampleMap = extractExamples(objectMap,
+                ballerinaFilePath, location);
+            resMetaInfoBuilder.requestExamples(mediaTypeExampleMap);
+
+    }
+
+    private static Map<String, Map<String, Object>> extractExamples(Object exampleValues, Path ballerinaFilePath,
+                                                                    Location location) {
+        //Map format: <key:mediaType ,value: <key:name, value>>
+        Map<String, Map<String, Object>> mediaTypeExampleMap = new HashMap<>();
+        if (exampleValues instanceof LinkedHashMap<?, ?> exampleValueMap) {
+            Set<? extends Map.Entry<?, ?>> exampleSets = exampleValueMap.entrySet();
+
+            for (Map.Entry<?, ?> valuePair : exampleSets) {
+                String mediaType = valuePair.getKey().toString().trim();
+                Object resExamples = valuePair.getValue();
+                if (resExamples instanceof LinkedHashMap<?, ?> resExampleMaps) {
+                    Map<String, Object> modifiedExample = new HashMap<>();
+                    for (Map.Entry<?, ?> example: resExampleMaps.entrySet()) {
+                        String exampleName = (String) example.getKey();
+                        if (example.getValue() instanceof LinkedHashMap<?, ?> exampleValue) {
+                            if (!exampleValue.containsKey(VALUE) && !exampleValue.containsKey(FILE_PATH)) {
+                                break;
+                            }
+                            Object value = exampleValue.get(VALUE);
+                            if (value == null) {
+                                value = exampleValue.get(FILE_PATH);
+                            }
+
+                            if (value instanceof LinkedHashMap<?, ?>) {
+                                modifiedExample.put(exampleName, example.getValue());
+                            } else if (value instanceof String stringNode) {
+                                String jsonFilePath = stringNode.replaceAll("\"", "").trim();
+                                Path relativePath = resolveExampleFilePath(ballerinaFilePath, jsonFilePath, location,
+                                        exampleName);
+                                if (relativePath == null) {
+                                    continue;
+                                }
+                                if (!Files.exists(relativePath)) {
+                                    DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_128;
+                                    ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, location,
+                                            jsonFilePath, exampleName);
+                                    diagnostics.add(diagnostic);
+                                    continue;
+                                }
+                                String content;
+                                try {
+                                    content = Files.readString(relativePath);
+                                    ObjectMapper objectMapper = new ObjectMapper();
+                                    Map<String, Object> objectMap = objectMapper.readValue(content, Map.class);
+                                    Map<String, Object> valueMap = new HashMap<>(objectMap);
+                                    modifiedExample.put(exampleName, valueMap);
+                                } catch (IOException e) {
+                                    DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_130;
+                                    ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, location,
+                                            e.toString());
+                                    diagnostics.add(diagnostic);
+                                }
+                            }
+                        }
+                    }
+                    mediaTypeExampleMap.put(mediaType, modifiedExample);
+                }
+            }
+        }
+        return mediaTypeExampleMap;
+    }
+
+    private static Path resolveExampleFilePath(Path ballerinaFilePath, String jsonFilePath, Location location,
+                                               String exampleName) {
+        if (jsonFilePath.isBlank()) {
+            DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_131;
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, location, exampleName);
+            diagnostics.add(diagnostic);
+            return null;
+        }
+        if (!(jsonFilePath.endsWith(JSON_EXTENSION))) {
+            DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_129;
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, location, jsonFilePath, exampleName);
+            diagnostics.add(diagnostic);
+            return null;
+        }
+
+        Path path = java.nio.file.Paths.get(jsonFilePath);
+        if (path.isAbsolute()) {
+            return path;
+        } else {
+            File file = new File(ballerinaFilePath.toString());
+            File parentFolder = new File(file.getParent());
+            File jsonFile = new File(parentFolder, jsonFilePath);
+            try {
+                return java.nio.file.Paths.get(jsonFile.getCanonicalPath());
+            } catch (IOException e) {
+                DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_128;
+                ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, location,
+                        jsonFilePath, exampleName);
+                diagnostics.add(diagnostic);
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Update OAS with the metadata by traversing each operation.
+     */
     private static void updateOASWithMetaData(Map<String, ResourceMetaInfoAnnotation> resourceMetaData, Paths paths) {
         if (paths != null) {
             paths.forEach((path, pathItem) -> {
@@ -262,6 +399,9 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
         }
     }
 
+    /**
+     * Update OAS operation with the given resource metadata.
+     */
     private static void updateOASOperationWithMetaData(Map<String, ResourceMetaInfoAnnotation> resourceMetaData,
                                                        Operation operation) {
         String operationId = operation.getOperationId();
@@ -290,12 +430,15 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                 for (Map.Entry<String, Map<String, Object>> entry : mediaTypeExampleMap.entrySet()) {
                     String mediaTypeKey = entry.getKey();
                     MediaType oasMediaType = oasContent.get(mediaTypeKey);
+                    if (oasMediaType == null) {
+                        continue;
+                    }
                     Map<String, Example> exampleMap = new HashMap<>();
                     Map<String, Object> examples = entry.getValue();
                     for (Map.Entry<String, Object> example : examples.entrySet()) {
                         Object value = example.getValue();
                         if (value instanceof LinkedHashMap<?, ?> exampleValue) {
-                            value = exampleValue.get("value");
+                            value = exampleValue.get(VALUE);
                         }
                         Example oasExample = new Example();
                         oasExample.setValue(value);
@@ -308,7 +451,42 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                 responses.put(response.getKey(), oasApiResponse);
             }
             operation.setResponses(responses);
+
+            // Request body example payload mapping
+            RequestBody requestBody = operation.getRequestBody();
+            if (requestBody != null) {
+                updateRequestBodyExample(resourceMetaInfo, requestBody);
+                operation.setRequestBody(requestBody);
+            }
         }
+    }
+
+    /**
+     * Update the OAS operation with given requestBody examples.
+     */
+    private static void updateRequestBodyExample(ResourceMetaInfoAnnotation resourceMetaInfo, RequestBody requestBody) {
+        Content requestBodyContent = requestBody.getContent();
+        Map<String, Map<String, Object>> requestExamples = resourceMetaInfo.getRequestExamples();
+
+        for (Map.Entry<String, Map<String, Object>> example: requestExamples.entrySet()) {
+            MediaType oasMediaType = requestBodyContent.get(example.getKey());
+            if (oasMediaType == null) {
+                continue;
+            }
+            Map<String, Example> exampleMap = new HashMap<>();
+            for (Map.Entry<String, Object> exampleValuePair: example.getValue().entrySet()) {
+                Object value = exampleValuePair.getValue();
+                if (value instanceof LinkedHashMap<?, ?> exampleValue) {
+                    value = exampleValue.get(VALUE);
+                }
+                Example oasExample = new Example();
+                oasExample.setValue(value);
+                exampleMap.put(exampleValuePair.getKey(), oasExample);
+            }
+            oasMediaType.setExamples(exampleMap);
+            requestBodyContent.put(example.getKey().trim(), oasMediaType);
+        }
+        requestBody.setContent(requestBodyContent);
     }
 
     private static List<String> extractListItems(ListConstructorExpressionNode list) {

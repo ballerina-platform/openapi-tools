@@ -264,7 +264,8 @@ public final class ServiceToOpenAPIMapper {
                 hateoasMapper.setOpenApiLinks(serviceDefinition, openapi);
 
                 MetaInfoMapper metaInfoMapper = serviceMapperFactory.getMetaInfoMapper();
-                metaInfoMapper.setResourceMetaData(openapi, serviceDefinition);
+                metaInfoMapper.setResourceMetaData(serviceDefinition, openapi, ballerinaFilePath);
+                diagnostics.addAll(metaInfoMapper.getDiagnostics());
 
                 if (openapi.getComponents().getSchemas().isEmpty()) {
                     openapi.setComponents(null);

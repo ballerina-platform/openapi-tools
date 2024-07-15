@@ -88,15 +88,21 @@ public enum DiagnosticMessages {
             "/request parameter information from the interceptor pipeline. Cause: %s", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_127("OAS_CONVERTOR_127", "Generated OpenAPI definition does not contain the request" +
             " parameter information from the interceptor pipeline. Cause: %s", DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_128("OAS_CONVERTOR_128", "Generated OpenAPI definition for the service contract type: " +
+    OAS_CONVERTOR_128("OAS_CONVERTOR_128", "Given example path `%s` is not exist, therefore " +
+            "generated yaml doesn't contain example for `%s` ", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_129("OAS_CONVERTOR_129", "Given example path `%s` should be JSON file for" +
+            " example `%s`", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_130("OAS_CONVERTOR_130", "Following issue occurred parsing given example:" +
+            " %s", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_131("OAS_CONVERTOR_131", "`%s` example can not have a blank path", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_132("OAS_CONVERTOR_128", "Generated OpenAPI definition for the service contract type: " +
             "'%s' has errors", DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_129("OAS_CONVERTOR_129", "Failed to obtain the OpenAPI definition from the service contract" +
+    OAS_CONVERTOR_133("OAS_CONVERTOR_129", "Failed to obtain the OpenAPI definition from the service contract" +
             " type: '%s'", DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_130("OAS_CONVERTOR_130", "Failed to find the package to obtain the OpenAPI definition from the " +
+    OAS_CONVERTOR_134("OAS_CONVERTOR_130", "Failed to find the package to obtain the OpenAPI definition from the " +
             "service contract type: '%s'", DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_131("OAS_CONVERTOR_131", "Failed to find the OpenAPI definition resource for the " +
+    OAS_CONVERTOR_135("OAS_CONVERTOR_131", "Failed to find the OpenAPI definition resource for the " +
             "service contract type: '%s'", DiagnosticSeverity.ERROR);
-
     private final String code;
     private final String description;
     private final DiagnosticSeverity severity;
