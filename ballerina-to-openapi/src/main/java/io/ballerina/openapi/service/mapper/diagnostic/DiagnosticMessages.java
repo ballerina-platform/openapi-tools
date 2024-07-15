@@ -95,13 +95,13 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_130("OAS_CONVERTOR_130", "Following issue occurred parsing given example:" +
             " %s", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_131("OAS_CONVERTOR_131", "`%s` example can not have a blank path", DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_132("OAS_CONVERTOR_128", "Generated OpenAPI definition for the service contract type: " +
+    OAS_CONVERTOR_132("OAS_CONVERTOR_132", "Generated OpenAPI definition for the service contract type: " +
             "'%s' has errors", DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_133("OAS_CONVERTOR_129", "Failed to obtain the OpenAPI definition from the service contract" +
+    OAS_CONVERTOR_133("OAS_CONVERTOR_133", "Failed to obtain the OpenAPI definition from the service contract" +
             " type: '%s'", DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_134("OAS_CONVERTOR_130", "Failed to find the package to obtain the OpenAPI definition from the " +
+    OAS_CONVERTOR_134("OAS_CONVERTOR_134", "Failed to find the package to obtain the OpenAPI definition from the " +
             "service contract type: '%s'", DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_135("OAS_CONVERTOR_131", "Failed to find the OpenAPI definition resource for the " +
+    OAS_CONVERTOR_135("OAS_CONVERTOR_135", "Failed to find the OpenAPI definition resource for the " +
             "service contract type: '%s'", DiagnosticSeverity.ERROR);
     private final String code;
     private final String description;
