@@ -1,5 +1,6 @@
 import ballerina/url;
 import ballerina/mime;
+import ballerina/http;
 
 # Represents encoding mechanism details.
 type Encoding record {
@@ -277,4 +278,42 @@ isolated function createBodyParts(record {|anydata...;|} anyRecord, map<Encoding
         entities.push(entity);
     }
     return entities;
+}
+
+isolated function getValidatedResponseForDefaultMapping(http:StatusCodeResponse|error response, int[] nonDefaultStatusCodes) returns http:StatusCodeResponse|error {
+    if response is error {
+        if response is http:StatusCodeResponseDataBindingError {
+            http:StatusCodeBindingErrorDetail detail = response.detail();
+            if nonDefaultStatusCodes.indexOf(detail.statusCode) is int && detail.fromDefaultStatusCodeMapping {
+                return createStatusCodeResponseBindingError(detail.statusCode, detail.headers, detail.body);
+            }
+        }
+    } else if response is http:DefaultStatusCodeResponse {
+        int statusCode = response.status.code;
+        map<anydata> headersFromResponse = response.headers ?: {};
+        map<string[]> headers = {};
+        foreach var [key, value] in headersFromResponse.entries() {
+            if value is anydata[] {
+                headers[key] = from anydata data in value
+                    select data.toString();
+            } else {
+                headers[key] = [value.toString()];
+            }
+        }
+        if nonDefaultStatusCodes.indexOf(statusCode) is int {
+            return createStatusCodeResponseBindingError(statusCode, headers, response?.body);
+        }
+    }
+    return response;
+}
+
+isolated function createStatusCodeResponseBindingError(int statusCode, map<string[]> headers, anydata body = ()) returns http:StatusCodeResponseBindingError {
+    string reasonPhrase = string `incompatible type found for the response with non-default status code: ${statusCode}`;
+    if 100 <= statusCode && statusCode <= 399 {
+        return error http:StatusCodeResponseBindingError(reasonPhrase, statusCode = statusCode, headers = headers, body = body, fromDefaultStatusCodeMapping = false);
+    } else if 400 <= statusCode && statusCode <= 499 {
+        return error http:StatusCodeBindingClientRequestError(reasonPhrase, statusCode = statusCode, headers = headers, body = body, fromDefaultStatusCodeMapping = false);
+    } else {
+        return error http:StatusCodeBindingRemoteServerError(reasonPhrase, statusCode = statusCode, headers = headers, body = body, fromDefaultStatusCodeMapping = false);
+    }
 }

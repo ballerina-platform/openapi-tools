@@ -1,7 +1,6 @@
 import ballerina/http;
 
-public type OkAnydata record {|
+public type AnydataOk record {|
     *http:Ok;
     anydata body;
-    map<string|string[]> headers;
 |};

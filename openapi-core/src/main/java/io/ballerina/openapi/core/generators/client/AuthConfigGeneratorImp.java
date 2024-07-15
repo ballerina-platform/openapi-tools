@@ -1367,9 +1367,9 @@ public class AuthConfigGeneratorImp {
 
         List<StatementNode> clientConfigAssignmentNodes = new ArrayList<>();
 
-        // config.auth = <http:BearerTokenConfig>config.auth;
+        // httpClientConfig.auth = <http:BearerTokenConfig>config.auth;
         FieldAccessExpressionNode clientConfigAuthRef = createFieldAccessExpressionNode(
-                createSimpleNameReferenceNode(createIdentifierToken(CONFIG)), createToken(DOT_TOKEN),
+                createSimpleNameReferenceNode(createIdentifierToken(HTTP_CLIENT_CONFIG)), createToken(DOT_TOKEN),
                 createSimpleNameReferenceNode(createIdentifierToken(AUTH)));
         SimpleNameReferenceNode clientConfigExpr = createSimpleNameReferenceNode(
                 createIdentifierToken("<" + getAuthFieldTypeName() +

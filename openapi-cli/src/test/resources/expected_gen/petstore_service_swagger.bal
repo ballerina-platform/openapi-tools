@@ -31,7 +31,7 @@ service /v2 on ep0 {
     #
     # + petId - ID of pet to return
     # + return - returns can be any of following types
-    # Pet (successful operation)
+    # http:Ok (successful operation)
     # http:BadRequest (Invalid ID supplied)
     # http:NotFound (Pet not found)
     resource function get pet/[int petId]() returns Pet|http:BadRequest|http:NotFound {
@@ -40,7 +40,7 @@ service /v2 on ep0 {
     #
     # + status - Status values that need to be considered for filter
     # + return - returns can be any of following types
-    # Pet[] (successful operation)
+    # http:Ok (successful operation)
     # http:BadRequest (Invalid status value)
     resource function get pet/findByStatus(("available"|"pending"|"sold")[] status) returns Pet[]|http:BadRequest {
     }
@@ -48,7 +48,7 @@ service /v2 on ep0 {
     #
     # + tags - Tags to filter by
     # + return - returns can be any of following types
-    # Pet[] (successful operation)
+    # http:Ok (successful operation)
     # http:BadRequest (Invalid tag value)
     resource function get pet/findByTags(string[] tags) returns Pet[]|http:BadRequest {
     }
@@ -70,7 +70,7 @@ service /v2 on ep0 {
     #
     # + username - The name that needs to be fetched. Use user1 for testing.
     # + return - returns can be any of following types
-    # User (successful operation)
+    # http:Ok (successful operation)
     # http:BadRequest (Invalid username supplied)
     # http:NotFound (User not found)
     resource function get user/[string username]() returns User|http:BadRequest|http:NotFound {
@@ -80,14 +80,14 @@ service /v2 on ep0 {
     # + username - The user name for login
     # + password - The password for login in clear text
     # + return - returns can be any of following types
-    # string (successful operation)
+    # http:Ok (successful operation)
     # http:BadRequest (Invalid username/password supplied)
     resource function get user/login(string username, string password) returns string|http:BadRequest {
     }
     # Logs out current logged in user session
     #
     # + return - successful operation
-    resource function get user/logout() returns http:Response {
+    resource function get user/logout() returns http:DefaultStatusCodeResponse {
     }
     # Add a new pet to the store
     #
@@ -107,7 +107,7 @@ service /v2 on ep0 {
     # + petId - ID of pet to update
     # + request - parameter description
     # + return - successful operation
-    resource function post pet/[int petId]/uploadImage(http:Request request) returns OkApiResponse {
+    resource function post pet/[int petId]/uploadImage(http:Request request) returns ApiResponseOk {
     }
     # Place an order for a pet
     #
@@ -115,25 +115,25 @@ service /v2 on ep0 {
     # + return - returns can be any of following types
     # OkOrder (successful operation)
     # http:BadRequest (Invalid Order)
-    resource function post store/'order(http:Request request) returns OkOrder|http:BadRequest {
+    resource function post store/'order(http:Request request) returns OrderOk|http:BadRequest {
     }
     # Create user
     #
     # + request - Created user object
     # + return - successful operation
-    resource function post user(http:Request request) returns http:Response {
+    resource function post user(http:Request request) returns http:DefaultStatusCodeResponse {
     }
     # Creates list of users with given input array
     #
     # + request - List of user object
     # + return - successful operation
-    resource function post user/createWithArray(http:Request request) returns http:Response {
+    resource function post user/createWithArray(http:Request request) returns http:DefaultStatusCodeResponse {
     }
     # Creates list of users with given input array
     #
     # + request - List of user object
     # + return - successful operation
-    resource function post user/createWithList(http:Request request) returns http:Response {
+    resource function post user/createWithList(http:Request request) returns http:DefaultStatusCodeResponse {
     }
     # Update an existing pet
     #

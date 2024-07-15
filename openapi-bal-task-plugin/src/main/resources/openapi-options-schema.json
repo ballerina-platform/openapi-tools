@@ -28,6 +28,9 @@
     },
     "statusCodeBinding": {
       "type": "boolean"
+    },
+    "mock": {
+      "type": "boolean"
     }
   },
   "additionalProperties": false

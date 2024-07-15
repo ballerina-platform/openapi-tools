@@ -61,6 +61,7 @@ public final class Constants {
     public static final String PORT = "port";
     public static final String HTTP_REQUEST = "http:Request";
     public static final String DEFAULT = "default";
+    public static final String DEFAULT_STATUS_CODE_RESPONSE = "DefaultStatusCodeResponse";
     public static final String WILD_CARD_CONTENT_KEY = "*/*";
     public static final String WILD_CARD_SUMMARY = "Any type of entity body";
     public static final String MEDIA_TYPE = "mediaType";
@@ -184,8 +185,8 @@ public final class Constants {
         httpCodeMap.put("LoopDetected", "508");
         httpCodeMap.put("NotExtended", "510");
         httpCodeMap.put("NetworkAuthenticationRequired", "511");
-        httpCodeMap.put("NetworkAuthorizationRequired", "511"); //This status code was added since it is deprecated.
         // TODO: remove this after fixing https://github.com/ballerina-platform/ballerina-standard-library/issues/4245
+        httpCodeMap.put("NetworkAuthorizationRequired", "511"); //This status code was added since it is deprecated.
         HTTP_CODES = Collections.unmodifiableMap(httpCodeMap);
     }
     public static final Map<String, String> HTTP_STATUS_CODE_ERRORS;
@@ -326,9 +327,18 @@ public final class Constants {
     public static final String FALSE = "false";
     public static final String SLASH = "/";
     public static final String HYPHEN = "-";
+
+    //`@openapi:ServiceInfo` annotation constants
     public static final String CONTRACT = "contract";
     public static final String VERSION = "version";
     public static final String TITLE = "title";
+    public static final String EMAIL = "email";
+    public static final String DESCRIPTION = "description";
+    public static final String CONTACT_NAME = "contactName";
+    public static final String CONTACT_URL = "contactURL";
+    public static final String LICENSE_NAME = "licenseName";
+    public static final String LICENSE_URL = "licenseURL";
+    public static final String TERMS_OF_SERVICE = "termsOfService";
     public static final String OPENAPI_ANNOTATION = "openapi:ServiceInfo";
 
     //File extensions
@@ -336,4 +346,15 @@ public final class Constants {
     public static final String JSON_EXTENSION = ".json";
     public static final String YML_EXTENSION = ".yml";
     public static final String UNDERSCORE = "_";
+
+    //openapi:ResourceInFo annotation
+    public static final String OPENAPI_RESOURCE_INFO = "openapi:ResourceInfo";
+    public static final String TAGS = "tags";
+    public static final String SUMMARY = "summary";
+    public static final String EXAMPLES = "examples";
+    public static final String OPERATION_ID = "operationId";
+    public static final String RESPONSE_ATTRIBUTE = "response";
+    public static final String REQUEST_BODY_ATTRIBUTE = "requestBody";
+    public static final String VALUE = "value";
+    public static final String FILE_PATH = "filePath";
 }

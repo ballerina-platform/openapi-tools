@@ -1,8 +1,15 @@
+import ballerina/http;
+
 public type SimpleType int;
 
 public type Pets Pet[];
 
 public type TestPet Pet;
+
+public type TestPetAccepted record {|
+    *http:Accepted;
+    TestPet body;
+|};
 
 public type TestDog Dog;
 

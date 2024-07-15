@@ -23,6 +23,6 @@ service /v1 on ep0 {
     # + return - returns can be any of following types
     # string (Created)
     # OkString (ok)
-    resource function post user04() returns string|OkString {
+    resource function post user04() returns string|StringOk {
     }
 }

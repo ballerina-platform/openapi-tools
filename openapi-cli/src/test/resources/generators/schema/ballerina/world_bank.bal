@@ -1,3 +1,5 @@
+import ballerina/http;
+
 public type PrimaryEducationExpenditure record {
     Indicator indicator?;
     Country country?;
@@ -21,6 +23,11 @@ public type AccessToElectricity record {
     int value?;
     int 'decimal?;
 };
+
+public type ErrorCreated record {|
+    *http:Created;
+    Error body;
+|};
 
 public type GrossDomesticProduct record {
     Indicator indicator?;

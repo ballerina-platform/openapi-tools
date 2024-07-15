@@ -1,7 +1,6 @@
- import ballerina/http;
+import ballerina/http;
 
-public type AcceptedString record {|
+public type StringAccepted record {|
     *http:Accepted;
     string body;
-    map<string|string[]> headers;
 |};

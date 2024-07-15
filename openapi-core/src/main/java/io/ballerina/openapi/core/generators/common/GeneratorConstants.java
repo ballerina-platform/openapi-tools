@@ -224,6 +224,9 @@ public class GeneratorConstants {
     public static final String QUERY = "query";
     public static final String HTTP_RESPONSE = "http:Response";
     public static final String DEFAULT = "default";
+    public static final String DEFAULT_STATUS = "Default";
+    public static final String DEFAULT_STATUS_CODE_RESPONSE = "DefaultStatusCodeResponse";
+
     /**
      * Util for select http keywords with http codes.
      *
@@ -295,6 +298,7 @@ public class GeneratorConstants {
         httpCodeMap.put("508", "LoopDetected");
         httpCodeMap.put("510", "NotExtended");
         httpCodeMap.put("511", "NetworkAuthenticationRequired");
+        httpCodeMap.put(DEFAULT, DEFAULT_STATUS_CODE_RESPONSE);
         HTTP_CODES_DES = Collections.unmodifiableMap(httpCodeMap);
     }
 

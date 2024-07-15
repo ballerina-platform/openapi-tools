@@ -196,4 +196,12 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
     public List<ClientDiagnostic> getDiagnostics() {
         return diagnostics;
     }
+
+    public boolean hasDefaultStatusCodeBinding() {
+        return false;
+    }
+
+    public List<String> getNonDefaultStatusCodes() {
+        return new ArrayList<>();
+    }
 }

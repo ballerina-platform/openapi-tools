@@ -35,6 +35,7 @@ public class OASClientConfig {
     private final boolean isPlugin;
     private final String license;
     private final boolean statusCodeBinding;
+    private final boolean isMock;
 
 
     private OASClientConfig(Builder clientConfigBuilder) {
@@ -45,6 +46,7 @@ public class OASClientConfig {
         this.resourceMode = clientConfigBuilder.resourceMode;
         this.license = clientConfigBuilder.license;
         this.statusCodeBinding = clientConfigBuilder.statusCodeBinding;
+        this.isMock = clientConfigBuilder.isMock;
     }
 
     public OpenAPI getOpenAPI() {
@@ -73,17 +75,22 @@ public class OASClientConfig {
         return statusCodeBinding;
     }
 
+    public boolean isMock() {
+        return isMock;
+    }
+
     /**
      * Client IDL plugin meta data builder class.
      */
     public static class Builder {
         private OpenAPI openAPI;
-        private Filter filter;
+        private Filter filter = new Filter();
         private boolean nullable = false;
         private boolean resourceMode = true;
         private boolean isPlugin = false;
         private String license = DO_NOT_MODIFY_FILE_HEADER;
         private boolean statusCodeBinding = false;
+        private boolean isMock = false;
 
         public Builder withOpenAPI(OpenAPI openAPI) {
             this.openAPI = openAPI;
@@ -117,6 +124,11 @@ public class OASClientConfig {
 
         public Builder withStatusCodeBinding(boolean statusCodeBinding) {
             this.statusCodeBinding = statusCodeBinding;
+            return this;
+        }
+
+        public Builder withMock(boolean isMock) {
+            this.isMock = isMock;
             return this;
         }
 

@@ -20,6 +20,16 @@ public type ClientHttp1Settings record {|
     ProxyConfig proxy?;
 |};
 
+public type ErrorDefault record {|
+    *http:DefaultStatusCodeResponse;
+    Error body;
+|};
+
+public type Error record {
+    int code;
+    string message;
+};
+
 # Proxy server configurations to be used with the HTTP client endpoint.
 public type ProxyConfig record {|
     # Host name of the proxy server
