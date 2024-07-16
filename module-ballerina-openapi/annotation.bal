@@ -106,3 +106,21 @@ public const annotation ResourceInformation ResourceInfo on object function;
 public annotation ServiceInformation ServiceInfo on service;
 // # Annotation for additional OpenAPI configurations of a Ballerina client.
 // public const annotation ClientConfiguration ClientConfig on source client;
+
+# Represents an example value.
+#
+# + value - The example value.
+public type ExampleValue record {|
+    anydata value;
+|};
+
+# Represents a set of example values.
+public type ExampleValues record {|
+    ExampleValue...;
+|};
+
+# Annotation for an example value.
+public const annotation ExampleValue Example on type, parameter, record field;
+
+# Annotation for a set of example values.
+public const annotation ExampleValues Examples on parameter;
