@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * This {@link TypeExampleMapper} class represents the example mapper for type.
@@ -111,34 +112,20 @@ public class TypeExampleMapper implements ExampleMapper {
     }
 
     private String getJsonString(Object value) {
-        if (value instanceof String) {
-            return "\"" + value + "\"";
-        } else if (value instanceof ArrayList<?> objects) {
-            StringBuilder array = new StringBuilder();
-            array.append("[");
-            for (Object obj : objects) {
-                array.append(getJsonString(obj));
-                array.append(",");
-            }
-            array.deleteCharAt(array.length() - 1);
-            array.append("]");
-            return array.toString();
-        } else if (value instanceof HashMap<?, ?> hashMap) {
-            StringBuilder map = new StringBuilder();
-            map.append("{");
-            for (Object key : hashMap.keySet()) {
-                map.append(getJsonString(key));
-                map.append(":");
-                map.append(getJsonString(hashMap.get(key)));
-                map.append(",");
-            }
-            map.deleteCharAt(map.length() - 1);
-            map.append("}");
-            return map.toString();
-        } else if (value instanceof ConstantValue constantValue) {
+        if (value instanceof ConstantValue constantValue) {
             return getJsonString(constantValue.value());
         } else if (value instanceof BLangConstantValue constantValue) {
             return getJsonString(constantValue.value);
+        } else if (value instanceof String stringValue) {
+            return "\"" + stringValue + "\"";
+        } else if (value instanceof ArrayList<?> objects) {
+            return objects.stream()
+                    .map(this::getJsonString)
+                    .collect(Collectors.joining(",", "[", "]"));
+        } else if (value instanceof HashMap<?, ?> hashMap) {
+            return hashMap.entrySet().stream()
+                    .map(entry -> getJsonString(entry.getKey()) + ":" + getJsonString(entry.getValue()))
+                    .collect(Collectors.joining(",", "{", "}"));
         } else {
             return value.toString();
         }
