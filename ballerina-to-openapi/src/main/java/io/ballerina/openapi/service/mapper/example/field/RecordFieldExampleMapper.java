@@ -15,59 +15,65 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.mapper.example.type;
+package io.ballerina.openapi.service.mapper.example.field;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
-import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
-import io.ballerina.compiler.api.values.ConstantValue;
+import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
+import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.example.ExampleMapper;
-import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 import static io.ballerina.openapi.service.mapper.example.CommonUtils.extractOpenApiExampleValue;
-import static io.ballerina.openapi.service.mapper.example.CommonUtils.getJsonString;
 
 /**
- * This {@link TypeExampleMapper} class represents the example mapper for type.
+ * This {@link RecordFieldExampleMapper} class represents the example mapper for record field.
  *
  * @since 2.1.0
  */
-public class TypeExampleMapper implements ExampleMapper {
+public class RecordFieldExampleMapper implements ExampleMapper {
 
-    TypeDefinitionSymbol typeDefinitionSymbol;
-    Schema typeSchema;
+    RecordTypeSymbol recordTypeSymbol;
+    ObjectSchema schema;
     SemanticModel semanticModel;
     List<OpenAPIMapperDiagnostic> diagnostics;
 
-    public TypeExampleMapper(TypeDefinitionSymbol typeDefinitionSymbol, Schema typeSchema,
-                             SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
-        this.typeDefinitionSymbol = typeDefinitionSymbol;
-        this.typeSchema = typeSchema;
+    public RecordFieldExampleMapper(RecordTypeSymbol recordTypeSymbol, ObjectSchema schema,
+                                    SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
+        this.recordTypeSymbol = recordTypeSymbol;
+        this.schema = schema;
         this.semanticModel = semanticModel;
         this.diagnostics = diagnostics;
     }
 
     @Override
     public void setExample() {
-        Optional<Object> exampleValue = extractExample();
-        if (exampleValue.isEmpty()) {
+        Map<String, RecordFieldSymbol> recordFields = recordTypeSymbol.fieldDescriptors();
+        if (Objects.isNull(recordFields) || recordFields.isEmpty()) {
             return;
         }
 
-        typeSchema.setExample(exampleValue.get());
+        recordFields.forEach(this::setPropertyExample);
     }
 
-    public Optional<Object> extractExample() {
+    private void setPropertyExample(String fieldName, RecordFieldSymbol fieldSymbol) {
+        Optional<Object> example = extractExample(fieldSymbol);
+        if (example.isEmpty()) {
+            return;
+        }
+        schema.getProperties().get(fieldName).setExample(example.get());
+    }
+
+    private Optional<Object> extractExample(RecordFieldSymbol fieldSymbol) {
         try {
-            List<AnnotationAttachmentSymbol> annotations = typeDefinitionSymbol.annotAttachments();
+            List<AnnotationAttachmentSymbol> annotations = fieldSymbol.annotAttachments();
             if (Objects.isNull(annotations)) {
                 return Optional.empty();
             }

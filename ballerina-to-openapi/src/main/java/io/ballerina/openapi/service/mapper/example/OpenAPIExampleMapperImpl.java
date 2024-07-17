@@ -18,10 +18,12 @@
 package io.ballerina.openapi.service.mapper.example;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.example.field.RecordFieldExampleMapper;
 import io.ballerina.openapi.service.mapper.example.type.TypeExampleMapper;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
@@ -29,6 +31,7 @@ import io.ballerina.openapi.service.mapper.type.BallerinaPackage;
 import io.ballerina.openapi.service.mapper.type.BallerinaTypeExtensioner;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
@@ -45,7 +48,6 @@ import java.util.Optional;
 public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
 
     private final OpenAPI openAPI;
-    private final ModuleMemberVisitor moduleMemberVisitor;
     private final List<OpenAPIMapperDiagnostic> diagnostics;
     private final ServiceDeclarationNode serviceDeclarationNode;
     private final SemanticModel semanticModel;
@@ -53,7 +55,6 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
     public OpenAPIExampleMapperImpl(OpenAPI openAPI, ServiceDeclarationNode serviceDeclarationNode,
                                     AdditionalData additionalData) {
         this.openAPI = openAPI;
-        this.moduleMemberVisitor = additionalData.moduleMemberVisitor();
         this.diagnostics = additionalData.diagnostics();
         this.serviceDeclarationNode = serviceDeclarationNode;
         this.semanticModel = additionalData.semanticModel();
@@ -66,20 +67,33 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
             return;
         }
         Map<String, Schema> schemas = components.getSchemas();
-        for (Map.Entry<String, Schema> schemaEntry : schemas.entrySet()) {
-            Optional<BallerinaPackage> ballerinaExt = BallerinaTypeExtensioner.getExtension(schemaEntry.getValue());
-            if (ballerinaExt.isEmpty()) {
-                continue;
-            }
-            BallerinaPackage ballerinaPkg = ballerinaExt.get();
-            Optional<Symbol> ballerinaType = semanticModel.types().getTypeByName(ballerinaPkg.orgName(),
-                    ballerinaPkg.moduleName(), ballerinaPkg.version(), schemaEntry.getKey());
-            if (ballerinaType.isEmpty() || !(ballerinaType.get() instanceof TypeDefinitionSymbol typeDefSymbol)) {
-                continue;
-            }
-            ExampleMapper typeExampleMapper = new TypeExampleMapper(typeDefSymbol, schemaEntry.getValue(),
+        schemas.forEach((key, schema) -> {
+            setExamplesForTypes(key, schema);
+        });
+    }
+
+    private void setExamplesForTypes(String key, Schema schema) {
+        Optional<BallerinaPackage> ballerinaExt = BallerinaTypeExtensioner.getExtension(schema);
+        if (ballerinaExt.isEmpty()) {
+            return;
+        }
+        BallerinaPackage ballerinaPkg = ballerinaExt.get();
+        Optional<Symbol> ballerinaType = semanticModel.types().getTypeByName(ballerinaPkg.orgName(),
+                ballerinaPkg.moduleName(), ballerinaPkg.version(), key);
+        if (ballerinaType.isEmpty() || !(ballerinaType.get() instanceof TypeDefinitionSymbol typeDefSymbol)) {
+            return;
+        }
+
+        // Map examples from types
+        ExampleMapper typeExampleMapper = new TypeExampleMapper(typeDefSymbol, schema, semanticModel, diagnostics);
+        typeExampleMapper.setExample();
+
+        if (typeDefSymbol.typeDescriptor() instanceof RecordTypeSymbol recordTypeSymbol
+                && schema instanceof ObjectSchema objectSchema) {
+            // Map examples from record fields
+            ExampleMapper recordFieldExampleMapper = new RecordFieldExampleMapper(recordTypeSymbol, objectSchema,
                     semanticModel, diagnostics);
-            typeExampleMapper.setExample();
+            recordFieldExampleMapper.setExample();
         }
     }
 }
