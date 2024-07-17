@@ -31,6 +31,8 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.constraint.ConstraintMapper;
 import io.ballerina.openapi.service.mapper.constraint.ConstraintMapperImpl;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.example.OpenAPIExampleMapper;
+import io.ballerina.openapi.service.mapper.example.OpenAPIExampleMapperImpl;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapper;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapperImpl;
 import io.ballerina.openapi.service.mapper.interceptor.model.RequestParameterInfo;
@@ -84,6 +86,7 @@ public class ServiceMapperFactory {
     private final HateoasMapper hateoasMapper;
     private final InterceptorPipeline interceptorPipeline;
     private final MetaInfoMapper metaInfoMapper;
+    private final OpenAPIExampleMapper exampleMapper;
 
     public ServiceMapperFactory(OpenAPI openAPI, SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
                                 List<OpenAPIMapperDiagnostic> diagnostics, ServiceDeclarationNode serviceDefinition) {
@@ -96,6 +99,7 @@ public class ServiceMapperFactory {
         this.constraintMapper = new ConstraintMapperImpl(openAPI, moduleMemberVisitor, diagnostics);
         this.hateoasMapper = new HateoasMapperImpl();
         this.metaInfoMapper = new MetaInfoMapperImpl();
+        this.exampleMapper = new OpenAPIExampleMapperImpl(openAPI, serviceDefinition, additionalData);
     }
 
     public ServersMapper getServersMapper(Set<ListenerDeclarationNode> endpoints, ServiceDeclarationNode serviceNode) {
@@ -168,6 +172,10 @@ public class ServiceMapperFactory {
 
     public MetaInfoMapper getMetaInfoMapper() {
             return metaInfoMapper;
+    }
+
+    public OpenAPIExampleMapper getExampleMapper() {
+        return exampleMapper;
     }
 
     private Components getComponents(OpenAPI openAPI) {
