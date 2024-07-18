@@ -35,12 +35,27 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static io.ballerina.openapi.service.mapper.Constants.BALLERINA;
+import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
+import static io.ballerina.openapi.service.mapper.Constants.OPENAPI;
+
 /**
  * This {@link CommonUtils} class represents the common utility functions of example mapper.
  *
  * @since 2.1.0
  */
 public final class CommonUtils {
+
+    private static final String EXAMPLE_VALUES = "ExampleValues";
+    private static final String EXAMPLE_VALUE = "ExampleValue";
+    private static final String VALUE = "value";
+    private static final String QUOTE = "\"";
+    private static final String COMMA = ",";
+    private static final String BRACKET_START = "[";
+    private static final String BRACKET_END = "]";
+    private static final String COLON = ":";
+    private static final String BRACE_START = "{";
+    private static final String BRACE_END = "}";
 
     private CommonUtils() {
     }
@@ -71,7 +86,7 @@ public final class CommonUtils {
             return Optional.empty();
         }
 
-        Object value = exampleMap.get("value");
+        Object value = exampleMap.get(VALUE);
         if (Objects.isNull(value) || !(value instanceof ConstantValue)) {
             return Optional.empty();
         }
@@ -82,7 +97,7 @@ public final class CommonUtils {
 
     public static boolean isOpenAPIExampleAnnotation(AnnotationAttachmentSymbol annotAttachment,
                                                      SemanticModel semanticModel) {
-        return isOpenAPIAnnotation(annotAttachment, "ExampleValue", semanticModel);
+        return isOpenAPIAnnotation(annotAttachment, EXAMPLE_VALUE, semanticModel);
     }
 
     public static boolean hasBothOpenAPIExampleAnnotations(List<AnnotationAttachmentSymbol> annotations,
@@ -126,7 +141,7 @@ public final class CommonUtils {
 
     public static boolean isOpenAPIExamplesAnnotation(AnnotationAttachmentSymbol annotAttachment,
                                                       SemanticModel semanticModel) {
-        return isOpenAPIAnnotation(annotAttachment, "ExampleValues", semanticModel);
+        return isOpenAPIAnnotation(annotAttachment, EXAMPLE_VALUES, semanticModel);
     }
 
     private static boolean isOpenAPIAnnotation(AnnotationAttachmentSymbol annotAttachment, String annotationName,
@@ -134,8 +149,8 @@ public final class CommonUtils {
         if (annotAttachment.typeDescriptor().typeDescriptor().isEmpty()) {
             return false;
         }
-        Optional<Symbol> exampleValueSymbol = semanticModel.types().getTypeByName("ballerina", "openapi",
-                "", annotationName);
+        Optional<Symbol> exampleValueSymbol = semanticModel.types().getTypeByName(BALLERINA, OPENAPI, EMPTY,
+                annotationName);
         if (exampleValueSymbol.isEmpty() ||
                 !(exampleValueSymbol.get() instanceof TypeDefinitionSymbol serviceContractInfoType)) {
             return false;
@@ -150,15 +165,15 @@ public final class CommonUtils {
         } else if (value instanceof BLangConstantValue constantValue) {
             return getJsonString(constantValue.value);
         } else if (value instanceof String stringValue) {
-            return "\"" + stringValue + "\"";
+            return QUOTE + stringValue + QUOTE;
         } else if (value instanceof ArrayList<?> objects) {
             return objects.stream()
                     .map(CommonUtils::getJsonString)
-                    .collect(Collectors.joining(",", "[", "]"));
+                    .collect(Collectors.joining(COMMA, BRACKET_START, BRACKET_END));
         } else if (value instanceof HashMap<?, ?> hashMap) {
             return hashMap.entrySet().stream()
-                    .map(entry -> getJsonString(entry.getKey()) + ":" + getJsonString(entry.getValue()))
-                    .collect(Collectors.joining(",", "{", "}"));
+                    .map(entry -> getJsonString(entry.getKey()) + COLON + getJsonString(entry.getValue()))
+                    .collect(Collectors.joining(COMMA, BRACE_START, BRACE_END));
         } else {
             return value.toString();
         }

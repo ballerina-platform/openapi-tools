@@ -36,7 +36,7 @@ public abstract class ExampleMapper {
 
     private final SemanticModel semanticModel;
 
-    public ExampleMapper(SemanticModel semanticModel) {
+    protected ExampleMapper(SemanticModel semanticModel) {
         this.semanticModel = semanticModel;
     }
 

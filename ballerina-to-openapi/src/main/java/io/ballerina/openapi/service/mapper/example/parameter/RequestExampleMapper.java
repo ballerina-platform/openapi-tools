@@ -35,6 +35,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static io.ballerina.openapi.service.mapper.Constants.EXAMPLE;
+import static io.ballerina.openapi.service.mapper.Constants.EXAMPLES;
+import static io.ballerina.openapi.service.mapper.Constants.REQUEST;
 import static io.ballerina.openapi.service.mapper.example.CommonUtils.hasBothOpenAPIExampleAnnotations;
 
 /**
@@ -83,8 +86,8 @@ public class RequestExampleMapper extends ExamplesMapper {
             }
             content.forEach((mediaType, mediaTypeObject) -> mediaTypeObject.setExample(exampleValue.get()));
         } catch (JsonProcessingException exception) {
-            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, "example",
-                    "request", paramName));
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, EXAMPLE,
+                    REQUEST, paramName));
         }
     }
 
@@ -117,8 +120,8 @@ public class RequestExampleMapper extends ExamplesMapper {
             }
             content.forEach((mediaType, mediaTypeObject) -> mediaTypeObject.setExamples(exampleValues.get()));
         }  catch (JsonProcessingException exception) {
-            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, "examples",
-                    "request", paramName));
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, EXAMPLES,
+                    REQUEST, paramName));
         }
     }
 }

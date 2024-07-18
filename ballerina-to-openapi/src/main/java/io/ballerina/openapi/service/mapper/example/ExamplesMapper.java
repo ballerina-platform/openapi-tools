@@ -35,7 +35,7 @@ import static io.ballerina.openapi.service.mapper.example.CommonUtils.extractOpe
  */
 public abstract class ExamplesMapper extends ExampleMapper {
 
-    public ExamplesMapper(SemanticModel semanticModel) {
+    protected ExamplesMapper(SemanticModel semanticModel) {
         super(semanticModel);
     }
 

@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.openapi.service.mapper.Constants.EXAMPLE;
+import static io.ballerina.openapi.service.mapper.Constants.EXAMPLES;
 import static io.ballerina.openapi.service.mapper.example.CommonUtils.hasBothOpenAPIExampleAnnotations;
 
 /**
@@ -49,9 +51,9 @@ public abstract class ParameterExampleMapper extends ExamplesMapper {
     Location location;
     String paramType;
 
-    public ParameterExampleMapper(List<AnnotationAttachmentSymbol> annotations, Parameter parameterSchema,
-                                  SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics,
-                                  String paramName, Location location, String paramType) {
+    protected ParameterExampleMapper(List<AnnotationAttachmentSymbol> annotations, Parameter parameterSchema,
+                                     SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics,
+                                     String paramName, Location location, String paramType) {
         super(semanticModel);
         this.parameterSchema = parameterSchema;
         this.annotations = annotations;
@@ -78,8 +80,8 @@ public abstract class ParameterExampleMapper extends ExamplesMapper {
             }
             parameterSchema.setExample(exampleValue.get());
         } catch (JsonProcessingException exception) {
-            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, "example",
-                    paramType, paramName));
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, EXAMPLE, paramType,
+                    paramName));
         }
     }
 
@@ -95,7 +97,7 @@ public abstract class ParameterExampleMapper extends ExamplesMapper {
             }
             parameterSchema.setExamples(exampleValues.get());
         } catch (JsonProcessingException exception) {
-            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, "examples",
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, EXAMPLES,
                     paramType, paramName));
         }
     }

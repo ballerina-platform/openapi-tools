@@ -425,17 +425,18 @@ public class MapperCommonUtils {
 
     private static String getNameFromHeaderAnnotation(AnnotationNode annotation) {
         Optional<MappingConstructorExpressionNode> annotationRecord = annotation.annotValue();
-        if (annotationRecord.isPresent()) {
-            SeparatedNodeList<MappingFieldNode> fields = annotationRecord.get().fields();
-            for (MappingFieldNode field : fields) {
-                if (field instanceof SpecificFieldNode specificFieldNode &&
-                        specificFieldNode.fieldName().toString().trim().equals("name")) {
-                    Optional<ExpressionNode> expressionNode = specificFieldNode.valueExpr();
-                    if (expressionNode.isPresent()) {
-                        ExpressionNode valueExpression = expressionNode.get();
-                        if (valueExpression.kind().equals(STRING_LITERAL)) {
-                            return valueExpression.toString().trim().replaceAll("\"", "");
-                        }
+        if (annotationRecord.isEmpty()) {
+            return null;
+        }
+        SeparatedNodeList<MappingFieldNode> fields = annotationRecord.get().fields();
+        for (MappingFieldNode field : fields) {
+            if (field instanceof SpecificFieldNode specificFieldNode &&
+                    specificFieldNode.fieldName().toString().trim().equals("name")) {
+                Optional<ExpressionNode> expressionNode = specificFieldNode.valueExpr();
+                if (expressionNode.isPresent()) {
+                    ExpressionNode valueExpression = expressionNode.get();
+                    if (valueExpression.kind().equals(STRING_LITERAL)) {
+                        return valueExpression.toString().trim().replaceAll("\"", "");
                     }
                 }
             }

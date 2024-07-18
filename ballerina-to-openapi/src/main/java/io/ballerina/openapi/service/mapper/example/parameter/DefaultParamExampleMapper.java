@@ -24,6 +24,8 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.List;
 
+import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
+
 /**
  * This {@link DefaultParamExampleMapper} class represents the examples mapper for query and header parameters.
  *
@@ -34,6 +36,6 @@ public class DefaultParamExampleMapper extends ParameterExampleMapper {
     public DefaultParamExampleMapper(String paramType, ParameterSymbol parameterSymbol, Parameter parameterSchema,
                                      SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
         super(parameterSymbol.annotAttachments(), parameterSchema, semanticModel, diagnostics,
-                parameterSymbol.getName().orElse(""), parameterSymbol.getLocation().orElse(null), paramType);
+                parameterSymbol.getName().orElse(EMPTY), parameterSymbol.getLocation().orElse(null), paramType);
     }
 }

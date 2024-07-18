@@ -57,7 +57,7 @@ public final class BallerinaTypeExtensioner {
         }
 
         schemas.forEach((key, schema) -> {
-            Map extensions = schema.getExtensions();
+            Map<?, ?> extensions = schema.getExtensions();
             if (Objects.nonNull(extensions)) {
                 extensions.remove(X_BALLERINA_TYPE);
             }
@@ -65,7 +65,7 @@ public final class BallerinaTypeExtensioner {
     }
 
     public static Optional<BallerinaPackage> getExtension(Schema schema) {
-        Map extensions = schema.getExtensions();
+        Map<?, ?> extensions = schema.getExtensions();
         if (Objects.isNull(extensions)) {
             return Optional.empty();
         }

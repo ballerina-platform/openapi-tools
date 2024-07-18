@@ -51,11 +51,19 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static io.ballerina.openapi.service.mapper.Constants.BALLERINA;
+import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
+import static io.ballerina.openapi.service.mapper.Constants.HEADER;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP_HEADER_TYPE;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP_PAYLOAD_TYPE;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP_QUERY_TYPE;
+import static io.ballerina.openapi.service.mapper.Constants.PATH;
+import static io.ballerina.openapi.service.mapper.Constants.QUERY;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getHeaderName;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOperationId;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
@@ -72,6 +80,13 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
     private final List<OpenAPIMapperDiagnostic> diagnostics;
     private final ServiceDeclarationNode serviceDeclarationNode;
     private final SemanticModel semanticModel;
+
+    private enum ParameterType {
+        PAYLOAD,
+        QUERY,
+        HEADER,
+        OTHER
+    }
 
     public OpenAPIExampleMapperImpl(OpenAPI openAPI, ServiceDeclarationNode serviceDeclarationNode,
                                     AdditionalData additionalData) {
@@ -146,39 +161,39 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
             return;
         }
 
-        String parameterType = getParameterType(parameterSymbol, semanticModel);
+        ParameterType parameterType = getParameterType(parameterSymbol, semanticModel);
         switch (parameterType) {
-            case "PAYLOAD":
+            case PAYLOAD:
                 RequestBody requestBody = operation.getRequestBody();
                 ExamplesMapper reqExampleMapper = new RequestExampleMapper(parameterSymbol, requestBody,
                         semanticModel, diagnostics);
                 reqExampleMapper.setExample();
                 reqExampleMapper.setExamples();
                 break;
-            case "QUERY":
+            case QUERY:
                 Optional<Parameter> queryParam = operation.getParameters().stream()
-                        .filter(param -> param.getIn().equals("query") &&
+                        .filter(param -> param.getIn().equals(QUERY) &&
                                 param.getName().equals(unescapeIdentifier(parameterSymbol.getName().get())))
                         .findFirst();
                 if (queryParam.isEmpty()) {
                     return;
                 }
-                ExamplesMapper queryExampleMapper = new DefaultParamExampleMapper(parameterType.toLowerCase(
-                        Locale.ENGLISH), parameterSymbol, queryParam.get(), semanticModel, diagnostics);
+                ExamplesMapper queryExampleMapper = new DefaultParamExampleMapper(QUERY, parameterSymbol,
+                        queryParam.get(), semanticModel, diagnostics);
                 queryExampleMapper.setExample();
                 queryExampleMapper.setExamples();
                 break;
-            case "HEADER":
+            case HEADER:
                 Optional<Parameter> headerParam = operation.getParameters().stream()
-                        .filter(param -> param.getIn().equals("header") && param.getName()
+                        .filter(param -> param.getIn().equals(HEADER) && param.getName()
                                 .equals(getHeaderName(parameterNode,
                                         unescapeIdentifier(parameterSymbol.getName().get()))))
                         .findFirst();
                 if (headerParam.isEmpty()) {
                     return;
                 }
-                ExamplesMapper headerExampleMapper = new DefaultParamExampleMapper(parameterType.toLowerCase(
-                        Locale.ENGLISH), parameterSymbol, headerParam.get(), semanticModel, diagnostics);
+                ExamplesMapper headerExampleMapper = new DefaultParamExampleMapper(HEADER, parameterSymbol,
+                        headerParam.get(), semanticModel, diagnostics);
                 headerExampleMapper.setExample();
                 headerExampleMapper.setExamples();
                 break;
@@ -195,7 +210,7 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
         }
 
         Optional<Parameter> pathParam = operation.getParameters().stream()
-                .filter(parameter -> parameter.getIn().equals("path") &&
+                .filter(parameter -> parameter.getIn().equals(PATH) &&
                         parameter.getName().equals(unescapeIdentifier(parameterSymbol.getName().get())))
                 .findFirst();
         if (pathParam.isEmpty()) {
@@ -208,10 +223,10 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
         pathExampleMapper.setExamples();
     }
 
-    private static String getParameterType(ParameterSymbol parameterSymbol, SemanticModel semanticModel) {
+    private static ParameterType getParameterType(ParameterSymbol parameterSymbol, SemanticModel semanticModel) {
         TypeSymbol parameterTypeSymbol = parameterSymbol.typeDescriptor();
         if (!parameterTypeSymbol.subtypeOf(semanticModel.types().ANYDATA)) {
-            return "OTHER";
+            return ParameterType.OTHER;
         }
 
         List<AnnotationSymbol> httpAnnotations = parameterSymbol.annotations().stream()
@@ -219,22 +234,22 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
                         isHttpPackageAnnotationTypeDesc(annotation.typeDescriptor().get()))
                 .toList();
         if (httpAnnotations.isEmpty()) {
-            return "QUERY";
+            return ParameterType.QUERY;
         }
 
         for (AnnotationSymbol annotation : httpAnnotations) {
             TypeSymbol annotationType = annotation.typeDescriptor().get();
-            if (isSubTypeOfHttpType(annotationType, "HttpPayload", semanticModel)) {
-                return "PAYLOAD";
+            if (isSubTypeOfHttpType(annotationType, HTTP_PAYLOAD_TYPE, semanticModel)) {
+                return ParameterType.PAYLOAD;
             }
-            if (isSubTypeOfHttpType(annotationType, "HttpHeader", semanticModel)) {
-                return "HEADER";
+            if (isSubTypeOfHttpType(annotationType, HTTP_HEADER_TYPE, semanticModel)) {
+                return ParameterType.HEADER;
             }
-            if (isSubTypeOfHttpType(annotationType, "HttpQuery", semanticModel)) {
-                return "QUERY";
+            if (isSubTypeOfHttpType(annotationType, HTTP_QUERY_TYPE, semanticModel)) {
+                return ParameterType.QUERY;
             }
         }
-        return "QUERY";
+        return ParameterType.QUERY;
     }
 
     private static boolean isHttpPackageAnnotationTypeDesc(TypeSymbol typeSymbol) {
@@ -243,12 +258,12 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
             return false;
         }
         ModuleID id = module.get().id();
-        return id.orgName().equals("ballerina") && id.moduleName().startsWith("http");
+        return id.orgName().equals(BALLERINA) && id.moduleName().startsWith(HTTP);
     }
 
     private static boolean isSubTypeOfHttpType(TypeSymbol typeSymbol, String httpTypeName,
                                                SemanticModel semanticModel) {
-        Optional<Symbol> httpType = semanticModel.types().getTypeByName("ballerina", "http", "", httpTypeName);
+        Optional<Symbol> httpType = semanticModel.types().getTypeByName(BALLERINA, HTTP, EMPTY, httpTypeName);
         if (httpType.isEmpty() || !(httpType.get() instanceof TypeDefinitionSymbol httpTypeDef)) {
             return false;
         }

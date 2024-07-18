@@ -24,6 +24,9 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.List;
 
+import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
+import static io.ballerina.openapi.service.mapper.Constants.PATH;
+
 /**
  * This {@link PathExampleMapper} class represents the examples mapper for path parameters.
  *
@@ -34,6 +37,6 @@ public class PathExampleMapper extends ParameterExampleMapper {
     public PathExampleMapper(PathParameterSymbol parameter, Parameter parameterSchema, SemanticModel semanticModel,
                              List<OpenAPIMapperDiagnostic> diagnostics) {
         super(parameter.annotAttachments(), parameterSchema, semanticModel, diagnostics,
-                parameter.getName().orElse(""), parameter.getLocation().orElse(null), "path");
+                parameter.getName().orElse(EMPTY), parameter.getLocation().orElse(null), PATH);
     }
 }
