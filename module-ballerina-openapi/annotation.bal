@@ -110,12 +110,12 @@ public annotation ServiceInformation ServiceInfo on service;
 # Represents an example value.
 #
 # + value - The example value.
-public type ExampleValue record {|
+public type ExampleValue readonly & record {|
     anydata value;
 |};
 
 # Represents a set of example values.
-public type ExampleValues record {|
+public type ExampleValues readonly & record {|
     ExampleValue...;
 |};
 
