@@ -21,15 +21,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.example.ExampleMapper;
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-
-import static io.ballerina.openapi.service.mapper.example.CommonUtils.extractOpenApiExampleValue;
 
 /**
  * This {@link TypeExampleMapper} class represents the example mapper for type.
@@ -41,6 +41,8 @@ public class TypeExampleMapper extends ExampleMapper {
     List<AnnotationAttachmentSymbol> annotations;
     Schema typeSchema;
     List<OpenAPIMapperDiagnostic> diagnostics;
+    String typeName;
+    Location location;
 
     public TypeExampleMapper(TypeDefinitionSymbol typeDefinitionSymbol, Schema typeSchema,
                              SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
@@ -48,6 +50,8 @@ public class TypeExampleMapper extends ExampleMapper {
         this.annotations = typeDefinitionSymbol.annotAttachments();
         this.typeSchema = typeSchema;
         this.diagnostics = diagnostics;
+        this.typeName = typeDefinitionSymbol.getName().get();
+        this.location = typeDefinitionSymbol.getLocation().orElse(null);
     }
 
     @Override
@@ -59,7 +63,7 @@ public class TypeExampleMapper extends ExampleMapper {
             }
             typeSchema.setExample(exampleValue.get());
         } catch (JsonProcessingException exception) {
-            // TODO: Add diagnostic
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_132, location, typeName));
         }
     }
 }

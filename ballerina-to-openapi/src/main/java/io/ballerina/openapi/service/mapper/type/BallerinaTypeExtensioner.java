@@ -84,6 +84,6 @@ public final class BallerinaTypeExtensioner {
         }
         ModuleID moduleID = module.get().id();
         return Optional.of(new BallerinaPackage(moduleID.orgName(), moduleID.packageName(), moduleID.moduleName(),
-                moduleID.version(), moduleID.modulePrefix()));
+                moduleID.version(), moduleID.modulePrefix(), typeSymbol.getName()));
     }
 }

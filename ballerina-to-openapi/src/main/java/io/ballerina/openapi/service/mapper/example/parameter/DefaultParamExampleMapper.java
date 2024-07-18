@@ -31,8 +31,9 @@ import java.util.List;
  */
 public class DefaultParamExampleMapper extends ParameterExampleMapper {
 
-    public DefaultParamExampleMapper(ParameterSymbol parameterSymbol, Parameter parameterSchema,
+    public DefaultParamExampleMapper(String paramType, ParameterSymbol parameterSymbol, Parameter parameterSchema,
                                      SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
-        super(parameterSymbol.annotAttachments(), parameterSchema, semanticModel, diagnostics);
+        super(parameterSymbol.annotAttachments(), parameterSchema, semanticModel, diagnostics,
+                parameterSymbol.getName().orElse(""), parameterSymbol.getLocation().orElse(null), paramType);
     }
 }

@@ -67,7 +67,7 @@ public final class CommonUtils {
             exampleValue = ((BLangConstantValue) exampleValue).value;
         }
 
-        if (!(exampleValue instanceof HashMap<?,?> exampleMap)) {
+        if (!(exampleValue instanceof HashMap<?, ?> exampleMap)) {
             return Optional.empty();
         }
 
@@ -107,7 +107,7 @@ public final class CommonUtils {
         }
 
         Object exampleValues = openAPIExamples.get().attachmentValue().get().value();
-        if (!(exampleValues instanceof HashMap<?,?> exampleValuesMap)) {
+        if (!(exampleValues instanceof HashMap<?, ?> exampleValuesMap)) {
             return Optional.empty();
         }
 

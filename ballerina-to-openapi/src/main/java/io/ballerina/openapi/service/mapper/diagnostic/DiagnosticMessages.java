@@ -95,6 +95,16 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_130("OAS_CONVERTOR_130", "Following issue occurred parsing given example:" +
             " %s", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_131("OAS_CONVERTOR_131", "`%s` example can not have a blank path",
+            DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_132("OAS_CONVERTOR_132", "Error occurred while parsing the example for type: `%s`",
+            DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_133("OAS_CONVERTOR_133", "Error occurred while parsing the example for record field: `%s.%s`",
+            DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_134("OAS_CONVERTOR_134", "Error occurred while parsing the `%s` for `%s` parameter: `%s`",
+            DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_135("OAS_CONVERTOR_135", "Example skipped for request parameter: `%s`, since the request payload " +
+            "type implies more than one content-type", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_136("OAS_CONVERTOR_136", "Both Example and Examples annotations are not allowed",
             DiagnosticSeverity.WARNING);
     private final String code;
     private final String description;

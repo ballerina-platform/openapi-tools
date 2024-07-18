@@ -22,8 +22,11 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.example.ExampleMapper;
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 
 import java.util.List;
@@ -31,7 +34,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import static io.ballerina.openapi.service.mapper.example.CommonUtils.extractOpenApiExampleValue;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 /**
  * This {@link RecordFieldExampleMapper} class represents the example mapper for record field.
@@ -40,16 +43,20 @@ import static io.ballerina.openapi.service.mapper.example.CommonUtils.extractOpe
  */
 public class RecordFieldExampleMapper extends ExampleMapper {
 
+    String recordName;
     RecordTypeSymbol recordTypeSymbol;
     ObjectSchema schema;
     List<OpenAPIMapperDiagnostic> diagnostics;
+    Location location;
 
-    public RecordFieldExampleMapper(RecordTypeSymbol recordTypeSymbol, ObjectSchema schema,
+    public RecordFieldExampleMapper(String recordName, RecordTypeSymbol recordTypeSymbol, ObjectSchema schema,
                                     SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
         super(semanticModel);
+        this.recordName = recordName;
         this.recordTypeSymbol = recordTypeSymbol;
         this.schema = schema;
         this.diagnostics = diagnostics;
+        this.location = recordTypeSymbol.getLocation().orElse(null);
     }
 
     @Override
@@ -68,9 +75,10 @@ public class RecordFieldExampleMapper extends ExampleMapper {
             if (example.isEmpty()) {
                 return;
             }
-            schema.getProperties().get(fieldName).setExample(example.get());
+            schema.getProperties().get(unescapeIdentifier(fieldName.trim())).setExample(example.get());
         } catch (JsonProcessingException exp) {
-            // Add a diagnostic
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_133, location, recordName,
+                    fieldName));
         }
     }
 }

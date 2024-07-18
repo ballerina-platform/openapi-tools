@@ -21,8 +21,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
 import io.ballerina.compiler.api.symbols.ParameterSymbol;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.example.ExamplesMapper;
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -45,6 +48,8 @@ public class RequestExampleMapper extends ExamplesMapper {
     List<OpenAPIMapperDiagnostic> diagnostics;
     List<AnnotationAttachmentSymbol> annotations;
     boolean disabled = false;
+    String paramName;
+    Location location;
 
     public RequestExampleMapper(ParameterSymbol parameterSymbol, RequestBody requestBody, SemanticModel semanticModel,
                                 List<OpenAPIMapperDiagnostic> diagnostics) {
@@ -52,9 +57,11 @@ public class RequestExampleMapper extends ExamplesMapper {
         this.annotations = parameterSymbol.annotAttachments();
         this.requestBody = requestBody;
         this.diagnostics = diagnostics;
+        this.paramName = parameterSymbol.getName().orElse("");
+        this.location = parameterSymbol.getLocation().orElse(null);
 
         if (hasBothOpenAPIExampleAnnotations(annotations, semanticModel)) {
-            // TODO: Add a diagnostic
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_136, location));
             disabled = true;
         }
     }
@@ -65,26 +72,33 @@ public class RequestExampleMapper extends ExamplesMapper {
             return;
         }
         try {
-            Content content = requestBody.getContent();
-            if (Objects.isNull(content)) {
-                return;
-            }
-
             Optional<Object> exampleValue = extractExample(annotations);
             if (exampleValue.isEmpty()) {
                 return;
             }
 
-            int mediaTypesSize = content.size();
-            if (mediaTypesSize != 1) {
-                // TODO: add a diagnostic
+            Content content = getValidatedContent();
+            if (Objects.isNull(content)) {
                 return;
             }
-
             content.forEach((mediaType, mediaTypeObject) -> mediaTypeObject.setExample(exampleValue.get()));
         } catch (JsonProcessingException exception) {
-            // TODO: Add diagnostic
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, "example",
+                    "request", paramName));
         }
+    }
+
+    private Content getValidatedContent() {
+        Content content = requestBody.getContent();
+        if (Objects.isNull(content)) {
+            return null;
+        }
+        int mediaTypesSize = content.size();
+        if (mediaTypesSize != 1) {
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_135, location, paramName));
+            return null;
+        }
+        return content;
     }
 
     @Override
@@ -93,25 +107,18 @@ public class RequestExampleMapper extends ExamplesMapper {
             return;
         }
         try {
-            Content content = requestBody.getContent();
-            if (Objects.isNull(content)) {
-                return;
-            }
-
             Optional<Map<String, Example>> exampleValues = extractExamples(annotations);
             if (exampleValues.isEmpty()) {
                 return;
             }
-
-            int mediaTypesSize = content.size();
-            if (mediaTypesSize != 1) {
-                // TODO: add a diagnostic
+            Content content = getValidatedContent();
+            if (Objects.isNull(content)) {
                 return;
             }
-
             content.forEach((mediaType, mediaTypeObject) -> mediaTypeObject.setExamples(exampleValues.get()));
         }  catch (JsonProcessingException exception) {
-            // TODO: Add diagnostic
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, "examples",
+                    "request", paramName));
         }
     }
 }

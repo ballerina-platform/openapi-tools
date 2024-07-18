@@ -20,8 +20,11 @@ package io.ballerina.openapi.service.mapper.example.parameter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.example.ExamplesMapper;
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
@@ -29,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.openapi.service.mapper.example.CommonUtils.extractOpenApiExampleValues;
 import static io.ballerina.openapi.service.mapper.example.CommonUtils.hasBothOpenAPIExampleAnnotations;
 
 /**
@@ -43,16 +45,23 @@ public abstract class ParameterExampleMapper extends ExamplesMapper {
     List<AnnotationAttachmentSymbol> annotations;
     List<OpenAPIMapperDiagnostic> diagnostics;
     boolean disabled;
+    String paramName;
+    Location location;
+    String paramType;
 
     public ParameterExampleMapper(List<AnnotationAttachmentSymbol> annotations, Parameter parameterSchema,
-                                  SemanticModel semanticModel,List<OpenAPIMapperDiagnostic> diagnostics) {
+                                  SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics,
+                                  String paramName, Location location, String paramType) {
         super(semanticModel);
         this.parameterSchema = parameterSchema;
         this.annotations = annotations;
         this.diagnostics = diagnostics;
+        this.paramName = paramName;
+        this.location = location;
+        this.paramType = paramType;
 
         if (hasBothOpenAPIExampleAnnotations(annotations, semanticModel)) {
-            // TODO: Add a diagnostic
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_136, location));
             disabled = true;
         }
     }
@@ -69,7 +78,8 @@ public abstract class ParameterExampleMapper extends ExamplesMapper {
             }
             parameterSchema.setExample(exampleValue.get());
         } catch (JsonProcessingException exception) {
-            // TODO: Add diagnostic
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, "example",
+                    paramType, paramName));
         }
     }
 
@@ -85,7 +95,8 @@ public abstract class ParameterExampleMapper extends ExamplesMapper {
             }
             parameterSchema.setExamples(exampleValues.get());
         } catch (JsonProcessingException exception) {
-            // TODO: Add diagnostic
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, "examples",
+                    paramType, paramName));
         }
     }
 }
