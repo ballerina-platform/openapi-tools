@@ -18,63 +18,48 @@
 package io.ballerina.openapi.service.mapper.example.type;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
-import io.ballerina.compiler.api.values.ConstantValue;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.example.ExampleMapper;
 import io.swagger.v3.oas.models.media.Schema;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import static io.ballerina.openapi.service.mapper.example.CommonUtils.extractOpenApiExampleValue;
-import static io.ballerina.openapi.service.mapper.example.CommonUtils.getJsonString;
 
 /**
  * This {@link TypeExampleMapper} class represents the example mapper for type.
  *
  * @since 2.1.0
  */
-public class TypeExampleMapper implements ExampleMapper {
+public class TypeExampleMapper extends ExampleMapper {
 
-    TypeDefinitionSymbol typeDefinitionSymbol;
+    List<AnnotationAttachmentSymbol> annotations;
     Schema typeSchema;
-    SemanticModel semanticModel;
     List<OpenAPIMapperDiagnostic> diagnostics;
 
     public TypeExampleMapper(TypeDefinitionSymbol typeDefinitionSymbol, Schema typeSchema,
                              SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
-        this.typeDefinitionSymbol = typeDefinitionSymbol;
+        super(semanticModel);
+        this.annotations = typeDefinitionSymbol.annotAttachments();
         this.typeSchema = typeSchema;
-        this.semanticModel = semanticModel;
         this.diagnostics = diagnostics;
     }
 
     @Override
     public void setExample() {
-        Optional<Object> exampleValue = extractExample();
-        if (exampleValue.isEmpty()) {
-            return;
-        }
-
-        typeSchema.setExample(exampleValue.get());
-    }
-
-    public Optional<Object> extractExample() {
         try {
-            List<AnnotationAttachmentSymbol> annotations = typeDefinitionSymbol.annotAttachments();
-            if (Objects.isNull(annotations)) {
-                return Optional.empty();
+            Optional<Object> exampleValue = extractExample(annotations);
+            if (exampleValue.isEmpty()) {
+                return;
             }
-            return extractOpenApiExampleValue(annotations, semanticModel);
-        } catch (JsonProcessingException exp) {
-            // Add a diagnostic
-            return Optional.empty();
+            typeSchema.setExample(exampleValue.get());
+        } catch (JsonProcessingException exception) {
+            // TODO: Add diagnostic
         }
     }
 }

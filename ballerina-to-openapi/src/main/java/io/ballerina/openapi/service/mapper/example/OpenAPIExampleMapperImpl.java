@@ -17,27 +17,47 @@
  */
 package io.ballerina.openapi.service.mapper.example;
 
+import io.ballerina.compiler.api.ModuleID;
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.AnnotationSymbol;
+import io.ballerina.compiler.api.symbols.ModuleSymbol;
+import io.ballerina.compiler.api.symbols.ParameterSymbol;
+import io.ballerina.compiler.api.symbols.PathParameterSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
+import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.example.field.RecordFieldExampleMapper;
+import io.ballerina.openapi.service.mapper.example.parameter.DefaultParamExampleMapper;
+import io.ballerina.openapi.service.mapper.example.parameter.PathExampleMapper;
+import io.ballerina.openapi.service.mapper.example.parameter.RequestExampleMapper;
 import io.ballerina.openapi.service.mapper.example.type.TypeExampleMapper;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.type.BallerinaPackage;
 import io.ballerina.openapi.service.mapper.type.BallerinaTypeExtensioner;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getHeaderName;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOperationId;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 /**
  * This {@link OpenAPIExampleMapper} class is the implementation of the {@link OpenAPIExampleMapper} interface.
@@ -67,8 +87,18 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
             return;
         }
         Map<String, Schema> schemas = components.getSchemas();
-        schemas.forEach((key, schema) -> {
-            setExamplesForTypes(key, schema);
+        schemas.forEach(this::setExamplesForTypes);
+
+        serviceDeclarationNode.members().forEach(member -> {
+            if (member.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
+                FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) member;
+                openAPI.getPaths().forEach((path, pathItem) -> pathItem.readOperationsMap()
+                        .forEach((httpMethod, operation) -> {
+                            if (getOperationId(functionDefinitionNode).equals(operation.getOperationId())) {
+                                setExamplesForResource(functionDefinitionNode, operation);
+                            }
+                }));
+            }
         });
     }
 
@@ -95,5 +125,130 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
                     semanticModel, diagnostics);
             recordFieldExampleMapper.setExample();
         }
+    }
+
+    private void setExamplesForResource(FunctionDefinitionNode functionDefinitionNode, Operation operation) {
+        SeparatedNodeList<ParameterNode> parameters = functionDefinitionNode.functionSignature().parameters();
+        parameters.forEach(parameter -> setExamplesForResourceSignatureParam(parameter, operation));
+
+        List<ResourcePathParameterNode> pathParameters = functionDefinitionNode.relativeResourcePath().stream()
+                .filter(param -> param instanceof ResourcePathParameterNode)
+                .map(param -> (ResourcePathParameterNode) param)
+                .toList();
+        pathParameters.forEach(pathParam -> setExamplesForResourcePathParam(pathParam, operation));
+    }
+
+    private void setExamplesForResourceSignatureParam(ParameterNode parameterNode, Operation operation) {
+        Optional<Symbol> parameterSymbolOpt = semanticModel.symbol(parameterNode);
+        if (parameterSymbolOpt.isEmpty() || !(parameterSymbolOpt.get() instanceof ParameterSymbol parameterSymbol)) {
+            return;
+        }
+
+        String parameterType = getParameterType(parameterSymbol, semanticModel);
+        switch (parameterType) {
+            case "PAYLOAD":
+                RequestBody requestBody = operation.getRequestBody();
+                ExamplesMapper reqExampleMapper = new RequestExampleMapper(parameterSymbol, requestBody,
+                        semanticModel, diagnostics);
+                reqExampleMapper.setExample();
+                reqExampleMapper.setExamples();
+                break;
+            case "QUERY":
+                Optional<Parameter> queryParam = operation.getParameters().stream()
+                        .filter(param -> param.getIn().equals("query") &&
+                                param.getName().equals(unescapeIdentifier(parameterSymbol.getName().get())))
+                        .findFirst();
+                if (queryParam.isEmpty()) {
+                    return;
+                }
+                ExamplesMapper queryExampleMapper = new DefaultParamExampleMapper(parameterSymbol,
+                        queryParam.get(), semanticModel, diagnostics);
+                queryExampleMapper.setExample();
+                queryExampleMapper.setExamples();
+                break;
+            case "HEADER":
+                Optional<Parameter> headerParam = operation.getParameters().stream()
+                        .filter(param -> param.getIn().equals("header") && param.getName()
+                                .equals(getHeaderName(parameterNode,
+                                        unescapeIdentifier(parameterSymbol.getName().get()))))
+                        .findFirst();
+                if (headerParam.isEmpty()) {
+                    return;
+                }
+                ExamplesMapper headerExampleMapper = new DefaultParamExampleMapper(parameterSymbol,
+                        headerParam.get(), semanticModel, diagnostics);
+                headerExampleMapper.setExample();
+                headerExampleMapper.setExamples();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void setExamplesForResourcePathParam(ResourcePathParameterNode parameterNode, Operation operation) {
+        Optional<Symbol> parameterSymbolOpt = semanticModel.symbol(parameterNode);
+        if (parameterSymbolOpt.isEmpty() || !(parameterSymbolOpt.get() instanceof PathParameterSymbol parameterSymbol)) {
+            return;
+        }
+
+        Optional<Parameter> pathParam = operation.getParameters().stream()
+                .filter(parameter -> parameter.getIn().equals("path") &&
+                        parameter.getName().equals(unescapeIdentifier(parameterSymbol.getName().get())))
+                .findFirst();
+        if (pathParam.isEmpty()) {
+            return;
+        }
+
+        ExamplesMapper pathExampleMapper = new PathExampleMapper(parameterSymbol, pathParam.get(),
+                semanticModel, diagnostics);
+        pathExampleMapper.setExample();
+        pathExampleMapper.setExamples();
+    }
+
+    private static String getParameterType(ParameterSymbol parameterSymbol, SemanticModel semanticModel) {
+        TypeSymbol parameterTypeSymbol = parameterSymbol.typeDescriptor();
+        if (!parameterTypeSymbol.subtypeOf(semanticModel.types().ANYDATA)) {
+            return "OTHER";
+        }
+
+        List<AnnotationSymbol> httpAnnotations = parameterSymbol.annotations().stream()
+                .filter(annotation -> annotation.typeDescriptor().isPresent() &&
+                        isHttpPackageAnnotationTypeDesc(annotation.typeDescriptor().get()))
+                .toList();
+        if (httpAnnotations.isEmpty()) {
+            return "QUERY";
+        }
+
+        for (AnnotationSymbol annotation : httpAnnotations) {
+            TypeSymbol annotationType = annotation.typeDescriptor().get();
+            if (isSubTypeOfHttpType(annotationType, "HttpPayload", semanticModel)) {
+                return "PAYLOAD";
+            }
+            if (isSubTypeOfHttpType(annotationType, "HttpHeader", semanticModel)) {
+                return "HEADER";
+            }
+            if (isSubTypeOfHttpType(annotationType, "HttpQuery", semanticModel)) {
+                return "QUERY";
+            }
+        }
+        return "QUERY";
+    }
+
+    private static boolean isHttpPackageAnnotationTypeDesc(TypeSymbol typeSymbol) {
+        Optional<ModuleSymbol> module = typeSymbol.getModule();
+        if (module.isEmpty()) {
+            return false;
+        }
+        ModuleID id = module.get().id();
+        return id.orgName().equals("ballerina") && id.moduleName().startsWith("http");
+    }
+
+    private static boolean isSubTypeOfHttpType(TypeSymbol typeSymbol, String httpTypeName,
+                                               SemanticModel semanticModel) {
+        Optional<Symbol> httpType = semanticModel.types().getTypeByName("ballerina", "http", "", httpTypeName);
+        if (httpType.isEmpty() || !(httpType.get() instanceof TypeDefinitionSymbol httpTypeDef)) {
+            return false;
+        }
+        return typeSymbol.subtypeOf(httpTypeDef.typeDescriptor());
     }
 }

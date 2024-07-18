@@ -20,37 +20,32 @@ package io.ballerina.openapi.service.mapper.example;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
+import io.swagger.v3.oas.models.examples.Example;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.openapi.service.mapper.example.CommonUtils.extractOpenApiExampleValue;
+import static io.ballerina.openapi.service.mapper.example.CommonUtils.extractOpenApiExampleValues;
 
 /**
- * This {@link ExampleMapper} class represents the abstraction of OpenAPI example mapper.
+ * This {@link ExamplesMapper} class represents the abstraction of OpenAPI example and examples mapper.
  *
  * @since 2.1.0
  */
-public abstract class ExampleMapper {
+public abstract class ExamplesMapper extends ExampleMapper {
 
-    private final SemanticModel semanticModel;
-
-    public ExampleMapper(SemanticModel semanticModel) {
-        this.semanticModel = semanticModel;
+    public ExamplesMapper(SemanticModel semanticModel) {
+        super(semanticModel);
     }
 
-    public SemanticModel getSemanticModel() {
-        return semanticModel;
-    }
+    public abstract void setExamples();
 
-    public abstract void setExample();
-
-    public Optional<Object> extractExample(List<AnnotationAttachmentSymbol> annotations)
+    public Optional<Map<String, Example>> extractExamples(List<AnnotationAttachmentSymbol> annotations)
             throws JsonProcessingException {
-        if (Objects.isNull(annotations)) {
+        if (annotations == null) {
             return Optional.empty();
         }
-        return extractOpenApiExampleValue(annotations, semanticModel);
+        return extractOpenApiExampleValues(annotations, this.getSemanticModel());
     }
 }

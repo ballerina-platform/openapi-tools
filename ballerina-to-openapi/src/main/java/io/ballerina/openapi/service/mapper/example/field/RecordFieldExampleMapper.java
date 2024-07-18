@@ -38,18 +38,17 @@ import static io.ballerina.openapi.service.mapper.example.CommonUtils.extractOpe
  *
  * @since 2.1.0
  */
-public class RecordFieldExampleMapper implements ExampleMapper {
+public class RecordFieldExampleMapper extends ExampleMapper {
 
     RecordTypeSymbol recordTypeSymbol;
     ObjectSchema schema;
-    SemanticModel semanticModel;
     List<OpenAPIMapperDiagnostic> diagnostics;
 
     public RecordFieldExampleMapper(RecordTypeSymbol recordTypeSymbol, ObjectSchema schema,
                                     SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
+        super(semanticModel);
         this.recordTypeSymbol = recordTypeSymbol;
         this.schema = schema;
-        this.semanticModel = semanticModel;
         this.diagnostics = diagnostics;
     }
 
@@ -59,28 +58,19 @@ public class RecordFieldExampleMapper implements ExampleMapper {
         if (Objects.isNull(recordFields) || recordFields.isEmpty()) {
             return;
         }
-
         recordFields.forEach(this::setPropertyExample);
     }
 
     private void setPropertyExample(String fieldName, RecordFieldSymbol fieldSymbol) {
-        Optional<Object> example = extractExample(fieldSymbol);
-        if (example.isEmpty()) {
-            return;
-        }
-        schema.getProperties().get(fieldName).setExample(example.get());
-    }
-
-    private Optional<Object> extractExample(RecordFieldSymbol fieldSymbol) {
+        List<AnnotationAttachmentSymbol> annotations = fieldSymbol.annotAttachments();
         try {
-            List<AnnotationAttachmentSymbol> annotations = fieldSymbol.annotAttachments();
-            if (Objects.isNull(annotations)) {
-                return Optional.empty();
+            Optional<Object> example = extractExample(annotations);
+            if (example.isEmpty()) {
+                return;
             }
-            return extractOpenApiExampleValue(annotations, semanticModel);
+            schema.getProperties().get(fieldName).setExample(example.get());
         } catch (JsonProcessingException exp) {
             // Add a diagnostic
-            return Optional.empty();
         }
     }
 }
