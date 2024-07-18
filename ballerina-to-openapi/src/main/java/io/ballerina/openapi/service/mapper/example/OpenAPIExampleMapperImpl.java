@@ -33,6 +33,7 @@ import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.example.field.RecordFieldExampleMapper;
 import io.ballerina.openapi.service.mapper.example.parameter.DefaultParamExampleMapper;
@@ -40,6 +41,7 @@ import io.ballerina.openapi.service.mapper.example.parameter.PathExampleMapper;
 import io.ballerina.openapi.service.mapper.example.parameter.RequestExampleMapper;
 import io.ballerina.openapi.service.mapper.example.type.TypeExampleMapper;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.type.BallerinaPackage;
 import io.ballerina.openapi.service.mapper.type.BallerinaTypeExtensioner;
 import io.swagger.v3.oas.models.Components;
@@ -80,6 +82,7 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
     private final List<OpenAPIMapperDiagnostic> diagnostics;
     private final ServiceDeclarationNode serviceDeclarationNode;
     private final SemanticModel semanticModel;
+    private final ModuleMemberVisitor moduleMemberVisitor;
 
     private enum ParameterType {
         PAYLOAD,
@@ -94,6 +97,7 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
         this.diagnostics = additionalData.diagnostics();
         this.serviceDeclarationNode = serviceDeclarationNode;
         this.semanticModel = additionalData.semanticModel();
+        this.moduleMemberVisitor = additionalData.moduleMemberVisitor();
     }
 
     @Override
@@ -109,28 +113,23 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
             if (member.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
                 FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) member;
                 openAPI.getPaths().forEach((path, pathItem) -> pathItem.readOperationsMap()
-                        .forEach((httpMethod, operation) -> {
-                            if (getOperationId(functionDefinitionNode).equals(operation.getOperationId())) {
-                                setExamplesForResource(functionDefinitionNode, operation);
-                            }
-                }));
+                    .forEach((httpMethod, operation) -> {
+                        if (getOperationId(functionDefinitionNode).equals(operation.getOperationId())) {
+                            setExamplesForResource(functionDefinitionNode, operation);
+                        }
+                    })
+                );
             }
         });
     }
 
-    private void setExamplesForTypes(String key, Schema schema) {
-        Optional<BallerinaPackage> ballerinaExt = BallerinaTypeExtensioner.getExtension(schema);
-        if (ballerinaExt.isEmpty()) {
-            return;
-        }
-        BallerinaPackage ballerinaPkg = ballerinaExt.get();
-        String typeName = ballerinaPkg.name().orElse(key);
-        Optional<Symbol> ballerinaType = semanticModel.types().getTypeByName(ballerinaPkg.orgName(),
-                ballerinaPkg.moduleName(), ballerinaPkg.version(), typeName);
-        if (ballerinaType.isEmpty() || !(ballerinaType.get() instanceof TypeDefinitionSymbol typeDefSymbol)) {
+    private void setExamplesForTypes(String name, Schema schema) {
+        Optional<TypeDefinitionSymbol> ballerinaType = getTypeDefinitionNode(name, schema);
+        if (ballerinaType.isEmpty()) {
             return;
         }
 
+        TypeDefinitionSymbol typeDefSymbol = ballerinaType.get();
         // Map examples from types
         ExampleMapper typeExampleMapper = new TypeExampleMapper(typeDefSymbol, schema, semanticModel, diagnostics);
         typeExampleMapper.setExample();
@@ -138,10 +137,34 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
         if (typeDefSymbol.typeDescriptor() instanceof RecordTypeSymbol recordTypeSymbol
                 && schema instanceof ObjectSchema objectSchema) {
             // Map examples from record fields
-            ExampleMapper recordFieldExampleMapper = new RecordFieldExampleMapper(typeName, recordTypeSymbol,
+            ExampleMapper recordFieldExampleMapper = new RecordFieldExampleMapper(name, recordTypeSymbol,
                     objectSchema, semanticModel, diagnostics);
             recordFieldExampleMapper.setExample();
         }
+    }
+
+    private Optional<TypeDefinitionSymbol> getTypeDefinitionNode(String name, Schema schema) {
+        Optional<BallerinaPackage> ballerinaExt = BallerinaTypeExtensioner.getExtension(schema);
+        Optional<Symbol> ballerinaType;
+        if (ballerinaExt.isPresent()) {
+            BallerinaPackage ballerinaPkg = ballerinaExt.get();
+            String typeName = ballerinaPkg.name().orElse(name);
+            ballerinaType = semanticModel.types().getTypeByName(ballerinaPkg.orgName(), ballerinaPkg.moduleName(),
+                    ballerinaPkg.version(), typeName);
+        } else {
+            // Try to get it from the module member visitor
+            // This only works for the types that are defined in the same package
+            Optional<TypeDefinitionNode> typeDefinitionNode = moduleMemberVisitor.getTypeDefinitionNode(name);
+            if (typeDefinitionNode.isEmpty()) {
+                return Optional.empty();
+            }
+            ballerinaType = semanticModel.symbol(typeDefinitionNode.get());
+        }
+
+        if (ballerinaType.isEmpty() || !(ballerinaType.get() instanceof TypeDefinitionSymbol typeDefSymbol)) {
+            return Optional.empty();
+        }
+        return Optional.of(typeDefSymbol);
     }
 
     private void setExamplesForResource(FunctionDefinitionNode functionDefinitionNode, Operation operation) {
