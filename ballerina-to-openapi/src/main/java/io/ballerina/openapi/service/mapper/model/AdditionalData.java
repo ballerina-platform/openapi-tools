@@ -27,10 +27,12 @@ import java.util.List;
  * @param semanticModel - The semantic model of the ballerina project.
  * @param moduleMemberVisitor - The module member visitor.
  * @param diagnostics - The list of diagnostics.
+ * @param enableBallerinaExt - The flag to enable ballerina extension in the type schema.
  *
  * @since 1.9.0
  */
 public record AdditionalData(SemanticModel semanticModel,
                              ModuleMemberVisitor moduleMemberVisitor,
-                             List<OpenAPIMapperDiagnostic> diagnostics) {
+                             List<OpenAPIMapperDiagnostic> diagnostics,
+                             boolean enableBallerinaExt) {
 }

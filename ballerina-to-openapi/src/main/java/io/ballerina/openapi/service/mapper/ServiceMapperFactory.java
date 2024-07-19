@@ -89,8 +89,9 @@ public class ServiceMapperFactory {
     private final OpenAPIExampleMapper exampleMapper;
 
     public ServiceMapperFactory(OpenAPI openAPI, SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
-                                List<OpenAPIMapperDiagnostic> diagnostics, ServiceDeclarationNode serviceDefinition) {
-        this.additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics);
+                                List<OpenAPIMapperDiagnostic> diagnostics, ServiceDeclarationNode serviceDefinition,
+                                boolean enableBallerinaExt) {
+        this.additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics, enableBallerinaExt);
         this.treatNilableAsOptional = isTreatNilableAsOptionalParameter(serviceDefinition);
         this.openAPI = openAPI;
         this.interceptorPipeline = getInterceptorPipeline(serviceDefinition, additionalData);
@@ -100,6 +101,11 @@ public class ServiceMapperFactory {
         this.hateoasMapper = new HateoasMapperImpl();
         this.metaInfoMapper = new MetaInfoMapperImpl();
         this.exampleMapper = new OpenAPIExampleMapperImpl(openAPI, serviceDefinition, additionalData);
+    }
+
+    public ServiceMapperFactory(OpenAPI openAPI, SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
+                                List<OpenAPIMapperDiagnostic> diagnostics, ServiceDeclarationNode serviceDefinition) {
+        this(openAPI, semanticModel, moduleMemberVisitor, diagnostics, serviceDefinition, false);
     }
 
     public ServersMapper getServersMapper(Set<ListenerDeclarationNode> endpoints, ServiceDeclarationNode serviceNode) {

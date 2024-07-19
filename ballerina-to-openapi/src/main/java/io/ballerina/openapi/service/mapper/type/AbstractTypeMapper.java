@@ -55,7 +55,9 @@ public abstract class AbstractTypeMapper {
             return;
         }
         Schema schema = getReferenceSchema(components);
-        BallerinaTypeExtensioner.addExtension(schema, typeSymbol);
+        if (additionalData.enableBallerinaExt()) {
+            BallerinaTypeExtensioner.addExtension(schema, typeSymbol);
+        }
         if (Objects.nonNull(schema)) {
             components.addSchemas(name, schema);
         }

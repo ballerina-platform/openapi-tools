@@ -196,7 +196,7 @@ public final class ServiceToOpenAPIMapper {
             List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
             if (openapi.getPaths() == null) {
                 ServiceMapperFactory serviceMapperFactory = new ServiceMapperFactory(openapi, semanticModel,
-                        moduleMemberVisitor, diagnostics, serviceDefinition);
+                        moduleMemberVisitor, diagnostics, serviceDefinition, true);
 
                 ServersMapper serversMapperImpl = serviceMapperFactory.getServersMapper(listeners, serviceDefinition);
                 serversMapperImpl.setServers();
