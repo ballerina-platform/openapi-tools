@@ -23,7 +23,6 @@ import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 
 import java.util.List;
@@ -34,8 +33,7 @@ import java.util.Optional;
  *
  * @since 2.1.0
  */
-public class RecordFieldExampleAnalyzer extends AbstractExampleAnalyzer
-        implements AnalysisTask<SyntaxNodeAnalysisContext> {
+public class RecordFieldExampleAnalyzer extends AbstractExampleAnalyzer {
 
     @Override
     public void perform(SyntaxNodeAnalysisContext context) {

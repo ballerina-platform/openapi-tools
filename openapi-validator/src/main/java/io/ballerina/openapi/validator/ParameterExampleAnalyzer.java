@@ -11,7 +11,6 @@ import io.ballerina.compiler.api.symbols.resourcepath.PathRestParam;
 import io.ballerina.compiler.api.symbols.resourcepath.PathSegmentList;
 import io.ballerina.compiler.api.symbols.resourcepath.ResourcePath;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 
 import java.util.List;
@@ -22,8 +21,7 @@ import java.util.Optional;
  *
  * @since 2.1.0
  */
-public class ParameterExampleAnalyzer extends AbstractExampleAnalyzer
-        implements AnalysisTask<SyntaxNodeAnalysisContext> {
+public class ParameterExampleAnalyzer extends AbstractExampleAnalyzer {
 
     @Override
     public void perform(SyntaxNodeAnalysisContext context) {
@@ -47,8 +45,8 @@ public class ParameterExampleAnalyzer extends AbstractExampleAnalyzer
         });
     }
 
-    private static void validatePathParams(SyntaxNodeAnalysisContext context, ResourceMethodSymbol resourceMethodSymbol,
-                                           SemanticModel semanticModel) {
+    private void validatePathParams(SyntaxNodeAnalysisContext context, ResourceMethodSymbol resourceMethodSymbol,
+                                    SemanticModel semanticModel) {
         ResourcePath path = resourceMethodSymbol.resourcePath();
         if (path instanceof PathRestParam pathRestParam) {
             validateRestParameterAnnotations(context, pathRestParam.parameter().annotAttachments(), semanticModel);
@@ -60,18 +58,17 @@ public class ParameterExampleAnalyzer extends AbstractExampleAnalyzer
         }
     }
 
-    private static void validateSignatureParams(SyntaxNodeAnalysisContext context,
-                                                ResourceMethodSymbol resourceMethodSymbol,
-                                                SemanticModel semanticModel) {
+    private void validateSignatureParams(SyntaxNodeAnalysisContext context, ResourceMethodSymbol resourceMethodSymbol,
+                                         SemanticModel semanticModel) {
         Optional<List<ParameterSymbol>> params = resourceMethodSymbol.typeDescriptor().params();
         params.ifPresent(parameterSymbols -> parameterSymbols.forEach(parameterSymbol ->
                 validateParameterAnnotations(context, parameterSymbol.typeDescriptor(),
                         parameterSymbol.annotAttachments(), semanticModel)));
     }
 
-    private static void validateParameterAnnotations(SyntaxNodeAnalysisContext context, TypeSymbol typeSymbol,
-                                                     List<AnnotationAttachmentSymbol> annotations,
-                                                     SemanticModel semanticModel) {
+    private void validateParameterAnnotations(SyntaxNodeAnalysisContext context, TypeSymbol typeSymbol,
+                                              List<AnnotationAttachmentSymbol> annotations,
+                                              SemanticModel semanticModel) {
         validateExampleAnnotationUsage(context, typeSymbol, annotations, semanticModel);
         validateExamplesAnnotationUsage(context, typeSymbol, annotations, semanticModel);
         validateBothExampleAnnotations(context, annotations, semanticModel);

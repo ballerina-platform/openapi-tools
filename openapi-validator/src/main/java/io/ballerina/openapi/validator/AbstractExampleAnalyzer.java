@@ -22,6 +22,7 @@ import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -45,8 +46,8 @@ import static io.ballerina.openapi.validator.diagnostic.OpenAPIDiagnosticCodes.O
  *
  * @since 2.1.0
  */
-public abstract class AbstractExampleAnalyzer {
-    static void validateExampleAnnotationUsage(SyntaxNodeAnalysisContext context, TypeSymbol typeSymbol,
+public abstract class AbstractExampleAnalyzer implements AnalysisTask<SyntaxNodeAnalysisContext> {
+    void validateExampleAnnotationUsage(SyntaxNodeAnalysisContext context, TypeSymbol typeSymbol,
                                                List<AnnotationAttachmentSymbol> annotations,
                                                SemanticModel semanticModel) {
         Optional<AnnotationAttachmentSymbol> example = getOpenAPIExampleAnnotation(annotations, semanticModel);
@@ -60,16 +61,16 @@ public abstract class AbstractExampleAnalyzer {
         }
     }
 
-    private static Optional<AnnotationAttachmentSymbol> getOpenAPIExampleAnnotation(
+    private Optional<AnnotationAttachmentSymbol> getOpenAPIExampleAnnotation(
             List<AnnotationAttachmentSymbol> annotations, SemanticModel semanticModel) {
         return annotations.stream()
                 .filter(annotAttachment -> isOpenAPIExampleAnnotation(annotAttachment, semanticModel))
                 .findFirst();
     }
 
-    static void validateExamplesAnnotationUsage(SyntaxNodeAnalysisContext context, TypeSymbol typeSymbol,
-                                                List<AnnotationAttachmentSymbol> annotations,
-                                                SemanticModel semanticModel) {
+    void validateExamplesAnnotationUsage(SyntaxNodeAnalysisContext context, TypeSymbol typeSymbol,
+                                         List<AnnotationAttachmentSymbol> annotations,
+                                         SemanticModel semanticModel) {
         Optional<AnnotationAttachmentSymbol> examples = getOpenAPIExamplesAnnotation(annotations, semanticModel);
         if (examples.isEmpty() || !examples.get().isConstAnnotation() ||
                 examples.get().attachmentValue().isEmpty()) {
@@ -81,15 +82,15 @@ public abstract class AbstractExampleAnalyzer {
         }
     }
 
-    private static Optional<AnnotationAttachmentSymbol> getOpenAPIExamplesAnnotation(List<AnnotationAttachmentSymbol> annotations, SemanticModel semanticModel) {
+    private Optional<AnnotationAttachmentSymbol> getOpenAPIExamplesAnnotation(
+            List<AnnotationAttachmentSymbol> annotations, SemanticModel semanticModel) {
         return annotations.stream()
                 .filter(annotAttachment -> isOpenAPIExamplesAnnotation(annotAttachment, semanticModel))
                 .findFirst();
     }
 
-    static void validateBothExampleAnnotations(SyntaxNodeAnalysisContext context,
-                                               List<AnnotationAttachmentSymbol> annotations,
-                                               SemanticModel semanticModel) {
+    void validateBothExampleAnnotations(SyntaxNodeAnalysisContext context,
+                                        List<AnnotationAttachmentSymbol> annotations, SemanticModel semanticModel) {
         if (hasBothOpenAPIExampleAnnotations(annotations, semanticModel)) {
             Optional<AnnotationAttachmentSymbol> openAPIExamples = annotations.stream()
                     .filter(annotAttachment -> isOpenAPIExamplesAnnotation(annotAttachment, semanticModel))
@@ -98,45 +99,44 @@ public abstract class AbstractExampleAnalyzer {
         }
     }
 
-    static boolean hasBothOpenAPIExampleAnnotations(List<AnnotationAttachmentSymbol> annotations,
-                                                    SemanticModel semanticModel) {
+    boolean hasBothOpenAPIExampleAnnotations(List<AnnotationAttachmentSymbol> annotations,
+                                             SemanticModel semanticModel) {
         return annotations.stream().anyMatch(
                 annotAttachment -> isOpenAPIExampleAnnotation(annotAttachment, semanticModel)) &&
                 annotations.stream().anyMatch(
                         annotAttachment -> isOpenAPIExamplesAnnotation(annotAttachment, semanticModel));
     }
 
-    static boolean diagnosticContainsErrors(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
+    boolean diagnosticContainsErrors(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
         List<Diagnostic> diagnostics = syntaxNodeAnalysisContext.semanticModel().diagnostics();
         return diagnostics.stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
     }
 
-    static void validateRestParameterAnnotations(SyntaxNodeAnalysisContext context,
-                                                 List<AnnotationAttachmentSymbol> annotations,
-                                                 SemanticModel semanticModel) {
+    void validateRestParameterAnnotations(SyntaxNodeAnalysisContext context,
+                                          List<AnnotationAttachmentSymbol> annotations, SemanticModel semanticModel) {
         getOpenAPIExampleAnnotation(annotations, semanticModel).ifPresent(annotAttachment ->
                 reportUnsupportedAnnotationForRestParam(context, annotAttachment.getLocation().orElse(null)));
         getOpenAPIExamplesAnnotation(annotations, semanticModel).ifPresent(annotAttachment ->
                 reportUnsupportedAnnotationForRestParam(context, annotAttachment.getLocation().orElse(null)));
     }
 
-    private static void reportUnsupportedAnnotationForRestParam(SyntaxNodeAnalysisContext context, Location location) {
+    private void reportUnsupportedAnnotationForRestParam(SyntaxNodeAnalysisContext context, Location location) {
         context.reportDiagnostic(OPENAPI_103.getDiagnosticCode(location));
     }
 
-    private static boolean isOpenAPIExampleAnnotation(AnnotationAttachmentSymbol annotAttachment,
-                                                      SemanticModel semanticModel) {
+    private boolean isOpenAPIExampleAnnotation(AnnotationAttachmentSymbol annotAttachment,
+                                               SemanticModel semanticModel) {
         return isOpenAPIAnnotation(annotAttachment, EXAMPLE_VALUE, semanticModel);
     }
 
-    private static boolean isOpenAPIExamplesAnnotation(AnnotationAttachmentSymbol annotAttachment,
-                                                      SemanticModel semanticModel) {
+    private boolean isOpenAPIExamplesAnnotation(AnnotationAttachmentSymbol annotAttachment,
+                                                SemanticModel semanticModel) {
         return isOpenAPIAnnotation(annotAttachment, EXAMPLE_VALUES, semanticModel);
     }
 
-    private static boolean isOpenAPIAnnotation(AnnotationAttachmentSymbol annotAttachment, String annotationName,
-                                               SemanticModel semanticModel) {
+    private boolean isOpenAPIAnnotation(AnnotationAttachmentSymbol annotAttachment, String annotationName,
+                                        SemanticModel semanticModel) {
         if (annotAttachment.typeDescriptor().typeDescriptor().isEmpty()) {
             return false;
         }
