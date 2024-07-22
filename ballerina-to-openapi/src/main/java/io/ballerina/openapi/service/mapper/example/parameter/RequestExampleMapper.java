@@ -99,6 +99,9 @@ public class RequestExampleMapper extends ExamplesMapper {
     }
 
     private Content getValidatedContent() {
+        if (Objects.isNull(requestBody)) {
+            return null;
+        }
         Content content = requestBody.getContent();
         if (Objects.isNull(content)) {
             return null;
