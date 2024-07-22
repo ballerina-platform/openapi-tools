@@ -36,7 +36,6 @@ import java.util.Optional;
 
 import static io.ballerina.openapi.service.mapper.Constants.EXAMPLE;
 import static io.ballerina.openapi.service.mapper.Constants.EXAMPLES;
-import static io.ballerina.openapi.service.mapper.example.CommonUtils.hasBothOpenAPIExampleAnnotations;
 import static io.ballerina.openapi.service.mapper.example.CommonUtils.setExampleForInlineRecordFields;
 
 /**
@@ -49,7 +48,6 @@ public abstract class ParameterExampleMapper extends ExamplesMapper {
     Parameter parameterSchema;
     List<AnnotationAttachmentSymbol> annotations;
     List<OpenAPIMapperDiagnostic> diagnostics;
-    boolean disabled;
     String paramName;
     Location location;
     String paramTypeName;
@@ -66,18 +64,10 @@ public abstract class ParameterExampleMapper extends ExamplesMapper {
         this.location = location;
         this.paramTypeName = paramTypeName;
         this.paramType = paramType;
-
-        if (hasBothOpenAPIExampleAnnotations(annotations, semanticModel)) {
-            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_136, location));
-            disabled = true;
-        }
     }
 
     @Override
     public void setExample() {
-        if (disabled) {
-            return;
-        }
         try {
             setExampleForInlineRecord();
             Optional<Object> exampleValue = extractExample(annotations);
@@ -98,9 +88,6 @@ public abstract class ParameterExampleMapper extends ExamplesMapper {
 
     @Override
     public void setExamples() {
-        if (disabled) {
-            return;
-        }
         try {
             Optional<Map<String, Example>> exampleValues = extractExamples(annotations);
             if (exampleValues.isEmpty()) {

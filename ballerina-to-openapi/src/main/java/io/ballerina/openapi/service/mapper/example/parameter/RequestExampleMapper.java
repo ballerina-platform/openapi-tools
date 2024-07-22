@@ -43,7 +43,6 @@ import java.util.Set;
 import static io.ballerina.openapi.service.mapper.Constants.EXAMPLE;
 import static io.ballerina.openapi.service.mapper.Constants.EXAMPLES;
 import static io.ballerina.openapi.service.mapper.Constants.REQUEST;
-import static io.ballerina.openapi.service.mapper.example.CommonUtils.hasBothOpenAPIExampleAnnotations;
 
 /**
  * This {@link RequestExampleMapper} class represents the example mapper for resource function parameter.
@@ -55,7 +54,6 @@ public class RequestExampleMapper extends ExamplesMapper {
     RequestBody requestBody;
     List<OpenAPIMapperDiagnostic> diagnostics;
     List<AnnotationAttachmentSymbol> annotations;
-    boolean disabled = false;
     String paramName;
     Location location;
     TypeSymbol paramType;
@@ -69,18 +67,10 @@ public class RequestExampleMapper extends ExamplesMapper {
         this.paramName = parameterSymbol.getName().orElse("");
         this.location = parameterSymbol.getLocation().orElse(null);
         this.paramType = parameterSymbol.typeDescriptor();
-
-        if (hasBothOpenAPIExampleAnnotations(annotations, semanticModel)) {
-            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_136, location));
-            disabled = true;
-        }
     }
 
     @Override
     public void setExample() {
-        if (disabled) {
-            return;
-        }
         try {
             Content content = getValidatedContent();
             if (Objects.isNull(content)) {
@@ -123,9 +113,6 @@ public class RequestExampleMapper extends ExamplesMapper {
 
     @Override
     public void setExamples() {
-        if (disabled) {
-            return;
-        }
         try {
             Optional<Map<String, Example>> exampleValues = extractExamples(annotations);
             if (exampleValues.isEmpty()) {

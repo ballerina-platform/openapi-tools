@@ -107,14 +107,6 @@ public final class CommonUtils {
         return isOpenAPIAnnotation(annotAttachment, EXAMPLE_VALUE, semanticModel);
     }
 
-    public static boolean hasBothOpenAPIExampleAnnotations(List<AnnotationAttachmentSymbol> annotations,
-                                                           SemanticModel semanticModel) {
-        return annotations.stream().anyMatch(
-                        annotAttachment -> isOpenAPIExampleAnnotation(annotAttachment, semanticModel)) &&
-                annotations.stream().anyMatch(
-                        annotAttachment -> isOpenAPIExamplesAnnotation(annotAttachment, semanticModel));
-    }
-
     public static Optional<Map<String, Example>> extractOpenApiExampleValues(List<AnnotationAttachmentSymbol>
                                                                                      annotations,
                                                                              SemanticModel semanticModel)
