@@ -230,14 +230,22 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_9");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = "ERROR [service_file.bal:(4:1,4:32)] OpenAPI example annotation is not supported on non-anydata types " +
-                "ERROR [service_file.bal:(8:5,8:36)] OpenAPI example annotation is not supported on non-anydata types " +
-                "ERROR [service_file.bal:(70:13,70:91)] OpenAPI example and OpenAPI examples annotations cannot be used together " +
-                "ERROR [service_file.bal:(92:51,92:82)] OpenAPI example annotation is not supported on non-anydata types " +
-                "ERROR [service_file.bal:(93:42,93:85)] OpenAPI examples annotation is not supported on non-anydata types " +
-                "ERROR [service_file.bal:(65:9,65:81)] OpenAPI example and OpenAPI examples annotations cannot be used together " +
-                "ERROR [service_file.bal:(98:34,98:65)] OpenAPI example(s) annotation is not supported on rest parameter " +
-                "ERROR [service_file.bal:(102:28,102:71)] OpenAPI example(s) annotation is not supported on rest parameter";
+        String msg = "ERROR [service_file.bal:(4:1,4:32)] OpenAPI example annotation is not supported on non-anydata" +
+                " types " +
+                "ERROR [service_file.bal:(8:5,8:36)] OpenAPI example annotation is not supported on non-anydata" +
+                " types " +
+                "ERROR [service_file.bal:(70:13,70:91)] OpenAPI example and OpenAPI examples annotations cannot be" +
+                " used together " +
+                "ERROR [service_file.bal:(92:51,92:82)] OpenAPI example annotation is not supported on non-anydata" +
+                " types " +
+                "ERROR [service_file.bal:(93:42,93:85)] OpenAPI examples annotation is not supported on non-anydata" +
+                " types " +
+                "ERROR [service_file.bal:(65:9,65:81)] OpenAPI example and OpenAPI examples annotations cannot be" +
+                " used together " +
+                "ERROR [service_file.bal:(98:34,98:65)] OpenAPI example(s) annotation is not supported on rest" +
+                " parameter " +
+                "ERROR [service_file.bal:(102:28,102:71)] OpenAPI example(s) annotation is not supported on rest" +
+                " parameter";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
