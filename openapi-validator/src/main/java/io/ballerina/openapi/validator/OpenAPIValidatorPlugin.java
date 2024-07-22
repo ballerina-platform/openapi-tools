@@ -29,5 +29,6 @@ public class OpenAPIValidatorPlugin extends CompilerPlugin {
     @Override
     public void init(CompilerPluginContext compilerPluginContext) {
         compilerPluginContext.addCodeAnalyzer(new OpenAPICodeAnalyzer());
+        compilerPluginContext.addCodeAnalyzer(new OpenAPIExampleAnalyzer());
     }
 }
