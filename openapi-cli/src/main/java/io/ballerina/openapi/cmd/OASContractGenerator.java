@@ -129,7 +129,6 @@ public class OASContractGenerator {
                             .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.getDiagnosticSeverity()));
                     this.diagnostics.addAll(definition.getDiagnostics());
                     if (hasErrors) {
-                        //This is only stop code generation for the given ERROR severity.
                         outStream.println("openapi contract generation is skipped because of the following error(s) " +
                                 "occurred during the code generation:");
                         return;
