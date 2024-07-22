@@ -45,7 +45,7 @@ import static io.ballerina.openapi.validator.diagnostic.OpenAPIDiagnosticCodes.O
  *
  * @since 2.1.0
  */
-public class AbstractExampleAnalyzer {
+public abstract class AbstractExampleAnalyzer {
     static void validateExampleAnnotationUsage(SyntaxNodeAnalysisContext context, TypeSymbol typeSymbol,
                                                List<AnnotationAttachmentSymbol> annotations,
                                                SemanticModel semanticModel) {
