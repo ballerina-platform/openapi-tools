@@ -20,12 +20,14 @@ package io.ballerina.openapi.service.mapper.example.parameter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.example.ExamplesMapper;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.examples.Example;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.List;
@@ -35,6 +37,7 @@ import java.util.Optional;
 import static io.ballerina.openapi.service.mapper.Constants.EXAMPLE;
 import static io.ballerina.openapi.service.mapper.Constants.EXAMPLES;
 import static io.ballerina.openapi.service.mapper.example.CommonUtils.hasBothOpenAPIExampleAnnotations;
+import static io.ballerina.openapi.service.mapper.example.CommonUtils.setExampleForInlineRecordFields;
 
 /**
  * This {@link ParameterExampleMapper} class represents the examples mapper for resource function parameter.
@@ -49,17 +52,19 @@ public abstract class ParameterExampleMapper extends ExamplesMapper {
     boolean disabled;
     String paramName;
     Location location;
-    String paramType;
+    String paramTypeName;
+    TypeSymbol paramType;
 
     protected ParameterExampleMapper(List<AnnotationAttachmentSymbol> annotations, Parameter parameterSchema,
                                      SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics,
-                                     String paramName, Location location, String paramType) {
+                                     String paramName, Location location, String paramTypeName, TypeSymbol paramType) {
         super(semanticModel);
         this.parameterSchema = parameterSchema;
         this.annotations = annotations;
         this.diagnostics = diagnostics;
         this.paramName = paramName;
         this.location = location;
+        this.paramTypeName = paramTypeName;
         this.paramType = paramType;
 
         if (hasBothOpenAPIExampleAnnotations(annotations, semanticModel)) {
@@ -74,15 +79,21 @@ public abstract class ParameterExampleMapper extends ExamplesMapper {
             return;
         }
         try {
+            setExampleForInlineRecord();
             Optional<Object> exampleValue = extractExample(annotations);
             if (exampleValue.isEmpty()) {
                 return;
             }
             parameterSchema.setExample(exampleValue.get());
         } catch (JsonProcessingException exception) {
-            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, EXAMPLE, paramType,
-                    paramName));
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, EXAMPLE,
+                    paramTypeName, paramName));
         }
+    }
+
+    private void setExampleForInlineRecord() {
+        Schema schema = parameterSchema.getSchema();
+        setExampleForInlineRecordFields(paramType, schema, getSemanticModel(), diagnostics);
     }
 
     @Override
@@ -98,7 +109,7 @@ public abstract class ParameterExampleMapper extends ExamplesMapper {
             parameterSchema.setExamples(exampleValues.get());
         } catch (JsonProcessingException exception) {
             diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, EXAMPLES,
-                    paramType, paramName));
+                    paramTypeName, paramName));
         }
     }
 }

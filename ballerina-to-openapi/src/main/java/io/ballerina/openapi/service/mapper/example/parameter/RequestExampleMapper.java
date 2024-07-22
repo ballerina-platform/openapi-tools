@@ -21,19 +21,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
 import io.ballerina.compiler.api.symbols.ParameterSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.example.CommonUtils;
 import io.ballerina.openapi.service.mapper.example.ExamplesMapper;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import static io.ballerina.openapi.service.mapper.Constants.EXAMPLE;
 import static io.ballerina.openapi.service.mapper.Constants.EXAMPLES;
@@ -53,6 +58,7 @@ public class RequestExampleMapper extends ExamplesMapper {
     boolean disabled = false;
     String paramName;
     Location location;
+    TypeSymbol paramType;
 
     public RequestExampleMapper(ParameterSymbol parameterSymbol, RequestBody requestBody, SemanticModel semanticModel,
                                 List<OpenAPIMapperDiagnostic> diagnostics) {
@@ -62,6 +68,7 @@ public class RequestExampleMapper extends ExamplesMapper {
         this.diagnostics = diagnostics;
         this.paramName = parameterSymbol.getName().orElse("");
         this.location = parameterSymbol.getLocation().orElse(null);
+        this.paramType = parameterSymbol.typeDescriptor();
 
         if (hasBothOpenAPIExampleAnnotations(annotations, semanticModel)) {
             diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_136, location));
@@ -75,20 +82,30 @@ public class RequestExampleMapper extends ExamplesMapper {
             return;
         }
         try {
-            Optional<Object> exampleValue = extractExample(annotations);
-            if (exampleValue.isEmpty()) {
-                return;
-            }
-
             Content content = getValidatedContent();
             if (Objects.isNull(content)) {
                 return;
             }
-            content.forEach((mediaType, mediaTypeObject) -> mediaTypeObject.setExample(exampleValue.get()));
+
+            Set<String> mediaTypes = content.keySet();
+            String mediaType = mediaTypes.stream().findFirst().get();
+            MediaType mediaTypeObject = content.get(mediaType);
+            setExampleForInlineRecordFields(mediaTypeObject);
+
+            Optional<Object> exampleValue = extractExample(annotations);
+            if (exampleValue.isEmpty()) {
+                return;
+            }
+            mediaTypeObject.setExample(exampleValue.get());
         } catch (JsonProcessingException exception) {
             diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, EXAMPLE,
                     REQUEST, paramName));
         }
+    }
+
+    private void setExampleForInlineRecordFields(MediaType mediaTypeObject) {
+        Schema schema = mediaTypeObject.getSchema();
+        CommonUtils.setExampleForInlineRecordFields(paramType, schema, getSemanticModel(), diagnostics);
     }
 
     private Content getValidatedContent() {

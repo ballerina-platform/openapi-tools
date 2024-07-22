@@ -21,10 +21,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
+import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.values.ConstantValue;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.example.field.RecordFieldExampleMapper;
 import io.swagger.v3.oas.models.examples.Example;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
 import org.wso2.ballerinalang.compiler.tree.BLangConstantValue;
 
 import java.util.ArrayList;
@@ -56,6 +62,7 @@ public final class CommonUtils {
     private static final String COLON = ":";
     private static final String BRACE_START = "{";
     private static final String BRACE_END = "}";
+    public static final String INLINE_REC = "<inline-record>";
 
     private CommonUtils() {
     }
@@ -176,6 +183,16 @@ public final class CommonUtils {
                     .collect(Collectors.joining(COMMA, BRACE_START, BRACE_END));
         } else {
             return value.toString();
+        }
+    }
+
+    public static void setExampleForInlineRecordFields(TypeSymbol type, Schema schema, SemanticModel semanticModel,
+                                                       List<OpenAPIMapperDiagnostic> diagnostics) {
+        if (type instanceof RecordTypeSymbol recordType && Objects.nonNull(schema) &&
+                schema instanceof ObjectSchema objectSchema) {
+            ExampleMapper recordExampleMapper = new RecordFieldExampleMapper(INLINE_REC, recordType, objectSchema,
+                    semanticModel, diagnostics);
+            recordExampleMapper.setExample();
         }
     }
 }

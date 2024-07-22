@@ -37,6 +37,7 @@ public class PathExampleMapper extends ParameterExampleMapper {
     public PathExampleMapper(PathParameterSymbol parameter, Parameter parameterSchema, SemanticModel semanticModel,
                              List<OpenAPIMapperDiagnostic> diagnostics) {
         super(parameter.annotAttachments(), parameterSchema, semanticModel, diagnostics,
-                parameter.getName().orElse(EMPTY), parameter.getLocation().orElse(null), PATH);
+                parameter.getName().orElse(EMPTY), parameter.getLocation().orElse(null), PATH,
+                parameter.typeDescriptor());
     }
 }

@@ -22,18 +22,21 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.example.ExampleMapper;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static io.ballerina.openapi.service.mapper.example.CommonUtils.setExampleForInlineRecordFields;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 /**
@@ -65,7 +68,10 @@ public class RecordFieldExampleMapper extends ExampleMapper {
         if (Objects.isNull(recordFields) || recordFields.isEmpty()) {
             return;
         }
-        recordFields.forEach(this::setPropertyExample);
+        recordFields.forEach((fieldName, fieldSymbol) -> {
+            setPropertyExample(fieldName, fieldSymbol);
+            setExampleForInlineRecord(fieldName, fieldSymbol);
+        });
     }
 
     private void setPropertyExample(String fieldName, RecordFieldSymbol fieldSymbol) {
@@ -80,5 +86,11 @@ public class RecordFieldExampleMapper extends ExampleMapper {
             diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_133, location, recordName,
                     fieldName));
         }
+    }
+
+    private void setExampleForInlineRecord(String fieldName, RecordFieldSymbol fieldSymbol) {
+        TypeSymbol fieldType = fieldSymbol.typeDescriptor();
+        Schema fieldSchema = schema.getProperties().get(unescapeIdentifier(fieldName.trim()));
+        setExampleForInlineRecordFields(fieldType, fieldSchema, getSemanticModel(), diagnostics);
     }
 }

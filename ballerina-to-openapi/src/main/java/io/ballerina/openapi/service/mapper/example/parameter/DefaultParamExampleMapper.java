@@ -33,9 +33,10 @@ import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
  */
 public class DefaultParamExampleMapper extends ParameterExampleMapper {
 
-    public DefaultParamExampleMapper(String paramType, ParameterSymbol parameterSymbol, Parameter parameterSchema,
+    public DefaultParamExampleMapper(String paramTypeName, ParameterSymbol parameterSymbol, Parameter parameterSchema,
                                      SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
         super(parameterSymbol.annotAttachments(), parameterSchema, semanticModel, diagnostics,
-                parameterSymbol.getName().orElse(EMPTY), parameterSymbol.getLocation().orElse(null), paramType);
+                parameterSymbol.getName().orElse(EMPTY), parameterSymbol.getLocation().orElse(null),
+                paramTypeName, parameterSymbol.typeDescriptor());
     }
 }

@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
@@ -30,6 +31,8 @@ import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
 import java.util.Optional;
+
+import static io.ballerina.openapi.service.mapper.example.CommonUtils.setExampleForInlineRecordFields;
 
 /**
  * This {@link TypeExampleMapper} class represents the example mapper for type.
@@ -43,11 +46,13 @@ public class TypeExampleMapper extends ExampleMapper {
     List<OpenAPIMapperDiagnostic> diagnostics;
     String typeName;
     Location location;
+    TypeSymbol typeSymbol;
 
     public TypeExampleMapper(TypeDefinitionSymbol typeDefinitionSymbol, Schema typeSchema,
                              SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics) {
         super(semanticModel);
         this.annotations = typeDefinitionSymbol.annotAttachments();
+        this.typeSymbol = typeDefinitionSymbol.typeDescriptor();
         this.typeSchema = typeSchema;
         this.diagnostics = diagnostics;
         this.typeName = typeDefinitionSymbol.getName().get();
@@ -57,6 +62,7 @@ public class TypeExampleMapper extends ExampleMapper {
     @Override
     public void setExample() {
         try {
+            setExampleForInlineRecordFields(typeSymbol, typeSchema, getSemanticModel(), diagnostics);
             Optional<Object> exampleValue = extractExample(annotations);
             if (exampleValue.isEmpty()) {
                 return;
