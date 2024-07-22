@@ -60,6 +60,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -209,19 +210,82 @@ public class BallerinaUtilGenerator {
      * @return Syntax tree of the util.bal file
      */
     public SyntaxTree generateUtilSyntaxTree() throws IOException {
+
+        Set<String> functionNameList = getFunctionNameList();
+        List<ModuleMemberDeclarationNode> memberDeclarationNodes = new ArrayList<>();
+        getUtilTypeDeclarationNodes(memberDeclarationNodes);
+        addUtilFunctionDeclarationNodes(memberDeclarationNodes, functionNameList);
+        List<ImportDeclarationNode> imports = generateImports(functionNameList);
+        NodeList<ImportDeclarationNode> importsList = createNodeList(imports);
+        ModulePartNode utilModulePartNode =
+                createModulePartNode(importsList, createNodeList(memberDeclarationNodes), createToken(EOF_TOKEN));
+        TextDocument textDocument = TextDocuments.from("");
+        SyntaxTree utilSyntaxTree = SyntaxTree.from(textDocument);
+        return utilSyntaxTree.modifyWith(utilModulePartNode);
+    }
+
+    public SyntaxTree appendUtilSyntaxTree(SyntaxTree syntaxTree) throws IOException {
+        Set<String> functionNameList = getFunctionNameList();
+        List<ModuleMemberDeclarationNode> memberDeclarationNodes = new ArrayList<>();
+        getUtilTypeDeclarationNodes(memberDeclarationNodes);
+        addUtilFunctionDeclarationNodes(memberDeclarationNodes, functionNameList);
+        List<ImportDeclarationNode> imports = generateImports(functionNameList);
+        ModulePartNode rootNode = syntaxTree.rootNode();
+        NodeList<ImportDeclarationNode> importDeclarationNodes = rootNode.imports();
+        NodeList<ModuleMemberDeclarationNode> moduleMemberDeclarationNodes = rootNode.members();
+        importDeclarationNodes = importDeclarationNodes.addAll(imports);
+        Collection<ImportDeclarationNode> removingImports = new ArrayList<>();
+        importDeclarationNodes.stream().forEach(importDecNode -> {
+            imports.forEach(newImportNode -> {
+                if (importDecNode.toString().equals(newImportNode.toString())) {
+                    removingImports.add(newImportNode);
+                }
+            });
+        });
+        imports.removeAll(removingImports);
+        importDeclarationNodes = importDeclarationNodes.addAll(imports);
+        moduleMemberDeclarationNodes = moduleMemberDeclarationNodes.addAll(memberDeclarationNodes);
+        return syntaxTree.modifyWith(createModulePartNode(importDeclarationNodes, moduleMemberDeclarationNodes,
+                createToken(EOF_TOKEN)));
+    }
+
+    private void addUtilFunctionDeclarationNodes(List<ModuleMemberDeclarationNode> memberDeclarationNodes,
+                                                 Set<String> functionNameList) throws IOException {
+        Path path = getResourceFilePath();
+        Project project = ProjectLoader.loadProject(path);
+        Package currentPackage = project.currentPackage();
+        DocumentId docId = currentPackage.getDefaultModule().documentIds().iterator().next();
+        SyntaxTree fileSyntaxTree = currentPackage.getDefaultModule().document(docId).syntaxTree();
+
+        ModulePartNode modulePartNode = fileSyntaxTree.rootNode();
+        NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
+        for (ModuleMemberDeclarationNode node : members) {
+            if (node.kind().equals(SyntaxKind.FUNCTION_DEFINITION)) {
+                for (ChildNodeEntry childNodeEntry : node.childEntries()) {
+                    if (childNodeEntry.name().equals("functionName")) {
+                        if (functionNameList.contains(childNodeEntry.node().get().toString())) {
+                            memberDeclarationNodes.add(node);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private Set<String> getFunctionNameList() {
         Set<String> functionNameList = new LinkedHashSet<>();
         if (requestBodyEncodingFound) {
             functionNameList.addAll(Arrays.asList(
                     CREATE_FORM_URLENCODED_REQUEST_BODY, GET_DEEP_OBJECT_STYLE_REQUEST, GET_FORM_STYLE_REQUEST,
                     GET_ENCODED_URI, GET_ORIGINAL_KEY, GET_SERIALIZED_ARRAY, GET_SERIALIZED_RECORD_ARRAY
-                                                 ));
+            ));
         }
         if (queryParamsFound) {
             functionNameList.addAll(Arrays.asList(
                     GET_DEEP_OBJECT_STYLE_REQUEST, GET_FORM_STYLE_REQUEST,
                     GET_ENCODED_URI, GET_ORIGINAL_KEY, GET_SERIALIZED_ARRAY, GET_PATH_FOR_QUERY_PARAM,
                     GET_SERIALIZED_RECORD_ARRAY
-                                                 ));
+            ));
         }
         if (headersFound) {
             functionNameList.add(GET_MAP_FOR_HEADERS);
@@ -238,31 +302,10 @@ public class BallerinaUtilGenerator {
                     CREATE_STATUS_CODE_RESPONSE_BINDING_ERROR
             ));
         }
+        return functionNameList;
+    }
 
-        List<ModuleMemberDeclarationNode> memberDeclarationNodes = new ArrayList<>();
-        getUtilTypeDeclarationNodes(memberDeclarationNodes);
-
-        Path path = getResourceFilePath();
-
-        Project project = ProjectLoader.loadProject(path);
-        Package currentPackage = project.currentPackage();
-        DocumentId docId = currentPackage.getDefaultModule().documentIds().iterator().next();
-        SyntaxTree syntaxTree = currentPackage.getDefaultModule().document(docId).syntaxTree();
-
-        ModulePartNode modulePartNode = syntaxTree.rootNode();
-        NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
-        for (ModuleMemberDeclarationNode node : members) {
-            if (node.kind().equals(SyntaxKind.FUNCTION_DEFINITION)) {
-                for (ChildNodeEntry childNodeEntry : node.childEntries()) {
-                    if (childNodeEntry.name().equals("functionName")) {
-                        if (functionNameList.contains(childNodeEntry.node().get().toString())) {
-                            memberDeclarationNodes.add(node);
-                        }
-                    }
-                }
-            }
-        }
-
+    private List<ImportDeclarationNode> generateImports(Set<String> functionNameList) {
         List<ImportDeclarationNode> imports = new ArrayList<>();
         if (functionNameList.contains(GET_ENCODED_URI)) {
             ImportDeclarationNode importForUrl = GeneratorUtils.getImportDeclarationNode(BALLERINA, URL);
@@ -276,13 +319,7 @@ public class BallerinaUtilGenerator {
             ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(BALLERINA, HTTP);
             imports.add(importForHttp);
         }
-
-        NodeList<ImportDeclarationNode> importsList = createNodeList(imports);
-        ModulePartNode utilModulePartNode =
-                createModulePartNode(importsList, createNodeList(memberDeclarationNodes), createToken(EOF_TOKEN));
-        TextDocument textDocument = TextDocuments.from("");
-        SyntaxTree utilSyntaxTree = SyntaxTree.from(textDocument);
-        return utilSyntaxTree.modifyWith(utilModulePartNode);
+        return imports;
     }
 
     /**

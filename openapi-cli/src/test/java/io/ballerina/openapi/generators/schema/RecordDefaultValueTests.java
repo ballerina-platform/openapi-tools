@@ -53,7 +53,7 @@ public class RecordDefaultValueTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/" +
                         "default_optional_primitive_schema.bal", syntaxTree);
@@ -70,7 +70,7 @@ public class RecordDefaultValueTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/" +
                         "default_optional_string_schema.bal", syntaxTree);
@@ -87,7 +87,7 @@ public class RecordDefaultValueTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/" +
                 "default_optional_schema_with_doublequote.bal", syntaxTree);
@@ -104,7 +104,7 @@ public class RecordDefaultValueTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/" +
                         "default_optional_array_schema.bal", syntaxTree);
@@ -121,7 +121,7 @@ public class RecordDefaultValueTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/" +
                         "default_required_field_schema.bal", syntaxTree);
@@ -138,7 +138,7 @@ public class RecordDefaultValueTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/" +
                 "default_non_required_field_schema.bal", syntaxTree);

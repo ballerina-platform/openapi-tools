@@ -54,7 +54,7 @@ public class AdvanceRecordTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema10.bal", syntaxTree);
         // todo : design a more suitable way to handle not types
@@ -71,7 +71,7 @@ public class AdvanceRecordTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema11.bal", syntaxTree);
     }
@@ -87,7 +87,7 @@ public class AdvanceRecordTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/openapi_weather_api_schema.bal",
                 syntaxTree);
@@ -105,7 +105,7 @@ public class AdvanceRecordTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
     }
 }

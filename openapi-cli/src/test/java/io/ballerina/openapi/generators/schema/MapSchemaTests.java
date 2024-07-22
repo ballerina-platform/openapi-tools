@@ -51,7 +51,7 @@ public class MapSchemaTests {
                 .withNullable(true)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/additional_properties_true.bal", syntaxTree);
@@ -69,7 +69,7 @@ public class MapSchemaTests {
                 .withNullable(true)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/additional_properties_composed_schema.bal", syntaxTree);

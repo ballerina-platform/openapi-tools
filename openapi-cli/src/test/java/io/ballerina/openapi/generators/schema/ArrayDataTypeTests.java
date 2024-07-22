@@ -65,7 +65,7 @@ public class ArrayDataTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema03.bal",
                 syntaxTree);
@@ -82,7 +82,7 @@ public class ArrayDataTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema04.bal",
                 syntaxTree);
@@ -99,7 +99,7 @@ public class ArrayDataTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema06.bal",
                 syntaxTree);
@@ -117,7 +117,7 @@ public class ArrayDataTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema08.bal",
                 syntaxTree);
@@ -134,7 +134,7 @@ public class ArrayDataTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/schema_with_array.bal", syntaxTree);
@@ -152,7 +152,7 @@ public class ArrayDataTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/schema_with_nested_array.bal", syntaxTree);
@@ -169,7 +169,7 @@ public class ArrayDataTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/array_no_item_type.bal", syntaxTree);
@@ -186,7 +186,7 @@ public class ArrayDataTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/array_max_item.bal", syntaxTree);
@@ -203,7 +203,7 @@ public class ArrayDataTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/array_with_allOf.bal", syntaxTree);
@@ -220,7 +220,7 @@ public class ArrayDataTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/array_with_oneOf.bal", syntaxTree);
@@ -237,7 +237,7 @@ public class ArrayDataTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/array_with_oneOf_complex.bal", syntaxTree);
@@ -254,7 +254,7 @@ public class ArrayDataTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/array_exceed_max_item.bal", syntaxTree);
@@ -274,7 +274,7 @@ public class ArrayDataTypeTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/array_exceed_max_item_02.bal", syntaxTree);

@@ -65,7 +65,7 @@ public class MapSchemaNegativeTests {
                 .withNullable(true)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class MapSchemaNegativeTests {
                 .withNullable(true)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         // Check the generated content, till the warning test enable.
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(

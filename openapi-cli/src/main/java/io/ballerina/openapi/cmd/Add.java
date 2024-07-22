@@ -183,6 +183,7 @@ public class Add implements BLauncherCmd {
                 .withLicensePath(baseCmd.licenseFilePath)
                 .withStatusCodeBinding(baseCmd.statusCodeBinding)
                 .withMock(baseCmd.mock)
+                .withSingleFile(baseCmd.singleFile)
                 .build();
     }
 

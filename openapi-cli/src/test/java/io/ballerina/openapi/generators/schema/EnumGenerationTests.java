@@ -68,7 +68,7 @@ public class EnumGenerationTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/schema_with_enums.bal",
                 syntaxTree);
@@ -92,7 +92,7 @@ public class EnumGenerationTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/schema_with_nullable_enums.bal", syntaxTree);
@@ -111,7 +111,7 @@ public class EnumGenerationTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/empty_enum.bal",
                 syntaxTree);

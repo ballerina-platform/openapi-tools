@@ -54,7 +54,7 @@ public class NullableFieldTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/nullable_primitive.bal", syntaxTree);
@@ -71,7 +71,7 @@ public class NullableFieldTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/nullable_array.bal",
                 syntaxTree);
@@ -88,7 +88,7 @@ public class NullableFieldTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/nullable_ref_array.bal", syntaxTree);
@@ -105,7 +105,7 @@ public class NullableFieldTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         String syntaxTreeContent = syntaxTree.toString().trim().replaceAll("\n", "")
                 .replaceAll("\\s+", "");
@@ -123,7 +123,7 @@ public class NullableFieldTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/nullable_option_null_type.bal", syntaxTree);
@@ -140,7 +140,7 @@ public class NullableFieldTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/nullable_record.bal", syntaxTree);
@@ -157,7 +157,7 @@ public class NullableFieldTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
                 "schema/ballerina/nullable_anyof_schema.bal", syntaxTree);
@@ -174,7 +174,7 @@ public class NullableFieldTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/" +
                         "nullable_anyof_array_schema.bal", syntaxTree);
@@ -191,7 +191,7 @@ public class NullableFieldTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/" +
                 "null_empty_record.bal", syntaxTree);
@@ -208,7 +208,7 @@ public class NullableFieldTests {
                 .withNullable(false)
                 .withFilters(FILTER)
                 .build();
-        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, false);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/" +
                 "null_type_3_1.bal", syntaxTree);

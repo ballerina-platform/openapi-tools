@@ -62,10 +62,13 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
         Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
         ModulePartNode modulePartNode = (ModulePartNode) rootNode;
         NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
-        List<TypeDefinitionNode> updatedList = new ArrayList<>();
+        List<ModuleMemberDeclarationNode> updatedList = new ArrayList<>();
 
-        members.forEach(member -> {
-            TypeDefinitionNode typeDef = (TypeDefinitionNode) member;
+        members.stream().forEach(member -> {
+            if (!(member instanceof TypeDefinitionNode typeDef)) {
+                updatedList.add(member);
+                return;
+            }
             // Find a matching schema based on type name
             TypeDefinitionNode finalTypeDef = typeDef;
             if (schemas == null) {
@@ -128,7 +131,7 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
             }
         });
         NodeList<ModuleMemberDeclarationNode> typeMembers = AbstractNodeFactory.createNodeList(
-                updatedList.toArray(new TypeDefinitionNode[updatedList.size()]));
+                updatedList.toArray(new ModuleMemberDeclarationNode[updatedList.size()]));
 
         modulePartNode = modulePartNode.modify(modulePartNode.imports(), typeMembers, modulePartNode.eofToken());
         return syntaxTree.modifyWith(modulePartNode);

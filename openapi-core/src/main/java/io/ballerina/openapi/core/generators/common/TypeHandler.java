@@ -51,6 +51,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -64,11 +66,13 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordFieldNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeReferenceNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.EOF_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
@@ -107,19 +111,7 @@ public class TypeHandler {
     }
 
     public SyntaxTree generateTypeSyntaxTree() {
-        if (!GeneratorMetaData.getInstance().isNullable()) {
-            ConstraintGeneratorImp constraintGenerator = new ConstraintGeneratorImp(GeneratorMetaData
-                    .getInstance().getOpenAPI(), typeDefinitionNodes);
-            ConstraintResult constraintResult = constraintGenerator.updateTypeDefinitionsWithConstraints();
-            typeDefinitionNodes = constraintResult.typeDefinitionNodeHashMap();
-            boolean isConstraintAvailable = constraintResult.isConstraintAvailable();
-            if (isConstraintAvailable) {
-                imports.add("import ballerina/constraint;");
-            }
-            constraintDiagnostics.addAll(constraintResult.diagnostics());
-        }
-        NodeList<ModuleMemberDeclarationNode> typeMembers = AbstractNodeFactory.createNodeList(
-                typeDefinitionNodes.values().toArray(new TypeDefinitionNode[typeDefinitionNodes.size()]));
+        NodeList<ModuleMemberDeclarationNode> typeMembers = getTypeMembers();
         NodeList<ImportDeclarationNode> imports = generateImportNodes();
         Token eofToken = AbstractNodeFactory.createIdentifierToken("");
         ModulePartNode modulePartNode = NodeFactory.createModulePartNode(imports, typeMembers, eofToken);
@@ -131,6 +123,45 @@ public class TypeHandler {
         return docCommentGenerator.updateSyntaxTreeWithDocComments();
     }
 
+    public SyntaxTree appendTypeSyntaxTree(SyntaxTree syntaxTree) {
+        NodeList<ModuleMemberDeclarationNode> typeMembers = getTypeMembers();
+        ModulePartNode rootNode = syntaxTree.rootNode();
+        NodeList<ImportDeclarationNode> importDeclarationNodes = rootNode.imports();
+        NodeList<ModuleMemberDeclarationNode> moduleMemberDeclarationNodes = rootNode.members();
+        Collection<ImportDeclarationNode> importNodes = generateImportNodesList();
+        Collection<ImportDeclarationNode> removingImports = new ArrayList<>();
+        importDeclarationNodes.stream().forEach(importDecNode -> {
+            importNodes.forEach(newImportNode -> {
+                if (importDecNode.toString().equals(newImportNode.toString())) {
+                    removingImports.add(newImportNode);
+                }
+            });
+        });
+        importNodes.removeAll(removingImports);
+        importDeclarationNodes = importDeclarationNodes.addAll(importNodes);
+        moduleMemberDeclarationNodes = moduleMemberDeclarationNodes.addAll(typeMembers.stream().toList());
+        syntaxTree = syntaxTree.modifyWith(createModulePartNode(importDeclarationNodes, moduleMemberDeclarationNodes,
+                createToken(EOF_TOKEN)));
+        DocCommentGeneratorImp docCommentGenerator = new DocCommentGeneratorImp(GeneratorMetaData.getInstance()
+                .getOpenAPI(), syntaxTree, GenSrcFile.GenFileType.GEN_TYPE, false);
+        return docCommentGenerator.updateSyntaxTreeWithDocComments();
+    }
+
+    private NodeList<ModuleMemberDeclarationNode> getTypeMembers() {
+        if (!GeneratorMetaData.getInstance().isNullable()) {
+            ConstraintGeneratorImp constraintGenerator = new ConstraintGeneratorImp(GeneratorMetaData
+                    .getInstance().getOpenAPI(), typeDefinitionNodes);
+            ConstraintResult constraintResult = constraintGenerator.updateTypeDefinitionsWithConstraints();
+            typeDefinitionNodes = constraintResult.typeDefinitionNodeHashMap();
+            boolean isConstraintAvailable = constraintResult.isConstraintAvailable();
+            if (isConstraintAvailable) {
+                imports.add("import ballerina/constraint;");
+            }
+            constraintDiagnostics.addAll(constraintResult.diagnostics());
+        }
+        return AbstractNodeFactory.createNodeList(
+                typeDefinitionNodes.values().toArray(new TypeDefinitionNode[typeDefinitionNodes.size()]));
+    }
 
     private NodeList<ImportDeclarationNode> generateImportNodes() {
         Set<ImportDeclarationNode> importDeclarationNodes = new LinkedHashSet<>();
@@ -149,6 +180,23 @@ public class TypeHandler {
             return createEmptyNodeList();
         }
         return createNodeList(importDeclarationNodes);
+    }
+
+    private Collection<ImportDeclarationNode> generateImportNodesList() {
+        Set<ImportDeclarationNode> importDeclarationNodes = new LinkedHashSet<>();
+        // Imports for the http module, when record has http type inclusions.
+        if (!typeDefinitionNodes.isEmpty()) {
+            importsForTypeDefinitions(importDeclarationNodes);
+        }
+        //Imports for constraints
+        if (!imports.isEmpty()) {
+            for (String importValue : imports) {
+                ImportDeclarationNode importDeclarationNode = NodeParser.parseImportDeclaration(importValue);
+                importDeclarationNodes.add(importDeclarationNode);
+            }
+        }
+        Collections.emptyList();
+        return importDeclarationNodes;
     }
 
     private void importsForTypeDefinitions(Set<ImportDeclarationNode> imports) {
