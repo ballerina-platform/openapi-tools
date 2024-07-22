@@ -90,6 +90,9 @@ public class RecordFieldExampleMapper extends ExampleMapper {
 
     private void setExampleForInlineRecord(String fieldName, RecordFieldSymbol fieldSymbol) {
         TypeSymbol fieldType = fieldSymbol.typeDescriptor();
+        if (Objects.isNull(schema.getProperties())) {
+            return;
+        }
         Schema fieldSchema = schema.getProperties().get(unescapeIdentifier(fieldName.trim()));
         setExampleForInlineRecordFields(fieldType, fieldSchema, getSemanticModel(), diagnostics);
     }
