@@ -57,7 +57,7 @@ public class RequestExampleMapper extends ExamplesMapper {
     String paramName;
     Location location;
     TypeSymbol paramType;
-    Content content;
+    Content validatedContent;
 
     public RequestExampleMapper(ParameterSymbol parameterSymbol, RequestBody requestBody, SemanticModel semanticModel,
                                 List<OpenAPIMapperDiagnostic> diagnostics) {
@@ -68,19 +68,19 @@ public class RequestExampleMapper extends ExamplesMapper {
         this.paramName = parameterSymbol.getName().orElse("");
         this.location = parameterSymbol.getLocation().orElse(null);
         this.paramType = parameterSymbol.typeDescriptor();
-        this.content = getValidatedContent();
+        this.validatedContent = getValidatedContent();
     }
 
     @Override
     public void setExample() {
         try {
-            if (Objects.isNull(content)) {
+            if (Objects.isNull(validatedContent)) {
                 return;
             }
 
-            Set<String> mediaTypes = content.keySet();
+            Set<String> mediaTypes = validatedContent.keySet();
             String mediaType = mediaTypes.stream().findFirst().get();
-            MediaType mediaTypeObject = content.get(mediaType);
+            MediaType mediaTypeObject = validatedContent.get(mediaType);
             setExampleForInlineRecordFields(mediaTypeObject);
 
             Optional<Object> exampleValue = extractExample(annotations);
@@ -122,10 +122,10 @@ public class RequestExampleMapper extends ExamplesMapper {
             if (exampleValues.isEmpty()) {
                 return;
             }
-            if (Objects.isNull(content)) {
+            if (Objects.isNull(validatedContent)) {
                 return;
             }
-            content.forEach((mediaType, mediaTypeObject) -> mediaTypeObject.setExamples(exampleValues.get()));
+            validatedContent.forEach((mediaType, mediaTypeObject) -> mediaTypeObject.setExamples(exampleValues.get()));
         }  catch (JsonProcessingException exception) {
             diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, location, EXAMPLES,
                     REQUEST, paramName));
