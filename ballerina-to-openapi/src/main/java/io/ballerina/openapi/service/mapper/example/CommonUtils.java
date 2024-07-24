@@ -83,10 +83,10 @@ public final class CommonUtils {
     }
 
     private static Optional<Object> getExampleFromValue(Object exampleValue) throws JsonProcessingException {
-        if (exampleValue instanceof ConstantValue) {
-            exampleValue = ((ConstantValue) exampleValue).value();
-        } else if (exampleValue instanceof BLangConstantValue) {
-            exampleValue = ((BLangConstantValue) exampleValue).value;
+        if (exampleValue instanceof ConstantValue constantExampleValue) {
+            exampleValue = constantExampleValue.value();
+        } else if (exampleValue instanceof BLangConstantValue constantExampleValue) {
+            exampleValue = constantExampleValue.value;
         }
 
         if (!(exampleValue instanceof HashMap<?, ?> exampleMap)) {
