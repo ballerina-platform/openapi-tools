@@ -87,8 +87,8 @@ public class BallerinaToOpenAPICLINegativeTests extends OpenAPITest {
                 "during the code generation:\n" +
                 "WARNING [main.bal:(12:25,25:14)] Given example path `examples01.json` " +
                 "is not exist, therefore generated yaml does not contain example for `responseExample01` \n" +
-                "WARNING [main.bal:(12:25,25:14)] The given JSON value for example contains parsing issues, " +
-                "therefore generated yaml does not contain example details" +
+                "WARNING [main.bal:(12:25,25:14)] Generated OpenAPI definition does not contain the example " +
+                "details since the JSON value provided for the example has parser errors " +
                 "WARNING [main.bal:(11:19,36:10)] Following issue occurred parsing given example: " +
                 "Unexpected character (r (code 114)): was expecting double-quote to start field name";
         //Thread for wait out put generate
