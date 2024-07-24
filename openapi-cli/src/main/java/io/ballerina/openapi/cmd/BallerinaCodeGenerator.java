@@ -158,7 +158,6 @@ public class BallerinaCodeGenerator {
                     (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + utilContent));
         }
 
-        String serviceContent = "";
         if (complexPaths.isEmpty()) {
             OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                     .withOpenAPI(openAPIDef)
@@ -214,8 +213,7 @@ public class BallerinaCodeGenerator {
         writeGeneratedSources(newGenFiles, srcPath, implPath, GEN_BOTH);
     }
 
-    public static <T> Predicate<T> distinctByKey(
-            Function<? super T, ?> keyExtractor) {
+    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
@@ -397,42 +395,36 @@ public class BallerinaCodeGenerator {
         licenseHeader = licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER : licenseHeader;
         TypeHandler.createInstance(openAPIDef, nullable);
         BallerinaClientGenerator clientGenerator = getBallerinaClientGenerator(oasClientConfig);
-        SyntaxTree mainContentSyntaxTree = clientGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTree = clientGenerator.generateSyntaxTree();
         //Update type definition list with auth related type definitions
         List<TypeDefinitionNode> authNodes = clientGenerator.getBallerinaAuthConfigGenerator()
                 .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef : authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
-        if (!singleFile) {
-            String mainContent = Formatter.format(mainContentSyntaxTree).toSourceCode();
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME,
-                    licenseHeader + mainContent));
-        }
 
         if (singleFile) {
-            mainContentSyntaxTree = clientGenerator.getBallerinaUtilGenerator()
-                    .appendUtilSyntaxTree(mainContentSyntaxTree);
+            syntaxTree = clientGenerator.getBallerinaUtilGenerator().appendUtilSyntaxTree(syntaxTree);
+            syntaxTree = TypeHandler.getInstance().appendTypeSyntaxTree(syntaxTree);
         } else {
+            String mainContent = Formatter.format(syntaxTree).toSourceCode();
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME,
+                    licenseHeader + mainContent));
             String utilContent = Formatter.format(
                     clientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
             if (!utilContent.isBlank()) {
                 sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, srcPackage, UTIL_FILE_NAME,
                         licenseHeader + utilContent));
             }
-        }
-
-        if (singleFile) {
-            mainContentSyntaxTree = TypeHandler.getInstance().appendTypeSyntaxTree(mainContentSyntaxTree);
-        } else {
             // Generate ballerina records to represent schemas.
             SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
             String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
             if (!schemaContent.isBlank()) {
                 sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
-                    licenseHeader + schemaContent));
+                        licenseHeader + schemaContent));
             }
         }
+
         //Type diagnostic
         List<Diagnostic> diagnosticList = TypeHandler.getInstance().getDiagnostics();
         // Generate test boilerplate code for test cases
@@ -456,7 +448,7 @@ public class BallerinaCodeGenerator {
         printDiagnostic(diagnosticList);
         if (singleFile) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
-                    CLIENT_FILE_NAME, Formatter.format(mainContentSyntaxTree).toSourceCode()));
+                    CLIENT_FILE_NAME, licenseHeader + Formatter.format(syntaxTree).toSourceCode()));
         }
         return sourceFiles;
     }

@@ -29,6 +29,8 @@ import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
 import io.ballerina.compiler.syntax.tree.Minutiae;
 import io.ballerina.compiler.syntax.tree.MinutiaeList;
+import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
+import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -39,6 +41,7 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxInfo;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
@@ -85,6 +88,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -107,6 +111,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleN
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createExpressionStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createResourcePathParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
@@ -118,6 +123,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.EOF_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
@@ -1175,5 +1181,25 @@ public class GeneratorUtils {
     public static String generateOperationUniqueId(Operation operation, String path, String method) {
         return Objects.nonNull(operation.getOperationId()) ?
                 operation.getOperationId() : method + getValidName(path, true);
+    }
+
+    public static SyntaxTree appendMembersToSyntaxTree(SyntaxTree syntaxTree, Collection<ImportDeclarationNode> imports,
+                                                       Collection<ModuleMemberDeclarationNode> memberDeclarationNodes) {
+        ModulePartNode rootNode = syntaxTree.rootNode();
+        NodeList<ImportDeclarationNode> importDeclarationNodes = rootNode.imports();
+        NodeList<ModuleMemberDeclarationNode> moduleMemberDeclarationNodes = rootNode.members();
+        Collection<ImportDeclarationNode> removingImports = new ArrayList<>();
+        importDeclarationNodes.stream().forEach(importDecNode -> {
+            imports.forEach(newImportNode -> {
+                if (importDecNode.toString().equals(newImportNode.toString())) {
+                    removingImports.add(newImportNode);
+                }
+            });
+        });
+        imports.removeAll(removingImports);
+        importDeclarationNodes = importDeclarationNodes.addAll(imports);
+        moduleMemberDeclarationNodes = moduleMemberDeclarationNodes.addAll(memberDeclarationNodes);
+        return syntaxTree.modifyWith(createModulePartNode(importDeclarationNodes, moduleMemberDeclarationNodes,
+                createToken(EOF_TOKEN)));
     }
 }

@@ -31,12 +31,14 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -80,6 +82,13 @@ public class ServiceTypeGenerator extends ServiceGenerator {
         TextDocument textDocument = TextDocuments.from("");
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
         return syntaxTree.modifyWith(modulePartNode);
+    }
+
+    public SyntaxTree appendSyntaxTree(SyntaxTree syntaxTree) throws BallerinaOpenApiException {
+        Collection<ImportDeclarationNode> imports = new ArrayList<>(ServiceGenerationUtils
+                .createImportDeclarationNodes().stream().toList());
+        NodeList<ModuleMemberDeclarationNode> moduleMembers = createNodeList(generateServiceObject());
+        return GeneratorUtils.appendMembersToSyntaxTree(syntaxTree, imports, moduleMembers.stream().toList());
     }
 
     private TypeDefinitionNode generateServiceObject() throws BallerinaOpenApiException {

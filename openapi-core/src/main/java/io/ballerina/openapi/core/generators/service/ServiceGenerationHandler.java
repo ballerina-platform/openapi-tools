@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.core.generators.service;
 
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
@@ -39,51 +40,44 @@ public class ServiceGenerationHandler {
     public List<GenSrcFile> generateServiceFiles(OASServiceMetadata oasServiceMetadata, boolean singleFile) throws
             FormatterException, BallerinaOpenApiException {
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        StringBuilder singleFileContent = new StringBuilder();
-        String mainContent;
         ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
-        mainContent = Formatter.format(serviceGenerator.generateSyntaxTree()).toSourceCode();
-        if (singleFile) {
-            singleFileContent.append((oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
-                    oasServiceMetadata.getLicenseHeader()) + mainContent);
-        } else {
+        SyntaxTree syntaxTree = serviceGenerator.generateSyntaxTree();
+        if (!singleFile) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
                     oasServiceMetadata.getSrcFile(),
                     (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
-                            oasServiceMetadata.getLicenseHeader()) + mainContent));
+                            oasServiceMetadata.getLicenseHeader()) + Formatter.format(syntaxTree).toSourceCode()));
         }
         if (oasServiceMetadata.isServiceTypeRequired()) {
             ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata,
                     serviceGenerator.getFunctionsList());
-            String serviceType = Formatter.format(serviceTypeGenerator.generateSyntaxTree()).toSourceCode();
             if (singleFile) {
-                singleFileContent.append(serviceType);
+                syntaxTree = serviceTypeGenerator.appendSyntaxTree(syntaxTree);
             } else {
+                String serviceType = Formatter.format(serviceTypeGenerator.generateSyntaxTree()).toSourceCode();
                 sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SERVICE_TYPE,
-                        oasServiceMetadata.getSrcPackage(), "service_type.bal",
-                        singleFileContent.toString()));
+                        oasServiceMetadata.getSrcPackage(), "service_type.bal", serviceType));
             }
         }
         diagnostics.addAll(serviceGenerator.getDiagnostics());
+
+        if (!oasServiceMetadata.generateWithoutDataBinding()) {
+            if (singleFile) {
+                syntaxTree = TypeHandler.getInstance().appendTypeSyntaxTree(syntaxTree);
+            } else {
+                String schemaSyntaxTree = Formatter.format(TypeHandler.getInstance()
+                        .generateTypeSyntaxTree()).toSourceCode();
+                if (!schemaSyntaxTree.isBlank()) {
+                    sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
+                            TYPE_FILE_NAME, oasServiceMetadata.getLicenseHeader() + schemaSyntaxTree));
+                }
+            }
+        }
         if (singleFile) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
                     oasServiceMetadata.getSrcFile(),
                     (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
-                            oasServiceMetadata.getLicenseHeader()) + mainContent));
-        }
-
-
-        String schemaSyntaxTree = Formatter.format(TypeHandler.getInstance().generateTypeSyntaxTree()).toSourceCode();
-        if (!schemaSyntaxTree.isBlank() && !oasServiceMetadata.generateWithoutDataBinding()) {
-            if (singleFile) {
-                GenSrcFile genSrcFile = sourceFiles.stream().filter(genSrcFile1 ->
-                        genSrcFile1.getFileName().endsWith("_service.bal")
-                ).findFirst().get();
-                genSrcFile.setContent(genSrcFile.getContent() + schemaSyntaxTree);
-            } else {
-                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
-                        TYPE_FILE_NAME, oasServiceMetadata.getLicenseHeader() + schemaSyntaxTree));
-            }
+                            oasServiceMetadata.getLicenseHeader()) + Formatter.format(syntaxTree).toSourceCode()));
         }
         return sourceFiles;
     }

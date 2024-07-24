@@ -60,7 +60,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -230,23 +229,7 @@ public class BallerinaUtilGenerator {
         getUtilTypeDeclarationNodes(memberDeclarationNodes);
         addUtilFunctionDeclarationNodes(memberDeclarationNodes, functionNameList);
         List<ImportDeclarationNode> imports = generateImports(functionNameList);
-        ModulePartNode rootNode = syntaxTree.rootNode();
-        NodeList<ImportDeclarationNode> importDeclarationNodes = rootNode.imports();
-        NodeList<ModuleMemberDeclarationNode> moduleMemberDeclarationNodes = rootNode.members();
-        importDeclarationNodes = importDeclarationNodes.addAll(imports);
-        Collection<ImportDeclarationNode> removingImports = new ArrayList<>();
-        importDeclarationNodes.stream().forEach(importDecNode -> {
-            imports.forEach(newImportNode -> {
-                if (importDecNode.toString().equals(newImportNode.toString())) {
-                    removingImports.add(newImportNode);
-                }
-            });
-        });
-        imports.removeAll(removingImports);
-        importDeclarationNodes = importDeclarationNodes.addAll(imports);
-        moduleMemberDeclarationNodes = moduleMemberDeclarationNodes.addAll(memberDeclarationNodes);
-        return syntaxTree.modifyWith(createModulePartNode(importDeclarationNodes, moduleMemberDeclarationNodes,
-                createToken(EOF_TOKEN)));
+        return GeneratorUtils.appendMembersToSyntaxTree(syntaxTree, imports, memberDeclarationNodes);
     }
 
     private void addUtilFunctionDeclarationNodes(List<ModuleMemberDeclarationNode> memberDeclarationNodes,
