@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_FILE_HEADER;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
 import static io.ballerina.openapi.core.generators.type.GeneratorConstants.TYPE_FILE_NAME;
 
 public class ServiceGenerationHandler {
@@ -56,7 +57,9 @@ public class ServiceGenerationHandler {
             } else {
                 String serviceType = Formatter.format(serviceTypeGenerator.generateSyntaxTree()).toSourceCode();
                 sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SERVICE_TYPE,
-                        oasServiceMetadata.getSrcPackage(), "service_type.bal", serviceType));
+                        oasServiceMetadata.getSrcPackage(), "service_type.bal",
+                        (oasServiceMetadata.getLicenseHeader().isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
+                        oasServiceMetadata.getLicenseHeader()) + serviceType));
             }
         }
         diagnostics.addAll(serviceGenerator.getDiagnostics());
@@ -68,8 +71,9 @@ public class ServiceGenerationHandler {
                 String schemaSyntaxTree = Formatter.format(TypeHandler.getInstance()
                         .generateTypeSyntaxTree()).toSourceCode();
                 if (!schemaSyntaxTree.isBlank()) {
-                    sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
-                            TYPE_FILE_NAME, oasServiceMetadata.getLicenseHeader() + schemaSyntaxTree));
+                    sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, oasServiceMetadata.getSrcPackage(),
+                            TYPE_FILE_NAME, oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
+                            oasServiceMetadata.getLicenseHeader() + schemaSyntaxTree));
                 }
             }
         }

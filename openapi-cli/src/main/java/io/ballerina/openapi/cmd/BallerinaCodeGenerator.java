@@ -174,17 +174,7 @@ public class BallerinaCodeGenerator {
             sourceFiles.addAll(serviceGenerationHandler.generateServiceFiles(oasServiceMetadata, singleFile));
             this.diagnostics.addAll(serviceGenerationHandler.getDiagnostics());
         }
-
-        TypeHandler typeHandler = TypeHandler.getInstance();
-        SyntaxTree schemaSyntaxTree = typeHandler.generateTypeSyntaxTree();
-        String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
         this.diagnostics.addAll(TypeHandler.getInstance().getDiagnostics());
-
-
-        if (!schemaContent.isBlank()) {
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
-                    (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaContent));
-        }
 
         // Generate test boilerplate code for test cases
         if (this.includeTestFiles) {
