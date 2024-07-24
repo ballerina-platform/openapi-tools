@@ -57,6 +57,7 @@ public class RequestExampleMapper extends ExamplesMapper {
     String paramName;
     Location location;
     TypeSymbol paramType;
+    Content content;
 
     public RequestExampleMapper(ParameterSymbol parameterSymbol, RequestBody requestBody, SemanticModel semanticModel,
                                 List<OpenAPIMapperDiagnostic> diagnostics) {
@@ -67,12 +68,12 @@ public class RequestExampleMapper extends ExamplesMapper {
         this.paramName = parameterSymbol.getName().orElse("");
         this.location = parameterSymbol.getLocation().orElse(null);
         this.paramType = parameterSymbol.typeDescriptor();
+        this.content = getValidatedContent();
     }
 
     @Override
     public void setExample() {
         try {
-            Content content = getValidatedContent();
             if (Objects.isNull(content)) {
                 return;
             }
@@ -121,7 +122,6 @@ public class RequestExampleMapper extends ExamplesMapper {
             if (exampleValues.isEmpty()) {
                 return;
             }
-            Content content = getValidatedContent();
             if (Objects.isNull(content)) {
                 return;
             }
