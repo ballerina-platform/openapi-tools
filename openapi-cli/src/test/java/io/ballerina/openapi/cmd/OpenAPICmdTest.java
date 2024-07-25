@@ -500,6 +500,163 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
     }
 
+    @Test(description = "Test openapi service generation for single file option")
+    public void testSingleFileServiceGeneration() throws IOException {
+        Path jiraYaml = resourceDir.resolve(Paths.get("jira_openapi.yaml"));
+        String[] args = {"--input", jiraYaml.toString(), "-o", this.tmpDir.toString(), "--mode",
+                "service", "--single-file"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        try {
+            cmd.execute();
+        } catch (BLauncherException e) {
+        }
+        Path expectedFile = resourceDir.resolve(Paths.get("expected_gen", "jira_openapi_service.bal"));
+        String expectedFileContent = "";
+        try (Stream<String> expectedLines = Files.lines(expectedFile)) {
+            expectedFileContent = expectedLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+            String generatedFile = "";
+            try (Stream<String> generatedLines = Files.lines(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+                generatedFile = generatedLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
+            expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
+            if (expectedFileContent.equals(generatedFile)) {
+                Assert.assertTrue(true);
+                deleteGeneratedFiles(false);
+            } else {
+                Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
+                deleteGeneratedFiles(false);
+            }
+        } else {
+            Assert.fail("Service generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test(description = "Test openapi service generation for single file option with service type")
+    public void testSingleFileServiceGenerationWithServiceType() throws IOException {
+        Path jiraYaml = resourceDir.resolve(Paths.get("jira_openapi.yaml"));
+        String[] args = {"--input", jiraYaml.toString(), "-o", this.tmpDir.toString(), "--mode", "service",
+                "--single-file", "--with-service-type"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        try {
+            cmd.execute();
+        } catch (BLauncherException e) {
+        }
+        Path expectedFile = resourceDir.resolve(Paths.get("expected_gen", "jira_openapi_service_with_type.bal"));
+        String expectedFileContent = "";
+        try (Stream<String> expectedLines = Files.lines(expectedFile)) {
+            expectedFileContent = expectedLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+            String generatedFile = "";
+            try (Stream<String> generatedLines = Files.lines(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+                generatedFile = generatedLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
+            expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
+            if (expectedFileContent.equals(generatedFile)) {
+                Assert.assertTrue(true);
+                deleteGeneratedFiles(false);
+            } else {
+                Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
+                deleteGeneratedFiles(false);
+            }
+        } else {
+            Assert.fail("Service generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test(description = "Test openapi service generation for single file option with service type without data binding")
+    public void testSingleFileServiceGenerationWithoutDatabinding() throws IOException {
+        Path jiraYaml = resourceDir.resolve(Paths.get("jira_openapi.yaml"));
+        String[] args = {"--input", jiraYaml.toString(), "-o", this.tmpDir.toString(), "--mode", "service",
+                "--single-file", "--with-service-type", "--without-data-binding"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        try {
+            cmd.execute();
+        } catch (BLauncherException e) {
+        }
+        Path expectedFile = resourceDir.resolve(Paths.get("expected_gen",
+                "jira_openapi_service_with_type_without_data_binding.bal"));
+        String expectedFileContent = "";
+        try (Stream<String> expectedLines = Files.lines(expectedFile)) {
+            expectedFileContent = expectedLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+            String generatedFile = "";
+            try (Stream<String> generatedLines = Files.lines(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+                generatedFile = generatedLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
+            expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
+            if (expectedFileContent.equals(generatedFile)) {
+                Assert.assertTrue(true);
+                deleteGeneratedFiles(false);
+            } else {
+                Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
+                deleteGeneratedFiles(false);
+            }
+        } else {
+            Assert.fail("Service generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test(description = "Test openapi client generation for single file option")
+    public void testSingleFileClientGeneration() throws IOException {
+        Path jiraYaml = resourceDir.resolve(Paths.get("jira_openapi.yaml"));
+        String[] args = {"--input", jiraYaml.toString(), "-o", this.tmpDir.toString(), "--mode", "client",
+                "--single-file"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        try {
+            cmd.execute();
+        } catch (BLauncherException e) {
+        }
+        Path expectedFile = resourceDir.resolve(Paths.get("expected_gen", "jira_openapi_client.bal"));
+        String expectedFileContent = "";
+        try (Stream<String> expectedLines = Files.lines(expectedFile)) {
+            expectedFileContent = expectedLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("client.bal"))) {
+            String generatedFile = "";
+            try (Stream<String> generatedLines = Files.lines(this.tmpDir.resolve("client.bal"))) {
+                generatedFile = generatedLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
+            expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
+            if (expectedFileContent.equals(generatedFile)) {
+                Assert.assertTrue(true);
+                deleteGeneratedFiles(false);
+            } else {
+                Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
+                deleteGeneratedFiles(false);
+            }
+        } else {
+            Assert.fail("Service generation failed. : " + readOutput(true));
+        }
+    }
+
     @Test(description = "Test Ballerina service generation with service type")
     public void testServiceTypeGeneration() throws IOException {
         Path projectDir = resourceDir.resolve("expected_gen").resolve("ballerina_project");

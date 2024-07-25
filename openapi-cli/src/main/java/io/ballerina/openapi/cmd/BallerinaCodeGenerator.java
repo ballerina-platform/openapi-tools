@@ -522,9 +522,9 @@ public class BallerinaCodeGenerator {
                 syntaxTree = TypeHandler.getInstance().appendTypeSyntaxTree(syntaxTree);
             }
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
-                    GeneratorConstants.TYPE_FILE_NAME,
+                    oasServiceMetadata.getSrcFile(),
                     (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
-                            oasServiceMetadata.getLicenseHeader()) + Formatter.format(syntaxTree.toSourceCode())));
+                            oasServiceMetadata.getLicenseHeader()) + Formatter.format(syntaxTree).toSourceCode()));
         } else {
             sourceFiles = serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
             if (!oasServiceMetadata.generateWithoutDataBinding()) {
