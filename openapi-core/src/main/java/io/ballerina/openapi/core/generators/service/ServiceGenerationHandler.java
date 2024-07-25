@@ -72,8 +72,8 @@ public class ServiceGenerationHandler {
                         .generateTypeSyntaxTree()).toSourceCode();
                 if (!schemaSyntaxTree.isBlank()) {
                     sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, oasServiceMetadata.getSrcPackage(),
-                            TYPE_FILE_NAME, oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
-                            oasServiceMetadata.getLicenseHeader() + schemaSyntaxTree));
+                            TYPE_FILE_NAME, (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
+                            oasServiceMetadata.getLicenseHeader()) + schemaSyntaxTree));
                 }
             }
         }
