@@ -185,8 +185,7 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                         setResponseExamples(resMetaInfoBuilder, objectMap, ballerinFilePath, expressValue.location());
                     } catch (JsonProcessingException e) {
                         DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_130;
-                        ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, mapNode.location(),
-                                e.getOriginalMessage());
+                        ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, mapNode.location());
                         diagnostics.add(diagnostic);
                     }
                 } else if (fName.equals(REQUEST_BODY_ATTRIBUTE)) {
@@ -202,8 +201,7 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                         setRequestExamples(resMetaInfoBuilder, objectMap, ballerinFilePath, expressValue.location());
                     } catch (JsonProcessingException e) {
                         DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_130;
-                        ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, mapNode.location(),
-                                e.getOriginalMessage());
+                        ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, mapNode.location());
                         diagnostics.add(diagnostic);
                     }
                 }
@@ -301,8 +299,7 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                                     modifiedExample.put(exampleName, valueMap);
                                 } catch (IOException e) {
                                     DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_130;
-                                    ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, location,
-                                            e.toString());
+                                    ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, location);
                                     diagnostics.add(diagnostic);
                                 }
                             }
