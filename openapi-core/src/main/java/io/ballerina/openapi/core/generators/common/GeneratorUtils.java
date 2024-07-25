@@ -180,13 +180,18 @@ public class GeneratorUtils {
     public static final MinutiaeList SINGLE_WS_MINUTIAE = getSingleWSMinutiae();
     public static final List<String> BAL_KEYWORDS = SyntaxInfo.keywords();
     public static final MinutiaeList SINGLE_END_OF_LINE_MINUTIAE = getEndOfLineMinutiae();
-    private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
     private static final PrintStream OUT_STREAM = System.err;
-    private static final HashMap<String, Integer> recordCountMap = new HashMap<>();
+    private static HashMap<String, Integer> recordCountMap;
 
     private static final List<String> primitiveTypeList =
             new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
                     GeneratorConstants.STRING, GeneratorConstants.BOOLEAN));
+
+    // This is needs to be initialized at every CLI run. Otherwise, the record type details are persisted
+    // for a second invocation as well. Todo: Need to update this with a different appraoch.
+    public static void initializeRecordCountMap() {
+        recordCountMap = new HashMap<>();
+    }
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
 

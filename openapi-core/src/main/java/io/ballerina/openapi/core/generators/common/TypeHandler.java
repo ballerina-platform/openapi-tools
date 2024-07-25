@@ -92,6 +92,7 @@ public class TypeHandler {
         typeHandlerInstance = new TypeHandler();
         ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI, isNullable);
         constraintDiagnostics = new ArrayList<>();
+        GeneratorUtils.initializeRecordCountMap();
     }
 
     public static TypeHandler getInstance() {

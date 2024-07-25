@@ -527,7 +527,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             }
             generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
             expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
-            deleteGeneratedFile("jira_openapi_service.bal", false);
+            deleteGeneratedFiles("jira_openapi_service.bal", false);
             if (!expectedFileContent.equals(generatedFile)) {
                 Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
             }
@@ -563,7 +563,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             }
             generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
             expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
-            deleteGeneratedFile("jira_openapi_service.bal", false);
+            deleteGeneratedFiles("jira_openapi_service.bal", false);
             if (!expectedFileContent.equals(generatedFile)) {
                 Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
             }
@@ -600,7 +600,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             }
             generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
             expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
-            deleteGeneratedFile("jira_openapi_service.bal", false);
+            deleteGeneratedFiles("jira_openapi_service.bal", false);
             if (!expectedFileContent.equals(generatedFile)) {
                 Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
             }
@@ -636,7 +636,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             }
             generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
             expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
-            deleteGeneratedFile("", false);
+            deleteGeneratedFiles("", false);
             if (!expectedFileContent.equals(generatedFile)) {
                 Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
             }
@@ -762,7 +762,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         FileUtils.deleteDirectory(testDir);
     }
 
-    private void deleteGeneratedFile(String filename, boolean isConfigGenerated) throws IOException {
+    private void deleteGeneratedFiles(String filename, boolean isConfigGenerated) throws IOException {
         File serviceFile = new File(this.tmpDir.resolve(filename).toString());
         File clientFile = new File(this.tmpDir.resolve("client.bal").toString());
         File testFile = new File(this.tmpDir.resolve("tests/test.bal").toString());
