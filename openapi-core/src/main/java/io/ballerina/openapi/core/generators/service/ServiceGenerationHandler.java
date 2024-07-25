@@ -19,7 +19,6 @@
 package io.ballerina.openapi.core.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
@@ -32,7 +31,6 @@ import java.util.List;
 
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_FILE_HEADER;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
-import static io.ballerina.openapi.core.generators.type.GeneratorConstants.TYPE_FILE_NAME;
 
 public class ServiceGenerationHandler {
 
