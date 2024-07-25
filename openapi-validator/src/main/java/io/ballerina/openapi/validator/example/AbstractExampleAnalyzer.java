@@ -40,6 +40,8 @@ import static io.ballerina.openapi.validator.diagnostic.OpenAPIDiagnosticCodes.O
 import static io.ballerina.openapi.validator.diagnostic.OpenAPIDiagnosticCodes.OPENAPI_101;
 import static io.ballerina.openapi.validator.diagnostic.OpenAPIDiagnosticCodes.OPENAPI_102;
 import static io.ballerina.openapi.validator.diagnostic.OpenAPIDiagnosticCodes.OPENAPI_103;
+import static io.ballerina.openapi.validator.diagnostic.OpenAPIDiagnosticCodes.OPENAPI_104;
+import static io.ballerina.openapi.validator.diagnostic.OpenAPIDiagnosticCodes.OPENAPI_105;
 
 /**
  * Abstract class for example analyzers.
@@ -48,8 +50,8 @@ import static io.ballerina.openapi.validator.diagnostic.OpenAPIDiagnosticCodes.O
  */
 public abstract class AbstractExampleAnalyzer implements AnalysisTask<SyntaxNodeAnalysisContext> {
     void validateExampleAnnotationUsage(SyntaxNodeAnalysisContext context, TypeSymbol typeSymbol,
-                                               List<AnnotationAttachmentSymbol> annotations,
-                                               SemanticModel semanticModel) {
+                                        List<AnnotationAttachmentSymbol> annotations,
+                                        SemanticModel semanticModel) {
         Optional<AnnotationAttachmentSymbol> example = getOpenAPIExampleAnnotation(annotations, semanticModel);
         if (example.isEmpty() || !example.get().isConstAnnotation() ||
                 example.get().attachmentValue().isEmpty()) {
@@ -59,6 +61,13 @@ public abstract class AbstractExampleAnalyzer implements AnalysisTask<SyntaxNode
         if (!typeSymbol.subtypeOf(semanticModel.types().ANYDATA)) {
             context.reportDiagnostic(OPENAPI_100.getDiagnosticCode(example.get().getLocation().orElse(null)));
         }
+    }
+
+    void invalidateExampleAnnotationUsage(SyntaxNodeAnalysisContext context, SemanticModel semanticModel,
+                                          List<AnnotationAttachmentSymbol> annotations) {
+        Optional<AnnotationAttachmentSymbol> example = getOpenAPIExampleAnnotation(annotations, semanticModel);
+        example.ifPresent(annotationAttachmentSymbol -> context.reportDiagnostic(
+                OPENAPI_104.getDiagnosticCode(annotationAttachmentSymbol.getLocation().orElse(null))));
     }
 
     private Optional<AnnotationAttachmentSymbol> getOpenAPIExampleAnnotation(
@@ -80,6 +89,19 @@ public abstract class AbstractExampleAnalyzer implements AnalysisTask<SyntaxNode
         if (!typeSymbol.subtypeOf(semanticModel.types().ANYDATA)) {
             context.reportDiagnostic(OPENAPI_101.getDiagnosticCode(examples.get().getLocation().orElse(null)));
         }
+    }
+
+    void invalidateBothExampleAnnotations(SyntaxNodeAnalysisContext context, SemanticModel semanticModel,
+                                         List<AnnotationAttachmentSymbol> annotations) {
+        invalidateExampleAnnotationUsage(context, semanticModel, annotations);
+        invalidateExamplesAnnotationUsage(context, semanticModel, annotations);
+    }
+
+    void invalidateExamplesAnnotationUsage(SyntaxNodeAnalysisContext context, SemanticModel semanticModel,
+                                          List<AnnotationAttachmentSymbol> annotations) {
+        Optional<AnnotationAttachmentSymbol> examples = getOpenAPIExamplesAnnotation(annotations, semanticModel);
+        examples.ifPresent(annotationAttachmentSymbol -> context.reportDiagnostic(
+                OPENAPI_105.getDiagnosticCode(annotationAttachmentSymbol.getLocation().orElse(null))));
     }
 
     private Optional<AnnotationAttachmentSymbol> getOpenAPIExamplesAnnotation(

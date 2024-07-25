@@ -38,6 +38,8 @@ public class Constants {
     public static final String EMPTY = "";
     public static final String EXAMPLE_VALUE = "ExampleValue";
     public static final String EXAMPLE_VALUES = "ExampleValues";
+    public static final String HTTP_SERVICE_TYPE = "Service";
+    public static final String SERVICE_CONTRACT_TYPE = "ServiceContract";
     public static final String FALSE = "false";
     public static final String EMBED = "embed";
     public static final String JSON = ".json";
