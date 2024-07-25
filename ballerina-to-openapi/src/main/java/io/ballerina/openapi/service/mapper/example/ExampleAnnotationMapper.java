@@ -28,15 +28,15 @@ import java.util.Optional;
 import static io.ballerina.openapi.service.mapper.example.CommonUtils.extractOpenApiExampleValue;
 
 /**
- * This {@link ExampleMapper} class represents the abstraction of OpenAPI example mapper.
+ * This {@link ExampleAnnotationMapper} class represents the abstraction of OpenAPI example mapper.
  *
  * @since 2.1.0
  */
-public abstract class ExampleMapper {
+public abstract class ExampleAnnotationMapper {
 
     private final SemanticModel semanticModel;
 
-    protected ExampleMapper(SemanticModel semanticModel) {
+    protected ExampleAnnotationMapper(SemanticModel semanticModel) {
         this.semanticModel = semanticModel;
     }
 

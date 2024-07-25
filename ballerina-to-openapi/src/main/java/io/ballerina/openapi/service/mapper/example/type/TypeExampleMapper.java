@@ -25,7 +25,7 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.example.ExampleMapper;
+import io.ballerina.openapi.service.mapper.example.ExampleAnnotationMapper;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -39,7 +39,7 @@ import static io.ballerina.openapi.service.mapper.example.CommonUtils.setExample
  *
  * @since 2.1.0
  */
-public class TypeExampleMapper extends ExampleMapper {
+public class TypeExampleMapper extends ExampleAnnotationMapper {
 
     List<AnnotationAttachmentSymbol> annotations;
     Schema typeSchema;

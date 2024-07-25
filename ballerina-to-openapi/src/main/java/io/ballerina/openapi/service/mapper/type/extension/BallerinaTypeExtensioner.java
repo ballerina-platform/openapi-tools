@@ -40,7 +40,7 @@ public final class BallerinaTypeExtensioner {
     private BallerinaTypeExtensioner() {
     }
 
-    public static void  addExtension(Schema schema, TypeSymbol typeSymbol) {
+    public static void addExtension(Schema schema, TypeSymbol typeSymbol) {
         getBallerinaPackage(typeSymbol).ifPresent(
                 ballerinaPackage -> schema.addExtension(X_BALLERINA_TYPE, ballerinaPackage));
     }

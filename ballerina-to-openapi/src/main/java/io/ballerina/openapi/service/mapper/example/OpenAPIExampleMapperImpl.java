@@ -131,13 +131,14 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
 
         TypeDefinitionSymbol typeDefSymbol = ballerinaType.get();
         // Map examples from types
-        ExampleMapper typeExampleMapper = new TypeExampleMapper(typeDefSymbol, schema, semanticModel, diagnostics);
+        ExampleAnnotationMapper typeExampleMapper = new TypeExampleMapper(typeDefSymbol, schema, semanticModel,
+                diagnostics);
         typeExampleMapper.setExample();
 
         if (typeDefSymbol.typeDescriptor() instanceof RecordTypeSymbol recordTypeSymbol
                 && schema instanceof ObjectSchema objectSchema) {
             // Map examples from record fields
-            ExampleMapper recordFieldExampleMapper = new RecordFieldExampleMapper(name, recordTypeSymbol,
+            ExampleAnnotationMapper recordFieldExampleMapper = new RecordFieldExampleMapper(name, recordTypeSymbol,
                     objectSchema, semanticModel, diagnostics);
             recordFieldExampleMapper.setExample();
         }
@@ -188,7 +189,7 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
         switch (parameterType) {
             case PAYLOAD:
                 RequestBody requestBody = operation.getRequestBody();
-                ExamplesMapper reqExampleMapper = new RequestExampleMapper(parameterSymbol, requestBody,
+                ExamplesAnnotationMapper reqExampleMapper = new RequestExampleMapper(parameterSymbol, requestBody,
                         semanticModel, diagnostics);
                 reqExampleMapper.setExample();
                 reqExampleMapper.setExamples();
@@ -201,7 +202,7 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
                 if (queryParam.isEmpty()) {
                     return;
                 }
-                ExamplesMapper queryExampleMapper = new DefaultParamExampleMapper(QUERY, parameterSymbol,
+                ExamplesAnnotationMapper queryExampleMapper = new DefaultParamExampleMapper(QUERY, parameterSymbol,
                         queryParam.get(), semanticModel, diagnostics);
                 queryExampleMapper.setExample();
                 queryExampleMapper.setExamples();
@@ -215,7 +216,7 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
                 if (headerParam.isEmpty()) {
                     return;
                 }
-                ExamplesMapper headerExampleMapper = new DefaultParamExampleMapper(HEADER, parameterSymbol,
+                ExamplesAnnotationMapper headerExampleMapper = new DefaultParamExampleMapper(HEADER, parameterSymbol,
                         headerParam.get(), semanticModel, diagnostics);
                 headerExampleMapper.setExample();
                 headerExampleMapper.setExamples();
@@ -240,7 +241,7 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
             return;
         }
 
-        ExamplesMapper pathExampleMapper = new PathExampleMapper(parameterSymbol, pathParam.get(),
+        ExamplesAnnotationMapper pathExampleMapper = new PathExampleMapper(parameterSymbol, pathParam.get(),
                 semanticModel, diagnostics);
         pathExampleMapper.setExample();
         pathExampleMapper.setExamples();

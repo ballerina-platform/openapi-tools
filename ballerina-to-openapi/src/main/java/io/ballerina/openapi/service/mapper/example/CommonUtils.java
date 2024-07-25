@@ -182,8 +182,8 @@ public final class CommonUtils {
                                                        List<OpenAPIMapperDiagnostic> diagnostics) {
         if (type instanceof RecordTypeSymbol recordType && Objects.nonNull(schema) &&
                 schema instanceof ObjectSchema objectSchema) {
-            ExampleMapper recordExampleMapper = new RecordFieldExampleMapper(INLINE_REC, recordType, objectSchema,
-                    semanticModel, diagnostics);
+            ExampleAnnotationMapper recordExampleMapper = new RecordFieldExampleMapper(INLINE_REC, recordType,
+                    objectSchema, semanticModel, diagnostics);
             recordExampleMapper.setExample();
         }
     }

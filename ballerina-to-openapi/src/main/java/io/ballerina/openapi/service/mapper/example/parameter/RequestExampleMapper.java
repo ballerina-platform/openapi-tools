@@ -26,7 +26,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.example.CommonUtils;
-import io.ballerina.openapi.service.mapper.example.ExamplesMapper;
+import io.ballerina.openapi.service.mapper.example.ExamplesAnnotationMapper;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.Content;
@@ -49,7 +49,7 @@ import static io.ballerina.openapi.service.mapper.Constants.REQUEST;
  *
  * @since 2.1.0
  */
-public class RequestExampleMapper extends ExamplesMapper {
+public class RequestExampleMapper extends ExamplesAnnotationMapper {
 
     RequestBody requestBody;
     List<OpenAPIMapperDiagnostic> diagnostics;
