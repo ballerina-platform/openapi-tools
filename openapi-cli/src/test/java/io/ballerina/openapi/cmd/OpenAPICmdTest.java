@@ -567,7 +567,6 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
             expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
             if (expectedFileContent.equals(generatedFile)) {
-                Assert.assertTrue(true);
                 deleteGeneratedFiles(false);
             } else {
                 Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
@@ -607,7 +606,6 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
             expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
             if (expectedFileContent.equals(generatedFile)) {
-                Assert.assertTrue(true);
                 deleteGeneratedFiles(false);
             } else {
                 Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
@@ -646,7 +644,6 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
             expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
             if (expectedFileContent.equals(generatedFile)) {
-                Assert.assertTrue(true);
                 deleteGeneratedFiles(false);
             } else {
                 Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
