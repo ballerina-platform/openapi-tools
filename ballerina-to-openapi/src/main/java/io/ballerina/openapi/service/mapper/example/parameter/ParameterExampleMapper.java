@@ -53,9 +53,9 @@ public abstract class ParameterExampleMapper extends ExamplesMapper {
     String paramTypeName;
     TypeSymbol paramType;
 
-    protected ParameterExampleMapper(List<AnnotationAttachmentSymbol> annotations, Parameter parameterSchema,
-                                     SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics,
-                                     String paramName, Location location, String paramTypeName, TypeSymbol paramType) {
+    ParameterExampleMapper(List<AnnotationAttachmentSymbol> annotations, Parameter parameterSchema,
+                           SemanticModel semanticModel, List<OpenAPIMapperDiagnostic> diagnostics,
+                           String paramName, Location location, String paramTypeName, TypeSymbol paramType) {
         super(semanticModel);
         this.parameterSchema = parameterSchema;
         this.annotations = annotations;
