@@ -24,5 +24,6 @@ module io.ballerina.openapi.validator {
     exports io.ballerina.openapi.validator;
     exports io.ballerina.openapi.validator.error;
     exports io.ballerina.openapi.validator.model;
+    exports io.ballerina.openapi.validator.example;
 }
 
