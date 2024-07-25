@@ -160,6 +160,12 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
                 "project_openapi_info/result.yaml");
     }
 
+    @Test(description = "Service with OpenAPI example and examples annotations")
+    public void openAPIExampleAnnotations() throws IOException, InterruptedException {
+        executeCommand("project_openapi_examples/service_file.bal", "api_openapi.yaml",
+                "project_openapi_examples/result.yaml");
+    }
+
     @AfterClass
     public void cleanUp() throws IOException {
         TestUtil.cleanDistribution();

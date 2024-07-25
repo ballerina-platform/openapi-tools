@@ -36,6 +36,7 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
@@ -43,8 +44,10 @@ import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.ObjectTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
@@ -77,6 +80,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -426,6 +430,48 @@ public class MapperCommonUtils {
     public static String unescapeIdentifier(String parameterName) {
         String unescapedParamName = IdentifierUtils.unescapeBallerina(parameterName);
         return unescapedParamName.replaceAll("\\\\", "").replaceAll("'", "");
+    }
+
+    public static String getHeaderName(ParameterNode parameterNode, String defaultName) {
+        NodeList<AnnotationNode> annotations = null;
+        if (parameterNode instanceof RequiredParameterNode requiredParameterNode) {
+            annotations = requiredParameterNode.annotations();
+        } else if (parameterNode instanceof DefaultableParameterNode defaultableParameterNode) {
+            annotations = defaultableParameterNode.annotations();
+        }
+        if (Objects.isNull(annotations) || annotations.isEmpty()) {
+            return defaultName;
+        }
+        for (AnnotationNode annotation : annotations) {
+            if (annotation.annotReference().toString().trim().equals("http:Header")) {
+                String valueExpression = getNameFromHeaderAnnotation(annotation);
+                if (valueExpression != null) {
+                    return valueExpression;
+                }
+            }
+        }
+        return defaultName;
+    }
+
+    private static String getNameFromHeaderAnnotation(AnnotationNode annotation) {
+        Optional<MappingConstructorExpressionNode> annotationRecord = annotation.annotValue();
+        if (annotationRecord.isEmpty()) {
+            return null;
+        }
+        SeparatedNodeList<MappingFieldNode> fields = annotationRecord.get().fields();
+        for (MappingFieldNode field : fields) {
+            if (field instanceof SpecificFieldNode specificFieldNode &&
+                    specificFieldNode.fieldName().toString().trim().equals("name")) {
+                Optional<ExpressionNode> expressionNode = specificFieldNode.valueExpr();
+                if (expressionNode.isPresent()) {
+                    ExpressionNode valueExpression = expressionNode.get();
+                    if (valueExpression.kind().equals(STRING_LITERAL)) {
+                        return valueExpression.toString().trim().replaceAll("\"", "");
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     public static String getTypeDescription(TypeReferenceTypeSymbol typeSymbol) {

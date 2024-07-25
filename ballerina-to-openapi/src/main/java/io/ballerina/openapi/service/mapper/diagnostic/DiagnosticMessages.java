@@ -94,16 +94,26 @@ public enum DiagnosticMessages {
             " example `%s`", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_130("OAS_CONVERTOR_130", "Generated OpenAPI definition does not contain the example" +
             " details since the JSON value provided for the example has parser errors", DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_131("OAS_CONVERTOR_131", "`%s` example can not have a blank path", DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_132("OAS_CONVERTOR_132", "Generated OpenAPI definition for the service contract type: " +
+    OAS_CONVERTOR_131("OAS_CONVERTOR_131", "`%s` example can not have a blank path",
+            DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_132("OAS_CONVERTOR_132", "Generated OpenAPI definition does not contain the example " +
+            "for type: `%s`, since the example value has parser errors", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_133("OAS_CONVERTOR_133", "Generated OpenAPI definition does not contain the example " +
+            "for record field: `%s.%s`, since the example value has parser errors", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_134("OAS_CONVERTOR_134", "Generated OpenAPI definition does not contain the `%s` for" +
+            " `%s` parameter: `%s`, since the example value(s) has parser errors", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_135("OAS_CONVERTOR_135", "Example skipped for request parameter: `%s`, since the request payload " +
+            "type implies more than one content-type", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_136("OAS_CONVERTOR_136", "`%s` example can not have a blank path", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_137("OAS_CONVERTOR_137", "Generated OpenAPI definition for the service contract type: " +
             "'%s' has errors", DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_133("OAS_CONVERTOR_133", "Failed to obtain the OpenAPI definition from the service contract" +
+    OAS_CONVERTOR_138("OAS_CONVERTOR_138", "Failed to obtain the OpenAPI definition from the service contract" +
             " type: '%s'", DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_134("OAS_CONVERTOR_134", "Failed to find the package to obtain the OpenAPI definition from the " +
+    OAS_CONVERTOR_139("OAS_CONVERTOR_139", "Failed to find the package to obtain the OpenAPI definition from the " +
             "service contract type: '%s'", DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_135("OAS_CONVERTOR_135", "Failed to find the OpenAPI definition resource for the " +
+    OAS_CONVERTOR_140("OAS_CONVERTOR_140", "Failed to find the OpenAPI definition resource for the " +
             "service contract type: '%s'", DiagnosticSeverity.ERROR);
-  
+
     private final String code;
     private final String description;
     private final DiagnosticSeverity severity;

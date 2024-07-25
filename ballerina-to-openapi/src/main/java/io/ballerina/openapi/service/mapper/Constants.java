@@ -35,6 +35,7 @@ public final class Constants {
     public static final String DOUBLE = "double";
     public static final String HTTP_PAYLOAD = "http:Payload";
     public static final String HTTP_SERVICE_CONFIG = "http:ServiceConfig";
+    public static final String OPENAPI = "openapi";
     public static final String HTTP = "http";
     public static final String BALLERINA = "ballerina";
     public static final String EMPTY = "";
@@ -70,6 +71,14 @@ public final class Constants {
     public static final String MEDIA_TYPE = "mediaType";
     public static final String REGEX_INTERPOLATION_PATTERN = "^(?!.*\\$\\{).+$";
     public static final String DATE_CONSTRAINT_ANNOTATION = "constraint:Date";
+    public static final String PATH = "path";
+    public static final String QUERY = "query";
+    public static final String HEADER = "header";
+    public static final String HTTP_PAYLOAD_TYPE = "HttpPayload";
+    public static final String HTTP_QUERY_TYPE = "HttpQuery";
+    public static final String HTTP_HEADER_TYPE = "HttpHeader";
+    public static final String EXAMPLE = "example";
+    public static final String REQUEST = "request";
 
     private Constants() {
 
