@@ -214,7 +214,7 @@ public class ReturnTypeValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertEquals(errors.length, 1);
-        String typeMismatch = "ERROR [record.bal:(13:5,17:6)] could not find OpenAPI object schema field 'type' in" +
+        String typeMismatch = "ERROR [record.bal:(4:10,7:2)] could not find OpenAPI object schema field 'type' in" +
                 " 'Pet' the Ballerina record.";
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }

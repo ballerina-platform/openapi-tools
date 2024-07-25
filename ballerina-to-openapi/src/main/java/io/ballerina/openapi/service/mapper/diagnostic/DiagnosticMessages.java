@@ -87,8 +87,15 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_126("OAS_CONVERTOR_126", "Generated OpenAPI definition does not contain the response" +
             "/request parameter information from the interceptor pipeline. Cause: %s", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_127("OAS_CONVERTOR_127", "Generated OpenAPI definition does not contain the request" +
-            " parameter information from the interceptor pipeline. Cause: %s", DiagnosticSeverity.WARNING),;
-
+            " parameter information from the interceptor pipeline. Cause: %s", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_128("OAS_CONVERTOR_128", "Given example path `%s` is not exist, therefore " +
+            "generated yaml does not contain example for `%s` ", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_129("OAS_CONVERTOR_129", "Given example path `%s` should be JSON file for" +
+            " example `%s`", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_130("OAS_CONVERTOR_130", "Generated OpenAPI definition does not contain the example" +
+            " details since the JSON value provided for the example has parser errors", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_131("OAS_CONVERTOR_131", "`%s` example can not have a blank path",
+            DiagnosticSeverity.WARNING);
     private final String code;
     private final String description;
     private final DiagnosticSeverity severity;
