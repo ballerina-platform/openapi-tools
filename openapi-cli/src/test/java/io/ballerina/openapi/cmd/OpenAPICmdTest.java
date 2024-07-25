@@ -900,7 +900,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path packagePath = resourceDir.resolve(Paths.get("cmd/bal-task-client"));
         String[] addArgs = {"--input", "petstore.yaml", "-p", packagePath.toString(),
                 "--module", "delivery", "--nullable", "--license", "license.txt", "--mode", "client",
-                "--client-methods", "resource", "--status-code-binding"};
+                "--client-methods", "resource", "--status-code-binding", "--single-file"};
         Add add = new Add(printStream,  false);
         new CommandLine(add).parseArgs(addArgs);
         add.execute();
@@ -914,7 +914,8 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "options.nullable = true" + newLine +
                 "options.clientMethods = \"resource\"" + newLine +
                 "options.licensePath = \"license.txt\"" + newLine +
-                "options.statusCodeBinding = true" + newLine;
+                "options.statusCodeBinding = true" + newLine +
+                "options.singleFile = true";
         Assert.assertTrue(tomlContent.contains(generatedTool));
     }
 

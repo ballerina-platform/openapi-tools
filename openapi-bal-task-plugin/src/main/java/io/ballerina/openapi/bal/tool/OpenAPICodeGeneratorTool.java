@@ -83,6 +83,7 @@ import static io.ballerina.openapi.bal.tool.Constants.MOCK;
 import static io.ballerina.openapi.bal.tool.Constants.MODE;
 import static io.ballerina.openapi.bal.tool.Constants.NULLABLE;
 import static io.ballerina.openapi.bal.tool.Constants.OPERATIONS;
+import static io.ballerina.openapi.bal.tool.Constants.SINGLE_FILE;
 import static io.ballerina.openapi.bal.tool.Constants.STATUS_CODE_BINDING;
 import static io.ballerina.openapi.bal.tool.Constants.TAGS;
 import static io.ballerina.openapi.bal.tool.Constants.TRUE;
@@ -144,7 +145,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                     return;
                 }
                 if (options.containsKey(MODE)) {
-                    String value = (String) options.get(MODE).value().toString().trim();
+                    String value = options.get(MODE).value().toString().trim();
                     handleCodeGenerationMode(toolContext, codeGeneratorConfig, location, value);
                 } else {
                     // Create client for the given OAS
@@ -301,6 +302,9 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                     break;
                 case MOCK:
                     clientMetaDataBuilder.withMock(value.contains(TRUE));
+                    break;
+                case SINGLE_FILE:
+                    clientMetaDataBuilder.withSingleFile(value.contains(TRUE));
                     break;
                 default:
                     break;
@@ -487,8 +491,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         TypeHandler.createInstance(oasClientConfig.getOpenAPI(), oasClientConfig.isNullable());
         String licenseContent = oasClientConfig.getLicense();
         BallerinaClientGenerator ballerinaClientGenerator = getClientGenerator(oasClientConfig);
-        String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
-
+        io.ballerina.compiler.syntax.tree.SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<ClientDiagnostic> clientDiagnostic = ballerinaClientGenerator.getDiagnostics();
 
         for (ClientDiagnostic diagnostic : clientDiagnostic) {
@@ -501,32 +504,38 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
             throw new ClientException("Error occurred while generating client");
         }
 
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
-                licenseContent == null || licenseContent.isBlank() ? mainContent :
-                        licenseContent + System.lineSeparator() + mainContent));
-        String utilContent = Formatter.format(
-                ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
-
-        if (!utilContent.isBlank()) {
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, null, UTIL_FILE_NAME,
-                    licenseContent == null || licenseContent.isBlank() ? utilContent :
-                            licenseContent + System.lineSeparator() + utilContent));
-        }
-
         List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
                 .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
 
-        io.ballerina.compiler.syntax.tree.SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().
-                generateTypeSyntaxTree();
-        String schemaContent = Formatter.format(schemaSyntaxTree).toString();
+        String licenseHeader = licenseContent == null || licenseContent.isBlank() ? "" :
+                licenseContent + System.lineSeparator();
 
-        if (!schemaContent.isBlank()) {
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, null, TYPE_FILE_NAME,
-                    licenseContent == null || licenseContent.isBlank() ? schemaContent :
-                            licenseContent + System.lineSeparator() + schemaContent));
+        if (oasClientConfig.singleFile()) {
+            syntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().appendUtilSyntaxTree(syntaxTree);
+            syntaxTree = TypeHandler.getInstance().appendTypeSyntaxTree(syntaxTree);
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null,
+                    CLIENT_FILE_NAME, licenseHeader + Formatter.format(syntaxTree).toSourceCode()));
+        } else {
+            String mainContent = Formatter.format(syntaxTree).toSourceCode();
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
+                    licenseHeader + mainContent));
+            String utilContent = Formatter.format(
+                    ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
+            if (!utilContent.isBlank()) {
+                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, null, UTIL_FILE_NAME,
+                        licenseHeader + utilContent));
+            }
+            // Generate ballerina records to represent schemas.
+            io.ballerina.compiler.syntax.tree.SyntaxTree schemaSyntaxTree = TypeHandler.getInstance()
+                    .generateTypeSyntaxTree();
+            String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
+            if (!schemaContent.isBlank()) {
+                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, null, TYPE_FILE_NAME,
+                        licenseHeader + schemaContent));
+            }
         }
 
         return sourceFiles;

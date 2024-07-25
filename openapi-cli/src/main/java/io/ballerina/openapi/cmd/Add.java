@@ -259,6 +259,10 @@ public class Add implements BLauncherCmd {
             moduleMembers = moduleMembers.add(SampleNodeGenerator.createBooleanKV("options.mock",
                     optionsBuilder.getMock(), null));
         }
+        if (optionsBuilder.getSingleFile()) {
+            moduleMembers = moduleMembers.add(SampleNodeGenerator.createBooleanKV("options.singleFile",
+                    optionsBuilder.getSingleFile(), null));
+        }
         moduleMembers = CmdUtils.addNewLine(moduleMembers, 2);
         return moduleMembers;
     }
