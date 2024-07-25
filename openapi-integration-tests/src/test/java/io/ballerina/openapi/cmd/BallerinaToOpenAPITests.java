@@ -146,6 +146,13 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
                 "project_non_openapi_annotation_without_base_path/result.yaml");
     }
 
+    @Test(description = "Service is with non openapi annotation and without a base path")
+    public void exampleMapping() throws IOException, InterruptedException {
+        executeCommand("examples/response_example/service.bal",
+                "convert_openapi.yaml",
+                "examples/response_example/result.yaml");
+    }
+
     //TODO enable after resolving dependency issue
     @Test(description = "Service is with openapi annotation include all oas infor section details", enabled = false)
     public void openAPInForSectionTest() throws IOException, InterruptedException {
