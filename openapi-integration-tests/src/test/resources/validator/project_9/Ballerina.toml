@@ -1,0 +1,4 @@
+[package]
+org= "ballerina"
+name= "service"
+version= "2.0.0"

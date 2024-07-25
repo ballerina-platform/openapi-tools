@@ -32,11 +32,13 @@ import io.ballerina.openapi.service.mapper.constraint.ConstraintMapper;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.example.OpenAPIExampleMapper;
 import io.ballerina.openapi.service.mapper.hateoas.HateoasMapper;
 import io.ballerina.openapi.service.mapper.metainfo.MetaInfoMapper;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
+import io.ballerina.openapi.service.mapper.type.extension.BallerinaTypeExtensioner;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Project;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -194,7 +196,7 @@ public final class ServiceToOpenAPIMapper {
             List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
             if (openapi.getPaths() == null) {
                 ServiceMapperFactory serviceMapperFactory = new ServiceMapperFactory(openapi, semanticModel,
-                        moduleMemberVisitor, diagnostics, serviceDefinition);
+                        moduleMemberVisitor, diagnostics, serviceDefinition, true);
 
                 ServersMapper serversMapperImpl = serviceMapperFactory.getServersMapper(listeners, serviceDefinition);
                 serversMapperImpl.setServers();
@@ -211,9 +213,14 @@ public final class ServiceToOpenAPIMapper {
                 metaInfoMapper.setResourceMetaData(serviceDefinition, openapi, ballerinaFilePath);
                 diagnostics.addAll(metaInfoMapper.getDiagnostics());
 
+                OpenAPIExampleMapper exampleMapper = serviceMapperFactory.getExampleMapper();
+                exampleMapper.setExamples();
+
                 if (openapi.getComponents().getSchemas().isEmpty()) {
                     openapi.setComponents(null);
                 }
+                // Remove ballerina extensions
+                BallerinaTypeExtensioner.removeExtensions(openapi);
                 return new OASResult(openapi, diagnostics);
             } else {
                 return new OASResult(openapi, oasResult.getDiagnostics());
