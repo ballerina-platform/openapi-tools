@@ -18,6 +18,7 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator.ServiceGeneratorOptions;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
@@ -446,8 +447,10 @@ public class OpenApiCmd implements BLauncherCmd {
                         "openapi tool.");
                 exitError(this.exitWhenFinish);
             } else {
+                ServiceGeneratorOptions options = new ServiceGeneratorOptions(baseCmd.nullable, generateServiceType,
+                                generateServiceContract, generateWithoutDataBinding);
                 generator.generateService(resourcePath.toString(), serviceName, targetOutputPath.toString(), filter,
-                        baseCmd.nullable, generateServiceType, generateServiceContract, generateWithoutDataBinding);
+                        options);
             }
         } catch (IOException | FormatterException | BallerinaOpenApiException e) {
             outStream.println("Error occurred when generating service for openAPI contract at " + baseCmd.inputPath +

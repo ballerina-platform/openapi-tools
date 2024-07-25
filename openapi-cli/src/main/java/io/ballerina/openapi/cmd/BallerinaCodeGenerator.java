@@ -265,13 +265,11 @@ public class BallerinaCodeGenerator {
      * @throws BallerinaOpenApiException when code generator fails
      */
     public void generateService(String definitionPath, String serviceName, String outPath, Filter filter,
-                                boolean nullable, boolean generateServiceType, boolean generateServiceContract,
-                                boolean generateWithoutDataBinding)
+                                ServiceGeneratorOptions options)
             throws IOException, BallerinaOpenApiException, FormatterException {
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
-        List<GenSrcFile> genFiles = generateBallerinaService(Paths.get(definitionPath), serviceName,
-                filter, nullable, generateServiceType, generateServiceContract, generateWithoutDataBinding);
+        List<GenSrcFile> genFiles = generateBallerinaService(Paths.get(definitionPath), serviceName, filter, options);
         if (genFiles.isEmpty()) {
             return;
         }
@@ -279,6 +277,18 @@ public class BallerinaCodeGenerator {
             outStream.println(String.format("%s: %s", diagnostic.diagnosticInfo().severity(), diagnostic.message()));
         });
         writeGeneratedSources(genFiles, srcPath, implPath, GEN_SERVICE);
+    }
+
+    /**
+     * Represents a record which stores the additional generator options for service.
+     *
+     * @param nullable                Enable nullable option for make record field optional
+     * @param generateServiceType      Enable to generate service type
+     * @param generateServiceContract  Enable to generate service contract
+     * @param generateWithoutDataBinding  Enable to generate service without data binding
+     */
+    public record ServiceGeneratorOptions(boolean nullable, boolean generateServiceType,
+                                          boolean generateServiceContract, boolean generateWithoutDataBinding) {
     }
 
     private void writeGeneratedSources(List<GenSrcFile> sources, Path srcPath, Path implPath,
@@ -464,10 +474,8 @@ public class BallerinaCodeGenerator {
     }
 
 
-    public List<GenSrcFile> generateBallerinaService(Path openAPI, String serviceName,
-                                                     Filter filter, boolean nullable,
-                                                     boolean generateServiceType, boolean generateServiceContract,
-                                                     boolean generateWithoutDataBinding)
+    public List<GenSrcFile> generateBallerinaService(Path openAPI, String serviceName, Filter filter,
+                                                     ServiceGeneratorOptions options)
             throws IOException, FormatterException, BallerinaOpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_MOCK_PKG;
@@ -502,19 +510,19 @@ public class BallerinaCodeGenerator {
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPIDef)
                 .withFilters(filter)
-                .withNullable(nullable)
-                .withGenerateServiceType(generateServiceType)
-                .withGenerateServiceContract(generateServiceContract)
-                .withGenerateWithoutDataBinding(generateWithoutDataBinding)
+                .withNullable(options.nullable)
+                .withGenerateServiceType(options.generateServiceType)
+                .withGenerateServiceContract(options.generateServiceContract)
+                .withGenerateWithoutDataBinding(options.generateWithoutDataBinding)
                 .withLicenseHeader(licenseHeader)
                 .withSrcFile(srcFile)
                 .withSrcPackage(srcPackage)
                 .build();
-        TypeHandler.createInstance(openAPIDef, nullable);
+        TypeHandler.createInstance(openAPIDef, options.nullable);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         List<GenSrcFile> sourceFiles = serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         String schemaSyntaxTree = Formatter.format(TypeHandler.getInstance().generateTypeSyntaxTree()).toSourceCode();
-        if (!schemaSyntaxTree.isBlank() && !generateWithoutDataBinding) {
+        if (!schemaSyntaxTree.isBlank() && !options.generateWithoutDataBinding) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME,
                     (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaSyntaxTree));
         }

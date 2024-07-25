@@ -30,6 +30,7 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeDescriptor;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.isHttpServiceContract;
 
 /**
@@ -52,8 +53,7 @@ public class ModuleMemberVisitor extends NodeVisitor {
     @Override
     public void visit(TypeDefinitionNode typeDefinitionNode) {
         typeDefinitionNodes.add(typeDefinitionNode);
-        Node descriptorNode = typeDefinitionNode.typeDescriptor();
-        // TODO: Distinct service types should work here
+        Node descriptorNode = getTypeDescriptor(typeDefinitionNode);
         if (descriptorNode.kind().equals(SyntaxKind.OBJECT_TYPE_DESC) &&
                 isHttpServiceContract(descriptorNode, semanticModel)) {
             serviceContractTypeNodes.add(new ServiceContractType(typeDefinitionNode));

@@ -37,6 +37,7 @@ import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
+import io.ballerina.compiler.syntax.tree.DistinctTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
@@ -55,6 +56,7 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.service.mapper.Constants;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
@@ -143,8 +145,7 @@ public class MapperCommonUtils {
         // this - > !operationID.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
         String relativePath = MapperCommonUtils.generateRelativePath(resourceFunction);
         String cleanResourcePath = MapperCommonUtils.unescapeIdentifier(relativePath);
-        String resName = (resourceFunction.functionName() + "_" +
-                cleanResourcePath).replaceAll("\\{///\\}", "_");
+        String resName = (resourceFunction.functionName() + "_" + cleanResourcePath).replace("{}", "_");
         if (cleanResourcePath.equals("/")) {
             resName = resourceFunction.functionName();
         }
@@ -552,5 +553,13 @@ public class MapperCommonUtils {
             return Optional.of(new ResourceFunctionDeclaration((MethodDeclarationNode) function));
         }
         return Optional.empty();
+    }
+
+    public static Node getTypeDescriptor(TypeDefinitionNode typeDefinitionNode) {
+        Node node = typeDefinitionNode.typeDescriptor();
+        if (node instanceof DistinctTypeDescriptorNode distinctTypeDescriptorNode) {
+            return distinctTypeDescriptorNode.typeDescriptor();
+        }
+        return node;
     }
 }

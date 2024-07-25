@@ -67,6 +67,7 @@ import java.util.Set;
 import static io.ballerina.openapi.service.mapper.Constants.HYPHEN;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.containErrors;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpenApiFileName;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeDescriptor;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.isHttpService;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.isHttpServiceContract;
 
@@ -147,9 +148,7 @@ public final class ServiceToOpenAPIMapper {
                                             Map<String, ServiceNode> servicesToGenerate,
                                             ModulePartNode modulePartNode, SemanticModel semanticModel) {
         for (Node node : modulePartNode.members()) {
-            SyntaxKind syntaxKind = node.kind();
-            if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
-                ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
+            if (node instanceof ServiceDeclarationNode serviceNode) {
                 if (isHttpService(serviceNode, semanticModel)) {
                     // Here check the service is related to the http
                     // module by checking listener type that attached to service endpoints.
@@ -159,9 +158,8 @@ public final class ServiceToOpenAPIMapper {
                         addService(serviceName, availableService, service, servicesToGenerate, serviceSymbol.get());
                     }
                 }
-            } else if (syntaxKind.equals(SyntaxKind.TYPE_DEFINITION)) {
-                Node descriptorNode = ((TypeDefinitionNode) node).typeDescriptor();
-                // TODO: Distinct service types should work here
+            } else if (node instanceof TypeDefinitionNode typeDefinitionNode) {
+                Node descriptorNode = getTypeDescriptor(typeDefinitionNode);
                 if (descriptorNode.kind().equals(SyntaxKind.OBJECT_TYPE_DESC) &&
                         isHttpServiceContract(descriptorNode, semanticModel)) {
                     ServiceNode service = new ServiceContractType((TypeDefinitionNode) node);
@@ -173,6 +171,7 @@ public final class ServiceToOpenAPIMapper {
         }
     }
 
+    // Used by HTTP package to extract service nodes
     public static Optional<ServiceNode> getServiceNode(Node node, SemanticModel semanticModel) {
         if (node instanceof ServiceDeclarationNode serviceNode && isHttpService(serviceNode, semanticModel)) {
             return Optional.of(new ServiceDeclaration(serviceNode, semanticModel));
