@@ -1,4 +1,4 @@
-package io.ballerina.openapi.validator;
+package io.ballerina.openapi.validator.example;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;

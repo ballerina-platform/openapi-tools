@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.validator;
 
+import io.ballerina.openapi.validator.example.OpenAPIExampleAnalyzer;
 import io.ballerina.projects.plugins.CompilerPlugin;
 import io.ballerina.projects.plugins.CompilerPluginContext;
 
