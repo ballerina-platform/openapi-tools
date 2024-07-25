@@ -108,7 +108,7 @@ public class ServiceMapperFactory {
     }
 
     public ServiceMapperFactory(OpenAPI openAPI, SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
-                                List<OpenAPIMapperDiagnostic> diagnostics, ServiceDeclarationNode serviceDefinition) {
+                                List<OpenAPIMapperDiagnostic> diagnostics, ServiceNode serviceDefinition) {
         this(openAPI, semanticModel, moduleMemberVisitor, diagnostics, serviceDefinition, false);
     }
 

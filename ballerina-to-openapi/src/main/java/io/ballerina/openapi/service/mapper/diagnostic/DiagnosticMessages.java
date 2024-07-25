@@ -104,14 +104,13 @@ public enum DiagnosticMessages {
             " `%s` parameter: `%s`, since the example value(s) has parser errors", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_135("OAS_CONVERTOR_135", "Example skipped for request parameter: `%s`, since the request payload " +
             "type implies more than one content-type", DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_136("OAS_CONVERTOR_136", "`%s` example can not have a blank path", DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_137("OAS_CONVERTOR_137", "Generated OpenAPI definition for the service contract type: " +
+    OAS_CONVERTOR_136("OAS_CONVERTOR_136", "Generated OpenAPI definition for the service contract type: " +
             "'%s' has errors", DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_138("OAS_CONVERTOR_138", "Failed to obtain the OpenAPI definition from the service contract" +
+    OAS_CONVERTOR_137("OAS_CONVERTOR_137", "Failed to obtain the OpenAPI definition from the service contract" +
             " type: '%s'", DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_139("OAS_CONVERTOR_139", "Failed to find the package to obtain the OpenAPI definition from the " +
+    OAS_CONVERTOR_138("OAS_CONVERTOR_138", "Failed to find the package to obtain the OpenAPI definition from the " +
             "service contract type: '%s'", DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_140("OAS_CONVERTOR_140", "Failed to find the OpenAPI definition resource for the " +
+    OAS_CONVERTOR_139("OAS_CONVERTOR_139", "Failed to find the OpenAPI definition resource for the " +
             "service contract type: '%s'", DiagnosticSeverity.ERROR);
 
     private final String code;

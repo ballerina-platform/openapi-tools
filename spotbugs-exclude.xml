@@ -29,4 +29,9 @@
         <Method name="matches"/>
         <Bug pattern="BC_UNCONFIRMED_CAST" />
     </Match>
+    <Match>
+        <Class name="io.ballerina.openapi.service.mapper.utils.MapperCommonUtils" />
+        <Method name="getResourceFunction"/>
+        <Bug pattern="BC_UNCONFIRMED_CAST" />
+    </Match>
 </FindBugsFilter>

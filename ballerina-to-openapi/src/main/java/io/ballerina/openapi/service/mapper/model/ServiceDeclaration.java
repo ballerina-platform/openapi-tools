@@ -187,20 +187,20 @@ public class ServiceDeclaration implements ServiceNode {
 
         Optional<ModuleSymbol> serviceContractModule = serviceContractType.getModule();
         if (serviceContractModule.isEmpty()) {
-            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_133, serviceName.get()));
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_137, serviceName.get()));
             return Optional.empty();
         }
         ModuleID serviceContractModuleId = serviceContractModule.get().id();
 
         Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceDeclarationNode);
         if (serviceSymbol.isEmpty()) {
-            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_133, serviceName.get()));
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_137, serviceName.get()));
             return Optional.empty();
         }
 
         Optional<ModuleSymbol> currentModule = serviceSymbol.get().getModule();
         if (currentModule.isEmpty()) {
-            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_133, serviceName.get()));
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_137, serviceName.get()));
             return Optional.empty();
         }
         ModuleID currentModuleId = currentModule.get().id();
@@ -211,14 +211,14 @@ public class ServiceDeclaration implements ServiceNode {
                     .filter(contractType -> contractType.matchesName(serviceName.get()))
                     .findFirst();
             if (serviceContract.isEmpty()) {
-                diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_133, serviceName.get()));
+                diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_137, serviceName.get()));
                 return Optional.empty();
             }
             OASResult oasResult = generateOasFroServiceNode(pkg.project(), serviceName.get(), semanticModel, null,
                     serviceContract.get());
             if (oasResult.getDiagnostics().stream()
                     .anyMatch(diagnostic -> diagnostic.getDiagnosticSeverity().equals(DiagnosticSeverity.ERROR))) {
-                diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_132, serviceName.get()));
+                diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_136, serviceName.get()));
                 return Optional.empty();
             }
             return oasResult.getJson();
@@ -232,7 +232,7 @@ public class ServiceDeclaration implements ServiceNode {
                 })
                 .findFirst();
         if (resolvedPackage.isEmpty()) {
-            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_134, String.format("%s/%s:%s",
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_138, String.format("%s/%s:%s",
                     serviceContractModuleId.orgName(), serviceContractModuleId.packageName(), serviceName.get())));
             return Optional.empty();
         }
@@ -242,7 +242,7 @@ public class ServiceDeclaration implements ServiceNode {
                 .filter(resourceId -> resourceId.toString().contains(openApiFileName))
                 .findFirst();
         if (openApiDocument.isEmpty()) {
-            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_135, String.format("%s/%s:%s",
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_139, String.format("%s/%s:%s",
                     serviceContractModuleId.orgName(), serviceContractModuleId.packageName(), serviceName.get())));
             return Optional.empty();
         }

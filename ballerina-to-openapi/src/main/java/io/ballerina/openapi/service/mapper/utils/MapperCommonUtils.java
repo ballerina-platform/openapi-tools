@@ -38,14 +38,16 @@ import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.MethodDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.ObjectTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
@@ -59,6 +61,8 @@ import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.OASResult;
 import io.ballerina.openapi.service.mapper.model.ResourceFunction;
+import io.ballerina.openapi.service.mapper.model.ResourceFunctionDeclaration;
+import io.ballerina.openapi.service.mapper.model.ResourceFunctionDefinition;
 import io.ballerina.runtime.api.utils.IdentifierUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -538,5 +542,15 @@ public class MapperCommonUtils {
                                 .findFirst()
                 ).flatMap(SpecificFieldNode::valueExpr)
                 .map(en -> en.toString().trim());
+    }
+
+    public static Optional<ResourceFunction> getResourceFunction(Node function) {
+        SyntaxKind kind = function.kind();
+        if (kind.equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
+            return Optional.of(new ResourceFunctionDefinition((FunctionDefinitionNode) function));
+        } else if (kind.equals(SyntaxKind.RESOURCE_ACCESSOR_DECLARATION)) {
+            return Optional.of(new ResourceFunctionDeclaration((MethodDeclarationNode) function));
+        }
+        return Optional.empty();
     }
 }
