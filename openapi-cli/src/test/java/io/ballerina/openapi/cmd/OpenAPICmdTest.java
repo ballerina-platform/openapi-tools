@@ -527,12 +527,9 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             }
             generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
             expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
-            if (expectedFileContent.equals(generatedFile)) {
-                Assert.assertTrue(true);
-                deleteGeneratedFiles(false);
-            } else {
+            deleteGeneratedFile("jira_openapi_service.bal", false);
+            if (!expectedFileContent.equals(generatedFile)) {
                 Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
-                deleteGeneratedFiles(false);
             }
         } else {
             Assert.fail("Service generation failed. : " + readOutput(true));
@@ -566,11 +563,9 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             }
             generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
             expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
-            if (expectedFileContent.equals(generatedFile)) {
-                deleteGeneratedFiles(false);
-            } else {
+            deleteGeneratedFile("jira_openapi_service.bal", false);
+            if (!expectedFileContent.equals(generatedFile)) {
                 Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
-                deleteGeneratedFiles(false);
             }
         } else {
             Assert.fail("Service generation failed. : " + readOutput(true));
@@ -605,11 +600,9 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             }
             generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
             expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
-            if (expectedFileContent.equals(generatedFile)) {
-                deleteGeneratedFiles(false);
-            } else {
+            deleteGeneratedFile("jira_openapi_service.bal", false);
+            if (!expectedFileContent.equals(generatedFile)) {
                 Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
-                deleteGeneratedFiles(false);
             }
         } else {
             Assert.fail("Service generation failed. : " + readOutput(true));
@@ -643,11 +636,9 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             }
             generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
             expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
-            if (expectedFileContent.equals(generatedFile)) {
-                deleteGeneratedFiles(false);
-            } else {
+            deleteGeneratedFile("", false);
+            if (!expectedFileContent.equals(generatedFile)) {
                 Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
-                deleteGeneratedFiles(false);
             }
         } else {
             Assert.fail("Service generation failed. : " + readOutput(true));
@@ -764,6 +755,27 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         clientFile.delete();
         schemaFile.delete();
         testFile.delete();
+        if (isConfigGenerated) {
+            File configFile = new File(this.tmpDir.resolve("tests/Config.toml").toString());
+            configFile.delete();
+        }
+        FileUtils.deleteDirectory(testDir);
+    }
+
+    private void deleteGeneratedFile(String filename, boolean isConfigGenerated) throws IOException {
+        File serviceFile = new File(this.tmpDir.resolve(filename).toString());
+        File clientFile = new File(this.tmpDir.resolve("client.bal").toString());
+        File testFile = new File(this.tmpDir.resolve("tests/test.bal").toString());
+        File testDir = new File(this.tmpDir.resolve("tests").toString());
+        if (serviceFile.exists()) {
+            serviceFile.delete();
+        }
+        if (clientFile.exists()) {
+            clientFile.delete();
+        }
+        if (testFile.exists()) {
+            testFile.delete();
+        }
         if (isConfigGenerated) {
             File configFile = new File(this.tmpDir.resolve("tests/Config.toml").toString());
             configFile.delete();
