@@ -15,7 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.service.mapper.type;
+package io.ballerina.openapi.service.mapper.type.extension;
 
 import java.util.Optional;
 

@@ -42,8 +42,8 @@ import io.ballerina.openapi.service.mapper.example.parameter.RequestExampleMappe
 import io.ballerina.openapi.service.mapper.example.type.TypeExampleMapper;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
-import io.ballerina.openapi.service.mapper.type.BallerinaPackage;
-import io.ballerina.openapi.service.mapper.type.BallerinaTypeExtensioner;
+import io.ballerina.openapi.service.mapper.type.extension.BallerinaPackage;
+import io.ballerina.openapi.service.mapper.type.extension.BallerinaTypeExtensioner;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;

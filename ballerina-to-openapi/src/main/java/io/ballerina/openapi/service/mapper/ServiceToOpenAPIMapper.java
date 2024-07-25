@@ -38,7 +38,7 @@ import io.ballerina.openapi.service.mapper.metainfo.MetaInfoMapper;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
-import io.ballerina.openapi.service.mapper.type.BallerinaTypeExtensioner;
+import io.ballerina.openapi.service.mapper.type.extension.BallerinaTypeExtensioner;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Project;
 import io.swagger.v3.oas.models.OpenAPI;
