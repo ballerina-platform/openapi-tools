@@ -39,7 +39,9 @@ import io.ballerina.openapi.service.mapper.model.OpenAPIInfo;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,10 +53,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import static io.ballerina.openapi.service.mapper.Constants.CONTACT_NAME;
+import static io.ballerina.openapi.service.mapper.Constants.CONTACT_URL;
 import static io.ballerina.openapi.service.mapper.Constants.CONTRACT;
+import static io.ballerina.openapi.service.mapper.Constants.DESCRIPTION;
+import static io.ballerina.openapi.service.mapper.Constants.EMAIL;
+import static io.ballerina.openapi.service.mapper.Constants.LICENSE_NAME;
+import static io.ballerina.openapi.service.mapper.Constants.LICENSE_URL;
 import static io.ballerina.openapi.service.mapper.Constants.OPENAPI_ANNOTATION;
 import static io.ballerina.openapi.service.mapper.Constants.SLASH;
 import static io.ballerina.openapi.service.mapper.Constants.SPECIAL_CHAR_REGEX;
+import static io.ballerina.openapi.service.mapper.Constants.TERMS_OF_SERVICE;
 import static io.ballerina.openapi.service.mapper.Constants.TITLE;
 import static io.ballerina.openapi.service.mapper.Constants.VERSION;
 
@@ -132,7 +141,7 @@ public final class InfoMapper {
 
     // Finalize the openAPI info section
     private static OASResult normalizeInfoSection(String openapiFileName, String currentServiceName, String version,
-                                          OASResult oasResult) {
+                                                  OASResult oasResult) {
         if (oasResult.getOpenAPI().isPresent()) {
             OpenAPI openAPI = oasResult.getOpenAPI().get();
             if (openAPI.getInfo() == null) {
@@ -202,30 +211,65 @@ public final class InfoMapper {
     private static OASResult parseServiceInfoAnnotationAttachmentDetails(List<OpenAPIMapperDiagnostic> diagnostics,
                                                                          AnnotationNode annotation,
                                                                          Path ballerinaFilePath) {
+
         Location location = annotation.location();
         OpenAPI openAPI = new OpenAPI();
-        Optional<MappingConstructorExpressionNode> content = annotation.annotValue();
-        // If contract path there
-        if (content.isPresent()) {
-           SeparatedNodeList<MappingFieldNode> fields = content.get().fields();
-           if (!fields.isEmpty()) {
-               OpenAPIInfo openAPIInfo = updateOpenAPIInfoModel(fields);
-               // If in case ballerina file path is getting null, then openAPI specification will be generated for
-               // given services.
-               if (openAPIInfo.getContractPath().isPresent() && ballerinaFilePath != null) {
-                   return updateExistingContractOpenAPI(diagnostics, location, openAPIInfo, ballerinaFilePath);
-               } else if (openAPIInfo.getTitle().isPresent() && openAPIInfo.getVersion().isPresent()) {
-                   openAPI.setInfo(new Info().version(openAPIInfo.getVersion().get()).title(normalizeTitle
-                           (openAPIInfo.getTitle().get())));
-               } else if (openAPIInfo.getVersion().isPresent()) {
-                   openAPI.setInfo(new Info().version(openAPIInfo.getVersion().get()));
-               } else if (openAPIInfo.getTitle().isPresent()) {
-                   openAPI.setInfo(new Info().title(normalizeTitle(openAPIInfo.getTitle().get())));
-               }
-           }
+        Optional<MappingConstructorExpressionNode> svcInfoAnnotationValue = annotation.annotValue();
+
+        if (svcInfoAnnotationValue.isEmpty()) {
+            return new OASResult(openAPI, diagnostics);
         }
+
+        SeparatedNodeList<MappingFieldNode> fields = svcInfoAnnotationValue.get().fields();
+        if (fields.isEmpty()) {
+            return new OASResult(openAPI, diagnostics);
+        }
+
+        OpenAPIInfo openAPIInfo = updateOpenAPIInfoModel(fields);
+
+        // Check for contract path and existing Ballerina file path
+        if (openAPIInfo.getContractPath().isPresent() && ballerinaFilePath != null) {
+            return updateExistingContractOpenAPI(diagnostics, location, openAPIInfo, ballerinaFilePath);
+        }
+        populateOASInfo(openAPI, openAPIInfo);
         return new OASResult(openAPI, diagnostics);
     }
+
+    private static void populateOASInfo(OpenAPI openAPI, OpenAPIInfo openAPIInfo) {
+        // Populate OpenAPI Info object
+        Info info = openAPI.getInfo() == null ? new Info() : openAPI.getInfo();
+        openAPIInfo.getTitle().ifPresent(title -> info.setTitle(normalizeTitle(title)));
+        openAPIInfo.getVersion().ifPresent(info::setVersion);
+        openAPIInfo.getEmail().ifPresent(email -> {
+            Contact contact = (info.getContact() != null) ? info.getContact() : new Contact();
+            contact.setEmail(email);
+            info.setContact(contact);
+        });
+        openAPIInfo.getContactName().ifPresent(name -> {
+            Contact contact = (info.getContact() != null) ? info.getContact() : new Contact();
+            contact.setName(name);
+            info.setContact(contact);
+        });
+        openAPIInfo.getContactURL().ifPresent(url -> {
+            Contact contact = (info.getContact() != null) ? info.getContact() : new Contact();
+            contact.setUrl(url);
+            info.setContact(contact);
+        });
+        openAPIInfo.getLicenseURL().ifPresent(url -> {
+            License license = (info.getLicense() != null) ? info.getLicense() : new License();
+            license.setUrl(url);
+            info.setLicense(license);
+        });
+        openAPIInfo.getLicenseName().ifPresent(name -> {
+            License license = (info.getLicense() != null) ? info.getLicense() : new License();
+            license.setName(name);
+            info.setLicense(license);
+        });
+        openAPIInfo.getTermsOfService().ifPresent(info::setTermsOfService);
+        openAPIInfo.getDescription().ifPresent(info::setDescription);
+        openAPI.setInfo(info);
+    }
+
 
     private static OASResult updateExistingContractOpenAPI(List<OpenAPIMapperDiagnostic> diagnostics,
                                                            Location location, OpenAPIInfo openAPIInfo,
@@ -237,21 +281,9 @@ public final class InfoMapper {
             return oasResult;
         }
         OpenAPI openAPI = contract.get();
-        if (openAPIInfo.getVersion().isPresent() && openAPIInfo.getTitle().isPresent()) {
-            // read the openapi
-            openAPI.getInfo().setVersion(openAPIInfo.getVersion().get());
-            openAPI.getInfo().setTitle(openAPIInfo.getTitle().get());
-            diagnostics.addAll(oasResult.getDiagnostics());
-            return new OASResult(openAPI, oasResult.getDiagnostics());
-        } else if (openAPIInfo.getTitle().isPresent()) {
-            openAPI.getInfo().setTitle(openAPIInfo.getTitle().get());
-            return new OASResult(openAPI, oasResult.getDiagnostics());
-        } else if (openAPIInfo.getVersion().isPresent()) {
-            openAPI.getInfo().setVersion(openAPIInfo.getVersion().get());
-            return new OASResult(openAPI, oasResult.getDiagnostics());
-        } else {
-            return oasResult;
-        }
+        diagnostics.addAll(oasResult.getDiagnostics());
+        populateOASInfo(openAPI, openAPIInfo);
+        return new OASResult(openAPI, diagnostics);
     }
 
     private static OpenAPIInfo updateOpenAPIInfoModel(SeparatedNodeList<MappingFieldNode> fields) {
@@ -264,19 +296,21 @@ public final class InfoMapper {
                 ExpressionNode expressionNode = value.get();
                 if (!expressionNode.toString().trim().isBlank()) {
                     fieldValue = expressionNode.toString().trim().replaceAll("\"", "");
-                    if (!fieldValue.isBlank()) {
-                        switch (fieldName) {
-                            case CONTRACT:
-                                infoBuilder.contractPath(fieldValue);
-                                break;
-                            case TITLE:
-                                infoBuilder.title(fieldValue);
-                                break;
-                            case VERSION:
-                                infoBuilder.version(fieldValue);
-                                break;
-                            default:
-                                break;
+                    if (fieldValue.isBlank()) {
+                        continue;
+                    }
+                    switch (fieldName) {
+                        case CONTRACT -> infoBuilder.contractPath(fieldValue);
+                        case TITLE -> infoBuilder.title(fieldValue);
+                        case VERSION -> infoBuilder.version(fieldValue);
+                        case EMAIL -> infoBuilder.email(fieldValue);
+                        case DESCRIPTION -> infoBuilder.description(fieldValue);
+                        case CONTACT_NAME -> infoBuilder.contactName(fieldValue);
+                        case CONTACT_URL -> infoBuilder.contactURL(fieldValue);
+                        case TERMS_OF_SERVICE -> infoBuilder.termsOfService(fieldValue);
+                        case LICENSE_NAME -> infoBuilder.licenseName(fieldValue);
+                        case LICENSE_URL -> infoBuilder.licenseURL(fieldValue);
+                        default -> {
                         }
                     }
                 }

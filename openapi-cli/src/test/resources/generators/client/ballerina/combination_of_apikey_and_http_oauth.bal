@@ -34,7 +34,7 @@ public isolated client class Client {
         if config.auth is ApiKeysConfig {
             self.apiKeyConfig = (<ApiKeysConfig>config.auth).cloneReadOnly();
         } else {
-            config.auth = <OAuth2ClientCredentialsGrantConfig|http:BearerTokenConfig|OAuth2RefreshTokenGrantConfig>config.auth;
+            httpClientConfig.auth = <OAuth2ClientCredentialsGrantConfig|http:BearerTokenConfig|OAuth2RefreshTokenGrantConfig>config.auth;
             self.apiKeyConfig = ();
         }
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
