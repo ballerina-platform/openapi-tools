@@ -23,7 +23,6 @@ import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.projects.DocumentId;
-import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.PackageDescriptor;
 import io.ballerina.projects.ResolvedPackageDependency;
@@ -237,8 +236,8 @@ public class ServiceDeclaration implements ServiceNode {
             return Optional.empty();
         }
 
-        Module defaultModule = resolvedPackage.get().packageInstance().getDefaultModule();
-        Optional<DocumentId> openApiDocument = defaultModule.resourceIds().stream()
+        Package packageInstance = resolvedPackage.get().packageInstance();
+        Optional<DocumentId> openApiDocument = packageInstance.resourceIds().stream()
                 .filter(resourceId -> resourceId.toString().contains(openApiFileName))
                 .findFirst();
         if (openApiDocument.isEmpty()) {
@@ -247,7 +246,7 @@ public class ServiceDeclaration implements ServiceNode {
             return Optional.empty();
         }
 
-        byte[] openApiContent = defaultModule.resource(openApiDocument.get()).content();
+        byte[] openApiContent = packageInstance.resource(openApiDocument.get()).content();
         return Optional.of(new String(openApiContent, StandardCharsets.UTF_8));
     }
 }
