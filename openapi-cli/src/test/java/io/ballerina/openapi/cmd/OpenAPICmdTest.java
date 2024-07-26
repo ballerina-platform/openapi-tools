@@ -464,10 +464,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString()};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
-        try {
-            cmd.execute();
-        } catch (BLauncherException e) {
-        }
+        cmd.execute();
         Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema_2.bal"));
         String expectedSchemaContent = "";
         try (Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile)) {
@@ -507,10 +504,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "service", "--single-file"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
-        try {
-            cmd.execute();
-        } catch (BLauncherException e) {
-        }
+        cmd.execute();
         Path expectedFile = resourceDir.resolve(Paths.get("expected_gen", "jira_openapi_service.bal"));
         String expectedFileContent = "";
         try (Stream<String> expectedLines = Files.lines(expectedFile)) {
@@ -543,10 +537,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "--single-file", "--with-service-type"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
-        try {
-            cmd.execute();
-        } catch (BLauncherException e) {
-        }
+        cmd.execute();
         Path expectedFile = resourceDir.resolve(Paths.get("expected_gen", "jira_openapi_service_with_type.bal"));
         String expectedFileContent = "";
         try (Stream<String> expectedLines = Files.lines(expectedFile)) {
@@ -579,10 +570,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "--single-file", "--with-service-type", "--without-data-binding"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
-        try {
-            cmd.execute();
-        } catch (BLauncherException e) {
-        }
+        cmd.execute();
         Path expectedFile = resourceDir.resolve(Paths.get("expected_gen",
                 "jira_openapi_service_with_type_without_data_binding.bal"));
         String expectedFileContent = "";
@@ -616,10 +604,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "--single-file"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
-        try {
-            cmd.execute();
-        } catch (BLauncherException e) {
-        }
+        cmd.execute();
         Path expectedFile = resourceDir.resolve(Paths.get("expected_gen", "jira_openapi_client.bal"));
         String expectedFileContent = "";
         try (Stream<String> expectedLines = Files.lines(expectedFile)) {
