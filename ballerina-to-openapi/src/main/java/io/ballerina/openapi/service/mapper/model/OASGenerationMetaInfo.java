@@ -18,9 +18,11 @@
 package io.ballerina.openapi.service.mapper.model;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.projects.Project;
 
 import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * This {@link OASGenerationMetaInfo} contains details related to openAPI specification.
@@ -39,7 +41,11 @@ public class OASGenerationMetaInfo {
         this.openApiFileName = builder.openApiFileName;
         this.ballerinaFilePath = builder.ballerinaFilePath;
         this.semanticModel = builder.semanticModel;
-        this.serviceNode = builder.serviceNode;
+        ServiceNode serviceNode = builder.serviceNode;
+        if (Objects.isNull(serviceNode)) {
+            serviceNode = new ServiceDeclaration(builder.serviceDeclarationNode, semanticModel);
+        }
+        this.serviceNode = serviceNode;
         this.project = builder.project;
     }
 
@@ -71,6 +77,7 @@ public class OASGenerationMetaInfo {
         private String openApiFileName;
         private Path ballerinaFilePath;
         private SemanticModel semanticModel;
+        private ServiceDeclarationNode serviceDeclarationNode;
         private ServiceNode serviceNode;
         private Project project;
 
@@ -81,6 +88,16 @@ public class OASGenerationMetaInfo {
 
         public OASGenerationMetaInfoBuilder setSemanticModel(SemanticModel semanticModel) {
             this.semanticModel = semanticModel;
+            return this;
+        }
+
+        /**
+         * @deprecated Construct the {@link ServiceDeclarationNode} instance from the serviceDeclarationNode and use
+         * that with {@link #setServiceNode(ServiceNode)} method
+         */
+        @Deprecated(forRemoval = true, since = "2.1.0")
+        public OASGenerationMetaInfoBuilder setServiceDeclarationNode(ServiceDeclarationNode serviceDeclarationNode) {
+            this.serviceDeclarationNode = serviceDeclarationNode;
             return this;
         }
 

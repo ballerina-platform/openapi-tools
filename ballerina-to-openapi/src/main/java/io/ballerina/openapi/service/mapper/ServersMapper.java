@@ -17,10 +17,34 @@
  */
 package io.ballerina.openapi.service.mapper;
 
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.openapi.service.mapper.model.ServiceDeclaration;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
+
 /**
  * The {@link ServersMapper} represents the interface for servers mapper.
  */
 public interface ServersMapper {
 
     void setServers();
+
+    /**
+     * Gets the base path of a mapper.
+     *
+     * @param serviceDefinition The mapper definition node.
+     * @return The base path.
+     * @deprecated Construct the {@link io.ballerina.openapi.service.mapper.model.ServiceDeclaration} instance from the
+     * serviceDefinition and use {@link ServiceDeclaration#absoluteResourcePath()}  method to get the base path.
+     */
+    @Deprecated(forRemoval = true, since = "2.1.0")
+    static String getServiceBasePath(ServiceDeclarationNode serviceDefinition) {
+        StringBuilder currentServiceName = new StringBuilder();
+        NodeList<Node> serviceNameNodes = serviceDefinition.absoluteResourcePath();
+        for (Node serviceBasedPathNode : serviceNameNodes) {
+            currentServiceName.append(MapperCommonUtils.unescapeIdentifier(serviceBasedPathNode.toString()));
+        }
+        return currentServiceName.toString().trim();
+    }
 }
