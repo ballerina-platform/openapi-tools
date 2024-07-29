@@ -181,10 +181,7 @@ public class BallerinaCodeGenerator {
         String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
         this.diagnostics.addAll(TypeHandler.getInstance().getDiagnostics());
 
-        if (!schemaContent.isBlank()) {
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
-                    (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaContent));
-        }
+        generateSchemaFile(sourceFiles, schemaContent, licenseHeader);
 
         // Generate test boilerplate code for test cases
         if (this.includeTestFiles) {
@@ -227,19 +224,17 @@ public class BallerinaCodeGenerator {
      * @param outPath        Destination file path to save generated source files. If not provided
      *                       {@code definitionPath} will be used as the default destination path
      * @param filter         For take the tags and operation option values
-     * @param nullable       Enable nullable option for make record field optional
+     * @param options        Contains the generation options
      * @throws IOException               when file operations fail
      * @throws BallerinaOpenApiException when code generator fails
      */
-    public void generateClient(String definitionPath, String outPath, Filter filter, boolean nullable,
-                               boolean isResource, boolean statusCodeBinding, boolean isMock, boolean singleFile)
+    public void generateClient(String definitionPath, String outPath, Filter filter, ClientGeneratorOptions options)
             throws IOException, FormatterException, BallerinaOpenApiException, OASTypeGenException {
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles = null;
         try {
-            genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource, statusCodeBinding,
-                    isMock, singleFile);
+            genFiles = generateClientFiles(Paths.get(definitionPath), filter, options);
             if (!genFiles.isEmpty()) {
                 writeGeneratedSources(genFiles, srcPath, implPath, GEN_CLIENT);
             }
@@ -360,18 +355,18 @@ public class BallerinaCodeGenerator {
      * @return generated source files as a list of {@link GenSrcFile}
      * @throws IOException when code generation with specified templates fails
      */
-    private List<GenSrcFile> generateClientFiles(Path openAPI, Filter filter, boolean nullable, boolean isResource,
-                                                 boolean statusCodeBinding, boolean isMock, boolean singleFile)
+    private List<GenSrcFile> generateClientFiles(Path openAPI, Filter filter, ClientGeneratorOptions options)
             throws IOException, BallerinaOpenApiException, FormatterException, ClientException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_CLIENT_PKG;
         }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         // Normalize OpenAPI definition
-        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, !isResource);
+        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, !options.isResource);
         checkOpenAPIVersion(openAPIDef);
         // Validate the service generation
         List<String> complexPaths = GeneratorUtils.getComplexPaths(openAPIDef);
+        boolean isResource = options.isResource;
         if (!complexPaths.isEmpty()) {
             outStream.println("WARNING: remote function(s) will be generated for client as the given openapi " +
                     "definition contains following complex path(s):");
@@ -384,16 +379,16 @@ public class BallerinaCodeGenerator {
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
-                .withNullable(nullable)
+                .withNullable(options.nullable)
                 .withPlugin(false)
                 .withOpenAPI(openAPIDef)
                 .withResourceMode(isResource)
-                .withStatusCodeBinding(statusCodeBinding)
-                .withMock(isMock)
+                .withStatusCodeBinding(options.statusCodeBinding)
+                .withMock(options.isMock)
                 .build();
         //Take default DO NOT modify
         licenseHeader = licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER : licenseHeader;
-        TypeHandler.createInstance(openAPIDef, nullable);
+        TypeHandler.createInstance(openAPIDef, options.nullable);
         BallerinaClientGenerator clientGenerator = getBallerinaClientGenerator(oasClientConfig);
         SyntaxTree syntaxTree = clientGenerator.generateSyntaxTree();
         //Update type definition list with auth related type definitions
@@ -403,27 +398,10 @@ public class BallerinaCodeGenerator {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
 
-        if (singleFile) {
-            syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree,
-                    clientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree(),
-                    TypeHandler.getInstance().generateTypeSyntaxTree());
+        if (options.singleFile) {
+            syntaxTree = generateSingleFileForClient(syntaxTree, clientGenerator);
         } else {
-            String mainContent = Formatter.format(syntaxTree).toSourceCode();
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME,
-                    licenseHeader + mainContent));
-            String utilContent = Formatter.format(
-                    clientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
-            if (!utilContent.isBlank()) {
-                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, srcPackage, UTIL_FILE_NAME,
-                        licenseHeader + utilContent));
-            }
-            // Generate ballerina records to represent schemas.
-            SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
-            String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
-            if (!schemaContent.isBlank()) {
-                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
-                        licenseHeader + schemaContent));
-            }
+            generateFilesForClient(syntaxTree, sourceFiles, clientGenerator);
         }
 
         //Type diagnostic
@@ -447,11 +425,56 @@ public class BallerinaCodeGenerator {
             outStream.println(diagnostic.getDiagnosticSeverity() + ":" + diagnostic.getMessage());
         }
         printDiagnostic(diagnosticList);
-        if (singleFile) {
+        if (options.singleFile) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
                     CLIENT_FILE_NAME, licenseHeader + Formatter.format(syntaxTree).toSourceCode()));
         }
         return sourceFiles;
+    }
+
+    /**
+     * Represents a record which stores the additional generator options for client.
+     *
+     *  @param nullable               Enable nullable option to make record field optional
+     *  @param isResource             Enable isResource option to generate resource methods
+     *  @param statusCodeBinding      Enable statusCodeBinding option
+     *  @param isMock                 Enable isMock option to generate mocks
+     *  @param singleFile             Enable singleFile option to generate all content in a single file
+     */
+    public record ClientGeneratorOptions(boolean nullable, boolean isResource, boolean statusCodeBinding,
+                                         boolean isMock, boolean singleFile) {}
+
+    private void generateFilesForClient(SyntaxTree syntaxTree, List<GenSrcFile> sourceFiles,
+                                        BallerinaClientGenerator clientGenerator) throws FormatterException,
+            IOException {
+        String mainContent = Formatter.format(syntaxTree).toSourceCode();
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME,
+                licenseHeader + mainContent));
+        String utilContent = Formatter.format(
+                clientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
+        if (!utilContent.isBlank()) {
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, srcPackage, UTIL_FILE_NAME,
+                    licenseHeader + utilContent));
+        }
+        // Generate ballerina records to represent schemas.
+        SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
+        generateSchemaFile(sourceFiles, schemaContent, licenseHeader);
+    }
+
+    private static SyntaxTree generateSingleFileForClient(SyntaxTree syntaxTree,
+                                                          BallerinaClientGenerator clientGenerator) throws IOException {
+        syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree,
+                clientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree(),
+                TypeHandler.getInstance().generateTypeSyntaxTree());
+        return syntaxTree;
+    }
+
+    private void generateSchemaFile(List<GenSrcFile> sourceFiles, String schemaContent, String licenseHeader) {
+        if (!schemaContent.isBlank()) {
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
+                    licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader + schemaContent));
+        }
     }
 
     private static BallerinaClientGenerator getBallerinaClientGenerator(OASClientConfig oasClientConfig) {
@@ -519,33 +542,48 @@ public class BallerinaCodeGenerator {
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         if (singleFile) {
-            SyntaxTree syntaxTree = serviceGenerationHandler.generateSingleSyntaxTree(oasServiceMetadata);
-            if (!oasServiceMetadata.generateWithoutDataBinding()) {
-                syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree,
-                        TypeHandler.getInstance().generateTypeSyntaxTree());
-            }
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
-                    oasServiceMetadata.getSrcFile(),
-                    (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
-                            oasServiceMetadata.getLicenseHeader()) + Formatter.format(syntaxTree).toSourceCode()));
+            generateSingleFileForService(serviceGenerationHandler, oasServiceMetadata, sourceFiles);
         } else {
-            sourceFiles = serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
-            if (!oasServiceMetadata.generateWithoutDataBinding()) {
-                String schemaSyntaxTree = Formatter.format(TypeHandler.getInstance()
-                        .generateTypeSyntaxTree()).toSourceCode();
-                if (!schemaSyntaxTree.isBlank()) {
-                    sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, oasServiceMetadata.getSrcPackage(),
-                            GeneratorConstants.TYPE_FILE_NAME,
-                            (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
-                            oasServiceMetadata.getLicenseHeader()) + schemaSyntaxTree));
-                }
-            }
+            sourceFiles = generateFilesForService(serviceGenerationHandler, oasServiceMetadata);
         }
 
         this.diagnostics.addAll(serviceGenerationHandler.getDiagnostics());
         this.diagnostics.addAll(TypeHandler.getInstance().getDiagnostics());
         printDiagnostic(diagnostics);
         return sourceFiles;
+    }
+
+    private static List<GenSrcFile> generateFilesForService(ServiceGenerationHandler serviceGenerationHandler,
+                                                            OASServiceMetadata oasServiceMetadata) throws
+            FormatterException, BallerinaOpenApiException {
+        List<GenSrcFile> sourceFiles;
+        sourceFiles = serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        if (!oasServiceMetadata.generateWithoutDataBinding()) {
+            String schemaSyntaxTree = Formatter.format(TypeHandler.getInstance()
+                    .generateTypeSyntaxTree()).toSourceCode();
+            if (!schemaSyntaxTree.isBlank()) {
+                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, oasServiceMetadata.getSrcPackage(),
+                        GeneratorConstants.TYPE_FILE_NAME,
+                        (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
+                        oasServiceMetadata.getLicenseHeader()) + schemaSyntaxTree));
+            }
+        }
+        return sourceFiles;
+    }
+
+    private static void generateSingleFileForService(ServiceGenerationHandler serviceGenerationHandler,
+                                                     OASServiceMetadata oasServiceMetadata,
+                                                     List<GenSrcFile> sourceFiles) throws
+            BallerinaOpenApiException, FormatterException {
+        SyntaxTree syntaxTree = serviceGenerationHandler.generateSingleSyntaxTree(oasServiceMetadata);
+        if (!oasServiceMetadata.generateWithoutDataBinding()) {
+            syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree,
+                    TypeHandler.getInstance().generateTypeSyntaxTree());
+        }
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
+                oasServiceMetadata.getSrcFile(),
+                (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
+                        oasServiceMetadata.getLicenseHeader()) + Formatter.format(syntaxTree).toSourceCode()));
     }
 
     private void printDiagnostic(List<Diagnostic> diagnostics) {

@@ -99,7 +99,7 @@ public class CodeGeneratorTest {
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "generate_client.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter,
-                    false, false, false, false, false);
+                    new BallerinaCodeGenerator.ClientGeneratorOptions(false, false, false, false, false));
             if (Files.exists(resourcePath.resolve("client.bal"))) {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
                 generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
@@ -152,8 +152,8 @@ public class CodeGeneratorTest {
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedDirPath,
                     "petstore_client_swagger.bal");
-            generator.generateClient(definitionPath, resourcePath.toString(), filter, false, false,
-                    false, false, false);
+            generator.generateClient(definitionPath, resourcePath.toString(), filter,
+                    new BallerinaCodeGenerator.ClientGeneratorOptions(false, false, false, false, false));
             if (Files.exists(resourcePath.resolve("client.bal"))) {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
                 generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
@@ -205,8 +205,8 @@ public class CodeGeneratorTest {
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "x_init_description.bal");
-            generator.generateClient(definitionPath, resourcePath.toString(), filter, false, false,
-                    false, false, false);
+            generator.generateClient(definitionPath, resourcePath.toString(), filter,
+                    new BallerinaCodeGenerator.ClientGeneratorOptions(false, false, false, false, false));
 
             if (Files.exists(resourcePath.resolve("client.bal"))) {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
@@ -230,8 +230,8 @@ public class CodeGeneratorTest {
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "nullable_types.bal");
-            generator.generateClient(definitionPath, resourcePath.toString(), filter, true, false,
-                    false, false, false);
+            generator.generateClient(definitionPath, resourcePath.toString(), filter,
+                    new BallerinaCodeGenerator.ClientGeneratorOptions(true, false, false, false, false));
 
             if (Files.exists(resourcePath.resolve("types.bal"))) {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "types.bal");
@@ -255,8 +255,8 @@ public class CodeGeneratorTest {
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "nullable_false_types.bal");
-            generator.generateClient(definitionPath, resourcePath.toString(), filter, true, false,
-                    false, false, false);
+            generator.generateClient(definitionPath, resourcePath.toString(), filter,
+                    new BallerinaCodeGenerator.ClientGeneratorOptions(true, false, false, false, false));
 
             if (Files.exists(resourcePath.resolve("types.bal"))) {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "types.bal");
@@ -280,8 +280,8 @@ public class CodeGeneratorTest {
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "utils.bal");
-            generator.generateClient(definitionPath, resourcePath.toString(), filter, true, false,
-                    false, false, false);
+            generator.generateClient(definitionPath, resourcePath.toString(), filter,
+                    new BallerinaCodeGenerator.ClientGeneratorOptions(true, false, false, false, false));
 
             if (Files.exists(resourcePath.resolve("utils.bal"))) {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "utils.bal");
@@ -306,8 +306,8 @@ public class CodeGeneratorTest {
         try {
             String expectedConfigContent = getStringFromGivenBalFile(expectedDirPath, "api_key_config.toml");
             generator.setIncludeTestFiles(true);
-            generator.generateClient(definitionPath, resourcePath.toString(), filter, true, false,
-                    false, false, false);
+            generator.generateClient(definitionPath, resourcePath.toString(), filter,
+                    new BallerinaCodeGenerator.ClientGeneratorOptions(true, false, false, false, false));
 
             if (Files.exists(resourcePath.resolve("tests/Config.toml"))) {
                 String generateConfigContent = getStringFromGivenBalFile(resourcePath, "tests/Config.toml");
@@ -337,7 +337,7 @@ public class CodeGeneratorTest {
             String expectedSchemaContent = getStringFromGivenBalFile(expectedDirPath,
                 "type_filtered_by_tags.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filterCustom,
-                    false, false, false, false, false);
+                    new BallerinaCodeGenerator.ClientGeneratorOptions(false, false, false, false, false));
             if (Files.exists(resourcePath.resolve("client.bal")) &&
                     Files.exists(resourcePath.resolve("types.bal"))) {
                 String generatedSchema = getStringFromGivenBalFile(resourcePath, "types.bal");
@@ -362,8 +362,8 @@ public class CodeGeneratorTest {
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedDirPath,
                     "generate_client_requestbody.bal");
-            generator.generateClient(definitionPath, resourcePath.toString(), filter, false, false,
-                    false, false, false);
+            generator.generateClient(definitionPath, resourcePath.toString(), filter,
+                    new BallerinaCodeGenerator.ClientGeneratorOptions(false, false, false, false, false));
 
             if (Files.exists(resourcePath.resolve("client.bal"))) {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
@@ -448,8 +448,8 @@ public class CodeGeneratorTest {
         try {
             String expectedClientContent = getStringFromGivenBalFile(
                     expectedDirPath, "petstore_catch_all_path_client.bal");
-            generator.generateClient(definitionPath, resourcePath.toString(), filter, false, true, false,
-                    false, false);
+            generator.generateClient(definitionPath, resourcePath.toString(), filter,
+                    new BallerinaCodeGenerator.ClientGeneratorOptions(false, true, false, false, false));
             if (Files.exists(resourcePath.resolve("client.bal"))) {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
                 generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
@@ -706,8 +706,8 @@ public class CodeGeneratorTest {
     FormatterException {
         String definitionPath = RES_DIR.resolve("invalid_petstore.yaml").toString();
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
-        generator.generateClient(definitionPath, "", filter, false, false,
-                false, false, false);
+        generator.generateClient(definitionPath, "", filter,
+                new BallerinaCodeGenerator.ClientGeneratorOptions(false, false, false, false, false));
     }
 
     @Test(description = "Functionality tests when swagger 1.2 contract is given as input",
@@ -718,8 +718,8 @@ public class CodeGeneratorTest {
             OASTypeGenException, FormatterException {
         String definitionPath = RES_DIR.resolve("petstore_swagger_1.2.json").toString();
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
-        generator.generateClient(definitionPath, "", filter, false, false,
-                false, false, false);
+        generator.generateClient(definitionPath, "", filter,
+                new BallerinaCodeGenerator.ClientGeneratorOptions(false, false, false, false, false));
     }
 
     @Test
