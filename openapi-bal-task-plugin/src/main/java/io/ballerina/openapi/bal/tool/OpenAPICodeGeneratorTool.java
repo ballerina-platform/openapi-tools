@@ -524,7 +524,10 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         return sourceFiles;
     }
 
-    private static void generateFilesForClient(io.ballerina.compiler.syntax.tree.SyntaxTree syntaxTree, List<GenSrcFile> sourceFiles, String licenseHeader, BallerinaClientGenerator ballerinaClientGenerator) throws FormatterException, IOException {
+    private static void generateFilesForClient(io.ballerina.compiler.syntax.tree.SyntaxTree syntaxTree,
+                                               List<GenSrcFile> sourceFiles, String licenseHeader,
+                                               BallerinaClientGenerator ballerinaClientGenerator) throws
+            FormatterException, IOException {
         String mainContent = Formatter.format(syntaxTree).toSourceCode();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
                 licenseHeader + mainContent));
@@ -544,7 +547,11 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         }
     }
 
-    private void generateSingleFileForClient(ToolContext toolContext, io.ballerina.compiler.syntax.tree.SyntaxTree syntaxTree, BallerinaClientGenerator ballerinaClientGenerator, List<GenSrcFile> sourceFiles, String licenseHeader) throws IOException, FormatterException {
+    private void generateSingleFileForClient(ToolContext toolContext,
+                                             io.ballerina.compiler.syntax.tree.SyntaxTree syntaxTree,
+                                             BallerinaClientGenerator ballerinaClientGenerator,
+                                             List<GenSrcFile> sourceFiles, String licenseHeader) throws IOException,
+            FormatterException {
         syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree,
                 ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree(),
                 TypeHandler.getInstance().generateTypeSyntaxTree());
