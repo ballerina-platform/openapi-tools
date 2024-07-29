@@ -1184,24 +1184,4 @@ public class GeneratorUtils {
         return Objects.nonNull(operation.getOperationId()) ?
                 operation.getOperationId() : method + getValidName(path, true);
     }
-
-    public static SyntaxTree appendMembersToSyntaxTree(SyntaxTree syntaxTree, Collection<ImportDeclarationNode> imports,
-                                                       Collection<ModuleMemberDeclarationNode> memberDeclarationNodes) {
-        ModulePartNode rootNode = syntaxTree.rootNode();
-        NodeList<ImportDeclarationNode> importDeclarationNodes = rootNode.imports();
-        NodeList<ModuleMemberDeclarationNode> moduleMemberDeclarationNodes = rootNode.members();
-        Collection<ImportDeclarationNode> removingImports = new ArrayList<>();
-        importDeclarationNodes.stream().forEach(importDecNode -> {
-            imports.forEach(newImportNode -> {
-                if (importDecNode.toString().equals(newImportNode.toString())) {
-                    removingImports.add(newImportNode);
-                }
-            });
-        });
-        imports.removeAll(removingImports);
-        importDeclarationNodes = importDeclarationNodes.addAll(imports);
-        moduleMemberDeclarationNodes = moduleMemberDeclarationNodes.addAll(memberDeclarationNodes);
-        return syntaxTree.modifyWith(createModulePartNode(importDeclarationNodes, moduleMemberDeclarationNodes,
-                createToken(EOF_TOKEN)));
-    }
 }

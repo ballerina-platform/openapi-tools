@@ -516,34 +516,42 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 licenseContent + System.lineSeparator();
 
         if (oasClientConfig.singleFile()) {
-            syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree,
-                    ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree(),
-                    TypeHandler.getInstance().generateTypeSyntaxTree());
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null,
-                    CLIENT_FILE_NAME, licenseHeader + Formatter.format(syntaxTree).toSourceCode()));
-            deleteFileIfExists(toolContext.outputPath().resolve("types.bal"));
-            deleteFileIfExists(toolContext.outputPath().resolve("utils.bal"));
+            generateSingleFileForClient(toolContext, syntaxTree, ballerinaClientGenerator, sourceFiles, licenseHeader);
         } else {
-            String mainContent = Formatter.format(syntaxTree).toSourceCode();
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
-                    licenseHeader + mainContent));
-            String utilContent = Formatter.format(
-                    ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
-            if (!utilContent.isBlank()) {
-                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, null, UTIL_FILE_NAME,
-                        licenseHeader + utilContent));
-            }
-            // Generate ballerina records to represent schemas.
-            io.ballerina.compiler.syntax.tree.SyntaxTree schemaSyntaxTree = TypeHandler.getInstance()
-                    .generateTypeSyntaxTree();
-            String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
-            if (!schemaContent.isBlank()) {
-                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, null, TYPE_FILE_NAME,
-                        licenseHeader + schemaContent));
-            }
+            generateFilesForClient(syntaxTree, sourceFiles, licenseHeader, ballerinaClientGenerator);
         }
 
         return sourceFiles;
+    }
+
+    private static void generateFilesForClient(io.ballerina.compiler.syntax.tree.SyntaxTree syntaxTree, List<GenSrcFile> sourceFiles, String licenseHeader, BallerinaClientGenerator ballerinaClientGenerator) throws FormatterException, IOException {
+        String mainContent = Formatter.format(syntaxTree).toSourceCode();
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
+                licenseHeader + mainContent));
+        String utilContent = Formatter.format(
+                ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
+        if (!utilContent.isBlank()) {
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, null, UTIL_FILE_NAME,
+                    licenseHeader + utilContent));
+        }
+        // Generate ballerina records to represent schemas.
+        io.ballerina.compiler.syntax.tree.SyntaxTree schemaSyntaxTree = TypeHandler.getInstance()
+                .generateTypeSyntaxTree();
+        String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
+        if (!schemaContent.isBlank()) {
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, null, TYPE_FILE_NAME,
+                    licenseHeader + schemaContent));
+        }
+    }
+
+    private void generateSingleFileForClient(ToolContext toolContext, io.ballerina.compiler.syntax.tree.SyntaxTree syntaxTree, BallerinaClientGenerator ballerinaClientGenerator, List<GenSrcFile> sourceFiles, String licenseHeader) throws IOException, FormatterException {
+        syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree,
+                ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree(),
+                TypeHandler.getInstance().generateTypeSyntaxTree());
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null,
+                CLIENT_FILE_NAME, licenseHeader + Formatter.format(syntaxTree).toSourceCode()));
+        deleteFileIfExists(toolContext.outputPath().resolve("types.bal"));
+        deleteFileIfExists(toolContext.outputPath().resolve("utils.bal"));
     }
 
     private BallerinaClientGenerator getClientGenerator(OASClientConfig oasClientConfig) {
