@@ -26,6 +26,7 @@ import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.mock.AdvanceMockClientGenerator;
 import io.ballerina.openapi.core.generators.client.mock.BallerinaMockClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
+import io.ballerina.openapi.core.generators.common.SingleFileGenerator;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
@@ -463,7 +464,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 .append(clientConfig.getLicense())
                 .append(clientConfig.isNullable())
                 .append(clientConfig.isStatusCodeBinding())
-                .append(clientConfig.isMock());
+                .append(clientConfig.isMock())
+                .append(clientConfig.singleFile());
         List<String> tags = clientConfig.getFilter().getTags();
         tags.sort(String.CASE_INSENSITIVE_ORDER);
         for (String str : tags) {
@@ -514,8 +516,9 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 licenseContent + System.lineSeparator();
 
         if (oasClientConfig.singleFile()) {
-            syntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().appendUtilSyntaxTree(syntaxTree);
-            syntaxTree = TypeHandler.getInstance().appendTypeSyntaxTree(syntaxTree);
+            syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree,
+                    ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree(),
+                    TypeHandler.getInstance().generateTypeSyntaxTree());
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null,
                     CLIENT_FILE_NAME, licenseHeader + Formatter.format(syntaxTree).toSourceCode()));
         } else {

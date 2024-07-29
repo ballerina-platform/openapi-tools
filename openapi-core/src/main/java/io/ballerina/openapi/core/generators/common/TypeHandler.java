@@ -51,7 +51,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -116,15 +115,6 @@ public class TypeHandler {
         TextDocument textDocument = TextDocuments.from("");
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
         syntaxTree = syntaxTree.modifyWith(modulePartNode);
-        DocCommentGeneratorImp docCommentGenerator = new DocCommentGeneratorImp(GeneratorMetaData.getInstance()
-                .getOpenAPI(), syntaxTree, GenSrcFile.GenFileType.GEN_TYPE, false);
-        return docCommentGenerator.updateSyntaxTreeWithDocComments();
-    }
-
-    public SyntaxTree appendTypeSyntaxTree(SyntaxTree syntaxTree) {
-        NodeList<ModuleMemberDeclarationNode> typeMembers = getTypeMembers();
-        Collection<ImportDeclarationNode> importNodes = new ArrayList<>(generateImportNodes().stream().toList());
-        syntaxTree = GeneratorUtils.appendMembersToSyntaxTree(syntaxTree, importNodes, typeMembers.stream().toList());
         DocCommentGeneratorImp docCommentGenerator = new DocCommentGeneratorImp(GeneratorMetaData.getInstance()
                 .getOpenAPI(), syntaxTree, GenSrcFile.GenFileType.GEN_TYPE, false);
         return docCommentGenerator.updateSyntaxTreeWithDocComments();

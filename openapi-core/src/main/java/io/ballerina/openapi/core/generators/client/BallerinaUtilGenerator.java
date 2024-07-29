@@ -223,15 +223,6 @@ public class BallerinaUtilGenerator {
         return utilSyntaxTree.modifyWith(utilModulePartNode);
     }
 
-    public SyntaxTree appendUtilSyntaxTree(SyntaxTree syntaxTree) throws IOException {
-        Set<String> functionNameList = getFunctionNameList();
-        List<ModuleMemberDeclarationNode> memberDeclarationNodes = new ArrayList<>();
-        getUtilTypeDeclarationNodes(memberDeclarationNodes);
-        addUtilFunctionDeclarationNodes(memberDeclarationNodes, functionNameList);
-        List<ImportDeclarationNode> imports = generateImports(functionNameList);
-        return GeneratorUtils.appendMembersToSyntaxTree(syntaxTree, imports, memberDeclarationNodes);
-    }
-
     private void addUtilFunctionDeclarationNodes(List<ModuleMemberDeclarationNode> memberDeclarationNodes,
                                                  Set<String> functionNameList) throws IOException {
         Path path = getResourceFilePath();

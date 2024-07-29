@@ -29,6 +29,7 @@ import io.ballerina.openapi.core.generators.client.mock.AdvanceMockClientGenerat
 import io.ballerina.openapi.core.generators.client.mock.BallerinaMockClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.SingleFileGenerator;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
@@ -403,8 +404,9 @@ public class BallerinaCodeGenerator {
         }
 
         if (singleFile) {
-            syntaxTree = clientGenerator.getBallerinaUtilGenerator().appendUtilSyntaxTree(syntaxTree);
-            syntaxTree = TypeHandler.getInstance().appendTypeSyntaxTree(syntaxTree);
+            syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree,
+                    clientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree(),
+                    TypeHandler.getInstance().generateTypeSyntaxTree());
         } else {
             String mainContent = Formatter.format(syntaxTree).toSourceCode();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME,
@@ -519,7 +521,8 @@ public class BallerinaCodeGenerator {
         if (singleFile) {
             SyntaxTree syntaxTree = serviceGenerationHandler.generateSingleSyntaxTree(oasServiceMetadata);
             if (!oasServiceMetadata.generateWithoutDataBinding()) {
-                syntaxTree = TypeHandler.getInstance().appendTypeSyntaxTree(syntaxTree);
+                syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree,
+                        TypeHandler.getInstance().generateTypeSyntaxTree());
             }
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
                     oasServiceMetadata.getSrcFile(),
