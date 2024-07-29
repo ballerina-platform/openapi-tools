@@ -34,6 +34,10 @@ public class Constants {
     public static final String ATTRIBUTE_EXCLUDE_OPERATIONS = "excludeOperations";
     public static final String ATTRIBUTE_FAIL_ON_ERRORS = "failOnErrors";
     public static final String BALLERINA = "ballerina";
+    public static final String OPENAPI = "openapi";
+    public static final String EMPTY = "";
+    public static final String EXAMPLE_VALUE = "ExampleValue";
+    public static final String EXAMPLE_VALUES = "ExampleValues";
     public static final String FALSE = "false";
     public static final String EMBED = "embed";
     public static final String JSON = ".json";

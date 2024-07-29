@@ -95,7 +95,15 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_130("OAS_CONVERTOR_130", "Generated OpenAPI definition does not contain the example" +
             " details since the JSON value provided for the example has parser errors", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_131("OAS_CONVERTOR_131", "`%s` example can not have a blank path",
-            DiagnosticSeverity.WARNING);
+            DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_132("OAS_CONVERTOR_132", "Generated OpenAPI definition does not contain the example " +
+            "for type: `%s`, since the example value has parser errors", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_133("OAS_CONVERTOR_133", "Generated OpenAPI definition does not contain the example " +
+            "for record field: `%s.%s`, since the example value has parser errors", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_134("OAS_CONVERTOR_134", "Generated OpenAPI definition does not contain the `%s` for" +
+            " `%s` parameter: `%s`, since the example value(s) has parser errors", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_135("OAS_CONVERTOR_135", "Example skipped for request parameter: `%s`, since the request payload " +
+            "type implies more than one content-type", DiagnosticSeverity.WARNING);
     private final String code;
     private final String description;
     private final DiagnosticSeverity severity;
