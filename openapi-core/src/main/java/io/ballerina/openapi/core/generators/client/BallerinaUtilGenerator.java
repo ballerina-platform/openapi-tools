@@ -209,7 +209,6 @@ public class BallerinaUtilGenerator {
      * @return Syntax tree of the util.bal file
      */
     public SyntaxTree generateUtilSyntaxTree() throws IOException {
-
         Set<String> functionNameList = getFunctionNameList();
         List<ModuleMemberDeclarationNode> memberDeclarationNodes = new ArrayList<>();
         getUtilTypeDeclarationNodes(memberDeclarationNodes);
