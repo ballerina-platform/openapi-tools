@@ -8,6 +8,7 @@ servers:
 paths:
   /products:
     get:
+      operationId: products
       summary: Product Types
       description: The Products endpoint returns information about the Uber products
         offered at a given location. The response includes the display name and
