@@ -256,13 +256,11 @@ public class BallerinaCodeGenerator {
      * @throws BallerinaOpenApiException when code generator fails
      */
     public void generateService(String definitionPath, String serviceName, String outPath, Filter filter,
-                                boolean nullable, boolean generateServiceType, boolean generateWithoutDataBinding,
-                                boolean singleFile)
+                                ServiceGeneratorOptions options)
             throws IOException, BallerinaOpenApiException, FormatterException {
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
-        List<GenSrcFile> genFiles = generateBallerinaService(Paths.get(definitionPath), serviceName,
-                filter, nullable, generateServiceType, generateWithoutDataBinding, singleFile);
+        List<GenSrcFile> genFiles = generateBallerinaService(Paths.get(definitionPath), serviceName, filter, options);
         if (genFiles.isEmpty()) {
             return;
         }
@@ -442,7 +440,7 @@ public class BallerinaCodeGenerator {
      *  @param singleFile             Enable singleFile option to generate all content in a single file
      */
     public record ClientGeneratorOptions(boolean nullable, boolean isResource, boolean statusCodeBinding,
-                                         boolean isMock, boolean singleFile) {}
+                                         boolean isMock, boolean singleFile) { }
 
     private void generateFilesForClient(SyntaxTree syntaxTree, List<GenSrcFile> sourceFiles,
                                         BallerinaClientGenerator clientGenerator) throws FormatterException,
@@ -495,8 +493,7 @@ public class BallerinaCodeGenerator {
 
 
     public List<GenSrcFile> generateBallerinaService(Path openAPI, String serviceName,
-                                                     Filter filter, boolean nullable, boolean generateServiceType,
-                                                     boolean generateWithoutDataBinding, boolean singleFile)
+                                                     Filter filter, ServiceGeneratorOptions options)
             throws IOException, FormatterException, BallerinaOpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_MOCK_PKG;
@@ -531,17 +528,17 @@ public class BallerinaCodeGenerator {
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPIDef)
                 .withFilters(filter)
-                .withNullable(nullable)
-                .withGenerateServiceType(generateServiceType)
-                .withGenerateWithoutDataBinding(generateWithoutDataBinding)
+                .withNullable(options.nullable)
+                .withGenerateServiceType(options.generateServiceType)
+                .withGenerateWithoutDataBinding(options.generateWithoutDataBinding)
                 .withLicenseHeader(licenseHeader)
                 .withSrcFile(srcFile)
                 .withSrcPackage(srcPackage)
                 .build();
-        TypeHandler.createInstance(openAPIDef, nullable);
+        TypeHandler.createInstance(openAPIDef, options.nullable);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        if (singleFile) {
+        if (options.singleFile) {
             generateSingleFileForService(serviceGenerationHandler, oasServiceMetadata, sourceFiles);
         } else {
             sourceFiles = generateFilesForService(serviceGenerationHandler, oasServiceMetadata);
@@ -552,6 +549,17 @@ public class BallerinaCodeGenerator {
         printDiagnostic(diagnostics);
         return sourceFiles;
     }
+
+    /**
+     * Represents a record which stores the additional generator options for service.
+     *
+     * @param nullable                     Enable nullable option for make record field optional
+     * @param generateServiceType          Enable to generate service type
+     * @param generateWithoutDataBinding   Enable to generate service without data binding
+     * @param singleFile                   Enable singleFile option to generate all content in a single file
+     */
+    public record ServiceGeneratorOptions(boolean nullable, boolean generateServiceType,
+                                          boolean generateWithoutDataBinding, boolean singleFile) { }
 
     private static List<GenSrcFile> generateFilesForService(ServiceGenerationHandler serviceGenerationHandler,
                                                             OASServiceMetadata oasServiceMetadata) throws
