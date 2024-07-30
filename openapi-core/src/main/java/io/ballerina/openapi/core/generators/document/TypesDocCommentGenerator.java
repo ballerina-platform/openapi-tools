@@ -62,17 +62,17 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
         Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
         ModulePartNode modulePartNode = (ModulePartNode) rootNode;
         NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
-        List<ModuleMemberDeclarationNode> updatedList = new ArrayList<>();
+        List<ModuleMemberDeclarationNode> updatedMemberTypesList = new ArrayList<>();
 
         members.stream().forEach(member -> {
             if (!(member instanceof TypeDefinitionNode typeDef)) {
-                updatedList.add(member);
+                updatedMemberTypesList.add(member);
                 return;
             }
             // Find a matching schema based on type name
             TypeDefinitionNode finalTypeDef = typeDef;
             if (schemas == null) {
-                updatedList.add(typeDef);
+                updatedMemberTypesList.add(typeDef);
                 return;
             }
             Schema<?> schema = schemas.entrySet()
@@ -125,15 +125,15 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
                             typeDef.typeDescriptor(),
                             typeDef.semicolonToken());
                 }
-                updatedList.add(typeDef);
+                updatedMemberTypesList.add(typeDef);
             } else {
-                updatedList.add(typeDef);
+                updatedMemberTypesList.add(typeDef);
             }
         });
-        NodeList<ModuleMemberDeclarationNode> typeMembers = AbstractNodeFactory.createNodeList(
-                updatedList.toArray(new ModuleMemberDeclarationNode[updatedList.size()]));
+        NodeList<ModuleMemberDeclarationNode> updatedMembers = AbstractNodeFactory.createNodeList(
+                updatedMemberTypesList.toArray(new ModuleMemberDeclarationNode[updatedMemberTypesList.size()]));
 
-        modulePartNode = modulePartNode.modify(modulePartNode.imports(), typeMembers, modulePartNode.eofToken());
+        modulePartNode = modulePartNode.modify(modulePartNode.imports(), updatedMembers, modulePartNode.eofToken());
         return syntaxTree.modifyWith(modulePartNode);
     }
 
