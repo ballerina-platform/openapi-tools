@@ -185,4 +185,21 @@ public class FunctionSignatureReturnTypeTests {
         SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
+
+    @Test(description = "Tests for the server sent event return type")
+    public void getReturnTypeWithSSE() throws IOException, BallerinaOpenApiException, ClientException {
+        OpenAPI openAPI = getOpenAPI(RES_DIR.resolve("swagger/return_type" +
+                "/sse_return_type.yaml"));
+        Path expectedPath = RES_DIR.resolve("ballerina/return/sse_return_type.bal");
+        TypeHandler.createInstance(openAPI, false);
+        List<String> list1 = new ArrayList<>();
+        Filter filter = new Filter(list1, list1);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
 }
