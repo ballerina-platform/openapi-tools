@@ -100,8 +100,7 @@ public class BallerinaCodeGenerator {
      * <p>Method can be user for generating Ballerina mock services and clients</p>
      */
     public void generateClientAndService(String definitionPath, String serviceName, String outPath, Filter filter,
-                                         boolean nullable, boolean isResource, boolean generateServiceType,
-                                         boolean generateWithoutDataBinding, boolean statusCodeBinding, boolean isMock)
+                                         ClientServiceGeneratorOptions options)
             throws IOException, FormatterException, BallerinaOpenApiException,
             OASTypeGenException, ClientException {
         Path srcPath = Paths.get(outPath);
@@ -112,14 +111,15 @@ public class BallerinaCodeGenerator {
         // Normalize OpenAPI definition, in the client generation we suppose to terminate code generation when the
         // absence of the operationId in operation. Therefor we enable client flag true as default code generation.
         // if resource is enabled, we avoid checking operationId.
-        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPIPath, !isResource);
+        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPIPath, !options.isResource);
         checkOpenAPIVersion(openAPIDef);
         // Add typeHandler
-        TypeHandler.createInstance(openAPIDef, nullable);
+        TypeHandler.createInstance(openAPIDef, options.nullable);
         // Generate service
         String serviceTitle = serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = String.format("%s_service.bal", serviceTitle);
         List<String> complexPaths = GeneratorUtils.getComplexPaths(openAPIDef);
+        boolean isResource = options.isResource;
         if (!complexPaths.isEmpty()) {
             isResource = false;
             outStream.println("WARNING: remote function(s) will be generated for client and the service" +
@@ -134,12 +134,12 @@ public class BallerinaCodeGenerator {
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
-                .withNullable(nullable)
+                .withNullable(options.nullable)
                 .withPlugin(false)
                 .withOpenAPI(openAPIDef)
                 .withResourceMode(isResource)
-                .withStatusCodeBinding(statusCodeBinding)
-                .withMock(isMock).build();
+                .withStatusCodeBinding(options.statusCodeBinding)
+                .withMock(options.isMock).build();
 
         BallerinaClientGenerator clientGenerator = getBallerinaClientGenerator(oasClientConfig);
         String clientContent = Formatter.format(clientGenerator.generateSyntaxTree()).toSourceCode();
@@ -163,9 +163,9 @@ public class BallerinaCodeGenerator {
             OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                     .withOpenAPI(openAPIDef)
                     .withFilters(filter)
-                    .withNullable(nullable)
-                    .withGenerateServiceType(generateServiceType)
-                    .withGenerateWithoutDataBinding(generateWithoutDataBinding)
+                    .withNullable(options.nullable)
+                    .withGenerateServiceType(options.generateServiceType)
+                    .withGenerateWithoutDataBinding(options.generateWithoutDataBinding)
                     .withSrcFile(srcFile)
                     .withSrcPackage(srcPackage)
                     .withLicenseHeader(licenseHeader)
@@ -209,6 +209,21 @@ public class BallerinaCodeGenerator {
         printDiagnostic(diagnostics);
         writeGeneratedSources(newGenFiles, srcPath, implPath, GEN_BOTH);
     }
+
+    /**
+     * Represents a record which stores the additional generator options for client.
+     *
+     *  @param nullable                     Enable nullable option to make record field optional
+     *  @param isResource                   Enable isResource option to generate resource methods
+     *  @param generateServiceType          Enable generateServiceType option to generate service type
+     *  @param generateWithoutDataBinding   Enable generateWithoutDataBinding option to generate the
+     *                                      service without data binding
+     *  @param statusCodeBinding            Enable statusCodeBinding option
+     *  @param isMock                       Enable isMock option to generate mocks
+     */
+    public record ClientServiceGeneratorOptions(boolean nullable, boolean isResource, boolean generateServiceType,
+                                                boolean generateWithoutDataBinding, boolean statusCodeBinding,
+                                         boolean isMock) { }
 
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();
@@ -471,7 +486,7 @@ public class BallerinaCodeGenerator {
     private void generateSchemaFile(List<GenSrcFile> sourceFiles, String schemaContent, String licenseHeader) {
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
-                    licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader + schemaContent));
+                    (licenseHeader.isBlank() ? DEFAULT_FILE_HEADER : licenseHeader) + schemaContent));
         }
     }
 

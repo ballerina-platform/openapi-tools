@@ -463,8 +463,9 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             assert resourcePath != null;
             generator.generateClientAndService(resourcePath.toString(), fileName, targetOutputPath.toString(), filter,
-                    baseCmd.nullable, generateClientResourceFunctions, generateServiceType, generateWithoutDataBinding,
-                    statusCodeBinding, baseCmd.mock);
+                    new BallerinaCodeGenerator.ClientServiceGeneratorOptions(baseCmd.nullable,
+                            generateClientResourceFunctions, generateServiceType, generateWithoutDataBinding,
+                            statusCodeBinding, baseCmd.mock));
         } catch (BallerinaOpenApiException e) {
             outStream.println(e.getMessage());
             exitError(this.exitWhenFinish);
