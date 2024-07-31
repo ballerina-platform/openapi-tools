@@ -557,8 +557,6 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 TypeHandler.getInstance().generateTypeSyntaxTree());
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null,
                 CLIENT_FILE_NAME, licenseHeader + Formatter.format(syntaxTree).toSourceCode()));
-        deleteFileIfExists(toolContext.outputPath().resolve("types.bal"));
-        deleteFileIfExists(toolContext.outputPath().resolve("utils.bal"));
     }
 
     private BallerinaClientGenerator getClientGenerator(OASClientConfig oasClientConfig) {
@@ -677,13 +675,5 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         try (FileWriter writer = new FileWriter(filePath.toString(), StandardCharsets.UTF_8)) {
             writer.write(content);
         }
-    }
-
-    private boolean deleteFileIfExists(Path filePath) {
-        File file = new File(filePath.toString());
-        if (file.exists()) {
-           return file.delete();
-        }
-        return false;
     }
 }
