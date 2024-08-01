@@ -41,11 +41,11 @@ public class OASGenerationMetaInfo {
         this.openApiFileName = builder.openApiFileName;
         this.ballerinaFilePath = builder.ballerinaFilePath;
         this.semanticModel = builder.semanticModel;
-        ServiceNode serviceNode = builder.serviceNode;
-        if (Objects.isNull(serviceNode)) {
-            serviceNode = new ServiceDeclaration(builder.serviceDeclarationNode, semanticModel);
+        ServiceNode serviceNodeFromBuilder = builder.serviceNode;
+        if (Objects.isNull(serviceNodeFromBuilder)) {
+            serviceNodeFromBuilder = new ServiceDeclaration(builder.serviceDeclarationNode, semanticModel);
         }
-        this.serviceNode = serviceNode;
+        this.serviceNode = serviceNodeFromBuilder;
         this.project = builder.project;
     }
 
