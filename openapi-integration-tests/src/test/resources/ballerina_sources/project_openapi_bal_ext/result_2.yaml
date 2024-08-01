@@ -3,12 +3,12 @@ info:
   title: Api V1
   version: 0.1.0
 servers:
-- url: "{server}:{port}/api/v1"
-  variables:
-    server:
-      default: http://localhost
-    port:
-      default: "9090"
+  - url: "{server}:{port}/api/v1"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /students:
     get:
@@ -26,8 +26,8 @@ components:
   schemas:
     BasicStudent:
       required:
-      - age
-      - name
+        - age
+        - name
       type: object
       properties:
         name:
@@ -37,9 +37,9 @@ components:
           format: int64
       additionalProperties: false
       x-ballerina-type:
-        orgName: tharmigan
-        pkgName: bal_ext
-        moduleName: bal_ext.module
+        orgName: ballerina
+        pkgName: openapi_bal_ext
+        moduleName: openapi_bal_ext.module
         version: 0.1.0
         modulePrefix: module
         name: BasicStudent
@@ -47,12 +47,12 @@ components:
       type: object
       description: Date in proleptic Gregorian calendar.
       allOf:
-      - $ref: '#/components/schemas/DateFields'
-      - $ref: '#/components/schemas/OptionalTimeOfDayFields'
-      - type: object
-        properties:
-          utcOffset:
-            $ref: '#/components/schemas/ZoneOffset'
+        - $ref: '#/components/schemas/DateFields'
+        - $ref: '#/components/schemas/OptionalTimeOfDayFields'
+        - type: object
+          properties:
+            utcOffset:
+              $ref: '#/components/schemas/ZoneOffset'
       x-ballerina-type:
         orgName: ballerina
         pkgName: time
@@ -62,9 +62,9 @@ components:
         name: Date
     DateFields:
       required:
-      - day
-      - month
-      - year
+        - day
+        - month
+        - year
       type: object
       properties:
         year:
@@ -117,21 +117,21 @@ components:
     Student:
       type: object
       allOf:
-      - $ref: '#/components/schemas/BasicStudent'
-      - required:
-        - subjects
-        type: object
-        properties:
-          subjects:
-            type: array
-            items:
-              $ref: '#/components/schemas/Subject'
-        additionalProperties: false
+        - $ref: '#/components/schemas/BasicStudent'
+        - required:
+            - subjects
+          type: object
+          properties:
+            subjects:
+              type: array
+              items:
+                $ref: '#/components/schemas/Subject'
+          additionalProperties: false
     Subject:
       required:
-      - credits
-      - examDate
-      - name
+        - credits
+        - examDate
+        - name
       type: object
       properties:
         name:
@@ -144,7 +144,7 @@ components:
       additionalProperties: false
     ZoneOffset:
       required:
-      - hours
+        - hours
       type: object
       properties:
         hours:
