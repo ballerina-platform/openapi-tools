@@ -44,7 +44,7 @@ import static io.ballerina.openapi.TestUtil.TEST_DISTRIBUTION_PATH;
  */
 public class BallerinaToOpenAPITests extends OpenAPITest {
     public static final String DISTRIBUTION_FILE_NAME = DISTRIBUTIONS_DIR.toString();
-    public static final Path TEST_RESOURCE = Paths.get(RESOURCES_PATH.toString() + "/ballerina_sources");
+    public static final Path TEST_RESOURCE = Paths.get(RESOURCES_PATH + "/ballerina_sources");
 
     @BeforeClass
     public void setupDistributions() throws IOException {
@@ -92,7 +92,7 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("-i");
         buildArgs.add("project_7/service.bal");
-        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        Assert.assertTrue(TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs));
         Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("mTitle_openapi.yaml")));
     }
 
@@ -101,7 +101,7 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("-i");
         buildArgs.add("project_8/service.bal");
-        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        Assert.assertTrue(TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs));
         Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("mTitle01_openapi.yaml")));
         Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("mVersion_openapi.yaml")));
     }
@@ -123,7 +123,7 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("-i");
         buildArgs.add("project_11/service.bal");
-        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        Assert.assertTrue(TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs));
         Assert.assertFalse(Files.exists(TEST_RESOURCE.resolve("query_openapi.yaml")));
     }
 
@@ -154,7 +154,7 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
     }
 
     //TODO enable after resolving dependency issue
-    @Test(description = "Service is with openapi annotation include all oas infor section details", enabled = false)
+    @Test(description = "Service is with openapi annotation include all oas info section details", enabled = false)
     public void openAPInForSectionTest() throws IOException, InterruptedException {
         executeCommand("project_openapi_info/service_file.bal", "info_openapi.yaml",
                 "project_openapi_info/result.yaml");
@@ -213,7 +213,7 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("-i");
         buildArgs.add(resourcePath);
-        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        Assert.assertTrue(TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs));
         Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve(generatedFile)));
         String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve(generatedFile));
         String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve(expectedPath));
@@ -227,7 +227,7 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
         buildArgs.add(resourcePath);
         buildArgs.add("--bal-ext-level");
         buildArgs.add(extensionLevel);
-        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        Assert.assertTrue(TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs));
         Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve(generatedFile)));
         String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve(generatedFile));
         String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve(expectedPath));
