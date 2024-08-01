@@ -1146,7 +1146,7 @@ public class GeneratorUtils {
     public static TypeDescriptorNode getUnionTypeDescriptorNodeFromTypeDescNodes(HashMap<String, TypeDescriptorNode>
                                                                                          typeDescNodes) {
         if (typeDescNodes.isEmpty()) {
-            return getSimpleNameReferenceNode(GeneratorConstants.ANYDATA);
+            return null;
         }
         List<TypeDescriptorNode> qualifiedNodeList = typeDescNodes.values().stream().toList();
         TypeDescriptorNode unionTypeDescriptorNode = qualifiedNodeList.get(0);
