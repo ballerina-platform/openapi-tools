@@ -168,31 +168,31 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
 
     @Test(description = "Generate without ballerina extension option")
     public void openAPIGenWithoutBalExt() throws IOException, InterruptedException {
-        executeCommand("project_openapi_bal_ext/main.bal", "api_openapi_ext_default.yaml",
+        executeCommand("project_openapi_bal_ext/main.bal", "api_v1_openapi.yaml",
                 "project_openapi_bal_ext/result_0.yaml");
     }
 
     @Test(description = "Generate with ballerina extension option - 0 - DISABLED")
     public void openAPIGenWithExtOpt0() throws IOException, InterruptedException {
-        executeCommand("project_openapi_bal_ext/main.bal", "api_openapi_ext_0.yaml",
+        executeCommand("project_openapi_bal_ext/main.bal", "api_v1_openapi.yaml",
                 "project_openapi_bal_ext/result_0.yaml", "0");
     }
 
     @Test(description = "Generate with ballerina extension option - 1 - EXTERNAL_PACKAGE_TYPES")
     public void openAPIGenWithExtOpt1() throws IOException, InterruptedException {
-        executeCommand("project_openapi_bal_ext/main.bal", "api_openapi_ext_1.yaml",
+        executeCommand("project_openapi_bal_ext/main.bal", "api_v1_openapi.yaml",
                 "project_openapi_bal_ext/result_1.yaml", "1");
     }
 
     @Test(description = "Generate with ballerina extension option - 2 - SAME_PACKAGE_DIFFERENT_MODULE_TYPES")
     public void openAPIGenWithExtOpt2() throws IOException, InterruptedException {
-        executeCommand("project_openapi_bal_ext/main.bal", "api_openapi_ext_2.yaml",
+        executeCommand("project_openapi_bal_ext/main.bal", "api_v1_openapi.yaml",
                 "project_openapi_bal_ext/result_2.yaml", "2");
     }
 
     @Test(description = "Generate with ballerina extension option - 3 - ALL_REFERENCED_TYPES")
     public void openAPIGenWithExtOpt3() throws IOException, InterruptedException {
-        executeCommand("project_openapi_bal_ext/main.bal", "api_openapi_ext_3.yaml",
+        executeCommand("project_openapi_bal_ext/main.bal", "api_v1_openapi.yaml",
                 "project_openapi_bal_ext/result_3.yaml", "3");
     }
 
