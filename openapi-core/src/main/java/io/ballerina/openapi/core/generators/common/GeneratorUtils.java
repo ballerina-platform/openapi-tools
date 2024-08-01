@@ -159,6 +159,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SPE
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STYLE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TEXT_EVENT_STREAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YML_EXTENSION;
@@ -528,6 +529,8 @@ public class GeneratorUtils {
             return SyntaxKind.JSON_KEYWORD.stringValue();
         } else if (mediaType.matches(".*/xml") || mediaType.matches("application/.*\\+xml")) {
             return SyntaxKind.XML_KEYWORD.stringValue();
+        } else if (mediaType.equals(TEXT_EVENT_STREAM) && !isRequest) {
+            return "stream<http:SseEvent, error?>";
         } else if (mediaType.equals(APPLICATION_FORM_URLENCODED) || mediaType.matches("text/.*")) {
             return STRING_KEYWORD.stringValue();
         } else if (mediaType.equals(APPLICATION_OCTET_STREAM) ||
