@@ -128,7 +128,7 @@ subprojects {
         ballerinaStdLibs "io.ballerina.stdlib:oauth2-ballerina:${stdlibOAuth2Version}"
         ballerinaStdLibs "io.ballerina.stdlib:uuid-ballerina:${stdlibUuidVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:url-ballerina:${stdlibUrlVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:xmldata-ballerina:${stdlibXmldataVersion}"
+        ballerinaStdLibs "io.ballerina.lib:data.xmldata-ballerina:${stdlibXmldataVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:observe-ballerina:${observeVersion}"
         ballerinaStdLibs "io.ballerina:observe-ballerina:${observeInternalVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:graphql-ballerina:${stdlibGraphqlVersion}"
