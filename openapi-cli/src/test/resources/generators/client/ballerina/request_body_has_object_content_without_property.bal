@@ -1,5 +1,5 @@
 import ballerina/http;
-import ballerina/xmldata;
+import ballerina/data.xmldata;
 
 public isolated client class Client {
     final http:Client clientEp;

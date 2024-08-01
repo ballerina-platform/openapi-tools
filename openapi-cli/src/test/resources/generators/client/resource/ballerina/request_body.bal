@@ -1,5 +1,5 @@
 import ballerina/http;
-import ballerina/xmldata;
+import ballerina/data.xmldata;
 
 # refComponent
 public isolated client class Client {
