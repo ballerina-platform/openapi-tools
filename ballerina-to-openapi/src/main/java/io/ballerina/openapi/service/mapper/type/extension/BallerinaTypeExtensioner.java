@@ -46,17 +46,18 @@ public final class BallerinaTypeExtensioner {
     }
 
     public static void removeExtensions(OpenAPI openAPI) {
-        removeExtensions(openAPI, BallerinaExtensionLevel.DISABLED, "", "");
+        removeExtensions(openAPI, BallerinaExtensionLevel.DISABLED, "", "", "");
     }
 
     public static void removeExtensions(OpenAPI openAPI, BallerinaExtensionLevel extensionLevel, ModuleID moduleID) {
         String orgName = moduleID.orgName();
+        String packageName = moduleID.packageName();
         String moduleName = moduleID.moduleName();
-        removeExtensions(openAPI, extensionLevel, orgName, moduleName);
+        removeExtensions(openAPI, extensionLevel, orgName, packageName, moduleName);
     }
 
     private static void removeExtensions(OpenAPI openAPI, BallerinaExtensionLevel extensionLevel,
-                                         String orgName, String moduleName) {
+                                         String orgName, String packageName, String moduleName) {
         Components components = openAPI.getComponents();
         if (Objects.isNull(components)) {
             return;
@@ -70,19 +71,19 @@ public final class BallerinaTypeExtensioner {
         schemas.forEach((key, schema) -> {
             Map<?, ?> extensions = schema.getExtensions();
             if (Objects.nonNull(extensions)) {
-                removeBallerinaExtension(extensionLevel, extensions, orgName, moduleName);
+                removeBallerinaExtension(extensionLevel, extensions, orgName, packageName, moduleName);
             }
         });
     }
 
-    private static void removeBallerinaExtension(BallerinaExtensionLevel extensionLevel,
-                                                 Map<?, ?> extensions, String orgName, String moduleName) {
+    private static void removeBallerinaExtension(BallerinaExtensionLevel extensionLevel, Map<?, ?> extensions,
+                                                 String orgName, String packageName, String moduleName) {
         switch (extensionLevel) {
             case DISABLED:
                 extensions.remove(X_BALLERINA_TYPE);
                 break;
             case EXTERNAL_PACKAGE_TYPES:
-                if (fromSamePackage(extensions, orgName)) {
+                if (fromSamePackage(extensions, orgName, packageName)) {
                     extensions.remove(X_BALLERINA_TYPE);
                 }
                 break;
@@ -101,9 +102,9 @@ public final class BallerinaTypeExtensioner {
                 orgName.equals(ballerinaPkg.orgName()) && moduleName.equals(ballerinaPkg.moduleName());
     }
 
-    private static boolean fromSamePackage(Map<?, ?> extensions, String orgName) {
+    private static boolean fromSamePackage(Map<?, ?> extensions, String orgName, String packageName) {
         return extensions.get(X_BALLERINA_TYPE) instanceof BallerinaPackage ballerinaPkg &&
-                orgName.equals(ballerinaPkg.orgName());
+                orgName.equals(ballerinaPkg.orgName()) && packageName.equals(ballerinaPkg.pkgName());
     }
 
     public static Optional<BallerinaPackage> getExtension(Schema schema) {
