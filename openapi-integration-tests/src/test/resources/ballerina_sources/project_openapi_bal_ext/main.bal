@@ -1,4 +1,4 @@
-import bal_ext.module as mod;
+import openapi_bal_ext.module as mod;
 
 import ballerina/http;
 import ballerina/time;
