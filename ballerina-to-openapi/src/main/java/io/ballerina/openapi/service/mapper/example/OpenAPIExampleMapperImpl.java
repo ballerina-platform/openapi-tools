@@ -149,7 +149,7 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
         Optional<Symbol> ballerinaType;
         if (ballerinaExt.isPresent()) {
             BallerinaPackage ballerinaPkg = ballerinaExt.get();
-            String typeName = ballerinaPkg.name().orElse(name);
+            String typeName = Objects.isNull(ballerinaPkg.name()) ? name : ballerinaPkg.name();
             ballerinaType = semanticModel.types().getTypeByName(ballerinaPkg.orgName(), ballerinaPkg.moduleName(),
                     ballerinaPkg.version(), typeName);
         } else {

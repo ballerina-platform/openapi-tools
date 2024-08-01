@@ -17,8 +17,6 @@
  */
 package io.ballerina.openapi.service.mapper.type.extension;
 
-import java.util.Optional;
-
 /**
  * This {@link BallerinaPackage} record represents the Ballerina package details.
  * @param orgName organization name
@@ -30,5 +28,5 @@ import java.util.Optional;
  * @since 2.1.0
  */
 public record BallerinaPackage(String orgName, String pkgName, String moduleName, String version,
-                               String modulePrefix, Optional<String> name) {
+                               String modulePrefix, String name) {
 }

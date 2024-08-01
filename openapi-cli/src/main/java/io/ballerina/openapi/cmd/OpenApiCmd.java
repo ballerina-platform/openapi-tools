@@ -121,6 +121,9 @@ public class OpenApiCmd implements BLauncherCmd {
             description = "Generate service without data binding")
     private boolean generateWithoutDataBinding;
 
+    @CommandLine.Option(names = {"--bal-ext-level"}, hidden = true, description = "Generate ballerina type extensions")
+    private String ballerinaExtensionLevel;
+
 
     @CommandLine.Parameters
     private List<String> argList;
@@ -211,7 +214,7 @@ public class OpenApiCmd implements BLauncherCmd {
 
             if (baseCmd.statusCodeBinding) {
                 if (baseCmd.mode != null && baseCmd.mode.equals(SERVICE)) {
-                    outStream.println("ERROR: the '--status-code-binding' option is only available in client " +
+                    outStream.println("the '--status-code-binding' option is only available in client " +
                             "generation mode.");
                     exitError(this.exitWhenFinish);
                 }
@@ -226,6 +229,12 @@ public class OpenApiCmd implements BLauncherCmd {
                 }
             }
 
+            if (ballerinaExtensionLevel != null) {
+                outStream.println("'--bal-ext-level' option is only available in OpenAPI specification " +
+                        "generation mode.");
+                exitError(this.exitWhenFinish);
+            }
+
             try {
                 openApiToBallerina(fileName, filter);
             } catch (IOException e) {
@@ -238,6 +247,14 @@ public class OpenApiCmd implements BLauncherCmd {
                 // Exit the code generation process
                 outStream.println("'--client-methods' option is only available in client generation mode.");
                 exitError(this.exitWhenFinish);
+            }
+            if (ballerinaExtensionLevel != null && !(ballerinaExtensionLevel.equals("0") ||
+                    ballerinaExtensionLevel.equals("1") || ballerinaExtensionLevel.equals("2") ||
+                    ballerinaExtensionLevel.equals("3"))) {
+                outStream.println("unsupported '--bal-ext-level' option value. Please use 0 - DISABLED, 1 - " +
+                        "EXTERNAL_PACKAGE_TYPES, 2 - SAME_PACKAGE_DIFFERENT_MODULE_TYPES, 3 - ALL_REFERENCED_TYPES");
+                exitError(this.exitWhenFinish);
+
             }
             ballerinaToOpenApi(fileName);
         } else {
@@ -277,6 +294,7 @@ public class OpenApiCmd implements BLauncherCmd {
         getTargetOutputPath();
         // Check service name it is mandatory
         OASContractGenerator openApiConverter = new OASContractGenerator();
+        openApiConverter.setBallerinaExtensionLevel(ballerinaExtensionLevel);
         openApiConverter.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, service,
                 generatedFileType);
         mapperDiagnostics.addAll(openApiConverter.getDiagnostics());

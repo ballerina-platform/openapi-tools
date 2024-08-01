@@ -19,6 +19,7 @@ package io.ballerina.openapi.service.mapper.model;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.openapi.service.mapper.type.extension.BallerinaExtensionLevel;
 import io.ballerina.projects.Project;
 
 import java.nio.file.Path;
@@ -35,6 +36,7 @@ public class OASGenerationMetaInfo {
     private final SemanticModel semanticModel;
     private final ServiceDeclarationNode serviceDeclarationNode;
     private final Project project;
+    private final BallerinaExtensionLevel ballerinaExtensionLevel;
 
     public OASGenerationMetaInfo(OASGenerationMetaInfoBuilder builder) {
         this.openApiFileName = builder.openApiFileName;
@@ -42,6 +44,7 @@ public class OASGenerationMetaInfo {
         this.semanticModel = builder.semanticModel;
         this.serviceDeclarationNode = builder.serviceDeclarationNode;
         this.project = builder.project;
+        this.ballerinaExtensionLevel = builder.ballerinaExtensionLevel;
     }
 
     public String getOpenApiFileName() {
@@ -64,6 +67,10 @@ public class OASGenerationMetaInfo {
         return project;
     }
 
+    public BallerinaExtensionLevel getBallerinaExtensionLevel() {
+        return ballerinaExtensionLevel;
+    }
+
     /**
      * This method is used to create a new {@link OASGenerationMetaInfoBuilder} instance.
      */
@@ -74,6 +81,7 @@ public class OASGenerationMetaInfo {
         private SemanticModel semanticModel;
         private ServiceDeclarationNode serviceDeclarationNode;
         private Project project;
+        private BallerinaExtensionLevel ballerinaExtensionLevel = BallerinaExtensionLevel.DISABLED;
 
         public OASGenerationMetaInfoBuilder setBallerinaFilePath(Path ballerinaFilePath) {
             this.ballerinaFilePath = ballerinaFilePath;
@@ -92,6 +100,11 @@ public class OASGenerationMetaInfo {
 
         public OASGenerationMetaInfoBuilder setOpenApiFileName(String openApiFileName) {
             this.openApiFileName = openApiFileName;
+            return this;
+        }
+
+        public OASGenerationMetaInfoBuilder setBallerinaExtensionLevel(BallerinaExtensionLevel balExtLevel) {
+            this.ballerinaExtensionLevel = balExtLevel;
             return this;
         }
 

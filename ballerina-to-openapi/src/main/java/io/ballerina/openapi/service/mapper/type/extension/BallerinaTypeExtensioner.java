@@ -46,6 +46,17 @@ public final class BallerinaTypeExtensioner {
     }
 
     public static void removeExtensions(OpenAPI openAPI) {
+        removeExtensions(openAPI, BallerinaExtensionLevel.DISABLED, "", "");
+    }
+
+    public static void removeExtensions(OpenAPI openAPI, BallerinaExtensionLevel extensionLevel, ModuleID moduleID) {
+        String orgName = moduleID.orgName();
+        String moduleName = moduleID.moduleName();
+        removeExtensions(openAPI, extensionLevel, orgName, moduleName);
+    }
+
+    private static void removeExtensions(OpenAPI openAPI, BallerinaExtensionLevel extensionLevel,
+                                         String orgName, String moduleName) {
         Components components = openAPI.getComponents();
         if (Objects.isNull(components)) {
             return;
@@ -59,9 +70,40 @@ public final class BallerinaTypeExtensioner {
         schemas.forEach((key, schema) -> {
             Map<?, ?> extensions = schema.getExtensions();
             if (Objects.nonNull(extensions)) {
-                extensions.remove(X_BALLERINA_TYPE);
+                removeBallerinaExtension(extensionLevel, extensions, orgName, moduleName);
             }
         });
+    }
+
+    private static void removeBallerinaExtension(BallerinaExtensionLevel extensionLevel,
+                                                 Map<?, ?> extensions, String orgName, String moduleName) {
+        switch (extensionLevel) {
+            case DISABLED:
+                extensions.remove(X_BALLERINA_TYPE);
+                break;
+            case EXTERNAL_PACKAGE_TYPES:
+                if (fromSamePackage(extensions, orgName)) {
+                    extensions.remove(X_BALLERINA_TYPE);
+                }
+                break;
+            case SAME_PACKAGE_DIFFERENT_MODULE_TYPES:
+                if (fromSameModule(extensions, orgName, moduleName)) {
+                    extensions.remove(X_BALLERINA_TYPE);
+                }
+                break;
+            case ALL_REFERENCED_TYPES:
+                break;
+        }
+    }
+
+    private static boolean fromSameModule(Map<?, ?> extensions, String orgName, String moduleName) {
+        return extensions.get(X_BALLERINA_TYPE) instanceof BallerinaPackage ballerinaPkg &&
+                orgName.equals(ballerinaPkg.orgName()) && moduleName.equals(ballerinaPkg.moduleName());
+    }
+
+    private static boolean fromSamePackage(Map<?, ?> extensions, String orgName) {
+        return extensions.get(X_BALLERINA_TYPE) instanceof BallerinaPackage ballerinaPkg &&
+                orgName.equals(ballerinaPkg.orgName());
     }
 
     public static Optional<BallerinaPackage> getExtension(Schema schema) {
@@ -84,6 +126,6 @@ public final class BallerinaTypeExtensioner {
         }
         ModuleID moduleID = module.get().id();
         return Optional.of(new BallerinaPackage(moduleID.orgName(), moduleID.packageName(), moduleID.moduleName(),
-                moduleID.version(), moduleID.modulePrefix(), typeSymbol.getName()));
+                moduleID.version(), moduleID.modulePrefix(), typeSymbol.getName().orElse(null)));
     }
 }

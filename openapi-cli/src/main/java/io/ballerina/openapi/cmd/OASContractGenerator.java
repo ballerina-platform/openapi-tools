@@ -59,12 +59,17 @@ public class OASContractGenerator {
     private Project project;
     private List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
     private PrintStream outStream = System.out;
+    private String ballerinaExtensionLevel = "0";
 
     /**
      * Initialize constructor.
      */
     public OASContractGenerator() {
 
+    }
+
+    public void setBallerinaExtensionLevel(String ballerinaExtensionLevel) {
+        this.ballerinaExtensionLevel = ballerinaExtensionLevel;
     }
 
     public List<OpenAPIMapperDiagnostic> getDiagnostics() {
@@ -118,7 +123,7 @@ public class OASContractGenerator {
         }
         semanticModel = compilation.getSemanticModel(docId.moduleId());
         List<OASResult> openAPIDefinitions = ServiceToOpenAPIMapper.generateOAS3Definition(project, syntaxTree,
-                semanticModel, serviceName, needJson, inputPath);
+                semanticModel, serviceName, needJson, inputPath, ballerinaExtensionLevel);
 
         if (!openAPIDefinitions.isEmpty()) {
             List<String> fileNames = new ArrayList<>();

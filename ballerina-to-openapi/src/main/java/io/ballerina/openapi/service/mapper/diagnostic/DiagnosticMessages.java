@@ -103,7 +103,9 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_134("OAS_CONVERTOR_134", "Generated OpenAPI definition does not contain the `%s` for" +
             " `%s` parameter: `%s`, since the example value(s) has parser errors", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_135("OAS_CONVERTOR_135", "Example skipped for request parameter: `%s`, since the request payload " +
-            "type implies more than one content-type", DiagnosticSeverity.WARNING);
+            "type implies more than one content-type", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_136("OAS_CONVERTOR_136", "Given ballerina extension level: %s is not supported. Set the " +
+            "ballerina extension level to DISABLED", DiagnosticSeverity.WARNING);
     private final String code;
     private final String description;
     private final DiagnosticSeverity severity;
