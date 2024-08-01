@@ -1,3 +1,6 @@
+# This workflow is to publish the Ballerina to OpenAPI package to the GitHub.
+# This has to be run before releasing the openapi-tool, since the http package
+# depends on the Ballerina to OpenAPI package.
 name: Publish Ballerina to OpenAPI package
 
 on:

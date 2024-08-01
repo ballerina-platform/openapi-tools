@@ -1,3 +1,6 @@
+# This workflow is to publish the openapi-tool packages except Ballerina to OpenAPI package,
+# to ballerina central, maven central and GitHub. Having a released version of Ballerina to OpenAPI
+# package is a prerequisite for this workflow.
 name: Publish release
 
 on:
