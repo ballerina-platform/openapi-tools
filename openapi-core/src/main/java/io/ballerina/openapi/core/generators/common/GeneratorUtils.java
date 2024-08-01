@@ -470,7 +470,7 @@ public class GeneratorUtils {
         String openAPIFileContent = Files.readString(definitionPath);
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
-//        parseOptions.setFlatten(true);
+        parseOptions.setFlatten(true);
         SwaggerParseResult parseResult = new OpenAPIParser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
             if (parseResult.getMessages().contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
@@ -484,7 +484,9 @@ public class GeneratorUtils {
 
             throw new BallerinaOpenApiException(errorMessage.toString());
         }
-        return parseResult.getOpenAPI();
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        OASSanitizer oasSanitizer = new OASSanitizer(openAPI);
+        return oasSanitizer.sanitized();
     }
 
     /**
