@@ -250,6 +250,26 @@ public class ClientGenerationTests extends OpenAPITest {
         compareFiles(projectGenPath, "utils.bal", projectExpectedPath, "utils_all_with_default.bal");
     }
 
+    @Test(description = "check client generation with allOf schema which has common required fields ")
+    public void allOfSchemaClientGenerationWithCommonRequiredFields() throws IOException, InterruptedException {
+        String openapiFilePath = "azure_openai.yaml";
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("-i");
+        buildArgs.add(openapiFilePath);
+        buildArgs.add("--mode");
+        buildArgs.add("client");
+        Path projectGenPath = Paths.get(TEST_RESOURCE + "/project-09");
+        Path projectExpectedPath = Paths.get(EXPECTED_RESOURCE + "/expected/project-09");
+        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, projectGenPath, buildArgs);
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("Ballerina.toml")));
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("client.bal")));
+        compareFiles(projectGenPath, "client.bal", projectExpectedPath, "client.bal");
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("types.bal")));
+        compareFiles(projectGenPath, "types.bal", projectExpectedPath, "types.bal");
+        Assert.assertTrue(Files.exists(projectGenPath.resolve("utils.bal")));
+        compareFiles(projectGenPath, "utils.bal", projectExpectedPath, "utils.bal");
+    }
+
     @Test(description = "`--status-code-binding` option with responses with optional header or body schema")
     public void optionalSchemaWithStatusCodeBinding() throws IOException, InterruptedException {
         String openapiFilePath = "openapi.yaml";
