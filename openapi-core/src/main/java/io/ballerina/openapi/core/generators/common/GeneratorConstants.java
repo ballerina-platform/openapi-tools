@@ -129,7 +129,7 @@ public class GeneratorConstants {
     public static final String QUERIES = "queries";
     public static final String SELF = "self";
     public static final String TEXT_PREFIX = "text/";
-    public static final String XML_DATA = "xmldata";
+    public static final String XML_DATA = "data.xmldata";
     public static final String IMAGE = "image";
     public static final String VENDOR_SPECIFIC_TYPE = "vnd.";
     public static final String MIME = "mime";
