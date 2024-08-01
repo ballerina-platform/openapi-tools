@@ -123,7 +123,7 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("-i");
         buildArgs.add("project_11/service.bal");
-        Assert.assertTrue(TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs));
+        Assert.assertFalse(TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs));
         Assert.assertFalse(Files.exists(TEST_RESOURCE.resolve("query_openapi.yaml")));
     }
 
