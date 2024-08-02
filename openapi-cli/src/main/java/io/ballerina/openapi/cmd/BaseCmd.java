@@ -59,4 +59,7 @@ public class BaseCmd {
     @CommandLine.Option(names = {"--mock"}, hidden = true,
             description = "Generate mock client with given response example")
     public boolean mock;
+
+    @CommandLine.Option(names = {"--single-file"}, description = "Generate all contents in a single file")
+    public boolean singleFile;
 }

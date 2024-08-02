@@ -163,7 +163,7 @@ public final class Constants {
         httpCodeMap.put("MethodNotAllowed", "405");
         httpCodeMap.put("NotAcceptable", "406");
         httpCodeMap.put("ProxyAuthenticationRequired", "407");
-        httpCodeMap.put("RequestTimeOut", "408");
+        httpCodeMap.put("RequestTimeout", "408");
         httpCodeMap.put("Conflict", "409");
         httpCodeMap.put("Gone", "410");
         httpCodeMap.put("LengthRequired", "411");
@@ -210,7 +210,7 @@ public final class Constants {
         httpErrorCodeMap.put("MethodNotAllowedError", "405");
         httpErrorCodeMap.put("NotAcceptableError", "406");
         httpErrorCodeMap.put("ProxyAuthenticationRequiredError", "407");
-        httpErrorCodeMap.put("RequestTimeOutError", "408");
+        httpErrorCodeMap.put("RequestTimeoutError", "408");
         httpErrorCodeMap.put("ConflictError", "409");
         httpErrorCodeMap.put("GoneError", "410");
         httpErrorCodeMap.put("LengthRequiredError", "411");
@@ -276,7 +276,7 @@ public final class Constants {
         httpCodeDescriptionMap.put("405", "MethodNotAllowed");
         httpCodeDescriptionMap.put("406", "NotAcceptable");
         httpCodeDescriptionMap.put("407", "ProxyAuthenticationRequired");
-        httpCodeDescriptionMap.put("408", "RequestTimeOut");
+        httpCodeDescriptionMap.put("408", "RequestTimeout");
         httpCodeDescriptionMap.put("409", "Conflict");
         httpCodeDescriptionMap.put("410", "Gone");
         httpCodeDescriptionMap.put("411", "LengthRequired");

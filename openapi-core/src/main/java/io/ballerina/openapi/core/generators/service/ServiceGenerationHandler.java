@@ -18,6 +18,8 @@
 
 package io.ballerina.openapi.core.generators.service;
 
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.core.generators.common.SingleFileGenerator;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
@@ -38,25 +40,35 @@ public class ServiceGenerationHandler {
     public List<GenSrcFile> generateServiceFiles(OASServiceMetadata oasServiceMetadata) throws
             FormatterException, BallerinaOpenApiException {
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        String mainContent;
         ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
-        mainContent = Formatter.format(serviceGenerator.generateSyntaxTree()).toSourceCode();
+        SyntaxTree syntaxTree = serviceGenerator.generateSyntaxTree();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
                 oasServiceMetadata.getSrcFile(),
                 (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
-                        oasServiceMetadata.getLicenseHeader()) + mainContent));
-
+                        oasServiceMetadata.getLicenseHeader()) + Formatter.format(syntaxTree).toSourceCode()));
         if (oasServiceMetadata.isServiceTypeRequired()) {
             ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata,
                     serviceGenerator.getFunctionsList());
             String serviceType = Formatter.format(serviceTypeGenerator.generateSyntaxTree()).toSourceCode();
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SERVICE_TYPE, oasServiceMetadata.getSrcPackage(),
-                    "service_type.bal",
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SERVICE_TYPE,
+                    oasServiceMetadata.getSrcPackage(), "service_type.bal",
                     (oasServiceMetadata.getLicenseHeader().isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
-                            oasServiceMetadata.getLicenseHeader()) + serviceType));
+                    oasServiceMetadata.getLicenseHeader()) + serviceType));
         }
         diagnostics.addAll(serviceGenerator.getDiagnostics());
         return sourceFiles;
+    }
+
+    public SyntaxTree generateSingleSyntaxTree(OASServiceMetadata oasServiceMetadata) throws BallerinaOpenApiException {
+        ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+        SyntaxTree syntaxTree = serviceGenerator.generateSyntaxTree();
+        if (oasServiceMetadata.isServiceTypeRequired()) {
+            ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata,
+                    serviceGenerator.getFunctionsList());
+            syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree, serviceTypeGenerator.generateSyntaxTree());
+        }
+        diagnostics.addAll(serviceGenerator.getDiagnostics());
+        return syntaxTree;
     }
 
     public List<Diagnostic> getDiagnostics() {

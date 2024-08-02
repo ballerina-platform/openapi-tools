@@ -36,6 +36,7 @@ public class Constants {
     public static final String CACHE_FILE = "openapi-cache.txt";
     public static final String STATUS_CODE_BINDING = "statusCodeBinding";
     public static final String MOCK = "mock";
+    public static final String SINGLE_FILE = "singleFile";
 
     /**
      * Enum class for containing diagnostic messages.
