@@ -347,6 +347,10 @@ public class OpenApiCmd implements BLauncherCmd {
                     break;
             }
         } else {
+            if (baseCmd.singleFile) {
+                outStream.println("WARNING: Generating single file for Client & Service generation mode is not " +
+                        "supported. Defaulting to generating all files.");
+            }
             generateBothFiles(generator, serviceName, resourcePath, filter, clientResourceMode, statusCodeBinding);
         }
         if (!skipDependecyUpdate) {
@@ -416,8 +420,9 @@ public class OpenApiCmd implements BLauncherCmd {
     private void generatesClientFile(BallerinaCodeGenerator generator, Path resourcePath, Filter filter,
                                      boolean resourceMode, boolean statusCodeBinding) {
         try {
-            generator.generateClient(resourcePath.toString(), targetOutputPath.toString(), filter, baseCmd.nullable,
-                    resourceMode, statusCodeBinding, baseCmd.mock);
+            generator.generateClient(resourcePath.toString(), targetOutputPath.toString(), filter,
+                    new BallerinaCodeGenerator.ClientGeneratorOptions(baseCmd.nullable, resourceMode,
+                            statusCodeBinding, baseCmd.mock, baseCmd.singleFile));
         } catch (IOException | FormatterException | BallerinaOpenApiException |
                  OASTypeGenException e) {
             if (e.getLocalizedMessage() != null) {
@@ -448,7 +453,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 exitError(this.exitWhenFinish);
             } else {
                 ServiceGeneratorOptions options = new ServiceGeneratorOptions(baseCmd.nullable, generateServiceType,
-                                generateServiceContract, generateWithoutDataBinding);
+                                generateServiceContract, generateWithoutDataBinding, baseCmd.singleFile);
                 generator.generateService(resourcePath.toString(), serviceName, targetOutputPath.toString(), filter,
                         options);
             }

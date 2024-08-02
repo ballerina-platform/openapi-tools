@@ -180,7 +180,7 @@ public class GeneratorConstants {
         httpCodeMap.put("405", "MethodNotAllowed");
         httpCodeMap.put("406", "NotAcceptable");
         httpCodeMap.put("407", "ProxyAuthenticationRequired");
-        httpCodeMap.put("408", "RequestTimeOut");
+        httpCodeMap.put("408", "RequestTimeout");
         httpCodeMap.put("409", "Conflict");
         httpCodeMap.put("410", "Gone");
         httpCodeMap.put("411", "LengthRequired");

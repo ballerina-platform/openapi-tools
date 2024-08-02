@@ -19,6 +19,8 @@
 package io.ballerina.openapi.core.generators.service;
 
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.core.generators.common.SingleFileGenerator;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
@@ -62,6 +64,18 @@ public class ServiceGenerationHandler {
 
         diagnostics.addAll(serviceGenerator.getDiagnostics());
         return sourceFiles;
+    }
+
+    public SyntaxTree generateSingleSyntaxTree(OASServiceMetadata oasServiceMetadata) throws BallerinaOpenApiException {
+        ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+        SyntaxTree syntaxTree = serviceGenerator.generateSyntaxTree();
+        if (oasServiceMetadata.isServiceTypeRequired()) {
+            ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata,
+                    serviceGenerator.getFunctionsList());
+            syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree, serviceTypeGenerator.generateSyntaxTree());
+        }
+        diagnostics.addAll(serviceGenerator.getDiagnostics());
+        return syntaxTree;
     }
 
     public List<Diagnostic> getDiagnostics() {
