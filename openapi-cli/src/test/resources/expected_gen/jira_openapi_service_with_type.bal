@@ -7,13 +7,13 @@ import ballerina/http;
 listener http:Listener ep0 = new (443, config = {host: "your-domain.atlassian.com"});
 
 service OASServiceType / on ep0 {
-    resource function delete rest/api/'2/'field/[string fieldId]/context/[int contextId]() returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function delete rest/api/'2/'field/[string fieldId]/context/[int contextId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function delete rest/api/'2/'field/[string fieldId]/context/[int contextId]/option/[int optionId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function delete rest/api/'2/'field/[string fieldKey]/option/[int optionId]() returns NoContent|http:Forbidden|http:NotFound|http:Conflict {
+    resource function delete rest/api/'2/'field/[string fieldKey]/option/[int optionId]() returns http:NoContent|http:Forbidden|http:NotFound|http:Conflict {
     }
 
     resource function delete rest/api/'2/'field/[string fieldKey]/option/[int optionId]/issue(int? replaceWith, string? jql) returns TaskProgressBeanRemoveOptionFromIssuesResultSeeOther|http:BadRequest|http:NotFound {
@@ -94,19 +94,19 @@ service OASServiceType / on ep0 {
     resource function delete rest/api/'2/issuetype/[string issueTypeId]/properties/[string propertyKey]() returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function delete rest/api/'2/issuetypescheme/[int issueTypeSchemeId]() returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function delete rest/api/'2/issuetypescheme/[int issueTypeSchemeId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function delete rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype/[int issueTypeId]() returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function delete rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype/[int issueTypeId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function delete rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]() returns NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|JsonNotFound {
+    resource function delete rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|JsonNotFound {
     }
 
     resource function delete rest/api/'2/mypreferences(string 'key) returns http:NoContent|http:Unauthorized|http:NotFound {
     }
 
-    resource function delete rest/api/'2/mypreferences/locale() returns NoContent|http:Unauthorized {
+    resource function delete rest/api/'2/mypreferences/locale() returns http:NoContent|http:Unauthorized {
     }
 
     resource function delete rest/api/'2/permissionscheme/[int schemeId]() returns http:NoContent|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -286,7 +286,7 @@ service OASServiceType / on ep0 {
     resource function get rest/api/'2/configuration() returns Configuration|http:Unauthorized {
     }
 
-    resource function get rest/api/'2/configuration/timetracking() returns TimeTrackingProvider|NoContent|http:Unauthorized|http:Forbidden {
+    resource function get rest/api/'2/configuration/timetracking() returns TimeTrackingProvider|http:NoContent|http:Unauthorized|http:Forbidden {
     }
 
     resource function get rest/api/'2/configuration/timetracking/list() returns TimeTrackingProvider[]|http:Unauthorized|http:Forbidden {
@@ -814,13 +814,13 @@ service OASServiceType / on ep0 {
     resource function post rest/api/'2/'field/[string fieldId]/context(@http:Payload CreateCustomFieldContext payload) returns CreateCustomFieldContext|http:BadRequest|http:Unauthorized|http:NotFound|JsonConflict {
     }
 
-    resource function post rest/api/'2/'field/[string fieldId]/context/[int contextId]/issuetype/remove(@http:Payload IssueTypeIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function post rest/api/'2/'field/[string fieldId]/context/[int contextId]/issuetype/remove(@http:Payload IssueTypeIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function post rest/api/'2/'field/[string fieldId]/context/[int contextId]/option(@http:Payload BulkCustomFieldOptionCreateRequest payload) returns CustomFieldCreatedContextOptionsListOk|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function post rest/api/'2/'field/[string fieldId]/context/[int contextId]/project/remove(@http:Payload ProjectIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function post rest/api/'2/'field/[string fieldId]/context/[int contextId]/project/remove(@http:Payload ProjectIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function post rest/api/'2/'field/[string fieldId]/context/mapping(@http:Payload ProjectIssueTypeMappings payload, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanContextForProjectAndIssueTypeOk|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
@@ -871,19 +871,19 @@ service OASServiceType / on ep0 {
     resource function post rest/api/'2/issue/[string issueIdOrKey]/comment(string? expand, @http:Payload Comment payload) returns Comment|http:BadRequest|http:Unauthorized|http:NotFound {
     }
 
-    resource function post rest/api/'2/issue/[string issueIdOrKey]/notify(@http:Payload Notification payload) returns NoContent|http:BadRequest|http:Forbidden|http:NotFound {
+    resource function post rest/api/'2/issue/[string issueIdOrKey]/notify(@http:Payload Notification payload) returns http:NoContent|http:BadRequest|http:Forbidden|http:NotFound {
     }
 
     resource function post rest/api/'2/issue/[string issueIdOrKey]/remotelink(@http:Payload RemoteIssueLinkRequest payload) returns RemoteIssueLinkIdentifiesOk|RemoteIssueLinkIdentifies|JsonBadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function post rest/api/'2/issue/[string issueIdOrKey]/transitions(@http:Payload IssueUpdateDetails payload) returns NoContent|http:BadRequest|http:Unauthorized|http:NotFound {
+    resource function post rest/api/'2/issue/[string issueIdOrKey]/transitions(@http:Payload IssueUpdateDetails payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:NotFound {
     }
 
-    resource function post rest/api/'2/issue/[string issueIdOrKey]/votes() returns NoContent|http:Unauthorized|http:NotFound {
+    resource function post rest/api/'2/issue/[string issueIdOrKey]/votes() returns http:NoContent|http:Unauthorized|http:NotFound {
     }
 
-    resource function post rest/api/'2/issue/[string issueIdOrKey]/watchers(@http:Payload string payload) returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function post rest/api/'2/issue/[string issueIdOrKey]/watchers(@http:Payload string payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
     resource function post rest/api/'2/issue/[string issueIdOrKey]/worklog(string? newEstimate, string? reduceBy, @http:Payload Worklog payload, boolean notifyUsers = true, "new"|"leave"|"manual"|"auto" adjustEstimate = "auto", string expand = "", boolean overrideEditableFlag = false) returns Worklog|http:BadRequest|http:Unauthorized|http:NotFound {
@@ -913,7 +913,7 @@ service OASServiceType / on ep0 {
     resource function post rest/api/'2/issuetypescreenscheme(@http:Payload IssueTypeScreenSchemeDetails payload) returns IssueTypeScreenSchemeId|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound|JsonConflict {
     }
 
-    resource function post rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping/remove(@http:Payload IssueTypeIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function post rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping/remove(@http:Payload IssueTypeIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function post rest/api/'2/jql/'match(@http:Payload IssuesAndJQLQueries payload) returns IssueMatchesOk|http:BadRequest {
@@ -943,7 +943,7 @@ service OASServiceType / on ep0 {
     resource function post rest/api/'2/project(@http:Payload ProjectInputBean payload) returns ProjectIdentifiers|http:BadRequest|http:Unauthorized|http:Forbidden {
     }
 
-    resource function post rest/api/'2/project/[string projectIdOrKey]/archive() returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function post rest/api/'2/project/[string projectIdOrKey]/archive() returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
     resource function post rest/api/'2/project/[string projectIdOrKey]/avatar2(int:Signed32? size, http:Request request, int:Signed32 x = 0, int:Signed32 y = 0) returns Avatar|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -979,10 +979,10 @@ service OASServiceType / on ep0 {
     resource function post rest/api/'2/screens/[int screenId]/tabs/[int tabId]/fields(@http:Payload AddFieldBean payload) returns ScreenableFieldOk|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function post rest/api/'2/screens/[int screenId]/tabs/[int tabId]/fields/[string id]/move(@http:Payload MoveFieldBean payload) returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function post rest/api/'2/screens/[int screenId]/tabs/[int tabId]/fields/[string id]/move(@http:Payload MoveFieldBean payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function post rest/api/'2/screens/[int screenId]/tabs/[int tabId]/move/[int:Signed32 pos]() returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function post rest/api/'2/screens/[int screenId]/tabs/[int tabId]/move/[int:Signed32 pos]() returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
     resource function post rest/api/'2/screens/addToDefault/[string fieldId]() returns JsonOk|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -1009,7 +1009,7 @@ service OASServiceType / on ep0 {
     resource function post rest/api/'2/version/[string id]/move(@http:Payload VersionMoveBean payload) returns VersionOk|http:BadRequest|http:Unauthorized|http:NotFound {
     }
 
-    resource function post rest/api/'2/version/[string id]/removeAndSwap(@http:Payload DeleteAndReplaceVersionBean payload) returns NoContent|http:BadRequest|http:Unauthorized|http:NotFound {
+    resource function post rest/api/'2/version/[string id]/removeAndSwap(@http:Payload DeleteAndReplaceVersionBean payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:NotFound {
     }
 
     resource function post rest/api/'2/webhook(@http:Payload WebhookRegistrationDetails payload) returns ContainerForRegisteredWebhooksOk|ErrorCollectionBadRequest|ErrorCollectionForbidden {
@@ -1033,31 +1033,31 @@ service OASServiceType / on ep0 {
     resource function post rest/atlassian\-connect/'1/app/module/dynamic(@http:Payload ConnectModules payload) returns http:Ok|ErrorMessageBadRequest|ErrorMessageUnauthorized {
     }
 
-    resource function put rest/api/'2/'field/[string fieldId](@http:Payload UpdateCustomFieldDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/'field/[string fieldId](@http:Payload UpdateCustomFieldDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId](@http:Payload CustomFieldContextUpdateDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId](@http:Payload CustomFieldContextUpdateDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/issuetype(@http:Payload IssueTypeIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound|JsonConflict {
+    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/issuetype(@http:Payload IssueTypeIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound|JsonConflict {
     }
 
     resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/option(@http:Payload BulkCustomFieldOptionUpdateRequest payload) returns CustomFieldUpdatedContextOptionsList|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/option/move(@http:Payload OrderOfCustomFieldOptions payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/option/move(@http:Payload OrderOfCustomFieldOptions payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/project(@http:Payload ProjectIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/project(@http:Payload ProjectIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/'field/[string fieldId]/context/defaultValue(@http:Payload CustomFieldContextDefaultValueUpdate payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/'field/[string fieldId]/context/defaultValue(@http:Payload CustomFieldContextDefaultValueUpdate payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function put rest/api/'2/'field/[string fieldKey]/option/[int optionId](@http:Payload IssueFieldOption payload) returns IssueFieldOption|http:BadRequest|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/app/'field/[string fieldIdOrKey]/value(@http:Payload CustomFieldValueUpdateRequest payload) returns NoContent|http:BadRequest|http:Forbidden|http:NotFound {
+    resource function put rest/api/'2/app/'field/[string fieldIdOrKey]/value(@http:Payload CustomFieldValueUpdateRequest payload) returns http:NoContent|http:BadRequest|http:Forbidden|http:NotFound {
     }
 
     resource function put rest/api/'2/application\-properties/[string id](@http:Payload SimpleApplicationPropertyBean payload) returns ApplicationProperty|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -1069,13 +1069,13 @@ service OASServiceType / on ep0 {
     resource function put rest/api/'2/component/[string id](@http:Payload Component payload) returns Component|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/configuration/timetracking(@http:Payload TimeTrackingProvider payload) returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden {
+    resource function put rest/api/'2/configuration/timetracking(@http:Payload TimeTrackingProvider payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden {
     }
 
     resource function put rest/api/'2/configuration/timetracking/options(@http:Payload TimeTrackingConfiguration payload) returns TimeTrackingConfiguration|http:BadRequest|http:Unauthorized|http:Forbidden {
     }
 
-    resource function put rest/api/'2/customField/[int fieldId]/option(@http:Payload UpdateCustomFieldOption payload) returns NoContent|ErrorCollectionBadRequest|ErrorCollectionUnauthorized|ErrorCollectionNotFound {
+    resource function put rest/api/'2/customField/[int fieldId]/option(@http:Payload UpdateCustomFieldOption payload) returns http:NoContent|ErrorCollectionBadRequest|ErrorCollectionUnauthorized|ErrorCollectionNotFound {
     }
 
     resource function put rest/api/'2/dashboard/[string dashboardId]/items/[string itemId]/properties/[string propertyKey](@http:Payload json payload) returns json|JsonCreated|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -1084,7 +1084,7 @@ service OASServiceType / on ep0 {
     resource function put rest/api/'2/dashboard/[string id](@http:Payload DashboardDetails payload) returns Dashboard|ErrorCollectionBadRequest|ErrorCollectionUnauthorized|ErrorCollectionNotFound {
     }
 
-    resource function put rest/api/'2/fieldconfigurationscheme/project(@http:Payload FieldConfigurationSchemeProjectAssociation payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/fieldconfigurationscheme/project(@http:Payload FieldConfigurationSchemeProjectAssociation payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function put rest/api/'2/filter/[int id](string? expand, @http:Payload Filter payload) returns Filter|http:BadRequest|http:Unauthorized {
@@ -1099,10 +1099,10 @@ service OASServiceType / on ep0 {
     resource function put rest/api/'2/filter/defaultShareScope(@http:Payload DefaultShareScope payload) returns DefaultShareScope|http:BadRequest|http:Unauthorized {
     }
 
-    resource function put rest/api/'2/issue/[string issueIdOrKey](@http:Payload IssueUpdateDetails payload, boolean notifyUsers = true, boolean overrideScreenSecurity = false, boolean overrideEditableFlag = false) returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function put rest/api/'2/issue/[string issueIdOrKey](@http:Payload IssueUpdateDetails payload, boolean notifyUsers = true, boolean overrideScreenSecurity = false, boolean overrideEditableFlag = false) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/issue/[string issueIdOrKey]/assignee(@http:Payload User payload) returns NoContent|http:BadRequest|http:Forbidden|http:NotFound {
+    resource function put rest/api/'2/issue/[string issueIdOrKey]/assignee(@http:Payload User payload) returns http:NoContent|http:BadRequest|http:Forbidden|http:NotFound {
     }
 
     resource function put rest/api/'2/issue/[string issueIdOrKey]/comment/[string id](string? expand, @http:Payload Comment payload) returns Comment|http:BadRequest|http:Unauthorized|http:NotFound {
@@ -1111,7 +1111,7 @@ service OASServiceType / on ep0 {
     resource function put rest/api/'2/issue/[string issueIdOrKey]/properties/[string propertyKey](@http:Payload json payload) returns json|JsonCreated|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/issue/[string issueIdOrKey]/remotelink/[string linkId](@http:Payload RemoteIssueLinkRequest payload) returns NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function put rest/api/'2/issue/[string issueIdOrKey]/remotelink/[string linkId](@http:Payload RemoteIssueLinkRequest payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
     resource function put rest/api/'2/issue/[string issueIdOrKey]/worklog/[string id](string? newEstimate, @http:Payload Worklog payload, boolean notifyUsers = true, "new"|"leave"|"manual"|"auto" adjustEstimate = "auto", string expand = "", boolean overrideEditableFlag = false) returns Worklog|http:BadRequest|http:Unauthorized|http:NotFound {
@@ -1132,40 +1132,40 @@ service OASServiceType / on ep0 {
     resource function put rest/api/'2/issuetype/[string issueTypeId]/properties/[string propertyKey](@http:Payload json payload) returns json|JsonCreated|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId](@http:Payload IssueTypeSchemeUpdateDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId](@http:Payload IssueTypeSchemeUpdateDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype(@http:Payload IssueTypeIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype(@http:Payload IssueTypeIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype/move(@http:Payload OrderOfIssueTypes payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype/move(@http:Payload OrderOfIssueTypes payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/issuetypescheme/project(@http:Payload IssueTypeSchemeProjectAssociation payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/issuetypescheme/project(@http:Payload IssueTypeSchemeProjectAssociation payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId](@http:Payload IssueTypeScreenSchemeUpdateDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId](@http:Payload IssueTypeScreenSchemeUpdateDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping(@http:Payload IssueTypeScreenSchemeMappingDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|JsonNotFound|JsonConflict {
+    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping(@http:Payload IssueTypeScreenSchemeMappingDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|JsonNotFound|JsonConflict {
     }
 
-    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping/default(@http:Payload UpdateDefaultScreenScheme payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping/default(@http:Payload UpdateDefaultScreenScheme payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/issuetypescreenscheme/project(@http:Payload IssueTypeScreenSchemeProjectAssociation payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/issuetypescreenscheme/project(@http:Payload IssueTypeScreenSchemeProjectAssociation payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/mypreferences(string 'key, @http:Payload string payload) returns NoContent|http:Unauthorized|http:NotFound {
+    resource function put rest/api/'2/mypreferences(string 'key, @http:Payload string payload) returns http:NoContent|http:Unauthorized|http:NotFound {
     }
 
-    resource function put rest/api/'2/mypreferences/locale(@http:Payload Locale payload) returns NoContent|http:BadRequest|http:Unauthorized {
+    resource function put rest/api/'2/mypreferences/locale(@http:Payload Locale payload) returns http:NoContent|http:BadRequest|http:Unauthorized {
     }
 
     resource function put rest/api/'2/permissionscheme/[int schemeId](string? expand, @http:Payload PermissionScheme payload) returns PermissionScheme|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/project/[int projectId]/email(@http:Payload ProjectEmailAddress payload) returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function put rest/api/'2/project/[int projectId]/email(@http:Payload ProjectEmailAddress payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
     resource function put rest/api/'2/project/[string projectIdOrKey](string? expand, @http:Payload ProjectInputBean payload) returns Project|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -1174,7 +1174,7 @@ service OASServiceType / on ep0 {
     resource function put rest/api/'2/project/[string projectIdOrKey]/'type/["software"|"service_desk"|"business" newProjectTypeKey]() returns Project|http:BadRequest|http:Unauthorized|http:NotFound {
     }
 
-    resource function put rest/api/'2/project/[string projectIdOrKey]/avatar(@http:Payload Avatar payload) returns NoContent|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function put rest/api/'2/project/[string projectIdOrKey]/avatar(@http:Payload Avatar payload) returns http:NoContent|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
     resource function put rest/api/'2/project/[string projectIdOrKey]/features/[string featureKey](@http:Payload ProjectFeatureToggleRequest payload) returns ProjectFeaturesResponse|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -1201,7 +1201,7 @@ service OASServiceType / on ep0 {
     resource function put rest/api/'2/screens/[int screenId]/tabs/[int tabId](@http:Payload ScreenableTab payload) returns ScreenableTab|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/screenscheme/[string screenSchemeId](@http:Payload UpdateScreenSchemeDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/screenscheme/[string screenSchemeId](@http:Payload UpdateScreenSchemeDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function put rest/api/'2/settings/columns(http:Request request) returns json|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -1216,7 +1216,7 @@ service OASServiceType / on ep0 {
     resource function put rest/api/'2/version/[string id](@http:Payload Version payload) returns Version|http:BadRequest|http:Unauthorized|http:NotFound {
     }
 
-    resource function put rest/api/'2/version/[string id]/mergeto/[string moveIssuesTo]() returns NoContent|http:BadRequest|http:Unauthorized|http:NotFound {
+    resource function put rest/api/'2/version/[string id]/mergeto/[string moveIssuesTo]() returns http:NoContent|http:BadRequest|http:Unauthorized|http:NotFound {
     }
 
     resource function put rest/api/'2/webhook/refresh(@http:Payload ContainerForWebhookIDs payload) returns WebhooksExpirationDate|ErrorCollectionBadRequest|ErrorCollectionForbidden {
@@ -1252,7 +1252,7 @@ service OASServiceType / on ep0 {
     resource function put rest/api/'2/workflowscheme/[int id]/workflow(string workflowName, @http:Payload IssueTypesWorkflowMapping payload) returns WorkflowScheme|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/workflowscheme/project(@http:Payload WorkflowSchemeProjectAssociation payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/workflowscheme/project(@http:Payload WorkflowSchemeProjectAssociation payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function put rest/atlassian\-connect/'1/addons/[string addonKey]/properties/[string propertyKey](@http:Payload json payload) returns OperationMessage|OperationMessageCreated|OperationMessageBadRequest|OperationMessageUnauthorized {
@@ -1261,7 +1261,7 @@ service OASServiceType / on ep0 {
 
 type OASServiceType service object {
     *http:Service;
-    resource function put rest/api/'2/app/'field/[string fieldIdOrKey]/value(@http:Payload CustomFieldValueUpdateRequest payload) returns NoContent|http:BadRequest|http:Forbidden|http:NotFound;
+    resource function put rest/api/'2/app/'field/[string fieldIdOrKey]/value(@http:Payload CustomFieldValueUpdateRequest payload) returns http:NoContent|http:BadRequest|http:Forbidden|http:NotFound;
     resource function get rest/api/'2/application\-properties(string? 'key, string? permissionLevel, string? keyFilter) returns ApplicationProperty[]|http:Unauthorized|http:NotFound;
     resource function get rest/api/'2/application\-properties/advanced\-settings() returns ApplicationProperty[]|http:Unauthorized|http:Forbidden;
     resource function put rest/api/'2/application\-properties/[string id](@http:Payload SimpleApplicationPropertyBean payload) returns ApplicationProperty|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
@@ -1285,13 +1285,13 @@ type OASServiceType service object {
     resource function delete rest/api/'2/component/[string id](string? moveIssuesTo) returns http:NoContent|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function get rest/api/'2/component/[string id]/relatedIssueCounts() returns ComponentIssuesCount|http:Unauthorized|http:NotFound;
     resource function get rest/api/'2/configuration() returns Configuration|http:Unauthorized;
-    resource function get rest/api/'2/configuration/timetracking() returns TimeTrackingProvider|NoContent|http:Unauthorized|http:Forbidden;
-    resource function put rest/api/'2/configuration/timetracking(@http:Payload TimeTrackingProvider payload) returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden;
+    resource function get rest/api/'2/configuration/timetracking() returns TimeTrackingProvider|http:NoContent|http:Unauthorized|http:Forbidden;
+    resource function put rest/api/'2/configuration/timetracking(@http:Payload TimeTrackingProvider payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden;
     resource function get rest/api/'2/configuration/timetracking/list() returns TimeTrackingProvider[]|http:Unauthorized|http:Forbidden;
     resource function get rest/api/'2/configuration/timetracking/options() returns TimeTrackingConfiguration|http:Unauthorized|http:Forbidden;
     resource function put rest/api/'2/configuration/timetracking/options(@http:Payload TimeTrackingConfiguration payload) returns TimeTrackingConfiguration|http:BadRequest|http:Unauthorized|http:Forbidden;
     resource function get rest/api/'2/customField/[int fieldId]/option(int startAt = 0, int:Signed32 maxResults = 1000) returns PageBeanCustomFieldOptionDetails|http:BadRequest|http:Unauthorized|http:NotFound;
-    resource function put rest/api/'2/customField/[int fieldId]/option(@http:Payload UpdateCustomFieldOption payload) returns NoContent|ErrorCollectionBadRequest|ErrorCollectionUnauthorized|ErrorCollectionNotFound;
+    resource function put rest/api/'2/customField/[int fieldId]/option(@http:Payload UpdateCustomFieldOption payload) returns http:NoContent|ErrorCollectionBadRequest|ErrorCollectionUnauthorized|ErrorCollectionNotFound;
     resource function post rest/api/'2/customField/[int fieldId]/option(@http:Payload BulkCreateCustomFieldOptionRequest payload) returns json|ErrorCollectionBadRequest|ErrorCollectionUnauthorized|ErrorCollectionNotFound;
     resource function get rest/api/'2/customFieldOption/[string id]() returns CustomFieldOption|http:Unauthorized|http:NotFound;
     resource function get rest/api/'2/dashboard("my"|"favourite"? filter, int:Signed32 startAt = 0, int:Signed32 maxResults = 20) returns PageOfDashboards|ErrorCollectionBadRequest|ErrorCollectionUnauthorized;
@@ -1310,25 +1310,25 @@ type OASServiceType service object {
     resource function get rest/api/'2/'field() returns FieldDetails[]|http:Unauthorized;
     resource function post rest/api/'2/'field(@http:Payload CustomFieldDefinitionJsonBean payload) returns FieldDetails|http:BadRequest;
     resource function get rest/api/'2/'field/search(("custom"|"system")[]? 'type, string[]? id, string? query, "contextsCount"|"-contextsCount"|"+contextsCount"|"lastUsed"|"-lastUsed"|"+lastUsed"|"name"|"-name"|"+name"|"screensCount"|"-screensCount"|"+screensCount"? orderBy, string? expand, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanField|ErrorCollectionBadRequest|http:Unauthorized|ErrorCollectionForbidden;
-    resource function put rest/api/'2/'field/[string fieldId](@http:Payload UpdateCustomFieldDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function put rest/api/'2/'field/[string fieldId](@http:Payload UpdateCustomFieldDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
     resource function get rest/api/'2/'field/[string fieldId]/context(boolean? isAnyIssueType, boolean? isGlobalContext, int[]? contextId, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanCustomFieldContext|http:Unauthorized|JsonForbidden|JsonNotFound;
     resource function post rest/api/'2/'field/[string fieldId]/context(@http:Payload CreateCustomFieldContext payload) returns CreateCustomFieldContext|http:BadRequest|http:Unauthorized|http:NotFound|JsonConflict;
     resource function get rest/api/'2/'field/[string fieldId]/context/defaultValue(int[]? contextId, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanCustomFieldContextDefaultValue|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function put rest/api/'2/'field/[string fieldId]/context/defaultValue(@http:Payload CustomFieldContextDefaultValueUpdate payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function put rest/api/'2/'field/[string fieldId]/context/defaultValue(@http:Payload CustomFieldContextDefaultValueUpdate payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
     resource function get rest/api/'2/'field/[string fieldId]/context/issuetypemapping(int[]? contextId, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanIssueTypeToContextMapping|http:Unauthorized|JsonForbidden;
     resource function post rest/api/'2/'field/[string fieldId]/context/mapping(@http:Payload ProjectIssueTypeMappings payload, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanContextForProjectAndIssueTypeOk|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
     resource function get rest/api/'2/'field/[string fieldId]/context/projectmapping(int[]? contextId, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanCustomFieldContextProjectMapping|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId](@http:Payload CustomFieldContextUpdateDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function delete rest/api/'2/'field/[string fieldId]/context/[int contextId]() returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/issuetype(@http:Payload IssueTypeIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound|JsonConflict;
-    resource function post rest/api/'2/'field/[string fieldId]/context/[int contextId]/issuetype/remove(@http:Payload IssueTypeIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId](@http:Payload CustomFieldContextUpdateDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function delete rest/api/'2/'field/[string fieldId]/context/[int contextId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/issuetype(@http:Payload IssueTypeIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound|JsonConflict;
+    resource function post rest/api/'2/'field/[string fieldId]/context/[int contextId]/issuetype/remove(@http:Payload IssueTypeIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
     resource function get rest/api/'2/'field/[string fieldId]/context/[int contextId]/option(int? optionId, boolean onlyOptions = false, int startAt = 0, int:Signed32 maxResults = 100) returns PageBeanCustomFieldContextOption|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
     resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/option(@http:Payload BulkCustomFieldOptionUpdateRequest payload) returns CustomFieldUpdatedContextOptionsList|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
     resource function post rest/api/'2/'field/[string fieldId]/context/[int contextId]/option(@http:Payload BulkCustomFieldOptionCreateRequest payload) returns CustomFieldCreatedContextOptionsListOk|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/option/move(@http:Payload OrderOfCustomFieldOptions payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/option/move(@http:Payload OrderOfCustomFieldOptions payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
     resource function delete rest/api/'2/'field/[string fieldId]/context/[int contextId]/option/[int optionId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/project(@http:Payload ProjectIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function post rest/api/'2/'field/[string fieldId]/context/[int contextId]/project/remove(@http:Payload ProjectIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/project(@http:Payload ProjectIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function post rest/api/'2/'field/[string fieldId]/context/[int contextId]/project/remove(@http:Payload ProjectIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
     resource function get rest/api/'2/'field/[string fieldId]/contexts(int startAt = 0, int:Signed32 maxResults = 20) returns PageBeanContext|http:Unauthorized|http:Forbidden;
     resource function get rest/api/'2/'field/[string fieldId]/screens(string? expand, int startAt = 0, int:Signed32 maxResults = 100) returns PageBeanScreenWithTab|http:Unauthorized|http:Forbidden;
     resource function get rest/api/'2/'field/[string fieldKey]/option(int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanIssueFieldOption|http:BadRequest|http:Forbidden;
@@ -1337,14 +1337,14 @@ type OASServiceType service object {
     resource function get rest/api/'2/'field/[string fieldKey]/option/suggestions/search(int:Signed32? maxResults, int? projectId, int startAt = 0) returns PageBeanIssueFieldOption|http:Unauthorized|http:NotFound;
     resource function get rest/api/'2/'field/[string fieldKey]/option/[int optionId]() returns IssueFieldOption|http:BadRequest|http:Forbidden|http:NotFound;
     resource function put rest/api/'2/'field/[string fieldKey]/option/[int optionId](@http:Payload IssueFieldOption payload) returns IssueFieldOption|http:BadRequest|http:Forbidden|http:NotFound;
-    resource function delete rest/api/'2/'field/[string fieldKey]/option/[int optionId]() returns NoContent|http:Forbidden|http:NotFound|http:Conflict;
+    resource function delete rest/api/'2/'field/[string fieldKey]/option/[int optionId]() returns http:NoContent|http:Forbidden|http:NotFound|http:Conflict;
     resource function delete rest/api/'2/'field/[string fieldKey]/option/[int optionId]/issue(int? replaceWith, string? jql) returns TaskProgressBeanRemoveOptionFromIssuesResultSeeOther|http:BadRequest|http:NotFound;
     resource function get rest/api/'2/fieldconfiguration(int[]? id, int startAt = 0, int:Signed32 maxResults = 50, boolean isDefault = false, string query = "") returns PageBeanFieldConfiguration|http:Unauthorized|http:Forbidden;
     resource function get rest/api/'2/fieldconfiguration/[int id]/fields(int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanFieldConfigurationItem|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function get rest/api/'2/fieldconfigurationscheme(int[]? id, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanFieldConfigurationScheme|http:BadRequest|http:Unauthorized|http:Forbidden;
     resource function get rest/api/'2/fieldconfigurationscheme/mapping(int[]? fieldConfigurationSchemeId, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanFieldConfigurationIssueTypeItem|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function get rest/api/'2/fieldconfigurationscheme/project(int[] projectId, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanFieldConfigurationSchemeProjects|http:BadRequest|http:Unauthorized|http:Forbidden;
-    resource function put rest/api/'2/fieldconfigurationscheme/project(@http:Payload FieldConfigurationSchemeProjectAssociation payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function put rest/api/'2/fieldconfigurationscheme/project(@http:Payload FieldConfigurationSchemeProjectAssociation payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
     resource function get rest/api/'2/filter(string? expand) returns Filter[]|http:Unauthorized;
     resource function post rest/api/'2/filter(string? expand, @http:Payload Filter payload) returns FilterOk|http:BadRequest|http:Unauthorized;
     resource function get rest/api/'2/filter/defaultShareScope() returns DefaultShareScope|http:Unauthorized;
@@ -1382,9 +1382,9 @@ type OASServiceType service object {
     resource function put rest/api/'2/issue/properties/[string propertyKey](@http:Payload BulkIssuePropertyUpdateRequest payload) returns http:SeeOther|ErrorCollectionBadRequest|ErrorCollectionUnauthorized;
     resource function delete rest/api/'2/issue/properties/[string propertyKey]() returns http:SeeOther|ErrorCollectionBadRequest|ErrorCollectionUnauthorized;
     resource function get rest/api/'2/issue/[string issueIdOrKey](string[]? fields, string? expand, string[]? properties, boolean fieldsByKeys = false, boolean updateHistory = false) returns IssueBean|http:Unauthorized|http:NotFound;
-    resource function put rest/api/'2/issue/[string issueIdOrKey](@http:Payload IssueUpdateDetails payload, boolean notifyUsers = true, boolean overrideScreenSecurity = false, boolean overrideEditableFlag = false) returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
+    resource function put rest/api/'2/issue/[string issueIdOrKey](@http:Payload IssueUpdateDetails payload, boolean notifyUsers = true, boolean overrideScreenSecurity = false, boolean overrideEditableFlag = false) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function delete rest/api/'2/issue/[string issueIdOrKey]("true"|"false" deleteSubtasks = "false") returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
-    resource function put rest/api/'2/issue/[string issueIdOrKey]/assignee(@http:Payload User payload) returns NoContent|http:BadRequest|http:Forbidden|http:NotFound;
+    resource function put rest/api/'2/issue/[string issueIdOrKey]/assignee(@http:Payload User payload) returns http:NoContent|http:BadRequest|http:Forbidden|http:NotFound;
     resource function post rest/api/'2/issue/[string issueIdOrKey]/attachments(http:Request request) returns AttachmentArrayOk|http:Forbidden|http:NotFound|http:PayloadTooLarge;
     resource function get rest/api/'2/issue/[string issueIdOrKey]/changelog(int:Signed32 startAt = 0, int:Signed32 maxResults = 100) returns PageBeanChangelog|http:NotFound;
     resource function get rest/api/'2/issue/[string issueIdOrKey]/comment("created"|"-created"|"+created"? orderBy, string? expand, int startAt = 0, int:Signed32 maxResults = 50) returns PageOfComments|http:BadRequest|http:Unauthorized|http:NotFound;
@@ -1393,7 +1393,7 @@ type OASServiceType service object {
     resource function put rest/api/'2/issue/[string issueIdOrKey]/comment/[string id](string? expand, @http:Payload Comment payload) returns Comment|http:BadRequest|http:Unauthorized|http:NotFound;
     resource function delete rest/api/'2/issue/[string issueIdOrKey]/comment/[string id]() returns http:NoContent|http:BadRequest|http:Unauthorized|http:NotFound|http:MethodNotAllowed;
     resource function get rest/api/'2/issue/[string issueIdOrKey]/editmeta(boolean overrideScreenSecurity = false, boolean overrideEditableFlag = false) returns IssueUpdateMetadata|http:Unauthorized|http:Forbidden|http:NotFound;
-    resource function post rest/api/'2/issue/[string issueIdOrKey]/notify(@http:Payload Notification payload) returns NoContent|http:BadRequest|http:Forbidden|http:NotFound;
+    resource function post rest/api/'2/issue/[string issueIdOrKey]/notify(@http:Payload Notification payload) returns http:NoContent|http:BadRequest|http:Forbidden|http:NotFound;
     resource function get rest/api/'2/issue/[string issueIdOrKey]/properties() returns PropertyKeys|http:NotFound;
     resource function get rest/api/'2/issue/[string issueIdOrKey]/properties/[string propertyKey]() returns EntityProperty|http:Unauthorized|http:NotFound;
     resource function put rest/api/'2/issue/[string issueIdOrKey]/properties/[string propertyKey](@http:Payload json payload) returns json|JsonCreated|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
@@ -1402,15 +1402,15 @@ type OASServiceType service object {
     resource function post rest/api/'2/issue/[string issueIdOrKey]/remotelink(@http:Payload RemoteIssueLinkRequest payload) returns RemoteIssueLinkIdentifiesOk|RemoteIssueLinkIdentifies|JsonBadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function delete rest/api/'2/issue/[string issueIdOrKey]/remotelink(string globalId) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function get rest/api/'2/issue/[string issueIdOrKey]/remotelink/[string linkId]() returns RemoteIssueLink|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
-    resource function put rest/api/'2/issue/[string issueIdOrKey]/remotelink/[string linkId](@http:Payload RemoteIssueLinkRequest payload) returns NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
+    resource function put rest/api/'2/issue/[string issueIdOrKey]/remotelink/[string linkId](@http:Payload RemoteIssueLinkRequest payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function delete rest/api/'2/issue/[string issueIdOrKey]/remotelink/[string linkId]() returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function get rest/api/'2/issue/[string issueIdOrKey]/transitions(string? expand, string? transitionId, boolean skipRemoteOnlyCondition = false, boolean includeUnavailableTransitions = false, boolean sortByOpsBarAndStatus = false) returns Transitions|http:Unauthorized|http:NotFound;
-    resource function post rest/api/'2/issue/[string issueIdOrKey]/transitions(@http:Payload IssueUpdateDetails payload) returns NoContent|http:BadRequest|http:Unauthorized|http:NotFound;
+    resource function post rest/api/'2/issue/[string issueIdOrKey]/transitions(@http:Payload IssueUpdateDetails payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:NotFound;
     resource function get rest/api/'2/issue/[string issueIdOrKey]/votes() returns Votes|http:Unauthorized|http:NotFound;
-    resource function post rest/api/'2/issue/[string issueIdOrKey]/votes() returns NoContent|http:Unauthorized|http:NotFound;
+    resource function post rest/api/'2/issue/[string issueIdOrKey]/votes() returns http:NoContent|http:Unauthorized|http:NotFound;
     resource function delete rest/api/'2/issue/[string issueIdOrKey]/votes() returns http:NoContent|http:Unauthorized|http:NotFound;
     resource function get rest/api/'2/issue/[string issueIdOrKey]/watchers() returns Watchers|http:Unauthorized|http:NotFound;
-    resource function post rest/api/'2/issue/[string issueIdOrKey]/watchers(@http:Payload string payload) returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
+    resource function post rest/api/'2/issue/[string issueIdOrKey]/watchers(@http:Payload string payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function delete rest/api/'2/issue/[string issueIdOrKey]/watchers(string? username, string? accountId) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function get rest/api/'2/issue/[string issueIdOrKey]/worklog(int? startedAfter, int startAt = 0, int:Signed32 maxResults = 1048576, string expand = "") returns PageOfWorklogs|http:Unauthorized|http:NotFound;
     resource function post rest/api/'2/issue/[string issueIdOrKey]/worklog(string? newEstimate, string? reduceBy, @http:Payload Worklog payload, boolean notifyUsers = true, "new"|"leave"|"manual"|"auto" adjustEstimate = "auto", string expand = "", boolean overrideEditableFlag = false) returns Worklog|http:BadRequest|http:Unauthorized|http:NotFound;
@@ -1447,22 +1447,22 @@ type OASServiceType service object {
     resource function post rest/api/'2/issuetypescheme(@http:Payload IssueTypeSchemeDetails payload) returns IssueTypeSchemeID|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonConflict;
     resource function get rest/api/'2/issuetypescheme/mapping(int[]? issueTypeSchemeId, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanIssueTypeSchemeMapping|http:BadRequest|http:Unauthorized|http:Forbidden;
     resource function get rest/api/'2/issuetypescheme/project(int[] projectId, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanIssueTypeSchemeProjects|http:BadRequest|http:Unauthorized|http:Forbidden;
-    resource function put rest/api/'2/issuetypescheme/project(@http:Payload IssueTypeSchemeProjectAssociation payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId](@http:Payload IssueTypeSchemeUpdateDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function delete rest/api/'2/issuetypescheme/[int issueTypeSchemeId]() returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype(@http:Payload IssueTypeIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype/move(@http:Payload OrderOfIssueTypes payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function delete rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype/[int issueTypeId]() returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function put rest/api/'2/issuetypescheme/project(@http:Payload IssueTypeSchemeProjectAssociation payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId](@http:Payload IssueTypeSchemeUpdateDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function delete rest/api/'2/issuetypescheme/[int issueTypeSchemeId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype(@http:Payload IssueTypeIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype/move(@http:Payload OrderOfIssueTypes payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function delete rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype/[int issueTypeId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
     resource function get rest/api/'2/issuetypescreenscheme(int[]? id, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanIssueTypeScreenScheme|http:BadRequest|http:Unauthorized|http:Forbidden;
     resource function post rest/api/'2/issuetypescreenscheme(@http:Payload IssueTypeScreenSchemeDetails payload) returns IssueTypeScreenSchemeId|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound|JsonConflict;
     resource function get rest/api/'2/issuetypescreenscheme/mapping(int[]? issueTypeScreenSchemeId, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanIssueTypeScreenSchemeItem|http:BadRequest|http:Unauthorized|http:Forbidden;
     resource function get rest/api/'2/issuetypescreenscheme/project(int[] projectId, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanIssueTypeScreenSchemesProjects|http:BadRequest|http:Unauthorized|http:Forbidden;
-    resource function put rest/api/'2/issuetypescreenscheme/project(@http:Payload IssueTypeScreenSchemeProjectAssociation payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId](@http:Payload IssueTypeScreenSchemeUpdateDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function delete rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]() returns NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|JsonNotFound;
-    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping(@http:Payload IssueTypeScreenSchemeMappingDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|JsonNotFound|JsonConflict;
-    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping/default(@http:Payload UpdateDefaultScreenScheme payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function post rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping/remove(@http:Payload IssueTypeIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function put rest/api/'2/issuetypescreenscheme/project(@http:Payload IssueTypeScreenSchemeProjectAssociation payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId](@http:Payload IssueTypeScreenSchemeUpdateDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function delete rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|JsonNotFound;
+    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping(@http:Payload IssueTypeScreenSchemeMappingDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|JsonNotFound|JsonConflict;
+    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping/default(@http:Payload UpdateDefaultScreenScheme payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function post rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping/remove(@http:Payload IssueTypeIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
     resource function get rest/api/'2/jql/autocompletedata() returns JQLReferenceData|http:Unauthorized;
     resource function post rest/api/'2/jql/autocompletedata(@http:Payload SearchAutoCompleteFilter payload) returns JQLReferenceDataOk|http:BadRequest|http:Unauthorized;
     resource function get rest/api/'2/jql/autocompletedata/suggestions(string? fieldName, string? fieldValue, string? predicateName, string? predicateValue) returns AutoCompleteSuggestions|http:BadRequest|http:Unauthorized;
@@ -1472,11 +1472,11 @@ type OASServiceType service object {
     resource function get rest/api/'2/label(int startAt = 0, int:Signed32 maxResults = 1000) returns PageBeanString;
     resource function get rest/api/'2/mypermissions(string? projectKey, string? projectId, string? issueKey, string? issueId, string? permissions, string? projectUuid, string? projectConfigurationUuid) returns Permissions|ErrorCollectionBadRequest|ErrorCollectionUnauthorized|ErrorCollectionNotFound;
     resource function get rest/api/'2/mypreferences(string 'key) returns string|http:Unauthorized|http:NotFound;
-    resource function put rest/api/'2/mypreferences(string 'key, @http:Payload string payload) returns NoContent|http:Unauthorized|http:NotFound;
+    resource function put rest/api/'2/mypreferences(string 'key, @http:Payload string payload) returns http:NoContent|http:Unauthorized|http:NotFound;
     resource function delete rest/api/'2/mypreferences(string 'key) returns http:NoContent|http:Unauthorized|http:NotFound;
     resource function get rest/api/'2/mypreferences/locale() returns Locale|http:Unauthorized;
-    resource function put rest/api/'2/mypreferences/locale(@http:Payload Locale payload) returns NoContent|http:BadRequest|http:Unauthorized;
-    resource function delete rest/api/'2/mypreferences/locale() returns NoContent|http:Unauthorized;
+    resource function put rest/api/'2/mypreferences/locale(@http:Payload Locale payload) returns http:NoContent|http:BadRequest|http:Unauthorized;
+    resource function delete rest/api/'2/mypreferences/locale() returns http:NoContent|http:Unauthorized;
     resource function get rest/api/'2/myself(string? expand) returns User|http:Unauthorized;
     resource function get rest/api/'2/notificationscheme(string? expand, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanNotificationScheme|http:Unauthorized;
     resource function get rest/api/'2/notificationscheme/[int id](string? expand) returns NotificationScheme|http:BadRequest|http:Unauthorized|http:NotFound;
@@ -1504,8 +1504,8 @@ type OASServiceType service object {
     resource function get rest/api/'2/project/[string projectIdOrKey](string? expand, string[]? properties) returns Project|http:Unauthorized|http:NotFound;
     resource function put rest/api/'2/project/[string projectIdOrKey](string? expand, @http:Payload ProjectInputBean payload) returns Project|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function delete rest/api/'2/project/[string projectIdOrKey](boolean enableUndo = false) returns http:NoContent|http:Unauthorized|http:NotFound;
-    resource function post rest/api/'2/project/[string projectIdOrKey]/archive() returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
-    resource function put rest/api/'2/project/[string projectIdOrKey]/avatar(@http:Payload Avatar payload) returns NoContent|http:Unauthorized|http:Forbidden|http:NotFound;
+    resource function post rest/api/'2/project/[string projectIdOrKey]/archive() returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
+    resource function put rest/api/'2/project/[string projectIdOrKey]/avatar(@http:Payload Avatar payload) returns http:NoContent|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function delete rest/api/'2/project/[string projectIdOrKey]/avatar/[int id]() returns http:NoContent|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function post rest/api/'2/project/[string projectIdOrKey]/avatar2(int:Signed32? size, http:Request request, int:Signed32 x = 0, int:Signed32 y = 0) returns Avatar|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function get rest/api/'2/project/[string projectIdOrKey]/avatars() returns ProjectAvatars|http:Unauthorized|http:NotFound;
@@ -1530,7 +1530,7 @@ type OASServiceType service object {
     resource function get rest/api/'2/project/[string projectIdOrKey]/version("description"|"-description"|"+description"|"name"|"-name"|"+name"|"releaseDate"|"-releaseDate"|"+releaseDate"|"sequence"|"-sequence"|"+sequence"|"startDate"|"-startDate"|"+startDate"? orderBy, string? query, string? status, string? expand, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanVersion|http:NotFound;
     resource function get rest/api/'2/project/[string projectIdOrKey]/versions(string? expand) returns Version[]|http:NotFound;
     resource function get rest/api/'2/project/[int projectId]/email() returns ProjectEmailAddress|http:Unauthorized|http:Forbidden|http:NotFound;
-    resource function put rest/api/'2/project/[int projectId]/email(@http:Payload ProjectEmailAddress payload) returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
+    resource function put rest/api/'2/project/[int projectId]/email(@http:Payload ProjectEmailAddress payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function get rest/api/'2/project/[int projectId]/hierarchy() returns ProjectIssueTypeHierarchy|http:BadRequest|http:Unauthorized|http:NotFound;
     resource function get rest/api/'2/project/[string projectKeyOrId]/issuesecuritylevelscheme() returns SecurityScheme|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function get rest/api/'2/project/[string projectKeyOrId]/notificationscheme(string? expand) returns NotificationScheme|http:BadRequest|http:Unauthorized|http:NotFound;
@@ -1569,11 +1569,11 @@ type OASServiceType service object {
     resource function get rest/api/'2/screens/[int screenId]/tabs/[int tabId]/fields(string? projectKey) returns ScreenableField[]|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function post rest/api/'2/screens/[int screenId]/tabs/[int tabId]/fields(@http:Payload AddFieldBean payload) returns ScreenableFieldOk|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function delete rest/api/'2/screens/[int screenId]/tabs/[int tabId]/fields/[string id]() returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
-    resource function post rest/api/'2/screens/[int screenId]/tabs/[int tabId]/fields/[string id]/move(@http:Payload MoveFieldBean payload) returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
-    resource function post rest/api/'2/screens/[int screenId]/tabs/[int tabId]/move/[int:Signed32 pos]() returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
+    resource function post rest/api/'2/screens/[int screenId]/tabs/[int tabId]/fields/[string id]/move(@http:Payload MoveFieldBean payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
+    resource function post rest/api/'2/screens/[int screenId]/tabs/[int tabId]/move/[int:Signed32 pos]() returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function get rest/api/'2/screenscheme(int[]? id, int startAt = 0, int:Signed32 maxResults = 25) returns PageBeanScreenScheme|http:Unauthorized|http:Forbidden;
     resource function post rest/api/'2/screenscheme(@http:Payload ScreenSchemeDetails payload) returns ScreenSchemeId|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
-    resource function put rest/api/'2/screenscheme/[string screenSchemeId](@http:Payload UpdateScreenSchemeDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function put rest/api/'2/screenscheme/[string screenSchemeId](@http:Payload UpdateScreenSchemeDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
     resource function delete rest/api/'2/screenscheme/[string screenSchemeId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
     resource function get rest/api/'2/search(string? jql, string[]? fields, string? expand, string[]? properties, int:Signed32 startAt = 0, int:Signed32 maxResults = 50, "strict"|"warn"|"none"|"true"|"false" validateQuery = "strict", boolean fieldsByKeys = false) returns SearchResults|http:BadRequest|http:Unauthorized;
     resource function post rest/api/'2/search(@http:Payload SearchRequestBean payload) returns SearchResultsOk|http:BadRequest|http:Unauthorized;
@@ -1619,10 +1619,10 @@ type OASServiceType service object {
     resource function get rest/api/'2/version/[string id](string? expand) returns Version|http:Unauthorized|http:NotFound;
     resource function put rest/api/'2/version/[string id](@http:Payload Version payload) returns Version|http:BadRequest|http:Unauthorized|http:NotFound;
     resource function delete rest/api/'2/version/[string id](string? moveFixIssuesTo, string? moveAffectedIssuesTo) returns http:NoContent|http:BadRequest|http:Unauthorized|http:NotFound;
-    resource function put rest/api/'2/version/[string id]/mergeto/[string moveIssuesTo]() returns NoContent|http:BadRequest|http:Unauthorized|http:NotFound;
+    resource function put rest/api/'2/version/[string id]/mergeto/[string moveIssuesTo]() returns http:NoContent|http:BadRequest|http:Unauthorized|http:NotFound;
     resource function post rest/api/'2/version/[string id]/move(@http:Payload VersionMoveBean payload) returns VersionOk|http:BadRequest|http:Unauthorized|http:NotFound;
     resource function get rest/api/'2/version/[string id]/relatedIssueCounts() returns VersionIssueCounts|http:Unauthorized|http:NotFound;
-    resource function post rest/api/'2/version/[string id]/removeAndSwap(@http:Payload DeleteAndReplaceVersionBean payload) returns NoContent|http:BadRequest|http:Unauthorized|http:NotFound;
+    resource function post rest/api/'2/version/[string id]/removeAndSwap(@http:Payload DeleteAndReplaceVersionBean payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:NotFound;
     resource function get rest/api/'2/version/[string id]/unresolvedIssueCount() returns VersionUnresolvedIssuesCount|http:Unauthorized|http:NotFound;
     resource function get rest/api/'2/webhook(int startAt = 0, int:Signed32 maxResults = 100) returns PageBeanWebhook|ErrorCollectionBadRequest|ErrorCollectionForbidden;
     resource function post rest/api/'2/webhook(@http:Payload WebhookRegistrationDetails payload) returns ContainerForRegisteredWebhooksOk|ErrorCollectionBadRequest|ErrorCollectionForbidden;
@@ -1642,7 +1642,7 @@ type OASServiceType service object {
     resource function get rest/api/'2/workflowscheme(int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanWorkflowScheme|http:Unauthorized|http:Forbidden;
     resource function post rest/api/'2/workflowscheme(@http:Payload WorkflowScheme payload) returns WorkflowScheme|http:BadRequest|http:Unauthorized|http:Forbidden;
     resource function get rest/api/'2/workflowscheme/project(int[] projectId) returns ContainerOfWorkflowSchemeAssociations|JsonBadRequest|http:Unauthorized|JsonForbidden;
-    resource function put rest/api/'2/workflowscheme/project(@http:Payload WorkflowSchemeProjectAssociation payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
+    resource function put rest/api/'2/workflowscheme/project(@http:Payload WorkflowSchemeProjectAssociation payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound;
     resource function get rest/api/'2/workflowscheme/[int id](boolean returnDraftIfExists = false) returns WorkflowScheme|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function put rest/api/'2/workflowscheme/[int id](@http:Payload WorkflowScheme payload) returns WorkflowScheme|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
     resource function delete rest/api/'2/workflowscheme/[int id]() returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound;
@@ -1884,10 +1884,6 @@ public type PageBeanFieldConfigurationItem record {|
     boolean isLast?;
     # The list of items.
     FieldConfigurationItem[] values?;
-|};
-
-public type NoContent record {|
-    *http:NoContent;
 |};
 
 public type SimpleListWrapperApplicationRole record {|

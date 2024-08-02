@@ -7,13 +7,13 @@ import ballerina/http;
 listener http:Listener ep0 = new (443, config = {host: "your-domain.atlassian.com"});
 
 service / on ep0 {
-    resource function delete rest/api/'2/'field/[string fieldId]/context/[int contextId]() returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function delete rest/api/'2/'field/[string fieldId]/context/[int contextId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function delete rest/api/'2/'field/[string fieldId]/context/[int contextId]/option/[int optionId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function delete rest/api/'2/'field/[string fieldKey]/option/[int optionId]() returns NoContent|http:Forbidden|http:NotFound|http:Conflict {
+    resource function delete rest/api/'2/'field/[string fieldKey]/option/[int optionId]() returns http:NoContent|http:Forbidden|http:NotFound|http:Conflict {
     }
 
     resource function delete rest/api/'2/'field/[string fieldKey]/option/[int optionId]/issue(int? replaceWith, string? jql) returns TaskProgressBeanRemoveOptionFromIssuesResultSeeOther|http:BadRequest|http:NotFound {
@@ -94,19 +94,19 @@ service / on ep0 {
     resource function delete rest/api/'2/issuetype/[string issueTypeId]/properties/[string propertyKey]() returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function delete rest/api/'2/issuetypescheme/[int issueTypeSchemeId]() returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function delete rest/api/'2/issuetypescheme/[int issueTypeSchemeId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function delete rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype/[int issueTypeId]() returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function delete rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype/[int issueTypeId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function delete rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]() returns NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|JsonNotFound {
+    resource function delete rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]() returns http:NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|JsonNotFound {
     }
 
     resource function delete rest/api/'2/mypreferences(string 'key) returns http:NoContent|http:Unauthorized|http:NotFound {
     }
 
-    resource function delete rest/api/'2/mypreferences/locale() returns NoContent|http:Unauthorized {
+    resource function delete rest/api/'2/mypreferences/locale() returns http:NoContent|http:Unauthorized {
     }
 
     resource function delete rest/api/'2/permissionscheme/[int schemeId]() returns http:NoContent|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -286,7 +286,7 @@ service / on ep0 {
     resource function get rest/api/'2/configuration() returns Configuration|http:Unauthorized {
     }
 
-    resource function get rest/api/'2/configuration/timetracking() returns TimeTrackingProvider|NoContent|http:Unauthorized|http:Forbidden {
+    resource function get rest/api/'2/configuration/timetracking() returns TimeTrackingProvider|http:NoContent|http:Unauthorized|http:Forbidden {
     }
 
     resource function get rest/api/'2/configuration/timetracking/list() returns TimeTrackingProvider[]|http:Unauthorized|http:Forbidden {
@@ -814,13 +814,13 @@ service / on ep0 {
     resource function post rest/api/'2/'field/[string fieldId]/context(@http:Payload CreateCustomFieldContext payload) returns CreateCustomFieldContext|http:BadRequest|http:Unauthorized|http:NotFound|JsonConflict {
     }
 
-    resource function post rest/api/'2/'field/[string fieldId]/context/[int contextId]/issuetype/remove(@http:Payload IssueTypeIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function post rest/api/'2/'field/[string fieldId]/context/[int contextId]/issuetype/remove(@http:Payload IssueTypeIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function post rest/api/'2/'field/[string fieldId]/context/[int contextId]/option(@http:Payload BulkCustomFieldOptionCreateRequest payload) returns CustomFieldCreatedContextOptionsListOk|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function post rest/api/'2/'field/[string fieldId]/context/[int contextId]/project/remove(@http:Payload ProjectIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function post rest/api/'2/'field/[string fieldId]/context/[int contextId]/project/remove(@http:Payload ProjectIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function post rest/api/'2/'field/[string fieldId]/context/mapping(@http:Payload ProjectIssueTypeMappings payload, int startAt = 0, int:Signed32 maxResults = 50) returns PageBeanContextForProjectAndIssueTypeOk|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
@@ -871,19 +871,19 @@ service / on ep0 {
     resource function post rest/api/'2/issue/[string issueIdOrKey]/comment(string? expand, @http:Payload Comment payload) returns Comment|http:BadRequest|http:Unauthorized|http:NotFound {
     }
 
-    resource function post rest/api/'2/issue/[string issueIdOrKey]/notify(@http:Payload Notification payload) returns NoContent|http:BadRequest|http:Forbidden|http:NotFound {
+    resource function post rest/api/'2/issue/[string issueIdOrKey]/notify(@http:Payload Notification payload) returns http:NoContent|http:BadRequest|http:Forbidden|http:NotFound {
     }
 
     resource function post rest/api/'2/issue/[string issueIdOrKey]/remotelink(@http:Payload RemoteIssueLinkRequest payload) returns RemoteIssueLinkIdentifiesOk|RemoteIssueLinkIdentifies|JsonBadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function post rest/api/'2/issue/[string issueIdOrKey]/transitions(@http:Payload IssueUpdateDetails payload) returns NoContent|http:BadRequest|http:Unauthorized|http:NotFound {
+    resource function post rest/api/'2/issue/[string issueIdOrKey]/transitions(@http:Payload IssueUpdateDetails payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:NotFound {
     }
 
-    resource function post rest/api/'2/issue/[string issueIdOrKey]/votes() returns NoContent|http:Unauthorized|http:NotFound {
+    resource function post rest/api/'2/issue/[string issueIdOrKey]/votes() returns http:NoContent|http:Unauthorized|http:NotFound {
     }
 
-    resource function post rest/api/'2/issue/[string issueIdOrKey]/watchers(@http:Payload string payload) returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function post rest/api/'2/issue/[string issueIdOrKey]/watchers(@http:Payload string payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
     resource function post rest/api/'2/issue/[string issueIdOrKey]/worklog(string? newEstimate, string? reduceBy, @http:Payload Worklog payload, boolean notifyUsers = true, "new"|"leave"|"manual"|"auto" adjustEstimate = "auto", string expand = "", boolean overrideEditableFlag = false) returns Worklog|http:BadRequest|http:Unauthorized|http:NotFound {
@@ -913,7 +913,7 @@ service / on ep0 {
     resource function post rest/api/'2/issuetypescreenscheme(@http:Payload IssueTypeScreenSchemeDetails payload) returns IssueTypeScreenSchemeId|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound|JsonConflict {
     }
 
-    resource function post rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping/remove(@http:Payload IssueTypeIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function post rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping/remove(@http:Payload IssueTypeIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function post rest/api/'2/jql/'match(@http:Payload IssuesAndJQLQueries payload) returns IssueMatchesOk|http:BadRequest {
@@ -943,7 +943,7 @@ service / on ep0 {
     resource function post rest/api/'2/project(@http:Payload ProjectInputBean payload) returns ProjectIdentifiers|http:BadRequest|http:Unauthorized|http:Forbidden {
     }
 
-    resource function post rest/api/'2/project/[string projectIdOrKey]/archive() returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function post rest/api/'2/project/[string projectIdOrKey]/archive() returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
     resource function post rest/api/'2/project/[string projectIdOrKey]/avatar2(int:Signed32? size, http:Request request, int:Signed32 x = 0, int:Signed32 y = 0) returns Avatar|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -979,10 +979,10 @@ service / on ep0 {
     resource function post rest/api/'2/screens/[int screenId]/tabs/[int tabId]/fields(@http:Payload AddFieldBean payload) returns ScreenableFieldOk|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function post rest/api/'2/screens/[int screenId]/tabs/[int tabId]/fields/[string id]/move(@http:Payload MoveFieldBean payload) returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function post rest/api/'2/screens/[int screenId]/tabs/[int tabId]/fields/[string id]/move(@http:Payload MoveFieldBean payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function post rest/api/'2/screens/[int screenId]/tabs/[int tabId]/move/[int:Signed32 pos]() returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function post rest/api/'2/screens/[int screenId]/tabs/[int tabId]/move/[int:Signed32 pos]() returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
     resource function post rest/api/'2/screens/addToDefault/[string fieldId]() returns JsonOk|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -1009,7 +1009,7 @@ service / on ep0 {
     resource function post rest/api/'2/version/[string id]/move(@http:Payload VersionMoveBean payload) returns VersionOk|http:BadRequest|http:Unauthorized|http:NotFound {
     }
 
-    resource function post rest/api/'2/version/[string id]/removeAndSwap(@http:Payload DeleteAndReplaceVersionBean payload) returns NoContent|http:BadRequest|http:Unauthorized|http:NotFound {
+    resource function post rest/api/'2/version/[string id]/removeAndSwap(@http:Payload DeleteAndReplaceVersionBean payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:NotFound {
     }
 
     resource function post rest/api/'2/webhook(@http:Payload WebhookRegistrationDetails payload) returns ContainerForRegisteredWebhooksOk|ErrorCollectionBadRequest|ErrorCollectionForbidden {
@@ -1033,31 +1033,31 @@ service / on ep0 {
     resource function post rest/atlassian\-connect/'1/app/module/dynamic(@http:Payload ConnectModules payload) returns http:Ok|ErrorMessageBadRequest|ErrorMessageUnauthorized {
     }
 
-    resource function put rest/api/'2/'field/[string fieldId](@http:Payload UpdateCustomFieldDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/'field/[string fieldId](@http:Payload UpdateCustomFieldDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId](@http:Payload CustomFieldContextUpdateDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId](@http:Payload CustomFieldContextUpdateDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/issuetype(@http:Payload IssueTypeIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound|JsonConflict {
+    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/issuetype(@http:Payload IssueTypeIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound|JsonConflict {
     }
 
     resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/option(@http:Payload BulkCustomFieldOptionUpdateRequest payload) returns CustomFieldUpdatedContextOptionsList|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/option/move(@http:Payload OrderOfCustomFieldOptions payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/option/move(@http:Payload OrderOfCustomFieldOptions payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/project(@http:Payload ProjectIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/'field/[string fieldId]/context/[int contextId]/project(@http:Payload ProjectIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/'field/[string fieldId]/context/defaultValue(@http:Payload CustomFieldContextDefaultValueUpdate payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/'field/[string fieldId]/context/defaultValue(@http:Payload CustomFieldContextDefaultValueUpdate payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function put rest/api/'2/'field/[string fieldKey]/option/[int optionId](@http:Payload IssueFieldOption payload) returns IssueFieldOption|http:BadRequest|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/app/'field/[string fieldIdOrKey]/value(@http:Payload CustomFieldValueUpdateRequest payload) returns NoContent|http:BadRequest|http:Forbidden|http:NotFound {
+    resource function put rest/api/'2/app/'field/[string fieldIdOrKey]/value(@http:Payload CustomFieldValueUpdateRequest payload) returns http:NoContent|http:BadRequest|http:Forbidden|http:NotFound {
     }
 
     resource function put rest/api/'2/application\-properties/[string id](@http:Payload SimpleApplicationPropertyBean payload) returns ApplicationProperty|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -1069,13 +1069,13 @@ service / on ep0 {
     resource function put rest/api/'2/component/[string id](@http:Payload Component payload) returns Component|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/configuration/timetracking(@http:Payload TimeTrackingProvider payload) returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden {
+    resource function put rest/api/'2/configuration/timetracking(@http:Payload TimeTrackingProvider payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden {
     }
 
     resource function put rest/api/'2/configuration/timetracking/options(@http:Payload TimeTrackingConfiguration payload) returns TimeTrackingConfiguration|http:BadRequest|http:Unauthorized|http:Forbidden {
     }
 
-    resource function put rest/api/'2/customField/[int fieldId]/option(@http:Payload UpdateCustomFieldOption payload) returns NoContent|ErrorCollectionBadRequest|ErrorCollectionUnauthorized|ErrorCollectionNotFound {
+    resource function put rest/api/'2/customField/[int fieldId]/option(@http:Payload UpdateCustomFieldOption payload) returns http:NoContent|ErrorCollectionBadRequest|ErrorCollectionUnauthorized|ErrorCollectionNotFound {
     }
 
     resource function put rest/api/'2/dashboard/[string dashboardId]/items/[string itemId]/properties/[string propertyKey](@http:Payload json payload) returns json|JsonCreated|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -1084,7 +1084,7 @@ service / on ep0 {
     resource function put rest/api/'2/dashboard/[string id](@http:Payload DashboardDetails payload) returns Dashboard|ErrorCollectionBadRequest|ErrorCollectionUnauthorized|ErrorCollectionNotFound {
     }
 
-    resource function put rest/api/'2/fieldconfigurationscheme/project(@http:Payload FieldConfigurationSchemeProjectAssociation payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/fieldconfigurationscheme/project(@http:Payload FieldConfigurationSchemeProjectAssociation payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function put rest/api/'2/filter/[int id](string? expand, @http:Payload Filter payload) returns Filter|http:BadRequest|http:Unauthorized {
@@ -1099,10 +1099,10 @@ service / on ep0 {
     resource function put rest/api/'2/filter/defaultShareScope(@http:Payload DefaultShareScope payload) returns DefaultShareScope|http:BadRequest|http:Unauthorized {
     }
 
-    resource function put rest/api/'2/issue/[string issueIdOrKey](@http:Payload IssueUpdateDetails payload, boolean notifyUsers = true, boolean overrideScreenSecurity = false, boolean overrideEditableFlag = false) returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function put rest/api/'2/issue/[string issueIdOrKey](@http:Payload IssueUpdateDetails payload, boolean notifyUsers = true, boolean overrideScreenSecurity = false, boolean overrideEditableFlag = false) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/issue/[string issueIdOrKey]/assignee(@http:Payload User payload) returns NoContent|http:BadRequest|http:Forbidden|http:NotFound {
+    resource function put rest/api/'2/issue/[string issueIdOrKey]/assignee(@http:Payload User payload) returns http:NoContent|http:BadRequest|http:Forbidden|http:NotFound {
     }
 
     resource function put rest/api/'2/issue/[string issueIdOrKey]/comment/[string id](string? expand, @http:Payload Comment payload) returns Comment|http:BadRequest|http:Unauthorized|http:NotFound {
@@ -1111,7 +1111,7 @@ service / on ep0 {
     resource function put rest/api/'2/issue/[string issueIdOrKey]/properties/[string propertyKey](@http:Payload json payload) returns json|JsonCreated|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/issue/[string issueIdOrKey]/remotelink/[string linkId](@http:Payload RemoteIssueLinkRequest payload) returns NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function put rest/api/'2/issue/[string issueIdOrKey]/remotelink/[string linkId](@http:Payload RemoteIssueLinkRequest payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
     resource function put rest/api/'2/issue/[string issueIdOrKey]/worklog/[string id](string? newEstimate, @http:Payload Worklog payload, boolean notifyUsers = true, "new"|"leave"|"manual"|"auto" adjustEstimate = "auto", string expand = "", boolean overrideEditableFlag = false) returns Worklog|http:BadRequest|http:Unauthorized|http:NotFound {
@@ -1132,40 +1132,40 @@ service / on ep0 {
     resource function put rest/api/'2/issuetype/[string issueTypeId]/properties/[string propertyKey](@http:Payload json payload) returns json|JsonCreated|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId](@http:Payload IssueTypeSchemeUpdateDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId](@http:Payload IssueTypeSchemeUpdateDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype(@http:Payload IssueTypeIds payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype(@http:Payload IssueTypeIds payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype/move(@http:Payload OrderOfIssueTypes payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/issuetypescheme/[int issueTypeSchemeId]/issuetype/move(@http:Payload OrderOfIssueTypes payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/issuetypescheme/project(@http:Payload IssueTypeSchemeProjectAssociation payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/issuetypescheme/project(@http:Payload IssueTypeSchemeProjectAssociation payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId](@http:Payload IssueTypeScreenSchemeUpdateDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId](@http:Payload IssueTypeScreenSchemeUpdateDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping(@http:Payload IssueTypeScreenSchemeMappingDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|JsonNotFound|JsonConflict {
+    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping(@http:Payload IssueTypeScreenSchemeMappingDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|http:Forbidden|JsonNotFound|JsonConflict {
     }
 
-    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping/default(@http:Payload UpdateDefaultScreenScheme payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/issuetypescreenscheme/[string issueTypeScreenSchemeId]/mapping/default(@http:Payload UpdateDefaultScreenScheme payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/issuetypescreenscheme/project(@http:Payload IssueTypeScreenSchemeProjectAssociation payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/issuetypescreenscheme/project(@http:Payload IssueTypeScreenSchemeProjectAssociation payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
-    resource function put rest/api/'2/mypreferences(string 'key, @http:Payload string payload) returns NoContent|http:Unauthorized|http:NotFound {
+    resource function put rest/api/'2/mypreferences(string 'key, @http:Payload string payload) returns http:NoContent|http:Unauthorized|http:NotFound {
     }
 
-    resource function put rest/api/'2/mypreferences/locale(@http:Payload Locale payload) returns NoContent|http:BadRequest|http:Unauthorized {
+    resource function put rest/api/'2/mypreferences/locale(@http:Payload Locale payload) returns http:NoContent|http:BadRequest|http:Unauthorized {
     }
 
     resource function put rest/api/'2/permissionscheme/[int schemeId](string? expand, @http:Payload PermissionScheme payload) returns PermissionScheme|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/project/[int projectId]/email(@http:Payload ProjectEmailAddress payload) returns NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function put rest/api/'2/project/[int projectId]/email(@http:Payload ProjectEmailAddress payload) returns http:NoContent|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
     resource function put rest/api/'2/project/[string projectIdOrKey](string? expand, @http:Payload ProjectInputBean payload) returns Project|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -1174,7 +1174,7 @@ service / on ep0 {
     resource function put rest/api/'2/project/[string projectIdOrKey]/'type/["software"|"service_desk"|"business" newProjectTypeKey]() returns Project|http:BadRequest|http:Unauthorized|http:NotFound {
     }
 
-    resource function put rest/api/'2/project/[string projectIdOrKey]/avatar(@http:Payload Avatar payload) returns NoContent|http:Unauthorized|http:Forbidden|http:NotFound {
+    resource function put rest/api/'2/project/[string projectIdOrKey]/avatar(@http:Payload Avatar payload) returns http:NoContent|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
     resource function put rest/api/'2/project/[string projectIdOrKey]/features/[string featureKey](@http:Payload ProjectFeatureToggleRequest payload) returns ProjectFeaturesResponse|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -1201,7 +1201,7 @@ service / on ep0 {
     resource function put rest/api/'2/screens/[int screenId]/tabs/[int tabId](@http:Payload ScreenableTab payload) returns ScreenableTab|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/screenscheme/[string screenSchemeId](@http:Payload UpdateScreenSchemeDetails payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/screenscheme/[string screenSchemeId](@http:Payload UpdateScreenSchemeDetails payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function put rest/api/'2/settings/columns(http:Request request) returns json|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
@@ -1216,7 +1216,7 @@ service / on ep0 {
     resource function put rest/api/'2/version/[string id](@http:Payload Version payload) returns Version|http:BadRequest|http:Unauthorized|http:NotFound {
     }
 
-    resource function put rest/api/'2/version/[string id]/mergeto/[string moveIssuesTo]() returns NoContent|http:BadRequest|http:Unauthorized|http:NotFound {
+    resource function put rest/api/'2/version/[string id]/mergeto/[string moveIssuesTo]() returns http:NoContent|http:BadRequest|http:Unauthorized|http:NotFound {
     }
 
     resource function put rest/api/'2/webhook/refresh(@http:Payload ContainerForWebhookIDs payload) returns WebhooksExpirationDate|ErrorCollectionBadRequest|ErrorCollectionForbidden {
@@ -1252,7 +1252,7 @@ service / on ep0 {
     resource function put rest/api/'2/workflowscheme/[int id]/workflow(string workflowName, @http:Payload IssueTypesWorkflowMapping payload) returns WorkflowScheme|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function put rest/api/'2/workflowscheme/project(@http:Payload WorkflowSchemeProjectAssociation payload) returns NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
+    resource function put rest/api/'2/workflowscheme/project(@http:Payload WorkflowSchemeProjectAssociation payload) returns http:NoContent|JsonBadRequest|http:Unauthorized|JsonForbidden|JsonNotFound {
     }
 
     resource function put rest/atlassian\-connect/'1/addons/[string addonKey]/properties/[string propertyKey](@http:Payload json payload) returns OperationMessage|OperationMessageCreated|OperationMessageBadRequest|OperationMessageUnauthorized {
@@ -1274,7 +1274,7 @@ public type EventNotification record {|
     # Identifies the recipients of the notification.
     "CurrentAssignee"|"Reporter"|"CurrentUser"|"ProjectLead"|"ComponentLead"|"User"|"Group"|"ProjectRole"|"EmailAddress"|"AllWatchers"|"UserCustomField"|"GroupCustomField" notificationType?;
     # The value of the `notificationType`:
-    # 
+    #
     #  *  `User` The `parameter` is the user account ID.
     #  *  `Group` The `parameter` is the group name.
     #  *  `ProjectRole` The `parameter` is the project role ID.
@@ -1427,7 +1427,7 @@ public type CreateWorkflowDetails record {|
     # The description of the workflow. The maximum length is 1000 characters.
     string description?;
     # The transitions of the workflow. For the request to be valid, these transitions must:
-    # 
+    #
     #  *  include one *initial* transition.
     #  *  not use the same name for a *global* and *directed* transition.
     #  *  have a unique name for each *global* transition.
@@ -1435,7 +1435,7 @@ public type CreateWorkflowDetails record {|
     #  *  have unique names for each transition from a status.
     #  *  not have a 'from' status on *initial* and *global* transitions.
     #  *  have a 'from' status on *directed* transitions.
-    # 
+    #
     # All the transition statuses must be included in `statuses`.
     CreateWorkflowTransitionDetails[] transitions;
     # The statuses of the workflow. Any status that does not include a transition is added to the workflow without a transition.
@@ -1463,10 +1463,6 @@ public type PageBeanFieldConfigurationItem record {|
     boolean isLast?;
     # The list of items.
     FieldConfigurationItem[] values?;
-|};
-
-public type NoContent record {|
-    *http:NoContent;
 |};
 
 public type SimpleListWrapperApplicationRole record {|
@@ -1514,7 +1510,7 @@ public type PermittedProjects record {|
 # Details about the complexity of the analysed Jira expression.
 public type JiraExpressionComplexity record {|
     # Information that can be used to determine how many [expensive operations](https://developer.atlassian.com/cloud/jira/platform/jira-expressions/#expensive-operations) the evaluation of the expression will perform. This information may be a formula or number. For example:
-    # 
+    #
     #  *  `issues.map(i => i.comments)` performs as many expensive operations as there are issues on the issues list. So this parameter returns `N`, where `N` is the size of issue list.
     #  *  `new Issue(10010).comments` gets comments for one issue, so its complexity is `2` (`1` to retrieve issue 10010 from the database plus `1` to get its comments).
     string expensiveOperations;
@@ -1525,7 +1521,7 @@ public type JiraExpressionComplexity record {|
 # A list of webhooks.
 public type WebhookDetails record {|
     # The JQL filter that specifies which issues the webhook is sent for. Only a subset of JQL can be used. The supported elements are:
-    # 
+    #
     #  *  Fields: `issueKey`, `project`, `issuetype`, `status`, `assignee`, `reporter`, `issue.property`, and `cf[id]` (for custom fields—only the epic label custom field is supported).
     #  *  Operators: `=`, `!=`, `IN`, and `NOT IN`.
     string jqlFilter;
@@ -1639,27 +1635,27 @@ public type JsonNotFound record {|
 |};
 
 # This object is used as follows:
-# 
+#
 #  *  In the [ issueLink](#api-rest-api-2-issueLink-post) resource it defines and reports on the type of link between the issues. Find a list of issue link types with [Get issue link types](#api-rest-api-2-issueLinkType-get).
 #  *  In the [ issueLinkType](#api-rest-api-2-issueLinkType-post) resource it defines and reports on issue link types.
 public type IssueLinkType record {|
     # The ID of the issue link type and is used as follows:
-    # 
+    #
     #  *  In the [ issueLink](#api-rest-api-2-issueLink-post) resource it is the type of issue link. Required on create when `name` isn't provided. Otherwise, read only.
     #  *  In the [ issueLinkType](#api-rest-api-2-issueLinkType-post) resource it is read only.
     string id?;
     # The name of the issue link type and is used as follows:
-    # 
+    #
     #  *  In the [ issueLink](#api-rest-api-2-issueLink-post) resource it is the type of issue link. Required on create when `id` isn't provided. Otherwise, read only.
     #  *  In the [ issueLinkType](#api-rest-api-2-issueLinkType-post) resource it is required on create and optional on update. Otherwise, read only.
     string name?;
     # The description of the issue link type inward link and is used as follows:
-    # 
+    #
     #  *  In the [ issueLink](#api-rest-api-2-issueLink-post) resource it is read only.
     #  *  In the [ issueLinkType](#api-rest-api-2-issueLinkType-post) resource it is required on create and optional on update. Otherwise, read only.
     string inward?;
     # The description of the issue link type outward link and is used as follows:
-    # 
+    #
     #  *  In the [ issueLink](#api-rest-api-2-issueLink-post) resource it is read only.
     #  *  In the [ issueLinkType](#api-rest-api-2-issueLinkType-post) resource it is required on create and optional on update. Otherwise, read only.
     string outward?;
@@ -2009,7 +2005,7 @@ public type FieldReferenceData record {|
     # The field identifier.
     string value?;
     # The display name contains the following:
-    # 
+    #
     #  *  for system fields, the field name. For example, `Summary`.
     #  *  for collapsed custom fields, the field name followed by a hyphen and then the field name and field type. For example, `Component - Component[Dropdown]`.
     #  *  for other custom fields, the field name followed by a hyphen and then the custom field ID. For example, `Component - cf[10061]`.
@@ -2037,7 +2033,7 @@ public type ListOperand record {
 # Details of the scope of the default sharing for new filters and dashboards.
 public type DefaultShareScope record {|
     # The scope of the default sharing for new filters and dashboards:
-    # 
+    #
     #  *  `AUTHENTICATED` Shared with all logged-in users.
     #  *  `GLOBAL` Shared with all logged-in users. This shows as `AUTHENTICATED` in the response.
     #  *  `PRIVATE` Not shared with any users.
@@ -2060,10 +2056,10 @@ public type WebhookRegistrationDetails record {|
 # Details about a project version.
 public type Version record {|
     # Use [expand](em>#expansion) to include additional information about version in the response. This parameter accepts a comma-separated list. Expand options include:
-    # 
+    #
     #  *  `operations` Returns the list of operations available for this version.
     #  *  `issuesstatus` Returns the count of issues in this version for each of the status categories *to do*, *in progress*, *done*, and *unmapped*. The *unmapped* property contains a count of issues with a status other than *to do*, *in progress*, and *done*.
-    # 
+    #
     # Optional for create and update.
     string expand?;
     # The URL of the version.
@@ -2262,14 +2258,14 @@ public type TaskProgressBeanRemoveOptionFromIssuesResultSeeOther record {|
 |};
 
 # An icon. If no icon is defined:
-# 
+#
 #  *  for a status icon, no status icon displays in Jira.
 #  *  for the remote object icon, the default link icon displays in Jira.
 public type Icon record {
     # The URL of an icon that displays at 16x16 pixel in Jira.
     string url16x16?;
     # The title of the icon. This is used as follows:
-    # 
+    #
     #  *  For a status icon it is used as a tooltip on the icon. If not set, the status icon doesn't display a tooltip in Jira.
     #  *  For the remote object icon it is used in conjunction with the application name to display a tooltip for the link's icon. The tooltip takes the format "\[application name\] icon title". Blank itemsare excluded from the tooltip title. If both items are blank, the icon tooltop displays as "Web Link".
     string title?;
@@ -2285,37 +2281,37 @@ public type SearchRequestBean record {|
     # The maximum number of items to return per page.
     int:Signed32 maxResults = 50;
     # A list of fields to return for each issue, use it to retrieve a subset of fields. This parameter accepts a comma-separated list. Expand options include:
-    # 
+    #
     #  *  `*all` Returns all fields.
     #  *  `*navigable` Returns navigable fields.
     #  *  Any issue field, prefixed with a minus to exclude.
-    # 
+    #
     # The default is `*navigable`.
-    # 
+    #
     # Examples:
-    # 
+    #
     #  *  `summary,comment` Returns the summary and comments fields only.
     #  *  `-description` Returns all navigable (default) fields except description.
     #  *  `*all,-comment` Returns all fields except comments.
-    # 
+    #
     # Multiple `fields` parameters can be included in a request.
-    # 
+    #
     # Note: All navigable fields are returned by default. This differs from [GET issue](#api-rest-api-2-issue-issueIdOrKey-get) where the default is all fields.
     string[] fields?;
     # Determines how to validate the JQL query and treat the validation results. Supported values:
-    # 
+    #
     #  *  `strict` Returns a 400 response code if any errors are found, along with a list of all errors (and warnings).
     #  *  `warn` Returns all errors as warnings.
     #  *  `none` No validation is performed.
     #  *  `true` *Deprecated* A legacy synonym for `strict`.
     #  *  `false` *Deprecated* A legacy synonym for `warn`.
-    # 
+    #
     # The default is `strict`.
-    # 
+    #
     # Note: If the JQL is not correctly formed a 400 response code is returned, regardless of the `validateQuery` value.
     "strict"|"warn"|"none"|"true"|"false" validateQuery?;
     # Use [expand](em>#expansion) to include additional information about issues in the response. Note that, unlike the majority of instances where `expand` is specified, `expand` is defined as a list of values. The expand options are:
-    # 
+    #
     #  *  `renderedFields` Returns field values rendered in HTML format.
     #  *  `names` Returns the display name of each field.
     #  *  `schema` Returns the schema describing a field type.
@@ -2542,19 +2538,19 @@ public type Component record {|
     @constraint:String {maxLength: 128}
     string leadAccountId?;
     # The nominal user type used to determine the assignee for issues created with this component. See `realAssigneeType` for details on how the type of the user, and hence the user, assigned to issues is determined. Can take the following values:
-    # 
+    #
     #  *  `PROJECT_LEAD` the assignee to any issues created with this component is nominally the lead for the project the component is in.
     #  *  `COMPONENT_LEAD` the assignee to any issues created with this component is nominally the lead for the component.
     #  *  `UNASSIGNED` an assignee is not set for issues created with this component.
     #  *  `PROJECT_DEFAULT` the assignee to any issues created with this component is nominally the default assignee for the project that the component is in.
-    # 
+    #
     # Default value: `PROJECT_DEFAULT`.
     # Optional when creating or updating a component.
     "PROJECT_DEFAULT"|"COMPONENT_LEAD"|"PROJECT_LEAD"|"UNASSIGNED" assigneeType?;
     # The details of the user associated with `assigneeType`, if any. See `realAssignee` for details of the user assigned to issues created with this component.
     User assignee?;
     # The type of the assignee that is assigned to issues created with this component, when an assignee cannot be set from the `assigneeType`. For example, `assigneeType` is set to `COMPONENT_LEAD` but no component lead is set. This property is set to one of the following values:
-    # 
+    #
     #  *  `PROJECT_LEAD` when `assigneeType` is `PROJECT_LEAD` and the project lead has permission to be assigned issues in the project that the component is in.
     #  *  `COMPONENT_LEAD` when `assignee`Type is `COMPONENT_LEAD` and the component lead has permission to be assigned issues in the project that the component is in.
     #  *  `UNASSIGNED` when `assigneeType` is `UNASSIGNED` and Jira is configured to allow unassigned issues.
@@ -2625,13 +2621,13 @@ public type CustomFieldValueUpdate record {|
     # The list of issue IDs.
     int[] issueIds;
     # The value for the custom field. The value must be compatible with the [custom field type](https://developer.atlassian.com/platform/forge/manifest-reference/modules/#data-types) as follows:
-    # 
+    #
     #  *  `string` – the value must be a string.
     #  *  `number` – the value must be a number.
     #  *  `datetime` – the value must be a string that represents a date in the ISO format, for example `"2021-01-18T12:00:00-03:00"`.
     #  *  `user` – the value must be an object that contains the `accountId` field.
     #  *  `group` – the value must be an object that contains the group `name` field.
-    # 
+    #
     # A list of appropriate values must be provided if the field is of the `list` [collection type](https://developer.atlassian.com/platform/forge/manifest-reference/modules/#collection-types).
     anydata value;
 |};
@@ -3544,7 +3540,7 @@ public type IssueTypeScheme record {|
 |};
 
 # User details permitted by the user's Atlassian Account privacy settings. However, be aware of these exceptions:
-# 
+#
 #  *  User record deleted from Atlassian: This occurs as the result of a right to be forgotten request. In this case, `displayName` provides an indication and other parameters have default values or are blank (for example, email is blank).
 #  *  User record corrupted: This occurs as a results of events such as a server import and can only happen to deleted users. In this case, `accountId` returns *unknown* and all other parameters have fallback values.
 #  *  User record unavailable: This usually occurs due to an internal service outage. In this case, all parameters have fallback values.
@@ -3889,7 +3885,7 @@ public type SharePermission record {|
     # The unique identifier of the share permission.
     int id?;
     # The type of share permission:
-    # 
+    #
     #  *  `group` Shared with a group. If set in a request, then specify `sharePermission.group` as well.
     #  *  `project` Shared with a project. If set in a request, then specify `sharePermission.project` as well.
     #  *  `projectRole` Share with a project role in a project. This value is not returned in responses. It is used in requests, where it needs to be specify with `projectId` and `projectRoleId`.
@@ -4273,7 +4269,7 @@ public type UpdateCustomFieldDetails record {|
     # The description of the custom field. The maximum length is 40000 characters.
     string description?;
     # The searcher that defines the way the field is searched in Jira. It can be set to `null`, otherwise you must specify the valid searcher for the field type, as listed below (abbreviated values shown):
-    # 
+    #
     #  *  `cascadingselect`: `cascadingselectsearcher`
     #  *  `datepicker`: `daterange`
     #  *  `datetime`: `datetimerange`
@@ -4972,11 +4968,11 @@ public type WorkflowScheme record {|
     string lastModified?;
     string self?;
     # Whether to create or update a draft workflow scheme when updating an active workflow scheme. An active workflow scheme is a workflow scheme that is used by at least one project. The following examples show how this property works:
-    # 
+    #
     #  *  Update an active workflow scheme with `updateDraftIfNeeded` set to `true`: If a draft workflow scheme exists, it is updated. Otherwise, a draft workflow scheme is created.
     #  *  Update an active workflow scheme with `updateDraftIfNeeded` set to `false`: An error is returned, as active workflow schemes cannot be updated.
     #  *  Update an inactive workflow scheme with `updateDraftIfNeeded` set to `true`: The workflow scheme is updated, as inactive workflow schemes do not require drafts to update.
-    # 
+    #
     # Defaults to `false`.
     boolean updateDraftIfNeeded?;
     # The issue types available in Jira.
@@ -5189,9 +5185,9 @@ public type ScreenDetails record {|
 # Details of a remote issue link.
 public type RemoteIssueLinkRequest record {
     # An identifier for the remote item in the remote system. For example, the global ID for a remote item in Confluence would consist of the app ID and page ID, like this: `appId=456&pageId=123`.
-    # 
+    #
     # Setting this field enables the remote issue link details to be updated or deleted using remote system and item details as the record identifier, rather than using the record's Jira ID.
-    # 
+    #
     # The maximum length is 255 characters.
     string globalId?;
     # Details of the remote application the linked item is in. For example, trello.
@@ -5226,7 +5222,7 @@ public type RuleConfiguration record {|
 |};
 
 # Details about syntax and type errors. The error details apply to the entire expression, unless the object includes:
-# 
+#
 #  *  `line` and `column`
 #  *  `expression`
 public type JiraExpressionValidationError record {|
@@ -5355,7 +5351,7 @@ public type PageBeanVersion record {|
 # Information about the most recent use of a field.
 public type FieldLastUsed record {|
     # Last used value type:
-    # 
+    #
     #  *  *TRACKED*: field is tracked and a last used date is available.
     #  *  *NOT\_TRACKED*: field is not tracked, last used date is not available.
     #  *  *NO\_INFORMATION*: field is tracked, but no last used date is available.
@@ -5370,7 +5366,7 @@ public type CustomFieldDefinitionJsonBean record {|
     # The description of the custom field, which is displayed in Jira.
     string description?;
     # The type of the custom field. For example, *com.atlassian.jira.plugin.system.customfieldtypes:grouppicker*.
-    # 
+    #
     #  *  `cascadingselect`: Allows multiple values to be selected using two select lists
     #  *  `datepicker`: Stores a date using a picker control
     #  *  `datetime`: Stores a date with a time component
@@ -5395,7 +5391,7 @@ public type CustomFieldDefinitionJsonBean record {|
     "com.atlassian.jira.plugin.system.customfieldtypes:cascadingselect"|"com.atlassian.jira.plugin.system.customfieldtypes:datepicker"|"com.atlassian.jira.plugin.system.customfieldtypes:datetime"|"com.atlassian.jira.plugin.system.customfieldtypes:float"|"com.atlassian.jira.plugin.system.customfieldtypes:grouppicker"|"com.atlassian.jira.plugin.system.customfieldtypes:importid"|"com.atlassian.jira.plugin.system.customfieldtypes:labels"|"com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes"|"com.atlassian.jira.plugin.system.customfieldtypes:multigrouppicker"|"com.atlassian.jira.plugin.system.customfieldtypes:multiselect"|"com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker"|"com.atlassian.jira.plugin.system.customfieldtypes:multiversion"|"com.atlassian.jira.plugin.system.customfieldtypes:project"|"com.atlassian.jira.plugin.system.customfieldtypes:radiobuttons"|"com.atlassian.jira.plugin.system.customfieldtypes:readonlyfield"|"com.atlassian.jira.plugin.system.customfieldtypes:select"|"com.atlassian.jira.plugin.system.customfieldtypes:textarea"|"com.atlassian.jira.plugin.system.customfieldtypes:textfield"|"com.atlassian.jira.plugin.system.customfieldtypes:url"|"com.atlassian.jira.plugin.system.customfieldtypes:userpicker"|"com.atlassian.jira.plugin.system.customfieldtypes:version" 'type;
     # The searcher defines the way the field is searched in Jira. For example, *com.atlassian.jira.plugin.system.customfieldtypes:grouppickersearcher*.
     # The search UI (basic search and JQL search) will display different operations and values for the field, based on the field searcher. You must specify a searcher that is valid for the field type, as listed below (abbreviated values shown):
-    # 
+    #
     #  *  `cascadingselect`: `cascadingselectsearcher`
     #  *  `datepicker`: `daterange`
     #  *  `datetime`: `datetimerange`
@@ -5891,7 +5887,7 @@ public type ComponentWithIssueCount record {|
     # The user details for the component's lead user.
     User lead?;
     # The nominal user type used to determine the assignee for issues created with this component. See `realAssigneeType` for details on how the type of the user, and hence the user, assigned to issues is determined. Takes the following values:
-    # 
+    #
     #  *  `PROJECT_LEAD` the assignee to any issues created with this component is nominally the lead for the project the component is in.
     #  *  `COMPONENT_LEAD` the assignee to any issues created with this component is nominally the lead for the component.
     #  *  `UNASSIGNED` an assignee is not set for issues created with this component.
@@ -5908,7 +5904,7 @@ public type ComponentWithIssueCount record {|
     # Whether a user is associated with `assigneeType`. For example, if the `assigneeType` is set to `COMPONENT_LEAD` but the component lead is not set, then `false` is returned.
     boolean isAssigneeTypeValid?;
     # The type of the assignee that is assigned to issues created with this component, when an assignee cannot be set from the `assigneeType`. For example, `assigneeType` is set to `COMPONENT_LEAD` but no component lead is set. This property is set to one of the following values:
-    # 
+    #
     #  *  `PROJECT_LEAD` when `assigneeType` is `PROJECT_LEAD` and the project lead has permission to be assigned issues in the project that the component is in.
     #  *  `COMPONENT_LEAD` when `assignee`Type is `COMPONENT_LEAD` and the component lead has permission to be assigned issues in the project that the component is in.
     #  *  `UNASSIGNED` when `assigneeType` is `UNASSIGNED` and Jira is configured to allow unassigned issues.
@@ -6049,7 +6045,7 @@ public type Changelog record {|
 
 public type SharePermissionInputBean record {|
     # The type of the share permission.Specify the type as follows:
-    # 
+    #
     #  *  `group` Share with a group. Specify `groupname` as well.
     #  *  `project` Share with a project. Specify `projectId` as well.
     #  *  `projectRole` Share with a project role in a project. Specify `projectId` and `projectRoleId` as well.
@@ -6538,7 +6534,7 @@ public type Resolution record {|
 |};
 
 # A user with details as permitted by the user's Atlassian Account privacy settings. However, be aware of these exceptions:
-# 
+#
 #  *  User record deleted from Atlassian: This occurs as the result of a right to be forgotten request. In this case, `displayName` provides an indication and other parameters have default values or are blank (for example, email is blank).
 #  *  User record corrupted: This occurs as a results of events such as a server import and can only happen to deleted users. In this case, `accountId` returns *unknown* and all other parameters have fallback values.
 #  *  User record unavailable: This usually occurs due to an internal service outage. In this case, all parameters have fallback values.
@@ -6551,7 +6547,7 @@ public type User record {|
     @constraint:String {maxLength: 128}
     string accountId?;
     # The user account type. Can take the following values:
-    # 
+    #
     #  *  `atlassian` regular Atlassian user account
     #  *  `app` system account used for Connect applications and OAuth to represent external systems
     #  *  `customer` Jira Service Desk account representing an external service desk
