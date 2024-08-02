@@ -18,8 +18,8 @@
 
 package io.ballerina.openapi.service.mapper.metainfo;
 
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.swagger.v3.oas.models.OpenAPI;
 
 import java.nio.file.Path;
@@ -32,6 +32,6 @@ import java.util.List;
  */
 public interface MetaInfoMapper {
 
-    void setResourceMetaData(ServiceDeclarationNode serviceNode, OpenAPI openAPI, Path ballerinaFilePath);
+    void setResourceMetaData(OpenAPI openAPI, ServiceNode serviceNode, Path ballerinaFilePath);
     List<OpenAPIMapperDiagnostic> getDiagnostics();
 }

@@ -18,21 +18,33 @@
 package io.ballerina.openapi.service.mapper.model;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.tools.diagnostics.Location;
 
-import java.util.List;
+import java.util.Optional;
 
 /**
- * This {@link AdditionalData} record stores the additional data required for the openapi service mapper.
- * @param semanticModel - The semantic model of the ballerina project.
- * @param moduleMemberVisitor - The module member visitor.
- * @param diagnostics - The list of diagnostics.
- * @param enableBallerinaExt - The flag to enable ballerina extension in the type schema.
+ * The {@link ResourceFunction} represents the interface for resource function.
  *
- * @since 1.9.0
+ * @since 2.1.0
  */
-public record AdditionalData(SemanticModel semanticModel,
-                             ModuleMemberVisitor moduleMemberVisitor,
-                             List<OpenAPIMapperDiagnostic> diagnostics,
-                             boolean enableBallerinaExt) {
+public interface ResourceFunction {
+
+    NodeList<Node> relativeResourcePath();
+
+    String functionName();
+
+    Location location();
+
+    Optional<MetadataNode> metadata();
+
+    Optional<Symbol> getSymbol(SemanticModel semanticModel);
+
+    FunctionSignatureNode functionSignature();
+
+    Optional<MetadataNode> parentMetaData();
 }

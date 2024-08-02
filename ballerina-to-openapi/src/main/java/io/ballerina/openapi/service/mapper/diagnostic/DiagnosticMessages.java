@@ -103,7 +103,16 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_134("OAS_CONVERTOR_134", "Generated OpenAPI definition does not contain the `%s` for" +
             " `%s` parameter: `%s`, since the example value(s) has parser errors", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_135("OAS_CONVERTOR_135", "Example skipped for request parameter: `%s`, since the request payload " +
-            "type implies more than one content-type", DiagnosticSeverity.WARNING);
+            "type implies more than one content-type", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_136("OAS_CONVERTOR_136", "Generated OpenAPI definition for the service contract type: " +
+            "'%s' has errors", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_137("OAS_CONVERTOR_137", "Failed to obtain the OpenAPI definition from the service contract" +
+            " type: '%s'", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_138("OAS_CONVERTOR_138", "Failed to find the package to obtain the OpenAPI definition from the " +
+            "service contract type: '%s'", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_139("OAS_CONVERTOR_139", "Failed to find the OpenAPI definition resource for the " +
+            "service contract type: '%s'", DiagnosticSeverity.ERROR);
+
     private final String code;
     private final String description;
     private final DiagnosticSeverity severity;

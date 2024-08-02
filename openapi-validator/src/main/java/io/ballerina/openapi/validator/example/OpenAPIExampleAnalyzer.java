@@ -33,5 +33,6 @@ public class OpenAPIExampleAnalyzer extends CodeAnalyzer {
         codeAnalysisContext.addSyntaxNodeAnalysisTask(new TypeExampleAnalyzer(), SyntaxKind.TYPE_DEFINITION);
         codeAnalysisContext.addSyntaxNodeAnalysisTask(new RecordFieldExampleAnalyzer(), SyntaxKind.RECORD_FIELD);
         codeAnalysisContext.addSyntaxNodeAnalysisTask(new ParameterExampleAnalyzer(), SyntaxKind.SERVICE_DECLARATION);
+        codeAnalysisContext.addSyntaxNodeAnalysisTask(new ContractParamExampleAnalyzer(), SyntaxKind.OBJECT_TYPE_DESC);
     }
 }

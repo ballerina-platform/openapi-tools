@@ -35,7 +35,11 @@ public enum OpenAPIDiagnosticCodes {
     OPENAPI_100("OPENAPI_100", "OpenAPI example annotation is not supported on non-anydata types", ERROR),
     OPENAPI_101("OPENAPI_101", "OpenAPI examples annotation is not supported on non-anydata types", ERROR),
     OPENAPI_102("OPENAPI_102", "OpenAPI example and OpenAPI examples annotations cannot be used together", ERROR),
-    OPENAPI_103("OPENAPI_103", "OpenAPI example(s) annotation is not supported on rest parameter", ERROR);
+    OPENAPI_103("OPENAPI_103", "OpenAPI example(s) annotation is not supported on rest parameter", ERROR),
+    OPENAPI_104("OPENAPI_104", "OpenAPI example annotation is not allowed for resource function implemented via the" +
+            " 'http:ServiceContract' type. The HTTP annotations are inferred from the service contract type", ERROR),
+    OPENAPI_105("OPENAPI_105", "OpenAPI examples annotation is not allowed for resource function implemented via the" +
+            " 'http:ServiceContract' type. The HTTP annotations are inferred from the service contract type", ERROR);
 
     private final String code;
     private final String message;
