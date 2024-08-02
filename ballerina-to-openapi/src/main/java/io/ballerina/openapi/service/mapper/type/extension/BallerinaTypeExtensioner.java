@@ -46,6 +46,18 @@ public final class BallerinaTypeExtensioner {
     }
 
     public static void removeExtensions(OpenAPI openAPI) {
+        removeExtensionsFromSchemas(openAPI, (extensions, orgName, moduleName) -> true);
+    }
+
+    public static void removeCurrentModuleTypeExtensions(OpenAPI openAPI, ModuleID moduleID) {
+        String orgName = moduleID.orgName();
+        String moduleName = moduleID.moduleName();
+
+        removeExtensionsFromSchemas(openAPI, (extensions, org, mod) -> fromSameModule(extensions, orgName,
+                moduleName));
+    }
+
+    private static void removeExtensionsFromSchemas(OpenAPI openAPI, ExtensionRemovalCondition condition) {
         Components components = openAPI.getComponents();
         if (Objects.isNull(components)) {
             return;
@@ -58,10 +70,20 @@ public final class BallerinaTypeExtensioner {
 
         schemas.forEach((key, schema) -> {
             Map<?, ?> extensions = schema.getExtensions();
-            if (Objects.nonNull(extensions)) {
+            if (Objects.nonNull(extensions) && condition.shouldRemove(extensions, null, null)) {
                 extensions.remove(X_BALLERINA_TYPE);
             }
         });
+    }
+
+    @FunctionalInterface
+    private interface ExtensionRemovalCondition {
+        boolean shouldRemove(Map<?, ?> extensions, String orgName, String moduleName);
+    }
+
+    private static boolean fromSameModule(Map<?, ?> extensions, String orgName, String moduleName) {
+        return extensions.get(X_BALLERINA_TYPE) instanceof BallerinaPackage ballerinaPkg &&
+                orgName.equals(ballerinaPkg.orgName()) && moduleName.equals(ballerinaPkg.moduleName());
     }
 
     public static Optional<BallerinaPackage> getExtension(Schema schema) {
@@ -84,6 +106,6 @@ public final class BallerinaTypeExtensioner {
         }
         ModuleID moduleID = module.get().id();
         return Optional.of(new BallerinaPackage(moduleID.orgName(), moduleID.packageName(), moduleID.moduleName(),
-                moduleID.version(), moduleID.modulePrefix(), typeSymbol.getName()));
+                moduleID.version(), moduleID.modulePrefix(), typeSymbol.getName().orElse(null)));
     }
 }

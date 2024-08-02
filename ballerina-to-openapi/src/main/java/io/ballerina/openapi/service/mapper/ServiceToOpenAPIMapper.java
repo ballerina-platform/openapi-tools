@@ -17,7 +17,9 @@
  */
 package io.ballerina.openapi.service.mapper;
 
+import io.ballerina.compiler.api.ModuleID;
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -95,6 +97,24 @@ public final class ServiceToOpenAPIMapper {
                                                          SemanticModel semanticModel,
                                                          String serviceName, Boolean needJson,
                                                          Path inputPath) {
+        return generateOAS3Definition(project, syntaxTree, semanticModel, serviceName, needJson, inputPath, false);
+    }
+
+    /**
+     * This method will generate  openapi definition Map lists with ballerina code.
+     *
+     * @param syntaxTree    - Syntax tree the related to ballerina service
+     * @param semanticModel - Semantic model related to ballerina module
+     * @param serviceName   - Service name that need to generate the openAPI specification
+     * @param needJson      - Flag for enabling the generated file format with json or YAML
+     * @param inputPath     - Input file path for resolve the annotation details
+     * @param ballerinaExtension - Flag to enable ballerina type extension
+     * @return - {@link java.util.Map} with openAPI definitions for service nodes
+     */
+    public static List<OASResult> generateOAS3Definition(Project project, SyntaxTree syntaxTree,
+                                                         SemanticModel semanticModel,
+                                                         String serviceName, Boolean needJson,
+                                                         Path inputPath, Boolean ballerinaExtension) {
         Map<String, ServiceNode> servicesToGenerate = new HashMap<>();
         List<String> availableService = new ArrayList<>();
         List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
@@ -115,7 +135,7 @@ public final class ServiceToOpenAPIMapper {
             for (Map.Entry<String, ServiceNode> serviceNode : servicesToGenerate.entrySet()) {
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNode.getKey(), needJson);
                 OASResult oasDefinition = generateOasFroServiceNode(project, openApiName,
-                        semanticModel, inputPath, serviceNode.getValue());
+                        semanticModel, inputPath, serviceNode.getValue(), ballerinaExtension);
                 outputs.add(oasDefinition);
             }
         }
@@ -127,13 +147,15 @@ public final class ServiceToOpenAPIMapper {
     }
 
     public static OASResult generateOasFroServiceNode(Project project, String openApiName, SemanticModel semanticModel,
-                                                       Path inputPath, ServiceNode serviceNode) {
+                                                      Path inputPath, ServiceNode serviceNode,
+                                                      Boolean ballerinaExtension) {
         OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder =
                 new OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
         builder.setServiceNode(serviceNode)
                 .setSemanticModel(semanticModel)
                 .setOpenApiFileName(openApiName)
                 .setBallerinaFilePath(inputPath)
+                .setBallerinaExtension(ballerinaExtension)
                 .setProject(project);
         OASGenerationMetaInfo oasGenerationMetaInfo = builder.build();
         OASResult oasDefinition = generateOAS(oasGenerationMetaInfo);
@@ -275,7 +297,12 @@ public final class ServiceToOpenAPIMapper {
                     openapi.setComponents(null);
                 }
                 // Remove ballerina extensions
-                BallerinaTypeExtensioner.removeExtensions(openapi);
+                Optional<ModuleID> serviceModuleId = getServiceModuleId(serviceDefinition, semanticModel);
+                if (oasGenerationMetaInfo.getBallerinaExtension() && serviceModuleId.isPresent()) {
+                    BallerinaTypeExtensioner.removeCurrentModuleTypeExtensions(openapi, serviceModuleId.get());
+                } else {
+                    BallerinaTypeExtensioner.removeExtensions(openapi);
+                }
                 return new OASResult(openapi, diagnostics);
             } else {
                 return new OASResult(openapi, oasResult.getDiagnostics());
@@ -329,6 +356,11 @@ public final class ServiceToOpenAPIMapper {
         }
         String[] parts = servers.get(0).getUrl().split("\\{server}:\\{port}");
         return servers.get(0).getUrl().split("\\{server}:\\{port}").length == 2 ? parts[1] : "";
+    }
+
+    private static Optional<ModuleID> getServiceModuleId(ServiceNode serviceNode, SemanticModel semanticModel) {
+        return semanticModel.symbol(serviceNode.getInternalNode())
+                .flatMap(symbol -> symbol.getModule().map(ModuleSymbol::id));
     }
 
     /**
