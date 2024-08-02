@@ -18,6 +18,7 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator.ClientServiceGeneratorOptions;
 import io.ballerina.openapi.cmd.BallerinaCodeGenerator.ServiceGeneratorOptions;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -474,9 +475,11 @@ public class OpenApiCmd implements BLauncherCmd {
                                    Filter filter, boolean generateClientResourceFunctions, boolean statusCodeBinding) {
         try {
             assert resourcePath != null;
-            generator.generateClientAndService(resourcePath.toString(), fileName, targetOutputPath.toString(), filter,
-                    baseCmd.nullable, generateClientResourceFunctions, generateServiceType, generateServiceContract,
+            ClientServiceGeneratorOptions options = new ClientServiceGeneratorOptions(baseCmd.nullable,
+                    generateClientResourceFunctions, generateServiceType, generateServiceContract,
                     generateWithoutDataBinding, statusCodeBinding, baseCmd.mock);
+            generator.generateClientAndService(resourcePath.toString(), fileName, targetOutputPath.toString(), filter,
+                    options);
         } catch (BallerinaOpenApiException e) {
             outStream.println(e.getMessage());
             exitError(this.exitWhenFinish);

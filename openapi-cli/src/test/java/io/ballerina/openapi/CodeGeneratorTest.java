@@ -62,7 +62,7 @@ public class CodeGeneratorTest {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
     ServiceGeneratorOptions defaultServiceOptions = new ServiceGeneratorOptions(false, false, false, false, false);
-    ClientGeneratorOptions defaultClientOptions = new BallerinaCodeGenerator.ClientGeneratorOptions(false, false, false, false, false)
+    ClientGeneratorOptions defaultClientOptions = new ClientGeneratorOptions(false, false, false, false, false);
 
     String replaceRegex  = System.getProperty("os.name").toLowerCase()
             .contains("windows") ? "#.*[+*a\\r\\n]" : "#.*[+*a\\n]";
@@ -616,7 +616,7 @@ public class CodeGeneratorTest {
         try {
             String expectedServiceContent = getStringWithNewlineFromGivenBalFile(expectedDirPath,
                     "generic_service_petstore_original.bal");
-            ServiceGeneratorOptions options = new ServiceGeneratorOptions(false, false, false, true);
+            ServiceGeneratorOptions options = new ServiceGeneratorOptions(false, false, false, true, false);
             generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter, options);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringWithNewlineFromGivenBalFile(resourcePath,
