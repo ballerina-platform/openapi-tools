@@ -32,6 +32,9 @@
     "mock": {
       "type": "boolean"
     },
+    "singleFile": {
+      "type": "boolean"
+    },
     "isUsingSanitizedOas": {
       "type": "boolean"
     }

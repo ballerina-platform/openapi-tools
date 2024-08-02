@@ -60,6 +60,9 @@ public class BaseCmd {
             description = "Generate mock client with given response example")
     public boolean mock;
 
+    @CommandLine.Option(names = {"--single-file"}, description = "Generate all contents in a single file")
+    public boolean singleFile;
+
     @CommandLine.Option(names = {"--use-sanitized-oas"}, hidden = true, description = "This is an experimental" +
             " feature. This option enables code generation by modifying the given OAS to follow the" +
             " Ballerina language best practices.")

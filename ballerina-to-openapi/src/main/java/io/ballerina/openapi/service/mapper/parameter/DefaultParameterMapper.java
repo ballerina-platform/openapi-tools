@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org).
  *
  *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -24,7 +24,6 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -37,6 +36,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
+import io.ballerina.openapi.service.mapper.model.ResourceFunction;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -61,14 +61,14 @@ public class DefaultParameterMapper implements ParameterMapper {
     public enum ParameterType {
         PAYLOAD, REQUEST, QUERY, HEADER, OTHER
     }
-    private final FunctionDefinitionNode functionDefinitionNode;
+    private final ResourceFunction functionDefinitionNode;
     private final OperationInventory operationInventory;
     private final Map<String, String> apiDocs;
     private final AdditionalData additionalData;
     private final boolean treatNilableAsOptional;
     private final TypeMapper typeMapper;
 
-    public DefaultParameterMapper(FunctionDefinitionNode functionDefinitionNode, OperationInventory operationInventory,
+    public DefaultParameterMapper(ResourceFunction functionDefinitionNode, OperationInventory operationInventory,
                                   Map<String, String> apiDocs, AdditionalData additionalData,
                                   Boolean treatNilableAsOptional, ServiceMapperFactory serviceMapperFactory) {
         this.functionDefinitionNode = functionDefinitionNode;

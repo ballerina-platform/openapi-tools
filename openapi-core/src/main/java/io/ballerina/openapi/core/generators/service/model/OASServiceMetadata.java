@@ -32,6 +32,7 @@ public class OASServiceMetadata {
     private final Filter filters;
     private final boolean nullable;
     private final boolean generateServiceType;
+    private final boolean generateServiceContract;
     private final boolean generateWithoutDataBinding;
     private final String licenseHeader;
     private final String srcPackage;
@@ -43,6 +44,7 @@ public class OASServiceMetadata {
         this.filters = serviceMetadataBuilder.filters;
         this.nullable = serviceMetadataBuilder.nullable;
         this.generateServiceType = serviceMetadataBuilder.generateServiceType;
+        this.generateServiceContract = serviceMetadataBuilder.generateServiceContract;
         this.generateWithoutDataBinding = serviceMetadataBuilder.generateWithoutDataBinding;
         this.licenseHeader = serviceMetadataBuilder.licenseHeader;
         this.srcPackage = serviceMetadataBuilder.srcPackage;
@@ -64,6 +66,10 @@ public class OASServiceMetadata {
 
     public boolean isServiceTypeRequired() {
         return generateServiceType;
+    }
+
+    public boolean isServiceContractRequired() {
+        return generateServiceContract;
     }
 
     public boolean generateWithoutDataBinding() {
@@ -95,6 +101,7 @@ public class OASServiceMetadata {
         private boolean nullable = false;
 
         private boolean generateServiceType = false;
+        private boolean generateServiceContract = false;
 
         private boolean generateWithoutDataBinding = false;
         private String licenseHeader = "";
@@ -119,6 +126,11 @@ public class OASServiceMetadata {
 
         public Builder withGenerateServiceType(boolean generateServiceType) {
             this.generateServiceType = generateServiceType;
+            return this;
+        }
+
+        public Builder withGenerateServiceContract(boolean generateServiceContract) {
+            this.generateServiceContract = generateServiceContract;
             return this;
         }
 

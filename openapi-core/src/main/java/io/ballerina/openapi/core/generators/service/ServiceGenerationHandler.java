@@ -18,6 +18,9 @@
 
 package io.ballerina.openapi.core.generators.service;
 
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.core.generators.common.SingleFileGenerator;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
@@ -27,6 +30,7 @@ import org.ballerinalang.formatter.core.FormatterException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_FILE_HEADER;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
@@ -38,28 +42,54 @@ public class ServiceGenerationHandler {
     public List<GenSrcFile> generateServiceFiles(OASServiceMetadata oasServiceMetadata) throws
             FormatterException, BallerinaOpenApiException {
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        String mainContent;
         ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
-        mainContent = Formatter.format(serviceGenerator.generateSyntaxTree()).toSourceCode();
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
-                oasServiceMetadata.getSrcFile(),
-                (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
-                        oasServiceMetadata.getLicenseHeader()) + mainContent));
 
-        if (oasServiceMetadata.isServiceTypeRequired()) {
-            ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata,
-                    serviceGenerator.getFunctionsList());
-            String serviceType = Formatter.format(serviceTypeGenerator.generateSyntaxTree()).toSourceCode();
+        if (!oasServiceMetadata.isServiceContractRequired()) {
+            String mainContent = Formatter.format(serviceGenerator.generateSyntaxTree()).toSourceCode();
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
+                    oasServiceMetadata.getSrcFile(),
+                    (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
+                            oasServiceMetadata.getLicenseHeader()) + mainContent));
+        }
+
+        Optional<ServiceTypeGenerator> serviceTypeGenerator = getServiceTypeGenerator(oasServiceMetadata,
+                serviceGenerator.getFunctionsList());
+        if (serviceTypeGenerator.isPresent()) {
+            String serviceType = Formatter.format(serviceTypeGenerator.get().generateSyntaxTree()).toSourceCode();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SERVICE_TYPE, oasServiceMetadata.getSrcPackage(),
-                    "service_type.bal",
+                    oasServiceMetadata.isServiceContractRequired() ? "service_contract.bal" : "service_type.bal",
                     (oasServiceMetadata.getLicenseHeader().isBlank() ? DO_NOT_MODIFY_FILE_HEADER :
                             oasServiceMetadata.getLicenseHeader()) + serviceType));
         }
+
         diagnostics.addAll(serviceGenerator.getDiagnostics());
         return sourceFiles;
     }
 
+    public SyntaxTree generateSingleSyntaxTree(OASServiceMetadata oasServiceMetadata) throws BallerinaOpenApiException {
+        ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+        SyntaxTree syntaxTree = serviceGenerator.generateSyntaxTree();
+        if (oasServiceMetadata.isServiceTypeRequired()) {
+            ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata,
+                    serviceGenerator.getFunctionsList());
+            syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree, serviceTypeGenerator.generateSyntaxTree());
+        }
+        diagnostics.addAll(serviceGenerator.getDiagnostics());
+        return syntaxTree;
+    }
+
     public List<Diagnostic> getDiagnostics() {
         return diagnostics;
+    }
+
+    private Optional<ServiceTypeGenerator> getServiceTypeGenerator(OASServiceMetadata oasServiceMetadata,
+                                                                   List<Node> functionsList) {
+        if (oasServiceMetadata.isServiceTypeRequired()) {
+            return Optional.of(new ServiceTypeGenerator(oasServiceMetadata, functionsList));
+        }
+        if (oasServiceMetadata.isServiceContractRequired()) {
+            return Optional.of(new ServiceContractGenerator(oasServiceMetadata, functionsList));
+        }
+        return Optional.empty();
     }
 }

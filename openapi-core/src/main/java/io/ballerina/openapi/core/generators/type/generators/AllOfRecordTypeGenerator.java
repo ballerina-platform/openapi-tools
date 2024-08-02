@@ -31,6 +31,7 @@ import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.type.diagnostic.TypeGeneratorDiagnostic;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
@@ -42,9 +43,12 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
@@ -106,6 +110,10 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
         // filtering as input. Has to use this assertion statement instead of `if` condition, because to avoid
         // unreachable else statement.
         List<Schema<?>> allOfSchemas = schema.getAllOf();
+        List<String> requiredFields = schema.getRequired();
+        if (Objects.isNull(requiredFields)) {
+            requiredFields = new ArrayList<>();
+        }
         RecordMetadata recordMetadata = getRecordMetadata();
         RecordRestDescriptorNode restDescriptorNode = recordMetadata.getRestDescriptorNode();
         if (allOfSchemas.size() == 1 && allOfSchemas.get(0).get$ref() != null) {
@@ -114,7 +122,8 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
             TypeDescriptorNode typeDescriptorNode = referencedTypeGenerator.generateTypeDescriptorNode();
             return typeDescriptorNode;
         } else {
-            ImmutablePair<List<Node>, List<Schema<?>>> recordFlist = generateAllOfRecordFields(allOfSchemas);
+            ImmutablePair<List<Node>, List<Schema<?>>> recordFlist = generateAllOfRecordFields(allOfSchemas,
+                    requiredFields);
             List<Node> recordFieldList = recordFlist.getLeft();
             List<Schema<?>> validSchemas = recordFlist.getRight();
             if (validSchemas.isEmpty()) {
@@ -143,7 +152,8 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
         }
     }
 
-    private ImmutablePair<List<Node>, List<Schema<?>>> generateAllOfRecordFields(List<Schema<?>> allOfSchemas)
+    private ImmutablePair<List<Node>, List<Schema<?>>> generateAllOfRecordFields(List<Schema<?>> allOfSchemas,
+                                                                                 List<String> requiredFields)
             throws OASTypeGenException {
 
         List<Node> recordFieldList = new ArrayList<>();
@@ -151,7 +161,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
 
         for (Schema allOfSchema : allOfSchemas) {
             if (allOfSchema.get$ref() != null) {
-                String extractedSchemaName = null;
+                String extractedSchemaName;
                 try {
                     extractedSchemaName = GeneratorUtils.extractReferenceType(allOfSchema.get$ref());
                 } catch (BallerinaOpenApiException e) {
@@ -163,7 +173,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                         typeRef, createToken(SEMICOLON_TOKEN));
                 // check whether given reference schema has additional fields.
                 OpenAPI openAPI = GeneratorMetaData.getInstance().getOpenAPI();
-                Schema<?> refSchema = openAPI.getComponents().getSchemas().get(extractedSchemaName);
+                Schema refSchema = openAPI.getComponents().getSchemas().get(extractedSchemaName);
                 addAdditionalSchemas(refSchema);
 
                 if (!pregeneratedTypeMap.containsKey(modifiedSchemaName)) {
@@ -181,15 +191,23 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                             createToken(SEMICOLON_TOKEN)));
                 }
                 recordFieldList.add(recordField);
+
+                if (!requiredFields.isEmpty()) {
+                    handleCommonRequiredFields(requiredFields, refSchema, recordFieldList);
+                }
             } else if (allOfSchema.getProperties() != null) {
                 Map<String, Schema<?>> properties = allOfSchema.getProperties();
                 List<String> required = allOfSchema.getRequired();
+                if (Objects.isNull(required)) {
+                    required = new ArrayList<>();
+                }
+                required.addAll(requiredFields);
                 recordFieldList.addAll(addRecordFields(required, properties.entrySet(), typeName));
                 addAdditionalSchemas(allOfSchema);
             } else if (GeneratorUtils.isComposedSchema(allOfSchema)) {
                 if (allOfSchema.getAllOf() != null) {
                     ImmutablePair<List<Node>, List<Schema<?>>> immutablePair =
-                            generateAllOfRecordFields(allOfSchema.getAllOf());
+                            generateAllOfRecordFields(allOfSchema.getAllOf(), requiredFields);
                     List<Node> recordAllFields = immutablePair.getLeft();
                     recordFieldList.addAll(recordAllFields);
                 } else {
@@ -203,6 +221,49 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
             }
         }
         return ImmutablePair.of(recordFieldList, validSchemas);
+    }
+
+    private void handleCommonRequiredFields(List<String> requiredFields, Schema refSchema, List<Node> recordFieldList)
+            throws OASTypeGenException {
+        try {
+            Map<String, Schema<?>> properties = getPropertiesFromRefSchema(refSchema);
+            List<String> required = refSchema.getRequired();
+            if (Objects.nonNull(required)) {
+                requiredFields.removeAll(required);
+            }
+            Set<Map.Entry<String, Schema<?>>> fieldProperties = new HashSet<>();
+            for (Map.Entry<String, Schema<?>> property : properties.entrySet()) {
+                if (requiredFields.contains(property.getKey())) {
+                    fieldProperties.add(property);
+                }
+            }
+            recordFieldList.addAll(addRecordFields(requiredFields, fieldProperties, typeName));
+        } catch (BallerinaOpenApiException e) {
+            throw new OASTypeGenException(e.getMessage());
+        }
+    }
+
+    private static Map<String, Schema<?>> getPropertiesFromRefSchema(Schema schema) throws InvalidReferenceException {
+        Map<String, Schema<?>> properties = schema.getProperties();
+        if (Objects.isNull(properties)) {
+            properties = new HashMap<>();
+        }
+        String refSchema = schema.get$ref();
+        if (Objects.nonNull(refSchema)) {
+            String extractedSchemaName = GeneratorUtils.extractReferenceType(refSchema);
+            OpenAPI openAPI = GeneratorMetaData.getInstance().getOpenAPI();
+            Schema<?> refSchemaObj = openAPI.getComponents().getSchemas().get(extractedSchemaName);
+            if (Objects.nonNull(refSchemaObj)) {
+                properties.putAll(getPropertiesFromRefSchema(refSchemaObj));
+            }
+        }
+        List<Schema<?>> allOfSchemas = schema.getAllOf();
+        if (Objects.nonNull(allOfSchemas)) {
+            for (Schema<?> allOfSchema : allOfSchemas) {
+                properties.putAll(getPropertiesFromRefSchema(allOfSchema));
+            }
+        }
+        return properties;
     }
 
     /**

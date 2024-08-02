@@ -26,6 +26,7 @@ import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.mock.AdvanceMockClientGenerator;
 import io.ballerina.openapi.core.generators.client.mock.BallerinaMockClientGenerator;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
+import io.ballerina.openapi.core.generators.common.SingleFileGenerator;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
@@ -84,6 +85,7 @@ import static io.ballerina.openapi.bal.tool.Constants.MOCK;
 import static io.ballerina.openapi.bal.tool.Constants.MODE;
 import static io.ballerina.openapi.bal.tool.Constants.NULLABLE;
 import static io.ballerina.openapi.bal.tool.Constants.OPERATIONS;
+import static io.ballerina.openapi.bal.tool.Constants.SINGLE_FILE;
 import static io.ballerina.openapi.bal.tool.Constants.STATUS_CODE_BINDING;
 import static io.ballerina.openapi.bal.tool.Constants.TAGS;
 import static io.ballerina.openapi.bal.tool.Constants.TRUE;
@@ -104,7 +106,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.normali
  */
 @ToolConfig(name = "openapi")
 public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
-    static String hashOpenAPI;
+    String hashOpenAPI;
 
     @Override
     public void execute(ToolContext toolContext) {
@@ -155,7 +157,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                     return;
                 }
                 if (options.containsKey(MODE)) {
-                    String value = (String) options.get(MODE).value().toString().trim();
+                    String value = options.get(MODE).value().toString().trim();
                     handleCodeGenerationMode(toolContext, codeGeneratorConfig, location, value);
                 } else {
                     // Create client for the given OAS
@@ -174,7 +176,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     /**
      * This method uses to validate the cache.
      */
-    private static boolean validateCache(ToolContext toolContext, OASClientConfig clientConfig) throws IOException {
+    private boolean validateCache(ToolContext toolContext, OASClientConfig clientConfig) throws IOException {
         Path cachePath = toolContext.cachePath();
         hashOpenAPI = getHashValue(clientConfig, toolContext.targetModule());
         if (!Files.isDirectory(cachePath)) {
@@ -206,7 +208,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
      * This method uses to check whether given specification can be handled via the openapi client generation tool.
      * This includes basic requirements like file extension check.
      */
-    private static boolean canHandle(ToolContext toolContext) {
+    private boolean canHandle(ToolContext toolContext) {
         String oasPath = toolContext.filePath();
         if (oasPath.isBlank()) {
             TomlNodeLocation location = toolContext.currentPackage().ballerinaToml().get().tomlAstNode().location();
@@ -251,7 +253,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         return Optional.empty();
     }
 
-    private static boolean operationIdValidationRequired(ToolContext toolContext) {
+    private boolean operationIdValidationRequired(ToolContext toolContext) {
         Map<String, ToolContext.Option> options = toolContext.options();
         if (Objects.isNull(options)) {
             return false;
@@ -270,7 +272,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     /**
      * This method uses to extract the options given by the user.
      */
-    public static ImmutablePair<OASClientConfig, OASServiceMetadata> extractOptionDetails(ToolContext toolContext,
+    public ImmutablePair<OASClientConfig, OASServiceMetadata> extractOptionDetails(ToolContext toolContext,
                                                                                           OpenAPI openAPI) throws
             IOException, BallerinaOpenApiException {
 
@@ -314,6 +316,9 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 case MOCK:
                     clientMetaDataBuilder.withMock(value.contains(TRUE));
                     break;
+                case SINGLE_FILE:
+                    clientMetaDataBuilder.withSingleFile(value.contains(TRUE));
+                    break;
                 case IS_SANITIZED_OAS:
                     clientMetaDataBuilder.withIsUsingSanitizedOas(value.contains(TRUE));
                     serviceMetaDataBuilder.withIsUsingSanitizedOas(value.contains(TRUE));
@@ -327,7 +332,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         return new ImmutablePair<>(clientMetaDataBuilder.build(), serviceMetaDataBuilder.build());
     }
 
-    private static List<String> getArrayItems(Object valueNode) {
+    private List<String> getArrayItems(Object valueNode) {
         List<String> arrayItems = new ArrayList<>();
         if (valueNode instanceof ArrayList) {
             return (List<String>) valueNode;
@@ -368,7 +373,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         }
     }
 
-    private static boolean getStatusCodeBindingOption(ToolContext toolContext) {
+    private boolean getStatusCodeBindingOption(ToolContext toolContext) {
         return toolContext.options().containsKey(STATUS_CODE_BINDING) &&
                 toolContext.options().get(STATUS_CODE_BINDING).value().toString().contains(TRUE);
     }
@@ -455,7 +460,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         }
     }
 
-    public static NodeList<DocumentMemberDeclarationNode> addNewLine(NodeList moduleMembers, int n) {
+    public NodeList<DocumentMemberDeclarationNode> addNewLine(NodeList moduleMembers, int n) {
         for (int i = 0; i < n; i++) {
             moduleMembers = moduleMembers.add(AbstractNodeFactory.createIdentifierToken(System.lineSeparator()));
         }
@@ -466,7 +471,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
      * This method uses to generate hash value for the given code generation details.
      * //TODO: This will be extended to support service generation.
      */
-    private static String getHashValue(OASClientConfig clientConfig, String targetPath) {
+    private String getHashValue(OASClientConfig clientConfig, String targetPath) {
         String openAPIDefinitions = clientConfig.getOpenAPI().toString().trim().replaceAll("\\s+", "");
         StringBuilder summaryOfCodegen = new StringBuilder();
         summaryOfCodegen.append(openAPIDefinitions)
@@ -476,6 +481,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 .append(clientConfig.isNullable())
                 .append(clientConfig.isStatusCodeBinding())
                 .append(clientConfig.isMock())
+                .append(clientConfig.singleFile())
                 .append(clientConfig.isUsingSanitizedOas());
         List<String> tags = clientConfig.getFilter().getTags();
         tags.sort(String.CASE_INSENSITIVE_ORDER);
@@ -494,7 +500,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
      * This method uses to generate ballerina files for openapi client stub.
      * This will return list of (client.bal, util.bal, types.bal) {@code GenSrcFile}.
      */
-    private static List<GenSrcFile> generateClientFiles(OASClientConfig oasClientConfig, ToolContext toolContext,
+    private List<GenSrcFile> generateClientFiles(OASClientConfig oasClientConfig, ToolContext toolContext,
                                                         Location location) throws
             BallerinaOpenApiException, IOException, FormatterException, ClientException {
 
@@ -504,8 +510,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         TypeHandler.createInstance(oasClientConfig.getOpenAPI(), oasClientConfig.isNullable());
         String licenseContent = oasClientConfig.getLicense();
         BallerinaClientGenerator ballerinaClientGenerator = getClientGenerator(oasClientConfig);
-        String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
-
+        io.ballerina.compiler.syntax.tree.SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<ClientDiagnostic> clientDiagnostic = ballerinaClientGenerator.getDiagnostics();
 
         for (ClientDiagnostic diagnostic : clientDiagnostic) {
@@ -518,38 +523,60 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
             throw new ClientException("Error occurred while generating client");
         }
 
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
-                licenseContent == null || licenseContent.isBlank() ? mainContent :
-                        licenseContent + System.lineSeparator() + mainContent));
-        String utilContent = Formatter.format(
-                ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
-
-        if (!utilContent.isBlank()) {
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, null, UTIL_FILE_NAME,
-                    licenseContent == null || licenseContent.isBlank() ? utilContent :
-                            licenseContent + System.lineSeparator() + utilContent));
-        }
-
         List<TypeDefinitionNode> authNodes = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
                 .getAuthRelatedTypeDefinitionNodes();
         for (TypeDefinitionNode typeDef: authNodes) {
             TypeHandler.getInstance().addTypeDefinitionNode(typeDef.typeName().text(), typeDef);
         }
 
-        io.ballerina.compiler.syntax.tree.SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().
-                generateTypeSyntaxTree();
-        String schemaContent = Formatter.format(schemaSyntaxTree).toString();
+        String licenseHeader = licenseContent == null || licenseContent.isBlank() ? "" :
+                licenseContent + System.lineSeparator();
 
-        if (!schemaContent.isBlank()) {
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, null, TYPE_FILE_NAME,
-                    licenseContent == null || licenseContent.isBlank() ? schemaContent :
-                            licenseContent + System.lineSeparator() + schemaContent));
+        if (oasClientConfig.singleFile()) {
+            generateSingleFileForClient(toolContext, syntaxTree, ballerinaClientGenerator, sourceFiles, licenseHeader);
+        } else {
+            generateFilesForClient(syntaxTree, sourceFiles, licenseHeader, ballerinaClientGenerator);
         }
 
         return sourceFiles;
     }
 
-    private static BallerinaClientGenerator getClientGenerator(OASClientConfig oasClientConfig) {
+    private static void generateFilesForClient(io.ballerina.compiler.syntax.tree.SyntaxTree syntaxTree,
+                                               List<GenSrcFile> sourceFiles, String licenseHeader,
+                                               BallerinaClientGenerator ballerinaClientGenerator) throws
+            FormatterException, IOException {
+        String mainContent = Formatter.format(syntaxTree).toSourceCode();
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
+                licenseHeader + mainContent));
+        String utilContent = Formatter.format(
+                ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
+        if (!utilContent.isBlank()) {
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, null, UTIL_FILE_NAME,
+                    licenseHeader + utilContent));
+        }
+        // Generate ballerina records to represent schemas.
+        io.ballerina.compiler.syntax.tree.SyntaxTree schemaSyntaxTree = TypeHandler.getInstance()
+                .generateTypeSyntaxTree();
+        String schemaContent = Formatter.format(schemaSyntaxTree).toSourceCode();
+        if (!schemaContent.isBlank()) {
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, null, TYPE_FILE_NAME,
+                    licenseHeader + schemaContent));
+        }
+    }
+
+    private void generateSingleFileForClient(ToolContext toolContext,
+                                             io.ballerina.compiler.syntax.tree.SyntaxTree syntaxTree,
+                                             BallerinaClientGenerator ballerinaClientGenerator,
+                                             List<GenSrcFile> sourceFiles, String licenseHeader) throws IOException,
+            FormatterException {
+        syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree,
+                ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree(),
+                TypeHandler.getInstance().generateTypeSyntaxTree());
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null,
+                CLIENT_FILE_NAME, licenseHeader + Formatter.format(syntaxTree).toSourceCode()));
+    }
+
+    private BallerinaClientGenerator getClientGenerator(OASClientConfig oasClientConfig) {
         boolean statusCodeBinding = oasClientConfig.isStatusCodeBinding();
         boolean isMock = oasClientConfig.isMock();
 
@@ -568,7 +595,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     /**
      * Util to read license content.
      */
-    private static Optional<String> getLicenseContent(ToolContext context, Path licensePath) {
+    private Optional<String> getLicenseContent(ToolContext context, Path licensePath) {
         Package packageInstance = context.currentPackage();
         Location location = context.options().get("license").location();
         Path ballerinaFilePath = packageInstance.project().sourceRoot();
@@ -586,7 +613,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     /**
      * Util to get license path.
      */
-    private static Path getLicensePath(Path licensePath, Path ballerinaFilePath) throws IOException {
+    private Path getLicensePath(Path licensePath, Path ballerinaFilePath) throws IOException {
         Path relativePath = null;
         if (!licensePath.toString().isBlank()) {
             Path finalLicensePath = Paths.get(licensePath.toString());
@@ -603,7 +630,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     /**
      * Util to create license content.
      */
-    private static Optional<String> createLicenseContent(Path relativePath, Location location,
+    private Optional<String> createLicenseContent(Path relativePath, Location location,
                                                          ToolContext toolContext) {
         String licenseHeader;
         try {
@@ -627,7 +654,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     /**
      * This method uses to report the diagnostics.
      */
-    private static void createDiagnostics(ToolContext toolContext, DiagnosticMessages error,
+    private void createDiagnostics(ToolContext toolContext, DiagnosticMessages error,
                                           Location location, String... args) {
         String message = String.format(error.getDescription(), (Object[]) args);
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), message,
@@ -635,7 +662,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         toolContext.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, location));
     }
 
-    private static void createDiagnostics(ToolContext toolContext, String diagnosticMessage, String diagnosticCode,
+    private void createDiagnostics(ToolContext toolContext, String diagnosticMessage, String diagnosticCode,
                                           DiagnosticSeverity severity, Location location) {
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(diagnosticCode, diagnosticMessage, severity);
         toolContext.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, location));
@@ -655,7 +682,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     /**
      * This method uses to write the content into the given file path.
      */
-    public static void writeFile(Path filePath, String content) throws IOException {
+    public void writeFile(Path filePath, String content) throws IOException {
         File file = new File(filePath.toString());
         // Ensure the directory structure exists
         File parentDirectory = file.getParentFile();

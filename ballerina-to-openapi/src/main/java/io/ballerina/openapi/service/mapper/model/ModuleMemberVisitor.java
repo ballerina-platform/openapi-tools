@@ -17,15 +17,21 @@
  */
 package io.ballerina.openapi.service.mapper.model;
 
+import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
+import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
+
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeDescriptor;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.isHttpServiceContract;
 
 /**
  * Visitor to get the TypeDefinitionNode and ListenerDeclarationNodes.
@@ -37,10 +43,21 @@ public class ModuleMemberVisitor extends NodeVisitor {
     Set<TypeDefinitionNode> typeDefinitionNodes = new LinkedHashSet<>();
     Set<ListenerDeclarationNode> listenerDeclarationNodes = new LinkedHashSet<>();
     Set<ClassDefinitionNode> interceptorServiceClassNodes = new LinkedHashSet<>();
+    Set<ServiceContractType> serviceContractTypeNodes = new LinkedHashSet<>();
+    SemanticModel semanticModel;
+
+    public ModuleMemberVisitor(SemanticModel semanticModel) {
+        this.semanticModel = semanticModel;
+    }
 
     @Override
     public void visit(TypeDefinitionNode typeDefinitionNode) {
         typeDefinitionNodes.add(typeDefinitionNode);
+        Node descriptorNode = getTypeDescriptor(typeDefinitionNode);
+        if (descriptorNode.kind().equals(SyntaxKind.OBJECT_TYPE_DESC) &&
+                isHttpServiceContract(descriptorNode, semanticModel)) {
+            serviceContractTypeNodes.add(new ServiceContractType(typeDefinitionNode));
+        }
     }
 
     @Override
@@ -73,5 +90,9 @@ public class ModuleMemberVisitor extends NodeVisitor {
             }
         }
         return Optional.empty();
+    }
+
+    public Set<ServiceContractType> getServiceContractTypeNodes() {
+        return serviceContractTypeNodes;
     }
 }

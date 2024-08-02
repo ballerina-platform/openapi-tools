@@ -36,6 +36,7 @@ public class OASClientConfig {
     private final String license;
     private final boolean statusCodeBinding;
     private final boolean isMock;
+    private final boolean singleFile;
     private final boolean isUsingSanitizedOas;
 
 
@@ -48,6 +49,7 @@ public class OASClientConfig {
         this.license = clientConfigBuilder.license;
         this.statusCodeBinding = clientConfigBuilder.statusCodeBinding;
         this.isMock = clientConfigBuilder.isMock;
+        this.singleFile = clientConfigBuilder.singleFile;
         this.isUsingSanitizedOas = clientConfigBuilder.isUsingSanitizedOas;
     }
 
@@ -81,6 +83,10 @@ public class OASClientConfig {
         return isMock;
     }
 
+    public boolean singleFile() {
+        return singleFile;
+    }
+
     public boolean isUsingSanitizedOas() {
         return isUsingSanitizedOas;
     }
@@ -97,6 +103,7 @@ public class OASClientConfig {
         private String license = DO_NOT_MODIFY_FILE_HEADER;
         private boolean statusCodeBinding = false;
         private boolean isMock = false;
+        private boolean singleFile = false;
         private boolean isUsingSanitizedOas = false;
 
         public Builder withOpenAPI(OpenAPI openAPI) {
@@ -136,6 +143,11 @@ public class OASClientConfig {
 
         public Builder withMock(boolean isMock) {
             this.isMock = isMock;
+            return this;
+        }
+
+        public Builder withSingleFile(boolean singleFile) {
+            this.singleFile = singleFile;
             return this;
         }
 

@@ -29,31 +29,42 @@ import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.SymbolKind;
+import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
+import io.ballerina.compiler.syntax.tree.DistinctTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.MethodDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ObjectTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.service.mapper.Constants;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.OASResult;
+import io.ballerina.openapi.service.mapper.model.ResourceFunction;
+import io.ballerina.openapi.service.mapper.model.ResourceFunctionDeclaration;
+import io.ballerina.openapi.service.mapper.model.ResourceFunctionDefinition;
 import io.ballerina.runtime.api.utils.IdentifierUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -75,6 +86,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -84,7 +96,9 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.NUMERIC_LITERAL;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.service.mapper.Constants.BALLERINA;
+import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP_SERVICE_CONTRACT;
 import static io.ballerina.openapi.service.mapper.Constants.HYPHEN;
 import static io.ballerina.openapi.service.mapper.Constants.JSON_EXTENSION;
 import static io.ballerina.openapi.service.mapper.Constants.SLASH;
@@ -100,7 +114,7 @@ public class MapperCommonUtils {
     private static final SyntaxKind[] validExpressionKind = {STRING_LITERAL, NUMERIC_LITERAL, BOOLEAN_LITERAL,
             LIST_CONSTRUCTOR, MAPPING_CONSTRUCTOR};
 
-    public static String generateRelativePath(FunctionDefinitionNode resourceFunction) {
+    public static String generateRelativePath(ResourceFunction resourceFunction) {
         StringBuilder relativePath = new StringBuilder();
         relativePath.append("/");
         if (!resourceFunction.relativeResourcePath().isEmpty()) {
@@ -126,15 +140,14 @@ public class MapperCommonUtils {
      * @param resourceFunction resource function definition
      * @return string with a unique operationId
      */
-    public static String getOperationId(FunctionDefinitionNode resourceFunction) {
+    public static String getOperationId(ResourceFunction resourceFunction) {
         //For the flatten enable we need to remove first Part of valid name check
         // this - > !operationID.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
         String relativePath = MapperCommonUtils.generateRelativePath(resourceFunction);
         String cleanResourcePath = MapperCommonUtils.unescapeIdentifier(relativePath);
-        String resName = (resourceFunction.functionName().text() + "_" +
-                cleanResourcePath).replaceAll("\\{///\\}", "_");
+        String resName = (resourceFunction.functionName() + "_" + cleanResourcePath).replace("{}", "_");
         if (cleanResourcePath.equals("/")) {
-            resName = resourceFunction.functionName().text();
+            resName = resourceFunction.functionName();
         }
         if (resName.matches("\\b[0-9]*\\b")) {
             return resName;
@@ -324,6 +337,32 @@ public class MapperCommonUtils {
         return false;
     }
 
+    public static boolean isHttpServiceContract(Node typeNode, SemanticModel semanticModel) {
+        if (!(typeNode instanceof ObjectTypeDescriptorNode serviceObjType) || !isServiceObjectType(serviceObjType)) {
+            return false;
+        }
+
+        Optional<Symbol> serviceObjSymbol = semanticModel.symbol(serviceObjType.parent());
+        if (serviceObjSymbol.isEmpty() ||
+                (!(serviceObjSymbol.get() instanceof TypeDefinitionSymbol serviceObjTypeDef))) {
+            return false;
+        }
+
+        Optional<Symbol> serviceContractType = semanticModel.types().getTypeByName(BALLERINA, HTTP, EMPTY,
+                HTTP_SERVICE_CONTRACT);
+        if (serviceContractType.isEmpty() ||
+                !(serviceContractType.get() instanceof TypeDefinitionSymbol serviceContractTypeDef)) {
+            return false;
+        }
+
+        return serviceObjTypeDef.typeDescriptor().subtypeOf(serviceContractTypeDef.typeDescriptor());
+    }
+
+    private static boolean isServiceObjectType(ObjectTypeDescriptorNode typeNode) {
+        return typeNode.objectTypeQualifiers().stream().anyMatch(
+                qualifier -> qualifier.kind().equals(SyntaxKind.SERVICE_KEYWORD));
+    }
+
     private static boolean isHttpListener(TypeSymbol listenerType) {
         if (listenerType.typeKind() == TypeDescKind.UNION) {
             return ((UnionTypeSymbol) listenerType).memberTypeDescriptors().stream()
@@ -398,6 +437,48 @@ public class MapperCommonUtils {
         return unescapedParamName.replaceAll("\\\\", "").replaceAll("'", "");
     }
 
+    public static String getHeaderName(ParameterNode parameterNode, String defaultName) {
+        NodeList<AnnotationNode> annotations = null;
+        if (parameterNode instanceof RequiredParameterNode requiredParameterNode) {
+            annotations = requiredParameterNode.annotations();
+        } else if (parameterNode instanceof DefaultableParameterNode defaultableParameterNode) {
+            annotations = defaultableParameterNode.annotations();
+        }
+        if (Objects.isNull(annotations) || annotations.isEmpty()) {
+            return defaultName;
+        }
+        for (AnnotationNode annotation : annotations) {
+            if (annotation.annotReference().toString().trim().equals("http:Header")) {
+                String valueExpression = getNameFromHeaderAnnotation(annotation);
+                if (valueExpression != null) {
+                    return valueExpression;
+                }
+            }
+        }
+        return defaultName;
+    }
+
+    private static String getNameFromHeaderAnnotation(AnnotationNode annotation) {
+        Optional<MappingConstructorExpressionNode> annotationRecord = annotation.annotValue();
+        if (annotationRecord.isEmpty()) {
+            return null;
+        }
+        SeparatedNodeList<MappingFieldNode> fields = annotationRecord.get().fields();
+        for (MappingFieldNode field : fields) {
+            if (field instanceof SpecificFieldNode specificFieldNode &&
+                    specificFieldNode.fieldName().toString().trim().equals("name")) {
+                Optional<ExpressionNode> expressionNode = specificFieldNode.valueExpr();
+                if (expressionNode.isPresent()) {
+                    ExpressionNode valueExpression = expressionNode.get();
+                    if (valueExpression.kind().equals(STRING_LITERAL)) {
+                        return valueExpression.toString().trim().replaceAll("\"", "");
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public static String getTypeDescription(TypeReferenceTypeSymbol typeSymbol) {
         Symbol definition = typeSymbol.definition();
         if (definition instanceof Documentable) {
@@ -437,7 +518,7 @@ public class MapperCommonUtils {
                 valueExpressionKind);
     }
 
-    public static Optional<AnnotationNode> getResourceConfigAnnotation(FunctionDefinitionNode resourceFunction) {
+    public static Optional<AnnotationNode> getResourceConfigAnnotation(ResourceFunction resourceFunction) {
         Optional<MetadataNode> metadata = resourceFunction.metadata();
         if (metadata.isEmpty()) {
             return Optional.empty();
@@ -462,5 +543,23 @@ public class MapperCommonUtils {
                                 .findFirst()
                 ).flatMap(SpecificFieldNode::valueExpr)
                 .map(en -> en.toString().trim());
+    }
+
+    public static Optional<ResourceFunction> getResourceFunction(Node function) {
+        SyntaxKind kind = function.kind();
+        if (kind.equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
+            return Optional.of(new ResourceFunctionDefinition((FunctionDefinitionNode) function));
+        } else if (kind.equals(SyntaxKind.RESOURCE_ACCESSOR_DECLARATION)) {
+            return Optional.of(new ResourceFunctionDeclaration((MethodDeclarationNode) function));
+        }
+        return Optional.empty();
+    }
+
+    public static Node getTypeDescriptor(TypeDefinitionNode typeDefinitionNode) {
+        Node node = typeDefinitionNode.typeDescriptor();
+        if (node instanceof DistinctTypeDescriptorNode distinctTypeDescriptorNode) {
+            return distinctTypeDescriptorNode.typeDescriptor();
+        }
+        return node;
     }
 }

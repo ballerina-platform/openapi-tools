@@ -28,17 +28,21 @@ import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.MethodDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.ResourceFunction;
+import io.ballerina.openapi.service.mapper.model.ResourceFunctionDeclaration;
+import io.ballerina.openapi.service.mapper.model.ResourceFunctionDefinition;
+import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -83,25 +87,22 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpe
 public class MetaInfoMapperImpl implements MetaInfoMapper {
     static List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
 
-
     @Override
     public List<OpenAPIMapperDiagnostic> getDiagnostics() {
         return diagnostics;
     }
 
-    @Override
-    public void setResourceMetaData(ServiceDeclarationNode serviceNode, OpenAPI openAPI, Path ballerinaFilePath) {
+    public void setResourceMetaData(OpenAPI openAPI, ServiceNode serviceNode, Path ballerinaFilePath) {
         NodeList<Node> functions = serviceNode.members();
         Map<String, ResourceMetaInfoAnnotation> resourceMetaData = new HashMap<>();
         for (Node function : functions) {
-            SyntaxKind kind = function.kind();
-            if (kind.equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
-                FunctionDefinitionNode resourceNode = (FunctionDefinitionNode) function;
-                Optional<MetadataNode> optMetadata = resourceNode.metadata();
+            Optional<ResourceFunction> resourceFunction = getResourceFunction(function);
+            if (resourceFunction.isPresent()) {
+                Optional<MetadataNode> optMetadata = resourceFunction.get().metadata();
                 if (optMetadata.isEmpty()) {
                     continue;
                 }
-                String operationId = getOperationId(resourceNode);
+                String operationId = getOperationId(resourceFunction.get());
                 ResourceMetaInfoAnnotation.Builder resMetaInfoBuilder = new ResourceMetaInfoAnnotation.Builder();
                 MetadataNode metadataNode = optMetadata.get();
                 NodeList<AnnotationNode> annotations = metadataNode.annotations();
@@ -154,6 +155,15 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
         updateOASWithMetaData(resourceMetaData, paths);
     }
 
+    private static Optional<ResourceFunction> getResourceFunction(Node node) {
+        if (node.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
+            return Optional.of(new ResourceFunctionDefinition((FunctionDefinitionNode) node));
+        } else if (node.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DECLARATION)) {
+            return Optional.of(new ResourceFunctionDeclaration((MethodDeclarationNode) node));
+        }
+        return Optional.empty();
+    }
+
     private static void handleExamples(ResourceMetaInfoAnnotation.Builder resMetaInfoBuilder,
                                        ExpressionNode expressionNode, Path ballerinFilePath) {
         if (expressionNode instanceof MappingConstructorExpressionNode mapNode) {
@@ -175,8 +185,7 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                         setResponseExamples(resMetaInfoBuilder, objectMap, ballerinFilePath, expressValue.location());
                     } catch (JsonProcessingException e) {
                         DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_130;
-                        ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, mapNode.location(),
-                                e.getOriginalMessage());
+                        ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, mapNode.location());
                         diagnostics.add(diagnostic);
                     }
                 } else if (fName.equals(REQUEST_BODY_ATTRIBUTE)) {
@@ -192,8 +201,7 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                         setRequestExamples(resMetaInfoBuilder, objectMap, ballerinFilePath, expressValue.location());
                     } catch (JsonProcessingException e) {
                         DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_130;
-                        ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, mapNode.location(),
-                                e.getOriginalMessage());
+                        ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, mapNode.location());
                         diagnostics.add(diagnostic);
                     }
                 }
@@ -291,8 +299,7 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                                     modifiedExample.put(exampleName, valueMap);
                                 } catch (IOException e) {
                                     DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_130;
-                                    ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, location,
-                                            e.toString());
+                                    ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(messages, location);
                                     diagnostics.add(diagnostic);
                                 }
                             }

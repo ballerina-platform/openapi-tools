@@ -56,8 +56,9 @@ public class ClientGenPluginTests extends OpenAPITest {
         ids.add("delivery03");
         ids.add("delivery04");
         ids.add("delivery05");
+        ids.add("delivery06");
         File[] matchingFiles = getMatchingFiles("project_01", ids);
         Assert.assertNotNull(matchingFiles);
-        Assert.assertEquals(matchingFiles.length, 5);
+        Assert.assertEquals(matchingFiles.length, 6);
     }
 }

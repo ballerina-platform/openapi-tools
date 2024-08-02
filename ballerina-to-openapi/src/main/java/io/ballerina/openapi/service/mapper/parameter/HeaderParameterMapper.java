@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org).
  *
  *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -22,16 +22,8 @@ import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
-import io.ballerina.compiler.syntax.tree.ExpressionNode;
-import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MappingFieldNode;
-import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.type.RecordTypeMapper;
@@ -46,11 +38,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getHeaderName;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 /**
@@ -86,47 +77,6 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
             }
             this.typeMapper = typeMapper;
         }
-    }
-
-    String getHeaderName(ParameterNode parameterNode, String defaultName) {
-        NodeList<AnnotationNode> annotations = null;
-        if (parameterNode instanceof RequiredParameterNode requiredParameterNode) {
-            annotations = requiredParameterNode.annotations();
-        } else if (parameterNode instanceof DefaultableParameterNode defaultableParameterNode) {
-            annotations = defaultableParameterNode.annotations();
-        }
-        if (Objects.isNull(annotations) || annotations.isEmpty()) {
-            return defaultName;
-        }
-        for (AnnotationNode annotation : annotations) {
-            if (annotation.annotReference().toString().trim().equals("http:Header")) {
-                String valueExpression = getNameFromHeaderAnnotation(annotation);
-                if (valueExpression != null) {
-                    return valueExpression;
-                }
-            }
-        }
-        return defaultName;
-    }
-
-    private static String getNameFromHeaderAnnotation(AnnotationNode annotation) {
-        Optional<MappingConstructorExpressionNode> annotationRecord = annotation.annotValue();
-        if (annotationRecord.isPresent()) {
-            SeparatedNodeList<MappingFieldNode> fields = annotationRecord.get().fields();
-            for (MappingFieldNode field : fields) {
-                if (field instanceof SpecificFieldNode specificFieldNode &&
-                        specificFieldNode.fieldName().toString().trim().equals("name")) {
-                        Optional<ExpressionNode> expressionNode = specificFieldNode.valueExpr();
-                        if (expressionNode.isPresent()) {
-                            ExpressionNode valueExpression = expressionNode.get();
-                            if (valueExpression.kind().equals(STRING_LITERAL)) {
-                                return valueExpression.toString().trim().replaceAll("\"", "");
-                            }
-                        }
-                }
-            }
-        }
-        return null;
     }
 
     @Override

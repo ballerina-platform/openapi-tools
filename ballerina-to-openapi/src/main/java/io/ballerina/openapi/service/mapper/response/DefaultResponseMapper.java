@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org).
  *
  *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -27,13 +27,13 @@ import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.openapi.service.mapper.ServiceMapperFactory;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
+import io.ballerina.openapi.service.mapper.model.ResourceFunction;
 import io.ballerina.openapi.service.mapper.response.model.CacheConfigAnnotation;
 import io.ballerina.openapi.service.mapper.response.model.ResponseInfo;
 import io.ballerina.openapi.service.mapper.response.utils.CacheHeaderUtils;
@@ -90,9 +90,9 @@ public class DefaultResponseMapper implements ResponseMapper {
     private final String mediaTypeSubTypePrefix;
     private final ApiResponses apiResponses = new ApiResponses();
     private final OperationInventory operationInventory;
-    private final FunctionDefinitionNode resourceNode;
+    private final ResourceFunction resourceNode;
 
-    public DefaultResponseMapper(FunctionDefinitionNode resourceNode, OperationInventory operationInventory,
+    public DefaultResponseMapper(ResourceFunction resourceNode, OperationInventory operationInventory,
                                  AdditionalData additionalData, ServiceMapperFactory serviceMapperFactory) {
         this.typeMapper = serviceMapperFactory.getTypeMapper();
         this.mediaTypeSubTypePrefix = MediaTypeUtils.extractCustomMediaType(resourceNode).orElse("");
@@ -101,7 +101,7 @@ public class DefaultResponseMapper implements ResponseMapper {
         this.resourceNode = resourceNode;
     }
 
-    private void generateApiResponses(FunctionDefinitionNode resourceNode, OperationInventory operationInventory) {
+    private void generateApiResponses(ResourceFunction resourceNode, OperationInventory operationInventory) {
         extractAnnotationDetails(resourceNode);
 
         String defaultStatusCode = operationInventory.getHttpOperation().equalsIgnoreCase(POST) ? HTTP_201 : HTTP_200;
@@ -121,8 +121,8 @@ public class DefaultResponseMapper implements ResponseMapper {
         operationInventory.setApiResponses(apiResponses);
     }
 
-    protected TypeSymbol getReturnTypeSymbol(FunctionDefinitionNode resourceNode) {
-        Optional<Symbol> symbol = semanticModel.symbol(resourceNode);
+    protected TypeSymbol getReturnTypeSymbol(ResourceFunction resourceNode) {
+        Optional<Symbol> symbol = resourceNode.getSymbol(semanticModel);
         if (symbol.isEmpty() || !(symbol.get() instanceof ResourceMethodSymbol resourceMethodSymbol)) {
             return null;
         }
@@ -130,7 +130,7 @@ public class DefaultResponseMapper implements ResponseMapper {
         return returnTypeOpt.orElse(null);
     }
 
-    private void extractAnnotationDetails(FunctionDefinitionNode resource) {
+    private void extractAnnotationDetails(ResourceFunction resource) {
         FunctionSignatureNode functionSignature = resource.functionSignature();
         Optional<ReturnTypeDescriptorNode> returnTypeDescriptor = functionSignature.returnTypeDesc();
         if (returnTypeDescriptor.isPresent()) {
