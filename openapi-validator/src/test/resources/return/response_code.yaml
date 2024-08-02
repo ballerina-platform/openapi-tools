@@ -64,6 +64,8 @@ paths:
           description: NotAcceptable
         "407":
           description: ProxyAuthenticationRequired
+        "408":
+          description: RequestTimeout
         "409":
           description: Conflict
         "410":

@@ -183,6 +183,7 @@ public class Add implements BLauncherCmd {
                 .withLicensePath(baseCmd.licenseFilePath)
                 .withStatusCodeBinding(baseCmd.statusCodeBinding)
                 .withMock(baseCmd.mock)
+                .withSingleFile(baseCmd.singleFile)
                 .build();
     }
 
@@ -257,6 +258,10 @@ public class Add implements BLauncherCmd {
         if (optionsBuilder.getMock()) {
             moduleMembers = moduleMembers.add(SampleNodeGenerator.createBooleanKV("options.mock",
                     optionsBuilder.getMock(), null));
+        }
+        if (optionsBuilder.getSingleFile()) {
+            moduleMembers = moduleMembers.add(SampleNodeGenerator.createBooleanKV("options.singleFile",
+                    optionsBuilder.getSingleFile(), null));
         }
         moduleMembers = CmdUtils.addNewLine(moduleMembers, 2);
         return moduleMembers;

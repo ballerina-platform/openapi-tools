@@ -111,7 +111,7 @@ public class Constants {
         httpCodes.put("MethodNotAllowed", "405");
         httpCodes.put("NotAcceptable", "406");
         httpCodes.put("ProxyAuthenticationRequired", "407");
-        httpCodes.put("RequestTimeOut", "408");
+        httpCodes.put("RequestTimeout", "408");
         httpCodes.put("Conflict", "409");
         httpCodes.put("Gone", "410");
         httpCodes.put("LengthRequired", "411");
