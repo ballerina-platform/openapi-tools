@@ -5,12 +5,12 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.10.0-20240624-004800-68612b63"
+distribution-version = "2201.10.0-20240711-141800-6245661f"
 
 [[package]]
 org = "ballerina"
 name = "auth"
-version = "2.11.1"
+version = "2.11.0"
 dependencies = [
 	{org = "ballerina", name = "crypto"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -75,7 +75,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.11.3"
+version = "2.11.1"
 dependencies = [
 	{org = "ballerina", name = "auth"},
 	{org = "ballerina", name = "cache"},
@@ -124,7 +124,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "jwt"
-version = "2.12.1"
+version = "2.11.0"
 dependencies = [
 	{org = "ballerina", name = "cache"},
 	{org = "ballerina", name = "crypto"},

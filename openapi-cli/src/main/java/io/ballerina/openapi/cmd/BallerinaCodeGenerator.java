@@ -165,6 +165,7 @@ public class BallerinaCodeGenerator {
                     .withFilters(filter)
                     .withNullable(options.nullable)
                     .withGenerateServiceType(options.generateServiceType)
+                    .withGenerateServiceContract(options.generateServiceContract)
                     .withGenerateWithoutDataBinding(options.generateWithoutDataBinding)
                     .withSrcFile(srcFile)
                     .withSrcPackage(srcPackage)
@@ -216,14 +217,15 @@ public class BallerinaCodeGenerator {
      *  @param nullable                     Enable nullable option to make record field optional
      *  @param isResource                   Enable isResource option to generate resource methods
      *  @param generateServiceType          Enable generateServiceType option to generate service type
+     *  @param  generateServiceContract     Enable generateServiceContract option to generate service contract type
      *  @param generateWithoutDataBinding   Enable generateWithoutDataBinding option to generate the
      *                                      service without data binding
      *  @param statusCodeBinding            Enable statusCodeBinding option
      *  @param isMock                       Enable isMock option to generate mocks
      */
     public record ClientServiceGeneratorOptions(boolean nullable, boolean isResource, boolean generateServiceType,
-                                                boolean generateWithoutDataBinding, boolean statusCodeBinding,
-                                         boolean isMock) { }
+                                                boolean generateServiceContract, boolean generateWithoutDataBinding,
+                                                boolean statusCodeBinding, boolean isMock) { }
 
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();
@@ -283,6 +285,20 @@ public class BallerinaCodeGenerator {
             outStream.println(String.format("%s: %s", diagnostic.diagnosticInfo().severity(), diagnostic.message()));
         });
         writeGeneratedSources(genFiles, srcPath, implPath, GEN_SERVICE);
+    }
+
+    /**
+     * Represents a record which stores the additional generator options for service.
+     *
+     * @param nullable                Enable nullable option for make record field optional
+     * @param generateServiceType      Enable to generate service type
+     * @param generateServiceContract  Enable to generate service contract
+     * @param generateWithoutDataBinding  Enable to generate service without data binding
+     * @param singleFile                   Enable singleFile option to generate all content in a single file
+     */
+    public record ServiceGeneratorOptions(boolean nullable, boolean generateServiceType,
+                                          boolean generateServiceContract, boolean generateWithoutDataBinding,
+                                          boolean singleFile) {
     }
 
     private void writeGeneratedSources(List<GenSrcFile> sources, Path srcPath, Path implPath,
@@ -507,8 +523,8 @@ public class BallerinaCodeGenerator {
     }
 
 
-    public List<GenSrcFile> generateBallerinaService(Path openAPI, String serviceName,
-                                                     Filter filter, ServiceGeneratorOptions options)
+    public List<GenSrcFile> generateBallerinaService(Path openAPI, String serviceName, Filter filter,
+                                                     ServiceGeneratorOptions options)
             throws IOException, FormatterException, BallerinaOpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_MOCK_PKG;
@@ -545,6 +561,7 @@ public class BallerinaCodeGenerator {
                 .withFilters(filter)
                 .withNullable(options.nullable)
                 .withGenerateServiceType(options.generateServiceType)
+                .withGenerateServiceContract(options.generateServiceContract)
                 .withGenerateWithoutDataBinding(options.generateWithoutDataBinding)
                 .withLicenseHeader(licenseHeader)
                 .withSrcFile(srcFile)
@@ -564,17 +581,6 @@ public class BallerinaCodeGenerator {
         printDiagnostic(diagnostics);
         return sourceFiles;
     }
-
-    /**
-     * Represents a record which stores the additional generator options for service.
-     *
-     * @param nullable                     Enable nullable option for make record field optional
-     * @param generateServiceType          Enable to generate service type
-     * @param generateWithoutDataBinding   Enable to generate service without data binding
-     * @param singleFile                   Enable singleFile option to generate all content in a single file
-     */
-    public record ServiceGeneratorOptions(boolean nullable, boolean generateServiceType,
-                                          boolean generateWithoutDataBinding, boolean singleFile) { }
 
     private static List<GenSrcFile> generateFilesForService(ServiceGenerationHandler serviceGenerationHandler,
                                                             OASServiceMetadata oasServiceMetadata) throws

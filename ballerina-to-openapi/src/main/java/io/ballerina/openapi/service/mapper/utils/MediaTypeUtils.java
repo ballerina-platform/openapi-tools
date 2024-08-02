@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org).
  *
  *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -20,10 +20,9 @@ package io.ballerina.openapi.service.mapper.utils;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.openapi.service.mapper.model.ResourceFunction;
 import io.ballerina.openapi.service.mapper.response.DefaultResponseMapper;
 
 import java.util.List;
@@ -135,10 +134,10 @@ public class MediaTypeUtils {
         return typeSymbol.subtypeOf(structuredType);
     }
 
-    public static Optional<String> extractCustomMediaType(FunctionDefinitionNode functionDefNode) {
-        ServiceDeclarationNode serviceDefNode = (ServiceDeclarationNode) functionDefNode.parent();
-        if (serviceDefNode.metadata().isPresent()) {
-            MetadataNode metadataNode = serviceDefNode.metadata().get();
+    public static Optional<String> extractCustomMediaType(ResourceFunction functionDefNode) {
+        Optional<MetadataNode> serviceMetadata = functionDefNode.parentMetaData();
+        if (serviceMetadata.isPresent()) {
+            MetadataNode metadataNode = serviceMetadata.get();
             NodeList<AnnotationNode> annotations = metadataNode.annotations();
             if (!annotations.isEmpty()) {
                 return MapperCommonUtils.extractServiceAnnotationDetails(annotations,

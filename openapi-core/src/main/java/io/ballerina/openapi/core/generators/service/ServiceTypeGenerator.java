@@ -20,6 +20,7 @@ package io.ballerina.openapi.core.generators.service;
 
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.MethodDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
@@ -61,10 +62,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
  */
 public class ServiceTypeGenerator extends ServiceGenerator {
 
-    public ServiceTypeGenerator(OASServiceMetadata oasServiceMetadata) {
-        super(oasServiceMetadata);
-    }
-
     public ServiceTypeGenerator(OASServiceMetadata oasServiceMetadata, List<Node> functionsList) {
         super(oasServiceMetadata, functionsList);
     }
@@ -85,7 +82,7 @@ public class ServiceTypeGenerator extends ServiceGenerator {
     private TypeDefinitionNode generateServiceObject() throws BallerinaOpenApiException {
         List<Node> serviceObjectMemberNodes = new ArrayList<>();
         TypeReferenceNode httpServiceTypeRefNode = createTypeReferenceNode(createToken(ASTERISK_TOKEN),
-                createIdentifierToken("http:Service"), createToken(SEMICOLON_TOKEN));
+                createIdentifierToken(getServiceTypeName()), createToken(SEMICOLON_TOKEN));
         serviceObjectMemberNodes.add(httpServiceTypeRefNode);
         if (functionsList == null) {
             functionsList = createResourceFunctions(oasServiceMetadata.getOpenAPI(), oasServiceMetadata.getFilters());
@@ -117,8 +114,16 @@ public class ServiceTypeGenerator extends ServiceGenerator {
                 members,
                 createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
-        return createTypeDefinitionNode(null, null, createToken(TYPE_KEYWORD),
+        return createTypeDefinitionNode(getServiceMetadata(), null, createToken(TYPE_KEYWORD),
                 createIdentifierToken(GeneratorConstants.SERVICE_TYPE_NAME), objectTypeDescriptorNode,
                 createToken(SEMICOLON_TOKEN));
+    }
+
+    protected MetadataNode getServiceMetadata() {
+        return null;
+    }
+
+    protected String getServiceTypeName() {
+        return "http:Service";
     }
 }

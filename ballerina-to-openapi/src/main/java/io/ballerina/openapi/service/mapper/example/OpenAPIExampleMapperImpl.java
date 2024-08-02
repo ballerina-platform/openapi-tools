@@ -27,12 +27,9 @@ import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.example.field.RecordFieldExampleMapper;
@@ -42,6 +39,8 @@ import io.ballerina.openapi.service.mapper.example.parameter.RequestExampleMappe
 import io.ballerina.openapi.service.mapper.example.type.TypeExampleMapper;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.ResourceFunction;
+import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.ballerina.openapi.service.mapper.type.extension.BallerinaPackage;
 import io.ballerina.openapi.service.mapper.type.extension.BallerinaTypeExtensioner;
 import io.swagger.v3.oas.models.Components;
@@ -68,6 +67,7 @@ import static io.ballerina.openapi.service.mapper.Constants.PATH;
 import static io.ballerina.openapi.service.mapper.Constants.QUERY;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getHeaderName;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOperationId;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getResourceFunction;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 /**
@@ -80,7 +80,7 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
 
     private final OpenAPI openAPI;
     private final List<OpenAPIMapperDiagnostic> diagnostics;
-    private final ServiceDeclarationNode serviceDeclarationNode;
+    private final ServiceNode serviceDeclarationNode;
     private final SemanticModel semanticModel;
     private final ModuleMemberVisitor moduleMemberVisitor;
 
@@ -91,11 +91,10 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
         OTHER
     }
 
-    public OpenAPIExampleMapperImpl(OpenAPI openAPI, ServiceDeclarationNode serviceDeclarationNode,
-                                    AdditionalData additionalData) {
+    public OpenAPIExampleMapperImpl(OpenAPI openAPI, ServiceNode serviceNode, AdditionalData additionalData) {
         this.openAPI = openAPI;
         this.diagnostics = additionalData.diagnostics();
-        this.serviceDeclarationNode = serviceDeclarationNode;
+        this.serviceDeclarationNode = serviceNode;
         this.semanticModel = additionalData.semanticModel();
         this.moduleMemberVisitor = additionalData.moduleMemberVisitor();
     }
@@ -110,12 +109,13 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
         schemas.forEach(this::setExamplesForTypes);
 
         serviceDeclarationNode.members().forEach(member -> {
-            if (member.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
-                FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) member;
+            Optional<ResourceFunction> resourceFunctionOpt = getResourceFunction(member);
+            if (resourceFunctionOpt.isPresent()) {
+                ResourceFunction resourceFunction = resourceFunctionOpt.get();
                 openAPI.getPaths().forEach((path, pathItem) -> pathItem.readOperationsMap()
                     .forEach((httpMethod, operation) -> {
-                        if (getOperationId(functionDefinitionNode).equals(operation.getOperationId())) {
-                            setExamplesForResource(functionDefinitionNode, operation);
+                        if (getOperationId(resourceFunction).equals(operation.getOperationId())) {
+                            setExamplesForResource(resourceFunction, operation);
                         }
                     })
                 );
@@ -168,11 +168,11 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
         return Optional.of(typeDefSymbol);
     }
 
-    private void setExamplesForResource(FunctionDefinitionNode functionDefinitionNode, Operation operation) {
-        SeparatedNodeList<ParameterNode> parameters = functionDefinitionNode.functionSignature().parameters();
+    private void setExamplesForResource(ResourceFunction resourceFunction, Operation operation) {
+        SeparatedNodeList<ParameterNode> parameters = resourceFunction.functionSignature().parameters();
         parameters.forEach(parameter -> setExamplesForResourceSignatureParam(parameter, operation));
 
-        List<ResourcePathParameterNode> pathParameters = functionDefinitionNode.relativeResourcePath().stream()
+        List<ResourcePathParameterNode> pathParameters = resourceFunction.relativeResourcePath().stream()
                 .filter(param -> param instanceof ResourcePathParameterNode)
                 .map(param -> (ResourcePathParameterNode) param)
                 .toList();

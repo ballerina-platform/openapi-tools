@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.projects.Project;
 
 import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * This {@link OASGenerationMetaInfo} contains details related to openAPI specification.
@@ -33,7 +34,7 @@ public class OASGenerationMetaInfo {
     private final String openApiFileName;
     private final Path ballerinaFilePath;
     private final SemanticModel semanticModel;
-    private final ServiceDeclarationNode serviceDeclarationNode;
+    private final ServiceNode serviceNode;
     private final Project project;
     private final Boolean ballerinaExtensionLevel;
 
@@ -41,7 +42,11 @@ public class OASGenerationMetaInfo {
         this.openApiFileName = builder.openApiFileName;
         this.ballerinaFilePath = builder.ballerinaFilePath;
         this.semanticModel = builder.semanticModel;
-        this.serviceDeclarationNode = builder.serviceDeclarationNode;
+        ServiceNode serviceNodeFromBuilder = builder.serviceNode;
+        if (Objects.isNull(serviceNodeFromBuilder)) {
+            serviceNodeFromBuilder = new ServiceDeclaration(builder.serviceDeclarationNode, semanticModel);
+        }
+        this.serviceNode = serviceNodeFromBuilder;
         this.project = builder.project;
         this.ballerinaExtensionLevel = builder.ballerinaExtension;
     }
@@ -58,8 +63,8 @@ public class OASGenerationMetaInfo {
         return semanticModel;
     }
 
-    public ServiceDeclarationNode getServiceDeclarationNode() {
-        return serviceDeclarationNode;
+    public ServiceNode getServiceNode() {
+        return serviceNode;
     }
 
     public Project getProject() {
@@ -79,6 +84,7 @@ public class OASGenerationMetaInfo {
         private Path ballerinaFilePath;
         private SemanticModel semanticModel;
         private ServiceDeclarationNode serviceDeclarationNode;
+        private ServiceNode serviceNode;
         private Project project;
         private Boolean ballerinaExtension = false;
 
@@ -92,8 +98,18 @@ public class OASGenerationMetaInfo {
             return this;
         }
 
+        /**
+         * @deprecated Construct the {@link ServiceDeclarationNode} instance from the serviceDeclarationNode and use
+         * that with {@link #setServiceNode(ServiceNode)} method
+         */
+        @Deprecated(forRemoval = true, since = "2.1.0")
         public OASGenerationMetaInfoBuilder setServiceDeclarationNode(ServiceDeclarationNode serviceDeclarationNode) {
             this.serviceDeclarationNode = serviceDeclarationNode;
+            return this;
+        }
+
+        public OASGenerationMetaInfoBuilder setServiceNode(ServiceNode serviceNode) {
+            this.serviceNode = serviceNode;
             return this;
         }
 
