@@ -172,14 +172,8 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
                 "project_openapi_bal_ext/result_0.yaml");
     }
 
-    @Test(description = "Generate with ballerina extension option - false")
-    public void openAPIGenWithExtOpt0() throws IOException, InterruptedException {
-        executeCommand("project_openapi_bal_ext/main.bal", "api_v1_openapi.yaml",
-                "project_openapi_bal_ext/result_0.yaml", false);
-    }
-
-    @Test(description = "Generate with ballerina extension option - true")
-    public void openAPIGenWithExtOpt2() throws IOException, InterruptedException {
+    @Test(description = "Generate with ballerina extension option")
+    public void openAPIGenWithBalExt() throws IOException, InterruptedException {
         executeCommand("project_openapi_bal_ext/main.bal", "api_v1_openapi.yaml",
                 "project_openapi_bal_ext/result_1.yaml", true);
     }
@@ -213,7 +207,7 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("-i");
         buildArgs.add(resourcePath);
-        buildArgs.add("--bal-ext");
+        buildArgs.add("--with-bal-ext");
         buildArgs.add(String.valueOf(balExt));
         Assert.assertTrue(TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs));
         Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve(generatedFile)));

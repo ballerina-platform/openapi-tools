@@ -122,7 +122,7 @@ public class OpenApiCmd implements BLauncherCmd {
     private boolean generateWithoutDataBinding;
 
     @CommandLine.Option(names = {"--with-bal-ext"}, hidden = true, description = "Generate ballerina type extensions")
-    private Boolean addBallerinaExtension;
+    private boolean addBallerinaExtension;
 
 
     @CommandLine.Parameters
@@ -229,8 +229,8 @@ public class OpenApiCmd implements BLauncherCmd {
                 }
             }
 
-            if (addBallerinaExtension != null) {
-                outStream.println("'--bal-ext' option is only available in OpenAPI specification " +
+            if (addBallerinaExtension) {
+                outStream.println("'--with-bal-ext' option is only available in OpenAPI specification " +
                         "generation mode.");
                 exitError(this.exitWhenFinish);
             }
