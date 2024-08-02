@@ -36,6 +36,13 @@ components:
           type: integer
           format: int64
       additionalProperties: false
+      x-ballerina-type:
+        orgName: ballerina
+        pkgName: openapi_bal_ext
+        moduleName: openapi_bal_ext.module
+        version: 0.1.0
+        modulePrefix: module
+        name: BasicStudent
     Date:
       type: object
       description: Date in proleptic Gregorian calendar.

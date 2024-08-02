@@ -172,28 +172,16 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
                 "project_openapi_bal_ext/result_0.yaml");
     }
 
-    @Test(description = "Generate with ballerina extension option - 0 - DISABLED")
+    @Test(description = "Generate with ballerina extension option - false")
     public void openAPIGenWithExtOpt0() throws IOException, InterruptedException {
         executeCommand("project_openapi_bal_ext/main.bal", "api_v1_openapi.yaml",
-                "project_openapi_bal_ext/result_0.yaml", "0");
+                "project_openapi_bal_ext/result_0.yaml", false);
     }
 
-    @Test(description = "Generate with ballerina extension option - 1 - EXTERNAL_PACKAGE_TYPES")
-    public void openAPIGenWithExtOpt1() throws IOException, InterruptedException {
-        executeCommand("project_openapi_bal_ext/main.bal", "api_v1_openapi.yaml",
-                "project_openapi_bal_ext/result_1.yaml", "1");
-    }
-
-    @Test(description = "Generate with ballerina extension option - 2 - SAME_PACKAGE_DIFFERENT_MODULE_TYPES")
+    @Test(description = "Generate with ballerina extension option - true")
     public void openAPIGenWithExtOpt2() throws IOException, InterruptedException {
         executeCommand("project_openapi_bal_ext/main.bal", "api_v1_openapi.yaml",
-                "project_openapi_bal_ext/result_2.yaml", "2");
-    }
-
-    @Test(description = "Generate with ballerina extension option - 3 - ALL_REFERENCED_TYPES")
-    public void openAPIGenWithExtOpt3() throws IOException, InterruptedException {
-        executeCommand("project_openapi_bal_ext/main.bal", "api_v1_openapi.yaml",
-                "project_openapi_bal_ext/result_3.yaml", "3");
+                "project_openapi_bal_ext/result_1.yaml", true);
     }
 
     @AfterClass
@@ -220,13 +208,13 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
         Assert.assertEquals(expectedYaml, generatedOpenAPI);
     }
 
-    private void executeCommand(String resourcePath, String generatedFile, String expectedPath, String extensionLevel)
+    private void executeCommand(String resourcePath, String generatedFile, String expectedPath, boolean balExt)
             throws IOException, InterruptedException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("-i");
         buildArgs.add(resourcePath);
-        buildArgs.add("--bal-ext-level");
-        buildArgs.add(extensionLevel);
+        buildArgs.add("--bal-ext");
+        buildArgs.add(String.valueOf(balExt));
         Assert.assertTrue(TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs));
         Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve(generatedFile)));
         String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve(generatedFile));
