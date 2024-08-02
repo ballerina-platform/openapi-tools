@@ -55,6 +55,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.ballerina.openapi.service.mapper.Constants.HYPHEN;
+import static io.ballerina.openapi.service.mapper.type.extension.BallerinaExtensionLevel.DISABLED;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.containErrors;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpenApiFileName;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.isHttpService;
@@ -83,7 +84,8 @@ public final class ServiceToOpenAPIMapper {
                                                          SemanticModel semanticModel,
                                                          String serviceName, Boolean needJson,
                                                          Path inputPath) {
-        return generateOAS3Definition(project, syntaxTree, semanticModel, serviceName, needJson, inputPath, "0");
+        return generateOAS3Definition(project, syntaxTree, semanticModel, serviceName, needJson, inputPath,
+                DISABLED.getValue());
     }
 
     /**
@@ -117,7 +119,7 @@ public final class ServiceToOpenAPIMapper {
                 diagnostics.add(error);
             }
             // Check ballerina extension level
-            BallerinaExtensionLevel extensionLevel = BallerinaExtensionLevel.DISABLED;
+            BallerinaExtensionLevel extensionLevel = DISABLED;
             try {
                 extensionLevel = BallerinaExtensionLevel.fromValue(ballerinaExtensionLevel);
             } catch (IllegalArgumentException e) {
@@ -268,12 +270,8 @@ public final class ServiceToOpenAPIMapper {
 
     private static Optional<ModuleID> getServiceModuleId(ServiceDeclarationNode serviceDeclarationNode,
                                                          SemanticModel semanticModel) {
-        Optional<Symbol> symbol = semanticModel.symbol(serviceDeclarationNode);
-        if (symbol.isEmpty()) {
-            return Optional.empty();
-        }
-        Optional<ModuleSymbol> module = symbol.get().getModule();
-        return module.map(ModuleSymbol::id);
+        return semanticModel.symbol(serviceDeclarationNode)
+                .flatMap(symbol -> symbol.getModule().map(ModuleSymbol::id));
     }
 
     /**
