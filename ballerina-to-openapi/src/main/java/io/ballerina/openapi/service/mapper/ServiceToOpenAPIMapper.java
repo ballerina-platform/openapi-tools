@@ -358,9 +358,8 @@ public final class ServiceToOpenAPIMapper {
         return servers.get(0).getUrl().split("\\{server}:\\{port}").length == 2 ? parts[1] : "";
     }
 
-    private static Optional<ModuleID> getServiceModuleId(ServiceDeclarationNode serviceDeclarationNode,
-                                                         SemanticModel semanticModel) {
-        return semanticModel.symbol(serviceDeclarationNode)
+    private static Optional<ModuleID> getServiceModuleId(ServiceNode serviceNode, SemanticModel semanticModel) {
+        return semanticModel.symbol(serviceNode.getInternalNode())
                 .flatMap(symbol -> symbol.getModule().map(ModuleSymbol::id));
     }
 
