@@ -36,6 +36,7 @@ public class OASClientConfig {
     private final String license;
     private final boolean statusCodeBinding;
     private final boolean isMock;
+    private final boolean isUsingSanitizedOas;
 
 
     private OASClientConfig(Builder clientConfigBuilder) {
@@ -47,6 +48,7 @@ public class OASClientConfig {
         this.license = clientConfigBuilder.license;
         this.statusCodeBinding = clientConfigBuilder.statusCodeBinding;
         this.isMock = clientConfigBuilder.isMock;
+        this.isUsingSanitizedOas = clientConfigBuilder.isUsingSanitizedOas;
     }
 
     public OpenAPI getOpenAPI() {
@@ -79,6 +81,10 @@ public class OASClientConfig {
         return isMock;
     }
 
+    public boolean isUsingSanitizedOas() {
+        return isUsingSanitizedOas;
+    }
+
     /**
      * Client IDL plugin meta data builder class.
      */
@@ -91,6 +97,7 @@ public class OASClientConfig {
         private String license = DO_NOT_MODIFY_FILE_HEADER;
         private boolean statusCodeBinding = false;
         private boolean isMock = false;
+        private boolean isUsingSanitizedOas = false;
 
         public Builder withOpenAPI(OpenAPI openAPI) {
             this.openAPI = openAPI;
@@ -129,6 +136,11 @@ public class OASClientConfig {
 
         public Builder withMock(boolean isMock) {
             this.isMock = isMock;
+            return this;
+        }
+
+        public Builder withIsUsingSanitizedOas(boolean isUsingSanitizedOas) {
+            this.isUsingSanitizedOas = isUsingSanitizedOas;
             return this;
         }
 

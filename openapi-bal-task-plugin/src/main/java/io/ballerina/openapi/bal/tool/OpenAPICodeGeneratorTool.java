@@ -78,6 +78,7 @@ import java.util.Properties;
 import static io.ballerina.openapi.bal.tool.Constants.CACHE_FILE;
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT;
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT_METHODS;
+import static io.ballerina.openapi.bal.tool.Constants.IS_SANITIZED_OAS;
 import static io.ballerina.openapi.bal.tool.Constants.LICENSE;
 import static io.ballerina.openapi.bal.tool.Constants.MOCK;
 import static io.ballerina.openapi.bal.tool.Constants.MODE;
@@ -119,7 +120,17 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
             // Handle the code generation
             String oasFilePath = toolContext.filePath();
             Path packagePath = toolContext.currentPackage().project().sourceRoot();
-            Optional<OpenAPI> openAPI = getOpenAPIContract(packagePath, Path.of(oasFilePath), location, toolContext);
+            boolean isSanitized = false;
+            if (toolContext.options() != null) {
+                Map<String, ToolContext.Option> options = toolContext.options();
+                if (options.containsKey(IS_SANITIZED_OAS)) {
+                    ToolContext.Option isUsingSanitizedOas = options.get(IS_SANITIZED_OAS);
+                    String value = isUsingSanitizedOas.value().toString().trim();
+                    isSanitized = value.contains(TRUE);
+                }
+            }
+            Optional<OpenAPI> openAPI = getOpenAPIContract(packagePath, Path.of(oasFilePath), location, toolContext,
+                    isSanitized);
             if (openAPI.isEmpty()) {
                 return;
             }
@@ -211,7 +222,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
      * This method uses to read the openapi contract and return the {@code OpenAPI} object.
      */
     private Optional<OpenAPI> getOpenAPIContract(Path ballerinaFilePath, Path openAPIPath, Location location,
-                                                 ToolContext toolContext) {
+                                                 ToolContext toolContext, boolean isSanitized) {
         Path relativePath;
         try {
             Path inputPath = Paths.get(openAPIPath.toString());
@@ -223,7 +234,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 relativePath = Paths.get(openapiContract.getCanonicalPath());
             }
             if (Files.exists(relativePath)) {
-                return Optional.of(normalizeOpenAPI(relativePath, operationIdValidationRequired(toolContext)));
+                return Optional.of(normalizeOpenAPI(relativePath, operationIdValidationRequired(toolContext),
+                        isSanitized));
             } else {
                 DiagnosticMessages error = DiagnosticMessages.INVALID_CONTRACT_PATH;
                 createDiagnostics(toolContext, error, location);
@@ -301,6 +313,10 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                     break;
                 case MOCK:
                     clientMetaDataBuilder.withMock(value.contains(TRUE));
+                    break;
+                case IS_SANITIZED_OAS:
+                    clientMetaDataBuilder.withIsUsingSanitizedOas(value.contains(TRUE));
+                    serviceMetaDataBuilder.withIsUsingSanitizedOas(value.contains(TRUE));
                     break;
                 default:
                     break;
@@ -459,7 +475,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
                 .append(clientConfig.getLicense())
                 .append(clientConfig.isNullable())
                 .append(clientConfig.isStatusCodeBinding())
-                .append(clientConfig.isMock());
+                .append(clientConfig.isMock())
+                .append(clientConfig.isUsingSanitizedOas());
         List<String> tags = clientConfig.getFilter().getTags();
         tags.sort(String.CASE_INSENSITIVE_ORDER);
         for (String str : tags) {

@@ -484,9 +484,7 @@ public class GeneratorUtils {
 
             throw new BallerinaOpenApiException(errorMessage.toString());
         }
-        OpenAPI openAPI = parseResult.getOpenAPI();
-        OASSanitizer oasSanitizer = new OASSanitizer(openAPI);
-        return oasSanitizer.sanitized();
+        return parseResult.getOpenAPI();
     }
 
     /**
@@ -742,7 +740,7 @@ public class GeneratorUtils {
      * @throws IOException
      * @throws BallerinaOpenApiException
      */
-    public static OpenAPI normalizeOpenAPI(Path openAPIPath, boolean validateOpIds) throws IOException,
+    public static OpenAPI normalizeOpenAPI(Path openAPIPath, boolean validateOpIds, boolean isSanitized) throws IOException,
             BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPIFromOpenAPIV3Parser(openAPIPath);
         io.swagger.v3.oas.models.Paths openAPIPaths = openAPI.getPaths();
@@ -750,6 +748,10 @@ public class GeneratorUtils {
             validateOperationIds(openAPIPaths.entrySet());
         }
         validateRequestBody(openAPIPaths.entrySet());
+        if (isSanitized) {
+            OASSanitizer oasSanitizer = new OASSanitizer(openAPI);
+            return oasSanitizer.sanitized();
+        }
         return openAPI;
     }
 

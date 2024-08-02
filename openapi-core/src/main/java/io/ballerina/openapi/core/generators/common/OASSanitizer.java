@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,10 +62,10 @@ public class OASSanitizer {
         return diagnostics;
     }
 
-    //TODO: v3.1 vs 3.0
-    public OpenAPI sanitized()  {
+    public OpenAPI sanitized() {
         Paths paths = openapi.getPaths();
         Components components = openapi.getComponents();
+        List<String> modifiedSchemaNames = new ArrayList<>();
         Map<String, Schema> modifiedSchemas = new HashMap<>();
         Map<String, RequestBody> modifiedRequestBodies = new HashMap<>();
         Map<String, ApiResponse> modifiedResponses = new HashMap<>();
@@ -73,13 +74,18 @@ public class OASSanitizer {
         if (components != null) {
             Map<String, Schema> schemas = components.getSchemas();
             if (schemas != null) {
-                for (Map.Entry<String, Schema> schema: schemas.entrySet()) {
+                for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
                     String schemaName = schema.getKey();
                     String modifiedName = getValidNameForType(schemaName);
-                    //check the duplication
+                    if (schema.getKey().contains(modifiedName) || modifiedSchemaNames.contains(modifiedName)) {
+                        // todo: check the duplication, till providing the name this will give same name as it is.
+                        continue;
+                    }
+                    modifiedSchemaNames.add(modifiedName);
+
                     // replace only for reference
                     // 1.Update the reference at the component sections
-                    for (Map.Entry<String, Schema> componentSchema: schemas.entrySet()) {
+                    for (Map.Entry<String, Schema> componentSchema : schemas.entrySet()) {
                         Schema value = componentSchema.getValue();
                         updateSchemaWithReference(schemaName, modifiedName, value);
                         modifiedSchemas.put(modifiedName, value);
@@ -89,7 +95,7 @@ public class OASSanitizer {
                     }
                     // 2. Update OAS reusable requestBody with reference details
                     if (components.getRequestBodies() != null) {
-                        for (Map.Entry<String, RequestBody> requestBody: components.getRequestBodies().entrySet()) {
+                        for (Map.Entry<String, RequestBody> requestBody : components.getRequestBodies().entrySet()) {
                             RequestBody requestBodyValue = updateRequestBodySchemaType(schemaName, modifiedName,
                                     requestBody.getValue());
                             modifiedRequestBodies.put(requestBody.getKey(), requestBodyValue);
@@ -98,7 +104,7 @@ public class OASSanitizer {
                     // 3. Update OAS reusable response with reference details
                     if (components.getResponses() != null) {
                         Map<String, ApiResponse> responsesEntry = components.getResponses();
-                        for (Map.Entry<String, ApiResponse> response: responsesEntry.entrySet()) {
+                        for (Map.Entry<String, ApiResponse> response : responsesEntry.entrySet()) {
                             ApiResponse modifiedResponse = updateSchemaTypeForResponses(schemaName, modifiedName,
                                     response.getValue());
                             modifiedResponses.put(response.getKey(), modifiedResponse);
@@ -107,7 +113,7 @@ public class OASSanitizer {
                     // 4. Update OAS reusable parameters with reference details
                     if (components.getParameters() != null) {
                         Map<String, Parameter> parameters = components.getParameters();
-                        for (Map.Entry<String, Parameter> param: parameters.entrySet()) {
+                        for (Map.Entry<String, Parameter> param : parameters.entrySet()) {
                             Parameter parameter = param.getValue();
                             if (parameter.getSchema() != null) {
                                 Schema<?> paramSchema = parameter.getSchema();
@@ -123,7 +129,7 @@ public class OASSanitizer {
                     // 5. Update OAS reusable headers with reference details
                     if (components.getHeaders() != null) {
                         Map<String, Header> headers = components.getHeaders();
-                        for (Map.Entry<String, Header> header: headers.entrySet()) {
+                        for (Map.Entry<String, Header> header : headers.entrySet()) {
                             Header headerValue = header.getValue();
                             Schema<?> type = headerValue.getSchema();
                             String ref = type.get$ref();
@@ -156,11 +162,8 @@ public class OASSanitizer {
 
         // This is for path parameter name modifications
         Paths modifiedPaths = new Paths();
-        for (Map.Entry<String, PathItem> path: paths.entrySet()) {
+        for (Map.Entry<String, PathItem> path : paths.entrySet()) {
             PathDetails result = updateParameterName(modifiedSchemas, path);
-            if (result == null) {
-                continue;
-            }
             modifiedPaths.put(result.pathValue(), result.pathItem());
         }
         openapi.setPaths(modifiedPaths);
@@ -176,31 +179,7 @@ public class OASSanitizer {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            List<String> parameterNames = collectParameterNames(operation.getParameters());
-            List<Parameter> parameters = operation.getParameters();
-            if (parameters != null) {
-                //check path parameter
-                List<Parameter> modifiedParameters = new ArrayList<>();
-                for (Parameter parameter: parameters) {
-                    if (!parameter.getIn().equals("path")) {
-                        modifiedParameters.add(parameter);
-                        continue;
-                    }
-                    String oasPathParamName = parameter.getName();
-                    String modifiedPathParam = getValidNameForParameter(oasPathParamName);
-                    //check duplicate
-                    if (parameterNames.contains(modifiedSchemas)) {
-                        // handle by adding abc_1 or abc_2
-                    }
-                    // to avoid the duplication after two modifiers
-                    parameterNames.add(modifiedPathParam);
-                    parameter.setName(modifiedPathParam);
-                    modifiedParameters.add(parameter);
-                    pathValue = pathValue.replace("{" + oasPathParamName + "}", "{" +
-                            modifiedPathParam + "}");
-                }
-                operation.setParameters(modifiedParameters);
-            }
+            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
             pathItem.setGet(operation);
         }
         if (pathItem.getPost() != null) {
@@ -208,31 +187,7 @@ public class OASSanitizer {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            List<String> parameterNames = collectParameterNames(operation.getParameters());
-            List<Parameter> parameters = operation.getParameters();
-            if (parameters != null) {
-                //check path parameter
-                List<Parameter> modifiedParameters = new ArrayList<>();
-                for (Parameter parameter: parameters) {
-                    if (!parameter.getIn().equals("path")) {
-                        modifiedParameters.add(parameter);
-                        continue;
-                    }
-                    String oasPathParamName = parameter.getName();
-                    String modifiedPathParam = getValidNameForParameter(oasPathParamName);
-                    //check duplicate
-                    if (parameterNames.contains(modifiedSchemas)) {
-                        // handle by adding abc_1 or abc_2
-                    }
-                    // to avoid the duplication after two modifiers
-                    parameterNames.add(modifiedPathParam);
-                    parameter.setName(modifiedPathParam);
-                    modifiedParameters.add(parameter);
-                    pathValue = pathValue.replace("{" + oasPathParamName + "}", "{" +
-                            modifiedPathParam + "}");
-                }
-                operation.setParameters(modifiedParameters);
-            }
+            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
             pathItem.setPost(operation);
         }
         if (pathItem.getPut() != null) {
@@ -240,32 +195,7 @@ public class OASSanitizer {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            List<String> parameterNames = collectParameterNames(operation.getParameters());
-            List<Parameter> parameters = operation.getParameters();
-            if (parameters != null) {
-                //check path parameter
-                List<Parameter> modifiedParameters = new ArrayList<>();
-                for (Parameter parameter: parameters) {
-                    if (!parameter.getIn().equals("path")) {
-                        modifiedParameters.add(parameter);
-                        continue;
-                    }
-                    String oasPathParamName = parameter.getName();
-                    String modifiedPathParam = getValidNameForParameter(oasPathParamName);
-                    //check duplicate
-                    if (parameterNames.contains(modifiedSchemas)) {
-                        // handle by adding abc_1 or abc_2
-                    }
-                    // to avoid the duplication after two modifiers
-                    parameterNames.add(modifiedPathParam);
-                    parameter.setName(modifiedPathParam);
-                    modifiedParameters.add(parameter);
-                    //todo: path item needs to be updated:
-                    pathValue = pathValue.replace("{" + oasPathParamName + "}", "{" +
-                            modifiedPathParam + "}");
-                }
-                operation.setParameters(modifiedParameters);
-            }
+            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
             pathItem.setPut(operation);
         }
         if (pathItem.getDelete() != null) {
@@ -273,31 +203,7 @@ public class OASSanitizer {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            List<String> parameterNames = collectParameterNames(operation.getParameters());
-            List<Parameter> parameters = operation.getParameters();
-            if (parameters != null) {
-                //check path parameter
-                List<Parameter> modifiedParameters = new ArrayList<>();
-                for (Parameter parameter: parameters) {
-                    if (!parameter.getIn().equals("path")) {
-                        modifiedParameters.add(parameter);
-                        continue;
-                    }
-                    String oasPathParamName = parameter.getName();
-                    String modifiedPathParam = getValidNameForParameter(oasPathParamName);
-                    //check duplicate
-                    if (parameterNames.contains(modifiedSchemas)) {
-                        // handle by adding abc_1 or abc_2
-                    }
-                    // to avoid the duplication after two modifiers
-                    parameterNames.add(modifiedPathParam);
-                    parameter.setName(modifiedPathParam);
-                    modifiedParameters.add(parameter);
-                    pathValue = pathValue.replace("{" + oasPathParamName + "}", "{" +
-                            modifiedPathParam + "}");
-                }
-                operation.setParameters(modifiedParameters);
-            }
+            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
             pathItem.setDelete(operation);
         }
         if (pathItem.getPatch() != null) {
@@ -305,31 +211,7 @@ public class OASSanitizer {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            List<String> parameterNames = collectParameterNames(operation.getParameters());
-            List<Parameter> parameters = operation.getParameters();
-            if (parameters != null) {
-                //check path parameter
-                List<Parameter> modifiedParameters = new ArrayList<>();
-                for (Parameter parameter: parameters) {
-                    if (!parameter.getIn().equals("path")) {
-                        modifiedParameters.add(parameter);
-                        continue;
-                    }
-                    String oasPathParamName = parameter.getName();
-                    String modifiedPathParam = getValidNameForParameter(oasPathParamName);
-                    //check duplicate
-                    if (parameterNames.contains(modifiedSchemas)) {
-                        // handle by adding abc_1 or abc_2
-                    }
-                    // to avoid the duplication after two modifiers
-                    parameterNames.add(modifiedPathParam);
-                    parameter.setName(modifiedPathParam);
-                    modifiedParameters.add(parameter);
-                    pathValue = pathValue.replace("{" + oasPathParamName + "}", "{" +
-                            modifiedPathParam + "}");
-                }
-                operation.setParameters(modifiedParameters);
-            }
+            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
             pathItem.setPatch(operation);
         }
         if (pathItem.getHead() != null) {
@@ -337,31 +219,7 @@ public class OASSanitizer {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            List<String> parameterNames = collectParameterNames(operation.getParameters());
-            List<Parameter> parameters = operation.getParameters();
-            if (parameters != null) {
-                //check path parameter
-                List<Parameter> modifiedParameters = new ArrayList<>();
-                for (Parameter parameter: parameters) {
-                    if (!parameter.getIn().equals("path")) {
-                        modifiedParameters.add(parameter);
-                        continue;
-                    }
-                    String oasPathParamName = parameter.getName();
-                    String modifiedPathParam = getValidNameForParameter(oasPathParamName);
-                    //check duplicate
-                    if (parameterNames.contains(modifiedSchemas)) {
-                        // handle by adding abc_1 or abc_2
-                    }
-                    // to avoid the duplication after two modifiers
-                    parameterNames.add(modifiedPathParam);
-                    parameter.setName(modifiedPathParam);
-                    modifiedParameters.add(parameter);
-                    pathValue = pathValue.replace("{" + oasPathParamName + "}", "{" +
-                            modifiedPathParam + "}");
-                }
-                operation.setParameters(modifiedParameters);
-            }
+            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
             pathItem.setHead(operation);
         }
         if (pathItem.getOptions() != null) {
@@ -369,31 +227,7 @@ public class OASSanitizer {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            List<String> parameterNames = collectParameterNames(operation.getParameters());
-            List<Parameter> parameters = operation.getParameters();
-            if (parameters != null) {
-                //check path parameter
-                List<Parameter> modifiedParameters = new ArrayList<>();
-                for (Parameter parameter: parameters) {
-                    if (!parameter.getIn().equals("path")) {
-                        modifiedParameters.add(parameter);
-                        continue;
-                    }
-                    String oasPathParamName = parameter.getName();
-                    String modifiedPathParam = getValidNameForParameter(oasPathParamName);
-                    //check duplicate
-                    if (parameterNames.contains(modifiedSchemas)) {
-                        // handle by adding abc_1 or abc_2
-                    }
-                    // to avoid the duplication after two modifiers
-                    parameterNames.add(modifiedPathParam);
-                    parameter.setName(modifiedPathParam);
-                    modifiedParameters.add(parameter);
-                    pathValue = pathValue.replace("{" + oasPathParamName + "}", "{" +
-                            modifiedPathParam + "}");
-                }
-                operation.setParameters(modifiedParameters);
-            }
+            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
             pathItem.setOptions(operation);
         }
         if (pathItem.getTrace() != null) {
@@ -401,48 +235,74 @@ public class OASSanitizer {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            List<String> parameterNames = collectParameterNames(operation.getParameters());
-            List<Parameter> parameters = operation.getParameters();
-            if (parameters != null) {
-                //check path parameter
-                List<Parameter> modifiedParameters = new ArrayList<>();
-                for (Parameter parameter: parameters) {
-                    if (!parameter.getIn().equals("path")) {
-                        modifiedParameters.add(parameter);
-                        continue;
-                    }
-                    String oasPathParamName = parameter.getName();
-                    String modifiedPathParam = getValidNameForParameter(oasPathParamName);
-                    //check duplicate
-                    if (parameterNames.contains(modifiedSchemas)) {
-                        // handle by adding abc_1 or abc_2
-                    }
-                    // to avoid the duplication after two modifiers
-                    parameterNames.add(modifiedPathParam);
-                    parameter.setName(modifiedPathParam);
-                    modifiedParameters.add(parameter);
-                    pathValue = pathValue.replace("{" + oasPathParamName + "}", "{" +
-                            modifiedPathParam + "}");
-                }
-                operation.setParameters(modifiedParameters);
-            }
+            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
             pathItem.setTrace(operation);
         }
         return new PathDetails(pathItem, pathValue);
     }
 
+    private static String updateParameterNames(Map<String, Schema> modifiedSchemas, String pathValue, Operation operation) {
+        List<String> parameterNames = collectParameterNames(operation.getParameters());
+        List<Parameter> parameters = operation.getParameters();
+        if (parameters != null) {
+            List<Parameter> modifiedParameters = new ArrayList<>();
+            pathValue = updateParameters(modifiedSchemas, pathValue, parameterNames, parameters,
+                    modifiedParameters);
+            operation.setParameters(modifiedParameters);
+        }
+        return pathValue;
+    }
+
+    private static String updateParameters(Map<String, Schema> modifiedSchemas, String pathValue,
+                                           List<String> parameterNames, List<Parameter> parameters,
+                                           List<Parameter> modifiedParameters) {
+        for (Parameter parameter : parameters) {
+            if (!parameter.getIn().equals("path")) {
+                modifiedParameters.add(parameter);
+                continue;
+            }
+            String oasPathParamName = parameter.getName();
+            Optional<String> modifiedPathParamResult = getValidNameForParameter(oasPathParamName);
+            if (modifiedPathParamResult.isEmpty()) {
+                //todo diagnostic, severity error
+                continue;
+            }
+            String modifiedPathParam = modifiedPathParamResult.get();
+            if (parameterNames.contains(modifiedPathParam)) {
+                // todo: handle by adding abc_1 or abc_2
+                continue;
+            }
+            // check given parameter has name which similar to component schema name
+            if (modifiedSchemas.containsKey(modifiedPathParam)) {
+                modifiedPathParam = "param" + getValidNameForParameter(modifiedPathParam).get();
+            }
+            parameterNames.add(modifiedPathParam);
+            parameter.setName(modifiedPathParam);
+            modifiedParameters.add(parameter);
+            pathValue = pathValue.replace("{" + oasPathParamName + "}", "{" +
+                    modifiedPathParam + "}");
+        }
+        return pathValue;
+    }
+
+    /**
+     * Record for storing return data
+     * @param pathItem
+     * @param pathValue
+     */
     private record PathDetails(PathItem pathItem, String pathValue) {
     }
 
     /**
+     * This util is to update the all OAS operations in given path with modified schema name.
      *
-     * @param schemaName
-     * @param modifiedName
-     * @param operations
+     * @param schemaName   - original schema name
+     * @param modifiedName - modified schema name
+     * @param operations   - OAS operation.
      */
     private static void updateOASOperations(String schemaName, String modifiedName,
                                             Set<Map.Entry<String, PathItem>> operations) {
-        for (Map.Entry<String, PathItem> path: operations) {
+        for (Map.Entry<String, PathItem> path : operations) {
             PathItem pathItem = path.getValue();
             if (pathItem.getGet() != null) {
                 Operation operation = pathItem.getGet();
@@ -498,25 +358,32 @@ public class OASSanitizer {
         }
     }
 
-    private static void updateSchemaWithReference(String schemaName, String modifiedName, Schema fieldValue) {
-        String ref = fieldValue.get$ref();
+    /**
+     * Common util for handle all the schema type by updating the reference details.
+     *
+     * @param schemaName   - original schema name
+     * @param modifiedName - modified schema
+     * @param typeSchema   - type schema
+     */
+    private static void updateSchemaWithReference(String schemaName, String modifiedName, Schema typeSchema) {
+        String ref = typeSchema.get$ref();
         if (ref != null) {
-            updateRef(schemaName, modifiedName, fieldValue);
-        } else if (fieldValue instanceof ObjectSchema objectSchema) {
+            updateRef(schemaName, modifiedName, typeSchema);
+        } else if (typeSchema instanceof ObjectSchema objectSchema) {
             Map<String, Schema> objectSchemaProperties = objectSchema.getProperties();
             updateObjectPropertyRef(objectSchemaProperties, schemaName, modifiedName);
-        } else if (fieldValue instanceof ArraySchema arraySchema) {
+        } else if (typeSchema instanceof ArraySchema arraySchema) {
             Schema<?> items = arraySchema.getItems();
             updateSchemaWithReference(schemaName, modifiedName, items);
-        } else if (fieldValue instanceof MapSchema mapSchema) {
+        } else if (typeSchema instanceof MapSchema mapSchema) {
             updateObjectPropertyRef(mapSchema.getProperties(), schemaName, modifiedName);
-        } else if (fieldValue.getProperties() != null) {
-            updateObjectPropertyRef(fieldValue.getProperties(), schemaName, modifiedName);
-        } else if (fieldValue instanceof ComposedSchema composedSchema) {
+        } else if (typeSchema.getProperties() != null) {
+            updateObjectPropertyRef(typeSchema.getProperties(), schemaName, modifiedName);
+        } else if (typeSchema instanceof ComposedSchema composedSchema) {
             if (composedSchema.getAllOf() != null) {
                 List<Schema> allOf = composedSchema.getAllOf();
                 List<Schema> modifiedAllOf = new ArrayList<>();
-                for (Schema schema: allOf) {
+                for (Schema schema : allOf) {
                     updateSchemaWithReference(schemaName, modifiedName, schema);
                     modifiedAllOf.add(schema);
                 }
@@ -525,7 +392,7 @@ public class OASSanitizer {
             if (composedSchema.getOneOf() != null) {
                 List<Schema> oneOf = composedSchema.getOneOf();
                 List<Schema> modifiedOneOf = new ArrayList<>();
-                for (Schema schema: oneOf) {
+                for (Schema schema : oneOf) {
                     updateSchemaWithReference(schemaName, modifiedName, schema);
                     modifiedOneOf.add(schema);
                 }
@@ -534,7 +401,7 @@ public class OASSanitizer {
             if (composedSchema.getAnyOf() != null) {
                 List<Schema> anyOf = composedSchema.getAnyOf();
                 List<Schema> modifiedAnyOf = new ArrayList<>();
-                for (Schema schema: anyOf) {
+                for (Schema schema : anyOf) {
                     updateSchemaWithReference(schemaName, modifiedName, schema);
                     modifiedAnyOf.add(schema);
                 }
@@ -548,23 +415,30 @@ public class OASSanitizer {
         String patternString = "/" + schemaName.replaceAll("\\s+", "") + "(?!\\S)";
         Pattern pattern = Pattern.compile(patternString);
         Matcher matcher = pattern.matcher(ref);
-        ref =  matcher.replaceAll("/" + modifiedName);
+        ref = matcher.replaceAll("/" + modifiedName);
         value.set$ref(ref);
     }
 
+    /**
+     * This util is to update the given OAS operation with modified schema name.
+     *
+     * @param schemaName   - original schema name
+     * @param modifiedName - modified schema name
+     * @param operation    - OAS operation.
+     */
     private static void updateSchemaReferenceDetailsWithOperation(String schemaName, String modifiedName,
                                                                   Operation operation) {
-        // parameters type
+        // update parameters type
         if (operation.getParameters() != null) {
             updateParameterSchemaType(schemaName, modifiedName, operation);
         }
-        // request body
+        // update request body
         RequestBody requestBody = operation.getRequestBody();
         if (requestBody != null) {
             RequestBody modifiedRequestBody = updateRequestBodySchemaType(schemaName, modifiedName, requestBody);
             operation.setRequestBody(modifiedRequestBody);
         }
-        // response
+        // update response
         ApiResponses responses = operation.getResponses();
         responses.forEach((statusCode, response) -> {
             response = updateSchemaTypeForResponses(schemaName, modifiedName, response);
@@ -574,25 +448,24 @@ public class OASSanitizer {
 
     private static ApiResponse updateSchemaTypeForResponses(String schemaName, String modifiedName,
                                                             ApiResponse response) {
-            Content content = response.getContent();
-            if (content != null) {
-                for (Map.Entry<String, MediaType> stringMediaTypeEntry : content.entrySet()) {
-                    MediaType mediaType = stringMediaTypeEntry.getValue();
-                    //TODO handle composeSchema
-                    Schema<?> responseSchemaType = mediaType.getSchema();
-                    if (responseSchemaType != null) {
-                        String ref = responseSchemaType.get$ref();
-                        if (ref != null) {
-                            updateSchemaWithReference(schemaName, modifiedName, responseSchemaType);
-                        }
-
-                        mediaType.setSchema(responseSchemaType);
+        Content content = response.getContent();
+        if (content != null) {
+            for (Map.Entry<String, MediaType> stringMediaTypeEntry : content.entrySet()) {
+                MediaType mediaType = stringMediaTypeEntry.getValue();
+                Schema<?> responseSchemaType = mediaType.getSchema();
+                if (responseSchemaType != null) {
+                    String ref = responseSchemaType.get$ref();
+                    if (ref != null) {
+                        updateSchemaWithReference(schemaName, modifiedName, responseSchemaType);
                     }
-                    content.put(stringMediaTypeEntry.getKey(), mediaType);
+
+                    mediaType.setSchema(responseSchemaType);
                 }
-                response.setContent(content);
+                content.put(stringMediaTypeEntry.getKey(), mediaType);
             }
-            return response;
+            response.setContent(content);
+        }
+        return response;
     }
 
     private static RequestBody updateRequestBodySchemaType(String schemaName, String modifiedName,
@@ -601,7 +474,6 @@ public class OASSanitizer {
         if (content != null) {
             for (Map.Entry<String, MediaType> stringMediaTypeEntry : content.entrySet()) {
                 MediaType mediaType = stringMediaTypeEntry.getValue();
-                //TODO handle composeSchema
                 Schema<?> requestSchemaType = mediaType.getSchema();
                 if (requestSchemaType != null) {
                     String ref = requestSchemaType.get$ref();
@@ -657,10 +529,9 @@ public class OASSanitizer {
         return (identifier.substring(0, 1).toUpperCase(Locale.ENGLISH) + identifier.substring(1)).trim();
     }
 
-    public static String getValidNameForParameter(String identifier) {
+    public static Optional<String> getValidNameForParameter(String identifier) {
         if (identifier.isBlank()) {
-            //diagnostics by saying path parameter should have a NAME
-            return "\\" + identifier;
+            return Optional.empty();
         }
         if (!identifier.matches("\\b[0-9]*\\b")) {
             String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN);
@@ -678,8 +549,7 @@ public class OASSanitizer {
         } else {
             identifier = "param" + identifier;
         }
-        //if modified name has duplicates
-        return identifier.trim();
+        return Optional.of(identifier.trim());
     }
 
     public static List<String> collectParameterNames(List<Parameter> parameters) {

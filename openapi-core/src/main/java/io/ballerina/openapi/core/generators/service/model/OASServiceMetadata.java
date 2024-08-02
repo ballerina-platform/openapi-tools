@@ -36,6 +36,7 @@ public class OASServiceMetadata {
     private final String licenseHeader;
     private final String srcPackage;
     private final String srcFile;
+    private final boolean isUsingSanitizedOas;
 
     private OASServiceMetadata(Builder serviceMetadataBuilder) {
         this.openAPI = serviceMetadataBuilder.openAPI;
@@ -46,6 +47,7 @@ public class OASServiceMetadata {
         this.licenseHeader = serviceMetadataBuilder.licenseHeader;
         this.srcPackage = serviceMetadataBuilder.srcPackage;
         this.srcFile = serviceMetadataBuilder.srcFile;
+        this.isUsingSanitizedOas = serviceMetadataBuilder.isUsingSanitizedOas;
     }
 
     public OpenAPI getOpenAPI() {
@@ -80,6 +82,9 @@ public class OASServiceMetadata {
         return srcFile;
     }
 
+    public boolean isUsingSanitizedOas() {
+        return isUsingSanitizedOas;
+    }
     /**
      * Service generation meta data builder class.
      */
@@ -95,6 +100,7 @@ public class OASServiceMetadata {
         private String licenseHeader = "";
         private String srcPackage = "";
         private String srcFile = "";
+        private boolean isUsingSanitizedOas = false;
 
         public Builder withOpenAPI(OpenAPI openAPI) {
             this.openAPI = openAPI;
@@ -133,6 +139,11 @@ public class OASServiceMetadata {
 
         public Builder withSrcFile(String srcFile) {
             this.srcFile = srcFile;
+            return this;
+        }
+
+        public Builder withIsUsingSanitizedOas(boolean isUsingSanitizedOas) {
+            this.isUsingSanitizedOas = isUsingSanitizedOas;
             return this;
         }
 

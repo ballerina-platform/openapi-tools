@@ -100,9 +100,10 @@ public class BallerinaCodeGenerator {
     public void generateClientAndService(String definitionPath, String serviceName,
                                          String outPath, Filter filter, boolean nullable,
                                          boolean isResource, boolean generateServiceType,
-                                         boolean generateWithoutDataBinding, boolean statusCodeBinding, boolean isMock)
-            throws IOException, FormatterException, BallerinaOpenApiException,
-            OASTypeGenException, ClientException {
+                                         boolean generateWithoutDataBinding, boolean statusCodeBinding, boolean isMock,
+                                         boolean isSanitized)
+            throws IOException, FormatterException, BallerinaOpenApiException, OASTypeGenException, ClientException {
+
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
 
@@ -111,7 +112,7 @@ public class BallerinaCodeGenerator {
         // Normalize OpenAPI definition, in the client generation we suppose to terminate code generation when the
         // absence of the operationId in operation. Therefor we enable client flag true as default code generation.
         // if resource is enabled, we avoid checking operationId.
-        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPIPath, !isResource);
+        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPIPath, !isResource, isSanitized);
         checkOpenAPIVersion(openAPIDef);
         // Add typeHandler
         TypeHandler.createInstance(openAPIDef, nullable);
@@ -234,14 +235,14 @@ public class BallerinaCodeGenerator {
      * @throws BallerinaOpenApiException when code generator fails
      */
     public void generateClient(String definitionPath, String outPath, Filter filter, boolean nullable,
-                               boolean isResource, boolean statusCodeBinding, boolean isMock)
+                               boolean isResource, boolean statusCodeBinding, boolean isMock, boolean isSanitized)
             throws IOException, FormatterException, BallerinaOpenApiException, OASTypeGenException {
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles = null;
         try {
             genFiles = generateClientFiles(Paths.get(definitionPath), filter, nullable, isResource, statusCodeBinding,
-                    isMock);
+                    isMock, isSanitized);
             if (!genFiles.isEmpty()) {
                 writeGeneratedSources(genFiles, srcPath, implPath, GEN_CLIENT);
             }
@@ -263,12 +264,13 @@ public class BallerinaCodeGenerator {
      * @throws BallerinaOpenApiException when code generator fails
      */
     public void generateService(String definitionPath, String serviceName, String outPath, Filter filter,
-                                boolean nullable, boolean generateServiceType, boolean generateWithoutDataBinding)
+                                boolean nullable, boolean generateServiceType, boolean generateWithoutDataBinding,
+                                boolean isSanitized)
             throws IOException, BallerinaOpenApiException, FormatterException {
         Path srcPath = Paths.get(outPath);
         Path implPath = getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles = generateBallerinaService(Paths.get(definitionPath), serviceName,
-                filter, nullable, generateServiceType, generateWithoutDataBinding);
+                filter, nullable, generateServiceType, generateWithoutDataBinding, isSanitized);
         if (genFiles.isEmpty()) {
             return;
         }
@@ -362,14 +364,14 @@ public class BallerinaCodeGenerator {
      * @throws IOException when code generation with specified templates fails
      */
     private List<GenSrcFile> generateClientFiles(Path openAPI, Filter filter, boolean nullable, boolean isResource,
-                                                 boolean statusCodeBinding, boolean isMock)
+                                                 boolean statusCodeBinding, boolean isMock, boolean isSanitized)
             throws IOException, BallerinaOpenApiException, FormatterException, ClientException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_CLIENT_PKG;
         }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         // Normalize OpenAPI definition
-        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, !isResource);
+        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, !isResource, isSanitized);
         checkOpenAPIVersion(openAPIDef);
         // Validate the service generation
         List<String> complexPaths = GeneratorUtils.getComplexPaths(openAPIDef);
@@ -463,12 +465,12 @@ public class BallerinaCodeGenerator {
 
     public List<GenSrcFile> generateBallerinaService(Path openAPI, String serviceName,
                                                      Filter filter, boolean nullable, boolean generateServiceType,
-                                                     boolean generateWithoutDataBinding)
+                                                     boolean generateWithoutDataBinding, boolean isSanitized)
             throws IOException, FormatterException, BallerinaOpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_MOCK_PKG;
         }
-        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, false);
+        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, false, isSanitized);
         if (openAPIDef.getInfo() == null) {
             throw new BallerinaOpenApiException("Info section of the definition file cannot be empty/null: " +
                     openAPI);

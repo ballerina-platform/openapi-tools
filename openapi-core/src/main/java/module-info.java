@@ -39,7 +39,6 @@ module io.ballerina.openapi.core {
     requires org.apache.commons.lang3;
     requires com.fasterxml.jackson.databind;
 
-
     exports io.ballerina.openapi.core.generators.common.model;
     exports io.ballerina.openapi.core.generators.common.exception;
     exports io.ballerina.openapi.core.generators.client.model;
