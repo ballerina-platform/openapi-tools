@@ -77,7 +77,9 @@ public class OASSanitizer {
                 for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
                     String schemaName = schema.getKey();
                     String modifiedName = getValidNameForType(schemaName);
-                    if (schema.getKey().contains(modifiedName) || modifiedSchemaNames.contains(modifiedName)) {
+
+                    if (!schemaName.equals(modifiedName) && (schema.getKey().contains(modifiedName) ||
+                            modifiedSchemaNames.contains(modifiedName))) {
                         // todo: check the duplication, till providing the name this will give same name as it is.
                         continue;
                     }
@@ -241,7 +243,8 @@ public class OASSanitizer {
         return new PathDetails(pathItem, pathValue);
     }
 
-    private static String updateParameterNames(Map<String, Schema> modifiedSchemas, String pathValue, Operation operation) {
+    private static String updateParameterNames(Map<String, Schema> modifiedSchemas, String pathValue,
+                                               Operation operation) {
         List<String> parameterNames = collectParameterNames(operation.getParameters());
         List<Parameter> parameters = operation.getParameters();
         if (parameters != null) {
@@ -268,7 +271,7 @@ public class OASSanitizer {
                 continue;
             }
             String modifiedPathParam = modifiedPathParamResult.get();
-            if (parameterNames.contains(modifiedPathParam)) {
+            if (!modifiedPathParam.equals(oasPathParamName) && parameterNames.contains(modifiedPathParam)) {
                 // todo: handle by adding abc_1 or abc_2
                 continue;
             }
@@ -286,7 +289,8 @@ public class OASSanitizer {
     }
 
     /**
-     * Record for storing return data
+     * Record for storing return data.
+     *
      * @param pathItem
      * @param pathValue
      */

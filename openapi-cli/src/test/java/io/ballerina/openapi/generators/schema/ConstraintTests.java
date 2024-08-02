@@ -62,7 +62,7 @@ public class ConstraintTests {
             "with constraint.")
     public void testRecordFiledConstraint() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/record_field.yaml"),
-                true);
+                true, false);
         TypeHandler.createInstance(openAPI, false);
         RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(openAPI.getPaths()
                 .get("/admin").getPost().getRequestBody(), openAPI);
@@ -82,7 +82,7 @@ public class ConstraintTests {
             "Use case 05 : Only array items have constrained with number format")
     public void testForArray() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/array.yaml"),
-                true);
+                true, false);
         TypeHandler.createInstance(openAPI, false);
         RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(openAPI.getPaths()
                 .get("/admin").getPost().getRequestBody(), openAPI);
@@ -100,7 +100,7 @@ public class ConstraintTests {
             "Use case 03 : Annotations on a type used as a record field")
     public void testForReference() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/type_def_node.yaml"),
-                true);
+                true, false);
         TypeHandler.createInstance(openAPI, false);
         RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(openAPI.getPaths().get("/admin")
                 .getPost().getRequestBody(), openAPI);
@@ -118,7 +118,7 @@ public class ConstraintTests {
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve(
                 "swagger/constraint/record_field_02.yaml"),
-                true);
+                true, false);
         TypeHandler.createInstance(openAPI, false);
         RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(openAPI.getPaths()
                 .get("/admin").getPost().getRequestBody(), openAPI);
@@ -135,7 +135,7 @@ public class ConstraintTests {
     public void testNestedArrayWithConstraint() throws IOException, BallerinaOpenApiException,
             FormatterException, ClientException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
-                        "/nested_array_with_constraint.yaml"), true);
+                        "/nested_array_with_constraint.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -158,7 +158,7 @@ public class ConstraintTests {
     public void testAdditionalPropertiesWithConstraint() throws IOException, BallerinaOpenApiException,
             FormatterException, ClientException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
-                "/additional_properties_with_constraint.yaml"), true);
+                "/additional_properties_with_constraint.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -182,7 +182,7 @@ public class ConstraintTests {
     public void testInvalidConstraintUses() throws IOException, BallerinaOpenApiException, FormatterException,
             ClientException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
-                "/invalidConstraintFieldWithDataType.yaml"), true);
+                "/invalidConstraintFieldWithDataType.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -204,7 +204,7 @@ public class ConstraintTests {
     public void testInvalidAndValidBothConstraintUses() throws IOException, BallerinaOpenApiException,
             FormatterException, ClientException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
-                "/invalidAndValidConstraintFieldWithDataType.yaml"), true);
+                "/invalidAndValidConstraintFieldWithDataType.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -226,7 +226,7 @@ public class ConstraintTests {
     public void testAllowedZeroValuesForNumber() throws IOException, BallerinaOpenApiException, FormatterException,
             ClientException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
-                "/allow_zero_values_for_number_constraint.yaml"), true);
+                "/allow_zero_values_for_number_constraint.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -248,7 +248,7 @@ public class ConstraintTests {
     public void testNullableRefTypesWithConstraint() throws IOException, BallerinaOpenApiException,
             FormatterException, ClientException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
-                "/constraint_with_nullable.yaml"), true);
+                "/constraint_with_nullable.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -270,7 +270,7 @@ public class ConstraintTests {
     public void testStringSchemaPropertyWithPattern() throws IOException, BallerinaOpenApiException,
             FormatterException, ClientException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
-                "/pattern_string.yaml"), true);
+                "/pattern_string.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -292,7 +292,7 @@ public class ConstraintTests {
     public void testExclusiveMinMaxInV31() throws IOException, BallerinaOpenApiException, OASTypeGenException,
             FormatterException, ClientException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
-                "/exclusive_min_max_3_1.yaml"), true);
+                "/exclusive_min_max_3_1.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -314,7 +314,7 @@ public class ConstraintTests {
             enabled = false) // todo : need to fix as the resource order changes intermittently
     public void testDataTypeHasFormatWithConstraint() throws IOException, BallerinaOpenApiException, ClientException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
-                "/format_types_v3_0.yaml"), true);
+                "/format_types_v3_0.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -334,7 +334,7 @@ public class ConstraintTests {
             ClientException {
         //Test for OpenAPI version 3.1
         OpenAPI openAPIV31 = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
-                "/format_types_v3_1.yaml"), true);
+                "/format_types_v3_1.yaml"), true, false);
         TypeHandler.createInstance(openAPIV31, false);
         OASClientConfig.Builder cBuilder = new OASClientConfig.Builder();
         OASClientConfig cBuilderConfig = cBuilder

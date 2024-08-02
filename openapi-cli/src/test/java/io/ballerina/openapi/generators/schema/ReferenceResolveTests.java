@@ -46,7 +46,7 @@ public class ReferenceResolveTests {
     public void testReferenceIncludeWithObjectType() throws IOException, BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/world_bank.yaml"),
-                true);
+                true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -63,7 +63,7 @@ public class ReferenceResolveTests {
     @Test(description = "Test for object data type when absent reference and properties fields")
     public void testWorldBank() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/object_without_fields_reference.yaml"), true);
+                "/object_without_fields_reference.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -79,7 +79,7 @@ public class ReferenceResolveTests {
     @Test(description = "Test for type generation for query parameters with referenced schemas")
     public void testParameterSchemaReferences() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/schema_referenced_in_parameters.yaml"), true);
+                "/schema_referenced_in_parameters.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -97,7 +97,7 @@ public class ReferenceResolveTests {
     public void testReferredTypesWithoutAdditionalFields() throws IOException,
             BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/referred_inclusion.yaml"), true);
+                "/referred_inclusion.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -115,7 +115,7 @@ public class ReferenceResolveTests {
     public void testDocCommentResolvingForRefferedSchemas() throws IOException,
             BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/resolve_reference_docs.yaml"), true);
+                "/resolve_reference_docs.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -132,7 +132,7 @@ public class ReferenceResolveTests {
     @Test(description = "Test for type generation for request body with reference")
     public void testRequestBodyReferences() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/request_body_with_ref.yaml"), true);
+                "/request_body_with_ref.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

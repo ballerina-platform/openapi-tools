@@ -105,7 +105,7 @@ public class AnnotationTests {
         List<String> list1 = new ArrayList<>();
         List<String> list2 = new ArrayList<>();
         Filter filter = new Filter(list1, list2);
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder

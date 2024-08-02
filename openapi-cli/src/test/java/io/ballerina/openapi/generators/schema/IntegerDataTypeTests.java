@@ -59,7 +59,7 @@ public class IntegerDataTypeTests {
     public void testIntegerFormatTypeSchema(final String swaggerPath, final String balPath)
             throws IOException, BallerinaOpenApiException, FormatterException {
         final Path definitionPath = RES_DIR.resolve(swaggerPath);
-        final OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        final OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

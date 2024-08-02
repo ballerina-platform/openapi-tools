@@ -45,7 +45,7 @@ public class MapSchemaTests {
     @Test
     public void testForAdditionalProperties() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/additional_properties_true.yaml"), true);
+                "/additional_properties_true.yaml"), true, false);
         TypeHandler.createInstance(openAPI, true);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -63,7 +63,7 @@ public class MapSchemaTests {
     public void testForAdditionalPropertiesComposedSchema()
             throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/additional_properties_composed_schema.yaml"), true);
+                "/additional_properties_composed_schema.yaml"), true, false);
         TypeHandler.createInstance(openAPI, true);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
