@@ -117,6 +117,33 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
         }
     }
 
+    @Test(description = "Test open-api genservice for successful service generation with OneOf schema type")
+    public void testArrayOfOneOfSchemaGen() throws IOException {
+        Path yamlPath = resourceDir.resolve(Paths.get("array-of-oneof.yaml"));
+        String[] args = {"--input", yamlPath.toString(), "-o", this.tmpDir.toString(), "--mode", "service"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, this.tmpDir);
+        new CommandLine(cmd).parseArgs(args);
+        String output = "";
+        try {
+            cmd.execute();
+        } catch (BLauncherException e) {
+            output = e.getDetailedMessages().get(0);
+        }
+
+        Path expectedServiceFile = resourceDir.resolve(Paths.get("expected_gen",
+                "array-of-oneof-schema.bal"));
+        String expectedService = new String(Files.readAllBytes(expectedServiceFile));
+        if (Files.exists(this.tmpDir.resolve("array-of-oneof_service.bal"))) {
+            String generatedService = getStringFromFile(this.tmpDir.resolve("array-of-oneof_service.bal"));
+            Assert.assertEquals(replaceWhiteSpace(generatedService.replaceAll(replaceRegex, "")),
+                    replaceWhiteSpace(expectedService.replaceAll(replaceRegex, "")),
+                    "Expected content and actual generated content is mismatched for: " + yamlPath);
+            deleteGeneratedFiles("array-of-oneof_service.bal");
+        } else {
+            Assert.fail("Service generation with array of OneOf Schema type failed.");
+        }
+    }
+
     @Test(description = "Test for --without-data-binding flag")
     public void testWithoutDataBinding() throws IOException {
         Path yamlPath = resourceDir.resolve(Paths.get("withoutDataBinding.yaml"));
