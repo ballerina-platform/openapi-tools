@@ -117,7 +117,7 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
         }
     }
 
-    @Test(description = "Test open-api genservice for successful service generation with OneOf schema type")
+    @Test(description = "Test OpenAPI genservice for successful service generation with OneOf schema type having arrays")
     public void testArrayOfOneOfSchemaGen() throws IOException {
         Path yamlPath = resourceDir.resolve(Paths.get("array-of-oneof.yaml"));
         String[] args = {"--input", yamlPath.toString(), "-o", this.tmpDir.toString(), "--mode", "service"};
