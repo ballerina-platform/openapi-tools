@@ -42,6 +42,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -53,6 +54,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameRefe
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.UNION_TYPE_DESC;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
 
 /**
@@ -206,7 +208,8 @@ public class ArrayTypeGenerator extends TypeGenerator {
         } else {
             return Optional.empty();
         }
-        if (schema.getItems().getEnum() != null) {
+        if (schema.getItems().getEnum() != null || (Objects.nonNull(member) && Objects.nonNull(member.kind())
+                && member.kind().equals(UNION_TYPE_DESC))) {
             member = createParenthesisedTypeDescriptorNode(
                     createToken(OPEN_PAREN_TOKEN), member, createToken(CLOSE_PAREN_TOKEN));
         }
