@@ -165,8 +165,8 @@ public class Add implements BLauncherCmd {
                 mode = searchEnum(CmdConstants.Mode.class, baseCmd.mode);
                 if (mode == null) {
                     // Exit the code generation process
-                    outStream.println("ERROR:Invalid value for option '--mode': expected one of [service, client] but" +
-                            " was ' " + baseCmd.mode + "'\n");
+                    outStream.printf("ERROR:Invalid value for option '--mode': expected one of [service, client] but" +
+                            " was '%s'\n%n", baseCmd.mode);
                     exitError(this.exitWhenFinish);
                 }
             }
