@@ -191,7 +191,7 @@ public class OpenApiCmd implements BLauncherCmd {
             }
             Filter filter = new Filter(tag, operation);
 
-            if (!baseCmd.isSanitized) {
+            if (baseCmd.useSanitized) {
                 outStream.println("This is an experimental feature. This option enables code generation by " +
                         "modifying the given OAS to follow the Ballerina language best practices.");
             }
@@ -427,7 +427,7 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             generator.generateClient(resourcePath.toString(), targetOutputPath.toString(), filter,
                     new BallerinaCodeGenerator.ClientGeneratorOptions(baseCmd.nullable, resourceMode,
-                            statusCodeBinding, baseCmd.mock, baseCmd.singleFile, baseCmd.isSanitized));
+                            statusCodeBinding, baseCmd.mock, baseCmd.singleFile, baseCmd.useSanitized));
         } catch (IOException | FormatterException | BallerinaOpenApiException |
                  OASTypeGenException e) {
             if (e.getLocalizedMessage() != null) {
@@ -459,7 +459,7 @@ public class OpenApiCmd implements BLauncherCmd {
             } else {
                 ServiceGeneratorOptions options = new ServiceGeneratorOptions(baseCmd.nullable, generateServiceType,
                                 generateServiceContract, generateWithoutDataBinding, baseCmd.singleFile,
-                        baseCmd.isSanitized);
+                        baseCmd.useSanitized);
                 generator.generateService(resourcePath.toString(), serviceName, targetOutputPath.toString(), filter,
                         options);
             }
@@ -482,7 +482,7 @@ public class OpenApiCmd implements BLauncherCmd {
             assert resourcePath != null;
             ClientServiceGeneratorOptions options = new ClientServiceGeneratorOptions(baseCmd.nullable,
                     generateClientResourceFunctions, generateServiceType, generateServiceContract,
-                    generateWithoutDataBinding, statusCodeBinding, baseCmd.mock, baseCmd.isSanitized);
+                    generateWithoutDataBinding, statusCodeBinding, baseCmd.mock, baseCmd.useSanitized);
             generator.generateClientAndService(resourcePath.toString(), fileName, targetOutputPath.toString(), filter,
                     options);
         } catch (BallerinaOpenApiException e) {

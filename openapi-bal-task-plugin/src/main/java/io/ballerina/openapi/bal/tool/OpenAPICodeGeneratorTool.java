@@ -123,16 +123,9 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
             // Handle the code generation
             String oasFilePath = toolContext.filePath();
             Path packagePath = toolContext.currentPackage().project().sourceRoot();
-            boolean isSanitized = false;
             Map<String, ToolContext.Option> options = toolContext.options();
-            if (options != null && options.containsKey(IS_SANITIZED_OAS)) {
-                ToolContext.Option isUsingSanitizedOas = options.get(IS_SANITIZED_OAS);
-                String value = isUsingSanitizedOas.value().toString().trim();
-                isSanitized = Boolean.parseBoolean(value);
-                createDiagnostics(toolContext, OPENAPI_MODIFICATION, location);
-            }
-            Optional<OpenAPI> openAPI = getOpenAPIContract(packagePath, Path.of(oasFilePath), location, toolContext,
-                    isSanitized);
+
+            Optional<OpenAPI> openAPI = getOpenAPIContract(packagePath, Path.of(oasFilePath), location, toolContext);
             if (openAPI.isEmpty()) {
                 return;
             }
@@ -223,8 +216,16 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
      * This method uses to read the openapi contract and return the {@code OpenAPI} object.
      */
     private Optional<OpenAPI> getOpenAPIContract(Path ballerinaFilePath, Path openAPIPath, Location location,
-                                                 ToolContext toolContext, boolean isSanitized) {
+                                                 ToolContext toolContext) {
         Path relativePath;
+        boolean isSanitized = false;
+        Map<String, ToolContext.Option> options = toolContext.options();
+        if (options != null && options.containsKey(IS_SANITIZED_OAS)) {
+            ToolContext.Option isUsingSanitizedOas = options.get(IS_SANITIZED_OAS);
+            String value = isUsingSanitizedOas.value().toString().trim();
+            isSanitized = Boolean.parseBoolean(value);
+            createDiagnostics(toolContext, OPENAPI_MODIFICATION, location);
+        }
         try {
             Path inputPath = Paths.get(openAPIPath.toString());
             if (inputPath.isAbsolute()) {
