@@ -18,7 +18,7 @@
 package io.ballerina.openapi.generators.common;
 
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
-import io.ballerina.openapi.core.generators.common.OASSanitizer;
+import io.ballerina.openapi.core.generators.common.OASModifier;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
@@ -31,7 +31,7 @@ import java.nio.file.Paths;
 /**
  * This contains the OAS modification tests.
  */
-public class OASSanitizerTests {
+public class OASModifierTests {
     //TODO: enable these tests separately, currently fix was tested by using connectors in manually.
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/sanitizer").toAbsolutePath();
     @Test(description = "Functionality tests for getBallerinaOpenApiType", enabled = false)
@@ -39,11 +39,11 @@ public class OASSanitizerTests {
         Path definitionPath = RES_DIR.resolve("record.yaml");
         Path expectedPath = RES_DIR.resolve("modified_record.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        OASSanitizer oasSanitizer = new OASSanitizer(openAPI);
-        OpenAPI sanitized = oasSanitizer.sanitized();
+        OASModifier oasModifier = new OASModifier(openAPI);
+        OpenAPI modifiedOAS = oasModifier.modifyWithBallerinaConventions();
         // file comparison
         OpenAPI expectedFileContent = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(expectedPath);
-        Assert.assertEquals(sanitized, expectedFileContent);
+        Assert.assertEquals(modifiedOAS, expectedFileContent);
     }
 
     public void pathParameter() {

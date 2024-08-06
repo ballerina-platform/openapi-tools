@@ -79,6 +79,7 @@ import java.util.Properties;
 import static io.ballerina.openapi.bal.tool.Constants.CACHE_FILE;
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT;
 import static io.ballerina.openapi.bal.tool.Constants.CLIENT_METHODS;
+import static io.ballerina.openapi.bal.tool.Constants.DiagnosticMessages.OPENAPI_MODIFICATION;
 import static io.ballerina.openapi.bal.tool.Constants.IS_SANITIZED_OAS;
 import static io.ballerina.openapi.bal.tool.Constants.LICENSE;
 import static io.ballerina.openapi.bal.tool.Constants.MOCK;
@@ -127,7 +128,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
             if (options != null && options.containsKey(IS_SANITIZED_OAS)) {
                 ToolContext.Option isUsingSanitizedOas = options.get(IS_SANITIZED_OAS);
                 String value = isUsingSanitizedOas.value().toString().trim();
-                isSanitized = value.contains(TRUE);
+                isSanitized = Boolean.parseBoolean(value);
+                createDiagnostics(toolContext, OPENAPI_MODIFICATION, location);
             }
             Optional<OpenAPI> openAPI = getOpenAPIContract(packagePath, Path.of(oasFilePath), location, toolContext,
                     isSanitized);

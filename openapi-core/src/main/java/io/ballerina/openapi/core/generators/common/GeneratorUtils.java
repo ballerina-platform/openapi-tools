@@ -754,8 +754,8 @@ public class GeneratorUtils {
         }
         validateRequestBody(openAPIPaths.entrySet());
         if (isSanitized) {
-            OASSanitizer oasSanitizer = new OASSanitizer(openAPI);
-            return oasSanitizer.sanitized();
+            OASModifier oasSanitizer = new OASModifier(openAPI);
+            return oasSanitizer.modifyWithBallerinaConventions();
         }
         return openAPI;
     }

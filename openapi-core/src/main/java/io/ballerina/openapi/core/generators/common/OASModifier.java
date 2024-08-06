@@ -50,11 +50,12 @@ import java.util.stream.Collectors;
 /**
  * This class is to contain a util g=for name.
  */
-public class OASSanitizer {
+//OASModifier
+public class OASModifier {
     OpenAPI openapi;
     List<Diagnostic> diagnostics = new ArrayList<>();
 
-    public OASSanitizer(OpenAPI openapi) {
+    public OASModifier(OpenAPI openapi) {
         this.openapi = openapi;
     }
 
@@ -62,7 +63,8 @@ public class OASSanitizer {
         return diagnostics;
     }
 
-    public OpenAPI sanitized() {
+    //modifyWithBallerinaConventions 
+    public OpenAPI modifyWithBallerinaConventions() {
         Paths paths = openapi.getPaths();
         Components components = openapi.getComponents();
         List<String> modifiedSchemaNames = new ArrayList<>();
@@ -92,9 +94,16 @@ public class OASSanitizer {
                         updateSchemaWithReference(schemaName, modifiedName, value);
                         modifiedSchemas.put(modifiedName, value);
                     }
+                    
+                    if (components.getSchemas() != null) {
+                        components.setSchemas(modifiedSchemas);
+                    }
+                    
                     if (paths == null || paths.isEmpty()) {
+                        openapi.setComponents(components);
                         return openapi;
                     }
+
                     // 2. Update OAS reusable requestBody with reference details
                     if (components.getRequestBodies() != null) {
                         for (Map.Entry<String, RequestBody> requestBody : components.getRequestBodies().entrySet()) {
@@ -147,9 +156,7 @@ public class OASSanitizer {
                     updateOASOperations(schemaName, modifiedName, operations);
                 }
             }
-            if (components.getSchemas() != null) {
-                components.setSchemas(modifiedSchemas);
-            }
+
             if (components.getRequestBodies() != null) {
                 components.setRequestBodies(modifiedRequestBodies);
             }
@@ -411,7 +418,11 @@ public class OASSanitizer {
                 }
                 composedSchema.setAnyOf(modifiedAnyOf);
             }
-        }
+        } 
+        if (typeSchema.getAdditionalProperties() != null && 
+                typeSchema.getAdditionalProperties() instanceof Schema<?> addtionalSchema) {
+            updateSchemaWithReference(schemaName, modifiedName, addtionalSchema);
+        } 
     }
 
     private static void updateRef(String schemaName, String modifiedName, Schema value) {
@@ -515,7 +526,7 @@ public class OASSanitizer {
         }
         // this - > !identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
         if (!identifier.matches("\\b[0-9]*\\b")) {
-            String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN);
+            String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN_FOR_MODIFIER);
             StringBuilder validName = new StringBuilder();
             for (String part : split) {
                 if (!part.isBlank()) {
@@ -538,7 +549,7 @@ public class OASSanitizer {
             return Optional.empty();
         }
         if (!identifier.matches("\\b[0-9]*\\b")) {
-            String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN);
+            String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN_FOR_MODIFIER);
             StringBuilder validName = new StringBuilder();
             for (String part : split) {
                 if (!part.isBlank()) {

@@ -71,7 +71,10 @@ public class Constants {
         ERROR_WHILE_UPDATING_TOML("OAS_CLIENT_11", "error occurred when updating Ballerina.toml " +
                 "file with the client native dependency.", DiagnosticSeverity.ERROR),
         OPENAPI_EXCEPTION("OAS_CLIENT_12", "exception occurred while reading the openapi contract: %s",
-                DiagnosticSeverity.ERROR);
+                DiagnosticSeverity.ERROR),
+        OPENAPI_MODIFICATION("OAS_CLIENT_13", "This `isUsingSanitizedOas` is an experimental feature." +
+                " This option enables code generation by " +
+                "modifying the given OAS to follow the Ballerina language best practices.", DiagnosticSeverity.WARNING);
 
         private final String code;
         private final String description;

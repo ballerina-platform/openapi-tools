@@ -191,6 +191,10 @@ public class OpenApiCmd implements BLauncherCmd {
             }
             Filter filter = new Filter(tag, operation);
 
+            if (!baseCmd.isSanitized) {
+                outStream.println("This is an experimental feature. This option enables code generation by " +
+                        "modifying the given OAS to follow the Ballerina language best practices.");
+            }
             if (baseCmd.generateClientMethods != null && !baseCmd.generateClientMethods.isBlank() &&
                     (!baseCmd.generateClientMethods.equals(RESOURCE) &&
                             !baseCmd.generateClientMethods.equals(REMOTE))) {
