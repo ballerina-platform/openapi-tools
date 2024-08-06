@@ -123,11 +123,12 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
         String[] args = {"--input", yamlPath.toString(), "-o", this.tmpDir.toString(), "--mode", "service"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, this.tmpDir);
         new CommandLine(cmd).parseArgs(args);
-        String output = "";
         try {
             cmd.execute();
         } catch (BLauncherException e) {
-            output = e.getDetailedMessages().get(0);
+            String errorMsg = String.format("Service generation with array of OneOf Schema type failed: %s",
+                    e.getDetailedMessages().get(0));
+            Assert.fail(errorMsg);
         }
 
         Path expectedServiceFile = resourceDir.resolve(Paths.get("expected_gen",
@@ -151,11 +152,12 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
                 this.tmpDir.toString(), "--mode", "service"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, this.tmpDir);
         new CommandLine(cmd).parseArgs(args);
-        String output = "";
         try {
             cmd.execute();
         } catch (BLauncherException e) {
-            output = e.getDetailedMessages().get(0);
+            String errorMsg = String.format("Service generation for low level service is failed: %s",
+                    e.getDetailedMessages().get(0));
+            Assert.fail(errorMsg);
         }
 
         Path expectedServiceFile = resourceDir.resolve(Paths.get("expected_gen",

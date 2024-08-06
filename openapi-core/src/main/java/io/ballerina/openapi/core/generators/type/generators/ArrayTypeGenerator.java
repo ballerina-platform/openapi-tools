@@ -208,12 +208,15 @@ public class ArrayTypeGenerator extends TypeGenerator {
         } else {
             return Optional.empty();
         }
-        if (schema.getItems().getEnum() != null || (Objects.nonNull(member) && Objects.nonNull(member.kind())
-                && member.kind().equals(UNION_TYPE_DESC))) {
+        if (schema.getItems().getEnum() != null || isUnionType(member)) {
             member = createParenthesisedTypeDescriptorNode(
                     createToken(OPEN_PAREN_TOKEN), member, createToken(CLOSE_PAREN_TOKEN));
         }
         return Optional.ofNullable(getArrayTypeDescriptorNodeFromTypeDescriptorNode(member));
+    }
+
+    private static boolean isUnionType(TypeDescriptorNode member) {
+        return Objects.nonNull(member) && Objects.nonNull(member.kind()) && member.kind().equals(UNION_TYPE_DESC);
     }
 
     private ArrayTypeDescriptorNode getArrayTypeDescriptorNodeFromTypeDescriptorNode(TypeDescriptorNode
