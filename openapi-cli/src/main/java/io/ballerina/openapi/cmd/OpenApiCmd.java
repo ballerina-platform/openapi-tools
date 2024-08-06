@@ -563,6 +563,7 @@ public class OpenApiCmd implements BLauncherCmd {
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("groupId", "io.ballerina.openapi", null));
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("artifactId", "client-native", null));
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("version", version, null));
+        tomlMembers = tomlMembers.add(SampleNodeGenerator.createBooleanKV("graalvmCompatible", true, null));
         return tomlMembers;
     }
 
