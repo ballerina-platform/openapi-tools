@@ -23,6 +23,7 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -30,7 +31,6 @@ import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
@@ -91,6 +91,7 @@ public class TypeHandler {
         typeHandlerInstance = new TypeHandler();
         ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI, isNullable);
         constraintDiagnostics = new ArrayList<>();
+        GeneratorUtils.initializeRecordCountMap();
     }
 
     public static TypeHandler getInstance() {
@@ -107,19 +108,7 @@ public class TypeHandler {
     }
 
     public SyntaxTree generateTypeSyntaxTree() {
-        if (!GeneratorMetaData.getInstance().isNullable()) {
-            ConstraintGeneratorImp constraintGenerator = new ConstraintGeneratorImp(GeneratorMetaData
-                    .getInstance().getOpenAPI(), typeDefinitionNodes);
-            ConstraintResult constraintResult = constraintGenerator.updateTypeDefinitionsWithConstraints();
-            typeDefinitionNodes = constraintResult.typeDefinitionNodeHashMap();
-            boolean isConstraintAvailable = constraintResult.isConstraintAvailable();
-            if (isConstraintAvailable) {
-                imports.add("import ballerina/constraint;");
-            }
-            constraintDiagnostics.addAll(constraintResult.diagnostics());
-        }
-        NodeList<ModuleMemberDeclarationNode> typeMembers = AbstractNodeFactory.createNodeList(
-                typeDefinitionNodes.values().toArray(new TypeDefinitionNode[typeDefinitionNodes.size()]));
+        NodeList<ModuleMemberDeclarationNode> typeMembers = getTypeMembers();
         NodeList<ImportDeclarationNode> imports = generateImportNodes();
         Token eofToken = AbstractNodeFactory.createIdentifierToken("");
         ModulePartNode modulePartNode = NodeFactory.createModulePartNode(imports, typeMembers, eofToken);
@@ -131,6 +120,21 @@ public class TypeHandler {
         return docCommentGenerator.updateSyntaxTreeWithDocComments();
     }
 
+    private NodeList<ModuleMemberDeclarationNode> getTypeMembers() {
+        if (!GeneratorMetaData.getInstance().isNullable()) {
+            ConstraintGeneratorImp constraintGenerator = new ConstraintGeneratorImp(GeneratorMetaData
+                    .getInstance().getOpenAPI(), typeDefinitionNodes);
+            ConstraintResult constraintResult = constraintGenerator.updateTypeDefinitionsWithConstraints();
+            typeDefinitionNodes = constraintResult.typeDefinitionNodeHashMap();
+            boolean isConstraintAvailable = constraintResult.isConstraintAvailable();
+            if (isConstraintAvailable) {
+                imports.add("import ballerina/constraint;");
+            }
+            constraintDiagnostics.addAll(constraintResult.diagnostics());
+        }
+        return AbstractNodeFactory.createNodeList(
+                typeDefinitionNodes.values().toArray(new TypeDefinitionNode[typeDefinitionNodes.size()]));
+    }
 
     private NodeList<ImportDeclarationNode> generateImportNodes() {
         Set<ImportDeclarationNode> importDeclarationNodes = new LinkedHashSet<>();
@@ -198,11 +202,16 @@ public class TypeHandler {
         return getTypeNodeFromOASSchema(headersSchema).orElse(null);
     }
 
-    public SimpleNameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode bodyType,
-                                                             TypeDescriptorNode headersType, String method) {
+    public NameReferenceNode createTypeInclusionRecord(String statusCode, TypeDescriptorNode bodyType,
+                                                       TypeDescriptorNode headersType, String method) {
         String recordName;
         String statusCodeName = statusCode.equals(DEFAULT_STATUS_CODE_RESPONSE) ? DEFAULT_STATUS : statusCode;
-        if (bodyType != null) {
+
+        if (Objects.isNull(bodyType) && Objects.isNull(headersType)) {
+            return GeneratorUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP, statusCode);
+        }
+
+        if (Objects.nonNull(bodyType)) {
             String bodyTypeStr = bodyType.toString().replaceAll("[\\[\\\\]]", "Array");
             recordName = GeneratorUtils.getValidName(bodyTypeStr, true) + statusCodeName;
         } else {

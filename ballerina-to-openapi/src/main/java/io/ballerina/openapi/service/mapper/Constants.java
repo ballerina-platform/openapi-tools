@@ -35,9 +35,13 @@ public final class Constants {
     public static final String DOUBLE = "double";
     public static final String HTTP_PAYLOAD = "http:Payload";
     public static final String HTTP_SERVICE_CONFIG = "http:ServiceConfig";
+    public static final String OPENAPI = "openapi";
     public static final String HTTP = "http";
     public static final String BALLERINA = "ballerina";
     public static final String EMPTY = "";
+    public static final String HTTP_SERVICE_CONTRACT_INFO = "ServiceContractInformation";
+    public static final String OPENAPI_DEFINITION = "openApiDefinition";
+    public static final String HTTP_SERVICE_CONTRACT = "ServiceContract";
     public static final String INTERCEPTABLE_SERVICE = "InterceptableService";
     public static final String NEXT_SERVICE = "NextService";
     public static final String INTERCEPTOR = "Interceptor";
@@ -67,6 +71,14 @@ public final class Constants {
     public static final String MEDIA_TYPE = "mediaType";
     public static final String REGEX_INTERPOLATION_PATTERN = "^(?!.*\\$\\{).+$";
     public static final String DATE_CONSTRAINT_ANNOTATION = "constraint:Date";
+    public static final String PATH = "path";
+    public static final String QUERY = "query";
+    public static final String HEADER = "header";
+    public static final String HTTP_PAYLOAD_TYPE = "HttpPayload";
+    public static final String HTTP_QUERY_TYPE = "HttpQuery";
+    public static final String HTTP_HEADER_TYPE = "HttpHeader";
+    public static final String EXAMPLE = "example";
+    public static final String REQUEST = "request";
 
     private Constants() {
 
@@ -154,7 +166,7 @@ public final class Constants {
         httpCodeMap.put("MethodNotAllowed", "405");
         httpCodeMap.put("NotAcceptable", "406");
         httpCodeMap.put("ProxyAuthenticationRequired", "407");
-        httpCodeMap.put("RequestTimeOut", "408");
+        httpCodeMap.put("RequestTimeout", "408");
         httpCodeMap.put("Conflict", "409");
         httpCodeMap.put("Gone", "410");
         httpCodeMap.put("LengthRequired", "411");
@@ -201,7 +213,7 @@ public final class Constants {
         httpErrorCodeMap.put("MethodNotAllowedError", "405");
         httpErrorCodeMap.put("NotAcceptableError", "406");
         httpErrorCodeMap.put("ProxyAuthenticationRequiredError", "407");
-        httpErrorCodeMap.put("RequestTimeOutError", "408");
+        httpErrorCodeMap.put("RequestTimeoutError", "408");
         httpErrorCodeMap.put("ConflictError", "409");
         httpErrorCodeMap.put("GoneError", "410");
         httpErrorCodeMap.put("LengthRequiredError", "411");
@@ -267,7 +279,7 @@ public final class Constants {
         httpCodeDescriptionMap.put("405", "MethodNotAllowed");
         httpCodeDescriptionMap.put("406", "NotAcceptable");
         httpCodeDescriptionMap.put("407", "ProxyAuthenticationRequired");
-        httpCodeDescriptionMap.put("408", "RequestTimeOut");
+        httpCodeDescriptionMap.put("408", "RequestTimeout");
         httpCodeDescriptionMap.put("409", "Conflict");
         httpCodeDescriptionMap.put("410", "Gone");
         httpCodeDescriptionMap.put("411", "LengthRequired");
@@ -354,4 +366,7 @@ public final class Constants {
     public static final String EXAMPLES = "examples";
     public static final String OPERATION_ID = "operationId";
     public static final String RESPONSE_ATTRIBUTE = "response";
+    public static final String REQUEST_BODY_ATTRIBUTE = "requestBody";
+    public static final String VALUE = "value";
+    public static final String FILE_PATH = "filePath";
 }

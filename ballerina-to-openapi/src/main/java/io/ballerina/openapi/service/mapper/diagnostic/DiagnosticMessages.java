@@ -87,7 +87,31 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_126("OAS_CONVERTOR_126", "Generated OpenAPI definition does not contain the response" +
             "/request parameter information from the interceptor pipeline. Cause: %s", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_127("OAS_CONVERTOR_127", "Generated OpenAPI definition does not contain the request" +
-            " parameter information from the interceptor pipeline. Cause: %s", DiagnosticSeverity.WARNING),;
+            " parameter information from the interceptor pipeline. Cause: %s", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_128("OAS_CONVERTOR_128", "Given example path `%s` is not exist, therefore " +
+            "generated yaml does not contain example for `%s` ", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_129("OAS_CONVERTOR_129", "Given example path `%s` should be JSON file for" +
+            " example `%s`", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_130("OAS_CONVERTOR_130", "Generated OpenAPI definition does not contain the example" +
+            " details since the JSON value provided for the example has parser errors", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_131("OAS_CONVERTOR_131", "`%s` example can not have a blank path",
+            DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_132("OAS_CONVERTOR_132", "Generated OpenAPI definition does not contain the example " +
+            "for type: `%s`, since the example value has parser errors", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_133("OAS_CONVERTOR_133", "Generated OpenAPI definition does not contain the example " +
+            "for record field: `%s.%s`, since the example value has parser errors", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_134("OAS_CONVERTOR_134", "Generated OpenAPI definition does not contain the `%s` for" +
+            " `%s` parameter: `%s`, since the example value(s) has parser errors", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_135("OAS_CONVERTOR_135", "Example skipped for request parameter: `%s`, since the request payload " +
+            "type implies more than one content-type", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_136("OAS_CONVERTOR_136", "Generated OpenAPI definition for the service contract type: " +
+            "'%s' has errors", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_137("OAS_CONVERTOR_137", "Failed to obtain the OpenAPI definition from the service contract" +
+            " type: '%s'", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_138("OAS_CONVERTOR_138", "Failed to find the package to obtain the OpenAPI definition from the " +
+            "service contract type: '%s'", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_139("OAS_CONVERTOR_139", "Failed to find the OpenAPI definition resource for the " +
+            "service contract type: '%s'", DiagnosticSeverity.ERROR);
 
     private final String code;
     private final String description;

@@ -36,6 +36,7 @@ public class CmdOptions {
     private final String licensePath;
     private boolean statusCodeBinding;
     private boolean mock;
+    private boolean singleFile;
 
     private CmdOptions(CmdOptionsBuilder builder) {
         this.input = builder.input;
@@ -50,6 +51,7 @@ public class CmdOptions {
         this.licensePath = builder.licensePath;
         this.statusCodeBinding = builder.statusCodeBinding;
         this.mock = builder.mock;
+        this.singleFile = builder.singleFile;
     }
 
     public String getInput() {
@@ -101,6 +103,10 @@ public class CmdOptions {
         return mock;
     }
 
+    public boolean getSingleFile() {
+        return singleFile;
+    }
+
     /**
      * CMD options builder class.
      */
@@ -117,6 +123,7 @@ public class CmdOptions {
         private String licensePath;
         private boolean statusCodeBinding;
         private boolean mock;
+        private boolean singleFile;
 
         public CmdOptionsBuilder withOutputModule(String outputModule) {
             this.outputModule = outputModule;
@@ -177,6 +184,12 @@ public class CmdOptions {
             this.mock = mock;
             return this;
         }
+
+        public CmdOptionsBuilder withSingleFile(boolean singleFile) {
+            this.singleFile = singleFile;
+            return this;
+        }
+
         public CmdOptions build() {
             return new CmdOptions(this);
         }

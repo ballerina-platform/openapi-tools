@@ -54,9 +54,11 @@ public class BaseCmd {
     @CommandLine.Option(names = {"--status-code-binding"}, description = "Generate the client methods with " +
             "status code response binding")
     public boolean statusCodeBinding;
-
-
+    
     @CommandLine.Option(names = {"--mock"}, hidden = true,
             description = "Generate mock client with given response example")
     public boolean mock;
+
+    @CommandLine.Option(names = {"--single-file"}, description = "Generate all contents in a single file")
+    public boolean singleFile;
 }

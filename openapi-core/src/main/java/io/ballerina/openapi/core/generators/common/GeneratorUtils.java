@@ -43,7 +43,6 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.core.generators.common.diagnostic.CommonDiagnostic;
 import io.ballerina.openapi.core.generators.common.diagnostic.CommonDiagnosticMessages;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -75,8 +74,6 @@ import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -159,6 +156,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SPE
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STYLE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TEXT_EVENT_STREAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YML_EXTENSION;
@@ -174,13 +172,18 @@ public class GeneratorUtils {
     public static final MinutiaeList SINGLE_WS_MINUTIAE = getSingleWSMinutiae();
     public static final List<String> BAL_KEYWORDS = SyntaxInfo.keywords();
     public static final MinutiaeList SINGLE_END_OF_LINE_MINUTIAE = getEndOfLineMinutiae();
-    private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
     private static final PrintStream OUT_STREAM = System.err;
-    private static final HashMap<String, Integer> recordCountMap = new HashMap<>();
+    private static HashMap<String, Integer> recordCountMap;
 
     private static final List<String> primitiveTypeList =
             new ArrayList<>(Arrays.asList(GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,
                     GeneratorConstants.STRING, GeneratorConstants.BOOLEAN));
+
+    // This is needs to be initialized at every CLI run. Otherwise, the record type details are persisted
+    // for a second invocation as well. Todo: Need to update this with a different appraoch.
+    public static void initializeRecordCountMap() {
+        recordCountMap = new HashMap<>();
+    }
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
 
@@ -528,6 +531,8 @@ public class GeneratorUtils {
             return SyntaxKind.JSON_KEYWORD.stringValue();
         } else if (mediaType.matches(".*/xml") || mediaType.matches("application/.*\\+xml")) {
             return SyntaxKind.XML_KEYWORD.stringValue();
+        } else if (mediaType.equals(TEXT_EVENT_STREAM) && !isRequest) {
+            return "stream<http:SseEvent, error?>";
         } else if (mediaType.equals(APPLICATION_FORM_URLENCODED) || mediaType.matches("text/.*")) {
             return STRING_KEYWORD.stringValue();
         } else if (mediaType.equals(APPLICATION_OCTET_STREAM) ||
@@ -1144,7 +1149,7 @@ public class GeneratorUtils {
     public static TypeDescriptorNode getUnionTypeDescriptorNodeFromTypeDescNodes(HashMap<String, TypeDescriptorNode>
                                                                                          typeDescNodes) {
         if (typeDescNodes.isEmpty()) {
-            return getSimpleNameReferenceNode(GeneratorConstants.ANYDATA);
+            return null;
         }
         List<TypeDescriptorNode> qualifiedNodeList = typeDescNodes.values().stream().toList();
         TypeDescriptorNode unionTypeDescriptorNode = qualifiedNodeList.get(0);

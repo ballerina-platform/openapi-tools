@@ -67,10 +67,6 @@ public class ServiceDeclarationGenerator extends ServiceGenerator {
         GeneratorMetaData.createInstance(oasServiceMetadata.getOpenAPI(), oasServiceMetadata.isNullable());
     }
 
-    public ServiceDeclarationGenerator(OASServiceMetadata oasServiceMetadata, List<Node> functionsList) {
-        super(oasServiceMetadata, functionsList);
-    }
-
     @Override
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
 

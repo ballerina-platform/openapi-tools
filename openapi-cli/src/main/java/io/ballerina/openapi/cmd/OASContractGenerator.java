@@ -43,6 +43,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static io.ballerina.openapi.service.mapper.utils.CodegenUtils.resolveContractFileName;
@@ -59,12 +60,19 @@ public class OASContractGenerator {
     private Project project;
     private List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
     private PrintStream outStream = System.out;
+    private Boolean ballerinaExtension = false;
 
     /**
      * Initialize constructor.
      */
     public OASContractGenerator() {
 
+    }
+
+    public void setBallerinaExtension(Boolean ballerinaExtension) {
+        if (Objects.nonNull(ballerinaExtension)) {
+            this.ballerinaExtension = ballerinaExtension;
+        }
     }
 
     public List<OpenAPIMapperDiagnostic> getDiagnostics() {
@@ -118,13 +126,21 @@ public class OASContractGenerator {
         }
         semanticModel = compilation.getSemanticModel(docId.moduleId());
         List<OASResult> openAPIDefinitions = ServiceToOpenAPIMapper.generateOAS3Definition(project, syntaxTree,
-                semanticModel, serviceName, needJson, inputPath);
+                semanticModel, serviceName, needJson, inputPath, ballerinaExtension);
 
         if (!openAPIDefinitions.isEmpty()) {
             List<String> fileNames = new ArrayList<>();
             for (OASResult definition : openAPIDefinitions) {
                 try {
+                    List<OpenAPIMapperDiagnostic> definitionDiagnostics = definition.getDiagnostics();
+                    boolean hasErrors = definitionDiagnostics.stream()
+                            .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.getDiagnosticSeverity()));
                     this.diagnostics.addAll(definition.getDiagnostics());
+                    if (hasErrors) {
+                        outStream.println("openapi contract generation skipped due to the following code generation " +
+                                "error(s):");
+                        return;
+                    }
                     if (definition.getOpenAPI().isPresent()) {
                         Optional<String> content;
                         if (needJson) {

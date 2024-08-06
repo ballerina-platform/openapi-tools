@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org).
  *
  *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -20,6 +20,7 @@ package io.ballerina.openapi.service.mapper.type;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
+import io.ballerina.openapi.service.mapper.type.extension.BallerinaTypeExtensioner;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
@@ -55,6 +56,9 @@ public abstract class AbstractTypeMapper {
             return;
         }
         Schema schema = getReferenceSchema(components);
+        if (additionalData.enableBallerinaExt()) {
+            BallerinaTypeExtensioner.addExtension(schema, typeSymbol);
+        }
         if (Objects.nonNull(schema)) {
             components.addSchemas(name, schema);
         }

@@ -36,14 +36,18 @@ public class OpenAPIDiagnostic extends Diagnostic {
     private final DiagnosticInfo diagnosticInfo;
     private final Location location;
     private final List<DiagnosticProperty<?>> properties;
-    private final String message;
+    private  String message = null;
 
     public OpenAPIDiagnostic(DiagnosticInfo diagnosticInfo, Location location, List<DiagnosticProperty<?>> properties,
                              Object[] args) {
         this.diagnosticInfo = diagnosticInfo;
         this.location = location;
         this.properties = properties;
-        this.message = MessageFormat.format(diagnosticInfo.messageFormat(), args);
+        try {
+            this.message = MessageFormat.format(diagnosticInfo.messageFormat(), args);
+        } catch (IllegalArgumentException e) {
+            this.message = diagnosticInfo.messageFormat();
+        }
     }
 
     public Location location() {

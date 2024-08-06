@@ -1,0 +1,62 @@
+openapi: 3.0.1
+info:
+  title: SocialMedia
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/socialMedia"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "8080"
+paths:
+  /users:
+    get:
+      summary: Get all users
+      operationId: getUsers
+      responses:
+        "200":
+          description: Ok
+  /products:
+    get:
+      summary: Get all products
+      operationId: getProducts
+      responses:
+        "200":
+          description: Ok
+          headers:
+            X-Rate-Limit:
+              description: Rate limit
+              schema:
+                type: integer
+                format: int32
+  /users/{id}:
+    get:
+      summary: Get user by id
+      operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string

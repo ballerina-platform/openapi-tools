@@ -17,7 +17,6 @@
  */
 package io.ballerina.openapi.cmd;
 
-import io.ballerina.cli.launcher.BLauncherException;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.common.GeneratorTestUtils;
@@ -464,10 +463,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString()};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
-        try {
-            cmd.execute();
-        } catch (BLauncherException e) {
-        }
+        cmd.execute();
         Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema_2.bal"));
         String expectedSchemaContent = "";
         try (Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile)) {
@@ -494,6 +490,139 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 Assert.fail("Expected content and actual generated content is mismatched for: "
                         + petstoreYaml.toString());
                 deleteGeneratedFiles(false);
+            }
+        } else {
+            Assert.fail("Service generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test(description = "Test openapi service generation for single file option")
+    public void testSingleFileServiceGeneration() throws IOException {
+        Path jiraYaml = resourceDir.resolve(Paths.get("jira_openapi.yaml"));
+        String[] args = {"--input", jiraYaml.toString(), "-o", this.tmpDir.toString(), "--mode",
+                "service", "--single-file"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedFile = resourceDir.resolve(Paths.get("expected_gen", "jira_openapi_service.bal"));
+        String expectedFileContent = "";
+        try (Stream<String> expectedLines = Files.lines(expectedFile)) {
+            expectedFileContent = expectedLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+            String generatedFile = "";
+            try (Stream<String> generatedLines = Files.lines(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+                generatedFile = generatedLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
+            expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
+            deleteGeneratedFiles("jira_openapi_service.bal", false);
+            if (!expectedFileContent.equals(generatedFile)) {
+                Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
+            }
+        } else {
+            Assert.fail("Service generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test(description = "Test openapi service generation for single file option with service type")
+    public void testSingleFileServiceGenerationWithServiceType() throws IOException {
+        Path jiraYaml = resourceDir.resolve(Paths.get("jira_openapi.yaml"));
+        String[] args = {"--input", jiraYaml.toString(), "-o", this.tmpDir.toString(), "--mode", "service",
+                "--single-file", "--with-service-type"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedFile = resourceDir.resolve(Paths.get("expected_gen", "jira_openapi_service_with_type.bal"));
+        String expectedFileContent = "";
+        try (Stream<String> expectedLines = Files.lines(expectedFile)) {
+            expectedFileContent = expectedLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+            String generatedFile = "";
+            try (Stream<String> generatedLines = Files.lines(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+                generatedFile = generatedLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
+            expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
+            deleteGeneratedFiles("jira_openapi_service.bal", false);
+            if (!expectedFileContent.equals(generatedFile)) {
+                Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
+            }
+        } else {
+            Assert.fail("Service generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test(description = "Test openapi service generation for single file option with service type without data binding")
+    public void testSingleFileServiceGenerationWithoutDatabinding() throws IOException {
+        Path jiraYaml = resourceDir.resolve(Paths.get("jira_openapi.yaml"));
+        String[] args = {"--input", jiraYaml.toString(), "-o", this.tmpDir.toString(), "--mode", "service",
+                "--single-file", "--with-service-type", "--without-data-binding"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedFile = resourceDir.resolve(Paths.get("expected_gen",
+                "jira_openapi_service_with_type_without_data_binding.bal"));
+        String expectedFileContent = "";
+        try (Stream<String> expectedLines = Files.lines(expectedFile)) {
+            expectedFileContent = expectedLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+            String generatedFile = "";
+            try (Stream<String> generatedLines = Files.lines(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+                generatedFile = generatedLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
+            expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
+            deleteGeneratedFiles("jira_openapi_service.bal", false);
+            if (!expectedFileContent.equals(generatedFile)) {
+                Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
+            }
+        } else {
+            Assert.fail("Service generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test(description = "Test openapi client generation for single file option")
+    public void testSingleFileClientGeneration() throws IOException {
+        Path jiraYaml = resourceDir.resolve(Paths.get("jira_openapi.yaml"));
+        String[] args = {"--input", jiraYaml.toString(), "-o", this.tmpDir.toString(), "--mode", "client",
+                "--single-file"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedFile = resourceDir.resolve(Paths.get("expected_gen", "jira_openapi_client.bal"));
+        String expectedFileContent = "";
+        try (Stream<String> expectedLines = Files.lines(expectedFile)) {
+            expectedFileContent = expectedLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("client.bal"))) {
+            String generatedFile = "";
+            try (Stream<String> generatedLines = Files.lines(this.tmpDir.resolve("client.bal"))) {
+                generatedFile = generatedLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
+            expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
+            deleteGeneratedFiles("", false);
+            if (!expectedFileContent.equals(generatedFile)) {
+                Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
             }
         } else {
             Assert.fail("Service generation failed. : " + readOutput(true));
@@ -610,6 +739,27 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         clientFile.delete();
         schemaFile.delete();
         testFile.delete();
+        if (isConfigGenerated) {
+            File configFile = new File(this.tmpDir.resolve("tests/Config.toml").toString());
+            configFile.delete();
+        }
+        FileUtils.deleteDirectory(testDir);
+    }
+
+    private void deleteGeneratedFiles(String filename, boolean isConfigGenerated) throws IOException {
+        File serviceFile = new File(this.tmpDir.resolve(filename).toString());
+        File clientFile = new File(this.tmpDir.resolve("client.bal").toString());
+        File testFile = new File(this.tmpDir.resolve("tests/test.bal").toString());
+        File testDir = new File(this.tmpDir.resolve("tests").toString());
+        if (serviceFile.exists()) {
+            serviceFile.delete();
+        }
+        if (clientFile.exists()) {
+            clientFile.delete();
+        }
+        if (testFile.exists()) {
+            testFile.delete();
+        }
         if (isConfigGenerated) {
             File configFile = new File(this.tmpDir.resolve("tests/Config.toml").toString());
             configFile.delete();
@@ -746,7 +896,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path packagePath = resourceDir.resolve(Paths.get("cmd/bal-task-client"));
         String[] addArgs = {"--input", "petstore.yaml", "-p", packagePath.toString(),
                 "--module", "delivery", "--nullable", "--license", "license.txt", "--mode", "client",
-                "--client-methods", "resource", "--status-code-binding"};
+                "--client-methods", "resource", "--status-code-binding", "--single-file"};
         Add add = new Add(printStream,  false);
         new CommandLine(add).parseArgs(addArgs);
         add.execute();
@@ -760,7 +910,8 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "options.nullable = true" + newLine +
                 "options.clientMethods = \"resource\"" + newLine +
                 "options.licensePath = \"license.txt\"" + newLine +
-                "options.statusCodeBinding = true" + newLine;
+                "options.statusCodeBinding = true" + newLine +
+                "options.singleFile = true";
         Assert.assertTrue(tomlContent.contains(generatedTool));
     }
 

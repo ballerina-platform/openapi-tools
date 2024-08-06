@@ -1,0 +1,283 @@
+openapi: 3.0.1
+info:
+  title: Api
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/api"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /users/{id}:
+    get:
+      operationId: getUsersId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          examples:
+            valid:
+              value: "235340"
+            invalid:
+              value: 23cjac0
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+    post:
+      operationId: postUsersId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: valid
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - approved
+              - pending
+              - closed
+              - new
+          example: approved
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+            examples:
+              john:
+                value:
+                  name: John
+                  age: 30
+                  address:
+                    street: 10 Downing Street
+                    city: London
+              doe:
+                value:
+                  name: Doe
+                  age: 25
+                  address:
+                    street: 13 Buckingham Palace
+                    city: Canberra
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /users:
+    get:
+      operationId: getUsers
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+  /developers:
+    post:
+      operationId: postDevelopers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - age
+                - name
+              type: object
+              properties:
+                name:
+                  type: string
+                age:
+                  type: integer
+                  format: int64
+              additionalProperties: false
+            example:
+              name: John
+              age: 30
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /developers/new:
+    post:
+      operationId: postDevelopersNew
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - age
+                - name
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: John
+                age:
+                  type: integer
+                  format: int64
+                  example: 30
+              additionalProperties: false
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /users/{id}/address:
+    get:
+      operationId: getUsersIdAddress
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "2345"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    Address:
+      required:
+        - city
+        - street
+      type: object
+      properties:
+        street:
+          type: string
+          example: 10 Downing Street
+        city:
+          type: string
+          example: London
+        country:
+          required:
+            - code
+            - country
+          type: object
+          properties:
+            country:
+              type: string
+              example: United Kingdom
+            code:
+              type: string
+              example: UK
+          additionalProperties: false
+      additionalProperties: false
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    User:
+      required:
+        - address
+        - age
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          example: John
+        age:
+          type: integer
+          format: int64
+          example: 30
+        address:
+          $ref: '#/components/schemas/Address'
+        friends:
+          type: array
+          example:
+            - name: Doe
+              age: 25
+              address:
+                street: 10 Downing Street
+                city: London
+          items:
+            $ref: '#/components/schemas/User'
+      additionalProperties: false
+    Users:
+      type: array
+      example:
+        - name: John
+          age: 30
+          address:
+            street: 10 Downing Street
+            city: London
+      items:
+        $ref: '#/components/schemas/User'

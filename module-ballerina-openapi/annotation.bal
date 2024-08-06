@@ -28,7 +28,7 @@
 # + email - The email address to contact the API provider or support.
 # + contactName - The full name of the person or organization responsible for the API.
 # + contactURL - The URL to a web page with more information about the API, the provider, or support.
-# + termOfService - The URL to the terms of service for the API.
+# + termsOfService - The URL to the terms of service for the API.
 # + licenseName - The name of the license under which the API is provided.
 # + licenseURL - The URL to the full text of the license.
 public type ServiceInformation record {|
@@ -82,14 +82,13 @@ public type ResourceInformation record {|
 #
 # + headers - The headers for the response.
 # + examples - Detailed examples of the response content.
-public type ResponseExample record {
+public type ResponseExample record {|
     map<string> headers?;
-    map<map<record {|record {} value;|}>> examples?;
-
-};
+    map<map<record {|record {} value;|}|record {|string filePath;|}>> examples?;
+|};
 
 # Represents an example of a request body for a specific media type.
-public type RequestExamples map<anydata>;
+public type RequestExamples readonly & map<map<record {|record {} value;|}|record {|string filePath;|}>>;
 
 # Represents examples for resource function.
 #
@@ -107,3 +106,21 @@ public const annotation ResourceInformation ResourceInfo on object function;
 public annotation ServiceInformation ServiceInfo on service;
 // # Annotation for additional OpenAPI configurations of a Ballerina client.
 // public const annotation ClientConfiguration ClientConfig on source client;
+
+# Represents an example value.
+#
+# + value - The example value.
+public type ExampleValue readonly & record {|
+    anydata value;
+|};
+
+# Represents a set of example values.
+public type ExampleValues readonly & record {|
+    ExampleValue...;
+|};
+
+# Annotation for an example value.
+public const annotation ExampleValue Example on type, parameter, record field;
+
+# Annotation for a set of example values.
+public const annotation ExampleValues Examples on parameter;

@@ -43,3 +43,9 @@ options.license = "license.txt"
 id = "client05"
 filePath = "openapi.yaml"
 targetModule = "delivery05"
+
+[[tool.openapi]]
+id = "client06"
+filePath = "openapi.yaml"
+targetModule = "delivery06"
+options.singleFile = true

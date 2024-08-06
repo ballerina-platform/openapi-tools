@@ -129,7 +129,7 @@ public class GeneratorConstants {
     public static final String QUERIES = "queries";
     public static final String SELF = "self";
     public static final String TEXT_PREFIX = "text/";
-    public static final String XML_DATA = "xmldata";
+    public static final String XML_DATA = "data.xmldata";
     public static final String IMAGE = "image";
     public static final String VENDOR_SPECIFIC_TYPE = "vnd.";
     public static final String MIME = "mime";
@@ -148,6 +148,7 @@ public class GeneratorConstants {
     public static final String APPLICATION_URL_ENCODE = "application/x-www-form-urlencoded";
     public static final String MULTIPART_FORM_DATA = "multipart/form-data";
     public static final String APPLICATION_FORM_URLENCODED = "application//x-www-form-urlencoded";
+    public static final String TEXT_EVENT_STREAM = "text/event-stream";
 
     public static final String TEXT = "text";
     public static final String IMAGE_PNG = "image/png";
@@ -267,7 +268,7 @@ public class GeneratorConstants {
         httpCodeMap.put("405", "MethodNotAllowed");
         httpCodeMap.put("406", "NotAcceptable");
         httpCodeMap.put("407", "ProxyAuthenticationRequired");
-        httpCodeMap.put("408", "RequestTimeOut");
+        httpCodeMap.put("408", "RequestTimeout");
         httpCodeMap.put("409", "Conflict");
         httpCodeMap.put("410", "Gone");
         httpCodeMap.put("411", "LengthRequired");
