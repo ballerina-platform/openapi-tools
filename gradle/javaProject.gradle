@@ -51,6 +51,7 @@ dependencies {
         implementation "io.swagger.core.v3:swagger-core:${swaggerCoreVersion}"
         implementation "io.swagger.core.v3:swagger-models:${swaggerCoreVersion}"
         implementation "io.swagger.parser.v3:swagger-parser:${swaggerParserVersion}"
+        implementation "io.swagger.parser.v3:swagger-parser-safe-url-resolver:${swaggerParserVersion}"
         implementation "javax.ws.rs:javax.ws.rs-api:2.1.1"
         implementation "org.ballerinalang:ballerina-lang:${ballerinaLangVersion}"
         implementation "org.ballerinalang:ballerina-parser:${ballerinaLangVersion}"

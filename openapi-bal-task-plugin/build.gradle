@@ -34,6 +34,7 @@ dependencies {
         exclude group: "org.slf4j", module: "slf4j-ext"
         exclude group: "javax.validation", module: "validation-api"
     }
+    implementation "io.swagger.parser.v3:swagger-parser-safe-url-resolver:${swaggerParserVersion}"
     implementation "org.ballerinalang:ballerina-lang"
     implementation "org.ballerinalang:ballerina-parser"
     implementation "org.ballerinalang:formatter-core"
@@ -50,6 +51,7 @@ shadowJar {
     dependencies {
         include(dependency("commons-codec:commons-codec:${commonsCodecVersion}"))
         include(dependency('io.swagger.parser.v3:swagger-parser'))
+        include(dependency('io.swagger.parser.v3:swagger-parser-safe-url-resolver'))
         exclude('META-INF/*.SF')
         exclude('META-INF/*.DSA')
         exclude('META-INF/*.RSA')
