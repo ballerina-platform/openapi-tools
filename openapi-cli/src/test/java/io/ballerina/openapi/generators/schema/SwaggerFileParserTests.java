@@ -59,6 +59,7 @@ public class SwaggerFileParserTests {
             expectedExceptionsMessageRegExp = "OpenAPI definition has errors: \n" +
                     "attribute components.schemas.Person.Person01 is not of type `schema`.*")
     public void testForUndocumentedReference() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/undocument_ref.yaml"), true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/undocument_ref.yaml"),
+                true, false);
     }
 }

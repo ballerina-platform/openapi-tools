@@ -71,7 +71,7 @@ public class ReferencedTypeGenerator extends TypeGenerator {
      */
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws OASTypeGenException {
-        String extractName = null;
+        String extractName;
         try {
             extractName = GeneratorUtils.extractReferenceType(schema.get$ref());
         } catch (BallerinaOpenApiException e) {

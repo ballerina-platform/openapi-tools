@@ -61,8 +61,10 @@ public class CodeGeneratorTest {
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
-    ServiceGeneratorOptions defaultServiceOptions = new ServiceGeneratorOptions(false, false, false, false, false);
-    ClientGeneratorOptions defaultClientOptions = new ClientGeneratorOptions(false, false, false, false, false);
+    ServiceGeneratorOptions defaultServiceOptions = new ServiceGeneratorOptions(false, false,
+            false, false, false, false);
+    ClientGeneratorOptions defaultClientOptions = new ClientGeneratorOptions(false, false,
+            false, false, false, false);
 
     String replaceRegex  = System.getProperty("os.name").toLowerCase()
             .contains("windows") ? "#.*[+*a\\r\\n]" : "#.*[+*a\\n]";
@@ -232,7 +234,8 @@ public class CodeGeneratorTest {
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "nullable_types.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter,
-                    new ClientGeneratorOptions(true, false, false, false, false));
+                    new ClientGeneratorOptions(true, false, false, false,
+                            false, false));
 
             if (Files.exists(resourcePath.resolve("types.bal"))) {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "types.bal");
@@ -257,7 +260,8 @@ public class CodeGeneratorTest {
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "nullable_false_types.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter,
-                    new ClientGeneratorOptions(true, false, false, false, false));
+                    new ClientGeneratorOptions(true, false, false, false,
+                            false, false));
 
             if (Files.exists(resourcePath.resolve("types.bal"))) {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "types.bal");
@@ -282,7 +286,8 @@ public class CodeGeneratorTest {
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "utils.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter,
-                    new ClientGeneratorOptions(true, false, false, false, false));
+                    new ClientGeneratorOptions(true, false, false, false,
+                            false, false));
 
             if (Files.exists(resourcePath.resolve("utils.bal"))) {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "utils.bal");
@@ -308,7 +313,8 @@ public class CodeGeneratorTest {
             String expectedConfigContent = getStringFromGivenBalFile(expectedDirPath, "api_key_config.toml");
             generator.setIncludeTestFiles(true);
             generator.generateClient(definitionPath, resourcePath.toString(), filter,
-                    new ClientGeneratorOptions(true, false, false, false, false));
+                    new ClientGeneratorOptions(true, false, false, false,
+                            false, false));
 
             if (Files.exists(resourcePath.resolve("tests/Config.toml"))) {
                 String generateConfigContent = getStringFromGivenBalFile(resourcePath, "tests/Config.toml");
@@ -448,7 +454,8 @@ public class CodeGeneratorTest {
             String expectedClientContent = getStringFromGivenBalFile(
                     expectedDirPath, "petstore_catch_all_path_client.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter,
-                    new ClientGeneratorOptions(false, true, false, false, false));
+                    new ClientGeneratorOptions(false, true, false, false,
+                            false, false));
             if (Files.exists(resourcePath.resolve("client.bal"))) {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
                 generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
@@ -616,7 +623,8 @@ public class CodeGeneratorTest {
         try {
             String expectedServiceContent = getStringWithNewlineFromGivenBalFile(expectedDirPath,
                     "generic_service_petstore_original.bal");
-            ServiceGeneratorOptions options = new ServiceGeneratorOptions(false, false, false, true, false);
+            ServiceGeneratorOptions options = new ServiceGeneratorOptions(false, false,
+                    false, true, false, false);
             generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter, options);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringWithNewlineFromGivenBalFile(resourcePath,

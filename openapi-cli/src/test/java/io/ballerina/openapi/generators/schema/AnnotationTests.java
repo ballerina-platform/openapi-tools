@@ -29,7 +29,7 @@ public class AnnotationTests {
             FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/deprecated_schemas.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/deprecated_schemas.bal");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

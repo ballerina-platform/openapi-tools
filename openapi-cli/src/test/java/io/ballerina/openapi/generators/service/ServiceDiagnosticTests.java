@@ -61,7 +61,7 @@ public class ServiceDiagnosticTests {
     public void checkDiagnosticIssues(String yamlFile) throws IOException, BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RESDIR.resolve(yamlFile);
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
@@ -83,7 +83,7 @@ public class ServiceDiagnosticTests {
     public void checkDiagnosticIssuesInGenericServiceGen(String yamlFile) throws IOException, BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RESDIR.resolve(yamlFile);
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)

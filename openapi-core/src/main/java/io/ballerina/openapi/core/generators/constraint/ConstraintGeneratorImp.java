@@ -92,6 +92,9 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
 
     @Override
     public ConstraintResult updateTypeDefinitionsWithConstraints() {
+        if (openAPI.getComponents() == null) {
+            return new ConstraintResult(typeDefinitions, isConstraint, diagnostics);
+        }
         if (openAPI.getComponents().getSchemas() == null) {
             return new ConstraintResult(typeDefinitions, isConstraint, diagnostics);
         }

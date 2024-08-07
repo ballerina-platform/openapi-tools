@@ -1,0 +1,84 @@
+openapi: 3.1.0
+info:
+  title: Convert
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/convert"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9000"
+paths:
+  /rate:
+    get:
+      operationId: getRate
+      parameters:
+        - name : limit
+          in: query
+          schema:
+            $ref: '#/components/schemas/limit-type'
+
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/account'
+  /rate2:
+    get:
+      operationId: postRate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/account'
+      responses:
+        "200":
+          description: Ok
+  /pet/{pet$Store}:
+    get:
+      parameters:
+        - name: pet$Store
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/200'
+
+components:
+  schemas:
+    limit-type:
+      type: string
+    account:
+      required:
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+    account-details:
+      type: object
+      properties:
+        name:
+          type: string
+        date:
+          type: string
+    200:
+      type: object
+      properties:
+        response:
+          type: string
+        code:
+          type: integer

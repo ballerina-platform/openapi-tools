@@ -80,7 +80,7 @@ public class GeneratorUtilsTests {
     @Test(description = "Set record name with removing special Characters")
     public static void testRecordName() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("schema/swagger/recordName" +
-                ".yaml"), false);
+                ".yaml"), false, false);
         SyntaxTree syntaxTree = null;
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();

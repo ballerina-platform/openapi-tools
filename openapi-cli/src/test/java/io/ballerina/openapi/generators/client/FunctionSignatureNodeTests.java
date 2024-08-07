@@ -124,7 +124,7 @@ public class FunctionSignatureNodeTests {
     @Test(description = "Test for generate function signature for multipart custom header")
     public void testFunctionSignatureNodeForMultipartCustomHeader() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
-                RESDIR.resolve("swagger/multipart_formdata_custom.yaml"), true);
+                RESDIR.resolve("swagger/multipart_formdata_custom.yaml"), true, false);
         Operation operation = openAPI.getPaths().get("/pets").getPost();
         TypeHandler.createInstance(openAPI, false);
         RemoteFunctionSignatureGenerator functionSignatureGenerator = new RemoteFunctionSignatureGenerator(operation,
