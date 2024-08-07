@@ -9,3 +9,4 @@ groupId = "io.ballerina.openapi"
 artifactId = "client-native"
 version = "@client.native.version@"
 path = "../build/libs/openapi-client-native-@client.native.version@.jar"
+graalvmCompatible = true

@@ -1,4 +1,4 @@
-name: Build
+name: Build Ballerina to OpenAPI package
 on:
   workflow_dispatch:
 

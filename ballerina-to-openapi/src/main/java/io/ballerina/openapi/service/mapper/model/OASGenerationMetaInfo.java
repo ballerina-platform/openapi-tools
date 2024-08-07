@@ -36,6 +36,7 @@ public class OASGenerationMetaInfo {
     private final SemanticModel semanticModel;
     private final ServiceNode serviceNode;
     private final Project project;
+    private final Boolean ballerinaExtensionLevel;
 
     public OASGenerationMetaInfo(OASGenerationMetaInfoBuilder builder) {
         this.openApiFileName = builder.openApiFileName;
@@ -47,6 +48,7 @@ public class OASGenerationMetaInfo {
         }
         this.serviceNode = serviceNodeFromBuilder;
         this.project = builder.project;
+        this.ballerinaExtensionLevel = builder.ballerinaExtension;
     }
 
     public String getOpenApiFileName() {
@@ -69,6 +71,10 @@ public class OASGenerationMetaInfo {
         return project;
     }
 
+    public Boolean getBallerinaExtension() {
+        return ballerinaExtensionLevel;
+    }
+
     /**
      * This method is used to create a new {@link OASGenerationMetaInfoBuilder} instance.
      */
@@ -80,6 +86,7 @@ public class OASGenerationMetaInfo {
         private ServiceDeclarationNode serviceDeclarationNode;
         private ServiceNode serviceNode;
         private Project project;
+        private Boolean ballerinaExtension = false;
 
         public OASGenerationMetaInfoBuilder setBallerinaFilePath(Path ballerinaFilePath) {
             this.ballerinaFilePath = ballerinaFilePath;
@@ -108,6 +115,11 @@ public class OASGenerationMetaInfo {
 
         public OASGenerationMetaInfoBuilder setOpenApiFileName(String openApiFileName) {
             this.openApiFileName = openApiFileName;
+            return this;
+        }
+
+        public OASGenerationMetaInfoBuilder setBallerinaExtension(Boolean balExt) {
+            this.ballerinaExtension = balExt;
             return this;
         }
 

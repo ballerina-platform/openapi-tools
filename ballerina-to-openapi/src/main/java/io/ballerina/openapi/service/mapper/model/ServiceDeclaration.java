@@ -236,7 +236,7 @@ public class ServiceDeclaration implements ServiceNode {
                 return Optional.empty();
             }
             OASResult oasResult = generateOasFroServiceNode(pkg.project(), serviceName.get(), semanticModel, null,
-                    serviceContract.get());
+                    serviceContract.get(), false);
             if (oasResult.getDiagnostics().stream()
                     .anyMatch(diagnostic -> diagnostic.getDiagnosticSeverity().equals(DiagnosticSeverity.ERROR))) {
                 diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_136, serviceName.get()));

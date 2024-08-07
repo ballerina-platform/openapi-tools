@@ -126,6 +126,9 @@ public class OpenApiCmd implements BLauncherCmd {
             description = "Generate service without data binding")
     private boolean generateWithoutDataBinding;
 
+    @CommandLine.Option(names = {"--with-bal-ext"}, hidden = true, description = "Generate ballerina type extensions")
+    private boolean addBallerinaExtension;
+
 
     @CommandLine.Parameters
     private List<String> argList;
@@ -227,7 +230,7 @@ public class OpenApiCmd implements BLauncherCmd {
 
             if (baseCmd.statusCodeBinding) {
                 if (baseCmd.mode != null && baseCmd.mode.equals(SERVICE)) {
-                    outStream.println("ERROR: the '--status-code-binding' option is only available in client " +
+                    outStream.println("the '--status-code-binding' option is only available in client " +
                             "generation mode.");
                     exitError(this.exitWhenFinish);
                 }
@@ -240,6 +243,12 @@ public class OpenApiCmd implements BLauncherCmd {
                     statusCodeBinding = true;
                     this.ballerinaTomlPath = ballerinaTomlPath.get();
                 }
+            }
+
+            if (addBallerinaExtension) {
+                outStream.println("'--with-bal-ext' option is only available in OpenAPI specification " +
+                        "generation mode.");
+                exitError(this.exitWhenFinish);
             }
 
             try {
@@ -293,6 +302,7 @@ public class OpenApiCmd implements BLauncherCmd {
         getTargetOutputPath();
         // Check service name it is mandatory
         OASContractGenerator openApiConverter = new OASContractGenerator();
+        openApiConverter.setBallerinaExtension(addBallerinaExtension);
         openApiConverter.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, service,
                 generatedFileType);
         mapperDiagnostics.addAll(openApiConverter.getDiagnostics());
@@ -558,6 +568,7 @@ public class OpenApiCmd implements BLauncherCmd {
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("groupId", "io.ballerina.openapi", null));
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("artifactId", "client-native", null));
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("version", version, null));
+        tomlMembers = tomlMembers.add(SampleNodeGenerator.createBooleanKV("graalvmCompatible", true, null));
         return tomlMembers;
     }
 
