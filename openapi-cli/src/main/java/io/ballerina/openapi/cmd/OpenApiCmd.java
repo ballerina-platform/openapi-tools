@@ -67,12 +67,14 @@ import java.util.stream.Collectors;
 import static io.ballerina.openapi.cmd.CmdConstants.BAL_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.CLIENT;
 import static io.ballerina.openapi.cmd.CmdConstants.JSON_EXTENSION;
+import static io.ballerina.openapi.cmd.CmdConstants.Mode.BOTH_SERVICE_CLIENT;
 import static io.ballerina.openapi.cmd.CmdConstants.REMOTE;
 import static io.ballerina.openapi.cmd.CmdConstants.RESOURCE;
 import static io.ballerina.openapi.cmd.CmdConstants.SERVICE;
 import static io.ballerina.openapi.cmd.CmdConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.YML_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdUtils.addNewLine;
+import static io.ballerina.openapi.cmd.CmdUtils.searchEnum;
 import static io.ballerina.openapi.cmd.CmdUtils.validateBallerinaProject;
 import static io.ballerina.openapi.cmd.ErrorMessages.NOT_A_BALLERINA_PACKAGE;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
@@ -95,6 +97,7 @@ public class OpenApiCmd implements BLauncherCmd {
     private boolean clientResourceMode;
     private boolean statusCodeBinding;
     private Path ballerinaTomlPath;
+    private CmdConstants.Mode mode = BOTH_SERVICE_CLIENT;
 
     @CommandLine.Mixin
     private BaseCmd baseCmd = new BaseCmd();
@@ -174,6 +177,15 @@ public class OpenApiCmd implements BLauncherCmd {
             exitError(this.exitWhenFinish);
             return;
         }
+        if (baseCmd.mode != null) {
+            mode = searchEnum(CmdConstants.Mode.class, baseCmd.mode);
+            if (mode == null) {
+                // Exit the code generation process
+                outStream.println("ERROR:Invalid value for option '--mode': expected one of [service, client] but" +
+                        " was '" + baseCmd.mode + "'");
+                exitError(this.exitWhenFinish);
+            }
+        }
         // If given input is yaml contract, it generates service file and client stub
         // else if given ballerina service file it generates openapi contract file
         // else it generates error message to enter correct input file
@@ -209,13 +221,13 @@ public class OpenApiCmd implements BLauncherCmd {
             clientResourceMode = baseCmd.generateClientMethods == null || baseCmd.generateClientMethods.isBlank() ||
                     (!baseCmd.generateClientMethods.equals(REMOTE));
 
-            if (!clientResourceMode && baseCmd.mode != null && baseCmd.mode.equals(SERVICE)) {
+            if (!clientResourceMode && mode.equals(CmdConstants.Mode.SERVICE)) {
                 // Exit the code generation process
                 outStream.println("'--client-methods' option is only available in client generation mode.");
                 exitError(this.exitWhenFinish);
             }
 
-            if (generateWithoutDataBinding && baseCmd.mode != null && baseCmd.mode.equals(CLIENT)) {
+            if (generateWithoutDataBinding && mode.equals(CmdConstants.Mode.CLIENT)) {
                 // Exit the code generation process
                 outStream.println("'--without-data-binding' option is only available in service generation mode.");
                 exitError(this.exitWhenFinish);
@@ -229,7 +241,7 @@ public class OpenApiCmd implements BLauncherCmd {
             }
 
             if (baseCmd.statusCodeBinding) {
-                if (baseCmd.mode != null && baseCmd.mode.equals(SERVICE)) {
+                if (mode.equals(CmdConstants.Mode.SERVICE)) {
                     outStream.println("the '--status-code-binding' option is only available in client " +
                             "generation mode.");
                     exitError(this.exitWhenFinish);
@@ -350,24 +362,19 @@ public class OpenApiCmd implements BLauncherCmd {
             outStream.println("WARNING: All the constraints in the OpenAPI contract will be ignored when generating" +
                     " the Ballerina client/service with the `--nullable` option");
         }
-        if (baseCmd.mode != null) {
-            switch (baseCmd.mode) {
-                case "service":
-                    generateServiceFile(generator, serviceName, resourcePath, filter);
-                    break;
-                case "client":
+        switch (mode) {
+            case SERVICE -> generateServiceFile(generator, serviceName, resourcePath, filter);
+            case CLIENT ->
                     generatesClientFile(generator, resourcePath, filter, clientResourceMode, statusCodeBinding);
-                    break;
-                default:
-                    break;
+            default -> {
+                if (baseCmd.singleFile) {
+                    outStream.println("WARNING: Generating single file for Client & Service generation mode is not " +
+                            "supported. Defaulting to generating all files.");
+                }
+                generateBothFiles(generator, serviceName, resourcePath, filter, clientResourceMode, statusCodeBinding);
             }
-        } else {
-            if (baseCmd.singleFile) {
-                outStream.println("WARNING: Generating single file for Client & Service generation mode is not " +
-                        "supported. Defaulting to generating all files.");
-            }
-            generateBothFiles(generator, serviceName, resourcePath, filter, clientResourceMode, statusCodeBinding);
         }
+
         if (!skipDependecyUpdate) {
             updateBallerinaTomlWithClientNativeDependency();
         }

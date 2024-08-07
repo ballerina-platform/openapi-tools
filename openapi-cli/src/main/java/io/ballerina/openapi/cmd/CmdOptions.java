@@ -30,7 +30,7 @@ public class CmdOptions {
     private final String packagePath;
     private final List<String> tags;
     private final List<String>  operations;
-    private final String mode;
+    private final CmdConstants.Mode mode;
     private final String clientMethod;
     private final boolean nullable;
     private final String licensePath;
@@ -82,7 +82,7 @@ public class CmdOptions {
         return nullable;
     }
 
-    public String getMode() {
+    public CmdConstants.Mode getMode() {
         return mode;
     }
 
@@ -116,7 +116,7 @@ public class CmdOptions {
         private String packagePath;
         private List<String> tags;
         private List<String> operations;
-        private String mode;
+        private CmdConstants.Mode mode;
         private String clientMethod;
         private boolean nullable;
         private String input;
@@ -150,7 +150,7 @@ public class CmdOptions {
             return this;
         }
 
-        public CmdOptionsBuilder withMode(String mode) {
+        public CmdOptionsBuilder withMode(CmdConstants.Mode mode) {
             this.mode = mode;
             return this;
         }

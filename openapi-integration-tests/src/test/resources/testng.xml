@@ -30,6 +30,7 @@
             <class name="io.ballerina.openapi.cmd.SchemaGenerationTests"/>
             <class name="io.ballerina.openapi.cmd.SchemaGenerationNegativeTests"/>
             <class name="io.ballerina.openapi.bal.task.client.ClientGenPluginTests"/>
+            <class name="io.ballerina.openapi.cmd.OpenAPIToBallerinaCLINegativeTests"/>
 <!--            <class name="io.ballerina.openapi.bal.task.client.ClientGenPluginNegativeTests"/>-->
         </classes>
     </test>
