@@ -26,7 +26,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
         "202":
           description: Accepted
         "404":
@@ -34,13 +34,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorInfo'
+                $ref: "#/components/schemas/ErrorInfo"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /users:
     post:
       operationId: postUsers
@@ -48,7 +48,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserWithoutId'
+              $ref: "#/components/schemas/UserWithoutId"
         required: true
       responses:
         "201":
@@ -56,15 +56,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/ErrorInfo'
-                  - $ref: '#/components/schemas/ErrorPayload'
+                  - $ref: "#/components/schemas/ErrorInfo"
+                  - $ref: "#/components/schemas/ErrorPayload"
         "202":
           description: Accepted
         "409":
@@ -72,7 +72,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorInfo'
+                $ref: "#/components/schemas/ErrorInfo"
   /test1:
     get:
       operationId: getTest1
@@ -97,7 +97,7 @@ paths:
                 description: Any type of entity body
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorInfo'
+                $ref: "#/components/schemas/ErrorInfo"
         "202":
           description: Accepted
 components:
@@ -139,7 +139,7 @@ components:
     User:
       type: object
       allOf:
-        - $ref: '#/components/schemas/UserWithoutId'
+        - $ref: "#/components/schemas/UserWithoutId"
         - required:
             - id
           type: object

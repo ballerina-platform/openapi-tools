@@ -19,7 +19,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: "#/components/schemas/Response"
         "404":
           description: NotFound
     post:
@@ -30,7 +30,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
         required: true
       responses:
         "201":
@@ -38,7 +38,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: "#/components/schemas/Response"
         "404":
           description: NotFound
   /users/{id}:
@@ -57,7 +57,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: "#/components/schemas/Response"
         "404":
           description: NotFound
   /user:
@@ -69,7 +69,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: "#/components/schemas/Response"
         "404":
           description: NotFound
 components:
@@ -87,10 +87,10 @@ components:
           type: string
         payload:
           oneOf:
-            - $ref: '#/components/schemas/User'
+            - $ref: "#/components/schemas/User"
             - type: array
               items:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
       additionalProperties: false
     User:
       required:

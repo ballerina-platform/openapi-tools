@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
         required: true
       responses:
         "202":
@@ -27,7 +27,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /path2:
     post:
       operationId: postPath2
@@ -35,7 +35,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TupleType'
+              $ref: "#/components/schemas/TupleType"
         required: true
       responses:
         "202":
@@ -45,7 +45,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /path3:
     post:
       operationId: postPath3
@@ -55,7 +55,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/TupleType'
+                $ref: "#/components/schemas/TupleType"
       responses:
         "202":
           description: Accepted
@@ -64,7 +64,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /path4:
     post:
       operationId: postPath4
@@ -88,7 +88,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /path5:
     post:
       operationId: postPath5
@@ -112,7 +112,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     ErrorPayload:
@@ -161,16 +161,16 @@ components:
                 format: double
               - type: number
                 format: float
-              - $ref: '#/components/schemas/User'
+              - $ref: "#/components/schemas/User"
         tupleSingle:
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/TupleType'
+            - $ref: "#/components/schemas/TupleType"
         tuples:
           type: array
           nullable: true
           items:
-            $ref: '#/components/schemas/TupleType'
+            $ref: "#/components/schemas/TupleType"
         unionTuple:
           type: array
           nullable: true

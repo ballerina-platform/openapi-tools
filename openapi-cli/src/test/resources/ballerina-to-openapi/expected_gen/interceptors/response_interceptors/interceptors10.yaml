@@ -37,8 +37,8 @@ paths:
                     additionalProperties:
                       type: array
                       items:
-                        $ref: '#/components/schemas/Person'
-                  - $ref: '#/components/schemas/Person'
+                        $ref: "#/components/schemas/Person"
+                  - $ref: "#/components/schemas/Person"
         "202":
           description: Accepted
         "500":
@@ -46,13 +46,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayloadNew'
+                $ref: "#/components/schemas/ErrorPayloadNew"
         "505":
           description: HttpVersionNotSupported
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayloadNew'
+                $ref: "#/components/schemas/ErrorPayloadNew"
   /persons:
     get:
       operationId: getPersons
@@ -73,10 +73,10 @@ paths:
                     additionalProperties:
                       type: array
                       items:
-                        $ref: '#/components/schemas/Person'
+                        $ref: "#/components/schemas/Person"
                   - type: array
                     items:
-                      $ref: '#/components/schemas/Person'
+                      $ref: "#/components/schemas/Person"
         "202":
           description: Accepted
         "500":
@@ -84,13 +84,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayloadNew'
+                $ref: "#/components/schemas/ErrorPayloadNew"
         "505":
           description: HttpVersionNotSupported
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayloadNew'
+                $ref: "#/components/schemas/ErrorPayloadNew"
     post:
       operationId: postPersons
       requestBody:
@@ -99,7 +99,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Person'
+                $ref: "#/components/schemas/Person"
         required: true
       responses:
         default:
@@ -118,10 +118,10 @@ paths:
                     additionalProperties:
                       type: array
                       items:
-                        $ref: '#/components/schemas/Person'
+                        $ref: "#/components/schemas/Person"
                   - type: array
                     items:
-                      $ref: '#/components/schemas/Person'
+                      $ref: "#/components/schemas/Person"
         "202":
           description: Accepted
         "500":
@@ -129,13 +129,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayloadNew'
+                $ref: "#/components/schemas/ErrorPayloadNew"
         "505":
           description: HttpVersionNotSupported
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayloadNew'
+                $ref: "#/components/schemas/ErrorPayloadNew"
         "400":
           description: BadRequest
   /person:
@@ -145,7 +145,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Person'
+              $ref: "#/components/schemas/Person"
         required: true
       responses:
         default:
@@ -164,8 +164,8 @@ paths:
                     additionalProperties:
                       type: array
                       items:
-                        $ref: '#/components/schemas/Person'
-                  - $ref: '#/components/schemas/Person'
+                        $ref: "#/components/schemas/Person"
+                  - $ref: "#/components/schemas/Person"
         "202":
           description: Accepted
         "500":
@@ -173,13 +173,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayloadNew'
+                $ref: "#/components/schemas/ErrorPayloadNew"
         "505":
           description: HttpVersionNotSupported
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayloadNew'
+                $ref: "#/components/schemas/ErrorPayloadNew"
   /persont:
     get:
       operationId: getPersont
@@ -190,7 +190,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Person'
+                $ref: "#/components/schemas/Person"
       responses:
         default:
           description: Default response
@@ -203,13 +203,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayloadNew'
+                $ref: "#/components/schemas/ErrorPayloadNew"
         "505":
           description: HttpVersionNotSupported
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayloadNew'
+                $ref: "#/components/schemas/ErrorPayloadNew"
 components:
   schemas:
     Civil:
@@ -218,18 +218,18 @@ components:
         Time within some region relative to a
         time scale stipulated by civilian authorities.
       allOf:
-        - $ref: '#/components/schemas/DateFields'
-        - $ref: '#/components/schemas/TimeOfDayFields'
+        - $ref: "#/components/schemas/DateFields"
+        - $ref: "#/components/schemas/TimeOfDayFields"
         - type: object
           properties:
             utcOffset:
-              $ref: '#/components/schemas/ZoneOffset'
+              $ref: "#/components/schemas/ZoneOffset"
             timeAbbrev:
               type: string
             which:
-              $ref: '#/components/schemas/ZERO_OR_ONE'
+              $ref: "#/components/schemas/ZERO_OR_ONE"
             dayOfWeek:
-              $ref: '#/components/schemas/DayOfWeek'
+              $ref: "#/components/schemas/DayOfWeek"
     DateFields:
       required:
         - day
@@ -265,7 +265,7 @@ components:
       type: object
       properties:
         timestamp:
-          $ref: '#/components/schemas/Civil'
+          $ref: "#/components/schemas/Civil"
         message:
           type: string
           default: something went wrong
@@ -305,7 +305,7 @@ components:
           type: integer
           format: int64
         second:
-          $ref: '#/components/schemas/Seconds'
+          $ref: "#/components/schemas/Seconds"
       description: Fields of the TimeOfDay record.
     ZERO_OR_ONE:
       type: integer

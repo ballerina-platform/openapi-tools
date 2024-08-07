@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Child'
+              $ref: "#/components/schemas/Child"
         required: true
       responses:
         "202":
@@ -27,13 +27,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     Child:
@@ -43,9 +43,9 @@ components:
       type: object
       properties:
         position:
-          $ref: '#/components/schemas/Position'
+          $ref: "#/components/schemas/Position"
         newPosition:
-          $ref: '#/components/schemas/NewPosition'
+          $ref: "#/components/schemas/NewPosition"
     ErrorPayload:
       required:
         - message
@@ -73,7 +73,7 @@ components:
       maximum: 100
       minimum: 50
       allOf:
-        - $ref: '#/components/schemas/Position'
+        - $ref: "#/components/schemas/Position"
     Position:
       maximum: 50
       minimum: 0

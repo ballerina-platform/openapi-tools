@@ -19,7 +19,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BalSubTypes'
+                $ref: "#/components/schemas/BalSubTypes"
   /path2:
     get:
       operationId: getPath2
@@ -30,22 +30,22 @@ paths:
             application/xml:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/XmlElement'
-                  - $ref: '#/components/schemas/XmlComment'
-                  - $ref: '#/components/schemas/XmlText'
-                  - $ref: '#/components/schemas/XmlProcessingInstruction'
+                  - $ref: "#/components/schemas/XmlElement"
+                  - $ref: "#/components/schemas/XmlComment"
+                  - $ref: "#/components/schemas/XmlText"
+                  - $ref: "#/components/schemas/XmlProcessingInstruction"
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Unsigned8'
-                  - $ref: '#/components/schemas/Unsigned16'
-                  - $ref: '#/components/schemas/Unsigned32'
-                  - $ref: '#/components/schemas/Signed8'
-                  - $ref: '#/components/schemas/Signed16'
-                  - $ref: '#/components/schemas/Signed32'
+                  - $ref: "#/components/schemas/Unsigned8"
+                  - $ref: "#/components/schemas/Unsigned16"
+                  - $ref: "#/components/schemas/Unsigned32"
+                  - $ref: "#/components/schemas/Signed8"
+                  - $ref: "#/components/schemas/Signed16"
+                  - $ref: "#/components/schemas/Signed32"
             text/plain:
               schema:
-                $ref: '#/components/schemas/Char'
+                $ref: "#/components/schemas/Char"
 components:
   schemas:
     BalInts:
@@ -55,9 +55,9 @@ components:
       type: object
       properties:
         signed:
-          $ref: '#/components/schemas/BalSignedInts'
+          $ref: "#/components/schemas/BalSignedInts"
         unsigned:
-          $ref: '#/components/schemas/BalUnsignedInts'
+          $ref: "#/components/schemas/BalUnsignedInts"
       additionalProperties: false
     BalSignedInts:
       required:
@@ -84,9 +84,9 @@ components:
         char:
           type: string
         ints:
-          $ref: '#/components/schemas/BalInts'
+          $ref: "#/components/schemas/BalInts"
         xmls:
-          $ref: '#/components/schemas/BalXmls'
+          $ref: "#/components/schemas/BalXmls"
       additionalProperties: false
     BalUnsignedInts:
       required:

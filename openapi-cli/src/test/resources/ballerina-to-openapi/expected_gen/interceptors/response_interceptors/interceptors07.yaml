@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Person'
+              $ref: "#/components/schemas/Person"
         required: true
       responses:
         "201":
@@ -29,7 +29,7 @@ paths:
                   - type: object
                     additionalProperties:
                       type: string
-                  - $ref: '#/components/schemas/Person'
+                  - $ref: "#/components/schemas/Person"
   /persons:
     post:
       operationId: postPersons
@@ -39,7 +39,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Person'
+                $ref: "#/components/schemas/Person"
         required: true
       responses:
         "201":
@@ -53,7 +53,7 @@ paths:
                       type: string
                   - type: array
                     items:
-                      $ref: '#/components/schemas/Person'
+                      $ref: "#/components/schemas/Person"
         "400":
           description: BadRequest
 components:

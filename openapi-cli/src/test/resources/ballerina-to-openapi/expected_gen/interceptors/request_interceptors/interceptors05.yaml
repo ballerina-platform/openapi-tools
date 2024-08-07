@@ -29,7 +29,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Course'
+                $ref: "#/components/schemas/Course"
             text/plain:
               schema:
                 type: string
@@ -42,8 +42,8 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Course'
-                  - $ref: '#/components/schemas/Person'
+                  - $ref: "#/components/schemas/Course"
+                  - $ref: "#/components/schemas/Person"
   /foo/{path}:
     post:
       operationId: postFooPath
@@ -59,7 +59,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Course'
+                $ref: "#/components/schemas/Course"
             text/plain:
               schema:
                 type: string
@@ -68,7 +68,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     Course:

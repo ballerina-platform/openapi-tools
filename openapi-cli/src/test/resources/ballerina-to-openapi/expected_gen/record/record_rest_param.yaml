@@ -20,7 +20,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
       responses:
         "202":
           description: Accepted
@@ -29,7 +29,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /path2:
     get:
       operationId: getPath2
@@ -53,7 +53,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /path3:
     post:
       operationId: postPath3
@@ -61,7 +61,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRestString'
+              $ref: "#/components/schemas/UserRestString"
         required: true
       responses:
         "202":
@@ -71,7 +71,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /path4:
     post:
       operationId: postPath4
@@ -82,12 +82,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserRestMap'
+                $ref: "#/components/schemas/UserRestMap"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserClosed'
+              $ref: "#/components/schemas/UserClosed"
         required: true
       responses:
         "202":
@@ -97,7 +97,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /path5:
     post:
       operationId: postPath5
@@ -117,7 +117,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRestProperty'
+              $ref: "#/components/schemas/UserRestProperty"
         required: true
       responses:
         "202":
@@ -127,7 +127,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /path6:
     post:
       operationId: postPath6
@@ -138,12 +138,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserClosed'
+                $ref: "#/components/schemas/UserClosed"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRestMapProperty'
+              $ref: "#/components/schemas/UserRestMapProperty"
         required: true
       responses:
         "202":
@@ -153,7 +153,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     ErrorPayload:
@@ -242,7 +242,7 @@ components:
       additionalProperties:
         type: object
         additionalProperties:
-          $ref: '#/components/schemas/Property'
+          $ref: "#/components/schemas/Property"
     UserRestProperty:
       required:
         - id
@@ -255,7 +255,7 @@ components:
         name:
           type: string
       additionalProperties:
-        $ref: '#/components/schemas/Property'
+        $ref: "#/components/schemas/Property"
     UserRestString:
       required:
         - id

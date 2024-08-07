@@ -33,13 +33,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pet-Task'
+                $ref: "#/components/schemas/Pet-Task"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /v2/say-hello:
     post:
       summary: Description
@@ -56,7 +56,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Pet-Task'
+              $ref: "#/components/schemas/Pet-Task"
         required: true
       responses:
         "202":
@@ -66,7 +66,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     ErrorPayload:
@@ -115,5 +115,5 @@ components:
           items:
             type: string
         store:
-          $ref: '#/components/schemas/Pet-Store'
+          $ref: "#/components/schemas/Pet-Store"
       description: Description

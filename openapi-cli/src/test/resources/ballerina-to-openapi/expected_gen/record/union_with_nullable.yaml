@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Link'
+              $ref: "#/components/schemas/Link"
         required: true
       responses:
         "202":
@@ -27,7 +27,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     Cat:
@@ -87,6 +87,6 @@ components:
         pet:
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Dog'
-            - $ref: '#/components/schemas/Cat'
+            - $ref: "#/components/schemas/Dog"
+            - $ref: "#/components/schemas/Cat"
       additionalProperties: false

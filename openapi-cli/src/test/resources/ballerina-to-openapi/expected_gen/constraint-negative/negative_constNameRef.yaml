@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudentRecord'
+              $ref: "#/components/schemas/StudentRecord"
         required: true
       responses:
         "202":
@@ -27,13 +27,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     ErrorPayload:
@@ -68,7 +68,7 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/St_ID'
+          $ref: "#/components/schemas/St_ID"
         num:
           type: number
           format: float

@@ -18,32 +18,32 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/MeetingGroup'
+            $ref: "#/components/schemas/MeetingGroup"
         - name: required-q-ref
           in: query
           required: true
           schema:
-            $ref: '#/components/schemas/RoomNo'
+            $ref: "#/components/schemas/RoomNo"
         - name: required-q-arr
           in: query
           required: true
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/Status'
+              $ref: "#/components/schemas/Status"
         - name: optional-q-arr
           in: query
           schema:
             type: array
             nullable: true
             items:
-              $ref: '#/components/schemas/Status'
+              $ref: "#/components/schemas/Status"
         - name: format
           in: query
           schema:
             nullable: true
             allOf:
-              - $ref: '#/components/schemas/Format'
+              - $ref: "#/components/schemas/Format"
         - name: type
           in: query
           schema:
@@ -57,7 +57,7 @@ paths:
           in: query
           schema:
             allOf:
-              - $ref: '#/components/schemas/RoomNo'
+              - $ref: "#/components/schemas/RoomNo"
             default: R5
       responses:
         "200":
@@ -65,7 +65,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MeetingList'
+                $ref: "#/components/schemas/MeetingList"
         "404":
           description: NotFound
         "400":
@@ -73,7 +73,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     ErrorPayload:
@@ -126,7 +126,7 @@ components:
         meetings:
           type: array
           items:
-            $ref: '#/components/schemas/Meeting'
+            $ref: "#/components/schemas/Meeting"
     RoomNo:
       type: string
       enum:
