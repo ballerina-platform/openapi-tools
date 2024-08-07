@@ -139,7 +139,7 @@ public class RequestBodyTests {
     public void oneOfScenarios() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/oneOf_request_body.yaml");
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
-                .withOpenAPI(GeneratorUtils.normalizeOpenAPI(definitionPath, false))
+                .withOpenAPI(GeneratorUtils.normalizeOpenAPI(definitionPath, false, false))
                 .withFilters(filter)
                 .build();
         TypeHandler.createInstance(oasServiceMetadata.getOpenAPI(), false);
@@ -234,7 +234,7 @@ public class RequestBodyTests {
     @Test(description = "RequestBody has object type with additional property")
     public void testForAdditionalProperty() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/additional_property.yaml");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, false);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, false, false);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)

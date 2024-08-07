@@ -89,6 +89,7 @@ public class GeneratorConstants {
 
     public static final String OAS_PATH_SEPARATOR = "/";
     public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~'`*\\-=^+();:\\/{}\\s|.$])";
+    public static final String ESCAPE_PATTERN_FOR_MODIFIER = "([\\[\\]\\\\?!<>@#&~'`*\\-=^+();:\\/{}\\s|.$]_)";
     public static final String REGEX_WITHOUT_SPECIAL_CHARACTERS = "\\b[_a-zA-Z][_a-zA-Z0-9]*\\b";
     public static final String REGEX_WORDS_STARTING_WITH_NUMBERS = "^[0-9].*";
     public static final String REGEX_ONLY_NUMBERS_OR_NUMBERS_WITH_SPECIAL_CHARACTERS = "\\b[0-9([\\[\\]\\\\?!<>@#&~'`" +

@@ -22,7 +22,7 @@ apply plugin: "java-library"
 
 description = "Ballerina - OpenAPI Tooling - OpenAPI to Ballerina"
 
-configurations.all {
+configurations.configureEach {
     resolutionStrategy.preferProjectModules()
 }
 

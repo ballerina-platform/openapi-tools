@@ -69,7 +69,7 @@ public class EnumGenerationTests {
             FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_enum.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/parameters_with_enum.bal");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -101,7 +101,7 @@ public class EnumGenerationTests {
             OASTypeGenException, FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_nullable_enums.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/parameters_with_nullable_enums.bal");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -133,7 +133,7 @@ public class EnumGenerationTests {
             OASTypeGenException, FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_enum.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/paramters_with_enum_resource.bal");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -165,7 +165,7 @@ public class EnumGenerationTests {
             OASTypeGenException, FormatterException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/parameters_with_nullable_enums.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/parameters_with_nullable_enums_resource.bal");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder

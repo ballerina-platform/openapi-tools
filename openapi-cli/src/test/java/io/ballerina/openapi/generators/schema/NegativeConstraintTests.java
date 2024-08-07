@@ -54,7 +54,7 @@ public class NegativeConstraintTests {
     public void testNonStringSchemaPropertyWithPattern() throws IOException, BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint" +
-                "/pattern_except_string_type.yaml"), true);
+                "/pattern_except_string_type.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

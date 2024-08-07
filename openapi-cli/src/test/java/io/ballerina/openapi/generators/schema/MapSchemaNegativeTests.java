@@ -57,7 +57,7 @@ public class MapSchemaNegativeTests {
     public void testForAdditionalPropertiesWithParserIssue() throws IOException, BallerinaOpenApiException,
             FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/additional_properties_true_negative.yaml"), true);
+                "/additional_properties_true_negative.yaml"), true, false);
         TypeHandler.createInstance(openAPI, true);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -72,7 +72,7 @@ public class MapSchemaNegativeTests {
     public void testForAdditionalPropertiesWithoutParserIssue()
             throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/additional_properties_true_negative_without_parser_issue.yaml"), true);
+                "/additional_properties_true_negative_without_parser_issue.yaml"), true, false);
         TypeHandler.createInstance(openAPI, true);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

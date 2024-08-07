@@ -72,7 +72,7 @@ public class BallerinaTestGeneratorTests {
         Path definitionPath = RES_DIR.resolve("sample_yamls/" + yamlFile);
         BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         codeGenerator.setIncludeTestFiles(true);
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder

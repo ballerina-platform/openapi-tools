@@ -115,7 +115,7 @@ public class RequestBodyTests {
                                     ".*GET operation cannot have a requestBody.*", enabled = false)
     public void testGetOrDeleteOrHeadContainRequestBody() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/request_body_in_get_delete_head.yaml");
-        GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
     }
 
     @Test(description = "Test for generating request body when operation has form url encoded media type")
@@ -270,7 +270,7 @@ public class RequestBodyTests {
 
     private BallerinaClientGenerator getBallerinaClientGenerator(Path definitionPath) throws IOException,
             BallerinaOpenApiException {
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder

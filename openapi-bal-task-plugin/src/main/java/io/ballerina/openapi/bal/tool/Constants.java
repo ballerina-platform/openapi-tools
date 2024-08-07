@@ -37,6 +37,7 @@ public class Constants {
     public static final String STATUS_CODE_BINDING = "statusCodeBinding";
     public static final String MOCK = "mock";
     public static final String SINGLE_FILE = "singleFile";
+    public static final String IS_SANITIZED_OAS = "isUsingSanitizedOas";
 
     /**
      * Enum class for containing diagnostic messages.
@@ -70,7 +71,10 @@ public class Constants {
         ERROR_WHILE_UPDATING_TOML("OAS_CLIENT_11", "error occurred when updating Ballerina.toml " +
                 "file with the client native dependency.", DiagnosticSeverity.ERROR),
         OPENAPI_EXCEPTION("OAS_CLIENT_12", "exception occurred while reading the openapi contract: %s",
-                DiagnosticSeverity.ERROR);
+                DiagnosticSeverity.ERROR),
+        OPENAPI_MODIFICATION("OAS_CLIENT_13", "This `isUsingSanitizedOas` is an experimental feature." +
+                " This option enables code generation by " +
+                "modifying the given OAS to follow the Ballerina language best practices.", DiagnosticSeverity.WARNING);
 
         private final String code;
         private final String description;

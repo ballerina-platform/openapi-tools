@@ -46,7 +46,7 @@ public class NullableFieldTests {
     @Test(description = "Test for nullable primitive fields")
     public void testNullablePrimitive() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/nullable_primitive_schema.yaml"), true);
+                "/nullable_primitive_schema.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -63,7 +63,7 @@ public class NullableFieldTests {
     @Test(description = "Test for nullable array fields")
     public void testNullableArray() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/nullable_array_schema.yaml"), true);
+                "/nullable_array_schema.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -80,7 +80,7 @@ public class NullableFieldTests {
     @Test(description = "Test for nullable array referenced schemas")
     public void testNullableArrayRefSchemas() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/nullable_ref_array.yaml"), true);
+                "/nullable_ref_array.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -97,7 +97,7 @@ public class NullableFieldTests {
     @Test(description = "Test nullable for primitive referenced type")
     public void testPrimitiveReferencedTypes() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/nullable_string_type.yaml"), true);
+                "/nullable_string_type.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -115,7 +115,7 @@ public class NullableFieldTests {
     @Test(description = "Test for referenced schema with no type given")
     public void testNullTypeReference() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/nullable_null_type.yaml"), true);
+                "/nullable_null_type.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -132,7 +132,7 @@ public class NullableFieldTests {
     @Test(description = "Test for nullable record fields")
     public void testNullableRecord() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/nullable_record_schema.yaml"), true);
+                "/nullable_record_schema.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -149,7 +149,7 @@ public class NullableFieldTests {
     @Test(description = "Test for union type generation for nullable anyOf schema")
     public void testNullableUnionType() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/nullable_anyof_schema.yaml"), true);
+                "/nullable_anyof_schema.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -166,7 +166,7 @@ public class NullableFieldTests {
     @Test(description = "Test for union type generation for nullable anyOf schema with array schema")
     public void testNullableArrayUnionType() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/nullable_anyof_array_schema.yaml"), true);
+                "/nullable_anyof_array_schema.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -183,7 +183,7 @@ public class NullableFieldTests {
     @Test(description = "Test for type generation for object schema with no properties")
     public void testNullableEmptyObjectSchema() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/null_empty_record.yaml"), true);
+                "/null_empty_record.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -200,7 +200,7 @@ public class NullableFieldTests {
     @Test(description = "Test for type generation for OpenAPI 3.1 schemas with `null` type")
     public void testNullTypePropertyGeneration() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/null_type_3_1.yaml"), true);
+                "/null_type_3_1.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

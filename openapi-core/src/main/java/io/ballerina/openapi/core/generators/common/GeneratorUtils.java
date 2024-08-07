@@ -745,14 +745,18 @@ public class GeneratorUtils {
      * @throws IOException
      * @throws BallerinaOpenApiException
      */
-    public static OpenAPI normalizeOpenAPI(Path openAPIPath, boolean validateOpIds) throws IOException,
-            BallerinaOpenApiException {
+    public static OpenAPI normalizeOpenAPI(Path openAPIPath, boolean validateOpIds, boolean isSanitized) throws
+            IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPIFromOpenAPIV3Parser(openAPIPath);
         io.swagger.v3.oas.models.Paths openAPIPaths = openAPI.getPaths();
         if (validateOpIds) {
             validateOperationIds(openAPIPaths.entrySet());
         }
         validateRequestBody(openAPIPaths.entrySet());
+        if (isSanitized) {
+            OASModifier oasSanitizer = new OASModifier(openAPI);
+            return oasSanitizer.modifyWithBallerinaConventions();
+        }
         return openAPI;
     }
 
