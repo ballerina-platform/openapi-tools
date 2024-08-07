@@ -166,7 +166,7 @@ public class Add implements BLauncherCmd {
                 if (mode == null) {
                     // Exit the code generation process
                     outStream.printf("ERROR:Invalid value for option '--mode': expected one of [service, client] but" +
-                            " was '%s'\n%n", baseCmd.mode);
+                            " was '%s'%n", baseCmd.mode);
                     exitError(this.exitWhenFinish);
                 }
             }

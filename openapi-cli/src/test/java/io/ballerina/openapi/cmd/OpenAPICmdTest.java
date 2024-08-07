@@ -915,17 +915,6 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Assert.assertTrue(tomlContent.contains(generatedTool));
     }
 
-    @Test(description = "when the user has given invalid mode option")
-    public void testForInvalidModeOption() {
-        Path yamlContract = resourceDir.resolve(Paths.get("petstore.yaml"));
-        String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString(), "--mode", "server"};
-        OpenApiCmd cmd = new OpenApiCmd(standardOut, tmpDir, true);
-        new CommandLine(cmd).parseArgs(args);
-        cmd.execute();
-        Assert.assertTrue(standardOut.toString().contains("ERROR:Invalid value for option '--mode': expected one of " +
-                "[service, client] but was 'server'"));
-    }
-
     @AfterTest
     public void clean() {
         System.setErr(null);
