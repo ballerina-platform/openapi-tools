@@ -33,6 +33,7 @@ configurations {
 
 dependencies {
     implementation "io.swagger.core.v3:swagger-models"
+    implementation "io.swagger.parser.v3:swagger-parser-safe-url-resolver:${swaggerParserVersion}"
     implementation ("io.swagger.parser.v3:swagger-parser:${swaggerParserVersion}") {
         exclude group: "io.swagger", module: "swagger-compat-spec-parser"
         exclude group: "org.slf4j", module: "slf4j-ext"
@@ -126,6 +127,7 @@ shadowJar {
         include(dependency('io.swagger.parser.v3:swagger-parser'))
         include(dependency('io.swagger.parser.v3:swagger-parser-core'))
         include(dependency('io.swagger.parser.v3:swagger-parser-v3'))
+        include(dependency('io.swagger.parser.v3:swagger-parser-safe-url-resolver'))
         exclude('META-INF/*.SF')
         exclude('META-INF/*.DSA')
         exclude('META-INF/*.RSA')
