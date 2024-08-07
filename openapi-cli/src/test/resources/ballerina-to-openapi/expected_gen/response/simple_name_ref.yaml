@@ -25,13 +25,13 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/ReturnValueStr'
+                $ref: "#/components/schemas/ReturnValueStr"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /lift02:
     get:
       operationId: getLift02
@@ -56,7 +56,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /lift03:
     get:
       operationId: getLift03
@@ -72,13 +72,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueIntArray'
+                $ref: "#/components/schemas/ReturnValueIntArray"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /lift05:
     get:
       operationId: getLift05
@@ -94,13 +94,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueMapJson'
+                $ref: "#/components/schemas/ReturnValueMapJson"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /lift06:
     get:
       operationId: getLift06
@@ -116,13 +116,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueJson'
+                $ref: "#/components/schemas/ReturnValueJson"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /lift07:
     get:
       operationId: getLift07
@@ -138,13 +138,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueMapRec'
+                $ref: "#/components/schemas/ReturnValueMapRec"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /lift08:
     get:
       operationId: getLift08
@@ -160,13 +160,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueMapString'
+                $ref: "#/components/schemas/ReturnValueMapString"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /lift09:
     get:
       operationId: getLift09
@@ -182,13 +182,13 @@ paths:
           content:
             application/xml:
               schema:
-                $ref: '#/components/schemas/ReturnValueXML'
+                $ref: "#/components/schemas/ReturnValueXML"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /lift10:
     get:
       operationId: getLift10
@@ -204,13 +204,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueError'
+                $ref: "#/components/schemas/ReturnValueError"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /lift11:
     get:
       operationId: getLift11
@@ -226,13 +226,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValuePrimitiveUnion'
+                $ref: "#/components/schemas/ReturnValuePrimitiveUnion"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /lift12:
     get:
       operationId: getLift12
@@ -248,13 +248,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueRecUnion'
+                $ref: "#/components/schemas/ReturnValueRecUnion"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /res13:
     get:
       operationId: getRes13
@@ -270,7 +270,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /res14:
     get:
       operationId: getRes14
@@ -296,7 +296,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /res16:
     get:
       operationId: getRes16
@@ -320,7 +320,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /res17:
     get:
       operationId: getRes17
@@ -336,13 +336,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StrArray'
+                $ref: "#/components/schemas/StrArray"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /res19:
     get:
       operationId: getRes19
@@ -358,13 +358,13 @@ paths:
           content:
             application/octet-stream:
               schema:
-                $ref: '#/components/schemas/ByteArr'
+                $ref: "#/components/schemas/ByteArr"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     ByteArr:
@@ -413,7 +413,7 @@ components:
         name:
           type: string
     ReturnValueError:
-      $ref: '#/components/schemas/ErrorPayload'
+      $ref: "#/components/schemas/ErrorPayload"
     ReturnValueIntArray:
       type: array
       items:
@@ -426,7 +426,7 @@ components:
     ReturnValueMapRec:
       type: object
       additionalProperties:
-        $ref: '#/components/schemas/Pet'
+        $ref: "#/components/schemas/Pet"
     ReturnValueMapString:
       type: object
       additionalProperties:
@@ -439,8 +439,8 @@ components:
           format: int64
     ReturnValueRecUnion:
       oneOf:
-        - $ref: '#/components/schemas/Pet'
-        - $ref: '#/components/schemas/Dog'
+        - $ref: "#/components/schemas/Pet"
+        - $ref: "#/components/schemas/Dog"
     ReturnValueStr:
       type: string
     ReturnValueXML:

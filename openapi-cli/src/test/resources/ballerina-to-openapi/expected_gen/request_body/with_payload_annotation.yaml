@@ -6,7 +6,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Reservation'
+              $ref: "#/components/schemas/Reservation"
         required: true
       responses:
         "200":
@@ -16,7 +16,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     ErrorPayload:

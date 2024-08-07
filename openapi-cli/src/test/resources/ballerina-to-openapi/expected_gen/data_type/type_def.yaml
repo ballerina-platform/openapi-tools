@@ -19,7 +19,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Link'
+              $ref: "#/components/schemas/Link"
         required: true
       responses:
         "202":
@@ -29,7 +29,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /reservation/{id}:
     get:
       operationId: getReservationId
@@ -38,7 +38,7 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/PetId'
+            $ref: "#/components/schemas/PetId"
       responses:
         "202":
           description: Accepted
@@ -47,7 +47,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     Action:
@@ -92,19 +92,19 @@ components:
       type: object
       properties:
         rels:
-          $ref: '#/components/schemas/Rels'
+          $ref: "#/components/schemas/Rels"
         actions:
-          $ref: '#/components/schemas/Action'
+          $ref: "#/components/schemas/Action"
         count:
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/Count'
+            - $ref: "#/components/schemas/Count"
         books:
-          $ref: '#/components/schemas/Books'
+          $ref: "#/components/schemas/Books"
         price:
-          $ref: '#/components/schemas/Price'
+          $ref: "#/components/schemas/Price"
         salary:
-          $ref: '#/components/schemas/Salary'
+          $ref: "#/components/schemas/Salary"
       additionalProperties: false
     PetId:
       type: integer
@@ -113,7 +113,7 @@ components:
       oneOf:
         - type: number
           format: float
-        - $ref: '#/components/schemas/PriceMap'
+        - $ref: "#/components/schemas/PriceMap"
     PriceMap:
       required:
         - price

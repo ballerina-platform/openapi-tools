@@ -17,7 +17,7 @@ paths:
         content:
           application/vnd.wso2.sales+json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
         required: true
       responses:
         "201":
@@ -25,13 +25,13 @@ paths:
           content:
             application/vnd.wso2.sales+json:
               schema:
-                $ref: '#/components/schemas/Pet'
+                $ref: "#/components/schemas/Pet"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     ErrorPayload:

@@ -19,7 +19,7 @@ paths:
           content:
             text/html:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
   /expense:
     get:
       operationId: getExpense
@@ -28,7 +28,7 @@ paths:
           in: query
           required: true
           schema:
-            $ref: '#/components/schemas/Currency'
+            $ref: "#/components/schemas/Currency"
       responses:
         "200":
           description: Ok
@@ -44,7 +44,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /bill:
     get:
       operationId: getBill
@@ -55,7 +55,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Product'
+                $ref: "#/components/schemas/Product"
       responses:
         "202":
           description: Accepted
@@ -64,7 +64,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     Currency:
@@ -104,7 +104,7 @@ components:
       type: object
       properties:
         currency:
-          $ref: '#/components/schemas/Currency'
+          $ref: "#/components/schemas/Currency"
         amount:
           type: number
           format: float
@@ -124,7 +124,7 @@ components:
         description:
           type: string
         price:
-          $ref: '#/components/schemas/Price'
+          $ref: "#/components/schemas/Price"
       additionalProperties: false
       description: Represents a product
     User:

@@ -31,7 +31,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Locations'
+                $ref: "#/components/schemas/Locations"
         "409":
           description: Conflict
           content:
@@ -61,7 +61,7 @@ components:
           type: array
           description: Allowed resource methods
           items:
-            $ref: '#/components/schemas/Method'
+            $ref: "#/components/schemas/Method"
       description: Represents a server-provided hyperlink
     Links:
       required:
@@ -71,7 +71,7 @@ components:
         _links:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/Link'
+            $ref: "#/components/schemas/Link"
           description: Map of available links
       additionalProperties: false
       description: Represents available server-provided links
@@ -79,7 +79,7 @@ components:
       type: object
       description: Represents location
       allOf:
-        - $ref: '#/components/schemas/Links'
+        - $ref: "#/components/schemas/Links"
         - required:
             - address
             - id
@@ -105,7 +105,7 @@ components:
           type: array
           description: collection of locations
           items:
-            $ref: '#/components/schemas/Location'
+            $ref: "#/components/schemas/Location"
       additionalProperties: false
       description: Represents a collection of locations
     Method:

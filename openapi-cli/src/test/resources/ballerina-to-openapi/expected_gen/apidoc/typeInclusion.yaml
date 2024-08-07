@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReservationReceipt'
+              $ref: "#/components/schemas/ReservationReceipt"
         required: true
       responses:
         "202":
@@ -27,7 +27,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     ErrorPayload:
@@ -82,7 +82,7 @@ components:
           type: array
           description: Array links
           items:
-            $ref: '#/components/schemas/Link'
+            $ref: "#/components/schemas/Link"
         linkid:
           type: integer
           description: link id
@@ -93,7 +93,7 @@ components:
       type: object
       description: ReservationReceipt details
       allOf:
-        - $ref: '#/components/schemas/Links'
+        - $ref: "#/components/schemas/Links"
         - required:
             - id
           type: object

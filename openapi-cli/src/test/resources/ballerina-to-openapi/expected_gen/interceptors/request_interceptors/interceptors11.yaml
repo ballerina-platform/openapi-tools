@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Person'
+              $ref: "#/components/schemas/Person"
         required: true
       responses:
         "500":
@@ -25,7 +25,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
         "501":
           description: NotImplemented
         "202":
@@ -35,7 +35,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /foo:
     put:
       operationId: putFoo
@@ -43,7 +43,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Person'
+              $ref: "#/components/schemas/Person"
         required: true
       responses:
         "202":
@@ -53,7 +53,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /{path}:
     put:
       operationId: putPath
@@ -67,7 +67,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Person'
+              $ref: "#/components/schemas/Person"
         required: true
       responses:
         "200":
@@ -75,13 +75,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Person'
+                $ref: "#/components/schemas/Person"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /foo/bar/true/4.35/4.56:
     get:
       operationId: getFooBarTrue435456
@@ -91,7 +91,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayloadNew'
+                $ref: "#/components/schemas/ErrorPayloadNew"
         "404":
           description: NotFound
         "505":
@@ -103,7 +103,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Person'
+                  $ref: "#/components/schemas/Person"
   /foo/baz/false/5.2/4.56:
     post:
       operationId: postFooBazFalse52456
@@ -113,7 +113,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayloadNew'
+                $ref: "#/components/schemas/ErrorPayloadNew"
         "404":
           description: NotFound
         "505":
@@ -128,7 +128,7 @@ paths:
                 type: object
                 properties:
                   p:
-                    $ref: '#/components/schemas/Person'
+                    $ref: "#/components/schemas/Person"
                 additionalProperties: false
   /foo/foo/{b}/{d}/4.56:
     post:
@@ -151,7 +151,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayloadNew'
+                $ref: "#/components/schemas/ErrorPayloadNew"
         "404":
           description: NotFound
         "505":
@@ -164,7 +164,7 @@ paths:
                 type: object
             application/json:
               schema:
-                $ref: '#/components/schemas/Person'
+                $ref: "#/components/schemas/Person"
             text/plain:
               schema:
                 type: string
@@ -173,7 +173,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     Civil:
@@ -182,18 +182,18 @@ components:
         Time within some region relative to a
         time scale stipulated by civilian authorities.
       allOf:
-        - $ref: '#/components/schemas/DateFields'
-        - $ref: '#/components/schemas/TimeOfDayFields'
+        - $ref: "#/components/schemas/DateFields"
+        - $ref: "#/components/schemas/TimeOfDayFields"
         - type: object
           properties:
             utcOffset:
-              $ref: '#/components/schemas/ZoneOffset'
+              $ref: "#/components/schemas/ZoneOffset"
             timeAbbrev:
               type: string
             which:
-              $ref: '#/components/schemas/ZERO_OR_ONE'
+              $ref: "#/components/schemas/ZERO_OR_ONE"
             dayOfWeek:
-              $ref: '#/components/schemas/DayOfWeek'
+              $ref: "#/components/schemas/DayOfWeek"
     DateFields:
       required:
         - day
@@ -252,7 +252,7 @@ components:
       type: object
       properties:
         timestamp:
-          $ref: '#/components/schemas/Civil'
+          $ref: "#/components/schemas/Civil"
         message:
           type: string
           default: something went wrong
@@ -292,7 +292,7 @@ components:
           type: integer
           format: int64
         second:
-          $ref: '#/components/schemas/Seconds'
+          $ref: "#/components/schemas/Seconds"
       description: Fields of the TimeOfDay record.
     ZERO_OR_ONE:
       type: integer

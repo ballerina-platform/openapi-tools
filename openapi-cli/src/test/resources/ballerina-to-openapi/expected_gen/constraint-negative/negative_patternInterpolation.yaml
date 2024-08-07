@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Emp'
+              $ref: "#/components/schemas/Emp"
         required: true
       responses:
         "202":
@@ -27,13 +27,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     Emp:
@@ -42,13 +42,13 @@ components:
       type: object
       properties:
         posId:
-          $ref: '#/components/schemas/PosID'
+          $ref: "#/components/schemas/PosID"
         code:
           type: string
         empID:
-          $ref: '#/components/schemas/EmpID'
+          $ref: "#/components/schemas/EmpID"
         name:
-          $ref: '#/components/schemas/Name'
+          $ref: "#/components/schemas/Name"
     EmpID:
       type: string
     ErrorPayload:

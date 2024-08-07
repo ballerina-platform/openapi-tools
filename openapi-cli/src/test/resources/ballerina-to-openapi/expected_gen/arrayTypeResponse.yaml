@@ -22,7 +22,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Product'
+                  $ref: "#/components/schemas/Product"
 components:
   schemas:
     Currency:
@@ -39,7 +39,7 @@ components:
       type: object
       properties:
         currency:
-          $ref: '#/components/schemas/Currency'
+          $ref: "#/components/schemas/Currency"
         amount:
           type: number
           format: float
@@ -59,6 +59,6 @@ components:
         description:
           type: string
         price:
-          $ref: '#/components/schemas/Price'
+          $ref: "#/components/schemas/Price"
       additionalProperties: false
       description: Represents a product

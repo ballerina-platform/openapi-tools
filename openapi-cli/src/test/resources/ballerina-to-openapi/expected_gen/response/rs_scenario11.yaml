@@ -28,20 +28,20 @@ paths:
           in: query
           required: true
           schema:
-            $ref: '#/components/schemas/String'
+            $ref: "#/components/schemas/String"
       responses:
         "200":
           description: Ok
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/String'
+                $ref: "#/components/schemas/String"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /howdy:
     get:
       operationId: getHowdy
@@ -51,7 +51,7 @@ paths:
           required: true
           schema:
             oneOf:
-              - $ref: '#/components/schemas/String'
+              - $ref: "#/components/schemas/String"
               - type: string
       responses:
         "200":
@@ -60,14 +60,14 @@ paths:
             text/plain:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/String'
+                  - $ref: "#/components/schemas/String"
                   - type: string
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     ErrorPayload:

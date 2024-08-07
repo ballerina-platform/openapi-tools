@@ -19,7 +19,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Link'
+              $ref: "#/components/schemas/Link"
         required: true
       responses:
         "202":
@@ -29,7 +29,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /getOrder:
     post:
       operationId: postGetorder
@@ -37,7 +37,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Order'
+              $ref: "#/components/schemas/Order"
         required: true
       responses:
         "202":
@@ -47,7 +47,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     Action:
@@ -89,7 +89,7 @@ components:
         rel:
           type: string
         actions:
-          $ref: '#/components/schemas/Action'
+          $ref: "#/components/schemas/Action"
       additionalProperties: false
     Order:
       required:
@@ -99,7 +99,7 @@ components:
         rel:
           type: string
         actions:
-          $ref: '#/components/schemas/OrderType'
+          $ref: "#/components/schemas/OrderType"
       additionalProperties: false
     OrderType:
       type: string

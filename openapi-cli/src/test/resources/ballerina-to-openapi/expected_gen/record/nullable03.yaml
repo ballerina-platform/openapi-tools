@@ -34,7 +34,7 @@ components:
         pet:
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/Pet'
+            - $ref: "#/components/schemas/Pet"
       additionalProperties: false
     Pet:
       required:
