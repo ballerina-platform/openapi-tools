@@ -55,7 +55,7 @@ public class AnyOfDataTypeTests {
     @Test(description = "Test for the schema has anyOf dataType")
     public void testAnyOfInSchema() throws IOException, BallerinaOpenApiException, OASTypeGenException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         Schema<?> schema = openAPI.getComponents().getSchemas().get("AnyOF");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         GeneratorMetaData.createInstance(openAPI, false);
@@ -69,7 +69,7 @@ public class AnyOfDataTypeTests {
     public void testAnyOfSchema() throws BallerinaOpenApiException, FormatterException, IOException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/schema15.bal");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

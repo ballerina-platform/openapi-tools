@@ -232,7 +232,7 @@ public class UtilGenerationTests {
 
     private BallerinaClientGenerator getBallerinaClientGenerator(Path definitionPath) throws IOException,
             BallerinaOpenApiException {
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder

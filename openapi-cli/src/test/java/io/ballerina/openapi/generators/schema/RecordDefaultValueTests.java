@@ -45,7 +45,7 @@ public class RecordDefaultValueTests {
     @Test(description = "Test for default optional primitive fields in records")
     public void testDefaultPrimitive() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/default_optional_primitive_schema.yaml"), true);
+                "/default_optional_primitive_schema.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -62,7 +62,7 @@ public class RecordDefaultValueTests {
     @Test(description = "Test for default optional String fields in records")
     public void testDefaultString() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/default_optional_string_schema.yaml"), true);
+                "/default_optional_string_schema.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -79,7 +79,7 @@ public class RecordDefaultValueTests {
     @Test(description = "Test for default optional String fields with value double quote in records")
     public void testDefaultWithDoubleQuote() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/default_optional_schema_with_doublequote.yaml"), true);
+                "/default_optional_schema_with_doublequote.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -96,7 +96,7 @@ public class RecordDefaultValueTests {
     @Test(description = "Test for default value for array record")
     public void testDefaultArray() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/default_optional_array_schema.yaml"), true);
+                "/default_optional_array_schema.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -113,7 +113,7 @@ public class RecordDefaultValueTests {
     @Test(description = "Test for default value for required fields")
     public void testDefaultRequired() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/default_required_field_schema.yaml"), true);
+                "/default_required_field_schema.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -130,7 +130,7 @@ public class RecordDefaultValueTests {
     @Test(description = "Test for default value without required fields")
     public void testDefaultWithoutRequired() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/default_non_required_field_schema.yaml"), true);
+                "/default_non_required_field_schema.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

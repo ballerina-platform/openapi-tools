@@ -40,7 +40,7 @@ public class NoServerURLTest {
         Path definitionPath = RES_DIR.resolve("swagger/missing_server_url.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/missing_server_url.bal");
 
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
@@ -88,7 +88,7 @@ public class NoServerURLTest {
         Path definitionPath = RES_DIR.resolve("swagger/blank_value_server_url.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/blank_value_server_url.bal");
 
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder

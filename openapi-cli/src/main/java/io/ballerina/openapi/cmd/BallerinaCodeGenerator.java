@@ -111,7 +111,7 @@ public class BallerinaCodeGenerator {
         // Normalize OpenAPI definition, in the client generation we suppose to terminate code generation when the
         // absence of the operationId in operation. Therefor we enable client flag true as default code generation.
         // if resource is enabled, we avoid checking operationId.
-        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPIPath, !options.isResource);
+        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPIPath, !options.isResource, options.isSanitizedOas);
         checkOpenAPIVersion(openAPIDef);
         // Add typeHandler
         TypeHandler.createInstance(openAPIDef, options.nullable);
@@ -222,10 +222,12 @@ public class BallerinaCodeGenerator {
      *                                      service without data binding
      *  @param statusCodeBinding            Enable statusCodeBinding option
      *  @param isMock                       Enable isMock option to generate mocks
+     *  @param isSanitizedOas               Enable isSanitizedOas option to modify the OAS to follow the Ballerina
+     *                                      language best practices
      */
     public record ClientServiceGeneratorOptions(boolean nullable, boolean isResource, boolean generateServiceType,
                                                 boolean generateServiceContract, boolean generateWithoutDataBinding,
-                                                boolean statusCodeBinding, boolean isMock) { }
+                                                boolean statusCodeBinding, boolean isMock, boolean isSanitizedOas) { }
 
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();
@@ -295,10 +297,12 @@ public class BallerinaCodeGenerator {
      * @param generateServiceContract  Enable to generate service contract
      * @param generateWithoutDataBinding  Enable to generate service without data binding
      * @param singleFile                   Enable singleFile option to generate all content in a single file
+     * @param isSanitizedOas               Enable isSanitizedOas option to modify the OAS to follow the Ballerina
+     *                                      language best practices
      */
     public record ServiceGeneratorOptions(boolean nullable, boolean generateServiceType,
                                           boolean generateServiceContract, boolean generateWithoutDataBinding,
-                                          boolean singleFile) {
+                                          boolean singleFile, boolean isSanitizedOas) {
     }
 
     private void writeGeneratedSources(List<GenSrcFile> sources, Path srcPath, Path implPath,
@@ -391,7 +395,7 @@ public class BallerinaCodeGenerator {
         }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         // Normalize OpenAPI definition
-        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, !options.isResource);
+        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, !options.isResource, options.isSanitizedOas);
         checkOpenAPIVersion(openAPIDef);
         // Validate the service generation
         List<String> complexPaths = GeneratorUtils.getComplexPaths(openAPIDef);
@@ -469,9 +473,11 @@ public class BallerinaCodeGenerator {
      *  @param statusCodeBinding      Enable statusCodeBinding option
      *  @param isMock                 Enable isMock option to generate mocks
      *  @param singleFile             Enable singleFile option to generate all content in a single file
+     *  @param isSanitizedOas               Enable isSanitizedOas option to modify the OAS to follow the Ballerina
+     *                                      language best practices
      */
     public record ClientGeneratorOptions(boolean nullable, boolean isResource, boolean statusCodeBinding,
-                                         boolean isMock, boolean singleFile) { }
+                                         boolean isMock, boolean singleFile, boolean isSanitizedOas) { }
 
     private void generateFilesForClient(SyntaxTree syntaxTree, List<GenSrcFile> sourceFiles,
                                         BallerinaClientGenerator clientGenerator) throws FormatterException,
@@ -529,7 +535,7 @@ public class BallerinaCodeGenerator {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_MOCK_PKG;
         }
-        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, false);
+        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, false, options.isSanitizedOas);
         if (openAPIDef.getInfo() == null) {
             throw new BallerinaOpenApiException("Info section of the definition file cannot be empty/null: " +
                     openAPI);

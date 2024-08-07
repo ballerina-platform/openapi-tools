@@ -51,8 +51,10 @@ paths:
                 - userName
               properties:
                 userName:
+                  description: User name
                   type: string
                 firstName:
+                  description: First name
                   type: string
   /path02:
     post:

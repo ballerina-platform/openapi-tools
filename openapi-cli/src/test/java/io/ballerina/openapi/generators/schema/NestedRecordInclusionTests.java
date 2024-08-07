@@ -27,7 +27,7 @@ public class NestedRecordInclusionTests {
     @Test(description = "Generate records for nested referenced schemas")
     public void generateAllOf() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/nested_schema_refs.yaml");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

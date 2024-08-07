@@ -60,7 +60,8 @@ public class EnumGenerationTests {
             "Use case 03 : Enum with null value" +
             "Use case 04 : Enum as array items")
     public void testForEnums() throws IOException, BallerinaOpenApiException, FormatterException {
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/schema_with_enums.yaml"), true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/schema_with_enums.yaml"),
+                true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -84,7 +85,7 @@ public class EnumGenerationTests {
             "Use case 05 : Nullable enum in arrays")
     public void testForNullableEnums() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve(
-                "swagger/schema_with_nullable_enums.yaml"), true);
+                "swagger/schema_with_nullable_enums.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -103,7 +104,7 @@ public class EnumGenerationTests {
     @Test(description = "Test enum with no values")
     public void testForEmptyEnums() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve(
-                "swagger/empty_enum.yaml"), true);
+                "swagger/empty_enum.yaml"), true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

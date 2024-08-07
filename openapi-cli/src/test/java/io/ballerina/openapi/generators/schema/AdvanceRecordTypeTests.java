@@ -46,7 +46,7 @@ public class AdvanceRecordTypeTests {
     @Test(description = "Generate record for schema has not type")
     public void generateSchemaHasNotType() throws IOException, FormatterException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario10.yaml");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -63,7 +63,7 @@ public class AdvanceRecordTypeTests {
     @Test(description = "Generate record for schema has inline record in fields reference")
     public void generateSchemaHasInlineRecord() throws IOException, FormatterException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario11.yaml");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -79,7 +79,7 @@ public class AdvanceRecordTypeTests {
     @Test(description = "Generate record for openapi weather api")
     public void generateOpenAPIWeatherAPI() throws IOException, FormatterException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -97,7 +97,7 @@ public class AdvanceRecordTypeTests {
     public void generateForSchemaHasObjectTypeOnly() throws IOException, BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario14.yaml");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
