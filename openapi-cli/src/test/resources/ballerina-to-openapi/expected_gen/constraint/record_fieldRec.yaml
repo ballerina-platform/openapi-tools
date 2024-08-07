@@ -20,12 +20,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Record'
+                $ref: "#/components/schemas/Record"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Person'
+              $ref: "#/components/schemas/Person"
         required: true
       responses:
         "202":
@@ -35,13 +35,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     Address:
@@ -91,7 +91,7 @@ components:
           type: integer
           format: int64
         address:
-          $ref: '#/components/schemas/Address'
+          $ref: "#/components/schemas/Address"
         salary:
           maximum: 100000.0
           exclusiveMaximum: true

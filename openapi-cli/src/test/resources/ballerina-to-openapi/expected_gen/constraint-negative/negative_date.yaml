@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegDate'
+              $ref: "#/components/schemas/RegDate"
         required: true
       responses:
         "202":
@@ -27,25 +27,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     Date:
       type: object
       description: Date in proleptic Gregorian calendar.
       allOf:
-        - $ref: '#/components/schemas/DateFields'
-        - $ref: '#/components/schemas/OptionalTimeOfDayFields'
+        - $ref: "#/components/schemas/DateFields"
+        - $ref: "#/components/schemas/OptionalTimeOfDayFields"
         - type: object
           properties:
             utcOffset:
-              $ref: '#/components/schemas/ZoneOffset'
+              $ref: "#/components/schemas/ZoneOffset"
     DateFields:
       required:
         - day
@@ -87,7 +87,7 @@ components:
         method:
           type: string
     MyDate:
-      $ref: '#/components/schemas/Date'
+      $ref: "#/components/schemas/Date"
     OptionalTimeOfDayFields:
       type: object
       properties:
@@ -98,7 +98,7 @@ components:
           type: integer
           format: int64
         second:
-          $ref: '#/components/schemas/Seconds'
+          $ref: "#/components/schemas/Seconds"
       description: TimeOfDay with all the fields beign optional.
     RegDate:
       required:
@@ -106,9 +106,9 @@ components:
       type: object
       properties:
         date:
-          $ref: '#/components/schemas/MyDate'
+          $ref: "#/components/schemas/MyDate"
         lastLogin:
-          $ref: '#/components/schemas/Date'
+          $ref: "#/components/schemas/Date"
     Seconds:
       type: number
       description: Holds the seconds as a decimal value.

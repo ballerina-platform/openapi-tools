@@ -19,7 +19,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: "#/components/schemas/Response"
     post:
       operationId: postUsers
       requestBody:
@@ -28,7 +28,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
         required: true
       responses:
         "201":
@@ -36,7 +36,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: "#/components/schemas/Response"
   /users/{id}:
     get:
       operationId: getUsersId
@@ -53,7 +53,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: "#/components/schemas/Response"
   /user:
     post:
       operationId: postUser
@@ -63,7 +63,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: "#/components/schemas/Response"
 components:
   schemas:
     Response:
@@ -79,10 +79,10 @@ components:
           type: string
         payload:
           oneOf:
-            - $ref: '#/components/schemas/User'
+            - $ref: "#/components/schemas/User"
             - type: array
               items:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
       additionalProperties: false
     User:
       required:

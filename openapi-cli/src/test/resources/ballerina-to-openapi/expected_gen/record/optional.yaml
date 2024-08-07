@@ -37,7 +37,7 @@ components:
           items:
             type: string
         pet:
-          $ref: '#/components/schemas/Pet'
+          $ref: "#/components/schemas/Pet"
       additionalProperties: false
     Pet:
       required:

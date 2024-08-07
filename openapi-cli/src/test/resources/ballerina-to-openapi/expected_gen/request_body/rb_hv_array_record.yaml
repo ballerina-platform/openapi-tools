@@ -8,7 +8,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Pet'
+                $ref: "#/components/schemas/Pet"
         required: true
       responses:
         "200":
@@ -18,7 +18,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     ErrorPayload:

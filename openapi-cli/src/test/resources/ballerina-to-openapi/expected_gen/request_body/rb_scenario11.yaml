@@ -6,7 +6,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Tag'
+              $ref: "#/components/schemas/Tag"
         required: true
       responses:
         "200":
@@ -16,14 +16,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
     post:
       operationId: postPets
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
         required: true
       responses:
         "200":
@@ -33,7 +33,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     ErrorPayload:
@@ -85,7 +85,7 @@ components:
         tagType:
           type: array
           items:
-            $ref: '#/components/schemas/TagType'
+            $ref: "#/components/schemas/TagType"
     TagType:
       required:
         - category

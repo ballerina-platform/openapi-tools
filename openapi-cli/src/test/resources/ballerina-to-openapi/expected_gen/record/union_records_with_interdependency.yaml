@@ -25,7 +25,7 @@ paths:
           content:
             application/fhir+json:
               schema:
-                $ref: '#/components/schemas/Patient'
+                $ref: "#/components/schemas/Patient"
             application/fhir+xml:
               schema:
                 type: object
@@ -34,7 +34,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     CodeExtension:
@@ -44,22 +44,22 @@ components:
       type: object
       properties:
         url:
-          $ref: '#/components/schemas/uri'
+          $ref: "#/components/schemas/uri"
         valueCode:
           type: string
       additionalProperties: false
     Coding:
       type: object
       allOf:
-        - $ref: '#/components/schemas/Element'
+        - $ref: "#/components/schemas/Element"
         - type: object
           properties:
             extension:
               type: array
               items:
-                $ref: '#/components/schemas/Extension'
+                $ref: "#/components/schemas/Extension"
             system:
-              $ref: '#/components/schemas/uri'
+              $ref: "#/components/schemas/uri"
             version:
               type: string
             display:
@@ -74,9 +74,9 @@ components:
       type: object
       properties:
         url:
-          $ref: '#/components/schemas/uri'
+          $ref: "#/components/schemas/uri"
         valueCoding:
-          $ref: '#/components/schemas/Coding'
+          $ref: "#/components/schemas/Coding"
       additionalProperties: false
     Element:
       type: object
@@ -112,32 +112,32 @@ components:
           type: string
     Extension:
       oneOf:
-        - $ref: '#/components/schemas/ExtensionExtension'
-        - $ref: '#/components/schemas/StringExtension'
-        - $ref: '#/components/schemas/CodingExtension'
-        - $ref: '#/components/schemas/CodeExtension'
-        - $ref: '#/components/schemas/IntegerExtension'
+        - $ref: "#/components/schemas/ExtensionExtension"
+        - $ref: "#/components/schemas/StringExtension"
+        - $ref: "#/components/schemas/CodingExtension"
+        - $ref: "#/components/schemas/CodeExtension"
+        - $ref: "#/components/schemas/IntegerExtension"
     ExtensionExtension:
       type: object
       allOf:
-        - $ref: '#/components/schemas/Element'
+        - $ref: "#/components/schemas/Element"
         - type: object
           properties:
             extension:
               type: array
               items:
-                $ref: '#/components/schemas/Extension'
+                $ref: "#/components/schemas/Extension"
           additionalProperties: false
     Identifier:
       type: object
       allOf:
-        - $ref: '#/components/schemas/Element'
+        - $ref: "#/components/schemas/Element"
         - type: object
           properties:
             value:
               type: string
             assigner:
-              $ref: '#/components/schemas/Reference'
+              $ref: "#/components/schemas/Reference"
           additionalProperties: false
     IntegerExtension:
       required:
@@ -146,7 +146,7 @@ components:
       type: object
       properties:
         url:
-          $ref: '#/components/schemas/uri'
+          $ref: "#/components/schemas/uri"
         valueInteger:
           type: integer
           format: int64
@@ -157,16 +157,16 @@ components:
         ext:
           type: array
           items:
-            $ref: '#/components/schemas/Extension'
+            $ref: "#/components/schemas/Extension"
         id:
           type: string
         ref:
-          $ref: '#/components/schemas/Reference'
+          $ref: "#/components/schemas/Reference"
       additionalProperties: false
     Reference:
       type: object
       allOf:
-        - $ref: '#/components/schemas/Element'
+        - $ref: "#/components/schemas/Element"
         - type: object
           properties:
             reference:
@@ -174,7 +174,7 @@ components:
             type:
               type: string
             identifier:
-              $ref: '#/components/schemas/Identifier'
+              $ref: "#/components/schemas/Identifier"
             display:
               type: string
           additionalProperties: false
@@ -185,7 +185,7 @@ components:
       type: object
       properties:
         url:
-          $ref: '#/components/schemas/uri'
+          $ref: "#/components/schemas/uri"
         valueString:
           type: string
       additionalProperties: false

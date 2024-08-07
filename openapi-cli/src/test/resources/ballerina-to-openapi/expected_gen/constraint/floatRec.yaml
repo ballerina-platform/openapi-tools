@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Hotel'
+              $ref: "#/components/schemas/Hotel"
         required: true
       responses:
         "202":
@@ -27,13 +27,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     ErrorPayload:
@@ -65,7 +65,7 @@ components:
       type: object
       properties:
         rate:
-          $ref: '#/components/schemas/Rating'
+          $ref: "#/components/schemas/Rating"
     Rating:
       maximum: 10.5
       exclusiveMaximum: true

@@ -46,20 +46,20 @@ paths:
                 oneOf:
                   - type: array
                     items:
-                      $ref: '#/components/schemas/Course'
-                  - $ref: '#/components/schemas/NewCourse'
+                      $ref: "#/components/schemas/Course"
+                  - $ref: "#/components/schemas/NewCourse"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /foo/bar/{p2}/2.0/{p3}/4:
     get:
       operationId: getFooBarP220P34
@@ -88,13 +88,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NewCourse'
+                $ref: "#/components/schemas/NewCourse"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
     post:
       operationId: postFooBarP220P34
       parameters:
@@ -125,14 +125,14 @@ paths:
                 oneOf:
                   - type: array
                     items:
-                      $ref: '#/components/schemas/Course'
-                  - $ref: '#/components/schemas/NewCourse'
+                      $ref: "#/components/schemas/Course"
+                  - $ref: "#/components/schemas/NewCourse"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
         "501":
           description: NotImplemented
           content:
@@ -148,7 +148,7 @@ paths:
                   courses:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Course'
+                      $ref: "#/components/schemas/Course"
                 additionalProperties:
                   oneOf:
                     - type: integer
@@ -174,7 +174,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /foo/baz/{p2}/2.2/{p3}/4:
     get:
       operationId: getFooBazP222P34
@@ -203,13 +203,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NewCourse'
+                $ref: "#/components/schemas/NewCourse"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /foo/{p1}/{p2}/2.0/{p3}/4/bar:
     get:
       operationId: getFooP1P220P34Bar
@@ -243,13 +243,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NewCourse'
+                $ref: "#/components/schemas/NewCourse"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /foo/bar/{p2}/2.0/{p3}/4/5:
     post:
       operationId: postFooBarP220P345
@@ -281,20 +281,20 @@ paths:
                 oneOf:
                   - type: array
                     items:
-                      $ref: '#/components/schemas/Course'
-                  - $ref: '#/components/schemas/NewCourse'
+                      $ref: "#/components/schemas/Course"
+                  - $ref: "#/components/schemas/NewCourse"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /foo/bar/{p2}/2.0/{p3}/7/5:
     post:
       operationId: postFooBarP220P375
@@ -326,20 +326,20 @@ paths:
                 oneOf:
                   - type: array
                     items:
-                      $ref: '#/components/schemas/Course'
-                  - $ref: '#/components/schemas/NewCourse'
+                      $ref: "#/components/schemas/Course"
+                  - $ref: "#/components/schemas/NewCourse"
         "500":
           description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     Course:

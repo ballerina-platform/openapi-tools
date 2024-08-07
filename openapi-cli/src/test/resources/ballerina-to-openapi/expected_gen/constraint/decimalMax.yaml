@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/School'
+              $ref: "#/components/schemas/School"
         required: true
       responses:
         "202":
@@ -27,20 +27,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     AdjustedMarks:
       maximum: 6.0
       minimum: 3.0
       allOf:
-        - $ref: '#/components/schemas/Marks'
+        - $ref: "#/components/schemas/Marks"
     ErrorPayload:
       required:
         - message
@@ -77,6 +77,6 @@ components:
       type: object
       properties:
         marks:
-          $ref: '#/components/schemas/Marks'
+          $ref: "#/components/schemas/Marks"
         adjustedMarks:
-          $ref: '#/components/schemas/AdjustedMarks'
+          $ref: "#/components/schemas/AdjustedMarks"

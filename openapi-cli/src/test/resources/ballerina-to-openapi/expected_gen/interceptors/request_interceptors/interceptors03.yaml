@@ -21,7 +21,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Course'
+                  $ref: "#/components/schemas/Course"
             text/plain:
               schema:
                 type: string
@@ -36,7 +36,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Course'
+                  $ref: "#/components/schemas/Course"
             text/plain:
               schema:
                 type: string
@@ -51,8 +51,8 @@ paths:
                 oneOf:
                   - type: array
                     items:
-                      $ref: '#/components/schemas/Course'
-                  - $ref: '#/components/schemas/Person'
+                      $ref: "#/components/schemas/Course"
+                  - $ref: "#/components/schemas/Person"
   /foo/{path}:
     get:
       operationId: getFooPath
@@ -70,7 +70,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Course'
+                  $ref: "#/components/schemas/Course"
             text/plain:
               schema:
                 type: string
@@ -79,7 +79,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     Course:

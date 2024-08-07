@@ -30,8 +30,8 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Course'
-                  - $ref: '#/components/schemas/Person'
+                  - $ref: "#/components/schemas/Course"
+                  - $ref: "#/components/schemas/Person"
   /foo/bar:
     get:
       operationId: getFooBar
@@ -52,7 +52,7 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Course'
+                  - $ref: "#/components/schemas/Course"
                   - type: integer
                     format: int64
   /{path1}/{path2}/{path}/4:
@@ -91,7 +91,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Course'
+                $ref: "#/components/schemas/Course"
         default:
           description: Any Response
           content:
@@ -105,7 +105,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     Course:

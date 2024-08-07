@@ -18,45 +18,45 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/MeetingGroup'
+            $ref: "#/components/schemas/MeetingGroup"
         - name: x-date-required
           in: header
           required: true
           schema:
-            $ref: '#/components/schemas/DateFormat'
+            $ref: "#/components/schemas/DateFormat"
         - name: x-date-optional
           in: header
           schema:
             nullable: true
             allOf:
-              - $ref: '#/components/schemas/DateFormat'
+              - $ref: "#/components/schemas/DateFormat"
         - name: x-required-arr
           in: header
           required: true
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/TimeZone'
+              $ref: "#/components/schemas/TimeZone"
         - name: x-optional-arr
           in: header
           schema:
             type: array
             nullable: true
             items:
-              $ref: '#/components/schemas/TimeZone'
+              $ref: "#/components/schemas/TimeZone"
         - name: x-def-arr
           in: header
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/DateFormat'
+              $ref: "#/components/schemas/DateFormat"
             default:
               - UTC
         - name: x-def-header
           in: header
           schema:
             allOf:
-              - $ref: '#/components/schemas/DateFormat'
+              - $ref: "#/components/schemas/DateFormat"
             default: UTC
       responses:
         "200":
@@ -64,7 +64,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MeetingList'
+                $ref: "#/components/schemas/MeetingList"
         "404":
           description: NotFound
         "400":
@@ -72,7 +72,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     DateFormat:
@@ -126,7 +126,7 @@ components:
         meetings:
           type: array
           items:
-            $ref: '#/components/schemas/Meeting'
+            $ref: "#/components/schemas/Meeting"
     TimeZone:
       type: string
       enum:

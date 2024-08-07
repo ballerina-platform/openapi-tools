@@ -21,7 +21,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Course'
+                  $ref: "#/components/schemas/Course"
   /foo/bar:
     get:
       operationId: getFooBar
@@ -33,7 +33,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Course'
+                  $ref: "#/components/schemas/Course"
     post:
       operationId: postFooBar
       responses:
@@ -44,7 +44,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Course'
+                  $ref: "#/components/schemas/Course"
   /foo/{path}:
     get:
       operationId: getFooPath
@@ -62,13 +62,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Course'
+                  $ref: "#/components/schemas/Course"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     Course:
