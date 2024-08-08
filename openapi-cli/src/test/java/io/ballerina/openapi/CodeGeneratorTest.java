@@ -716,6 +716,18 @@ public class CodeGeneratorTest {
         generator.generateClient(definitionPath, "", filter, defaultClientOptions);
     }
 
+    @Test(description = "Test client resource generation with complex path and missing operation ids",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "the configured generation mode requires operation ids for all " +
+                    "operations: \\ROperationId is missing in the resource path: .*", enabled = false)
+    public void testMissingOperationIdWithComplexPath() throws IOException, BallerinaOpenApiException,
+            FormatterException, OASTypeGenException {
+        String definitionPath = RES_DIR.resolve("petstore_with_complex_path_and_without_operation_id.yaml").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+        ClientGeneratorOptions options = new ClientGeneratorOptions(false, true, false, false, false, false);
+        generator.generateClient(definitionPath, "", filter, options);
+    }
+
     @Test(description = "Functionality tests when swagger 1.2 contract is given as input",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Provided OpenAPI contract version is not supported in the tool. " +

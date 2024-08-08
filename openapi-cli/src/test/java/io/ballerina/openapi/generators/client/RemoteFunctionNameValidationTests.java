@@ -35,7 +35,7 @@ public class RemoteFunctionNameValidationTests {
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "the configured generation mode requires operation ids for all " +
                     "operations: \\ROperationId is missing in the resource path: .*", enabled = false)
-    public void testMissionOperationId() throws IOException, BallerinaOpenApiException, ClientException {
+    public void testMissingOperationId() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("petstore_without_operation_id.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
