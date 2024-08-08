@@ -108,10 +108,7 @@ public class BallerinaCodeGenerator {
 
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         Path openAPIPath = Path.of(definitionPath);
-        // Normalize OpenAPI definition, in the client generation we suppose to terminate code generation when the
-        // absence of the operationId in operation. Therefor we enable client flag true as default code generation.
-        // if resource is enabled, we avoid checking operationId.
-        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPIPath, !options.isResource, options.isSanitizedOas);
+        OpenAPI openAPIDef = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(openAPIPath);
         checkOpenAPIVersion(openAPIDef);
         // Add typeHandler
         TypeHandler.createInstance(openAPIDef, options.nullable);
@@ -129,6 +126,10 @@ public class BallerinaCodeGenerator {
                 outStream.println(path);
             }
         }
+        // Normalize OpenAPI definition, in the client generation we suppose to terminate code generation when the
+        // absence of the operationId in operation. Therefore, we enable client flag true as default code generation.
+        // if resource is enabled, we avoid checking operationId.
+        OpenAPI normalizedOpenAPI = GeneratorUtils.normalizeOpenAPI(openAPIDef, isResource, options.isSanitizedOas);
         // Generate client.
         // Generate ballerina client remote.
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
@@ -136,7 +137,7 @@ public class BallerinaCodeGenerator {
                 .withFilters(filter)
                 .withNullable(options.nullable)
                 .withPlugin(false)
-                .withOpenAPI(openAPIDef)
+                .withOpenAPI(normalizedOpenAPI)
                 .withResourceMode(isResource)
                 .withStatusCodeBinding(options.statusCodeBinding)
                 .withMock(options.isMock).build();
@@ -161,7 +162,7 @@ public class BallerinaCodeGenerator {
 
         if (complexPaths.isEmpty()) {
             OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
-                    .withOpenAPI(openAPIDef)
+                    .withOpenAPI(normalizedOpenAPI)
                     .withFilters(filter)
                     .withNullable(options.nullable)
                     .withGenerateServiceType(options.generateServiceType)
@@ -394,8 +395,7 @@ public class BallerinaCodeGenerator {
             srcPackage = DEFAULT_CLIENT_PKG;
         }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        // Normalize OpenAPI definition
-        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, !options.isResource, options.isSanitizedOas);
+        OpenAPI openAPIDef = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(openAPI);
         checkOpenAPIVersion(openAPIDef);
         // Validate the service generation
         List<String> complexPaths = GeneratorUtils.getComplexPaths(openAPIDef);
@@ -408,13 +408,15 @@ public class BallerinaCodeGenerator {
             }
             isResource = false;
         }
+        // Validate and Normalize OpenAPI definition
+        OpenAPI normalizedOpenAPI = GeneratorUtils.normalizeOpenAPI(openAPIDef, !isResource, options.isSanitizedOas);
         // Generate ballerina service and resources.
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withNullable(options.nullable)
                 .withPlugin(false)
-                .withOpenAPI(openAPIDef)
+                .withOpenAPI(normalizedOpenAPI)
                 .withResourceMode(isResource)
                 .withStatusCodeBinding(options.statusCodeBinding)
                 .withMock(options.isMock)
