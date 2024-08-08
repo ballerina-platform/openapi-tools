@@ -129,7 +129,7 @@ public class BallerinaCodeGenerator {
         // Normalize OpenAPI definition, in the client generation we suppose to terminate code generation when the
         // absence of the operationId in operation. Therefore, we enable client flag true as default code generation.
         // if resource is enabled, we avoid checking operationId.
-        OpenAPI normalizedOpenAPI = GeneratorUtils.normalizeOpenAPI(openAPIDef, isResource, options.isSanitizedOas);
+        OpenAPI normalizedOpenAPI = GeneratorUtils.normalizeOpenAPI(openAPIDef, !isResource, options.isSanitizedOas);
         // Generate client.
         // Generate ballerina client remote.
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
