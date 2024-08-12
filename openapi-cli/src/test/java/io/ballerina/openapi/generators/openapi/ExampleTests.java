@@ -28,7 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * This test class for the covering the unit tests for return type scenarios.
+ * This test class for the covering the unit tests for example mapping scenarios.
  */
 public class ExampleTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi").toAbsolutePath();
