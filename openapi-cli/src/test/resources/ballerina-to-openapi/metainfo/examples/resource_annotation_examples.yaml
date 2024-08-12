@@ -1,0 +1,108 @@
+openapi: 3.0.1
+info:
+    title: Convert
+    version: 0.1.0
+servers:
+    - url: "{server}:{port}/convert"
+      variables:
+          server:
+              default: http://localhost
+          port:
+              default: "9000"
+paths:
+    /rate:
+        post:
+            operationId: postRate
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties: {}
+                        examples:
+                            requestExample01:
+                                value:
+                                    toAmount: 60000
+                                    fromCurrency: Same-EUR
+                                    toCurrency: LKR
+                                    fromAmount: 200
+                                    timestamp: 2024-07-14
+                            requestExample02:
+                                value:
+                                    fromCurrancy: LKR
+                                    toCurrancy: USD
+                required: true
+            responses:
+                "201":
+                    description: Created
+                    content:
+                        application/xml:
+                            schema:
+                                type: object
+                            examples:
+                                xml1:
+                                    value:
+                                        toAmount: 60000
+                                        fromCurrency: Same-EUR
+                                        toCurrency: LKR
+                                        fromAmount: 200
+                                        timestamp: 2024-07-14
+                                xml2:
+                                    value:
+                                        fromCurrency: EUR
+                                        toCurrency: LKR
+                                        fromAmount: 200
+                                        toAmount: 60000
+                                        timestamp: 2024-07-14
+                        application/json:
+                            schema:
+                                type: object
+                                properties: {}
+                            examples:
+                                json02:
+                                    value:
+                                        fromCurrency: EUR
+                                        toCurrency: LKR
+                                        fromAmount: 200
+                                        toAmount: 60000
+                                        timestamp: 2024-07-14
+                                json01:
+                                    value:
+                                        toAmount: 60000
+                                        fromCurrency: Same-EUR
+                                        toCurrency: LKR
+                                        fromAmount: 200
+                                        timestamp: 2024-07-14
+                "202":
+                    description: Accepted
+                "400":
+                    description: BadRequest
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorPayload'
+components:
+    schemas:
+        ErrorPayload:
+            required:
+                - message
+                - method
+                - path
+                - reason
+                - status
+                - timestamp
+            type: object
+            properties:
+                timestamp:
+                    type: string
+                status:
+                    type: integer
+                    format: int64
+                reason:
+                    type: string
+                message:
+                    type: string
+                path:
+                    type: string
+                method:
+                    type: string
