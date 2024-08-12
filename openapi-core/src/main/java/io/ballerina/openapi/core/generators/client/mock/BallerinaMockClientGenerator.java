@@ -25,6 +25,7 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.ObjectFieldNode;
 import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
@@ -54,6 +55,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnStatemen
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLASS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLIENT_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FUNCTION_DEFINITION;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FUNCTION_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ISOLATED_KEYWORD;
@@ -127,6 +129,13 @@ public class BallerinaMockClientGenerator extends BallerinaClientGenerator {
         // add apiKey instance variable when API key security schema is given
         ObjectFieldNode apiKeyFieldNode = authConfigGeneratorImp.getApiKeyMapClassVariable();
         if (apiKeyFieldNode != null) {
+            apiKeyFieldNode = apiKeyFieldNode.modify(apiKeyFieldNode.metadata().orElse(null),
+                    apiKeyFieldNode.visibilityQualifier().orElse(null),
+                    apiKeyFieldNode.qualifierList(),
+                    apiKeyFieldNode.typeName(),
+                    apiKeyFieldNode.fieldName(),
+                    createToken(EQUAL_TOKEN),
+                    NodeParser.parseExpression("{ apikey: \"\"}"), apiKeyFieldNode.semicolonToken());
             fieldNodeList.add(apiKeyFieldNode);
         }
         return fieldNodeList;
