@@ -1,5 +1,5 @@
 public isolated client class Client {
-    final readonly & ApiKeysConfig apiKeyConfig;
+    final readonly & ApiKeysConfig apiKeyConfig = {apikey: ""};
     # Gets invoked to initialize the `connector`.
     #
     # + apiKeyConfig - API keys for authorization
