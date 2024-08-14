@@ -48,9 +48,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * This class is to contain a util g=for name.
+ * This class is to contain the sanitized utils for naming.
+ *
+ * @since 2.1.0
  */
-//OASModifier
 public class OASModifier {
     OpenAPI openapi;
     List<Diagnostic> diagnostics = new ArrayList<>();
