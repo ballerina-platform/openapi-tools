@@ -69,7 +69,11 @@ public class ServiceGenerationHandler {
     public SyntaxTree generateSingleSyntaxTree(OASServiceMetadata oasServiceMetadata) throws BallerinaOpenApiException {
         ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
         SyntaxTree syntaxTree = serviceGenerator.generateSyntaxTree();
-        if (oasServiceMetadata.isServiceTypeRequired()) {
+        if (oasServiceMetadata.isServiceContractRequired()) {
+            ServiceContractGenerator serviceContractGenerator = new ServiceContractGenerator(oasServiceMetadata,
+                    serviceGenerator.getFunctionsList());
+            syntaxTree = serviceContractGenerator.generateSyntaxTree();
+        } else if (oasServiceMetadata.isServiceTypeRequired()) {
             ServiceTypeGenerator serviceTypeGenerator = new ServiceTypeGenerator(oasServiceMetadata,
                     serviceGenerator.getFunctionsList());
             syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree, serviceTypeGenerator.generateSyntaxTree());

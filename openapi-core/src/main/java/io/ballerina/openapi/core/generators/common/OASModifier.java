@@ -276,11 +276,13 @@ public class OASModifier {
             Optional<String> modifiedPathParamResult = getValidNameForParameter(oasPathParamName);
             if (modifiedPathParamResult.isEmpty()) {
                 //todo diagnostic, severity error
+                modifiedParameters.add(parameter);
                 continue;
             }
             String modifiedPathParam = modifiedPathParamResult.get();
             if (!modifiedPathParam.equals(oasPathParamName) && parameterNames.contains(modifiedPathParam)) {
                 // todo: handle by adding abc_1 or abc_2
+                modifiedParameters.add(parameter);
                 continue;
             }
             // check given parameter has name which similar to component schema name
@@ -290,8 +292,7 @@ public class OASModifier {
             parameterNames.add(modifiedPathParam);
             parameter.setName(modifiedPathParam);
             modifiedParameters.add(parameter);
-            pathValue = pathValue.replace("{" + oasPathParamName + "}", "{" +
-                    modifiedPathParam + "}");
+            pathValue = replaceContentInBraces(pathValue, modifiedPathParam);
         }
         return pathValue;
     }
@@ -492,10 +493,7 @@ public class OASModifier {
                 MediaType mediaType = stringMediaTypeEntry.getValue();
                 Schema<?> requestSchemaType = mediaType.getSchema();
                 if (requestSchemaType != null) {
-                    String ref = requestSchemaType.get$ref();
-                    if (ref != null) {
-                        updateSchemaWithReference(schemaName, modifiedName, requestSchemaType);
-                    }
+                    updateSchemaWithReference(schemaName, modifiedName, requestSchemaType);
                     mediaType.setSchema(requestSchemaType);
                 }
                 content.put(stringMediaTypeEntry.getKey(), mediaType);
@@ -510,10 +508,7 @@ public class OASModifier {
         for (Parameter parameter : operation.getParameters()) {
             if (parameter.getSchema() != null) {
                 Schema<?> paramSchema = parameter.getSchema();
-                String ref = paramSchema.get$ref();
-                if (ref != null) {
-                    updateSchemaWithReference(schemaName, modifiedName, paramSchema);
-                }
+                updateSchemaWithReference(schemaName, modifiedName, paramSchema);
                 parameter.setSchema(paramSchema);
             }
             modifiedParameters.add(parameter);
@@ -554,14 +549,13 @@ public class OASModifier {
             StringBuilder validName = new StringBuilder();
             for (String part : split) {
                 if (!part.isBlank()) {
-                    if (split.length > 1) {
                         part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
                                 part.substring(1).toLowerCase(Locale.ENGLISH);
-                    }
                     validName.append(part);
                 }
             }
-            identifier = validName.toString();
+            String modifiedName = validName.substring(0, 1).toLowerCase(Locale.ENGLISH) + validName.substring(1);
+            identifier = split.length > 1 ? modifiedName : identifier;
         } else {
             identifier = "param" + identifier;
         }
@@ -572,5 +566,31 @@ public class OASModifier {
         return parameters.stream()
                 .map(Parameter::getName)
                 .collect(Collectors.toList());
+    }
+
+    public static String replaceContentInBraces(String input, String expectedValue) {
+        String regex = "\\{([^}]*)\\}";
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+
+        StringBuilder result = new StringBuilder();
+
+        int lastEnd = 0;
+        while (matcher.find()) {
+            result.append(input, lastEnd, matcher.start());
+            String content = getValidNameForParameter(matcher.group(1)).get();
+            if (content.equals(expectedValue)) {
+                // Replace the content with the replacement
+                result.append("{").append(expectedValue).append("}");
+            } else {
+                result.append(matcher.group());
+            }
+            lastEnd = matcher.end();
+        }
+
+        // Append the remaining text after the last match
+        result.append(input.substring(lastEnd));
+        return result.toString();
     }
 }

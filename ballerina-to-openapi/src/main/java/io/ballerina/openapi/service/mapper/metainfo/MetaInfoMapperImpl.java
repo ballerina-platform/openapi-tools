@@ -66,6 +66,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.ballerina.openapi.service.mapper.Constants.EXAMPLES;
 import static io.ballerina.openapi.service.mapper.Constants.FILE_PATH;
@@ -178,7 +180,7 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                         continue;
                     }
                     ExpressionNode expressValue = optExamplesValue.get();
-                    String sourceCode = expressValue.toSourceCode();
+                    String sourceCode = removeCommentLines(expressValue.toSourceCode());
                     ObjectMapper objectMapper = new ObjectMapper();
                     try {
                         Map<?, ?> objectMap = objectMapper.readValue(sourceCode, Map.class);
@@ -194,7 +196,7 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
                         continue;
                     }
                     ExpressionNode expressValue = optExamplesValue.get();
-                    String mediaType = expressValue.toSourceCode();
+                    String mediaType = removeCommentLines(expressValue.toSourceCode());
                     ObjectMapper objectMapper = new ObjectMapper();
                     try {
                         Map<?, ?> objectMap = objectMapper.readValue(mediaType, Map.class);
@@ -506,5 +508,23 @@ public class MetaInfoMapperImpl implements MetaInfoMapper {
             }
         }
         return values;
+    }
+
+    public static String removeCommentLines(String content) {
+        // Use regex to match lines that start with "//" or "#" or contain inline "//" comments
+        String regex = "(?m)^\\s*(//|#).*|(?m)\\s*//.*$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(content);
+
+        // Remove lines that start with "//" or "#"
+        content = matcher.replaceAll("");
+
+        // Use regex to match and remove inline "//" comments
+        regex = "(?m)^(.*?)(//|#).*?$";
+        pattern = Pattern.compile(regex);
+        matcher = pattern.matcher(content);
+
+        // Replace inline comments with the content before them
+        return matcher.replaceAll("$1");
     }
 }

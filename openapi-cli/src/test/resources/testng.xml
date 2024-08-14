@@ -115,6 +115,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.common.DocCommenTests"/>
             <class name="io.ballerina.openapi.generators.client.MockClientGenerationTests"/>
             <class name="io.ballerina.openapi.generators.common.OASModifierTests"/>
+            <class name="io.ballerina.openapi.generators.openapi.ExampleTests"/>
         </classes>
     </test>
 </suite>
