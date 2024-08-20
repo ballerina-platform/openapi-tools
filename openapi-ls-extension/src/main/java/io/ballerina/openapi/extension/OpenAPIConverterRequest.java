@@ -26,16 +26,31 @@ package io.ballerina.openapi.extension;
 public class OpenAPIConverterRequest {
 
     private String documentFilePath;
+    private boolean enableBalExtension;
 
     public OpenAPIConverterRequest(String documentFilePath) {
         this.documentFilePath = documentFilePath;
+        this.enableBalExtension = false;
+    }
+
+    public OpenAPIConverterRequest(String documentFilePath, boolean enableBalExtension) {
+        this.documentFilePath = documentFilePath;
+        this.enableBalExtension = enableBalExtension;
     }
 
     public String getDocumentFilePath() {
         return documentFilePath;
     }
 
+    public boolean isEnableBalExtension() {
+        return enableBalExtension;
+    }
+
     public void setDocumentFilePath(String documentFilePath) {
         this.documentFilePath = documentFilePath;
+    }
+
+    public void setEnableBalExtension(boolean enableBalExtension) {
+        this.enableBalExtension = enableBalExtension;
     }
 }

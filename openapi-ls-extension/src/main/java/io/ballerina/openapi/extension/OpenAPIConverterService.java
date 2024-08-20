@@ -104,7 +104,7 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 response.setError(null);
                 List<OASResult> yamlContent = ServiceToOpenAPIMapper.generateOAS3Definition(
                         ballerinaPackage.get(), syntaxTree.get(), semanticModel.get(), null, false,
-                        Path.of(request.getDocumentFilePath()));
+                        Path.of(request.getDocumentFilePath()), request.isEnableBalExtension());
                 //Response should handle
                 if (!yamlContent.isEmpty() && (yamlContent.get(0).getOpenAPI().isPresent())) {
                     Optional<String> yaml = yamlContent.get(0).getYaml();
@@ -161,7 +161,7 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 Path inputPath = path.orElse(null);
                 SyntaxTree syntaxTree = document.syntaxTree();
                 List<OASResult> oasResults = ServiceToOpenAPIMapper.generateOAS3Definition(project.get(),
-                        syntaxTree, updatedSemanticModel, null, false, inputPath);
+                        syntaxTree, updatedSemanticModel, null, false, inputPath, request.isEnableBalExtension());
                 generateServiceJson(response, document.syntaxTree().filePath(), oasResults, specs);
             }
             response.setContent(specs);
