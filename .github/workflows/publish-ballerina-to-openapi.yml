@@ -44,5 +44,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BALLERINA_BOT_TOKEN }}
         run: |
-          curl -fsSL https://github.com/github/hub/raw/master/script/get | bash -s 2.14.1
-          bin/hub pull-request -m "[Automated] Sync master after ballerina-to-openapi:$VERSION release"
+          git checkout -b ballerina-to-openapi:$VERSION
+          git push origin ballerina-to-openapi:$VERSION
+          gh pr create --base ${GITHUB_REF##*/} --title "[Automated] Sync ${GITHUB_REF##*/} after ballerina-to-openapi:$VERSION release" --body "Sync ${GITHUB_REF##*/} after Ballerina to OpenAPI - $VERSION release"
