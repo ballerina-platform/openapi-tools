@@ -44,6 +44,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BALLERINA_BOT_TOKEN }}
         run: |
-          git checkout -b ballerina-to-openapi:$VERSION
-          git push origin ballerina-to-openapi:$VERSION
+          git checkout -b ballerina-to-openapi-release:$VERSION
+          git push origin ballerina-to-openapi-release:$VERSION
           gh pr create --base ${GITHUB_REF##*/} --title "[Automated] Sync ${GITHUB_REF##*/} after ballerina-to-openapi:$VERSION release" --body "Sync ${GITHUB_REF##*/} after Ballerina to OpenAPI - $VERSION release"
