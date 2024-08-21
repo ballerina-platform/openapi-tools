@@ -38,6 +38,7 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -53,40 +54,54 @@ import java.util.stream.Collectors;
  * @since 2.1.0
  */
 public class OASModifier {
-    OpenAPI openapi;
     List<Diagnostic> diagnostics = new ArrayList<>();
 
-    public OASModifier(OpenAPI openapi) {
-        this.openapi = openapi;
-    }
 
     public List<Diagnostic> getDiagnostics() {
         return diagnostics;
     }
 
-    //modifyWithBallerinaConventions 
-    public OpenAPI modifyWithBallerinaConventions() {
+    public Optional<Map<String, String>> getProposedNameList(OpenAPI openapi) {
+        Map<String, String> nameMap = new HashMap<>();
+        if (openapi.getComponents() == null) {
+            return Optional.empty();
+        }
+        Components components = openapi.getComponents();
+        Map<String, Schema> schemas = components.getSchemas();
+        if (schemas == null) {
+            return Optional.empty();
+        }
+        Set<String> modifiedSchemaNames = new HashSet<>();
+
+        for (Map.Entry<String, Schema> schemaEntry: schemas.entrySet()) {
+            //modified logic should come to here
+            String schemaName = schemaEntry.getKey();
+            String modifiedName = getValidNameForType(schemaEntry.getKey());
+            if (!schemaName.equals(modifiedName) && (schemas.containsKey(modifiedName) ||
+                    modifiedSchemaNames.contains(modifiedName))) {
+                // todo: check the duplication, till providing the name this will give same name as it is.
+                continue;
+            }
+            modifiedSchemaNames.add(modifiedName);
+            nameMap.put(schemaEntry.getKey(), modifiedName);
+        }
+        return Optional.of(nameMap);
+    }
+
+    public OpenAPI modifyWithBallerinaConventions(OpenAPI openapi, Map<String, String> nameMap) {
         Paths paths = openapi.getPaths();
         Components components = openapi.getComponents();
-        List<String> modifiedSchemaNames = new ArrayList<>();
         Map<String, Schema> modifiedSchemas = new HashMap<>();
         Map<String, RequestBody> modifiedRequestBodies = new HashMap<>();
         Map<String, ApiResponse> modifiedResponses = new HashMap<>();
         Map<String, Parameter> modifiedReusableParameters = new HashMap<>();
 
-        if (components != null) {
+        if (components != null && !nameMap.isEmpty()) {
             Map<String, Schema> schemas = components.getSchemas();
             if (schemas != null) {
                 for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
                     String schemaName = schema.getKey();
-                    String modifiedName = getValidNameForType(schemaName);
-
-                    if (!schemaName.equals(modifiedName) && (schema.getKey().contains(modifiedName) ||
-                            modifiedSchemaNames.contains(modifiedName))) {
-                        // todo: check the duplication, till providing the name this will give same name as it is.
-                        continue;
-                    }
-                    modifiedSchemaNames.add(modifiedName);
+                    String modifiedName = nameMap.get(schemaName);
 
                     // replace only for reference
                     // 1.Update the reference at the component sections
