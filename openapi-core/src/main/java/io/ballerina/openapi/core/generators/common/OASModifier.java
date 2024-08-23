@@ -45,7 +45,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * This class is to contain the sanitized utils for naming.
@@ -53,135 +52,204 @@ import java.util.stream.Collectors;
  * @since 2.1.0
  */
 public class OASModifier {
-    OpenAPI openapi;
     List<Diagnostic> diagnostics = new ArrayList<>();
 
-    public OASModifier(OpenAPI openapi) {
-        this.openapi = openapi;
-    }
 
     public List<Diagnostic> getDiagnostics() {
         return diagnostics;
     }
 
-    //modifyWithBallerinaConventions 
-    public OpenAPI modifyWithBallerinaConventions() {
-        Paths paths = openapi.getPaths();
+    public Optional<Map<String, String>> getProposedNameList(OpenAPI openapi) {
+        Map<String, String> nameMap = new HashMap<>();
+        if (openapi.getComponents() == null) {
+            return Optional.empty();
+        }
         Components components = openapi.getComponents();
-        List<String> modifiedSchemaNames = new ArrayList<>();
-        Map<String, Schema> modifiedSchemas = new HashMap<>();
-        Map<String, RequestBody> modifiedRequestBodies = new HashMap<>();
-        Map<String, ApiResponse> modifiedResponses = new HashMap<>();
-        Map<String, Parameter> modifiedReusableParameters = new HashMap<>();
-
-        if (components != null) {
-            Map<String, Schema> schemas = components.getSchemas();
-            if (schemas != null) {
-                for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
-                    String schemaName = schema.getKey();
-                    String modifiedName = getValidNameForType(schemaName);
-
-                    if (!schemaName.equals(modifiedName) && (schema.getKey().contains(modifiedName) ||
-                            modifiedSchemaNames.contains(modifiedName))) {
-                        // todo: check the duplication, till providing the name this will give same name as it is.
-                        continue;
-                    }
-                    modifiedSchemaNames.add(modifiedName);
-
-                    // replace only for reference
-                    // 1.Update the reference at the component sections
-                    for (Map.Entry<String, Schema> componentSchema : schemas.entrySet()) {
-                        Schema value = componentSchema.getValue();
-                        updateSchemaWithReference(schemaName, modifiedName, value);
-                        modifiedSchemas.put(modifiedName, value);
-                    }
-                    
-                    if (components.getSchemas() != null) {
-                        components.setSchemas(modifiedSchemas);
-                    }
-                    
-                    if (paths == null || paths.isEmpty()) {
-                        openapi.setComponents(components);
-                        return openapi;
-                    }
-
-                    // 2. Update OAS reusable requestBody with reference details
-                    if (components.getRequestBodies() != null) {
-                        for (Map.Entry<String, RequestBody> requestBody : components.getRequestBodies().entrySet()) {
-                            RequestBody requestBodyValue = updateRequestBodySchemaType(schemaName, modifiedName,
-                                    requestBody.getValue());
-                            modifiedRequestBodies.put(requestBody.getKey(), requestBodyValue);
-                        }
-                    }
-                    // 3. Update OAS reusable response with reference details
-                    if (components.getResponses() != null) {
-                        Map<String, ApiResponse> responsesEntry = components.getResponses();
-                        for (Map.Entry<String, ApiResponse> response : responsesEntry.entrySet()) {
-                            ApiResponse modifiedResponse = updateSchemaTypeForResponses(schemaName, modifiedName,
-                                    response.getValue());
-                            modifiedResponses.put(response.getKey(), modifiedResponse);
-                        }
-                    }
-                    // 4. Update OAS reusable parameters with reference details
-                    if (components.getParameters() != null) {
-                        Map<String, Parameter> parameters = components.getParameters();
-                        for (Map.Entry<String, Parameter> param : parameters.entrySet()) {
-                            Parameter parameter = param.getValue();
-                            if (parameter.getSchema() != null) {
-                                Schema<?> paramSchema = parameter.getSchema();
-                                String ref = paramSchema.get$ref();
-                                if (ref != null) {
-                                    updateRef(schemaName, modifiedName, paramSchema);
-                                }
-                                parameter.setSchema(paramSchema);
-                            }
-                            modifiedReusableParameters.put(param.getKey(), parameter);
-                        }
-                    }
-                    // 5. Update OAS reusable headers with reference details
-                    if (components.getHeaders() != null) {
-                        Map<String, Header> headers = components.getHeaders();
-                        for (Map.Entry<String, Header> header : headers.entrySet()) {
-                            Header headerValue = header.getValue();
-                            Schema<?> type = headerValue.getSchema();
-                            String ref = type.get$ref();
-                            if (ref != null) {
-                                updateRef(schemaName, modifiedName, type);
-                            }
-                            headerValue.setSchema(type);
-                            header.setValue(headerValue);
-                        }
-                    }
-                    // 6. Update Operation data type with reference details
-                    Set<Map.Entry<String, PathItem>> operations = paths.entrySet();
-                    updateOASOperations(schemaName, modifiedName, operations);
-                }
-            }
-
-            if (components.getRequestBodies() != null) {
-                components.setRequestBodies(modifiedRequestBodies);
-            }
-            if (components.getResponses() != null) {
-                components.setResponses(modifiedResponses);
-            }
-            if (components.getParameters() != null) {
-                components.setParameters(modifiedReusableParameters);
-            }
-            openapi.setComponents(components);
+        Map<String, Schema> schemas = components.getSchemas();
+        if (schemas == null) {
+            return Optional.empty();
         }
 
+        for (Map.Entry<String, Schema> schemaEntry: schemas.entrySet()) {
+            String modifiedName = getValidNameForType(schemaEntry.getKey());
+            nameMap.put(schemaEntry.getKey(), modifiedName);
+        }
+        return Optional.of(getResolvedNameMap(nameMap));
+    }
+
+    private static Map<String, String> getResolvedNameMap(Map<String, String> nameMap) {
+        Map<String, String> resolvedNames = new HashMap<>();
+        Map<String, Integer> nameCount = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : nameMap.entrySet()) {
+            String currentName = entry.getKey();
+            String newName = entry.getValue();
+            String resolvedName = newName;
+
+            while (resolvedNames.containsValue(resolvedName)) {
+                int count = nameCount.getOrDefault(newName, 1);
+                resolvedName = newName + count;
+                nameCount.put(newName, count + 1);
+            }
+
+            resolvedNames.put(currentName, resolvedName);
+        }
+
+        return resolvedNames;
+    }
+
+
+    public OpenAPI modifyWithBallerinaConventions(OpenAPI openapi, Map<String, String> nameMap) {
+        // This is for data type name modification
+        modifyOASWithSchemaName(openapi, nameMap);
+        Paths paths = openapi.getPaths();
+        if (paths == null || paths.isEmpty()) {
+            return openapi;
+        }
         // This is for path parameter name modifications
         Paths modifiedPaths = new Paths();
         for (Map.Entry<String, PathItem> path : paths.entrySet()) {
-            PathDetails result = updateParameterName(modifiedSchemas, path);
+            PathDetails result = updateParameterNameDetails(path);
             modifiedPaths.put(result.pathValue(), result.pathItem());
         }
         openapi.setPaths(modifiedPaths);
         return openapi;
     }
 
-    private static PathDetails updateParameterName(Map<String, Schema> modifiedSchemas, Map.Entry<String,
-            PathItem> path) {
+    private static void modifyOASWithSchemaName(OpenAPI openapi, Map<String, String> nameMap) {
+        Components components = openapi.getComponents();
+
+        if (components == null || nameMap.isEmpty() || components.getSchemas() == null) {
+            return;
+        }
+
+        Map<String, Schema> schemas = components.getSchemas();
+        Map<String, Schema> modifiedSchemas = new HashMap<>();
+        Map<String, RequestBody> modifiedRequestBodies = new HashMap<>();
+        Map<String, ApiResponse> modifiedResponses = new HashMap<>();
+        Map<String, Parameter> modifiedReusableParameters = new HashMap<>();
+        Map<String, Header> modifiedReusableHeaders = new HashMap<>();
+        Paths paths = openapi.getPaths();
+
+        for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
+            String schemaName = schema.getKey();
+            String modifiedName = nameMap.get(schemaName);
+
+            if (modifiedName != null) {
+                updateComponentSchemaSection(schemas, schemaName, modifiedName, modifiedSchemas);
+                updateComponentRequestBodySection(components, schemaName, modifiedName, modifiedRequestBodies);
+                updateComponentResponseSection(components, schemaName, modifiedName, modifiedResponses);
+                updateComponentParameterSection(components, schemaName, modifiedName, modifiedReusableParameters);
+                updateComponentHeaderSection(components, schemaName, modifiedName, modifiedReusableHeaders);
+
+                if (paths != null && !paths.isEmpty()) {
+                    updateOASOperations(schemaName, modifiedName, paths.entrySet());
+                }
+            }
+        }
+
+        updateComponents(components, modifiedSchemas, modifiedRequestBodies, modifiedResponses,
+                modifiedReusableParameters, modifiedReusableHeaders);
+        openapi.setComponents(components);
+    }
+
+    private static void updateComponents(Components components,
+                                         Map<String, Schema> modifiedSchemas,
+                                         Map<String, RequestBody> modifiedRequestBodies,
+                                         Map<String, ApiResponse> modifiedResponses,
+                                         Map<String, Parameter> modifiedReusableParameters,
+                                         Map<String, Header> modifiedReusableHeaders) {
+        components.setSchemas(modifiedSchemas);
+
+        if (components.getRequestBodies() != null) {
+            components.setRequestBodies(modifiedRequestBodies);
+        }
+
+        if (components.getResponses() != null) {
+            components.setResponses(modifiedResponses);
+        }
+
+        if (components.getParameters() != null) {
+            components.setParameters(modifiedReusableParameters);
+        }
+
+        if (components.getHeaders() != null) {
+            components.setHeaders(modifiedReusableHeaders);
+        }
+    }
+
+
+    private static void updateComponentHeaderSection(Components components, String schemaName, String modifiedName,
+                                                     Map<String, Header> modifiedHeaders) {
+        if (components.getHeaders() != null) {
+            Map<String, Header> headers = components.getHeaders();
+            for (Map.Entry<String, Header> header : headers.entrySet()) {
+                Header headerValue = header.getValue();
+                Schema<?> type = headerValue.getSchema();
+                String ref = type.get$ref();
+                if (ref != null) {
+                    updateRef(schemaName, modifiedName, type);
+                }
+                headerValue.setSchema(type);
+                header.setValue(headerValue);
+                modifiedHeaders.put(header.getKey(), headerValue);
+            }
+        }
+    }
+
+    private static void updateComponentParameterSection(Components components, String schemaName, String modifiedName,
+                                                        Map<String, Parameter> modifiedReusableParameters) {
+        if (components.getParameters() != null) {
+            Map<String, Parameter> parameters = components.getParameters();
+            for (Map.Entry<String, Parameter> param : parameters.entrySet()) {
+                Parameter parameter = param.getValue();
+                if (parameter.getSchema() != null) {
+                    Schema<?> paramSchema = parameter.getSchema();
+                    String ref = paramSchema.get$ref();
+                    if (ref != null) {
+                        updateRef(schemaName, modifiedName, paramSchema);
+                    }
+                    parameter.setSchema(paramSchema);
+                }
+                modifiedReusableParameters.put(param.getKey(), parameter);
+            }
+        }
+    }
+
+    private static void updateComponentResponseSection(Components components, String schemaName, String modifiedName,
+                                                       Map<String, ApiResponse> modifiedResponses) {
+        if (components.getResponses() != null) {
+            Map<String, ApiResponse> responsesEntry = components.getResponses();
+            for (Map.Entry<String, ApiResponse> response : responsesEntry.entrySet()) {
+                ApiResponse modifiedResponse = updateSchemaTypeForResponses(schemaName, modifiedName,
+                        response.getValue());
+                modifiedResponses.put(response.getKey(), modifiedResponse);
+            }
+        }
+    }
+
+    private static void updateComponentRequestBodySection(Components components, String schemaName,
+                                                          String modifiedName,
+                                                          Map<String, RequestBody> modifiedRequestBodies) {
+        if (components.getRequestBodies() != null) {
+            for (Map.Entry<String, RequestBody> requestBody : components.getRequestBodies().entrySet()) {
+                RequestBody requestBodyValue = updateRequestBodySchemaType(schemaName, modifiedName,
+                        requestBody.getValue());
+                modifiedRequestBodies.put(requestBody.getKey(), requestBodyValue);
+            }
+        }
+    }
+
+    private static void updateComponentSchemaSection(Map<String, Schema> schemas, String schemaName,
+                                                     String modifiedName, Map<String, Schema> modifiedSchemas) {
+        for (Map.Entry<String, Schema> componentSchema : schemas.entrySet()) {
+            Schema value = componentSchema.getValue();
+            updateSchemaWithReference(schemaName, modifiedName, value);
+            modifiedSchemas.put(modifiedName, value);
+        }
+    }
+
+    private static PathDetails updateParameterNameDetails(Map.Entry<String, PathItem> path) {
         PathItem pathItem = path.getValue();
         String pathValue = path.getKey();
         if (pathItem.getGet() != null) {
@@ -189,7 +257,7 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setGet(operation);
         }
         if (pathItem.getPost() != null) {
@@ -197,7 +265,7 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setPost(operation);
         }
         if (pathItem.getPut() != null) {
@@ -205,7 +273,7 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setPut(operation);
         }
         if (pathItem.getDelete() != null) {
@@ -213,7 +281,7 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setDelete(operation);
         }
         if (pathItem.getPatch() != null) {
@@ -221,7 +289,7 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setPatch(operation);
         }
         if (pathItem.getHead() != null) {
@@ -229,7 +297,7 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setHead(operation);
         }
         if (pathItem.getOptions() != null) {
@@ -237,7 +305,7 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setOptions(operation);
         }
         if (pathItem.getTrace() != null) {
@@ -245,51 +313,33 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setTrace(operation);
         }
         return new PathDetails(pathItem, pathValue);
     }
 
-    private static String updateParameterNames(Map<String, Schema> modifiedSchemas, String pathValue,
-                                               Operation operation) {
-        List<String> parameterNames = collectParameterNames(operation.getParameters());
+    private static String updateParameterNames(String pathValue, Operation operation) {
+        Map<String, String> parameterNames = collectParameterNames(operation.getParameters());
         List<Parameter> parameters = operation.getParameters();
         if (parameters != null) {
             List<Parameter> modifiedParameters = new ArrayList<>();
-            pathValue = updateParameters(modifiedSchemas, pathValue, parameterNames, parameters,
-                    modifiedParameters);
+            pathValue = updateParameters(pathValue, parameterNames, parameters, modifiedParameters);
             operation.setParameters(modifiedParameters);
         }
         return pathValue;
     }
 
-    private static String updateParameters(Map<String, Schema> modifiedSchemas, String pathValue,
-                                           List<String> parameterNames, List<Parameter> parameters,
-                                           List<Parameter> modifiedParameters) {
+    private static String updateParameters(String pathValue, Map<String, String> parameterNames,
+                                           List<Parameter> parameters, List<Parameter> modifiedParameters) {
+
         for (Parameter parameter : parameters) {
             if (!parameter.getIn().equals("path")) {
                 modifiedParameters.add(parameter);
                 continue;
             }
             String oasPathParamName = parameter.getName();
-            Optional<String> modifiedPathParamResult = getValidNameForParameter(oasPathParamName);
-            if (modifiedPathParamResult.isEmpty()) {
-                //todo diagnostic, severity error
-                modifiedParameters.add(parameter);
-                continue;
-            }
-            String modifiedPathParam = modifiedPathParamResult.get();
-            if (!modifiedPathParam.equals(oasPathParamName) && parameterNames.contains(modifiedPathParam)) {
-                // todo: handle by adding abc_1 or abc_2
-                modifiedParameters.add(parameter);
-                continue;
-            }
-            // check given parameter has name which similar to component schema name
-            if (modifiedSchemas.containsKey(modifiedPathParam)) {
-                modifiedPathParam = "param" + getValidNameForParameter(modifiedPathParam).get();
-            }
-            parameterNames.add(modifiedPathParam);
+            String modifiedPathParam = parameterNames.get(oasPathParamName);
             parameter.setName(modifiedPathParam);
             modifiedParameters.add(parameter);
             pathValue = replaceContentInBraces(pathValue, modifiedPathParam);
@@ -540,9 +590,9 @@ public class OASModifier {
         return (identifier.substring(0, 1).toUpperCase(Locale.ENGLISH) + identifier.substring(1)).trim();
     }
 
-    public static Optional<String> getValidNameForParameter(String identifier) {
+    public static String getValidNameForParameter(String identifier) {
         if (identifier.isBlank()) {
-            return Optional.empty();
+            return "param";
         }
         if (!identifier.matches("\\b[0-9]*\\b")) {
             String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN_FOR_MODIFIER);
@@ -559,13 +609,15 @@ public class OASModifier {
         } else {
             identifier = "param" + identifier;
         }
-        return Optional.of(identifier.trim());
+        return identifier.trim();
     }
 
-    public static List<String> collectParameterNames(List<Parameter> parameters) {
-        return parameters.stream()
-                .map(Parameter::getName)
-                .collect(Collectors.toList());
+    public static Map<String, String> collectParameterNames(List<Parameter> parameters) {
+        Map<String, String> parameterNames = new HashMap<>();
+        for (Parameter parameter: parameters) {
+            parameterNames.put(parameter.getName(), getValidNameForParameter(parameter.getName()));
+        }
+        return getResolvedNameMap(parameterNames);
     }
 
     public static String replaceContentInBraces(String input, String expectedValue) {
@@ -579,7 +631,7 @@ public class OASModifier {
         int lastEnd = 0;
         while (matcher.find()) {
             result.append(input, lastEnd, matcher.start());
-            String content = getValidNameForParameter(matcher.group(1)).get();
+            String content = getValidNameForParameter(matcher.group(1));
             if (content.equals(expectedValue)) {
                 // Replace the content with the replacement
                 result.append("{").append(expectedValue).append("}");
