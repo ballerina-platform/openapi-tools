@@ -770,6 +770,9 @@ public class GeneratorUtils {
         if (isSanitized) {
             OASModifier oasSanitizer = new OASModifier();
             Optional<Map<String, String>> proposedNameList = oasSanitizer.getProposedNameList(openAPI);
+            if (proposedNameList.isEmpty()) {
+                return openAPI;
+            }
             return oasSanitizer.modifyWithBallerinaConventions(openAPI, proposedNameList.get());
         }
         return openAPI;
