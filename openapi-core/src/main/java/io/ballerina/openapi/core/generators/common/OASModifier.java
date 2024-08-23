@@ -38,7 +38,6 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -108,13 +107,9 @@ public class OASModifier {
             return openapi;
         }
         // This is for path parameter name modifications
-        Set<String> modifiedNames = new HashSet<>();
-        for (Map.Entry<String, String> entry: nameMap.entrySet()) {
-            modifiedNames.add(entry.getValue());
-        }
         Paths modifiedPaths = new Paths();
         for (Map.Entry<String, PathItem> path : paths.entrySet()) {
-            PathDetails result = updateParameterName(path);
+            PathDetails result = updateParameterNameDetails(path);
             modifiedPaths.put(result.pathValue(), result.pathItem());
         }
         openapi.setPaths(modifiedPaths);
@@ -123,52 +118,66 @@ public class OASModifier {
 
     private static void modifyOASWithSchemaName(OpenAPI openapi, Map<String, String> nameMap) {
         Components components = openapi.getComponents();
-        if (components != null && !nameMap.isEmpty() && components.getSchemas() != null) {
-            Map<String, Schema> schemas = components.getSchemas();
-            Map<String, Schema> modifiedSchemas = new HashMap<>();
-            Map<String, RequestBody> modifiedRequestBodies = new HashMap<>();
-            Map<String, ApiResponse> modifiedResponses = new HashMap<>();
-            Map<String, Parameter> modifiedReusableParameters = new HashMap<>();
-            Map<String, Header> modifiedReusableHeaders = new HashMap<>();
 
-            for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
-                String schemaName = schema.getKey();
-                String modifiedName = nameMap.get(schemaName);
+        if (components == null || nameMap.isEmpty() || components.getSchemas() == null) {
+            return;
+        }
 
-                // replace only for reference
-                // 1.Update the reference at the component sections
+        Map<String, Schema> schemas = components.getSchemas();
+        Map<String, Schema> modifiedSchemas = new HashMap<>();
+        Map<String, RequestBody> modifiedRequestBodies = new HashMap<>();
+        Map<String, ApiResponse> modifiedResponses = new HashMap<>();
+        Map<String, Parameter> modifiedReusableParameters = new HashMap<>();
+        Map<String, Header> modifiedReusableHeaders = new HashMap<>();
+        Paths paths = openapi.getPaths();
+
+        for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
+            String schemaName = schema.getKey();
+            String modifiedName = nameMap.get(schemaName);
+
+            if (modifiedName != null) {
                 updateComponentSchemaSection(schemas, schemaName, modifiedName, modifiedSchemas);
-                // 2. Update OAS reusable requestBody with reference details
                 updateComponentRequestBodySection(components, schemaName, modifiedName, modifiedRequestBodies);
-                // 3. Update OAS reusable response with reference details
                 updateComponentResponseSection(components, schemaName, modifiedName, modifiedResponses);
-                // 4. Update OAS reusable parameters with reference details
                 updateComponentParameterSection(components, schemaName, modifiedName, modifiedReusableParameters);
-                // 5. Update OAS reusable headers with reference details
                 updateComponentHeaderSection(components, schemaName, modifiedName, modifiedReusableHeaders);
-                // 6. Update Operation data type with reference details
-                Paths paths = openapi.getPaths();
+
                 if (paths != null && !paths.isEmpty()) {
-                    Set<Map.Entry<String, PathItem>> operations = paths.entrySet();
-                    updateOASOperations(schemaName, modifiedName, operations);
+                    updateOASOperations(schemaName, modifiedName, paths.entrySet());
                 }
             }
-            components.setSchemas(modifiedSchemas);
-            if (components.getRequestBodies() != null) {
-                components.setRequestBodies(modifiedRequestBodies);
-            }
-            if (components.getResponses() != null) {
-                components.setResponses(modifiedResponses);
-            }
-            if (components.getParameters() != null) {
-                components.setParameters(modifiedReusableParameters);
-            }
-            if (components.getHeaders() != null) {
-                components.setHeaders(modifiedReusableHeaders);
-            }
-            openapi.setComponents(components);
+        }
+
+        updateComponents(components, modifiedSchemas, modifiedRequestBodies, modifiedResponses,
+                modifiedReusableParameters, modifiedReusableHeaders);
+        openapi.setComponents(components);
+    }
+
+    private static void updateComponents(Components components,
+                                         Map<String, Schema> modifiedSchemas,
+                                         Map<String, RequestBody> modifiedRequestBodies,
+                                         Map<String, ApiResponse> modifiedResponses,
+                                         Map<String, Parameter> modifiedReusableParameters,
+                                         Map<String, Header> modifiedReusableHeaders) {
+        components.setSchemas(modifiedSchemas);
+
+        if (components.getRequestBodies() != null) {
+            components.setRequestBodies(modifiedRequestBodies);
+        }
+
+        if (components.getResponses() != null) {
+            components.setResponses(modifiedResponses);
+        }
+
+        if (components.getParameters() != null) {
+            components.setParameters(modifiedReusableParameters);
+        }
+
+        if (components.getHeaders() != null) {
+            components.setHeaders(modifiedReusableHeaders);
         }
     }
+
 
     private static void updateComponentHeaderSection(Components components, String schemaName, String modifiedName,
                                                      Map<String, Header> modifiedHeaders) {
@@ -240,7 +249,7 @@ public class OASModifier {
         }
     }
 
-    private static PathDetails updateParameterName(Map.Entry<String, PathItem> path) {
+    private static PathDetails updateParameterNameDetails(Map.Entry<String, PathItem> path) {
         PathItem pathItem = path.getValue();
         String pathValue = path.getKey();
         if (pathItem.getGet() != null) {
