@@ -76,8 +76,30 @@ public class OASModifier {
             String modifiedName = getValidNameForType(schemaEntry.getKey());
             nameMap.put(schemaEntry.getKey(), modifiedName);
         }
-        return Optional.of(nameMap);
+        return Optional.of(getResolvedNameMap(nameMap));
     }
+
+    private static Map<String, String> getResolvedNameMap(Map<String, String> nameMap) {
+        Map<String, String> resolvedNames = new HashMap<>();
+        Map<String, Integer> nameCount = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : nameMap.entrySet()) {
+            String currentName = entry.getKey();
+            String newName = entry.getValue();
+            String resolvedName = newName;
+
+            while (resolvedNames.containsValue(resolvedName)) {
+                int count = nameCount.getOrDefault(newName, 1);
+                resolvedName = newName + count;
+                nameCount.put(newName, count + 1);
+            }
+
+            resolvedNames.put(currentName, resolvedName);
+        }
+
+        return resolvedNames;
+    }
+
 
     public OpenAPI modifyWithBallerinaConventions(OpenAPI openapi, Map<String, String> nameMap) {
         // This is for data type name modification
