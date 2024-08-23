@@ -46,7 +46,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * This class is to contain the sanitized utils for naming.
@@ -115,7 +114,7 @@ public class OASModifier {
         }
         Paths modifiedPaths = new Paths();
         for (Map.Entry<String, PathItem> path : paths.entrySet()) {
-            PathDetails result = updateParameterName(modifiedNames, path);
+            PathDetails result = updateParameterName(path);
             modifiedPaths.put(result.pathValue(), result.pathItem());
         }
         openapi.setPaths(modifiedPaths);
@@ -241,8 +240,7 @@ public class OASModifier {
         }
     }
 
-    private static PathDetails updateParameterName(Set<String> modifiedSchemas, Map.Entry<String,
-            PathItem> path) {
+    private static PathDetails updateParameterName(Map.Entry<String, PathItem> path) {
         PathItem pathItem = path.getValue();
         String pathValue = path.getKey();
         if (pathItem.getGet() != null) {
@@ -250,7 +248,7 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setGet(operation);
         }
         if (pathItem.getPost() != null) {
@@ -258,7 +256,7 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setPost(operation);
         }
         if (pathItem.getPut() != null) {
@@ -266,7 +264,7 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setPut(operation);
         }
         if (pathItem.getDelete() != null) {
@@ -274,7 +272,7 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setDelete(operation);
         }
         if (pathItem.getPatch() != null) {
@@ -282,7 +280,7 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setPatch(operation);
         }
         if (pathItem.getHead() != null) {
@@ -290,7 +288,7 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setHead(operation);
         }
         if (pathItem.getOptions() != null) {
@@ -298,7 +296,7 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setOptions(operation);
         }
         if (pathItem.getTrace() != null) {
@@ -306,51 +304,33 @@ public class OASModifier {
             if (operation.getParameters() == null) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(modifiedSchemas, pathValue, operation);
+            pathValue = updateParameterNames(pathValue, operation);
             pathItem.setTrace(operation);
         }
         return new PathDetails(pathItem, pathValue);
     }
 
-    private static String updateParameterNames(Set<String> modifiedSchemas, String pathValue,
-                                               Operation operation) {
-        List<String> parameterNames = collectParameterNames(operation.getParameters());
+    private static String updateParameterNames(String pathValue, Operation operation) {
+        Map<String, String> parameterNames = collectParameterNames(operation.getParameters());
         List<Parameter> parameters = operation.getParameters();
         if (parameters != null) {
             List<Parameter> modifiedParameters = new ArrayList<>();
-            pathValue = updateParameters(modifiedSchemas, pathValue, parameterNames, parameters,
-                    modifiedParameters);
+            pathValue = updateParameters(pathValue, parameterNames, parameters, modifiedParameters);
             operation.setParameters(modifiedParameters);
         }
         return pathValue;
     }
 
-    private static String updateParameters(Set<String> modifiedSchemasName, String pathValue,
-                                           List<String> parameterNames, List<Parameter> parameters,
-                                           List<Parameter> modifiedParameters) {
+    private static String updateParameters(String pathValue, Map<String, String> parameterNames,
+                                           List<Parameter> parameters, List<Parameter> modifiedParameters) {
+
         for (Parameter parameter : parameters) {
             if (!parameter.getIn().equals("path")) {
                 modifiedParameters.add(parameter);
                 continue;
             }
             String oasPathParamName = parameter.getName();
-            Optional<String> modifiedPathParamResult = getValidNameForParameter(oasPathParamName);
-            if (modifiedPathParamResult.isEmpty()) {
-                //todo diagnostic, severity error
-                modifiedParameters.add(parameter);
-                continue;
-            }
-            String modifiedPathParam = modifiedPathParamResult.get();
-            if (!modifiedPathParam.equals(oasPathParamName) && parameterNames.contains(modifiedPathParam)) {
-                // todo: handle by adding abc_1 or abc_2
-                modifiedParameters.add(parameter);
-                continue;
-            }
-            // check given parameter has name which similar to component schema name
-            if (modifiedSchemasName.contains(modifiedPathParam)) {
-                modifiedPathParam = "param" + getValidNameForParameter(modifiedPathParam).get();
-            }
-            parameterNames.add(modifiedPathParam);
+            String modifiedPathParam = parameterNames.get(oasPathParamName);
             parameter.setName(modifiedPathParam);
             modifiedParameters.add(parameter);
             pathValue = replaceContentInBraces(pathValue, modifiedPathParam);
@@ -601,9 +581,9 @@ public class OASModifier {
         return (identifier.substring(0, 1).toUpperCase(Locale.ENGLISH) + identifier.substring(1)).trim();
     }
 
-    public static Optional<String> getValidNameForParameter(String identifier) {
+    public static String getValidNameForParameter(String identifier) {
         if (identifier.isBlank()) {
-            return Optional.empty();
+            return "param";
         }
         if (!identifier.matches("\\b[0-9]*\\b")) {
             String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN_FOR_MODIFIER);
@@ -620,13 +600,15 @@ public class OASModifier {
         } else {
             identifier = "param" + identifier;
         }
-        return Optional.of(identifier.trim());
+        return identifier.trim();
     }
 
-    public static List<String> collectParameterNames(List<Parameter> parameters) {
-        return parameters.stream()
-                .map(Parameter::getName)
-                .collect(Collectors.toList());
+    public static Map<String, String> collectParameterNames(List<Parameter> parameters) {
+        Map<String, String> parameterNames = new HashMap<>();
+        for (Parameter parameter: parameters) {
+            parameterNames.put(parameter.getName(), getValidNameForParameter(parameter.getName()));
+        }
+        return getResolvedNameMap(parameterNames);
     }
 
     public static String replaceContentInBraces(String input, String expectedValue) {
@@ -640,7 +622,7 @@ public class OASModifier {
         int lastEnd = 0;
         while (matcher.find()) {
             result.append(input, lastEnd, matcher.start());
-            String content = getValidNameForParameter(matcher.group(1)).get();
+            String content = getValidNameForParameter(matcher.group(1));
             if (content.equals(expectedValue)) {
                 // Replace the content with the replacement
                 result.append("{").append(expectedValue).append("}");
