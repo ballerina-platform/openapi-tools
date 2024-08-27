@@ -101,7 +101,7 @@ public class OASModifier {
 
     public OpenAPI modifyWithBallerinaConventions(OpenAPI openapi, Map<String, String> nameMap) {
         // This is for data type name modification
-        openapi = modifyOASWithSchemaName1(openapi, nameMap);
+        openapi = modifyOASWithSchemaName(openapi, nameMap);
         Paths paths = openapi.getPaths();
         if (paths == null || paths.isEmpty()) {
             return openapi;
@@ -124,7 +124,7 @@ public class OASModifier {
         return modifyWithBallerinaConventions(openapi, proposedNameMap.get());
     }
 
-    private static OpenAPI modifyOASWithSchemaName1(OpenAPI openapi, Map<String, String> nameMap) {
+    private static OpenAPI modifyOASWithSchemaName(OpenAPI openapi, Map<String, String> nameMap) {
         Components components = openapi.getComponents();
         if (Objects.isNull(components) || nameMap.isEmpty() || Objects.isNull(components.getSchemas())) {
             return openapi;
