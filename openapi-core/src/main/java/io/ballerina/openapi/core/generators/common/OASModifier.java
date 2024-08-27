@@ -116,6 +116,14 @@ public class OASModifier {
         return openapi;
     }
 
+    public OpenAPI modifyWithBallerinaConventions(OpenAPI openapi) {
+        Optional<Map<String, String>> proposedNameMap = getProposedNameList(openapi);
+        if (proposedNameMap.isEmpty()) {
+            return openapi;
+        }
+        return modifyWithBallerinaConventions(openapi, proposedNameMap.get());
+    }
+
     private static OpenAPI modifyOASWithSchemaName1(OpenAPI openapi, Map<String, String> nameMap) {
         Components components = openapi.getComponents();
         if (Objects.isNull(components) || nameMap.isEmpty() || Objects.isNull(components.getSchemas())) {
@@ -357,8 +365,7 @@ public class OASModifier {
             for (String part : split) {
                 if (!part.isBlank()) {
                     if (split.length > 1) {
-                        part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
-                                part.substring(1).toLowerCase(Locale.ENGLISH);
+                        part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) + part.substring(1);
                     }
                     validName.append(part);
                 }
