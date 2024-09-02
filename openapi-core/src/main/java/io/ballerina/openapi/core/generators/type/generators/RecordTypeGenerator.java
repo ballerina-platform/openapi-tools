@@ -317,13 +317,6 @@ public class RecordTypeGenerator extends TypeGenerator {
         if (GeneratorUtils.isStringSchema(fieldSchema)) {
             defaultValue = "\"" + defaultValue.replaceAll("\"", "\\\\\"") + "\"";
             defaultValueToken = AbstractNodeFactory.createIdentifierToken(defaultValue);
-        } else if (!defaultValue.matches("^[0-9]*$") && !defaultValue.matches("^(\\d*\\.)?\\d+$")
-                && !(defaultValue.startsWith("[") && defaultValue.endsWith("]")) &&
-                !GeneratorUtils.isBooleanSchema(fieldSchema)) {
-            //This regex was added due to avoid adding quotes for default values which are numbers and array values.
-            //Ex: default: 123
-            defaultValueToken = AbstractNodeFactory.createIdentifierToken("\"" +
-                    fieldSchema.getDefault().toString() + "\"");
         } else {
             defaultValueToken = AbstractNodeFactory.createIdentifierToken(fieldSchema.getDefault().toString());
         }
