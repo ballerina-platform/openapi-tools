@@ -305,13 +305,12 @@ public class RecordTypeGenerator extends TypeGenerator {
                                                                                IdentifierToken fieldName,
                                                                                TypeDescriptorNode fieldTypeName) {
         Token defaultValueToken;
-        String defaultValue = fieldSchema.getDefault().toString().trim();
-        if (GeneratorUtils.isStringSchema(fieldSchema)) {
+        Object defaultValueNode = fieldSchema.getDefault();
+        String defaultValue = defaultValueNode.toString().trim();
+        if (defaultValueNode instanceof String || GeneratorUtils.isStringSchema(fieldSchema)) {
             defaultValue = "\"" + defaultValue.replaceAll("\"", "\\\\\"") + "\"";
-            defaultValueToken = AbstractNodeFactory.createIdentifierToken(defaultValue);
-        } else {
-            defaultValueToken = AbstractNodeFactory.createIdentifierToken(fieldSchema.getDefault().toString());
         }
+        defaultValueToken = AbstractNodeFactory.createIdentifierToken(defaultValue);
         ExpressionNode expressionNode = createRequiredExpressionNode(defaultValueToken);
         return NodeFactory.createRecordFieldWithDefaultValueNode
                 (null, null, fieldTypeName, fieldName, createToken(EQUAL_TOKEN),
