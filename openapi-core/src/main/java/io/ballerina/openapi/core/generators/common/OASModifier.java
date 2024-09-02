@@ -51,9 +51,13 @@ import java.util.regex.Pattern;
  * @since 2.1.0
  */
 public class OASModifier {
-    List<Diagnostic> diagnostics = new ArrayList<>();
+    private static final String REGEX_FOR_CURLY_BRACED_CONTENT = "\\{([^}]*)}";
+    private static final String COMPONENT_REF_WITH_NAME_PATTERN = "\"$ref\":\"#/components/schemas/%s\"";
+    private static final String COMPONENT_REF_REGEX_PATTERN = "(\\\"\\$ref\\\"\\s*:\\s*\\\"#/components/schemas/%s" +
+            "\\\")|('\\$ref'\\s*:\\s*'#/components/schemas/%s')";
     private static final PrintStream outStream = System.out;
 
+    List<Diagnostic> diagnostics = new ArrayList<>();
 
     public List<Diagnostic> getDiagnostics() {
         return diagnostics;
@@ -153,12 +157,11 @@ public class OASModifier {
             if (schemaName.equals(modifiedName)) {
                 continue;
             }
-            String patternString = ("(\\\"\\$ref\\\"\\s*:\\s*\\\"#/components/schemas/%s\\\")|" +
-                    "('\\$ref'\\s*:\\s*'#/components/schemas/%s')").formatted(schemaName, schemaName);
+            String patternString = COMPONENT_REF_REGEX_PATTERN.formatted(schemaName, schemaName);
             Pattern pattern = Pattern.compile(patternString);
             Matcher matcher = pattern.matcher(openApiJson);
 
-            String replacement = "\"$ref\":\"#/components/schemas/%s\"".formatted(modifiedName).replace("$", "\\$");
+            String replacement = COMPONENT_REF_WITH_NAME_PATTERN.formatted(modifiedName).replace("$", "\\$");
             openApiJson = matcher.replaceAll(replacement);
         }
 
@@ -408,9 +411,7 @@ public class OASModifier {
     }
 
     public static String replaceContentInBraces(String input, String expectedValue) {
-        String regex = "\\{([^}]*)}";
-
-        Pattern pattern = Pattern.compile(regex);
+        Pattern pattern = Pattern.compile(REGEX_FOR_CURLY_BRACED_CONTENT);
         Matcher matcher = pattern.matcher(input);
 
         StringBuilder result = new StringBuilder();
