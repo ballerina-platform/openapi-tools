@@ -131,15 +131,4 @@ public class QueriesParameterGenerator implements ParameterGenerator {
         }
         return queriesSchema;
     }
-
-    private Schema getSchemaWithDetails(Parameter parameter) {
-        Schema schema = parameter.getSchema();
-        if (Objects.isNull(schema)) {
-            return null;
-        }
-        schema.setDescription(parameter.getDescription());
-        schema.setDeprecated(parameter.getDeprecated());
-        schema.extensions(parameter.getExtensions());
-        return schema;
-    }
 }

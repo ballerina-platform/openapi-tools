@@ -274,7 +274,7 @@ public class RecordTypeGenerator extends TypeGenerator {
         Set<String> imports = new HashSet<>();
 
         if (required != null && required.contains(field.getKey().trim())) {
-            setRequiredFields(required, recordFieldList, field, fieldSchema, fieldName, fieldTypeName);
+            setRequiredFields(recordFieldList, fieldSchema, fieldName, fieldTypeName);
         } else if (fieldSchema.getDefault() != null) {
             RecordFieldWithDefaultValueNode recordFieldWithDefaultValueNode =
                     getRecordFieldWithDefaultValueNode(fieldSchema, fieldName, fieldTypeName);
@@ -287,21 +287,13 @@ public class RecordTypeGenerator extends TypeGenerator {
         return new ImmutablePair<>(recordFieldList, imports);
     }
 
-    private void setRequiredFields(List<String> required, List<Node> recordFieldList,
-                                          Map.Entry<String, Schema<?>> field, Schema<?> fieldSchema,
-                                          IdentifierToken fieldName, TypeDescriptorNode fieldTypeName) {
+    private void setRequiredFields(List<Node> recordFieldList, Schema<?> fieldSchema, IdentifierToken fieldName,
+                                   TypeDescriptorNode fieldTypeName) {
 
-        if (!required.contains(field.getKey().trim())) {
-            if (fieldSchema.getDefault() != null) {
-                RecordFieldWithDefaultValueNode defaultNode =
-                        getRecordFieldWithDefaultValueNode(fieldSchema, fieldName, fieldTypeName);
-                recordFieldList.add(defaultNode);
-            } else {
-                RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
-                        fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN),
-                        createToken(SEMICOLON_TOKEN));
-                recordFieldList.add(recordFieldNode);
-            }
+        if (fieldSchema.getDefault() != null) {
+            RecordFieldWithDefaultValueNode defaultNode =
+                    getRecordFieldWithDefaultValueNode(fieldSchema, fieldName, fieldTypeName);
+            recordFieldList.add(defaultNode);
         } else {
             RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
                     fieldTypeName, fieldName, null, createToken(SEMICOLON_TOKEN));

@@ -20,8 +20,11 @@ package io.ballerina.openapi.core.generators.client.parameter;
 
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public interface ParameterGenerator {
@@ -29,4 +32,14 @@ public interface ParameterGenerator {
     Optional<ParameterNode> generateParameterNode();
     List<ClientDiagnostic> getDiagnostics();
 
+    default Schema getSchemaWithDetails(Parameter parameter) {
+        Schema schema = parameter.getSchema();
+        if (Objects.isNull(schema)) {
+            return null;
+        }
+        schema.setDescription(parameter.getDescription());
+        schema.setDeprecated(parameter.getDeprecated());
+        schema.extensions(parameter.getExtensions());
+        return schema;
+    }
 }
