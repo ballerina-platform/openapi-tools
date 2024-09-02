@@ -90,7 +90,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -769,11 +768,11 @@ public class GeneratorUtils {
         validateRequestBody(openAPIPaths.entrySet());
         if (isSanitized) {
             OASModifier oasSanitizer = new OASModifier();
-            Optional<Map<String, String>> proposedNameList = oasSanitizer.getProposedNameList(openAPI);
-            if (proposedNameList.isEmpty()) {
+            Map<String, String> proposedNameMapping = oasSanitizer.getProposedNameMapping(openAPI);
+            if (proposedNameMapping.isEmpty()) {
                 return openAPI;
             }
-            return oasSanitizer.modifyWithBallerinaConventions(openAPI, proposedNameList.get());
+            return oasSanitizer.modifyWithBallerinaConventions(openAPI, proposedNameMapping);
         }
         return openAPI;
     }

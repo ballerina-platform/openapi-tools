@@ -36,12 +36,12 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,25 +59,25 @@ public class OASModifier {
         return diagnostics;
     }
 
-    public Optional<Map<String, String>> getProposedNameList(OpenAPI openapi) {
+    public Map<String, String> getProposedNameMapping(OpenAPI openapi) {
         Map<String, String> nameMap = new HashMap<>();
         if (openapi.getComponents() == null) {
-            return Optional.empty();
+            return Collections.emptyMap();
         }
         Components components = openapi.getComponents();
         Map<String, Schema> schemas = components.getSchemas();
         if (schemas == null) {
-            return Optional.empty();
+            return Collections.emptyMap();
         }
 
         for (Map.Entry<String, Schema> schemaEntry: schemas.entrySet()) {
             String modifiedName = getValidNameForType(schemaEntry.getKey());
             nameMap.put(schemaEntry.getKey(), modifiedName);
         }
-        return Optional.of(getResolvedNameMap(nameMap));
+        return getResolvedNameMapping(nameMap);
     }
 
-    private static Map<String, String> getResolvedNameMap(Map<String, String> nameMap) {
+    private static Map<String, String> getResolvedNameMapping(Map<String, String> nameMap) {
         Map<String, String> resolvedNames = new HashMap<>();
         Map<String, Integer> nameCount = new HashMap<>();
 
@@ -117,11 +117,11 @@ public class OASModifier {
     }
 
     public OpenAPI modifyWithBallerinaConventions(OpenAPI openapi) {
-        Optional<Map<String, String>> proposedNameMap = getProposedNameList(openapi);
-        if (proposedNameMap.isEmpty()) {
+        Map<String, String> proposedNameMapping = getProposedNameMapping(openapi);
+        if (proposedNameMapping.isEmpty()) {
             return openapi;
         }
-        return modifyWithBallerinaConventions(openapi, proposedNameMap.get());
+        return modifyWithBallerinaConventions(openapi, proposedNameMapping);
     }
 
     private static OpenAPI modifyOASWithSchemaName(OpenAPI openapi, Map<String, String> nameMap) {
@@ -404,7 +404,7 @@ public class OASModifier {
         for (Parameter parameter: parameters) {
             parameterNames.put(parameter.getName(), getValidNameForParameter(parameter.getName()));
         }
-        return getResolvedNameMap(parameterNames);
+        return getResolvedNameMapping(parameterNames);
     }
 
     public static String replaceContentInBraces(String input, String expectedValue) {
