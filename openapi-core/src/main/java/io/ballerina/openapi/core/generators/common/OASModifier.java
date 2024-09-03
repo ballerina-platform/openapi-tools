@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.core.generators.common;
 
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.core.util.Json;
@@ -103,7 +104,8 @@ public class OASModifier {
     }
 
 
-    public OpenAPI modifyWithBallerinaConventions(OpenAPI openapi, Map<String, String> nameMap) {
+    public OpenAPI modifyWithBallerinaConventions(OpenAPI openapi, Map<String, String> nameMap)
+            throws BallerinaOpenApiException {
         // This is for data type name modification
         openapi = modifyOASWithSchemaName(openapi, nameMap);
         Paths paths = openapi.getPaths();
@@ -120,7 +122,7 @@ public class OASModifier {
         return openapi;
     }
 
-    public OpenAPI modifyWithBallerinaConventions(OpenAPI openapi) {
+    public OpenAPI modifyWithBallerinaConventions(OpenAPI openapi) throws BallerinaOpenApiException {
         Map<String, String> proposedNameMapping = getProposedNameMapping(openapi);
         if (proposedNameMapping.isEmpty()) {
             return openapi;
@@ -128,7 +130,8 @@ public class OASModifier {
         return modifyWithBallerinaConventions(openapi, proposedNameMapping);
     }
 
-    private static OpenAPI modifyOASWithSchemaName(OpenAPI openapi, Map<String, String> nameMap) {
+    private static OpenAPI modifyOASWithSchemaName(OpenAPI openapi, Map<String, String> nameMap)
+            throws BallerinaOpenApiException {
         Components components = openapi.getComponents();
         if (Objects.isNull(components) || nameMap.isEmpty() || Objects.isNull(components.getSchemas())) {
             return openapi;
@@ -167,11 +170,17 @@ public class OASModifier {
 
         ParseOptions parseOptions = new ParseOptions();
         SwaggerParseResult parseResult = new OpenAPIParser().readContents(openApiJson, null, parseOptions);
-        if (!parseResult.getMessages().isEmpty()) {
-            outErrorStream.println("Sanitized OpenAPI contains errors:");
-            parseResult.getMessages().forEach(outErrorStream::println);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        if (Objects.isNull(openAPI)) {
+            List<String> messages = parseResult.getMessages();
+            if (Objects.nonNull(messages) && !messages.isEmpty()) {
+                outErrorStream.println("Sanitized OpenAPI contains errors: ");
+                messages.forEach(outErrorStream::println);
+            }
+            throw new BallerinaOpenApiException("Failed to generate the sanitized OpenAPI specification. Please " +
+                    "consider generating the client/service without the sanitization option.");
         }
-        return parseResult.getOpenAPI();
+        return openAPI;
     }
 
     private static PathDetails updateParameterNameDetails(Map.Entry<String, PathItem> path) {
