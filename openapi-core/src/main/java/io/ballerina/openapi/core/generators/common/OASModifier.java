@@ -55,7 +55,7 @@ public class OASModifier {
     private static final String COMPONENT_REF_WITH_NAME_PATTERN = "\"$ref\":\"#/components/schemas/%s\"";
     private static final String COMPONENT_REF_REGEX_PATTERN = "(\\\"\\$ref\\\"\\s*:\\s*\\\"#/components/schemas/%s" +
             "\\\")|('\\$ref'\\s*:\\s*'#/components/schemas/%s')";
-    private static final PrintStream outStream = System.out;
+    private static final PrintStream outErrorStream = System.err;
 
     List<Diagnostic> diagnostics = new ArrayList<>();
 
@@ -168,8 +168,8 @@ public class OASModifier {
         ParseOptions parseOptions = new ParseOptions();
         SwaggerParseResult parseResult = new OpenAPIParser().readContents(openApiJson, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
-            outStream.println("Sanitized OpenAPI contains errors:");
-            parseResult.getMessages().forEach(outStream::println);
+            outErrorStream.println("Sanitized OpenAPI contains errors:");
+            parseResult.getMessages().forEach(outErrorStream::println);
         }
         return parseResult.getOpenAPI();
     }
