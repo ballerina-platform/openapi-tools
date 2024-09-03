@@ -110,8 +110,6 @@ public class BallerinaCodeGenerator {
         Path openAPIPath = Path.of(definitionPath);
         OpenAPI openAPIDef = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(openAPIPath);
         checkOpenAPIVersion(openAPIDef);
-        // Add typeHandler
-        TypeHandler.createInstance(openAPIDef, options.nullable);
         // Generate service
         String serviceTitle = serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = String.format("%s_service.bal", serviceTitle);
@@ -130,6 +128,8 @@ public class BallerinaCodeGenerator {
         // absence of the operationId in operation. Therefore, we enable client flag true as default code generation.
         // if resource is enabled, we avoid checking operationId.
         OpenAPI normalizedOpenAPI = GeneratorUtils.normalizeOpenAPI(openAPIDef, !isResource, options.isSanitizedOas);
+        // Add typeHandler
+        TypeHandler.createInstance(normalizedOpenAPI, options.nullable);
         // Generate client.
         // Generate ballerina client remote.
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
@@ -423,7 +423,7 @@ public class BallerinaCodeGenerator {
                 .build();
         //Take default DO NOT modify
         licenseHeader = licenseHeader.isBlank() ? DO_NOT_MODIFY_FILE_HEADER : licenseHeader;
-        TypeHandler.createInstance(openAPIDef, options.nullable);
+        TypeHandler.createInstance(normalizedOpenAPI, options.nullable);
         BallerinaClientGenerator clientGenerator = getBallerinaClientGenerator(oasClientConfig);
         SyntaxTree syntaxTree = clientGenerator.generateSyntaxTree();
         //Update type definition list with auth related type definitions

@@ -1,0 +1,84 @@
+openapi: 3.0.1
+info:
+  title: Api
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/api"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9999"
+paths:
+  /albums:
+    get:
+      operationId: getAlbums
+      description: Get albums by genre
+      parameters:
+        - name: genre
+          in: query
+          required: true
+          description: Album genre
+          schema:
+            type: string
+        - name: API-VERSION
+          in: header
+          description: API Version
+          schema:
+            $ref: '#/components/schemas/VERSION'
+            default: V1
+      responses:
+        "200":
+          description: Albums found
+          headers:
+            req-id:
+              required: true
+              description: Request ID
+              schema:
+                type: integer
+                format: int64
+            api-version:
+              required: true
+              description: API Version
+              schema:
+                type: string
+            session-id:
+              required: true
+              description: Session ID
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/album'
+components:
+  schemas:
+    album:
+      required:
+        - artist
+        - genre
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: Album ID
+        name:
+          type: string
+          description: Album name
+        artist:
+          type: string
+          description: Album artist
+        genre:
+          type: string
+          description: Album genre
+      additionalProperties: false
+    VERSION:
+      type: string
+      description: API Version
+      enum:
+        - V1
+        - V2

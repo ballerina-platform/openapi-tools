@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * This contains the OAS modification tests.
@@ -42,8 +41,8 @@ public class OASModifierTests {
         Path expectedPath = RES_DIR.resolve("modified_record.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASModifier oasModifier = new OASModifier();
-        Optional<Map<String, String>> proposedNameList = oasModifier.getProposedNameList(openAPI);
-        OpenAPI modifiedOAS = oasModifier.modifyWithBallerinaConventions(openAPI, proposedNameList.get());
+        Map<String, String> proposedNameMapping = oasModifier.getProposedNameMapping(openAPI);
+        OpenAPI modifiedOAS = oasModifier.modifyWithBallerinaConventions(openAPI, proposedNameMapping);
         // file comparison
         OpenAPI expectedFileContent = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(expectedPath);
         Assert.assertEquals(modifiedOAS, expectedFileContent);
