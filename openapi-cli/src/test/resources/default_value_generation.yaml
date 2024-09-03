@@ -21,6 +21,7 @@ paths:
             type: string
         - name: q1
           in: query
+          required: true
           schema:
             type: string
             default: query1
@@ -32,6 +33,7 @@ paths:
             default: -1
         - name: X-HEADER
           in: header
+          required: true
           schema:
             type: string
             default: header1
