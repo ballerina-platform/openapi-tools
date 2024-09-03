@@ -65,12 +65,10 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 import static io.ballerina.openapi.cmd.CmdConstants.BAL_EXTENSION;
-import static io.ballerina.openapi.cmd.CmdConstants.CLIENT;
 import static io.ballerina.openapi.cmd.CmdConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.Mode.BOTH_SERVICE_CLIENT;
 import static io.ballerina.openapi.cmd.CmdConstants.REMOTE;
 import static io.ballerina.openapi.cmd.CmdConstants.RESOURCE;
-import static io.ballerina.openapi.cmd.CmdConstants.SERVICE;
 import static io.ballerina.openapi.cmd.CmdConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.YML_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdUtils.addNewLine;
@@ -204,12 +202,8 @@ public class OpenApiCmd implements BLauncherCmd {
                                 .collect(Collectors.toList());
                 operation.addAll(normalizedOperationIds);
             }
-            Filter filter = new Filter(tag, operation);
 
-            if (baseCmd.useSanitized) {
-                outStream.println("This is an experimental feature. This option enables code generation by " +
-                        "modifying the given OAS to follow the Ballerina language best practices.");
-            }
+            Filter filter = new Filter(tag, operation);
             if (baseCmd.generateClientMethods != null && !baseCmd.generateClientMethods.isBlank() &&
                     (!baseCmd.generateClientMethods.equals(RESOURCE) &&
                             !baseCmd.generateClientMethods.equals(REMOTE))) {
