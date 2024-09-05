@@ -1,11 +1,3 @@
-public type ApiHistoricosimulacaoAddhistoricoRequest_2 record {|
-    record {|string...;|}...;
-|};
-
-public type ApiHistoricosimulacaoAddhistoricoRequest_1 record {|
-    HistoricoSimulacaoViewModel...;
-|};
-
 public type Mailing_AddContact_body record {
     string name?;
 };
@@ -32,7 +24,7 @@ public type Mailing_AddContact_body_3 record {|
     MailingViewModel...;
 |};
 
-public type ApiHistoricosimulacaoAddhistoricoRequest record {|
+public type ApiHistoricoSimulacaoAddHistoricoRequest record {|
     string...;
 |};
 
@@ -41,4 +33,12 @@ public type HistoricoSimulacaoViewModel record {|
     string? data?;
     string? step?;
     string? descricao?;
+|};
+
+public type ApiHistoricoSimulacaoAddHistoricoRequest_2 record {|
+    record {|string...;|}...;
+|};
+
+public type ApiHistoricoSimulacaoAddHistoricoRequest_1 record {|
+    HistoricoSimulacaoViewModel...;
 |};
