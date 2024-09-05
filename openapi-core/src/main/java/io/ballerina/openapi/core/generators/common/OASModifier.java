@@ -379,7 +379,7 @@ public class OASModifier {
             return "param";
         }
         identifier = getValidStringFromIdentifier(identifier, "param");
-        return identifier.trim();
+        return (identifier.substring(0, 1).toLowerCase(Locale.ENGLISH) + identifier.substring(1)).trim();
     }
 
     private static String getValidStringFromIdentifier(String identifier, String prefix) {
