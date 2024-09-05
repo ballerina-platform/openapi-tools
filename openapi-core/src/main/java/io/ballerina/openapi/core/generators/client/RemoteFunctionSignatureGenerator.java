@@ -165,9 +165,8 @@ public class RemoteFunctionSignatureGenerator implements FunctionSignatureGenera
         if (parameters != null) {
             populateQueryAndHeaderParameters(parameters, queryParameters, headerParameters, pathParameters);
 
-            List<Parameter> nonHeaderParameters = new ArrayList<>(queryParameters) {{
-                addAll(pathParameters);
-            }};
+            List<Parameter> nonHeaderParameters = new ArrayList<>(queryParameters);
+            nonHeaderParameters.addAll(pathParameters);
             HeadersParameterGenerator headersParameterGenerator = new HeadersParameterGenerator(headerParameters,
                     openAPI, operation, httpMethod, path, nonHeaderParameters);
             Optional<ParameterNode> headers;
