@@ -95,6 +95,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.LIST_CONSTRUCTOR;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.NUMERIC_LITERAL;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.UNARY_EXPRESSION;
 import static io.ballerina.openapi.service.mapper.Constants.BALLERINA;
 import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP;
@@ -112,7 +113,7 @@ import static io.ballerina.openapi.service.mapper.Constants.YAML_EXTENSION;
 public class MapperCommonUtils {
 
     private static final SyntaxKind[] validExpressionKind = {STRING_LITERAL, NUMERIC_LITERAL, BOOLEAN_LITERAL,
-            LIST_CONSTRUCTOR, MAPPING_CONSTRUCTOR};
+            LIST_CONSTRUCTOR, MAPPING_CONSTRUCTOR, UNARY_EXPRESSION};
 
     public static String generateRelativePath(ResourceFunction resourceFunction) {
         StringBuilder relativePath = new StringBuilder();

@@ -125,6 +125,12 @@ public class RecordTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/record_rest_param.yaml");
     }
 
+    @Test(description = "Test for record with default values")
+    public void testRecordWithDefaultValues() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/record_with_default_values.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/record_with_default_values.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
