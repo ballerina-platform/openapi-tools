@@ -61,7 +61,8 @@ public abstract class AbstractFunctionSignatureGenerator implements FunctionSign
     private boolean hasHeadersParam = false;
     private boolean hasQueriesParam = false;
 
-    public AbstractFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod, String path) {
+    protected AbstractFunctionSignatureGenerator(Operation operation, OpenAPI openAPI, String httpMethod,
+                                                 String path) {
         this.operation = operation;
         this.openAPI = openAPI;
         this.httpMethod = httpMethod;
