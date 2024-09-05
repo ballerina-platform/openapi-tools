@@ -398,8 +398,7 @@ public class OASModifier {
             StringBuilder validName = new StringBuilder();
             for (String part : split) {
                 if (!part.isBlank()) {
-                        part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
-                                part.substring(1).toLowerCase(Locale.ENGLISH);
+                        part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) + part.substring(1);
                     validName.append(part);
                 }
             }

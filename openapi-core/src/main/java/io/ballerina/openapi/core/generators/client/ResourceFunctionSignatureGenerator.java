@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.core.generators.client;
 
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
@@ -46,6 +47,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages.OAS_CLIENT_100;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADERS;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 
 public class ResourceFunctionSignatureGenerator implements FunctionSignatureGenerator {
@@ -55,6 +57,7 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
     protected FunctionReturnTypeGeneratorImp functionReturnTypeGenerator;
     private final String httpMethod;
     private final String path;
+    private String headersParamName = HEADERS;
 
     private boolean hasDefaultHeader = false;
     private boolean hasHeadersParam = false;
@@ -125,6 +128,7 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
 
         List<Parameter> headerParameters = new ArrayList<>();
         List<Parameter> queryParameters = new ArrayList<>();
+        List<Parameter> pathParameters = new ArrayList<>();
 
         // 1. requestBody
         if (operation.getRequestBody() != null) {
@@ -142,14 +146,17 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
 
         // 2. parameters - query, requestBody, headers
         if (parameters != null) {
-            populateHeaderAndQueryParameters(parameters, queryParameters, headerParameters);
+            populateHeaderAndQueryParameters(parameters, queryParameters, headerParameters, pathParameters);
 
+            List<Parameter> nonHeaderParameters = new ArrayList<>(queryParameters) {{
+                addAll(pathParameters);
+            }};
             HeadersParameterGenerator headersParameterGenerator = new HeadersParameterGenerator(headerParameters,
-                    openAPI, operation, httpMethod, path);
+                    openAPI, operation, httpMethod, path, nonHeaderParameters);
             Optional<ParameterNode> headers;
             if (headerParameters.isEmpty()) {
                 hasDefaultHeader = true;
-                headers = HeadersParameterGenerator.getDefaultParameterNode();
+                headers = HeadersParameterGenerator.getDefaultParameterNode(nonHeaderParameters);
             } else {
                 headers = headersParameterGenerator.generateParameterNode();
             }
@@ -160,6 +167,7 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
             }
 
             if (headers.isPresent()) {
+                populateHeadersParamName(headers.get());
                 hasHeadersParam = true;
                 if (headers.get() instanceof RequiredParameterNode headerNode) {
                     requiredParams.add(headerNode);
@@ -190,6 +198,7 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
         } else {
             ParameterNode defaultHeaderParam = HeadersParameterGenerator.getDefaultParameterNode().orElse(null);
             if (defaultHeaderParam != null) {
+                populateHeadersParamName(defaultHeaderParam);
                 hasDefaultHeader = true;
                 hasHeadersParam = true;
                 defaultableParams.add(defaultHeaderParam);
@@ -200,8 +209,18 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
         return new ParametersInfo(requiredParams, defaultableParams, includedParam);
     }
 
+    private void populateHeadersParamName(ParameterNode parameterNode) {
+        if (parameterNode instanceof RequiredParameterNode requiredParameterNode &&
+                requiredParameterNode.paramName().isPresent()) {
+            headersParamName = requiredParameterNode.paramName().get().text();
+        } else if (parameterNode instanceof DefaultableParameterNode parameter &&
+                parameter.paramName().isPresent()) {
+            headersParamName = parameter.paramName().get().text();
+        }
+    }
+
     private void populateHeaderAndQueryParameters(List<Parameter> parameters, List<Parameter> queryParameters,
-                                                  List<Parameter> headerParameters) {
+                                                  List<Parameter> headerParameters, List<Parameter> pathParameters) {
         for (Parameter parameter : parameters) {
             if (parameter.get$ref() != null) {
                 String paramType = null;
@@ -223,6 +242,9 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
                     break;
                 case "header":
                     headerParameters.add(parameter);
+                    break;
+                case "path":
+                    pathParameters.add(parameter);
                     break;
                 default:
                     break;
@@ -257,5 +279,9 @@ public class ResourceFunctionSignatureGenerator implements FunctionSignatureGene
 
     public List<String> getNonDefaultStatusCodes() {
         return functionReturnTypeGenerator.getNonDefaultStatusCodes();
+    }
+
+    public String getHeadersParamName() {
+        return headersParamName;
     }
 }

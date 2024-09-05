@@ -257,8 +257,8 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
                                                                 ImplFunctionSignatureGenerator signatureGenerator) {
         return new ImplFunctionBodyGenerator(path, operation, openAPI,
                 authConfigGeneratorImp, ballerinaUtilGenerator, imports, signatureGenerator.hasHeaders(),
-                signatureGenerator.hasDefaultHeaders(), signatureGenerator.hasQueries(), hasDefaultResponse,
-                nonDefaultStatusCodes);
+                signatureGenerator.hasDefaultHeaders(), signatureGenerator.hasQueries(),
+                signatureGenerator.getHeadersParamName(), hasDefaultResponse, nonDefaultStatusCodes);
     }
 
     /**
