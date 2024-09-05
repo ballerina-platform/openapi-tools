@@ -3,7 +3,7 @@
 
 import ballerina/http;
 
-public type Inline_response_400BadRequest record {|
+public type InlineResponse400BadRequest record {|
     *http:BadRequest;
     inline_response_400 body;
 |};

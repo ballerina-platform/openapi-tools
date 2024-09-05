@@ -3,11 +3,6 @@
 
 import ballerina/http;
 
-public type Inline_response_200Ok record {|
-    *http:Ok;
-    inline_response_200 body;
-|};
-
 public type User record {
     string userName;
     string firstName?;
@@ -19,6 +14,11 @@ public type PetForm record {
     string firstName?;
     string lastName?;
 };
+
+public type InlineResponse200Ok record {|
+    *http:Ok;
+    inline_response_200 body;
+|};
 
 public type inline_response_200 User|Pet|PetForm;
 
