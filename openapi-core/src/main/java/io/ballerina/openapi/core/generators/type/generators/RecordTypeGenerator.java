@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.core.generators.type.generators;
 
+import com.fasterxml.jackson.databind.node.NullNode;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
@@ -47,19 +48,23 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createNilLiteralNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ELLIPSIS_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
@@ -274,7 +279,7 @@ public class RecordTypeGenerator extends TypeGenerator {
         Set<String> imports = new HashSet<>();
 
         if (required != null && required.contains(field.getKey().trim())) {
-            setRequiredFields(required, recordFieldList, field, fieldSchema, fieldName, fieldTypeName);
+            setRequiredFields(recordFieldList, fieldSchema, fieldName, fieldTypeName);
         } else if (fieldSchema.getDefault() != null) {
             RecordFieldWithDefaultValueNode recordFieldWithDefaultValueNode =
                     getRecordFieldWithDefaultValueNode(fieldSchema, fieldName, fieldTypeName);
@@ -287,21 +292,13 @@ public class RecordTypeGenerator extends TypeGenerator {
         return new ImmutablePair<>(recordFieldList, imports);
     }
 
-    private void setRequiredFields(List<String> required, List<Node> recordFieldList,
-                                          Map.Entry<String, Schema<?>> field, Schema<?> fieldSchema,
-                                          IdentifierToken fieldName, TypeDescriptorNode fieldTypeName) {
+    private void setRequiredFields(List<Node> recordFieldList, Schema<?> fieldSchema, IdentifierToken fieldName,
+                                   TypeDescriptorNode fieldTypeName) {
 
-        if (!required.contains(field.getKey().trim())) {
-            if (fieldSchema.getDefault() != null) {
-                RecordFieldWithDefaultValueNode defaultNode =
-                        getRecordFieldWithDefaultValueNode(fieldSchema, fieldName, fieldTypeName);
-                recordFieldList.add(defaultNode);
-            } else {
-                RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
-                        fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN),
-                        createToken(SEMICOLON_TOKEN));
-                recordFieldList.add(recordFieldNode);
-            }
+        if (Objects.nonNull(fieldSchema.getDefault())) {
+            RecordFieldWithDefaultValueNode defaultNode =
+                    getRecordFieldWithDefaultValueNode(fieldSchema, fieldName, fieldTypeName);
+            recordFieldList.add(defaultNode);
         } else {
             RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
                     fieldTypeName, fieldName, null, createToken(SEMICOLON_TOKEN));
@@ -313,21 +310,21 @@ public class RecordTypeGenerator extends TypeGenerator {
                                                                                IdentifierToken fieldName,
                                                                                TypeDescriptorNode fieldTypeName) {
         Token defaultValueToken;
-        String defaultValue = fieldSchema.getDefault().toString().trim();
-        if (GeneratorUtils.isStringSchema(fieldSchema)) {
+        Object defaultValueNode = fieldSchema.getDefault();
+        String defaultValue = defaultValueNode.toString().trim();
+        if (defaultValueNode instanceof String || GeneratorUtils.isStringSchema(fieldSchema)) {
             defaultValue = "\"" + defaultValue.replaceAll("\"", "\\\\\"") + "\"";
-            defaultValueToken = AbstractNodeFactory.createIdentifierToken(defaultValue);
-        } else if (!defaultValue.matches("^[0-9]*$") && !defaultValue.matches("^(\\d*\\.)?\\d+$")
-                && !(defaultValue.startsWith("[") && defaultValue.endsWith("]")) &&
-                !GeneratorUtils.isBooleanSchema(fieldSchema)) {
-            //This regex was added due to avoid adding quotes for default values which are numbers and array values.
-            //Ex: default: 123
-            defaultValueToken = AbstractNodeFactory.createIdentifierToken("\"" +
-                    fieldSchema.getDefault().toString() + "\"");
-        } else {
-            defaultValueToken = AbstractNodeFactory.createIdentifierToken(fieldSchema.getDefault().toString());
         }
-        ExpressionNode expressionNode = createRequiredExpressionNode(defaultValueToken);
+
+        ExpressionNode expressionNode;
+        if (defaultValueNode instanceof NullNode) {
+            // If the default value is null, create a nil literal node - ()
+            expressionNode = createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
+        } else {
+            defaultValueToken = AbstractNodeFactory.createIdentifierToken(defaultValue);
+            expressionNode = createRequiredExpressionNode(defaultValueToken);
+        }
+
         return NodeFactory.createRecordFieldWithDefaultValueNode
                 (null, null, fieldTypeName, fieldName, createToken(EQUAL_TOKEN),
                         expressionNode, createToken(SEMICOLON_TOKEN));
