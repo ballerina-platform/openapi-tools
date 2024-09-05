@@ -184,18 +184,4 @@ public class HeadersParameterGenerator implements ParameterGenerator {
         }
         return headersSchema;
     }
-
-    private Schema getSchemaWithDetails(Parameter parameter) {
-        Schema schema = parameter.getSchema();
-        if (Objects.isNull(schema)) {
-            return null;
-        }
-        schema.setDescription(parameter.getDescription());
-        schema.setDeprecated(parameter.getDeprecated());
-        schema.extensions(parameter.getExtensions());
-        if (!Boolean.TRUE.equals(parameter.getRequired())) {
-            schema.setNullable(true);
-        }
-        return schema;
-    }
 }

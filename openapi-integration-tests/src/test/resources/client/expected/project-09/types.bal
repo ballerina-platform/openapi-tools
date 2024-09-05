@@ -69,7 +69,7 @@ public type chatCompletionsRequestCommon record {
     # If set, partial message deltas will be sent, like in ChatGPT. Tokens will be sent as data-only server-sent events as they become available, with the stream terminated by a `data: [DONE]` message.
     boolean? 'stream = false;
     # Up to 4 sequences where the API will stop generating further tokens.
-    string|string[]? stop = "null";
+    string|string[]? stop = ();
     # The maximum number of tokens allowed for the generated answer. By default, the number of tokens the model can return will be (4096 - prompt tokens).
     int max_tokens = 4096;
     # Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.
