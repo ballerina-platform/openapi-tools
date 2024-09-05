@@ -2,9 +2,11 @@ package io.ballerina.openapi.core.generators.client.parameter;
 
 import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeParameterNode;
@@ -225,5 +227,16 @@ public class HeadersParameterGenerator implements ParameterGenerator {
             schema.setNullable(true);
         }
         return schema;
+    }
+
+    public static String getHeadersParamName(ParameterNode parameterNode) {
+        if (parameterNode instanceof RequiredParameterNode requiredParameterNode &&
+                requiredParameterNode.paramName().isPresent()) {
+            return requiredParameterNode.paramName().get().text();
+        } else if (parameterNode instanceof DefaultableParameterNode parameter &&
+                parameter.paramName().isPresent()) {
+            return parameter.paramName().get().text();
+        }
+        return HEADERS;
     }
 }
