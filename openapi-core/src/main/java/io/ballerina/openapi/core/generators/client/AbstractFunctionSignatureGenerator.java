@@ -37,6 +37,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
@@ -75,7 +76,7 @@ public abstract class AbstractFunctionSignatureGenerator implements FunctionSign
         List<Parameter> parameters = operation.getParameters();
         ParametersInfo parametersInfo = getParametersInfo(parameters);
 
-        if (parametersInfo == null) {
+        if (Objects.isNull(parametersInfo)) {
             return Optional.empty();
         }
 
@@ -119,11 +120,10 @@ public abstract class AbstractFunctionSignatureGenerator implements FunctionSign
     }
 
     protected ParametersInfo getParametersInfo(List<Parameter> parameters) {
-        return getParametersInfoWithoutPath(parameters);
+        return getParametersInfo(parameters, new ArrayList<>());
     }
 
-    protected ParametersInfo getParametersInfoWithoutPath(List<Parameter> parameters) {
-        List<Node> requiredParams = new ArrayList<>();
+    protected ParametersInfo getParametersInfo(List<Parameter> parameters, List<Node> requiredParams) {
         List<Node> defaultableParams = new ArrayList<>();
         List<Node> includedParam = new ArrayList<>();
         Token comma = createToken(COMMA_TOKEN);
@@ -133,7 +133,7 @@ public abstract class AbstractFunctionSignatureGenerator implements FunctionSign
         List<Parameter> pathParameters = new ArrayList<>();
 
         // requestBody
-        if (operation.getRequestBody() != null) {
+        if (Objects.nonNull(operation.getRequestBody())) {
             RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(operation.getRequestBody(),
                     openAPI);
             Optional<ParameterNode> requestBody = requestBodyGenerator.generateParameterNode();
@@ -147,7 +147,7 @@ public abstract class AbstractFunctionSignatureGenerator implements FunctionSign
         }
 
         // parameters -  query, headers
-        if (parameters != null) {
+        if (Objects.nonNull(parameters)) {
             populateHeaderAndQueryParameters(parameters, queryParameters, headerParameters, pathParameters);
 
             List<Parameter> nonHeaderParameters = new ArrayList<>(queryParameters);
@@ -198,7 +198,7 @@ public abstract class AbstractFunctionSignatureGenerator implements FunctionSign
             }
         } else {
             ParameterNode defaultHeaderParam = HeadersParameterGenerator.getDefaultParameterNode().orElse(null);
-            if (defaultHeaderParam != null) {
+            if (Objects.nonNull(defaultHeaderParam)) {
                 headersParamName = HeadersParameterGenerator.getHeadersParamName(defaultHeaderParam);
                 hasDefaultHeader = true;
                 hasHeadersParam = true;
@@ -212,7 +212,7 @@ public abstract class AbstractFunctionSignatureGenerator implements FunctionSign
     private void populateHeaderAndQueryParameters(List<Parameter> parameters, List<Parameter> queryParameters,
                                                   List<Parameter> headerParameters, List<Parameter> pathParameters) {
         for (Parameter parameter : parameters) {
-            if (parameter.get$ref() != null) {
+            if (Objects.nonNull(parameter.get$ref())) {
                 String paramType = null;
                 try {
                     paramType = extractReferenceType(parameter.get$ref());

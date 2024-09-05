@@ -20,7 +20,6 @@ package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.client.parameter.PathParameterGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -42,27 +41,11 @@ public class RemoteFunctionSignatureGenerator extends AbstractFunctionSignatureG
     }
 
     protected ParametersInfo getParametersInfo(List<Parameter> parameters) {
-        List<Node> requiredParams;
-        List<Node> defaultableParams;
-        List<Node> includedParam;
-        Token comma = createToken(COMMA_TOKEN);
-
-        ParametersInfo parametersInfo = super.getParametersInfo(parameters);
-
-        if (Objects.isNull(parameters)) {
-            return parametersInfo;
+       if (Objects.isNull(parameters)) {
+            return super.getParametersInfo(null);
         }
 
-        if (Objects.isNull(parametersInfo)) {
-            requiredParams = new ArrayList<>();
-            defaultableParams = new ArrayList<>();
-            includedParam = new ArrayList<>();
-        } else {
-            requiredParams = parametersInfo.requiredParams();
-            defaultableParams = parametersInfo.defaultableParams();
-            includedParam = parametersInfo.includedParam();
-        }
-
+        List<Node> requiredParams = new ArrayList<>();
         // path parameters
         for (Parameter parameter : parameters) {
             if (parameter.getIn().equals("path")) {
@@ -74,9 +57,9 @@ public class RemoteFunctionSignatureGenerator extends AbstractFunctionSignatureG
                 }
                 // Path parameters are always required.
                 requiredParams.add(param.get());
-                requiredParams.add(comma);
+                requiredParams.add(createToken(COMMA_TOKEN));
             }
         }
-        return new ParametersInfo(requiredParams, defaultableParams, includedParam);
+        return super.getParametersInfo(parameters, requiredParams);
     }
 }
