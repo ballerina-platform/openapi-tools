@@ -49,6 +49,12 @@ import static io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticM
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADERS;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 
+/**
+ * This class represents the abstract function signature generator which is used to implement
+ * the common functionalities of the function signature generators.
+ *
+ * @since 2.1.1
+ */
 public abstract class AbstractFunctionSignatureGenerator implements FunctionSignatureGenerator {
     OpenAPI openAPI;
     Operation operation;
