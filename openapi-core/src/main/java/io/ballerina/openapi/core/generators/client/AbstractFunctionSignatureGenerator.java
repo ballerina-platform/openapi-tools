@@ -93,9 +93,6 @@ public abstract class AbstractFunctionSignatureGenerator implements FunctionSign
         FunctionReturnTypeGeneratorImp functionReturnType = getFunctionReturnTypeGenerator();
         Optional<ReturnTypeDescriptorNode> returnType = functionReturnType.getReturnType();
         diagnostics.addAll(functionReturnType.getDiagnostics());
-        if (returnType.isEmpty()) {
-            return Optional.empty();
-        }
 
         //create function signature node
         return returnType.map(returnTypeDescriptorNode -> NodeFactory.createFunctionSignatureNode(
