@@ -1015,6 +1015,16 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.json"));
     }
 
+    @Test(description = "Test openapi flatten sub command with composed schema")
+    public void testFlattenCmdWithComposedSchema() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_composed_schema.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi_composed_schema.yaml", "-o", tmpDir.toString()};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.yaml"));
+    }
+
     @AfterTest
     public void clean() {
         System.setErr(null);

@@ -18,12 +18,15 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
+import io.ballerina.openapi.core.generators.common.OASModifier;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.service.mapper.utils.CodegenUtils;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.util.InlineModelResolver;
@@ -36,7 +39,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -45,6 +51,8 @@ import static io.ballerina.openapi.cmd.CmdConstants.OPENAPI_FLATTEN_CMD;
 import static io.ballerina.openapi.cmd.CmdConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.YML_EXTENSION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE;
+import static io.ballerina.openapi.core.generators.common.OASModifier.getResolvedNameMapping;
+import static io.ballerina.openapi.core.generators.common.OASModifier.getValidNameForType;
 import static io.ballerina.openapi.service.mapper.utils.CodegenUtils.resolveContractFileName;
 
 /**
@@ -79,6 +87,8 @@ public class Flatten implements BLauncherCmd {
     private static final String FOUND_PARSER_DIAGNOSTICS = "found the following parser diagnostic messages:";
     private static final String ERROR_OCCURRED_WHILE_WRITING_THE_OUTPUT_OPENAPI_FILE = "[ERROR] error occurred while " +
             "writing the flattened OpenAPI definition file";
+    private static final String ERROR_OCCURRED_WHILE_GENERATING_SCHEMA_NAMES = "[ERROR] error occurred while " +
+            "generating schema names";
 
     private final PrintStream infoStream = System.out;
     private final PrintStream errorStream = System.err;
@@ -176,29 +186,35 @@ public class Flatten implements BLauncherCmd {
     private Optional<OpenAPI> getFlattenOpenAPI(String openAPIFileContent) {
         // Read the contents of the file with default parser options
         // Flattening will be done after filtering the operations
-        SwaggerParseResult parseResult = new OpenAPIParser().readContents(openAPIFileContent, null,
+        SwaggerParseResult parserResult = new OpenAPIParser().readContents(openAPIFileContent, null,
                 new ParseOptions());
-        if (!parseResult.getMessages().isEmpty() &&
-                parseResult.getMessages().contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
+        if (!parserResult.getMessages().isEmpty() &&
+                parserResult.getMessages().contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
             errorStream.println(ERROR_UNSUPPORTED_OPENAPI_VERSION);
             return Optional.empty();
         }
 
-        OpenAPI openAPI = parseResult.getOpenAPI();
+        OpenAPI openAPI = parserResult.getOpenAPI();
         if (Objects.isNull(openAPI)) {
             errorStream.println(ERROR_OCCURRED_WHILE_PARSING_THE_INPUT_OPENAPI_FILE);
-            if (!parseResult.getMessages().isEmpty()) {
+            if (!parserResult.getMessages().isEmpty()) {
                 errorStream.println(FOUND_PARSER_DIAGNOSTICS);
-                parseResult.getMessages().forEach(errorStream::println);
+                parserResult.getMessages().forEach(errorStream::println);
             }
             return Optional.empty();
         }
 
+        Components components = openAPI.getComponents();
+        List<String> existingComponentNames = Objects.nonNull(components) && Objects.nonNull(components.getSchemas()) ?
+                new ArrayList<>(components.getSchemas().keySet()) : new ArrayList<>();
+
         filterOpenAPIOperations(openAPI);
+
         // Flatten the OpenAPI definition with `flattenComposedSchemas: true` and `camelCaseFlattenNaming: true`
         InlineModelResolver inlineModelResolver = new InlineModelResolver(true, true);
         inlineModelResolver.flatten(openAPI);
-        return Optional.of(openAPI);
+
+        return sanitizeOpenAPI(openAPI, existingComponentNames);
     }
 
     private void writeFlattenOpenAPIFile(OpenAPI openAPI) {
@@ -245,6 +261,50 @@ public class Flatten implements BLauncherCmd {
             }
         });
         pathsToRemove.forEach(openAPI.getPaths()::remove);
+    }
+
+    private Optional<OpenAPI> sanitizeOpenAPI(OpenAPI openAPI, List<String> existingComponentNames) {
+        Map<String, String> proposedNameMapping = getProposedNameMapping(openAPI, existingComponentNames);
+        if (proposedNameMapping.isEmpty()) {
+            return Optional.of(openAPI);
+        }
+
+        SwaggerParseResult parserResult = OASModifier.getOASWithSchemaNameModification(openAPI, proposedNameMapping);
+        openAPI = parserResult.getOpenAPI();
+        if (Objects.isNull(openAPI)) {
+            errorStream.println(ERROR_OCCURRED_WHILE_GENERATING_SCHEMA_NAMES);
+            if (!parserResult.getMessages().isEmpty()) {
+                errorStream.println(FOUND_PARSER_DIAGNOSTICS);
+                parserResult.getMessages().forEach(errorStream::println);
+            }
+            return Optional.empty();
+        }
+
+        return Optional.of(openAPI);
+    }
+
+    public Map<String, String> getProposedNameMapping(OpenAPI openapi, List<String> existingComponentNames) {
+        Map<String, String> nameMap = new HashMap<>();
+        if (Objects.isNull(openapi.getComponents())) {
+            return Collections.emptyMap();
+        }
+        Components components = openapi.getComponents();
+        Map<String, Schema> schemas = components.getSchemas();
+        if (Objects.isNull(schemas)) {
+            return Collections.emptyMap();
+        }
+
+        for (Map.Entry<String, Schema> schemaEntry: schemas.entrySet()) {
+            if (existingComponentNames.contains(schemaEntry.getKey())) {
+                continue;
+            }
+            String modifiedName = getValidNameForType(schemaEntry.getKey());
+            if (modifiedName.equals(schemaEntry.getKey())) {
+                continue;
+            }
+            nameMap.put(schemaEntry.getKey(), modifiedName);
+        }
+        return getResolvedNameMapping(nameMap);
     }
 
     private Filter getFilter() {
