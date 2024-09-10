@@ -10,8 +10,9 @@ SYNOPSIS
                            [--operations] <operation-names>
 
 DESCRIPTION
-       Flatten the OpenAPI contract file by moving all the inline schemas to the
-       components section. The generated schema names will be Ballerina friendly.
+       Make the OpenAPI contract more readable by relocating all inline
+       embedded schemas to the components section and assigning each a
+       unique, Ballerina-friendly name.
 
 OPTIONS
        -i, --input <openapi-contract-file-path>
