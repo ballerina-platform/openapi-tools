@@ -9,6 +9,7 @@ import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.util.InlineModelResolver;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static io.ballerina.openapi.cmd.CmdConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.OPENAPI_FLATTEN_CMD;
@@ -123,7 +125,7 @@ public class Flatten implements BLauncherCmd {
         }
 
         if (Objects.isNull(name)) {
-            name = "flatten_openapi";
+            name = "flattened_openapi";
         }
 
         if (Objects.nonNull(outputPath)) {
@@ -146,12 +148,23 @@ public class Flatten implements BLauncherCmd {
             return;
         }
 
-        SwaggerParseResult parseResult = getOpenAPIWithFlattenOption(openAPIFileContent);
+        Optional<OpenAPI> openAPIOptional = getFlattenOpenAPI(openAPIFileContent);
+        if (openAPIOptional.isEmpty()) {
+            exitError();
+            return;
+        }
+        writeFlattenOpenAPIFile(openAPIOptional.get());
+    }
+
+    private Optional<OpenAPI> getFlattenOpenAPI(String openAPIFileContent) {
+        // Read the contents of the file with default parser options
+        // Flattening will be done after filtering the operations
+        SwaggerParseResult parseResult = new OpenAPIParser().readContents(openAPIFileContent, null,
+                new ParseOptions());
         if (!parseResult.getMessages().isEmpty()) {
             if (parseResult.getMessages().contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
                 errorStream.println(ERROR_UNSUPPORTED_OPENAPI_VERSION);
-                exitError();
-                return;
+                return Optional.empty();
             }
         }
 
@@ -162,20 +175,14 @@ public class Flatten implements BLauncherCmd {
                 errorStream.println(FOUND_PARSER_DIAGNOSTICS);
                 parseResult.getMessages().forEach(errorStream::println);
             }
-            exitError();
-            return;
+            return Optional.empty();
         }
 
         filterOpenAPIOperations(openAPI);
-        writeFlattenOpenAPIFile(openAPI);
-    }
-
-    private static SwaggerParseResult getOpenAPIWithFlattenOption(String openAPIFileContent) {
-        ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setFlatten(true);
-        parseOptions.setCamelCaseFlattenNaming(true);
-        parseOptions.setFlattenComposedSchemas(true);
-        return new OpenAPIParser().readContents(openAPIFileContent, null, parseOptions);
+        // Flatten the OpenAPI definition with `flattenComposedSchemas: true` and `camelCaseFlattenNaming: true`
+        InlineModelResolver inlineModelResolver = new InlineModelResolver(true, true);
+        inlineModelResolver.flatten(openAPI);
+        return Optional.of(openAPI);
     }
 
     private void writeFlattenOpenAPIFile(OpenAPI openAPI) {
@@ -204,6 +211,7 @@ public class Flatten implements BLauncherCmd {
             return;
         }
 
+        // Remove the operations which are not present in the filter
         openAPI.getPaths().forEach((path, pathItem) -> pathItem.readOperationsMap()
                 .forEach((httpMethod, operation) -> {
                     if (!filter.getOperations().contains(operation.getOperationId()) &&
@@ -212,6 +220,15 @@ public class Flatten implements BLauncherCmd {
                     }
                 })
         );
+
+        // Remove the paths which do not have any operations after filtering
+        List<String> pathsToRemove = new ArrayList<>();
+        openAPI.getPaths().forEach((path, pathItem) -> {
+            if (pathItem.readOperationsMap().isEmpty()) {
+                pathsToRemove.add(path);
+            }
+        });
+        pathsToRemove.forEach(openAPI.getPaths()::remove);
     }
 
     private Filter getFilter() {
