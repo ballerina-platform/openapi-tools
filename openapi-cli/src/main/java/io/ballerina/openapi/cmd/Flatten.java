@@ -95,7 +95,7 @@ public class Flatten implements BLauncherCmd {
     private String outputPath;
 
     @CommandLine.Option(names = {"-n", "--name"}, description = "Name of the flattened OpenAPI definition file.")
-    private String name;
+    private String fileName;
 
     @CommandLine.Option(names = {"-f", "--format"}, description = "Output format of the flattened OpenAPI definition.")
     private String format;
@@ -141,8 +141,8 @@ public class Flatten implements BLauncherCmd {
             setDefaultFormat();
         }
 
-        if (Objects.isNull(name)) {
-            name = "flattened_openapi";
+        if (Objects.isNull(fileName)) {
+            fileName = "flattened_openapi";
         }
 
         if (Objects.nonNull(outputPath)) {
@@ -215,7 +215,7 @@ public class Flatten implements BLauncherCmd {
     }
 
     private String getOutputFileName() {
-        return resolveContractFileName(targetPath, name + getFileExtension(), format.equals("json"));
+        return resolveContractFileName(targetPath, fileName + getFileExtension(), format.equals("json"));
     }
 
     private String getFileExtension() {
