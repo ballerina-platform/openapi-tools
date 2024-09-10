@@ -178,17 +178,16 @@ public class Flatten implements BLauncherCmd {
         // Flattening will be done after filtering the operations
         SwaggerParseResult parseResult = new OpenAPIParser().readContents(openAPIFileContent, null,
                 new ParseOptions());
-        if (!parseResult.getMessages().isEmpty()) {
-            if (parseResult.getMessages().contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
-                errorStream.println(ERROR_UNSUPPORTED_OPENAPI_VERSION);
-                return Optional.empty();
-            }
+        if (!parseResult.getMessages().isEmpty() &&
+                parseResult.getMessages().contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
+            errorStream.println(ERROR_UNSUPPORTED_OPENAPI_VERSION);
+            return Optional.empty();
         }
 
         OpenAPI openAPI = parseResult.getOpenAPI();
         if (Objects.isNull(openAPI)) {
             errorStream.println(ERROR_OCCURRED_WHILE_PARSING_THE_INPUT_OPENAPI_FILE);
-            if (Objects.nonNull(parseResult.getMessages())) {
+            if (!parseResult.getMessages().isEmpty()) {
                 errorStream.println(FOUND_PARSER_DIAGNOSTICS);
                 parseResult.getMessages().forEach(errorStream::println);
             }
