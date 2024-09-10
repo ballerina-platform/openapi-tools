@@ -29,8 +29,8 @@ OPTIONS
 
        -f, --format [json|yaml]
             This is an optional input. The flatten OpenAPI contract will be saved
-            in given format. The format can be either JSON or YAML.
-            The default format is same as the input format.
+            in the given format. The format can be either JSON or YAML. The
+            default format is same as the input file format.
 
        -t, --tags <tag-names>
             This is an optional input. The flatten OpenAPI contract will only have
