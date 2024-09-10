@@ -70,30 +70,31 @@ public class Flatten implements BLauncherCmd {
     private static final String COMMAND_IDENTIFIER = "openapi-flatten";
     private static final String COMMA = ",";
 
-    private static final String INFO_OUTPUT_WRITTEN_MSG = "[INFO] flattened OpenAPI definition file was successfully" +
+    private static final String INFO_OUTPUT_WRITTEN_MSG = "INFO: flattened OpenAPI definition file was successfully" +
             " written to: %s%n";
-    private static final String WARNING_INVALID_OUTPUT_FORMAT = "[WARNING] invalid output format. The output format" +
+    private static final String WARNING_INVALID_OUTPUT_FORMAT = "WARNING: invalid output format. The output format" +
             " should be either \"json\" or \"yaml\".Defaulting to format of the input file.";
-    private static final String ERROR_INPUT_PATH_IS_REQUIRED = "[ERROR] an OpenAPI definition path is required to " +
+    private static final String ERROR_INPUT_PATH_IS_REQUIRED = "ERROR: an OpenAPI definition path is required to " +
             "flatten the OpenAPI definition.";
-    private static final String ERROR_INVALID_INPUT_FILE_EXTENSION = "[ERROR] invalid input OpenAPI definition file " +
+    private static final String ERROR_INVALID_INPUT_FILE_EXTENSION = "ERROR: invalid input OpenAPI definition file " +
             "extension. The OpenAPI definition file should be in YAML or JSON format.";
-    private static final String ERROR_OCCURRED_WHILE_READING_THE_INPUT_FILE = "[ERROR] error occurred while reading " +
+    private static final String ERROR_OCCURRED_WHILE_READING_THE_INPUT_FILE = "ERROR: error occurred while reading " +
             "the OpenAPI definition file.";
-    private static final String ERROR_UNSUPPORTED_OPENAPI_VERSION = "[ERROR] provided OpenAPI contract version is " +
+    private static final String ERROR_UNSUPPORTED_OPENAPI_VERSION = "ERROR: provided OpenAPI contract version is " +
             "not supported in the tool. Use OpenAPI specification version 2 or higher";
-    private static final String ERROR_OCCURRED_WHILE_PARSING_THE_INPUT_OPENAPI_FILE = "[Error] error occurred while " +
+    private static final String ERROR_OCCURRED_WHILE_PARSING_THE_INPUT_OPENAPI_FILE = "ERROR: error occurred while " +
             "parsing the OpenAPI definition file.";
     private static final String FOUND_PARSER_DIAGNOSTICS = "found the following parser diagnostic messages:";
-    private static final String ERROR_OCCURRED_WHILE_WRITING_THE_OUTPUT_OPENAPI_FILE = "[ERROR] error occurred while " +
+    private static final String ERROR_OCCURRED_WHILE_WRITING_THE_OUTPUT_OPENAPI_FILE = "ERROR: error occurred while " +
             "writing the flattened OpenAPI definition file";
-    private static final String ERROR_OCCURRED_WHILE_GENERATING_SCHEMA_NAMES = "[ERROR] error occurred while " +
+    private static final String ERROR_OCCURRED_WHILE_GENERATING_SCHEMA_NAMES = "ERROR: error occurred while " +
             "generating schema names";
 
-    private final PrintStream infoStream = System.out;
-    private final PrintStream errorStream = System.err;
+    private PrintStream infoStream = System.out;
+    private PrintStream errorStream = System.err;
 
     private Path targetPath = Paths.get(System.getProperty("user.dir"));
+    private boolean exitWhenFinish = true;
 
     @CommandLine.Option(names = {"-h", "--help"}, hidden = true)
     public boolean helpFlag;
@@ -115,6 +116,14 @@ public class Flatten implements BLauncherCmd {
 
     @CommandLine.Option(names = {"--operations"}, description = "Operations that need to be included when flattening.")
     public String operations;
+
+    public Flatten() {
+    }
+
+    public Flatten(PrintStream errorStream, boolean exitWhenFinish) {
+        this.errorStream = errorStream;
+        this.exitWhenFinish = exitWhenFinish;
+    }
 
     @Override
     public void execute() {
@@ -342,7 +351,9 @@ public class Flatten implements BLauncherCmd {
         //This is not used in this command
     }
 
-    private static void exitError() {
-        Runtime.getRuntime().exit(1);
+    private void exitError() {
+        if (exitWhenFinish) {
+            Runtime.getRuntime().exit(1);
+        }
     }
 }
