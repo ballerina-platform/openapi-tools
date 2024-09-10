@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com).
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,7 @@ import static io.ballerina.openapi.service.mapper.utils.CodegenUtils.resolveCont
  * Main class to implement "flatten" subcommand which is used to flatten the OpenAPI definition
  * by moving all the inline schemas to the "#/components/schemas" section.
  *
- * @since 1.9.0
+ * @since 2.2.0
  */
 @CommandLine.Command(
         name = "flatten",
