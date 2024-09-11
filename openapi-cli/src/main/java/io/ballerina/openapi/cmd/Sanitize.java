@@ -82,6 +82,7 @@ public class Sanitize implements BLauncherCmd {
             "writing the sanitized OpenAPI definition file";
     private static final String ERROR_OCCURRED_WHILE_GENERATING_SCHEMA_NAMES = "ERROR: error occurred while " +
             "generating schema names";
+    private static final String DEFAULT_FILE_NAME = "sanitized_openapi";
 
     private PrintStream infoStream = System.out;
     private PrintStream errorStream = System.err;
@@ -154,7 +155,7 @@ public class Sanitize implements BLauncherCmd {
         }
 
         if (Objects.isNull(fileName)) {
-            fileName = "sanitized_openapi";
+            fileName = DEFAULT_FILE_NAME;
         }
 
         if (Objects.nonNull(outputPath)) {

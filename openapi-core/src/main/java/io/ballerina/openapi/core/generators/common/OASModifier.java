@@ -46,6 +46,10 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADER;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PATH;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERY;
+
 /**
  * This class is to contain the sanitized utils for naming.
  *
@@ -57,6 +61,7 @@ public class OASModifier {
     private static final String COMPONENT_REF_REGEX_PATTERN = "(\\\"\\$ref\\\"\\s*:\\s*\\\"#/components/schemas/%s" +
             "\\\")|('\\$ref'\\s*:\\s*'#/components/schemas/%s')";
     private static final PrintStream outErrorStream = System.err;
+    private static final String BALLERINA_NAME_EXT = "x-ballerina-name";
 
     List<Diagnostic> diagnostics = new ArrayList<>();
 
@@ -66,12 +71,12 @@ public class OASModifier {
 
     public Map<String, String> getProposedNameMapping(OpenAPI openapi) {
         Map<String, String> nameMap = new HashMap<>();
-        if (openapi.getComponents() == null) {
+        if (Objects.isNull(openapi.getComponents())) {
             return Collections.emptyMap();
         }
         Components components = openapi.getComponents();
         Map<String, Schema> schemas = components.getSchemas();
-        if (schemas == null) {
+        if (Objects.isNull(schemas)) {
             return Collections.emptyMap();
         }
 
@@ -123,7 +128,7 @@ public class OASModifier {
             Schema schemaValue = schema.getValue();
             if (schemaValue instanceof ObjectSchema objectSchema) {
                 Map<String, Schema> properties = objectSchema.getProperties();
-                if (properties != null && !properties.isEmpty()) {
+                if (Objects.nonNull(properties) && !properties.isEmpty()) {
                     objectSchema.setProperties(getPropertiesWithBallerinaNameExtension(properties));
                 }
             }
@@ -132,7 +137,7 @@ public class OASModifier {
 
     private static void modifyOASWithParameterName(OpenAPI openapi) {
         Paths paths = openapi.getPaths();
-        if (paths == null || paths.isEmpty()) {
+        if (Objects.isNull(paths) || paths.isEmpty()) {
             return;
         }
 
@@ -208,65 +213,65 @@ public class OASModifier {
     private static PathDetails updateParameterNameDetails(Map.Entry<String, PathItem> path) {
         PathItem pathItem = path.getValue();
         String pathValue = path.getKey();
-        if (pathItem.getGet() != null) {
+        if (Objects.nonNull(pathItem.getGet())) {
             Operation operation = pathItem.getGet();
-            if (operation.getParameters() == null) {
+            if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
             pathValue = updateParameterNames(pathValue, operation);
             pathItem.setGet(operation);
         }
-        if (pathItem.getPost() != null) {
+        if (Objects.nonNull(pathItem.getPost())) {
             Operation operation = pathItem.getPost();
-            if (operation.getParameters() == null) {
+            if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
             pathValue = updateParameterNames(pathValue, operation);
             pathItem.setPost(operation);
         }
-        if (pathItem.getPut() != null) {
+        if (Objects.nonNull(pathItem.getPut())) {
             Operation operation = pathItem.getPut();
-            if (operation.getParameters() == null) {
+            if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
             pathValue = updateParameterNames(pathValue, operation);
             pathItem.setPut(operation);
         }
-        if (pathItem.getDelete() != null) {
+        if (Objects.nonNull(pathItem.getDelete())) {
             Operation operation = pathItem.getDelete();
-            if (operation.getParameters() == null) {
+            if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
             pathValue = updateParameterNames(pathValue, operation);
             pathItem.setDelete(operation);
         }
-        if (pathItem.getPatch() != null) {
+        if (Objects.nonNull(pathItem.getPatch())) {
             Operation operation = pathItem.getPatch();
-            if (operation.getParameters() == null) {
+            if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
             pathValue = updateParameterNames(pathValue, operation);
             pathItem.setPatch(operation);
         }
-        if (pathItem.getHead() != null) {
+        if (Objects.nonNull(pathItem.getHead())) {
             Operation operation = pathItem.getHead();
-            if (operation.getParameters() == null) {
+            if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
             pathValue = updateParameterNames(pathValue, operation);
             pathItem.setHead(operation);
         }
-        if (pathItem.getOptions() != null) {
+        if (Objects.nonNull(pathItem.getOptions())) {
             Operation operation = pathItem.getOptions();
-            if (operation.getParameters() == null) {
+            if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
             pathValue = updateParameterNames(pathValue, operation);
             pathItem.setOptions(operation);
         }
-        if (pathItem.getTrace() != null) {
+        if (Objects.nonNull(pathItem.getTrace())) {
             Operation operation = pathItem.getTrace();
-            if (operation.getParameters() == null) {
+            if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
             pathValue = updateParameterNames(pathValue, operation);
@@ -278,7 +283,7 @@ public class OASModifier {
     private static String updateParameterNames(String pathValue, Operation operation) {
         Map<String, String> parameterNames = collectParameterNames(operation.getParameters());
         List<Parameter> parameters = operation.getParameters();
-        if (parameters != null) {
+        if (Objects.nonNull(parameters)) {
             List<Parameter> modifiedParameters = new ArrayList<>();
             pathValue = updateParameters(pathValue, parameterNames, parameters, modifiedParameters);
             operation.setParameters(modifiedParameters);
@@ -291,11 +296,11 @@ public class OASModifier {
 
         for (Parameter parameter : parameters) {
             String location = parameter.getIn();
-            if ("path".equals(location)) {
+            if (location.equals(PATH)) {
                 String modifiedPathParam = parameterNames.get(parameter.getName());
                 parameter.setName(modifiedPathParam);
                 pathValue = replaceContentInBraces(pathValue, modifiedPathParam);
-            } else if ("query".equals(location) || "header".equals(location)) {
+            } else if (location.equals(QUERY) || location.equals(HEADER)) {
                 addBallerinaNameExtension(parameter);
             }
             modifiedParameters.add(parameter);
@@ -317,7 +322,7 @@ public class OASModifier {
         if (Objects.isNull(parameter.getExtensions())) {
             parameter.setExtensions(new HashMap<>());
         }
-        parameter.getExtensions().put("x-ballerina-name", sanitizedName);
+        parameter.getExtensions().put(BALLERINA_NAME_EXT, sanitizedName);
     }
 
     private static Schema getSchemaWithBallerinaNameExtension(String propertyName, Schema<?> propertySchema) {
@@ -337,7 +342,7 @@ public class OASModifier {
         if (Objects.isNull(propertySchema.getExtensions())) {
             propertySchema.setExtensions(new HashMap<>());
         }
-        propertySchema.getExtensions().put("x-ballerina-name", sanitizedPropertyName);
+        propertySchema.getExtensions().put(BALLERINA_NAME_EXT, sanitizedPropertyName);
         return propertySchema;
     }
 
@@ -362,7 +367,7 @@ public class OASModifier {
 
     private static void updateObjectPropertyRef(Map<String, Schema> properties, String schemaName,
                                                 String modifiedName) {
-        if (properties != null) {
+        if (Objects.nonNull(properties)) {
             for (Map.Entry<String, Schema> property : properties.entrySet()) {
                 Schema fieldValue = property.getValue();
                 updateSchemaWithReference(schemaName, modifiedName, fieldValue);
@@ -380,7 +385,7 @@ public class OASModifier {
      */
     private static void updateSchemaWithReference(String schemaName, String modifiedName, Schema typeSchema) {
         String ref = typeSchema.get$ref();
-        if (ref != null) {
+        if (Objects.nonNull(ref)) {
             updateRef(schemaName, modifiedName, typeSchema);
         } else if (typeSchema instanceof ObjectSchema objectSchema) {
             Map<String, Schema> objectSchemaProperties = objectSchema.getProperties();
@@ -390,10 +395,10 @@ public class OASModifier {
             updateSchemaWithReference(schemaName, modifiedName, items);
         } else if (typeSchema instanceof MapSchema mapSchema) {
             updateObjectPropertyRef(mapSchema.getProperties(), schemaName, modifiedName);
-        } else if (typeSchema.getProperties() != null) {
+        } else if (Objects.nonNull(typeSchema.getProperties())) {
             updateObjectPropertyRef(typeSchema.getProperties(), schemaName, modifiedName);
         } else if (typeSchema instanceof ComposedSchema composedSchema) {
-            if (composedSchema.getAllOf() != null) {
+            if (Objects.nonNull(composedSchema.getAllOf())) {
                 List<Schema> allOf = composedSchema.getAllOf();
                 List<Schema> modifiedAllOf = new ArrayList<>();
                 for (Schema schema : allOf) {
@@ -402,7 +407,7 @@ public class OASModifier {
                 }
                 composedSchema.setAllOf(modifiedAllOf);
             }
-            if (composedSchema.getOneOf() != null) {
+            if (Objects.nonNull(composedSchema.getOneOf())) {
                 List<Schema> oneOf = composedSchema.getOneOf();
                 List<Schema> modifiedOneOf = new ArrayList<>();
                 for (Schema schema : oneOf) {
@@ -411,7 +416,7 @@ public class OASModifier {
                 }
                 composedSchema.setOneOf(modifiedOneOf);
             }
-            if (composedSchema.getAnyOf() != null) {
+            if (Objects.nonNull(composedSchema.getAnyOf())) {
                 List<Schema> anyOf = composedSchema.getAnyOf();
                 List<Schema> modifiedAnyOf = new ArrayList<>();
                 for (Schema schema : anyOf) {
@@ -421,7 +426,7 @@ public class OASModifier {
                 composedSchema.setAnyOf(modifiedAnyOf);
             }
         } 
-        if (typeSchema.getAdditionalProperties() != null && 
+        if (Objects.nonNull(typeSchema.getAdditionalProperties()) && 
                 typeSchema.getAdditionalProperties() instanceof Schema<?> addtionalSchema) {
             updateSchemaWithReference(schemaName, modifiedName, addtionalSchema);
         } 
