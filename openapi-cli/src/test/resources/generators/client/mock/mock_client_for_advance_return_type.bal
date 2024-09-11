@@ -31,7 +31,7 @@ public isolated client class Client {
     # + headers - Headers to be sent with the request
     # + queries - Queries to be sent with the request
     @MethodImpl {name: "UpdateAccountAgentImpl"}
-    resource isolated function post api/v1/accounts/[string account_id]/update_agent(map<string|string[]> headers = {}, typedesc<Inline_response_200Ok> targetType = <>, *UpdateAccountAgentQueries queries) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+    resource isolated function post api/v1/accounts/[string account_id]/update_agent(map<string|string[]> headers = {}, typedesc<InlineResponse200Ok> targetType = <>, *UpdateAccountAgentQueries queries) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
 
     # Update account status
     #
@@ -39,19 +39,19 @@ public isolated client class Client {
     # + headers - Headers to be sent with the request
     # + queries - Queries to be sent with the request
     @MethodImpl {name: "UpdateAccountImpl"}
-    resource isolated function post api/v1/accounts/[string account_id]/update_status(map<string|string[]> headers = {}, typedesc<Inline_response_200Ok> targetType = <>, *UpdateAccountQueries queries) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+    resource isolated function post api/v1/accounts/[string account_id]/update_status(map<string|string[]> headers = {}, typedesc<InlineResponse200Ok> targetType = <>, *UpdateAccountQueries queries) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
 
     # Execute payments
     #
     # + headers - Headers to be sent with the request
     @MethodImpl {name: "UpdateExecutePaymentsImpl"}
-    resource isolated function post api/v1/payments/execute_payments(payments_execute_payments_body payload, map<string|string[]> headers = {}, typedesc<Inline_response_200_4Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
+    resource isolated function post api/v1/payments/execute_payments(payments_execute_payments_body payload, map<string|string[]> headers = {}, typedesc<InlineResponse2004Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
 
     # Submit a payment to retry cycle
     #
     # + headers - Headers to be sent with the request
     @MethodImpl {name: "UpdateSubmitPaymentToCycleImpl"}
-    resource isolated function post api/v1/payments/submit_failed_payment(payments_submit_failed_payment_body payload, map<string|string[]> headers = {}, typedesc<Inline_response_200_8Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
+    resource isolated function post api/v1/payments/submit_failed_payment(payments_submit_failed_payment_body payload, map<string|string[]> headers = {}, typedesc<InlineResponse2008Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
 
     # Create an ad hoc statement run
     #
@@ -69,13 +69,13 @@ public isolated client class Client {
     #
     # + headers - Headers to be sent with the request
     @MethodImpl {name: "createPaymentRunImpl"}
-    resource isolated function post api/v1/subscription_payment_runs(POSTPaymentRun payload, map<string|string[]> headers = {}, typedesc<PostpaymentrunresponseJsonOk> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
+    resource isolated function post api/v1/subscription_payment_runs(POSTPaymentRun payload, map<string|string[]> headers = {}, typedesc<POSTPaymentRunResponseJsonOk> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
 
     # Create a payment run schedule
     #
     # + headers - Headers to be sent with the request
     @MethodImpl {name: "createPaymentRunScheduleImpl"}
-    resource isolated function post api/v1/payment_run_schedules(POSTPaymentRunSchedule payload, map<string|string[]> headers = {}, typedesc<PostpaymentrunscheduleresponseJsonOk> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
+    resource isolated function post api/v1/payment_run_schedules(POSTPaymentRunSchedule payload, map<string|string[]> headers = {}, typedesc<POSTPaymentRunScheduleResponseJsonOk> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
 
     # Cancel a payment run schedule
     #
@@ -85,13 +85,13 @@ public isolated client class Client {
     resource isolated function delete api/v1/payment_run_schedules/[int schedule_id](map<string|string[]> headers = {}, typedesc<DELETEPaymentRunScheduleResponseOk> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
 
     @MethodImpl {name: "executeExecuteAccountPaymentsImpl"}
-    resource isolated function put api/v1/payments/execute_account_payments/\<account_id\>(map<string|string[]> headers = {}, typedesc<Inline_response_200_3Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+    resource isolated function put api/v1/payments/execute_account_payments/\<account_id\>(map<string|string[]> headers = {}, typedesc<InlineResponse2003Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
 
     @MethodImpl {name: "executeExecuteDebitMemoPaymentImpl"}
-    resource isolated function put api/v1/payments/execute_debit_memo_payment/\<debit_memo_id\>(map<string|string[]> headers = {}, typedesc<Inline_response_200_2Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+    resource isolated function put api/v1/payments/execute_debit_memo_payment/\<debit_memo_id\>(map<string|string[]> headers = {}, typedesc<InlineResponse2002Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
 
     @MethodImpl {name: "executeExecuteInvoicePaymentImpl"}
-    resource isolated function put api/v1/payments/execute_invoice_payment/\<invoice_id\>(map<string|string[]> headers = {}, typedesc<Inline_response_200_1Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+    resource isolated function put api/v1/payments/execute_invoice_payment/\<invoice_id\>(map<string|string[]> headers = {}, typedesc<InlineResponse2001Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
 
     @MethodImpl {name: "getAccountCycleHistoryImpl"}
     resource isolated function get api/v1/payments/account_cycle_history/\<account_id\>(map<string|string[]> headers = {}, typedesc<GETAccountCycleHistoryResponseOk> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
@@ -194,13 +194,13 @@ public isolated client class Client {
     resource isolated function get api/v1/fetch_settings(map<string|string[]> headers = {}, typedesc<GETStatementSettingsResponseOk> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
 
     @MethodImpl {name: "removeAccountFromCycleImpl"}
-    resource isolated function put api/v1/payments/remove_account_from_retry_cycle/\<account_id\>(map<string|string[]> headers = {}, typedesc<Inline_response_200_7Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+    resource isolated function put api/v1/payments/remove_account_from_retry_cycle/\<account_id\>(map<string|string[]> headers = {}, typedesc<InlineResponse2007Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
 
     @MethodImpl {name: "removeDebitMemoFromCycleImpl"}
-    resource isolated function put api/v1/payments/remove_debit_memo_from_retry_cycle/\<debit_memo_id\>(map<string|string[]> headers = {}, typedesc<Inline_response_200_6Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+    resource isolated function put api/v1/payments/remove_debit_memo_from_retry_cycle/\<debit_memo_id\>(map<string|string[]> headers = {}, typedesc<InlineResponse2006Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
 
     @MethodImpl {name: "removeRemoveInoviceFromCycleImpl"}
-    resource isolated function put api/v1/payments/remove_invoice_from_retry_cycle/\<invoice_id\>(map<string|string[]> headers = {}, typedesc<Inline_response_200_5Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
+    resource isolated function put api/v1/payments/remove_invoice_from_retry_cycle/\<invoice_id\>(map<string|string[]> headers = {}, typedesc<InlineResponse2005Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
 
     # Update a payment run schedule
     #
@@ -209,26 +209,26 @@ public isolated client class Client {
     @MethodImpl {name: "updatePaymentRunScheduleImpl"}
     resource isolated function put api/v1/payment_run_schedules/[int schedule_id](PUTPaymentRunSchedule payload, map<string|string[]> headers = {}, typedesc<POSTPaymentRunScheduleResponseOk> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
 
-    private isolated function UpdateAccountAgentImpl(string account_id, map<string|string[]> headers, typedesc<Inline_response_200Ok> targetType, *UpdateAccountAgentQueries queries) returns http:StatusCodeResponse|error {
-        return <Inline_response_200Ok>{
+    private isolated function UpdateAccountAgentImpl(string account_id, map<string|string[]> headers, typedesc<InlineResponse200Ok> targetType, *UpdateAccountAgentQueries queries) returns http:StatusCodeResponse|error {
+        return <InlineResponse200Ok>{
             body: {"success": true}
         };
     }
 
-    private isolated function UpdateAccountImpl(string account_id, map<string|string[]> headers, typedesc<Inline_response_200Ok> targetType, *UpdateAccountQueries queries) returns http:StatusCodeResponse|error {
-        return <Inline_response_200Ok>{
+    private isolated function UpdateAccountImpl(string account_id, map<string|string[]> headers, typedesc<InlineResponse200Ok> targetType, *UpdateAccountQueries queries) returns http:StatusCodeResponse|error {
+        return <InlineResponse200Ok>{
             body: {"success": true}
         };
     }
 
-    private isolated function UpdateExecutePaymentsImpl(payments_execute_payments_body payload, map<string|string[]> headers, typedesc<Inline_response_200_4Ok> targetType) returns http:StatusCodeResponse|error {
-        return <Inline_response_200_4Ok>{
+    private isolated function UpdateExecutePaymentsImpl(payments_execute_payments_body payload, map<string|string[]> headers, typedesc<InlineResponse2004Ok> targetType) returns http:StatusCodeResponse|error {
+        return <InlineResponse2004Ok>{
             body: {"success": true, "message": "Payments with the following IDs enqueued for processing: [100, 101, 110, 111, 121]"}
         };
     }
 
-    private isolated function UpdateSubmitPaymentToCycleImpl(payments_submit_failed_payment_body payload, map<string|string[]> headers, typedesc<Inline_response_200_8Ok> targetType) returns http:StatusCodeResponse|error {
-        return <Inline_response_200_8Ok>{
+    private isolated function UpdateSubmitPaymentToCycleImpl(payments_submit_failed_payment_body payload, map<string|string[]> headers, typedesc<InlineResponse2008Ok> targetType) returns http:StatusCodeResponse|error {
+        return <InlineResponse2008Ok>{
             body: {"success": true, "message": "Payment entered into retry process"}
         };
     }
@@ -245,14 +245,14 @@ public isolated client class Client {
         };
     }
 
-    private isolated function createPaymentRunImpl(POSTPaymentRun payload, map<string|string[]> headers, typedesc<PostpaymentrunresponseJsonOk> targetType) returns http:StatusCodeResponse|error {
-        return <PostpaymentrunresponseJsonOk>{
+    private isolated function createPaymentRunImpl(POSTPaymentRun payload, map<string|string[]> headers, typedesc<POSTPaymentRunResponseJsonOk> targetType) returns http:StatusCodeResponse|error {
+        return <POSTPaymentRunResponseJsonOk>{
             body: {"id": 6, "success": "true"}
         };
     }
 
-    private isolated function createPaymentRunScheduleImpl(POSTPaymentRunSchedule payload, map<string|string[]> headers, typedesc<PostpaymentrunscheduleresponseJsonOk> targetType) returns http:StatusCodeResponse|error {
-        return <PostpaymentrunscheduleresponseJsonOk>{
+    private isolated function createPaymentRunScheduleImpl(POSTPaymentRunSchedule payload, map<string|string[]> headers, typedesc<POSTPaymentRunScheduleResponseJsonOk> targetType) returns http:StatusCodeResponse|error {
+        return <POSTPaymentRunScheduleResponseJsonOk>{
             body: {"id": 6, "success": "true"}
         };
     }
@@ -263,20 +263,20 @@ public isolated client class Client {
         };
     }
 
-    private isolated function executeExecuteAccountPaymentsImpl(map<string|string[]> headers, typedesc<Inline_response_200_3Ok> targetType) returns http:StatusCodeResponse|error {
-        return <Inline_response_200_3Ok>{
+    private isolated function executeExecuteAccountPaymentsImpl(map<string|string[]> headers, typedesc<InlineResponse2003Ok> targetType) returns http:StatusCodeResponse|error {
+        return <InlineResponse2003Ok>{
             body: {"success": true, "message": "Payments with the following IDs enqueued for processing: [310, 311, 312]"}
         };
     }
 
-    private isolated function executeExecuteDebitMemoPaymentImpl(map<string|string[]> headers, typedesc<Inline_response_200_2Ok> targetType) returns http:StatusCodeResponse|error {
-        return <Inline_response_200_2Ok>{
+    private isolated function executeExecuteDebitMemoPaymentImpl(map<string|string[]> headers, typedesc<InlineResponse2002Ok> targetType) returns http:StatusCodeResponse|error {
+        return <InlineResponse2002Ok>{
             body: {"success": true, "message": "Payments with the following IDs enqueued for processing: [300]"}
         };
     }
 
-    private isolated function executeExecuteInvoicePaymentImpl(map<string|string[]> headers, typedesc<Inline_response_200_1Ok> targetType) returns http:StatusCodeResponse|error {
-        return <Inline_response_200_1Ok>{
+    private isolated function executeExecuteInvoicePaymentImpl(map<string|string[]> headers, typedesc<InlineResponse2001Ok> targetType) returns http:StatusCodeResponse|error {
+        return <InlineResponse2001Ok>{
             body: {"success": true, "message": "Payments with the following IDs enqueued for processing: [290, 291]"}
         };
     }
@@ -395,20 +395,20 @@ public isolated client class Client {
         };
     }
 
-    private isolated function removeAccountFromCycleImpl(map<string|string[]> headers, typedesc<Inline_response_200_7Ok> targetType) returns http:StatusCodeResponse|error {
-        return <Inline_response_200_7Ok>{
+    private isolated function removeAccountFromCycleImpl(map<string|string[]> headers, typedesc<InlineResponse2007Ok> targetType) returns http:StatusCodeResponse|error {
+        return <InlineResponse2007Ok>{
             body: {"success": true, "message": "Payments with the following IDs have been removed from the retry cycle: [310, 311, 312]"}
         };
     }
 
-    private isolated function removeDebitMemoFromCycleImpl(map<string|string[]> headers, typedesc<Inline_response_200_6Ok> targetType) returns http:StatusCodeResponse|error {
-        return <Inline_response_200_6Ok>{
+    private isolated function removeDebitMemoFromCycleImpl(map<string|string[]> headers, typedesc<InlineResponse2006Ok> targetType) returns http:StatusCodeResponse|error {
+        return <InlineResponse2006Ok>{
             body: {"success": true, "message": "Payments with the following IDs have been removed from the retry cycle: [301]"}
         };
     }
 
-    private isolated function removeRemoveInoviceFromCycleImpl(map<string|string[]> headers, typedesc<Inline_response_200_5Ok> targetType) returns http:StatusCodeResponse|error {
-        return <Inline_response_200_5Ok>{
+    private isolated function removeRemoveInoviceFromCycleImpl(map<string|string[]> headers, typedesc<InlineResponse2005Ok> targetType) returns http:StatusCodeResponse|error {
+        return <InlineResponse2005Ok>{
             body: {"success": true, "message": "Payments with the following IDs have been removed from the retry cycle: [290, 291]"}
         };
     }

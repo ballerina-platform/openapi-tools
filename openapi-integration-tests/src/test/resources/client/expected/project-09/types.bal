@@ -26,11 +26,6 @@ public type promptFilterResults promptFilterResult[];
 public type chatCompletionFunctionParameters record {
 };
 
-# Represents the Queries record for the operation: ChatCompletions_Create
-public type ChatCompletions_CreateQueries record {
-    string api\-version;
-};
-
 public type chatCompletionRequestMessage record {
     # The role of the messages author. One of `system`, `user`, `assistant`, or `function`.
     "system"|"user"|"assistant"|"function" role;
@@ -133,6 +128,11 @@ public type extensionsChatCompletionsRequest record {
     dataSource[] dataSources?;
 };
 
+# Represents the Queries record for the operation: ExtensionsChatCompletions_Create
+public type ExtensionsChatCompletionsCreateQueries record {
+    string api\-version;
+};
+
 # Error information returned by the service.
 public type errorBase record {
     # The error code.
@@ -213,6 +213,11 @@ public type chatCompletionResponseMessage record {
     chatCompletionRequestMessage_function_call function_call?;
 };
 
+# Represents the Queries record for the operation: ChatCompletions_Create
+public type ChatCompletionsCreateQueries record {
+    string api\-version;
+};
+
 public type extensionsChatCompletionChoice record {
     *chatCompletionChoiceCommon;
     message message?;
@@ -224,11 +229,6 @@ public type chatCompletionsResponseCommon record {
     int created;
     string model;
     chatCompletionsResponseCommon_usage usage?;
-};
-
-# Represents the Queries record for the operation: ExtensionsChatCompletions_Create
-public type ExtensionsChatCompletions_CreateQueries record {
-    string api\-version;
 };
 
 # Provides settings related to HTTP/1.x protocol.

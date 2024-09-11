@@ -42,10 +42,11 @@ public class ImplFunctionBodyGenerator extends FunctionBodyGeneratorImp {
                                      AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp,
                                      BallerinaUtilGenerator ballerinaUtilGenerator,
                                      List<ImportDeclarationNode> imports, boolean hasHeaders,
-                                     boolean hasDefaultHeaders, boolean hasQueries, boolean hasDefaultResponse,
+                                     boolean hasDefaultHeaders, boolean hasQueries, String headersParamName,
+                                     boolean hasDefaultResponse,
                                      List<String> nonDefaultStatusCodes) {
         super(path, operation, openAPI, ballerinaAuthConfigGeneratorImp, ballerinaUtilGenerator, imports,
-                hasHeaders, hasDefaultHeaders, hasQueries);
+                hasHeaders, hasDefaultHeaders, hasQueries, headersParamName);
         this.hasDefaultStatusResponse = hasDefaultResponse;
         this.nonDefaultStatusCodes = nonDefaultStatusCodes;
     }

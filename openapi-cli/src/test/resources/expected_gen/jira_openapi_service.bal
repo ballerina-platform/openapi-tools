@@ -571,7 +571,7 @@ service / on ep0 {
     resource function get rest/api/'2/project/[string projectIdOrKey]/properties/[string propertyKey]() returns EntityProperty|http:BadRequest|http:Unauthorized|http:Forbidden|http:NotFound {
     }
 
-    resource function get rest/api/'2/project/[string projectIdOrKey]/role() returns RestApi2ProjectProjectidorkeyRoleResponse|http:Unauthorized|http:NotFound {
+    resource function get rest/api/'2/project/[string projectIdOrKey]/role() returns RestApi2ProjectProjectIdOrKeyRoleResponse|http:Unauthorized|http:NotFound {
     }
 
     resource function get rest/api/'2/project/[string projectIdOrKey]/role/[int id]() returns ProjectRole|http:BadRequest|http:Unauthorized|http:NotFound {
@@ -2602,10 +2602,6 @@ public type IssueTypeScreenSchemesProjects record {|
     IssueTypeScreenScheme issueTypeScreenScheme;
     # The IDs of the projects using the issue type screen scheme.
     string[] projectIds;
-|};
-
-public type RestApi2ProjectProjectidorkeyRoleResponse record {|
-    string...;
 |};
 
 # Details of the identifiers for a created or updated remote issue link.
@@ -5920,6 +5916,10 @@ public type ComponentWithIssueCount record {|
 public type CustomFieldUpdatedContextOptionsList record {|
     # The updated custom field options.
     CustomFieldOptionUpdate[] options?;
+|};
+
+public type RestApi2ProjectProjectIdOrKeyRoleResponse record {|
+    string...;
 |};
 
 # Details about system and custom avatars.

@@ -63,7 +63,7 @@ public isolated client class Client {
     # + risk_id - Order Risk ID
     # + headers - Headers to be sent with the request
     # + return - Status OK
-    remote isolated function delete_order_risk(string order_id, string risk_id, map<string|string[]> headers = {}) returns error? {
+    remote isolated function deleteOrderRisk(string order_id, string risk_id, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/admin/api/2021-10/orders/${getEncodedUri(order_id)}/risks/${getEncodedUri(risk_id)}.json`;
         return self.clientEp->delete(resourcePath, headers = headers);
     }
@@ -72,7 +72,7 @@ public isolated client class Client {
     #
     # + headers - Headers to be sent with the request
     # + return - Status OK
-    remote isolated function order_risk(json payload, map<string|string[]> headers = {}) returns error? {
+    remote isolated function orderRisk(json payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/request-body`;
         http:Request request = new;
         request.setPayload(payload, "application/json");

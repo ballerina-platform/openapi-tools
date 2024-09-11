@@ -56,7 +56,7 @@ public isolated client class Client {
     # + queries - Queries to be sent with the request 
     # + return - OK 
     @display {label: "Create Chat Completion"}
-    resource isolated function post deployments/[string deployment\-id]/chat/completions(createChatCompletionRequest payload, map<string|string[]> headers = {}, *ChatCompletions_CreateQueries queries) returns createChatCompletionResponse|error {
+    resource isolated function post deployments/[string deployment\-id]/chat/completions(createChatCompletionRequest payload, map<string|string[]> headers = {}, *ChatCompletionsCreateQueries queries) returns createChatCompletionResponse|error {
         string resourcePath = string `/deployments/${getEncodedUri(deployment\-id)}/chat/completions`;
         map<anydata> headerValues = {...headers};
         if self.apiKeyConfig is ApiKeysConfig {
@@ -72,11 +72,11 @@ public isolated client class Client {
 
     # Using extensions to creates a completion for the chat messages.
     #
-    # + headers - Headers to be sent with the request 
-    # + queries - Queries to be sent with the request 
-    # + return - OK 
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
+    # + return - OK
     @display {label: "Create Extensions Chat Completion"}
-    resource isolated function post deployments/[string deployment\-id]/extensions/chat/completions(extensionsChatCompletionsRequest payload, map<string|string[]> headers = {}, *ExtensionsChatCompletions_CreateQueries queries) returns extensionsChatCompletionsResponse|error {
+    resource isolated function post deployments/[string deployment\-id]/extensions/chat/completions(extensionsChatCompletionsRequest payload, map<string|string[]> headers = {}, *ExtensionsChatCompletionsCreateQueries queries) returns extensionsChatCompletionsResponse|error {
         string resourcePath = string `/deployments/${getEncodedUri(deployment\-id)}/extensions/chat/completions`;
         map<anydata> headerValues = {...headers};
         if self.apiKeyConfig is ApiKeysConfig {

@@ -100,7 +100,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.API
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DELETE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ENCODING;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.EXECUTE;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADERS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADER_VALUES;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_HEADERS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_REQUEST;
@@ -136,6 +135,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
     private final OpenAPI openAPI;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp;
+    private String headersParamName;
 
     private final boolean hasHeaders;
     private final boolean hasQueries;
@@ -150,7 +150,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                                     OpenAPI openAPI, AuthConfigGeneratorImp ballerinaAuthConfigGeneratorImp,
                                     BallerinaUtilGenerator ballerinaUtilGenerator,
                                     List<ImportDeclarationNode> imports, boolean hasHeaders,
-                                    boolean hasDefaultHeaders, boolean hasQueries) {
+                                    boolean hasDefaultHeaders, boolean hasQueries, String headersParamName) {
         this.path = path;
         this.operation = operation;
         this.openAPI = openAPI;
@@ -160,6 +160,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
         this.hasHeaders = hasHeaders;
         this.hasQueries = hasQueries;
         this.hasDefaultHeaders = hasDefaultHeaders;
+        this.headersParamName = headersParamName;
     }
 
     /**
@@ -275,7 +276,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                 if (!headerApiKeyNameList.isEmpty()) {
                     String defaultValue = "{}";
                     if (hasHeaders) {
-                        defaultValue = "{..." + HEADERS + "}";
+                        defaultValue = "{..." + headersParamName + "}";
                     }
                     hasDefaultHeaders = false;
 
@@ -288,7 +289,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                     ballerinaUtilGenerator.setHeadersFound(true);
                 } else if (!hasDefaultHeaders) {
                     statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
-                            MAP_STRING_STRING_ARRAY + HTTP_HEADERS + GET_MAP_FOR_HEADERS + HEADERS + ")"));
+                            MAP_STRING_STRING_ARRAY + HTTP_HEADERS + GET_MAP_FOR_HEADERS + headersParamName + ")"));
                     ballerinaUtilGenerator.setHeadersFound(true);
                 }
             }
@@ -309,13 +310,13 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
         if (hasHeaders || !headerApiKeyNameList.isEmpty()) {
             if (headerApiKeyNameList.isEmpty()) {
                 if (!hasDefaultHeaders) {
-                    headerVarName = HEADERS;
+                    headerVarName = headersParamName;
                 }
             } else {
                 hasDefaultHeaders = false;
                 String defaultValue = "{}";
                 if (hasHeaders) {
-                    defaultValue = "{..." + HEADERS + "}";
+                    defaultValue = "{..." + headersParamName + "}";
                 }
                 ExpressionStatementNode headerMapCreation = GeneratorUtils.getSimpleExpressionStatementNode(
                         MAP_ANYDATA + HEADER_VALUES + " = " + defaultValue);
@@ -539,7 +540,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
     }
 
     /**
-     * Generate common statements in function bosy.
+     * Generate common statements in function body.
      */
     private void createCommonFunctionBodyStatements(List<StatementNode> statementsList, String method) {
 
@@ -549,7 +550,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
         boolean isEntityBodyMethods = method.equals(POST) || method.equals(PUT) || method.equals(PATCH)
                 || method.equals(EXECUTE);
         if (hasHeaders) {
-            String paramName = hasDefaultHeaders ? HEADERS : HTTP_HEADERS;
+            String paramName = hasDefaultHeaders ? headersParamName : HTTP_HEADERS;
             if (isEntityBodyMethods) {
                 ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                         "http:Request request = new");
@@ -688,7 +689,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
             if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
                     || method.equals(EXECUTE)) {
                 requestStatement = getClientCallWithRequestAndHeaders().formatted(method, RESOURCE_PATH,
-                        hasDefaultHeaders ? HEADERS : HTTP_HEADERS);
+                        hasDefaultHeaders ? headersParamName : HTTP_HEADERS);
                 generateReturnStatement(statementsList, requestStatement);
             }
         } else {

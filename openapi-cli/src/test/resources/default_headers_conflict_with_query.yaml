@@ -1,0 +1,33 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "http://{server}:{port}/payloadV"
+    variables:
+      server:
+        default: localhost
+      port:
+        default: "8080"
+paths:
+  /albums/{id}:
+    get:
+      operationId: getAlbumsId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: headers
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
