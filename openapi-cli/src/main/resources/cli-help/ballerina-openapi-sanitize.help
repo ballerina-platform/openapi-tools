@@ -1,0 +1,57 @@
+NAME
+       bal openapi sanitize - Sanitize the OpenAPI contract file according to
+       the best practices of Ballerina.
+
+SYNOPSIS
+       bal openapi sanitize [-i | --input] <openapi-contract-file-path>
+                            [-o | --output] <output-file-path>
+                            [-n | --name] <generated-file-name>
+                            [-f | --format] [json|yaml]
+                            [-t | --tags] <tag-names>
+                            [--operations] <operation-names>
+
+DESCRIPTION
+       Sanitize the OpenAPI contract file according to the best practices of
+       Ballerina. The OpenAPI contract is flatten and the type schema names
+       are made Ballerina friendly. The Ballerina name extensions are added
+       to the schemas which can not be modified.
+
+
+OPTIONS
+       -i, --input <openapi-contract-file-path>
+            This is a mandatory input. The given OpenAPI contract will be sanitized.
+            The OpenAPI contract can be either a YAML or a JSON.
+
+       -o, --output <output-file-path>
+            This is an optional input. The given output file path will be used to
+            save the sanitized OpenAPI contract. The default output file path is
+            the executed directory.
+
+       -n, --name <generated-file-name>
+            This is an optional input. The given name will be used to save the
+            sanitized OpenAPI contract. The default name is `sanitized_openapi`.
+
+       -f, --format [json|yaml]
+            This is an optional input. The sanitized OpenAPI contract will be
+            saved in the given format. The format can be either JSON or YAML.
+            The default format is same as the input file format.
+
+       -t, --tags <tag-names>
+            This is an optional input. The sanitized OpenAPI contract will only
+            have the operations with the given tags.
+
+       --operations <operation-names>
+            This is an optional input. The sanitized OpenAPI contract will only
+            have the given operations.
+
+EXAMPLES
+       Sanitize the `service.yaml` OpenAPI contract file.
+           $ bal openapi sanitize -i service.yaml
+
+       Sanitize the `service.yaml` OpenAPI contract file and save it as
+       `sanitized_svc.json` file.
+           $ bal openapi sanitize -i hello.yaml -n sanitized_svc -f json
+
+       Sanitize the `service.json` OpenAPI contract file by filtering the
+       operations with the `service` tag.
+           $ bal openapi sanitize -i service.json -t service
