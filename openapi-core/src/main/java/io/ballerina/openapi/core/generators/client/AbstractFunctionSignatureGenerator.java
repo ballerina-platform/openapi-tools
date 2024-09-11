@@ -53,7 +53,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extract
  * This class represents the abstract function signature generator which is used to implement
  * the common functionalities of the function signature generators.
  *
- * @since 2.1.1
+ * @since 2.2.0
  */
 public abstract class AbstractFunctionSignatureGenerator implements FunctionSignatureGenerator {
     OpenAPI openAPI;
