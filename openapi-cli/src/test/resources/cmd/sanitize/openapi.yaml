@@ -1,0 +1,189 @@
+openapi: 3.0.1
+info:
+  title: Api V1
+  version: 0.0.0
+servers:
+  - url: "http://{server}:{port}/api/v1"
+    variables:
+      server:
+        default: localhost
+      port:
+        default: "8080"
+paths:
+  /albums:
+    get:
+      tags:
+        - albums
+      operationId: getAlbums
+      parameters:
+        - name: _artists_
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+            default: []
+        - name: X-API-VERSION
+          in: header
+          schema:
+            type: string
+            default: v1
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/album"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+    post:
+      tags:
+        - albums
+      operationId: postAlbum
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/album"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/album"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+  /albums/{_id}:
+    get:
+      tags:
+        - albums
+      operationId: getAlbumById
+      parameters:
+        - name: _id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/album"
+        "404":
+          description: NotFound
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/message"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+  /albums/{id}/artist:
+    get:
+      tags:
+        - artists
+      operationId: getArtistByAlbum
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/album_aRTIST"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+components:
+  schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    album:
+      required:
+        - _id
+        - artist
+        - title
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        artist:
+          type: string
+      additionalProperties: false
+    album_aRTIST:
+      required:
+        - albums
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        albums:
+          type: array
+          items:
+            $ref: "#/components/schemas/album"
+      additionalProperties: false
+    message:
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: integer
+          format: int64
+      additionalProperties: false
