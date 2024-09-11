@@ -112,7 +112,8 @@ public class ResourceExternalFunctionGenerator extends ResourceFunctionGenerator
 
     @Override
     protected Optional<FunctionBodyNode> getFunctionBodyNode(List<ClientDiagnostic> diagnostics, boolean hasHeaders,
-                                                             boolean hasDefaultHeaders, boolean hasQueries) {
+                                                             boolean hasDefaultHeaders, boolean hasQueries,
+                                                             String headersParamName) {
         QualifiedNameReferenceNode javaMethodToken = createQualifiedNameReferenceNode(
                 createIdentifierToken("java"), createToken(COLON_TOKEN), createIdentifierToken("Method"));
         BasicLiteralNode classValueExp = createBasicLiteralNode(STRING_LITERAL,

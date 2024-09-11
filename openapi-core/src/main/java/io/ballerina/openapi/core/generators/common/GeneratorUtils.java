@@ -403,13 +403,12 @@ public class GeneratorUtils {
         //For the flatten enable we need to remove first Part of valid name check
         // this - > !identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
         if (!identifier.matches("\\b[0-9]*\\b")) {
-            String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN);
+            String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN_FOR_MODIFIER);
             StringBuilder validName = new StringBuilder();
             for (String part : split) {
                 if (!part.isBlank()) {
                     if (split.length > 1) {
-                        part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
-                                part.substring(1).toLowerCase(Locale.ENGLISH);
+                        part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) + part.substring(1);
                     }
                     validName.append(part);
                 }
@@ -769,9 +768,6 @@ public class GeneratorUtils {
         if (isSanitized) {
             OASModifier oasSanitizer = new OASModifier();
             Map<String, String> proposedNameMapping = oasSanitizer.getProposedNameMapping(openAPI);
-            if (proposedNameMapping.isEmpty()) {
-                return openAPI;
-            }
             return oasSanitizer.modifyWithBallerinaConventions(openAPI, proposedNameMapping);
         }
         return openAPI;

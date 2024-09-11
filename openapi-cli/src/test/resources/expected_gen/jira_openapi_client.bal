@@ -385,7 +385,7 @@ public isolated client class Client {
         return self.clientEp->delete(resourcePath, headers = headers);
     }
 
-    resource isolated function delete rest/atlassian\-connect/'1/app/module/dynamic(map<string|string[]> headers = {}, *DynamicmodulesresourceRemovemodules_deleteQueries queries) returns http:Response|error {
+    resource isolated function delete rest/atlassian\-connect/'1/app/module/dynamic(map<string|string[]> headers = {}, *DynamicModulesResourceRemoveModulesDeleteQueries queries) returns http:Response|error {
         string resourcePath = string `/rest/atlassian-connect/1/app/module/dynamic`;
         map<Encoding> queryParamEncoding = {"moduleKey": {style: FORM, explode: true}};
         resourcePath = resourcePath + check getPathForQueryParam(queries, queryParamEncoding);
@@ -3844,14 +3844,6 @@ public type GetChangeLogsQueries record {
     int:Signed32 startAt = 0;
 };
 
-# Represents the Queries record for the operation: DynamicModulesResource.removeModules_delete
-public type DynamicmodulesresourceRemovemodules_deleteQueries record {
-    # The key of the module to remove. To include multiple module keys, provide multiple copies of this parameter.
-    # For example, `moduleKey=dynamic-attachment-entity-property&moduleKey=dynamic-select-field`.
-    # Nonexistent keys are ignored.
-    string[] moduleKey?;
-};
-
 # Details of a field that can be used in advanced searches.
 public type FieldReferenceData record {|
     # The field identifier.
@@ -5738,6 +5730,14 @@ public type JQLPersonalDataMigrationRequest record {|
     # A list of queries with user identifiers. Maximum of 100 queries.
     string[] queryStrings?;
 |};
+
+# Represents the Queries record for the operation: DynamicModulesResource.removeModules_delete
+public type DynamicModulesResourceRemoveModulesDeleteQueries record {
+    # The key of the module to remove. To include multiple module keys, provide multiple copies of this parameter.
+    # For example, `moduleKey=dynamic-attachment-entity-property&moduleKey=dynamic-select-field`.
+    # Nonexistent keys are ignored.
+    string[] moduleKey?;
+};
 
 # A page of items.
 public type PageBeanFieldConfigurationScheme record {|

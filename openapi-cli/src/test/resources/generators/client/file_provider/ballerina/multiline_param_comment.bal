@@ -46,7 +46,7 @@ public isolated client class Client {
     # + headers - Headers to be sent with the request
     # + queries - Queries to be sent with the request
     # + return - Success
-    remote isolated function fineTunes_GetEvents(string fine\-tune\-id, map<string|string[]> headers = {}, *FineTunes_GetEventsQueries queries) returns EventList|error {
+    remote isolated function fineTunesGetEvents(string fine\-tune\-id, map<string|string[]> headers = {}, *FineTunesGetEventsQueries queries) returns EventList|error {
         string resourcePath = string `/fine-tunes/${getEncodedUri(fine\-tune\-id)}/events`;
         resourcePath = resourcePath + check getPathForQueryParam(queries);
         map<anydata> headerValues = {...headers};

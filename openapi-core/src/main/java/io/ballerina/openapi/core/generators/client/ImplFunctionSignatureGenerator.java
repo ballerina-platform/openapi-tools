@@ -138,4 +138,8 @@ public class ImplFunctionSignatureGenerator {
     public boolean hasQueries() {
         return resourceFunctionSignatureGenerator.hasQueries();
     }
+
+    public String getHeadersParamName() {
+        return resourceFunctionSignatureGenerator.getHeadersParamName();
+    }
 }
