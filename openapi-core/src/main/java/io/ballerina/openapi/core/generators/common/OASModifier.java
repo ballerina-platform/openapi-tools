@@ -445,7 +445,19 @@ public class OASModifier {
         if (identifier.isBlank()) {
             return "\\" + identifier;
         }
-        // this - > !identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
+        identifier = getValidStringFromIdentifier(identifier, "Schema");
+        return (identifier.substring(0, 1).toUpperCase(Locale.ENGLISH) + identifier.substring(1)).trim();
+    }
+
+    public static String getValidNameForParameter(String identifier) {
+        if (identifier.isBlank()) {
+            return "param";
+        }
+        identifier = getValidStringFromIdentifier(identifier, "param");
+        return (identifier.substring(0, 1).toLowerCase(Locale.ENGLISH) + identifier.substring(1)).trim();
+    }
+
+    private static String getValidStringFromIdentifier(String identifier, String prefix) {
         if (!identifier.matches("\\b[0-9]*\\b")) {
             String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN_FOR_MODIFIER);
             StringBuilder validName = new StringBuilder();
@@ -459,31 +471,9 @@ public class OASModifier {
             }
             identifier = validName.toString();
         } else {
-            identifier = "Schema" + identifier;
+            identifier = prefix + identifier;
         }
-        return (identifier.substring(0, 1).toUpperCase(Locale.ENGLISH) + identifier.substring(1)).trim();
-    }
-
-    public static String getValidNameForParameter(String identifier) {
-        if (identifier.isBlank()) {
-            return "param";
-        }
-        if (!identifier.matches("\\b[0-9]*\\b")) {
-            String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN_FOR_MODIFIER);
-            StringBuilder validName = new StringBuilder();
-            for (String part : split) {
-                if (!part.isBlank()) {
-                        part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
-                                part.substring(1).toLowerCase(Locale.ENGLISH);
-                    validName.append(part);
-                }
-            }
-            String modifiedName = validName.substring(0, 1).toLowerCase(Locale.ENGLISH) + validName.substring(1);
-            identifier = split.length > 1 ? modifiedName : identifier;
-        } else {
-            identifier = "param" + identifier;
-        }
-        return identifier.trim();
+        return identifier;
     }
 
     public static Map<String, String> collectParameterNames(List<Parameter> parameters) {

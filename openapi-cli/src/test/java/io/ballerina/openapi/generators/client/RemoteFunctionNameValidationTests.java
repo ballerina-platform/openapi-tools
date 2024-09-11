@@ -58,7 +58,7 @@ public class RemoteFunctionNameValidationTests {
     public Object[][] dataProvider() {
         return new Object[][]{
                 {"get-pet-name", "getPetName"},
-                {"GET_Add_permission", "gET_Add_permission"},
+                {"GET_Add_Permission", "gETAddPermission"},
                 {"ListBankAccount", "listBankAccount"},
                 {"chat.media.download", "chatMediaDownload"}
         };

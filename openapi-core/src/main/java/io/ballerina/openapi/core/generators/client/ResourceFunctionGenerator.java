@@ -93,7 +93,7 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
             //Create function body
             Optional<FunctionBodyNode> functionBodyNodeResult = getFunctionBodyNode(diagnostics,
                     signatureGenerator.hasHeaders(), signatureGenerator.hasDefaultHeaders(),
-                    signatureGenerator.hasQueries());
+                    signatureGenerator.hasQueries(), signatureGenerator.getHeadersParamName());
             if (functionBodyNodeResult.isEmpty()) {
                 return Optional.empty();
             }
@@ -105,9 +105,11 @@ public class ResourceFunctionGenerator implements FunctionGenerator {
     }
 
     protected Optional<FunctionBodyNode> getFunctionBodyNode(List<ClientDiagnostic> diagnostics, boolean hasHeaders,
-                                                             boolean hasDefaultHeaders, boolean hasQueries) {
+                                                             boolean hasDefaultHeaders, boolean hasQueries,
+                                                             String headersParamName) {
         FunctionBodyGeneratorImp functionBodyGenerator = new FunctionBodyGeneratorImp(path, operation, openAPI,
-                authConfigGeneratorImp, ballerinaUtilGenerator, imports, hasHeaders, hasDefaultHeaders, hasQueries);
+                authConfigGeneratorImp, ballerinaUtilGenerator, imports, hasHeaders, hasDefaultHeaders, hasQueries,
+                headersParamName);
         Optional<FunctionBodyNode> functionBodyNodeResult = functionBodyGenerator.getFunctionBodyNode();
         if (functionBodyNodeResult.isEmpty()) {
             diagnostics.addAll(functionBodyGenerator.getDiagnostics());

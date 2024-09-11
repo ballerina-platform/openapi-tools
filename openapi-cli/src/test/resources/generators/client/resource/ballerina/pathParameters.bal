@@ -48,7 +48,7 @@ public isolated client class Client {
     # + headers - Headers to be sent with the request
     # + queries - Queries to be sent with the request
     # + return - Requested customer
-    resource isolated function get admin/api/'2021\-10/customers/[string customer_id](map<string|string[]> headers = {}, *Get_customerQueries queries) returns error? {
+    resource isolated function get admin/api/'2021\-10/customers/[string customer_id](map<string|string[]> headers = {}, *GetCustomerQueries queries) returns error? {
         string resourcePath = string `/admin/api/2021-10/customers/${getEncodedUri(customer_id)}`;
         resourcePath = resourcePath + check getPathForQueryParam(queries);
         return self.clientEp->get(resourcePath, headers);

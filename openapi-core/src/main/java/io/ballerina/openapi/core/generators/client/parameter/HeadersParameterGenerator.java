@@ -2,9 +2,11 @@ package io.ballerina.openapi.core.generators.client.parameter;
 
 import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeParameterNode;
@@ -56,6 +58,7 @@ public class HeadersParameterGenerator implements ParameterGenerator {
     private final String httpMethod;
     private final String path;
     private boolean hasErrors = false;
+    private final List<String> otherParamNames;
 
     public HeadersParameterGenerator(List<Parameter> parameters, OpenAPI openAPI, Operation operation,
                                      String httpMethod, String path) {
@@ -64,6 +67,17 @@ public class HeadersParameterGenerator implements ParameterGenerator {
         this.operation = operation;
         this.httpMethod = httpMethod;
         this.path = path;
+        this.otherParamNames = new ArrayList<>();
+    }
+
+    public HeadersParameterGenerator(List<Parameter> parameters, OpenAPI openAPI, Operation operation,
+                                     String httpMethod, String path, List<Parameter> otherParameters) {
+        this.parameters = parameters;
+        this.openAPI = openAPI;
+        this.operation = operation;
+        this.httpMethod = httpMethod;
+        this.path = path;
+        this.otherParamNames = otherParameters.stream().map(Parameter::getName).toList();
     }
 
     @Override
@@ -111,14 +125,30 @@ public class HeadersParameterGenerator implements ParameterGenerator {
                     createEmptyMinutiaeList());
             BasicLiteralNode defaultMapExp = createBasicLiteralNode(null, defaultMapVal);
             return createDefaultableParameterNode(createEmptyNodeList(), headersType,
-                    createIdentifierToken(HEADERS), createToken(EQUAL_TOKEN), defaultMapExp);
+                    createIdentifierToken(getHeadersParamName(otherParamNames)), createToken(EQUAL_TOKEN),
+                    defaultMapExp);
         } else {
             return createRequiredParameterNode(createEmptyNodeList(), headersType,
-                    createIdentifierToken(HEADERS));
+                    createIdentifierToken(getHeadersParamName(otherParamNames)));
         }
     }
 
+    public static String getHeadersParamName(List<String> otherParamNames) {
+        String headersParamName = HEADERS;
+        int i = 1;
+        while (otherParamNames.contains(headersParamName)) {
+            headersParamName = HEADERS + i;
+            i++;
+        }
+        return headersParamName;
+    }
+
     public static Optional<ParameterNode> getDefaultParameterNode() {
+        return getDefaultParameterNode(new ArrayList<>());
+    }
+
+    public static Optional<ParameterNode> getDefaultParameterNode(List<Parameter> otherParameters) {
+        List<String> otherParamNames = otherParameters.stream().map(Parameter::getName).toList();
         TypeDescriptorNode stringType = createSimpleNameReferenceNode(
                 createIdentifierToken(GeneratorConstants.STRING));
 
@@ -138,7 +168,7 @@ public class HeadersParameterGenerator implements ParameterGenerator {
                 createEmptyMinutiaeList());
         BasicLiteralNode defaultMapExp = createBasicLiteralNode(null, defaultMapVal);
         return Optional.of(createDefaultableParameterNode(createEmptyNodeList(), defaultHeadersType,
-                createIdentifierToken(HEADERS), createToken(EQUAL_TOKEN), defaultMapExp));
+                createIdentifierToken(getHeadersParamName(otherParamNames)), createToken(EQUAL_TOKEN), defaultMapExp));
     }
 
     @Override
@@ -183,5 +213,16 @@ public class HeadersParameterGenerator implements ParameterGenerator {
             headersSchema.setRequired(requiredFields);
         }
         return headersSchema;
+    }
+
+    public static String getHeadersParamName(ParameterNode parameterNode) {
+        if (parameterNode instanceof RequiredParameterNode requiredParameterNode &&
+                requiredParameterNode.paramName().isPresent()) {
+            return requiredParameterNode.paramName().get().text();
+        } else if (parameterNode instanceof DefaultableParameterNode parameter &&
+                parameter.paramName().isPresent()) {
+            return parameter.paramName().get().text();
+        }
+        return HEADERS;
     }
 }

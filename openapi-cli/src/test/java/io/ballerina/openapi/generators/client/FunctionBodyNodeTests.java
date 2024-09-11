@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADERS;
 import static io.ballerina.openapi.generators.common.GeneratorTestUtils.getOpenAPI;
 
 /**
@@ -67,7 +68,7 @@ public class FunctionBodyNodeTests {
         TypeHandler.createInstance(openapi, false);
         FunctionBodyGeneratorImp functionBodyGeneratorImp = new FunctionBodyGeneratorImp(path, operation, openapi,
                 new AuthConfigGeneratorImp(false, false),
-                new BallerinaUtilGenerator(), new ArrayList<>(), hasHeaders, hasDefaultHeaders, hasQueries);
+                new BallerinaUtilGenerator(), new ArrayList<>(), hasHeaders, hasDefaultHeaders, hasQueries, HEADERS);
         Optional<FunctionBodyNode> bodyNode = functionBodyGeneratorImp.getFunctionBodyNode();
         content = content.trim().replaceAll("\n", "").replaceAll("\\s+", "");
         String bodyNodeContent = bodyNode.get().toString().trim().replaceAll("\n", "")
