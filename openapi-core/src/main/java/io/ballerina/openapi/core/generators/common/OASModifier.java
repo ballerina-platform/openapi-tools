@@ -106,20 +106,42 @@ public class OASModifier {
 
     public OpenAPI modifyWithBallerinaConventions(OpenAPI openapi, Map<String, String> nameMap)
             throws BallerinaOpenApiException {
-        // This is for data type name modification
         openapi = modifyOASWithSchemaName(openapi, nameMap);
+        modifyOASWithParameterName(openapi);
+        modifyOASWithObjectPropertyName(openapi);
+        return openapi;
+    }
+
+    private static void modifyOASWithObjectPropertyName(OpenAPI openapi) {
+        Components components = openapi.getComponents();
+        if (Objects.isNull(components) || Objects.isNull(components.getSchemas())) {
+            return;
+        }
+
+        Map<String, Schema> schemas = components.getSchemas();
+        for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
+            Schema schemaValue = schema.getValue();
+            if (schemaValue instanceof ObjectSchema objectSchema) {
+                Map<String, Schema> properties = objectSchema.getProperties();
+                if (properties != null && !properties.isEmpty()) {
+                    objectSchema.setProperties(getPropertiesWithBallerinaNameExtension(properties));
+                }
+            }
+        }
+    }
+
+    private static void modifyOASWithParameterName(OpenAPI openapi) {
         Paths paths = openapi.getPaths();
         if (paths == null || paths.isEmpty()) {
-            return openapi;
+            return;
         }
-        // This is for path parameter name modifications
+
         Paths modifiedPaths = new Paths();
         for (Map.Entry<String, PathItem> path : paths.entrySet()) {
             PathDetails result = updateParameterNameDetails(path);
             modifiedPaths.put(result.pathValue(), result.pathItem());
         }
         openapi.setPaths(modifiedPaths);
-        return openapi;
     }
 
     public OpenAPI modifyWithBallerinaConventions(OpenAPI openapi) throws BallerinaOpenApiException {
@@ -268,17 +290,65 @@ public class OASModifier {
                                            List<Parameter> parameters, List<Parameter> modifiedParameters) {
 
         for (Parameter parameter : parameters) {
-            if (!parameter.getIn().equals("path")) {
-                modifiedParameters.add(parameter);
-                continue;
+            String location = parameter.getIn();
+            if ("path".equals(location)) {
+                String modifiedPathParam = parameterNames.get(parameter.getName());
+                parameter.setName(modifiedPathParam);
+                pathValue = replaceContentInBraces(pathValue, modifiedPathParam);
+            } else if ("query".equals(location) || "header".equals(location)) {
+                addBallerinaNameExtension(parameter);
             }
-            String oasPathParamName = parameter.getName();
-            String modifiedPathParam = parameterNames.get(oasPathParamName);
-            parameter.setName(modifiedPathParam);
             modifiedParameters.add(parameter);
-            pathValue = replaceContentInBraces(pathValue, modifiedPathParam);
         }
         return pathValue;
+    }
+
+    private static void addBallerinaNameExtension(Parameter parameter) {
+        String parameterName = parameter.getName();
+        if (Objects.isNull(parameterName)) {
+            return;
+        }
+
+        String sanitizedName = getValidNameForParameter(parameterName);
+        if (parameterName.equals(sanitizedName)) {
+            return;
+        }
+
+        if (Objects.isNull(parameter.getExtensions())) {
+            parameter.setExtensions(new HashMap<>());
+        }
+        parameter.getExtensions().put("x-ballerina-name", sanitizedName);
+    }
+
+    private static Schema getSchemaWithBallerinaNameExtension(String propertyName, Schema<?> propertySchema) {
+        String sanitizedPropertyName = getValidNameForParameter(propertyName);
+        if (propertyName.equals(sanitizedPropertyName)) {
+            return propertySchema;
+        }
+
+        if (Objects.nonNull(propertySchema.get$ref())) {
+            Schema refSchema = new Schema<>();
+            refSchema.set$ref(propertySchema.get$ref());
+            propertySchema.set$ref(null);
+            propertySchema.addAllOfItem(refSchema);
+            propertySchema.setType(null);
+        }
+
+        if (Objects.isNull(propertySchema.getExtensions())) {
+            propertySchema.setExtensions(new HashMap<>());
+        }
+        propertySchema.getExtensions().put("x-ballerina-name", sanitizedPropertyName);
+        return propertySchema;
+    }
+
+    private static Map<String, Schema> getPropertiesWithBallerinaNameExtension(Map<String, Schema> properties) {
+        Map<String, Schema> modifiedProperties = new HashMap<>();
+        for (Map.Entry<String, Schema> property : properties.entrySet()) {
+            Schema<?> propertySchema = property.getValue();
+            String propertyName = property.getKey();
+            modifiedProperties.put(propertyName, getSchemaWithBallerinaNameExtension(propertyName, propertySchema));
+        }
+        return modifiedProperties;
     }
 
     /**
