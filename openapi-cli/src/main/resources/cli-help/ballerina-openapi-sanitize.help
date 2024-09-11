@@ -11,10 +11,11 @@ SYNOPSIS
                             [--operations] <operation-names>
 
 DESCRIPTION
-       Sanitize the OpenAPI contract file according to the best practices of
-       Ballerina. The OpenAPI contract is flatten and the type schema names
-       are made Ballerina friendly. The Ballerina name extensions are added
-       to the schemas which can not be modified.
+       Sanitize the OpenAPI contract file according to the best naming
+       practices of Ballerina. The OpenAPI contract is flatten and the type
+       schema names are made Ballerina friendly. The Ballerina name
+       extensions are added to the schemas which can not be modified
+       directly.
 
 
 OPTIONS
