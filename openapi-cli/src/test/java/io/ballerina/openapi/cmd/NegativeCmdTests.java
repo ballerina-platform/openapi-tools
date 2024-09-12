@@ -44,6 +44,60 @@ public class NegativeCmdTests extends OpenAPICommandTest {
         Assert.assertTrue(output.contains("ERROR: invalid Ballerina package directory:"));
     }
 
+    @Test(description = "Test without the input OpenAPI file in `flatten` sub command")
+    public void testFlattenWithOutInputOpenAPIFile() throws IOException {
+        String[] addArgs = {"-f", "json"};
+        Flatten flatten = new Flatten(printStream, false);
+        new CommandLine(flatten).parseArgs(addArgs);
+        flatten.execute();
+        String output = readOutput(true);
+        Assert.assertTrue(output.contains("ERROR: an OpenAPI definition path is required to flatten the OpenAPI " +
+                "definition."));
+    }
+
+    @Test(description = "Test with the invalid input OpenAPI file in `flatten` sub command")
+    public void testFlattenWithInvalidInputOpenAPIFile() throws IOException {
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi-1.json"};
+        Flatten flatten = new Flatten(printStream, false);
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        String output = readOutput(true);
+        Assert.assertTrue(output.contains("ERROR: error occurred while reading the OpenAPI definition file."));
+    }
+
+    @Test(description = "Test with invalid invalid input OpenAPI file extension in `flatten` sub command")
+    public void testFlattenWithInvalidInputOpenAPIFileExtension() throws IOException {
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.txt"};
+        Flatten flatten = new Flatten(printStream, false);
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        String output = readOutput(true);
+        Assert.assertTrue(output.contains("ERROR: invalid input OpenAPI definition file extension. The OpenAPI " +
+                "definition file should be in YAML or JSON format."));
+    }
+
+    @Test(description = "Test with the invalid output OpenAPI file format in `flatten` sub command")
+    public void testFlattenWithInvalidOutputOpenAPIFileFormat() throws IOException {
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.json", "-f", "txt", "-o", tmpDir.toString()};
+        Flatten flatten = new Flatten(printStream, false);
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        String output = readOutput(true);
+        Assert.assertTrue(output.contains("WARNING: invalid output format. The output format should be either " +
+                "\"json\" or \"yaml\".Defaulting to format of the input file."));
+    }
+
+    @Test(description = "Test with the input OpenAPI file in `flatten` sub command which has parsing issues")
+    public void testFlattenWithInputOpenAPIFileParsingIssues() throws IOException {
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi_invalid.json", "-f", "txt", "-o", tmpDir.toString()};
+        Flatten flatten = new Flatten(printStream, false);
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        String output = readOutput(true);
+        Assert.assertTrue(output.contains("WARNING: invalid output format. The output format should be either " +
+                "\"json\" or \"yaml\".Defaulting to format of the input file."));
+    }
+
     @Test(description = "Test without the input OpenAPI file in `sanitize` sub command")
     public void testSanitizeWithOutInputOpenAPIFile() throws IOException {
         String[] addArgs = {"-f", "json"};

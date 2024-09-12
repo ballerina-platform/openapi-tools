@@ -915,14 +915,14 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Assert.assertTrue(tomlContent.contains(generatedTool));
     }
 
-    @Test(description = "Test openapi sanitize sub command with default options with the json file")
-    public void testSanitizeCmdDefaultJson() throws IOException {
-        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_expected.json"));
-        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.json", "-o", tmpDir.toString()};
-        Sanitize sanitize = new Sanitize();
-        new CommandLine(sanitize).parseArgs(args);
-        sanitize.execute();
-        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.json"));
+    @Test(description = "Test openapi flatten sub command with default options with the json file")
+    public void testFlattenCmdDefaultJson() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_expected.json"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.json", "-o", tmpDir.toString()};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.json"));
     }
 
     private void compareFiles(Path expectedFilePath, Path generatedFilePath) throws IOException {
@@ -952,6 +952,87 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         } else {
             Assert.fail("Generation failed: " + readOutput(true));
         }
+    }
+
+    @Test(description = "Test openapi flatten sub command with default options with the yaml file")
+    public void testFlattenCmdDefaultYaml() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_expected.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.yaml", "-o", tmpDir.toString()};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi flatten sub command with the name option")
+    public void testFlattenCmdName() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_expected.json"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.json", "-o", tmpDir.toString(), "-n", "flattened"};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened.json"));
+    }
+
+    @Test(description = "Test openapi flatten sub command with the json format option")
+    public void testFlattenCmdJsonFormat() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_expected.json"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.yaml", "-o", tmpDir.toString(), "-f", "json"};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.json"));
+    }
+
+    @Test(description = "Test openapi flatten sub command with the yaml format option")
+    public void testFlattenCmdYamlFormat() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_expected.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.json", "-o", tmpDir.toString(), "-f", "yaml"};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi flatten sub command with the tags option")
+    public void testFlattenCmdTags() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_expected_pets.json"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.json", "-o", tmpDir.toString(), "-t", "pets"};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.json"));
+    }
+
+    @Test(description = "Test openapi flatten sub command with the operations option")
+    public void testFlattenCmdOperations() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_expected_list_pets.json"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.json", "-o", tmpDir.toString(), "--operations",
+                "listPets"};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.json"));
+    }
+
+    @Test(description = "Test openapi flatten sub command with composed schema")
+    public void testFlattenCmdWithComposedSchema() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_composed_schema.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi_composed_schema.yaml", "-o", tmpDir.toString()};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with default options with the json file")
+    public void testSanitizeCmdDefaultJson() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_expected.json"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.json", "-o", tmpDir.toString()};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.json"));
     }
 
     @Test(description = "Test openapi sanitize sub command with default options with the yaml file")

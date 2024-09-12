@@ -1,0 +1,54 @@
+NAME
+       bal openapi flatten - Flatten the OpenAPI contract file
+
+SYNOPSIS
+       bal openapi flatten [-i | --input] <openapi-contract-file-path>
+                           [-o | --output] <output-file-path>
+                           [-n | --name] <generated-file-name>
+                           [-f | --format] [json|yaml]
+                           [-t | --tags] <tag-names>
+                           [--operations] <operation-names>
+
+DESCRIPTION
+       Make the OpenAPI contract more readable by relocating all inline
+       embedded schemas to the components section and assigning each a
+       unique, Ballerina-friendly name.
+
+OPTIONS
+       -i, --input <openapi-contract-file-path>
+            This is a mandatory input. The given OpenAPI contract will be flatten.
+            The OpenAPI contract can be either a YAML or a JSON.
+
+       -o, --output <output-file-path>
+            This is an optional input. The given output file path will be used to
+            save the flatten OpenAPI contract. The default output file path is the
+            executed directory.
+
+       -n, --name <generated-file-name>
+            This is an optional input. The given name will be used to save the
+            flatten OpenAPI contract. The default name is `flattened_openapi`.
+
+       -f, --format [json|yaml]
+            This is an optional input. The flatten OpenAPI contract will be saved
+            in the given format. The format can be either JSON or YAML. The
+            default format is same as the input file format.
+
+       -t, --tags <tag-names>
+            This is an optional input. The flatten OpenAPI contract will only have
+            the operations with the given tags.
+
+       --operations <operation-names>
+            This is an optional input. The flatten OpenAPI contract will only have
+            the given operations.
+
+EXAMPLES
+       Flatten the `service.yaml` OpenAPI contract file.
+           $ bal openapi flatten -i service.yaml
+
+       Flatten the `service.yaml` OpenAPI contract file and save it as
+       `flatten_service.json` file.
+           $ bal openapi flatten -i hello.yaml -n flatten_service -f json
+
+       Flatten the `service.json` OpenAPI contract file by filtering the
+       operations with the `service` tag.
+           $ bal openapi flatten -i service.json -t service
