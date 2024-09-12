@@ -52,7 +52,7 @@ import static io.ballerina.openapi.service.mapper.utils.CodegenUtils.resolveCont
  *
  * @since 2.2.0
  */
-public abstract class SubCmdBase implements BLauncherCmd{
+public abstract class SubCmdBase implements BLauncherCmd {
 
     private static final String JSON = "json";
 
@@ -160,7 +160,7 @@ public abstract class SubCmdBase implements BLauncherCmd{
         exitError();
     }
 
-    public void printError(String message){
+    public void printError(String message) {
         errorStream.println(message);
     }
 
