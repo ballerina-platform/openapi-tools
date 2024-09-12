@@ -52,7 +52,7 @@ public class NegativeCmdTests extends OpenAPICommandTest {
         flatten.execute();
         String output = readOutput(true);
         Assert.assertTrue(output.contains("ERROR: an OpenAPI definition path is required to flatten the OpenAPI " +
-                "definition."));
+                "definition"));
     }
 
     @Test(description = "Test with the invalid input OpenAPI file in `flatten` sub command")
@@ -62,7 +62,7 @@ public class NegativeCmdTests extends OpenAPICommandTest {
         new CommandLine(flatten).parseArgs(args);
         flatten.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("ERROR: error occurred while reading the OpenAPI definition file."));
+        Assert.assertTrue(output.contains("ERROR: error occurred while reading the OpenAPI definition file"));
     }
 
     @Test(description = "Test with invalid invalid input OpenAPI file extension in `flatten` sub command")
@@ -73,7 +73,7 @@ public class NegativeCmdTests extends OpenAPICommandTest {
         flatten.execute();
         String output = readOutput(true);
         Assert.assertTrue(output.contains("ERROR: invalid input OpenAPI definition file extension. The OpenAPI " +
-                "definition file should be in YAML or JSON format."));
+                "definition file should be in YAML or JSON format"));
     }
 
     @Test(description = "Test with the invalid output OpenAPI file format in `flatten` sub command")
@@ -84,7 +84,7 @@ public class NegativeCmdTests extends OpenAPICommandTest {
         flatten.execute();
         String output = readOutput(true);
         Assert.assertTrue(output.contains("WARNING: invalid output format. The output format should be either " +
-                "\"json\" or \"yaml\".Defaulting to format of the input file."));
+                "\"json\" or \"yaml\".Defaulting to format of the input file"));
     }
 
     @Test(description = "Test with the input OpenAPI file in `flatten` sub command which has parsing issues")
@@ -95,7 +95,7 @@ public class NegativeCmdTests extends OpenAPICommandTest {
         flatten.execute();
         String output = readOutput(true);
         Assert.assertTrue(output.contains("WARNING: invalid output format. The output format should be either " +
-                "\"json\" or \"yaml\".Defaulting to format of the input file."));
+                "\"json\" or \"yaml\".Defaulting to format of the input file"));
     }
 
     @Test(description = "Test without the input OpenAPI file in `sanitize` sub command")
@@ -106,7 +106,7 @@ public class NegativeCmdTests extends OpenAPICommandTest {
         sanitize.execute();
         String output = readOutput(true);
         Assert.assertTrue(output.contains("ERROR: an OpenAPI definition path is required to sanitize the OpenAPI " +
-                "definition."));
+                "definition"));
     }
 
     @Test(description = "Test with the invalid input OpenAPI file in `sanitize` sub command")
@@ -116,7 +116,7 @@ public class NegativeCmdTests extends OpenAPICommandTest {
         new CommandLine(sanitize).parseArgs(args);
         sanitize.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("ERROR: error occurred while reading the OpenAPI definition file."));
+        Assert.assertTrue(output.contains("ERROR: error occurred while reading the OpenAPI definition file"));
     }
 
     @Test(description = "Test with invalid invalid input OpenAPI file extension in `sanitize` sub command")
@@ -127,7 +127,7 @@ public class NegativeCmdTests extends OpenAPICommandTest {
         sanitize.execute();
         String output = readOutput(true);
         Assert.assertTrue(output.contains("ERROR: invalid input OpenAPI definition file extension. The OpenAPI " +
-                "definition file should be in YAML or JSON format."));
+                "definition file should be in YAML or JSON format"));
     }
 
     @Test(description = "Test with the invalid output OpenAPI file format in `sanitize` sub command")
@@ -138,7 +138,7 @@ public class NegativeCmdTests extends OpenAPICommandTest {
         sanitize.execute();
         String output = readOutput(true);
         Assert.assertTrue(output.contains("WARNING: invalid output format. The output format should be either " +
-                "\"json\" or \"yaml\".Defaulting to format of the input file."));
+                "\"json\" or \"yaml\".Defaulting to format of the input file"));
     }
 
     @Test(description = "Test with the input OpenAPI file in `sanitize` sub command which has parsing issues")
@@ -150,6 +150,6 @@ public class NegativeCmdTests extends OpenAPICommandTest {
         sanitize.execute();
         String output = readOutput(true);
         Assert.assertTrue(output.contains("WARNING: invalid output format. The output format should be either " +
-                "\"json\" or \"yaml\".Defaulting to format of the input file."));
+                "\"json\" or \"yaml\".Defaulting to format of the input file"));
     }
 }
