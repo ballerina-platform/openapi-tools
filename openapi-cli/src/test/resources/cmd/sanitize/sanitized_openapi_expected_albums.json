@@ -50,7 +50,7 @@
               "type": "string",
               "default": "v1"
             },
-            "x-ballerina-name": "xApiVersion"
+            "x-ballerina-name": "xAPIVERSION"
           }
         ],
         "responses": {
