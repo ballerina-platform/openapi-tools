@@ -82,7 +82,7 @@ public class OASModifier {
         return getResolvedNameMapping(nameMap);
     }
 
-    private static Map<String, String> getResolvedNameMapping(Map<String, String> nameMap) {
+    public static Map<String, String> getResolvedNameMapping(Map<String, String> nameMap) {
         Map<String, String> resolvedNames = new HashMap<>();
         Map<String, Integer> nameCount = new HashMap<>();
 
@@ -132,9 +132,26 @@ public class OASModifier {
 
     private static OpenAPI modifyOASWithSchemaName(OpenAPI openapi, Map<String, String> nameMap)
             throws BallerinaOpenApiException {
+        SwaggerParseResult parseResult = getOASWithSchemaNameModification(openapi, nameMap);
+        OpenAPI openAPI = parseResult.getOpenAPI();
+        if (Objects.isNull(openAPI)) {
+            List<String> messages = parseResult.getMessages();
+            if (Objects.nonNull(messages) && !messages.isEmpty()) {
+                outErrorStream.println("Schema name sanitization contains errors: ");
+                messages.forEach(outErrorStream::println);
+            }
+            throw new BallerinaOpenApiException("Failed to generate the sanitized OpenAPI specification. Please " +
+                    "consider generating the client/service without the sanitization option.");
+        }
+        return openAPI;
+    }
+
+    public static SwaggerParseResult getOASWithSchemaNameModification(OpenAPI openapi, Map<String, String> nameMap) {
         Components components = openapi.getComponents();
         if (Objects.isNull(components) || nameMap.isEmpty() || Objects.isNull(components.getSchemas())) {
-            return openapi;
+            SwaggerParseResult result = new SwaggerParseResult();
+            result.setOpenAPI(openapi);
+            return result;
         }
 
         Map<String, Schema> schemas = components.getSchemas();
@@ -169,18 +186,7 @@ public class OASModifier {
         }
 
         ParseOptions parseOptions = new ParseOptions();
-        SwaggerParseResult parseResult = new OpenAPIParser().readContents(openApiJson, null, parseOptions);
-        OpenAPI openAPI = parseResult.getOpenAPI();
-        if (Objects.isNull(openAPI)) {
-            List<String> messages = parseResult.getMessages();
-            if (Objects.nonNull(messages) && !messages.isEmpty()) {
-                outErrorStream.println("Sanitized OpenAPI contains errors: ");
-                messages.forEach(outErrorStream::println);
-            }
-            throw new BallerinaOpenApiException("Failed to generate the sanitized OpenAPI specification. Please " +
-                    "consider generating the client/service without the sanitization option.");
-        }
-        return openAPI;
+        return new OpenAPIParser().readContents(openApiJson, null, parseOptions);
     }
 
     private static PathDetails updateParameterNameDetails(Map.Entry<String, PathItem> path) {
