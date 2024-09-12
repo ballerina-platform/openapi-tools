@@ -92,7 +92,7 @@ public abstract class SubCmdBase implements BLauncherCmd {
     private static final String ERROR_OCCURRED_WHILE_WRITING_THE_OUTPUT_OPENAPI_FILE = "ERROR: error occurred while " +
             "writing the %sed OpenAPI definition file%n";
 
-    private final PrintStream infoStream = System.out;
+    private static final PrintStream infoStream = System.out;
     private PrintStream errorStream = System.err;
 
     private Path targetPath = Paths.get(System.getProperty("user.dir"));
@@ -120,11 +120,11 @@ public abstract class SubCmdBase implements BLauncherCmd {
     @CommandLine.Option(names = {"--operations"}, description = "Operations that need to be included when sanitizing.")
     public String operations;
 
-    public SubCmdBase(CommandType cmdType) {
+    protected SubCmdBase(CommandType cmdType) {
         this.cmdType = cmdType;
     }
 
-    public SubCmdBase(CommandType cmdType, PrintStream errorStream, boolean exitWhenFinish) {
+    protected SubCmdBase(CommandType cmdType, PrintStream errorStream, boolean exitWhenFinish) {
         this.cmdType = cmdType;
         this.errorStream = errorStream;
         this.exitWhenFinish = exitWhenFinish;
