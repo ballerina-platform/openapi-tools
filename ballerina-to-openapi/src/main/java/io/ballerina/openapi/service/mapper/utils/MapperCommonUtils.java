@@ -99,6 +99,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.UNARY_EXPRESSION;
 import static io.ballerina.openapi.service.mapper.Constants.BALLERINA;
 import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP_HEADER;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP_QUERY;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_SERVICE_CONTRACT;
 import static io.ballerina.openapi.service.mapper.Constants.HYPHEN;
 import static io.ballerina.openapi.service.mapper.Constants.JSON_EXTENSION;
@@ -439,6 +441,14 @@ public class MapperCommonUtils {
     }
 
     public static String getHeaderName(ParameterNode parameterNode, String defaultName) {
+        return getParamName(HTTP_HEADER, parameterNode, defaultName);
+    }
+
+    public static String getQueryName(ParameterNode parameterNode, String defaultName) {
+        return getParamName(HTTP_QUERY, parameterNode, defaultName);
+    }
+
+    public static String getParamName(String paramTypeName, ParameterNode parameterNode, String defaultName) {
         NodeList<AnnotationNode> annotations = null;
         if (parameterNode instanceof RequiredParameterNode requiredParameterNode) {
             annotations = requiredParameterNode.annotations();
@@ -449,9 +459,9 @@ public class MapperCommonUtils {
             return defaultName;
         }
         for (AnnotationNode annotation : annotations) {
-            if (annotation.annotReference().toString().trim().equals("http:Header")) {
-                String valueExpression = getNameFromHeaderAnnotation(annotation);
-                if (valueExpression != null) {
+            if (annotation.annotReference().toString().trim().equals(paramTypeName)) {
+                String valueExpression = getNameFromParamAnnotation(annotation);
+                if (Objects.nonNull(valueExpression)) {
                     return valueExpression;
                 }
             }
@@ -459,7 +469,7 @@ public class MapperCommonUtils {
         return defaultName;
     }
 
-    private static String getNameFromHeaderAnnotation(AnnotationNode annotation) {
+    private static String getNameFromParamAnnotation(AnnotationNode annotation) {
         Optional<MappingConstructorExpressionNode> annotationRecord = annotation.annotValue();
         if (annotationRecord.isEmpty()) {
             return null;
