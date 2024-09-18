@@ -98,6 +98,12 @@ public class QueryParameterTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario09.yaml");
     }
 
+    @Test(description = "Query parameters configured with name field")
+    public void testQueryscenario10() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario10.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario10.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
