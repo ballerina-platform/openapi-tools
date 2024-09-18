@@ -19,6 +19,7 @@
 package io.ballerina.openapi.core.generators.common;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
@@ -27,6 +28,8 @@ import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Minutiae;
 import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -90,20 +93,26 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createLiteralValueToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createAnnotationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createBasicLiteralNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createExpressionStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createResourcePathParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
@@ -111,6 +120,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSpecificFieldN
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclarationNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.AT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
@@ -123,6 +133,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SLASH_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_FORM_URLENCODED;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.APPLICATION_OCTET_STREAM;
@@ -132,8 +143,11 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BOO
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CATCH_ALL_PATH;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLOSE_CURLY_BRACE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.EXPLODE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NAME_ANNOTATION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.GET;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEAD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADER;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADER_ANNOTATION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_REQUEST;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_RESPONSE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.IMAGE_PNG;
@@ -147,6 +161,8 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NUM
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPENAPI_TYPE_TO_FORMAT_MAP;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPEN_CURLY_BRACE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERY;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERY_ANNOTATION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REGEX_ONLY_NUMBERS_OR_NUMBERS_WITH_SPECIAL_CHARACTERS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REGEX_WITHOUT_SPECIAL_CHARACTERS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REGEX_WORDS_STARTING_WITH_NUMBERS;
@@ -158,6 +174,8 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STR
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STYLE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TEXT_EVENT_STREAM;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.X_BALLERINA_NAME;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.X_PARAM_TYPE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.YML_EXTENSION;
 import static io.ballerina.openapi.core.generators.common.diagnostic.CommonDiagnosticMessages.OAS_COMMON_101;
@@ -173,6 +191,9 @@ public class GeneratorUtils {
     public static final List<String> BAL_KEYWORDS = SyntaxInfo.keywords();
     public static final MinutiaeList SINGLE_END_OF_LINE_MINUTIAE = getEndOfLineMinutiae();
     private static final PrintStream OUT_STREAM = System.err;
+    public static final String NAME = "name";
+    public static final String VALUE = "value";
+    public static final char CHAR = '"';
     private static HashMap<String, Integer> recordCountMap;
 
     private static final List<String> primitiveTypeList =
@@ -450,6 +471,14 @@ public class GeneratorUtils {
         }
     }
 
+    public static Optional<String> getBallerinaNameExtension(Schema schema) {
+        return Optional.ofNullable(schema.getExtensions())
+                .map(extensions -> extensions.get(X_BALLERINA_NAME))
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .map(String::trim);
+    }
+
     public static boolean hasTags(List<String> tags, List<String> filterTags) {
         return !Collections.disjoint(filterTags, tags);
     }
@@ -627,7 +656,7 @@ public class GeneratorUtils {
      */
     public static void createEncodingMap(List<Node> filedOfMap, String style, Boolean explode, String key) {
 
-        IdentifierToken fieldName = createIdentifierToken('"' + key + '"');
+        IdentifierToken fieldName = createIdentifierToken(CHAR + key + CHAR);
         Token colon = createToken(COLON_TOKEN);
         SpecificFieldNode styleField = createSpecificFieldNode(null,
                 createIdentifierToken(STYLE), createToken(COLON_TOKEN),
@@ -1197,5 +1226,39 @@ public class GeneratorUtils {
     public static String generateOperationUniqueId(Operation operation, String path, String method) {
         return Objects.nonNull(operation.getOperationId()) ?
                 operation.getOperationId() : method + getValidName(path, true);
+    }
+
+    public static MetadataNode getNameAnnotationMetadataNode(Schema fieldSchema) {
+        String annotationType = getAnnotationType(fieldSchema);
+        AnnotationNode annotationNode = getNameAnnotationNode(fieldSchema, annotationType);
+        return createMetadataNode(null, createNodeList(annotationNode));
+    }
+
+    public static AnnotationNode getNameAnnotationNode(Schema fieldSchema, String annotationType) {
+        String fieldName = fieldSchema.getName().trim();
+        SimpleNameReferenceNode annotType = createSimpleNameReferenceNode(createIdentifierToken(annotationType));
+        SpecificFieldNode nameField = createSpecificFieldNode(null,
+                createIdentifierToken(annotationType.equals(NAME_ANNOTATION)  ? VALUE : NAME),
+                createToken(COLON_TOKEN), createBasicLiteralNode(STRING_LITERAL,
+                        createLiteralValueToken(SyntaxKind.STRING_LITERAL_TOKEN,
+                                CHAR + fieldName + CHAR, createEmptyMinutiaeList(),
+                                createEmptyMinutiaeList())));
+        MappingConstructorExpressionNode recExp = createMappingConstructorExpressionNode(createToken(OPEN_BRACE_TOKEN),
+                createSeparatedNodeList(nameField), createToken(CLOSE_BRACE_TOKEN));
+        return createAnnotationNode(createToken(AT_TOKEN), annotType, recExp);
+    }
+
+    private static String getAnnotationType(Schema schema) {
+        Map<String, Object> extensions = schema.getExtensions();
+        if (Objects.isNull(extensions) || Objects.isNull(extensions.get(X_PARAM_TYPE)) ||
+                !(extensions.get(X_PARAM_TYPE) instanceof String type)) {
+            return NAME_ANNOTATION;
+        }
+
+        return switch (type) {
+            case QUERY -> QUERY_ANNOTATION;
+            case HEADER -> HEADER_ANNOTATION;
+            default -> NAME_ANNOTATION;
+        };
     }
 }

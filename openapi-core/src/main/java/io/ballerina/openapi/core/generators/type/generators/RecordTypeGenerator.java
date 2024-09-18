@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.node.NullNode;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
@@ -49,6 +50,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -69,6 +71,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getNameAnnotationMetadataNode;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for object type schema.
@@ -277,15 +280,21 @@ public class RecordTypeGenerator extends TypeGenerator {
             List<String> required, List<Node> recordFieldList, Map.Entry<String, Schema<?>> field,
             Schema<?> fieldSchema, IdentifierToken fieldName, TypeDescriptorNode fieldTypeName) {
         Set<String> imports = new HashSet<>();
+        MetadataNode metadataNode = null;
 
+        Optional<String> fieldNameFromExt = GeneratorUtils.getBallerinaNameExtension(fieldSchema);
+        if (fieldNameFromExt.isPresent()) {
+            fieldName = createIdentifierToken(fieldNameFromExt.get());
+            metadataNode = GeneratorUtils.getNameAnnotationMetadataNode(fieldSchema);
+        }
         if (required != null && required.contains(field.getKey().trim())) {
-            setRequiredFields(recordFieldList, fieldSchema, fieldName, fieldTypeName);
+            setRequiredFields(recordFieldList, fieldSchema, fieldName, fieldTypeName, metadataNode);
         } else if (fieldSchema.getDefault() != null) {
             RecordFieldWithDefaultValueNode recordFieldWithDefaultValueNode =
-                    getRecordFieldWithDefaultValueNode(fieldSchema, fieldName, fieldTypeName);
+                    getRecordFieldWithDefaultValueNode(fieldSchema, fieldName, fieldTypeName, metadataNode);
             recordFieldList.add(recordFieldWithDefaultValueNode);
         } else {
-            RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
+            RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
                     fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
             recordFieldList.add(recordFieldNode);
         }
@@ -293,14 +302,14 @@ public class RecordTypeGenerator extends TypeGenerator {
     }
 
     private void setRequiredFields(List<Node> recordFieldList, Schema<?> fieldSchema, IdentifierToken fieldName,
-                                   TypeDescriptorNode fieldTypeName) {
+                                   TypeDescriptorNode fieldTypeName, MetadataNode metadataNode) {
 
         if (Objects.nonNull(fieldSchema.getDefault())) {
             RecordFieldWithDefaultValueNode defaultNode =
-                    getRecordFieldWithDefaultValueNode(fieldSchema, fieldName, fieldTypeName);
+                    getRecordFieldWithDefaultValueNode(fieldSchema, fieldName, fieldTypeName, metadataNode);
             recordFieldList.add(defaultNode);
         } else {
-            RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
+            RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
                     fieldTypeName, fieldName, null, createToken(SEMICOLON_TOKEN));
             recordFieldList.add(recordFieldNode);
         }
@@ -308,7 +317,8 @@ public class RecordTypeGenerator extends TypeGenerator {
 
     private RecordFieldWithDefaultValueNode getRecordFieldWithDefaultValueNode(Schema<?> fieldSchema,
                                                                                IdentifierToken fieldName,
-                                                                               TypeDescriptorNode fieldTypeName) {
+                                                                               TypeDescriptorNode fieldTypeName,
+                                                                               MetadataNode metadataNode) {
         Token defaultValueToken;
         Object defaultValueNode = fieldSchema.getDefault();
         String defaultValue = defaultValueNode.toString().trim();
@@ -325,8 +335,7 @@ public class RecordTypeGenerator extends TypeGenerator {
             expressionNode = createRequiredExpressionNode(defaultValueToken);
         }
 
-        return NodeFactory.createRecordFieldWithDefaultValueNode
-                (null, null, fieldTypeName, fieldName, createToken(EQUAL_TOKEN),
-                        expressionNode, createToken(SEMICOLON_TOKEN));
+        return NodeFactory.createRecordFieldWithDefaultValueNode(metadataNode, null, fieldTypeName,
+                fieldName, createToken(EQUAL_TOKEN), expressionNode, createToken(SEMICOLON_TOKEN));
     }
 }
