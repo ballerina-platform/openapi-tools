@@ -311,8 +311,8 @@ public type ProxyConfig record {|
 
 # Represents the Headers record for the operation: getAlbums
 public type GetAlbumsHeaders record {
-    # API Version
-    VERSION API\-VERSION?;
+    @http:Header {name: "API-VERSION"}
+    VERSION aPIVERSION?;
 };
 
 # Provides a set of configurations for controlling the behaviours when communicating with a remote HTTP endpoint.
