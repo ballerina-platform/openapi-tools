@@ -481,13 +481,12 @@ public class GeneratorUtils {
     }
 
     public static Optional<String> getBallerinaNameExtension(Schema schema) {
-        if (Objects.isNull(schema) || Objects.isNull(schema.getExtensions())) {
-            return Optional.empty();
-        }
-        return getBallerinaNameExtension(schema.getExtensions());
+        return Optional.ofNullable(schema)
+                .map(Schema::getExtensions)
+                .flatMap(GeneratorUtils::getBallerinaNameExtension);
     }
 
-    public static Optional<String> getBallerinaNameExtension(Map extensions) {
+    public static Optional<String> getBallerinaNameExtension(Map<String, Object> extensions) {
         return Optional.ofNullable(extensions)
                 .map(ext -> ext.get(X_BALLERINA_NAME))
                 .filter(String.class::isInstance)
