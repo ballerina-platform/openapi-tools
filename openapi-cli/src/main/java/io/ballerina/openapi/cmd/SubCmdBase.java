@@ -55,6 +55,7 @@ import static io.ballerina.openapi.service.mapper.utils.CodegenUtils.resolveCont
 public abstract class SubCmdBase implements BLauncherCmd {
 
     private static final String JSON = "json";
+    private static final String YAML = "yaml";
 
     public enum CommandType {
         FLATTEN("flatten"),
@@ -259,7 +260,7 @@ public abstract class SubCmdBase implements BLauncherCmd {
     }
 
     private void setDefaultFormat() {
-        format = inputPath.endsWith(JSON_EXTENSION) ? JSON : "yaml";
+        format = inputPath.endsWith(JSON_EXTENSION) ? JSON : YAML;
     }
 
     private void exitError() {

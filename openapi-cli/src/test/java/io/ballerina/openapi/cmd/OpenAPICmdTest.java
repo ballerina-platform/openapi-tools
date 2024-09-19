@@ -1045,6 +1045,26 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.yaml"));
     }
 
+    @Test(description = "Test openapi sanitize sub command with Swagger 2.0")
+    public void testSanitizeCmdWithSwaggerV2() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_2.0_expected.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi_2.0.yaml", "-o", tmpDir.toString()};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with OpenAPI 3.0.0")
+    public void testSanitizeCmdWithOpenAPIV3_0_0() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_3.0.0_expected.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi_3.0.0.yaml", "-o", tmpDir.toString()};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.yaml"));
+    }
+
     @Test(description = "Test openapi sanitize sub command with the name option")
     public void testSanitizeCmdName() throws IOException {
         Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_expected.json"));
