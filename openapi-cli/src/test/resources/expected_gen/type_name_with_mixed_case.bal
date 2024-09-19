@@ -267,14 +267,14 @@ isolated function getMapForHeaders(map<anydata> headerParam) returns map<string|
 }
 
 public type AlbumNewOne record {|
-    # Album ID
-    string id;
-    # Album name
-    string name;
     # Album artist
     string artist;
+    # Album name
+    string name;
     # Album genre
     string genre;
+    # Album ID
+    string id;
 |};
 
 # Provides settings related to HTTP/1.x protocol.

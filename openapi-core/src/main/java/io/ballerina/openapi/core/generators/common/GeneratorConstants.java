@@ -426,6 +426,7 @@ public class GeneratorConstants {
     public static final String DECIMAL = "decimal";
     public static final String RETURN = "return";
     public static final String OPTIONAL_ERROR = "error?";
+    public static final String PATH = "path";
     public static final String NAME_ANNOTATION = "jsondata:Name";
     public static final String QUERY_ANNOTATION = "http:Query";
     public static final String HEADER_ANNOTATION = "http:Header";

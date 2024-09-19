@@ -1,0 +1,174 @@
+swagger: "2.0"
+info:
+  title: Api V1
+  version: 0.0.0
+host: "localhost:8080"
+basePath: "/api/v1"
+schemes:
+  - http
+paths:
+  /albums:
+    get:
+      tags:
+        - albums
+      operationId: getAlbums
+      produces:
+        - application/json
+      parameters:
+        - name: _artists_
+          in: query
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
+          default: []
+        - name: X-API-VERSION
+          in: header
+          type: string
+          default: v1
+      responses:
+        "200":
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/album"
+        "400":
+          description: BadRequest
+          schema:
+            $ref: "#/definitions/ErrorPayload"
+    post:
+      tags:
+        - albums
+      operationId: postAlbum
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/album"
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: "#/definitions/album"
+        "400":
+          description: BadRequest
+          schema:
+            $ref: "#/definitions/ErrorPayload"
+  /albums/{_id}:
+    get:
+      tags:
+        - albums
+      operationId: getAlbumById
+      produces:
+        - application/json
+      parameters:
+        - name: _id
+          in: path
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Ok
+          schema:
+            $ref: "#/definitions/album"
+        "404":
+          description: NotFound
+          schema:
+            $ref: "#/definitions/message"
+        "400":
+          description: BadRequest
+          schema:
+            $ref: "#/definitions/ErrorPayload"
+  /albums/{id}/artist:
+    get:
+      tags:
+        - artists
+      operationId: getArtistByAlbum
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Ok
+          schema:
+            $ref: "#/definitions/album_aRTIST"
+        "400":
+          description: BadRequest
+          schema:
+            $ref: "#/definitions/ErrorPayload"
+definitions:
+  ErrorPayload:
+    required:
+      - message
+      - method
+      - path
+      - reason
+      - status
+      - timestamp
+    type: object
+    properties:
+      timestamp:
+        type: string
+      status:
+        type: integer
+        format: int64
+      reason:
+        type: string
+      message:
+        type: string
+      path:
+        type: string
+      method:
+        type: string
+  album:
+    required:
+      - _id
+      - artist
+      - title
+    type: object
+    properties:
+      _id:
+        type: string
+      title:
+        type: string
+      artist:
+        type: string
+    additionalProperties: false
+  album_aRTIST:
+    required:
+      - albums
+      - id
+      - name
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      albums:
+        type: array
+        items:
+          $ref: "#/definitions/album"
+    additionalProperties: false
+  message:
+    required:
+      - code
+      - message
+    type: object
+    properties:
+      message:
+        type: string
+      code:
+        type: integer
+        format: int64
+    additionalProperties: false
