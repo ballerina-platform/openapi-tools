@@ -130,6 +130,7 @@ public type extensionsChatCompletionsRequest record {
 
 # Represents the Queries record for the operation: ExtensionsChatCompletions_Create
 public type ExtensionsChatCompletionsCreateQueries record {
+    #apiversion
     string api\-version;
 };
 
@@ -215,6 +216,7 @@ public type chatCompletionResponseMessage record {
 
 # Represents the Queries record for the operation: ChatCompletions_Create
 public type ChatCompletionsCreateQueries record {
+    #apiversion
     string api\-version;
 };
 

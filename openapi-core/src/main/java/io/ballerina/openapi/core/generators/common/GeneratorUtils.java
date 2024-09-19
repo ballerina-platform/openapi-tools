@@ -474,7 +474,8 @@ public class GeneratorUtils {
     }
 
     public static Optional<String> getBallerinaNameExtension(Schema schema) {
-        return Optional.ofNullable(schema.getExtensions())
+        return Optional.ofNullable(schema)
+                .map(Schema::getExtensions)
                 .map(extensions -> extensions.get(X_BALLERINA_NAME))
                 .filter(String.class::isInstance)
                 .map(String.class::cast)
