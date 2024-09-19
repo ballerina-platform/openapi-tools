@@ -725,7 +725,7 @@ parameters:
       nullable: true
 ```
 
-The query parameter name in the schema is defaulted to the Ballerina parameter name. But this can be overridden using the `@http:Query` annotation.
+The query parameter name in the schema is defaulted to the Ballerina parameter name. But this can be overridden using the `name` attribute in the `@http:Query` annotation.
 
 ```ballerina
 service /api on new http:Listener(9090) {
@@ -856,7 +856,7 @@ parameters:
         nullable: true
 ```
 
-The header parameter name in the schema is defaulted to the Ballerina parameter name. But this can be overridden using the `@http:Header` annotation.
+The header parameter name in the schema is defaulted to the Ballerina parameter name. But this can be overridden using the `name` attribute in the `@http:Header` annotation.
 
 ```ballerina
 service /api on new http:Listener(9090) {
