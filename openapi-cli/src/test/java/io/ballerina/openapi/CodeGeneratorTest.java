@@ -920,6 +920,82 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test
+    public void testBallerinaNameExtensionInClient() {
+        String definitionPath = RES_DIR.resolve("bal_name_ext_sanitized.yaml").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+        try {
+            String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "bal_name_ext_client.bal");
+            generator.generateClient(definitionPath, resourcePath.toString(), filter,
+                    new ClientGeneratorOptions(false, true, false, false,
+                            true, false));
+            if (Files.exists(resourcePath.resolve("client.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
+                generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
+                expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedClient.contains(expectedClientContent));
+            } else {
+                Assert.fail("Client was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException |
+                 OASTypeGenException | FormatterException e) {
+            Assert.fail("Error while generating the client: " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("client.bal");
+        }
+    }
+
+    @Test
+    public void testBallerinaNameExtensionWithSanitization() {
+        String definitionPath = RES_DIR.resolve("bal_name_ext.yaml").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+        try {
+            String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "bal_name_ext_client.bal");
+            generator.generateClient(definitionPath, resourcePath.toString(), filter,
+                    new ClientGeneratorOptions(false, true, false, false,
+                            true, true));
+            if (Files.exists(resourcePath.resolve("client.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
+                generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
+                expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedClient.contains(expectedClientContent));
+            } else {
+                Assert.fail("Client was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException |
+                 OASTypeGenException | FormatterException e) {
+            Assert.fail("Error while generating the client: " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("client.bal");
+        }
+    }
+
+    @Test
+    public void testBallerinaNameExtensionInService() {
+        String definitionPath = RES_DIR.resolve("bal_name_ext_sanitized.yaml").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+        try {
+            String serviceName = "bal_name_ext";
+            String expectedServiceContractContent = getStringFromGivenBalFile(
+                    expectedDirPath, "bal_name_ext_service_contract.bal");
+            ServiceGeneratorOptions options = new ServiceGeneratorOptions(false, false,
+                    true, false, true, false);
+            generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter, options);
+            if (Files.exists(resourcePath.resolve("bal_name_ext_service.bal"))) {
+                String generatedServiceContract = getStringFromGivenBalFile(resourcePath, "bal_name_ext_service.bal");
+                generatedServiceContract = (generatedServiceContract.trim()).replaceAll("\\s+", "");
+                expectedServiceContractContent = (expectedServiceContractContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedServiceContract.contains(expectedServiceContractContent));
+            } else {
+                Assert.fail("Service contract was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            Assert.fail("Error while generating the service contract: " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("bal_name_ext_sanitized_service.bal");
+        }
+    }
+
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
 
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
