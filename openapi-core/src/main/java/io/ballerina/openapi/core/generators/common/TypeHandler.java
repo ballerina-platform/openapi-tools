@@ -107,6 +107,10 @@ public class TypeHandler {
         typeDefinitionNodes.put(key, typeDefinitionNode);
     }
 
+    public void addImport(String importValue) {
+        imports.add(importValue);
+    }
+
     public SyntaxTree generateTypeSyntaxTree() {
         NodeList<ModuleMemberDeclarationNode> typeMembers = getTypeMembers();
         NodeList<ImportDeclarationNode> imports = generateImportNodes();

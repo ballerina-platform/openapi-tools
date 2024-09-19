@@ -71,7 +71,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getNameAnnotationMetadataNode;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for object type schema.

@@ -194,6 +194,8 @@ public class GeneratorUtils {
     public static final String NAME = "name";
     public static final String VALUE = "value";
     public static final char CHAR = '"';
+    public static final String JSONDATA_IMPORT = "import ballerina/data.jsondata;";
+    public static final String HTTP_IMPORT = "import ballerina/http;";
     private static HashMap<String, Integer> recordCountMap;
 
     private static final List<String> primitiveTypeList =
@@ -1230,6 +1232,7 @@ public class GeneratorUtils {
 
     public static MetadataNode getNameAnnotationMetadataNode(Schema fieldSchema) {
         String annotationType = getAnnotationType(fieldSchema);
+        TypeHandler.getInstance().addImport(annotationType.equals(NAME_ANNOTATION) ? JSONDATA_IMPORT : HTTP_IMPORT);
         AnnotationNode annotationNode = getNameAnnotationNode(fieldSchema, annotationType);
         return createMetadataNode(null, createNodeList(annotationNode));
     }
