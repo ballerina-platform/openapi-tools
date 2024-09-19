@@ -92,6 +92,8 @@ public abstract class SubCmdBase implements BLauncherCmd {
     protected static final String FOUND_PARSER_DIAGNOSTICS = "found the following parser diagnostic messages:";
     private static final String ERROR_OCCURRED_WHILE_WRITING_THE_OUTPUT_OPENAPI_FILE = "ERROR: error occurred while " +
             "writing the %sed OpenAPI definition file%n";
+    private static final String WARNING_SWAGGER_V2_FOUND = "WARNING: Swagger version 2.0 found in the OpenAPI " +
+            "definition. The generated OpenAPI definition will be in OpenAPI version 3.0.x";
 
     private static final PrintStream infoStream = System.out;
     private PrintStream errorStream = System.err;
@@ -213,6 +215,11 @@ public abstract class SubCmdBase implements BLauncherCmd {
                 parserResult.getMessages().forEach(errorStream::println);
             }
             return Optional.empty();
+        }
+
+        if (Objects.nonNull(openAPI.getExtensions()) && openAPI.getExtensions().containsKey("x-original-swagger-version") &&
+                openAPI.getExtensions().get("x-original-swagger-version").toString().trim().equals("2.0")) {
+            errorStream.println(WARNING_SWAGGER_V2_FOUND);
         }
 
         filterOpenAPIOperations(openAPI);

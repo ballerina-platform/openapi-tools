@@ -152,4 +152,15 @@ public class NegativeCmdTests extends OpenAPICommandTest {
         Assert.assertTrue(output.contains("WARNING: invalid output format. The output format should be either " +
                 "\"json\" or \"yaml\".Defaulting to format of the input file"));
     }
+
+    @Test(description = "Test with the input OpenAPI file with Swagger V2 in `sanitize` sub command")
+    public void testSanitizeWithSwaggerV2() throws IOException {
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi_2.0.yaml", "-o", tmpDir.toString()};
+        Sanitize sanitize = new Sanitize(printStream, false);
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        String output = readOutput(true);
+        Assert.assertTrue(output.contains("WARNING: Swagger version 2.0 found in the OpenAPI definition. The " +
+                "generated OpenAPI definition will be in OpenAPI version 3.0.x"));
+    }
 }
