@@ -284,7 +284,7 @@ public class RecordTypeGenerator extends TypeGenerator {
         Optional<String> fieldNameFromExt = GeneratorUtils.getBallerinaNameExtension(fieldSchema);
         if (fieldNameFromExt.isPresent()) {
             fieldName = createIdentifierToken(fieldNameFromExt.get());
-            metadataNode = GeneratorUtils.getNameAnnotationMetadataNode(fieldSchema);
+            metadataNode = GeneratorUtils.getNameAnnotationMetadataNode(field.getKey(), fieldSchema);
         }
         if (required != null && required.contains(field.getKey().trim())) {
             setRequiredFields(recordFieldList, fieldSchema, fieldName, fieldTypeName, metadataNode);

@@ -58,7 +58,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParame
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADER;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADER_ANNOTATION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
@@ -87,10 +87,11 @@ public class HeaderParameterGenerator extends ParameterGenerator {
         String paramName = parameter.getName().trim();
         AnnotationNode headerNode = ServiceGenerationUtils.getAnnotationNode(GeneratorConstants.HEADER_ANNOT, null);
         NodeList<AnnotationNode> headerAnnotations = createNodeList(headerNode);
-        Optional<String> nameFromExt = GeneratorUtils.getBallerinaNameExtension(schema);
+        Optional<String> nameFromExt = GeneratorUtils.getBallerinaNameExtension(parameter);
         if (nameFromExt.isPresent()) {
             paramName = nameFromExt.get();
-            headerAnnotations = createNodeList(GeneratorUtils.getNameAnnotationNode(schema, HEADER));
+            headerAnnotations = createNodeList(GeneratorUtils.getNameAnnotationNode(parameter.getName(),
+                    HEADER_ANNOTATION));
         }
         String headerType = GeneratorConstants.STRING;
         TypeDescriptorNode headerTypeName;

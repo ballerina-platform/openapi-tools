@@ -473,10 +473,23 @@ public class GeneratorUtils {
         }
     }
 
+    public static Optional<String> getBallerinaNameExtension(Parameter parameter) {
+        if (Objects.isNull(parameter) || Objects.isNull(parameter.getExtensions())) {
+            return Optional.empty();
+        }
+        return getBallerinaNameExtension(parameter.getExtensions());
+    }
+
     public static Optional<String> getBallerinaNameExtension(Schema schema) {
-        return Optional.ofNullable(schema)
-                .map(Schema::getExtensions)
-                .map(extensions -> extensions.get(X_BALLERINA_NAME))
+        if (Objects.isNull(schema) || Objects.isNull(schema.getExtensions())) {
+            return Optional.empty();
+        }
+        return getBallerinaNameExtension(schema.getExtensions());
+    }
+
+    public static Optional<String> getBallerinaNameExtension(Map extensions) {
+        return Optional.ofNullable(extensions)
+                .map(ext -> ext.get(X_BALLERINA_NAME))
                 .filter(String.class::isInstance)
                 .map(String.class::cast)
                 .map(String::trim);
@@ -1231,15 +1244,14 @@ public class GeneratorUtils {
                 operation.getOperationId() : method + getValidName(path, true);
     }
 
-    public static MetadataNode getNameAnnotationMetadataNode(Schema fieldSchema) {
+    public static MetadataNode getNameAnnotationMetadataNode(String fieldName, Schema fieldSchema) {
         String annotationType = getAnnotationType(fieldSchema);
-        TypeHandler.getInstance().addImport(annotationType.equals(NAME_ANNOTATION) ? JSONDATA_IMPORT : HTTP_IMPORT);
-        AnnotationNode annotationNode = getNameAnnotationNode(fieldSchema, annotationType);
+        AnnotationNode annotationNode = getNameAnnotationNode(fieldName, annotationType);
         return createMetadataNode(null, createNodeList(annotationNode));
     }
 
-    public static AnnotationNode getNameAnnotationNode(Schema fieldSchema, String annotationType) {
-        String fieldName = fieldSchema.getName().trim();
+    public static AnnotationNode getNameAnnotationNode(String fieldName, String annotationType) {
+        TypeHandler.getInstance().addImport(annotationType.equals(NAME_ANNOTATION) ? JSONDATA_IMPORT : HTTP_IMPORT);
         SimpleNameReferenceNode annotType = createSimpleNameReferenceNode(createIdentifierToken(annotationType));
         SpecificFieldNode nameField = createSpecificFieldNode(null,
                 createIdentifierToken(annotationType.equals(NAME_ANNOTATION)  ? VALUE : NAME),

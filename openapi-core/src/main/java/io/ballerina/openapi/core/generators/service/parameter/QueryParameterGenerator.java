@@ -58,7 +58,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultablePar
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERY;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERY_ANNOTATION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
@@ -87,10 +87,10 @@ public class QueryParameterGenerator extends ParameterGenerator {
         Schema<?> schema = parameter.getSchema();
         String paramName = parameter.getName().trim();
         NodeList<AnnotationNode> annotations = createEmptyNodeList();
-        Optional<String> nameFromExt = GeneratorUtils.getBallerinaNameExtension(schema);
+        Optional<String> nameFromExt = GeneratorUtils.getBallerinaNameExtension(parameter);
         if (nameFromExt.isPresent()) {
             paramName = nameFromExt.get();
-            annotations = createNodeList(GeneratorUtils.getNameAnnotationNode(schema, QUERY));
+            annotations = createNodeList(GeneratorUtils.getNameAnnotationNode(parameter.getName(), QUERY_ANNOTATION));
         }
         IdentifierToken parameterName = createIdentifierToken(
                 GeneratorUtils.escapeIdentifier(paramName),
