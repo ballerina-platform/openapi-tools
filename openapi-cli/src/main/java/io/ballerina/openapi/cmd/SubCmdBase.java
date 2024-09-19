@@ -56,6 +56,8 @@ public abstract class SubCmdBase implements BLauncherCmd {
 
     private static final String JSON = "json";
     private static final String YAML = "yaml";
+    public static final String X_ORIGINAL_SWAGGER_VERSION = "x-original-swagger-version";
+    public static final String V2 = "2.0";
 
     public enum CommandType {
         FLATTEN("flatten"),
@@ -217,13 +219,17 @@ public abstract class SubCmdBase implements BLauncherCmd {
             return Optional.empty();
         }
 
-        if (Objects.nonNull(openAPI.getExtensions()) && openAPI.getExtensions().containsKey("x-original-swagger-version") &&
-                openAPI.getExtensions().get("x-original-swagger-version").toString().trim().equals("2.0")) {
+        if (Objects.nonNull(openAPI.getExtensions()) && isSwaggerV2(openAPI)) {
             errorStream.println(WARNING_SWAGGER_V2_FOUND);
         }
 
         filterOpenAPIOperations(openAPI);
         return Optional.of(openAPI);
+    }
+
+    private static boolean isSwaggerV2(OpenAPI openAPI) {
+        return openAPI.getExtensions().containsKey(X_ORIGINAL_SWAGGER_VERSION) &&
+                openAPI.getExtensions().get(X_ORIGINAL_SWAGGER_VERSION).toString().trim().equals(V2);
     }
 
     @Override
