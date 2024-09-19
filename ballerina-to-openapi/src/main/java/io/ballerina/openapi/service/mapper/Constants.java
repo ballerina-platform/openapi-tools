@@ -50,6 +50,7 @@ public final class Constants {
     public static final String ERROR_PAYLOAD = "ErrorPayload";
     public static final String TREAT_NILABLE_AS_OPTIONAL = "treatNilableAsOptional";
     public static final String HTTP_HEADER = "http:Header";
+    public static final String HTTP_QUERY = "http:Query";
     public static final String BYTE = "byte";
     public static final String XML = "xml";
     public static final String JSON = "json";

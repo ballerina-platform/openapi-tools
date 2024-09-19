@@ -725,6 +725,26 @@ parameters:
       nullable: true
 ```
 
+The query parameter name in the schema is defaulted to the Ballerina parameter name. But this can be overridden using the `name` attribute in the `@http:Query` annotation.
+
+```ballerina
+service /api on new http:Listener(9090) {
+
+  resource function get path(@http:Query{name: "userName"} string param) {
+      // ...
+  }
+}
+```
+
+```yml
+parameters:
+  - name: userName
+    in: query
+    required: true
+    schema:
+      type: string
+```
+
 If the query parameter type is a `map` or `record` with `anydata` fields, then the query parameter schema is wrapped with `content` and `application/json` to indicate that the query parameter should be a JSON object which should be encoded properly.
 
 ```ballerina
@@ -834,6 +854,27 @@ parameters:
      schema:
         type: string
         nullable: true
+```
+
+The header parameter name in the schema is defaulted to the Ballerina parameter name. But this can be overridden using the `name` attribute in the `@http:Header` annotation.
+
+```ballerina
+service /api on new http:Listener(9090) {
+
+  resource function get path(@http:Header{name: "xApiKeys"} string[] param) {
+      // ...
+  }
+}
+```
+
+```yml
+parameters:
+  - name: xApiKeys
+    in: header
+    schema:
+      type: array
+      items:
+        type: string
 ```
 
 Additionally, the header parameter can be a closed `record` which contains the above basic types as fields. In that case, each field of this record represents a header parameter.
@@ -1029,7 +1070,7 @@ additionalProperties: false
 </td>
 </tr>
 <tr>
-<td><code>string:Char<code></td>
+<td><code>string:Char</code></td>
 <td>
 
 ```yml

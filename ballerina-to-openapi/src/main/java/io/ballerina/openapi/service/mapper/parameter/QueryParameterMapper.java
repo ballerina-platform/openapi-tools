@@ -36,6 +36,7 @@ import io.swagger.v3.oas.models.parameters.QueryParameter;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getQueryName;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 /**
@@ -62,7 +63,8 @@ public class QueryParameterMapper extends AbstractParameterMapper {
         Symbol parameterSymbol = additionalData.semanticModel().symbol(parameterNode).orElse(null);
         if (Objects.nonNull(parameterSymbol) && (parameterSymbol instanceof ParameterSymbol queryParameter)) {
             this.type = queryParameter.typeDescriptor();
-            this.name = unescapeIdentifier(queryParameter.getName().get());
+            String paramName = unescapeIdentifier(queryParameter.getName().get());
+            this.name = getQueryName(parameterNode, paramName);
             this.isRequired = queryParameter.paramKind().equals(ParameterKind.REQUIRED);
             this.description = apiDocs.get(queryParameter.getName().get());
             this.treatNilableAsOptional = treatNilableAsOptional;
