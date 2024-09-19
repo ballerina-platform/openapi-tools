@@ -104,8 +104,10 @@ public class QueryParameterGenerator extends ParameterGenerator {
             return handleReferencedQueryParameter(parameter, refSchema, parameterName, annotations);
         } else if (parameter.getContent() != null) {
             Content content = parameter.getContent();
-            for (Map.Entry<String, MediaType> mediaTypeEntry : content.entrySet()) {
-                return handleMapJsonQueryParameter(parameter, parameterName, mediaTypeEntry, annotations);
+            // Only consider the first content
+            Optional<Map.Entry<String, MediaType>> mediaTypeEntry = content.entrySet().stream().findFirst();
+            if (mediaTypeEntry.isPresent()) {
+                return handleMapJsonQueryParameter(parameter, parameterName, mediaTypeEntry.get(), annotations);
             }
         } else if (isSchemaNotSupported) {
             diagnostics.add(new ServiceDiagnostic(ServiceDiagnosticMessages.OAS_SERVICE_102,
