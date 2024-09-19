@@ -1025,6 +1025,109 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.yaml"));
     }
 
+    @Test(description = "Test openapi sanitize sub command with default options with the json file")
+    public void testSanitizeCmdDefaultJson() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_expected.json"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.json", "-o", tmpDir.toString()};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.json"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with default options with the yaml file")
+    public void testSanitizeCmdDefaultYaml() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_expected.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.yaml", "-o", tmpDir.toString()};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with Swagger 2.0")
+    public void testSanitizeCmdWithSwaggerV2() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_2.0_expected.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi_2.0.yaml", "-o", tmpDir.toString()};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with OpenAPI 3.0.0")
+    public void testSanitizeCmdWithOpenAPIV3_0_0() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_3.0.0_expected.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi_3.0.0.yaml", "-o", tmpDir.toString()};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with the name option")
+    public void testSanitizeCmdName() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_expected.json"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.json", "-o", tmpDir.toString(), "-n", "sanitized"};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized.json"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with the json format option")
+    public void testSanitizeCmdJsonFormat() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_expected_1.json"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.yaml", "-o", tmpDir.toString(), "-f", "json"};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.json"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with the yaml format option")
+    public void testSanitizeCmdYamlFormat() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_expected_1.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.json", "-o", tmpDir.toString(), "-f", "yaml"};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with the tags option")
+    public void testSanitizeCmdTags() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(
+                Paths.get("cmd/sanitize/sanitized_openapi_expected_albums.json"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.json", "-o", tmpDir.toString(), "-t", "albums"};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.json"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with the operations option")
+    public void testSanitizeCmdOperations() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(
+                Paths.get("cmd/sanitize/sanitized_openapi_expected_operations.json"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.json", "-o", tmpDir.toString(), "--operations",
+                "getAlbumById,getAlbums"};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.json"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with composed schema")
+    public void testSanitizeCmdWithComposedSchema() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_composed_schema.json"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi_composed_schema.json", "-o", tmpDir.toString()};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.json"));
+    }
+
     @AfterTest
     public void clean() {
         System.setErr(null);

@@ -280,14 +280,14 @@ public type ClientHttp1Settings record {|
 public type VERSION "V1"|"V2";
 
 public type Album record {|
-    # Album ID
-    string id;
-    # Album name
-    string name;
     # Album artist
     string artist;
+    # Album name
+    string name;
     # Album genre
     string genre;
+    # Album ID
+    string id;
 |};
 
 # Represents the Queries record for the operation: getAlbums

@@ -423,4 +423,5 @@ public class GeneratorConstants {
     public static final String DECIMAL = "decimal";
     public static final String RETURN = "return";
     public static final String OPTIONAL_ERROR = "error?";
+    public static final String PATH = "path";
 }

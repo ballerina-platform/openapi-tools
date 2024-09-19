@@ -1,0 +1,202 @@
+openapi: 3.0.1
+info:
+  title: Api V1
+  version: 0.0.0
+servers:
+  - url: "http://{server}:{port}/api/v1"
+    variables:
+      server:
+        default: localhost
+      port:
+        default: "8080"
+paths:
+  /albums:
+    get:
+      tags:
+        - albums
+      operationId: getAlbums
+      parameters:
+        - name: _artists_
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            default: []
+          x-ballerina-name: artists
+        - name: X-API-VERSION
+          in: header
+          required: false
+          style: simple
+          explode: false
+          schema:
+            type: string
+            default: v1
+          x-ballerina-name: xAPIVERSION
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Album"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+    post:
+      tags:
+        - albums
+      operationId: postAlbum
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Album"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Album"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+  /albums/{id}:
+    get:
+      tags:
+        - albums
+      operationId: getAlbumById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Album"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+        "404":
+          description: NotFound
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+  /albums/{id}/artist:
+    get:
+      tags:
+        - artists
+      operationId: getArtistByAlbum
+      parameters:
+        - name: id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlbumARTIST"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+components:
+  schemas:
+    AlbumARTIST:
+      required:
+        - albums
+        - id
+        - name
+      type: object
+      properties:
+        albums:
+          type: array
+          items:
+            $ref: "#/components/schemas/Album"
+        name:
+          type: string
+        id:
+          type: string
+      additionalProperties: false
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        reason:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+    Message:
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+      additionalProperties: false
+    Album:
+      required:
+        - _id
+        - artist
+        - title
+      type: object
+      properties:
+        artist:
+          type: string
+        _id:
+          type: string
+          x-ballerina-name: id
+        title:
+          type: string
+      additionalProperties: false
