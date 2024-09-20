@@ -1201,12 +1201,12 @@ oneOf:
 > ```yml
 > Album:
 >   required:
->   - id
+>   - _id
 >   - artist
 >   - title
 >   type: object
 >   properties:
->     id:
+>     _id:
 >       type: string
 >     title:
 >       type: string
