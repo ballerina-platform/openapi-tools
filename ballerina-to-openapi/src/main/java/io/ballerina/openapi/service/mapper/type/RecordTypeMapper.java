@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.service.mapper.type;
 
+import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
@@ -48,6 +49,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import static io.ballerina.openapi.service.mapper.Constants.JSON_DATA;
+import static io.ballerina.openapi.service.mapper.Constants.NAME_CONFIG;
+import static io.ballerina.openapi.service.mapper.Constants.VALUE;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getNameFromAnnotation;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getRecordFieldTypeDescription;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
@@ -130,11 +135,13 @@ public class RecordTypeMapper extends AbstractTypeMapper {
     public static Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
                                                       Components components, Set<String> requiredFields,
                                                       String recordName, boolean treatNilableAsOptional,
+                                                      boolean inferNameFromJsonData,
                                                       AdditionalData additionalData) {
         Map<String, Schema> properties = new LinkedHashMap<>();
         for (Map.Entry<String, RecordFieldSymbol> recordField : recordFieldMap.entrySet()) {
             RecordFieldSymbol recordFieldSymbol = recordField.getValue();
-            String recordFieldName = MapperCommonUtils.unescapeIdentifier(recordField.getKey().trim());
+            String recordFieldName = getRecordFieldName(inferNameFromJsonData, recordField,
+                    additionalData.semanticModel());
             if (!recordFieldSymbol.isOptional() && !recordFieldSymbol.hasDefaultValue() &&
                     (!treatNilableAsOptional || !UnionTypeMapper.hasNilableType(recordFieldSymbol.typeDescriptor()))) {
                 requiredFields.add(recordFieldName);
@@ -159,6 +166,22 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             properties.put(recordFieldName, recordFieldSchema);
         }
         return properties;
+    }
+
+    public static Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
+                                                      Components components, Set<String> requiredFields,
+                                                      String recordName, boolean treatNilableAsOptional,
+                                                      AdditionalData additionalData) {
+        return mapRecordFields(recordFieldMap, components, requiredFields, recordName, treatNilableAsOptional,
+                true, additionalData);
+    }
+
+    private static String getRecordFieldName(boolean inferNameFromJsonData,
+                                             Map.Entry<String, RecordFieldSymbol> recordFieldEntry,
+                                             SemanticModel semanticModel) {
+        String defaultName = MapperCommonUtils.unescapeIdentifier(recordFieldEntry.getKey().trim());
+        return inferNameFromJsonData ? getNameFromAnnotation(JSON_DATA, NAME_CONFIG, VALUE, semanticModel,
+                defaultName, recordFieldEntry.getValue()) : defaultName;
     }
 
     public static Optional<Object> getRecordFieldDefaultValue(String recordName, String fieldName,

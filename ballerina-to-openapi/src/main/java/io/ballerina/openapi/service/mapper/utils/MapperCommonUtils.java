@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
 import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.Documentable;
 import io.ballerina.compiler.api.symbols.Documentation;
@@ -34,6 +35,7 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.api.values.ConstantValue;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
@@ -77,6 +79,7 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.FilenameUtils;
+import org.wso2.ballerinalang.compiler.tree.BLangConstantValue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -84,6 +87,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -572,5 +576,64 @@ public class MapperCommonUtils {
             return distinctTypeDescriptorNode.typeDescriptor();
         }
         return node;
+    }
+
+    public static String getNameFromAnnotation(String packageName, String annotationName, String annotationFieldName,
+                                               SemanticModel semanticModel, String defaultName,
+                                               RecordFieldSymbol recordField) {
+        Optional<AnnotationAttachmentSymbol> annotationAttachment = getAnnotationAttachment(packageName,
+                annotationName, semanticModel, recordField.annotAttachments());
+        if (annotationAttachment.isPresent() && annotationAttachment.get().isConstAnnotation() &&
+                annotationAttachment.get().attachmentValue().isPresent()) {
+            Object value = annotationAttachment.get().attachmentValue().get().value();
+            Optional<String> name = getNameFromValue(annotationFieldName, value);
+            if (name.isPresent()) {
+                return name.get();
+            }
+        }
+        return defaultName;
+    }
+
+    private static Optional<AnnotationAttachmentSymbol> getAnnotationAttachment(String packageName,
+            String annotationName, SemanticModel semanticModel, List<AnnotationAttachmentSymbol> annotations) {
+        return annotations.stream()
+                .filter(annotAttachment -> isMatchingAnnotation(packageName, annotationName,
+                        semanticModel, annotAttachment))
+                .findFirst();
+    }
+
+    private static boolean isMatchingAnnotation(String packageName, String annotationName, SemanticModel semanticModel,
+                                                AnnotationAttachmentSymbol annotAttachment) {
+        if (annotAttachment.typeDescriptor().typeDescriptor().isEmpty()) {
+            return false;
+        }
+        Optional<Symbol> exampleValueSymbol = semanticModel.types().getTypeByName(BALLERINA, packageName, EMPTY,
+                annotationName);
+        if (exampleValueSymbol.isEmpty() ||
+                !(exampleValueSymbol.get() instanceof TypeDefinitionSymbol serviceContractInfoType)) {
+            return false;
+        }
+        return annotAttachment.typeDescriptor().typeDescriptor().get()
+                .subtypeOf(serviceContractInfoType.typeDescriptor());
+    }
+
+    private static Optional<String> getNameFromValue(String annotationFieldName, Object value) {
+        if (value instanceof ConstantValue constantNameValue) {
+            value = constantNameValue.value();
+        } else if (value instanceof BLangConstantValue constantNameValue) {
+            value = constantNameValue.value;
+        }
+
+        if (!(value instanceof HashMap<?, ?> nameMap)) {
+            return Optional.empty();
+        }
+
+        Object name = nameMap.get(annotationFieldName);
+        if (Objects.isNull(name) || !(name instanceof ConstantValue constantName) ||
+                !(constantName.value() instanceof String nameFromAnnotation)) {
+            return Optional.empty();
+        }
+
+        return Optional.of(nameFromAnnotation);
     }
 }

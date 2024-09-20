@@ -114,7 +114,7 @@ public class TypeMapperImpl implements TypeMapper {
                                                         Set<String> requiredFields, String recordName,
                                                         boolean treatNilableAsOptional) {
         return RecordTypeMapper.mapRecordFields(recordFieldMap, components, requiredFields, recordName,
-                treatNilableAsOptional, componentMapperData);
+                treatNilableAsOptional, false, componentMapperData);
     }
 
     public TypeSymbol getReferredType(TypeSymbol typeSymbol) {

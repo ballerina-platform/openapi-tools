@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.service.mapper.parameter;
 
+import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ParameterKind;
 import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
@@ -41,7 +42,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static io.ballerina.openapi.service.mapper.Constants.HTTP;
+import static io.ballerina.openapi.service.mapper.Constants.HTTP_HEADER_TYPE;
+import static io.ballerina.openapi.service.mapper.Constants.NAME;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getHeaderName;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getNameFromAnnotation;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 /**
@@ -59,12 +64,14 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
     private  boolean treatNilableAsOptional = false;
     private Object defaultValue = null;
     private TypeMapper typeMapper = null;
+    private final SemanticModel semanticModel;
 
     public HeaderParameterMapper(ParameterNode parameterNode, Map<String, String> apiDocs,
                                  OperationInventory operationInventory, boolean treatNilableAsOptional,
                                  AdditionalData additionalData, TypeMapper typeMapper) {
         super(operationInventory);
         Symbol parameterSymbol = additionalData.semanticModel().symbol(parameterNode).orElse(null);
+        this.semanticModel = additionalData.semanticModel();
         if (Objects.nonNull(parameterSymbol) && (parameterSymbol instanceof ParameterSymbol headerParameter)) {
             this.type = headerParameter.typeDescriptor();
             String paramName = unescapeIdentifier(parameterSymbol.getName().get());
@@ -117,6 +124,7 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
 
         Set<String> requiredHeaders = new HashSet<>();
         HashMap<String, RecordFieldSymbol> headerMap = new HashMap<>(recordTypeInfo.typeSymbol().fieldDescriptors());
+        headerMap = updateHeaderMapWithName(headerMap);
         Map<String, Schema> headerSchemaMap = typeMapper.getSchemaForRecordFields(headerMap, requiredHeaders,
                 recordTypeInfo.name(), treatNilableAsOptional);
 
@@ -124,6 +132,17 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
                 entry -> createHeaderParameter(entry.getKey(), entry.getValue(),
                         requiredHeaders.contains(entry.getKey()), getDefaultValueForHeaderField(entry.getKey()))
         ).collect(Collectors.toList());
+    }
+
+    private HashMap<String, RecordFieldSymbol> updateHeaderMapWithName(HashMap<String, RecordFieldSymbol> headerMap) {
+        HashMap<String, RecordFieldSymbol> updatedHeaderMap = new HashMap<>();
+        for (Map.Entry<String, RecordFieldSymbol> entry : headerMap.entrySet()) {
+            String defaultName = entry.getKey();
+            RecordFieldSymbol recordField = entry.getValue();
+            updatedHeaderMap.put(getNameFromAnnotation(HTTP, HTTP_HEADER_TYPE, NAME, semanticModel,
+                    defaultName, recordField), recordField);
+        }
+        return updatedHeaderMap;
     }
 
     private Object getDefaultValueForHeaderField(String name) {
