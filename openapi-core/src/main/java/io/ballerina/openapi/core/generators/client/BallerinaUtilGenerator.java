@@ -121,7 +121,6 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.URL
  */
 public class BallerinaUtilGenerator {
 
-    private boolean headersFound = false;
     private boolean pathParametersFound = false;
     private boolean queryParamsFound = false;
     private boolean requestBodyEncodingFound = false;
@@ -136,7 +135,6 @@ public class BallerinaUtilGenerator {
     private static final String GET_ENCODED_URI = "getEncodedUri";
     private static final String GET_ORIGINAL_KEY = "getOriginalKey";
     private static final String GET_PATH_FOR_QUERY_PARAM = "getPathForQueryParam";
-    private static final String GET_MAP_FOR_HEADERS = "getMapForHeaders";
     private static final String GET_SERIALIZED_RECORD_ARRAY = "getSerializedRecordArray";
     private static final String CREATE_MULTIPART_BODY_PARTS = "createBodyParts";
     private static final String GET_VALIDATED_RESPONSE_FOR_DEFAULT_MAPPING = "getValidatedResponseForDefaultMapping";
@@ -149,16 +147,6 @@ public class BallerinaUtilGenerator {
      */
     public void setQueryParamsFound(boolean flag) {
         this.queryParamsFound = flag;
-    }
-
-    /**
-     * Set `headersFound` flag to `true` when at least one header found.
-     *
-     * @param flag Function will be called only in the occasions where flag needs to be set to `true`
-     */
-    public void setHeadersFound(boolean flag) {
-
-        this.headersFound = flag;
     }
 
     /**
@@ -260,9 +248,6 @@ public class BallerinaUtilGenerator {
                     GET_SERIALIZED_RECORD_ARRAY
             ));
         }
-        if (headersFound) {
-            functionNameList.add(GET_MAP_FOR_HEADERS);
-        }
         if (pathParametersFound) {
             functionNameList.add(GET_ENCODED_URI);
         }
@@ -288,7 +273,7 @@ public class BallerinaUtilGenerator {
             ImportDeclarationNode importMime = GeneratorUtils.getImportDeclarationNode(BALLERINA, MIME);
             imports.add(importMime);
         }
-        if (defaultStatusCodeResponseBindingFound) {
+        if (defaultStatusCodeResponseBindingFound || queryParamsFound) {
             ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(BALLERINA, HTTP);
             imports.add(importForHttp);
         }
@@ -301,7 +286,7 @@ public class BallerinaUtilGenerator {
      * @param memberDeclarationNodes {@link ModuleMemberDeclarationNode}
      */
     private void getUtilTypeDeclarationNodes(List<ModuleMemberDeclarationNode> memberDeclarationNodes) {
-        if (requestBodyEncodingFound || queryParamsFound || headersFound || requestBodyMultipartFormDatafound) {
+        if (requestBodyEncodingFound || queryParamsFound || requestBodyMultipartFormDatafound) {
             memberDeclarationNodes.add(getSimpleBasicTypeDefinitionNode());
         }
         if (requestBodyEncodingFound || queryParamsFound || requestBodyMultipartFormDatafound) {
