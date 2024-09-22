@@ -56,7 +56,7 @@ public isolated client class Client {
             queryParam["api-key-2"] = self.apiKeyConfig?.api\-key\-2;
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
         return self.clientEp->delete(resourcePath, headers = httpHeaders);
     }
 
@@ -73,7 +73,7 @@ public isolated client class Client {
             queryParam["api-key-2"] = self.apiKeyConfig?.api\-key\-2;
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
         return self.clientEp->delete(resourcePath, headers = httpHeaders);
     }
 
@@ -91,7 +91,7 @@ public isolated client class Client {
             queryParam["api-key-2"] = self.apiKeyConfig?.api\-key\-2;
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 
@@ -108,7 +108,7 @@ public isolated client class Client {
             queryParam["api-key-2"] = self.apiKeyConfig?.api\-key\-2;
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
         http:Request request = new;
         return self.clientEp->post(resourcePath, request, httpHeaders);
     }

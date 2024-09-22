@@ -45,7 +45,7 @@ public isolated client class Client {
     resource isolated function get albums/[int id](GetAlbumsIdHeaders headers = {}, *GetAlbumsIdQueries queries) returns record {}|error {
         string resourcePath = string `/albums/${getEncodedUri(id)}`;
         resourcePath = resourcePath + check getPathForQueryParam(queries);
-        map<string|string[]> httpHeaders = getMapForHeaders(headers);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headers);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 }
@@ -217,12 +217,13 @@ isolated function getEncodedUri(anydata value) returns string {
 # + encodingMap - Details on serialization mechanism
 # + return - Returns generated Path or error at failure of client initialization
 isolated function getPathForQueryParam(map<anydata> queryParam, map<Encoding> encodingMap = {}) returns string|error {
+    map<anydata> queriesMap = http:getQueryMap(queryParam);
     string[] param = [];
-    if queryParam.length() > 0 {
+    if queriesMap.length() > 0 {
         param.push("?");
-        foreach var [key, value] in queryParam.entries() {
+        foreach var [key, value] in queriesMap.entries() {
             if value is () {
-                _ = queryParam.remove(key);
+                _ = queriesMap.remove(key);
                 continue;
             }
             Encoding encodingData = encodingMap.hasKey(key) ? encodingMap.get(key) : defaultEncoding;
@@ -245,23 +246,6 @@ isolated function getPathForQueryParam(map<anydata> queryParam, map<Encoding> en
     }
     string restOfPath = string:'join("", ...param);
     return restOfPath;
-}
-
-# Generate header map for given header values.
-#
-# + headerParam - Headers  map
-# + return - Returns generated map or error at failure of client initialization
-isolated function getMapForHeaders(map<anydata> headerParam) returns map<string|string[]> {
-    map<string|string[]> headerMap = {};
-    foreach var [key, value] in headerParam.entries() {
-        if value is SimpleBasicType[] {
-            headerMap[key] = from SimpleBasicType data in value
-                select data.toString();
-        } else {
-            headerMap[key] = value.toString();
-        }
-    }
-    return headerMap;
 }
 
 # Provides settings related to HTTP/1.x protocol.

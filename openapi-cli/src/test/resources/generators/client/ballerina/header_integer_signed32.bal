@@ -46,7 +46,7 @@ public isolated client class Client {
         string resourcePath = string `/pets`;
         map<anydata> headerValues = {...headers};
         headerValues["X-API-KEY"] = self.apiKeyConfig.X\-API\-KEY;
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

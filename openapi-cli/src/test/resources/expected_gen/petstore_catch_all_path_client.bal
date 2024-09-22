@@ -53,7 +53,7 @@ public isolated client class Client {
             headerValues["api_key"] = self.apiKeyConfig?.api_key;
         }
         resourcePath = resourcePath + check getPathForQueryParam(queries);
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 

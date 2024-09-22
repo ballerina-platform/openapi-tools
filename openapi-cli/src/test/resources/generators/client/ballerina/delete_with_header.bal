@@ -41,7 +41,7 @@ public isolated client class Client {
     # + return - Status OK
     remote isolated function deleteHeader(DeleteHeaderHeaders headers) returns error? {
         string resourcePath = string `/header`;
-        map<string|string[]> httpHeaders = getMapForHeaders(headers);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headers);
         return self.clientEp->delete(resourcePath, headers = httpHeaders);
     }
 
@@ -51,7 +51,7 @@ public isolated client class Client {
     # + return - Status OK
     remote isolated function deleteHeaderRequestBody(DeleteHeaderRequestBodyHeaders headers, json payload) returns error? {
         string resourcePath = string `/header-with-request-body`;
-        map<string|string[]> httpHeaders = getMapForHeaders(headers);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headers);
         http:Request request = new;
         request.setPayload(payload, "application/json");
         return self.clientEp->delete(resourcePath, request, httpHeaders);

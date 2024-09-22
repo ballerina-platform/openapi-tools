@@ -50,7 +50,7 @@ public isolated client class Client {
         map<anydata> queryParam = {...queries};
         queryParam["appid"] = self.apiKeyConfig.appid;
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<string|string[]> httpHeaders = getMapForHeaders(headers);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headers);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

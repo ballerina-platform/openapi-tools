@@ -110,7 +110,7 @@ public isolated client class Client {
     # + return - Invalid ID supplied
     remote isolated function deletePet(int petId, DeletePetHeaders headers = {}) returns http:Response|error {
         string resourcePath = string `/pet/${getEncodedUri(petId)}`;
-        map<string|string[]> httpHeaders = getMapForHeaders(headers);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headers);
         return self.clientEp->delete(resourcePath, headers = httpHeaders);
     }
 
@@ -161,7 +161,7 @@ public isolated client class Client {
         if self.apiKeyConfig is ApiKeysConfig {
             headerValues["api_key"] = self.apiKeyConfig?.api_key;
         }
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 
@@ -186,7 +186,7 @@ public isolated client class Client {
         if self.apiKeyConfig is ApiKeysConfig {
             headerValues["api_key"] = self.apiKeyConfig?.api_key;
         }
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 
