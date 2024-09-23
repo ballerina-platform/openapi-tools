@@ -1185,7 +1185,7 @@ oneOf:
 </tr>
 </table>
 
-> **Note:** If the record type has `jsondata:Name` annotation, then the name specified in the annotation is used as the schema name.
+> **Note:** If any field in the record type has a `jsondata:Name` annotation, the name specified in the annotation will be used as the schema name.
 > 
 > Ballerina record type:
 > ```ballerina
