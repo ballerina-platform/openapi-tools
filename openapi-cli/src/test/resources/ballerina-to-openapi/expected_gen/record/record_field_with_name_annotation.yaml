@@ -44,6 +44,25 @@ paths:
                 $ref: "#/components/schemas/ErrorPayload"
     post:
       operationId: postAlbums
+      parameters:
+        - name: X-API-VERSION
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-CORRELATION-ID
+          in: header
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: ids
+          in: header
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
       requestBody:
         content:
           application/json:
