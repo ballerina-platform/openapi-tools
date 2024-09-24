@@ -75,6 +75,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_STATUS;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_STATUS_CODE_RESPONSE;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.HTTP_IMPORT;
 
 public class TypeHandler {
     private static TypeHandler typeHandlerInstance;
@@ -105,6 +106,10 @@ public class TypeHandler {
 
     public void addTypeDefinitionNode(String key, TypeDefinitionNode typeDefinitionNode) {
         typeDefinitionNodes.put(key, typeDefinitionNode);
+    }
+
+    public void addImport(String importValue) {
+        imports.add(importValue);
     }
 
     public SyntaxTree generateTypeSyntaxTree() {
@@ -140,7 +145,7 @@ public class TypeHandler {
         Set<ImportDeclarationNode> importDeclarationNodes = new LinkedHashSet<>();
         // Imports for the http module, when record has http type inclusions.
         if (!typeDefinitionNodes.isEmpty()) {
-            importsForTypeDefinitions(importDeclarationNodes);
+            importsForTypeDefinitions(imports);
         }
         //Imports for constraints
         if (!imports.isEmpty()) {
@@ -155,17 +160,13 @@ public class TypeHandler {
         return createNodeList(importDeclarationNodes);
     }
 
-    private void importsForTypeDefinitions(Set<ImportDeclarationNode> imports) {
+    private void importsForTypeDefinitions(Set<String> imports) {
         for (TypeDefinitionNode node : typeDefinitionNodes.values()) {
             if (!(node.typeDescriptor() instanceof RecordTypeDescriptorNode)) {
                 continue;
             }
-            boolean isHttpImportExist = imports.stream().anyMatch(importNode -> importNode.moduleName().stream()
-                    .anyMatch(moduleName -> moduleName.text().equals(GeneratorConstants.HTTP)));
-            if (node.typeName().text().equals(GeneratorConstants.CONNECTION_CONFIG) && !isHttpImportExist) {
-                ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(
-                        GeneratorConstants.BALLERINA, GeneratorConstants.HTTP);
-                imports.add(importForHttp);
+            if (node.typeName().text().equals(GeneratorConstants.CONNECTION_CONFIG)) {
+                imports.add(HTTP_IMPORT);
             }
             RecordTypeDescriptorNode record = (RecordTypeDescriptorNode) node.typeDescriptor();
             for (Node field : record.fields()) {
@@ -176,11 +177,8 @@ public class TypeHandler {
                 TypeReferenceNode recordField = (TypeReferenceNode) field;
                 QualifiedNameReferenceNode typeInclusion = (QualifiedNameReferenceNode) recordField.typeName();
 
-                if (!isHttpImportExist && typeInclusion.modulePrefix().text().equals(GeneratorConstants.HTTP)) {
-                    ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(
-                            GeneratorConstants.BALLERINA,
-                            GeneratorConstants.HTTP);
-                    imports.add(importForHttp);
+                if (typeInclusion.modulePrefix().text().equals(GeneratorConstants.HTTP)) {
+                    imports.add(HTTP_IMPORT);
                     break;
                 }
             }

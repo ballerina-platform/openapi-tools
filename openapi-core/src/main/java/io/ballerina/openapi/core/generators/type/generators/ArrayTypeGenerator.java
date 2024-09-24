@@ -183,13 +183,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
                         createIdentifierToken(validTypeName));
                 subTypesMap.put(validTypeName, typeDefinitionNode);
             }
-            try {
-                member = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(GeneratorUtils.escapeIdentifier(GeneratorUtils.
-                                extractReferenceType(schema.getItems().get$ref()))));
-            } catch (BallerinaOpenApiException e) {
-                throw new OASTypeGenException(e.getMessage());
-            }
+            member = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(validTypeName));
         } else if (schemaType != null && (schemaType.equals(GeneratorConstants.INTEGER) ||
                 schemaType.equals(GeneratorConstants.NUMBER) || schemaType.equals(GeneratorConstants.BOOLEAN) ||
                 schemaType.equals(GeneratorConstants.STRING))) {

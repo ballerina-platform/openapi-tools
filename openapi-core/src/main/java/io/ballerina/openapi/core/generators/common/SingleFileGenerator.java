@@ -54,7 +54,7 @@ public class SingleFileGenerator {
             Collection<ImportDeclarationNode> removingImports = new ArrayList<>();
             importDeclarationNodes.stream().forEach(importDecNode -> {
                 appendingImportDeclarationNodes.forEach(newImportNode -> {
-                    if (importDecNode.toString().equals(newImportNode.toString())) {
+                    if (importDecNode.toString().trim().equals(newImportNode.toString().trim())) {
                         removingImports.add(newImportNode);
                     }
                 });

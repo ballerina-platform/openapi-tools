@@ -94,10 +94,6 @@ public class ReferencedTypeGenerator extends TypeGenerator {
                     typeDescriptorNode,
                     createToken(SEMICOLON_TOKEN)));
         }
-        if (refSchema == null) {
-            throw new OASTypeGenException(String.format("Undefined $ref: '%s' in openAPI contract.",
-                    schema.get$ref()));
-        }
         return TypeGeneratorUtils.getNullableType(refSchema, nameReferenceNode, ignoreNullableFlag);
     }
 }

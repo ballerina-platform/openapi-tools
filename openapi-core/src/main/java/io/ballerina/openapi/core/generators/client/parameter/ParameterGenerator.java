@@ -23,9 +23,13 @@ import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.X_PARAM_TYPE;
 
 public interface ParameterGenerator {
     //type handler attribute
@@ -37,9 +41,14 @@ public interface ParameterGenerator {
         if (Objects.isNull(schema)) {
             return null;
         }
-        schema.setDescription(parameter.getDescription());
-        schema.setDeprecated(parameter.getDeprecated());
-        schema.extensions(parameter.getExtensions());
+        Optional.ofNullable(parameter.getDescription()).ifPresent(schema::setDescription);
+        Optional.ofNullable(parameter.getDeprecated()).ifPresent(schema::setDeprecated);
+        Map<String, Object> extensions = parameter.getExtensions();
+        if (Objects.isNull(extensions)) {
+            extensions = new HashMap<>();
+        }
+        extensions.put(X_PARAM_TYPE, parameter.getIn());
+        schema.setExtensions(extensions);
         return schema;
     }
 }
