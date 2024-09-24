@@ -42,7 +42,7 @@ public isolated client class Client {
     # + return - successful operation
     remote isolated function getInventory(GetInventoryHeaders headers = {}) returns record {|int:Signed32...;|}|error {
         string resourcePath = string `/store/inventory`;
-        map<string|string[]> httpHeaders = getMapForHeaders(headers);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headers);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

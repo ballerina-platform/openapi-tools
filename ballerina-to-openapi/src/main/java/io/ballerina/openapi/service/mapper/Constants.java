@@ -37,6 +37,9 @@ public final class Constants {
     public static final String HTTP_SERVICE_CONFIG = "http:ServiceConfig";
     public static final String OPENAPI = "openapi";
     public static final String HTTP = "http";
+    public static final String JSON_DATA = "data.jsondata";
+    public static final String NAME_CONFIG = "NameConfig";
+    public static final String NAME = "name";
     public static final String BALLERINA = "ballerina";
     public static final String EMPTY = "";
     public static final String HTTP_SERVICE_CONTRACT_INFO = "ServiceContractInformation";

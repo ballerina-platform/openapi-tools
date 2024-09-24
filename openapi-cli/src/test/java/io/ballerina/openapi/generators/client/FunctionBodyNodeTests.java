@@ -81,12 +81,12 @@ public class FunctionBodyNodeTests {
                 {"diagnostic_files/header_parameter.yaml", "/pets", true, false, false,
                         "{string resourcePath=string`/pets`;" +
                         "map<string|string[]>" +
-                        "httpHeaders=getMapForHeaders(headers);return self.clientEp->" +
+                        "httpHeaders=http:getHeaderMap(headers);return self.clientEp->" +
                         "get(resourcePath,httpHeaders);}"},
                 {"diagnostic_files/head_operation.yaml", "/{filesystem}", true, false, true,
                         "{string resourcePath=string`/${getEncodedUri(filesystem)}`;" +
                         "resourcePath = resourcePath + check getPathForQueryParam(queries);" +
-                        "map<string|string[]> httpHeaders = getMapForHeaders(headers);" +
+                        "map<string|string[]> httpHeaders = http:getHeaderMap(headers);" +
                         "return self.clientEp-> head(resourcePath, httpHeaders);}"},
                 {"diagnostic_files/operation_delete.yaml", "/pets/{petId}", false, false, false,
                         "{string resourcePath = " +

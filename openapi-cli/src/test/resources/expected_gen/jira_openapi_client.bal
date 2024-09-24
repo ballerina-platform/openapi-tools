@@ -2904,12 +2904,13 @@ isolated function getEncodedUri(anydata value) returns string {
 # + encodingMap - Details on serialization mechanism
 # + return - Returns generated Path or error at failure of client initialization
 isolated function getPathForQueryParam(map<anydata> queryParam, map<Encoding> encodingMap = {}) returns string|error {
+    map<anydata> queriesMap = http:getQueryMap(queryParam);
     string[] param = [];
-    if queryParam.length() > 0 {
+    if queriesMap.length() > 0 {
         param.push("?");
-        foreach var [key, value] in queryParam.entries() {
+        foreach var [key, value] in queriesMap.entries() {
             if value is () {
-                _ = queryParam.remove(key);
+                _ = queriesMap.remove(key);
                 continue;
             }
             Encoding encodingData = encodingMap.hasKey(key) ? encodingMap.get(key) : defaultEncoding;

@@ -14,6 +14,11 @@ paths:
     get:
       operationId: getHeader
       parameters:
+        - name: header14
+          in: header
+          required: true
+          schema:
+            type: boolean
         - name: header12
           in: header
           required: true
@@ -35,11 +40,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: header14
-          in: header
-          required: true
-          schema:
-            type: boolean
         - name: h0
           in: header
           schema:
@@ -89,18 +89,18 @@ paths:
               - 1
               - 2.3
               - 4.56
-        - name: name
-          in: header
-          required: true
-          schema:
-            type: string
-            default: John
         - name: city
           in: header
           required: true
           schema:
             type: string
             default: London
+        - name: name
+          in: header
+          required: true
+          schema:
+            type: string
+            default: John
         - name: header23
           in: header
           required: true

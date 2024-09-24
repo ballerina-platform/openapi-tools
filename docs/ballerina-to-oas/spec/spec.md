@@ -1185,6 +1185,36 @@ oneOf:
 </tr>
 </table>
 
+> **Note:** If any field in the record type has a `jsondata:Name` annotation, the name specified in the annotation will be used as the schema name.
+> 
+> Ballerina record type:
+> ```ballerina
+> public type Album record {|
+>     string artist;
+>     @jsondata:Name {value: "_id"}
+>     string id;
+>     string title;
+> |};
+> ```
+> 
+> Generated schema:
+> ```yml
+> Album:
+>   required:
+>   - _id
+>   - artist
+>   - title
+>   type: object
+>   properties:
+>     _id:
+>       type: string
+>     title:
+>       type: string
+>     artist:
+>       type: string
+>   additionalProperties: false
+> ```
+
 ### Ballerina constraints mapping to type schema
 
 The Ballerina constraint package supports constraints on types. These constraints are mapped to the corresponding constraints in each type schema in the components section.

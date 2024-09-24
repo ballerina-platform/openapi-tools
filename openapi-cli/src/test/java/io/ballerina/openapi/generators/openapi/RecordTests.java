@@ -131,6 +131,12 @@ public class RecordTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/record_with_default_values.yaml");
     }
 
+    @Test(description = "Test for record fields with name field annotation")
+    public void testRecordWithNameFieldAnnotation() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/record_field_with_name_annotation.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/record_field_with_name_annotation.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

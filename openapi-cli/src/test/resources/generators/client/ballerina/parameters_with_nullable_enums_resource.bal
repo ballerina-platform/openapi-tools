@@ -54,7 +54,7 @@ public isolated client class Client {
         string resourcePath = string `/users/meetings`;
         map<Encoding> queryParamEncoding = {"status": {style: FORM, explode: true}};
         resourcePath = resourcePath + check getPathForQueryParam(queries, queryParamEncoding);
-        map<string|string[]> httpHeaders = getMapForHeaders(headers);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headers);
         return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

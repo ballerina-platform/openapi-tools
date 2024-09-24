@@ -63,7 +63,7 @@ public isolated client class Client {
             headerValues["api-key"] = self.apiKeyConfig?.api\-key;
         }
         resourcePath = resourcePath + check getPathForQueryParam(queries);
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
@@ -83,7 +83,7 @@ public isolated client class Client {
             headerValues["api-key"] = self.apiKeyConfig?.api\-key;
         }
         resourcePath = resourcePath + check getPathForQueryParam(queries);
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");

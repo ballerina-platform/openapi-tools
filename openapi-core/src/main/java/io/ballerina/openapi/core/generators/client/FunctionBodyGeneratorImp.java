@@ -128,7 +128,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
 
     public static final String MAP_ANYDATA = "map<anydata> ";
     public static final String MAP_STRING_STRING_ARRAY = "map<string|string[]> ";
-    public static final String GET_MAP_FOR_HEADERS = " = getMapForHeaders(";
+    public static final String GET_MAP_FOR_HEADERS = " = http:getHeaderMap(";
     private final List<ImportDeclarationNode> imports;
     private final String path;
     protected final Map.Entry<PathItem.HttpMethod, Operation> operation;
@@ -286,11 +286,9 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                     addApiKeysToMap(HEADER_VALUES, headerApiKeyNameList, statementsList);
                     statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
                             MAP_STRING_STRING_ARRAY + HTTP_HEADERS + GET_MAP_FOR_HEADERS + HEADER_VALUES + ")"));
-                    ballerinaUtilGenerator.setHeadersFound(true);
                 } else if (!hasDefaultHeaders) {
                     statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
                             MAP_STRING_STRING_ARRAY + HTTP_HEADERS + GET_MAP_FOR_HEADERS + headersParamName + ")"));
-                    ballerinaUtilGenerator.setHeadersFound(true);
                 }
             }
         }
@@ -355,7 +353,6 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
         if ((hasHeaders || !headerApiKeyNameList.isEmpty()) && !hasDefaultHeaders) {
             statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
                     MAP_STRING_STRING_ARRAY + HTTP_HEADERS + GET_MAP_FOR_HEADERS + headerVarName + ")"));
-            ballerinaUtilGenerator.setHeadersFound(true);
         }
     }
 

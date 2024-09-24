@@ -1,0 +1,145 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "http://{server}:{port}/payloadV"
+    variables:
+      server:
+        default: localhost
+      port:
+        default: "8080"
+paths:
+  /albums:
+    get:
+      operationId: getAlbums
+      parameters:
+        - name: artists
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+            default: []
+        - name: X-API-VERSION
+          in: header
+          schema:
+            type: string
+            nullable: true
+            default: v1
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Album"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+    post:
+      operationId: postAlbums
+      parameters:
+        - name: X-API-VERSION
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-CORRELATION-ID
+          in: header
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: ids
+          in: header
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Album"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Album"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+  /albums/{id}:
+    get:
+      operationId: getAlbumsId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Album"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+components:
+  schemas:
+    Album:
+      required:
+        - _id
+        - _title
+        - artist
+      type: object
+      properties:
+        artist:
+          type: string
+        _id:
+          type: string
+        _title:
+          type: string
+      additionalProperties: false
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
