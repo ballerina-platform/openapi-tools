@@ -6,7 +6,7 @@ import ballerina/http;
 @http:ServiceConfig {basePath: "/payloadV"}
 type OASServiceType service object {
     *http:ServiceContract;
-    resource function get albums/[string id](string q1 = "query1", int q2 = -1, @http:Header string x\-header = "header1") returns Album;
+    resource function get albums/[string id](string q1 = "query1", int q2 = -1, @http:Header string X\-HEADER = "header1") returns Album;
 };
 
 public type Album record {|

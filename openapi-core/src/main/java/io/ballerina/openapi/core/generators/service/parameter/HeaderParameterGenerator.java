@@ -45,7 +45,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
+import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
@@ -58,6 +58,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParame
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADER_ANNOTATION;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
@@ -83,14 +84,22 @@ public class HeaderParameterGenerator extends ParameterGenerator {
     public ParameterNode generateParameterNode(Parameter parameter) throws UnsupportedOASDataTypeException,
             InvalidReferenceException, InvalidHeaderNameException {
         Schema<?> schema = parameter.getSchema();
+        String paramName = parameter.getName().trim();
+        AnnotationNode headerNode = ServiceGenerationUtils.getAnnotationNode(GeneratorConstants.HEADER_ANNOT, null);
+        NodeList<AnnotationNode> headerAnnotations = createNodeList(headerNode);
+        Optional<String> nameFromExt = GeneratorUtils.getBallerinaNameExtension(parameter);
+        if (nameFromExt.isPresent()) {
+            paramName = nameFromExt.get();
+            headerAnnotations = createNodeList(GeneratorUtils.getNameAnnotationNode(parameter.getName(),
+                    HEADER_ANNOTATION));
+        }
         String headerType = GeneratorConstants.STRING;
         TypeDescriptorNode headerTypeName;
         if (parameter.getName().isBlank()) {
             throw new InvalidHeaderNameException();
         }
-        IdentifierToken parameterName = createIdentifierToken(GeneratorUtils.escapeIdentifier(parameter.getName()
-                        .toLowerCase(Locale.ENGLISH)), AbstractNodeFactory.createEmptyMinutiaeList(),
-                GeneratorUtils.SINGLE_WS_MINUTIAE);
+        IdentifierToken parameterName = createIdentifierToken(GeneratorUtils.escapeIdentifier(paramName),
+                AbstractNodeFactory.createEmptyMinutiaeList(), GeneratorUtils.SINGLE_WS_MINUTIAE);
 
         if (getOpenAPIType(schema) == null && schema.get$ref() == null) {
             // Header example:
@@ -159,8 +168,6 @@ public class HeaderParameterGenerator extends ParameterGenerator {
         //        createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
         //        createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
-        AnnotationNode headerNode = ServiceGenerationUtils.getAnnotationNode(GeneratorConstants.HEADER_ANNOT, null);
-        NodeList<AnnotationNode> headerAnnotations = createNodeList(headerNode);
         // Handle optional values in headers
         if (!parameter.getRequired()) {
             // If optional it behaves like default value with null ex:(string? header)
