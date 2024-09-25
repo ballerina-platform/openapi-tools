@@ -1,116 +1,135 @@
 {
-  "openapi": "3.0.1",
-  "info": {
-    "title": "Api V1",
-    "version": "0.0.0"
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Api V1",
+    "version" : "0.0.0"
   },
-  "servers": [
-    {
-      "url": "http://{server}:{port}/api/v1",
-      "variables": {
-        "server": {
-          "default": "localhost"
-        },
-        "port": {
-          "default": "8080"
-        }
+  "servers" : [ {
+    "url" : "http://{server}:{port}/api/v1",
+    "variables" : {
+      "server" : {
+        "default" : "localhost"
+      },
+      "port" : {
+        "default" : "8080"
       }
     }
-  ],
-  "paths": {
-    "/albums": {
-      "get": {
-        "tags": [
-          "albums"
-        ],
-        "operationId": "getAlbums",
-        "parameters": [
-          {
-            "name": "_artists_",
-            "in": "query",
-            "required": false,
-            "style": "form",
-            "explode": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "default": []
+  } ],
+  "paths" : {
+    "/albums" : {
+      "get" : {
+        "tags" : [ "albums" ],
+        "operationId" : "getAlbums",
+        "parameters" : [ {
+          "name" : "_artists_",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
             },
-            "x-ballerina-name": "artists"
+            "default" : [ ]
           },
-          {
-            "name": "X-API-VERSION",
-            "in": "header",
-            "required": false,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string",
-              "default": "v1"
-            },
-            "x-ballerina-name": "xAPIVERSION"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Ok",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Album"
+          "x-ballerina-name" : "artists"
+        }, {
+          "name" : "X-API-VERSION",
+          "in" : "header",
+          "required" : false,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "v1"
+          },
+          "x-ballerina-name" : "xAPIVERSION"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Ok",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Album"
                   }
                 }
               }
             }
           },
-          "400": {
-            "description": "BadRequest",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorPayload"
+          "400" : {
+            "description" : "BadRequest",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorPayload"
                 }
               }
             }
           }
         }
       },
-      "post": {
-        "tags": [
-          "albums"
-        ],
-        "operationId": "postAlbum",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AlbumsBody"
+      "post" : {
+        "tags" : [ "albums" ],
+        "operationId" : "postAlbum",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "oneOf" : [ {
+                  "required" : [ "_id", "artist", "title" ],
+                  "type" : "object",
+                  "properties" : {
+                    "artist" : {
+                      "type" : "string"
+                    },
+                    "_id" : {
+                      "type" : "string",
+                      "x-ballerina-name" : "id"
+                    },
+                    "title" : {
+                      "type" : "string"
+                    }
+                  },
+                  "additionalProperties" : false
+                }, {
+                  "required" : [ "artist", "title" ],
+                  "type" : "object",
+                  "properties" : {
+                    "artist" : {
+                      "type" : "string"
+                    },
+                    "title" : {
+                      "type" : "string"
+                    }
+                  },
+                  "additionalProperties" : false
+                } ]
               }
             }
           },
-          "required": true
+          "required" : true
         },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Album"
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Album"
                 }
               }
             }
           },
-          "400": {
-            "description": "BadRequest",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorPayload"
+          "400" : {
+            "description" : "BadRequest",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorPayload"
                 }
               }
             }
@@ -118,51 +137,47 @@
         }
       }
     },
-    "/albums/{id}": {
-      "get": {
-        "tags": [
-          "albums"
-        ],
-        "operationId": "getAlbumById",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string"
-            }
+    "/albums/{id}" : {
+      "get" : {
+        "tags" : [ "albums" ],
+        "operationId" : "getAlbumById",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Ok",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Album"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Ok",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Album"
                 }
               }
             }
           },
-          "400": {
-            "description": "BadRequest",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorPayload"
+          "400" : {
+            "description" : "BadRequest",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorPayload"
                 }
               }
             }
           },
-          "404": {
-            "description": "NotFound",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Message"
+          "404" : {
+            "description" : "NotFound",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Message"
                 }
               }
             }
@@ -170,41 +185,53 @@
         }
       }
     },
-    "/albums/{id}/artist": {
-      "get": {
-        "tags": [
-          "artists"
-        ],
-        "operationId": "getArtistByAlbum",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string"
-            }
+    "/albums/{id}/artist" : {
+      "get" : {
+        "tags" : [ "artists" ],
+        "operationId" : "getArtistByAlbum",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Ok",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InlineResponse200"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Ok",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "required" : [ "albums", "id", "name" ],
+                  "type" : "object",
+                  "properties" : {
+                    "albums" : {
+                      "type" : "array",
+                      "items" : {
+                        "$ref" : "#/components/schemas/Album"
+                      }
+                    },
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "id" : {
+                      "type" : "string"
+                    }
+                  },
+                  "additionalProperties" : false
                 }
               }
             }
           },
-          "400": {
-            "description": "BadRequest",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorPayload"
+          "400" : {
+            "description" : "BadRequest",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorPayload"
                 }
               }
             }
@@ -213,147 +240,63 @@
       }
     }
   },
-  "components": {
-    "schemas": {
-      "ErrorPayload": {
-        "required": [
-          "message",
-          "method",
-          "path",
-          "reason",
-          "status",
-          "timestamp"
-        ],
-        "type": "object",
-        "properties": {
-          "reason": {
-            "type": "string"
+  "components" : {
+    "schemas" : {
+      "ErrorPayload" : {
+        "required" : [ "message", "method", "path", "reason", "status", "timestamp" ],
+        "type" : "object",
+        "properties" : {
+          "reason" : {
+            "type" : "string"
           },
-          "path": {
-            "type": "string"
+          "path" : {
+            "type" : "string"
           },
-          "method": {
-            "type": "string"
+          "method" : {
+            "type" : "string"
           },
-          "message": {
-            "type": "string"
+          "message" : {
+            "type" : "string"
           },
-          "timestamp": {
-            "type": "string"
+          "timestamp" : {
+            "type" : "string"
           },
-          "status": {
-            "type": "integer",
-            "format": "int64"
+          "status" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },
-      "AlbumsBody": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/AlbumsOneOf1"
+      "Message" : {
+        "required" : [ "code", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "integer",
+            "format" : "int64"
           },
-          {
-            "$ref": "#/components/schemas/AlbumsalbumsOneOf12"
-          }
-        ]
-      },
-      "Message": {
-        "required": [
-          "code",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "message": {
-            "type": "string"
+          "message" : {
+            "type" : "string"
           }
         },
-        "additionalProperties": false
+        "additionalProperties" : false
       },
-      "AlbumsalbumsOneOf12": {
-        "required": [
-          "artist",
-          "title"
-        ],
-        "type": "object",
-        "properties": {
-          "artist": {
-            "type": "string"
+      "Album" : {
+        "required" : [ "_id", "artist", "title" ],
+        "type" : "object",
+        "properties" : {
+          "artist" : {
+            "type" : "string"
           },
-          "title": {
-            "type": "string"
+          "_id" : {
+            "type" : "string",
+            "x-ballerina-name" : "id"
+          },
+          "title" : {
+            "type" : "string"
           }
         },
-        "additionalProperties": false
-      },
-      "Album": {
-        "required": [
-          "_id",
-          "artist",
-          "title"
-        ],
-        "type": "object",
-        "properties": {
-          "artist": {
-            "type": "string"
-          },
-          "_id": {
-            "type": "string",
-            "x-ballerina-name": "id"
-          },
-          "title": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "InlineResponse200": {
-        "required": [
-          "albums",
-          "id",
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "albums": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Album"
-            }
-          },
-          "name": {
-            "type": "string"
-          },
-          "id": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "AlbumsOneOf1": {
-        "required": [
-          "_id",
-          "artist",
-          "title"
-        ],
-        "type": "object",
-        "properties": {
-          "artist": {
-            "type": "string"
-          },
-          "_id": {
-            "type": "string",
-            "x-ballerina-name": "id"
-          },
-          "title": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
+        "additionalProperties" : false
       }
     }
   }
