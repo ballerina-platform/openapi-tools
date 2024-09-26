@@ -140,7 +140,7 @@ publishing {
         mavenJava(MavenPublication) {
             groupId "io.ballerina.openapi"
             artifactId "core"
-            version = githubReleaseVersion
+            version = project.version
             artifact jar
         }
     }
