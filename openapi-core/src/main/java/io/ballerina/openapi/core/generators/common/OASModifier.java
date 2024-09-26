@@ -128,7 +128,7 @@ public class OASModifier {
     }
 
     private void processOperationWithInlineObjectSchema(Operation operation) {
-        if (operation.getRequestBody() != null) {
+        if (Objects.nonNull(operation.getRequestBody())) {
             updateInlineObjectInContent(operation.getRequestBody().getContent());
         }
         processParametersWithInlineObjectSchema(operation.getParameters());
@@ -136,12 +136,12 @@ public class OASModifier {
     }
 
     private void processParametersWithInlineObjectSchema(List<Parameter> parameters) {
-        if (parameters == null) {
+        if (Objects.isNull(parameters)) {
             return;
         }
 
         for (Parameter parameter : parameters) {
-            if (parameter.getSchema() != null) {
+            if (Objects.nonNull(parameter.getSchema())) {
                 updateInlineObjectSchema(parameter.getSchema());
             }
         }
@@ -149,14 +149,14 @@ public class OASModifier {
 
     private void processResponsesWithInlineObjectSchema(Map<String, ApiResponse> responses) {
         responses.forEach((status, response) -> {
-            if (response.getContent() != null) {
+            if (Objects.nonNull(response.getContent())) {
                 updateInlineObjectInContent(response.getContent());
             }
         });
     }
 
     private void updateInlineObjectSchema(Schema<?> schema) {
-        if (schema == null) {
+        if (Objects.isNull(schema)) {
             return;
         }
         handleInlineObjectSchemaInComposedSchema(schema);
@@ -175,7 +175,7 @@ public class OASModifier {
     }
 
     private void processSubSchemas(List<Schema> subSchemas) {
-        if (subSchemas != null) {
+        if (Objects.nonNull(subSchemas)) {
             subSchemas.forEach(this::updateInlineObjectSchema);
         }
     }
@@ -183,7 +183,7 @@ public class OASModifier {
     private static void handleInlineObjectSchema(Schema<?> schema) {
         if (isInlineObjectSchema(schema)) {
             Map<String, Schema> properties = schema.getProperties();
-            if (properties != null && !properties.isEmpty()) {
+            if (Objects.nonNull(properties) && !properties.isEmpty()) {
                 schema.setProperties(getPropertiesWithBallerinaNameExtension(properties));
             }
         }
@@ -191,11 +191,12 @@ public class OASModifier {
 
     private static boolean isInlineObjectSchema(Schema<?> schema) {
         return schema instanceof ObjectSchema ||
-                (schema.getType() == null && schema.get$ref() == null && schema.getProperties() != null);
+                (Objects.isNull(schema.getType()) && Objects.isNull(schema.get$ref()) &&
+                        Objects.nonNull(schema.getProperties()));
     }
 
     private void handleInlineObjectSchemaItems(Schema<?> schema) {
-        if (schema.getItems() != null) {
+        if (Objects.nonNull(schema.getItems())) {
             updateInlineObjectSchema(schema.getItems());
         }
     }
@@ -207,7 +208,7 @@ public class OASModifier {
     }
 
     private void handleInlineObjectSchemaProperties(Schema<?> schema) {
-        if (schema.getProperties() != null) {
+        if (Objects.nonNull(schema.getProperties())) {
             schema.getProperties().values().forEach(this::updateInlineObjectSchema);
         }
     }
