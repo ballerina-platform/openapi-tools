@@ -12,8 +12,8 @@ SYNOPSIS
 
 DESCRIPTION
        Sanitize the OpenAPI contract file according to the best naming
-       practices of Ballerina. The Ballerina name extensions are added to the schemas which can not be modified
-       directly.
+       practices of Ballerina. The Ballerina name extensions are added
+       to the schemas which can not be modified directly.
 
 
 OPTIONS

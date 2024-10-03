@@ -115,11 +115,11 @@ public class OASModifier {
         openapi = modifyOASWithSchemaName(openapi, nameMap);
         modifyOASWithParameterName(openapi);
         modifyOASWithObjectPropertyName(openapi);
-        modifyOASWithObjectPropertyNameInlineObjectSchema(openapi);
+        modifyOASWithInlineObjectPropertyName(openapi);
         return openapi;
     }
 
-    private void modifyOASWithObjectPropertyNameInlineObjectSchema(OpenAPI openAPI) {
+    private void modifyOASWithInlineObjectPropertyName(OpenAPI openAPI) {
         openAPI.getPaths().forEach((path, pathItem) -> processPathItem(pathItem));
     }
 
