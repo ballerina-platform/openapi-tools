@@ -54,7 +54,7 @@ public class Sanitize extends SubCmdBase {
     @Override
     public Optional<OpenAPI> generate(String openAPIFileContent) {
         Optional<OpenAPI> filteredOpenAPI = getFilteredOpenAPI(openAPIFileContent);
-        return filteredOpenAPI.flatMap(this::getFlattenOpenAPI).flatMap(this::sanitizeOpenAPI);
+        return filteredOpenAPI.flatMap(this::sanitizeOpenAPI);
     }
 
     private Optional<OpenAPI> sanitizeOpenAPI(OpenAPI openAPI) {

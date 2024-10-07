@@ -32,6 +32,7 @@ import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
@@ -114,7 +115,109 @@ public class OASModifier {
         openapi = modifyOASWithSchemaName(openapi, nameMap);
         modifyOASWithParameterName(openapi);
         modifyOASWithObjectPropertyName(openapi);
+        modifyOASWithInlineObjectPropertyName(openapi);
         return openapi;
+    }
+
+    private void modifyOASWithInlineObjectPropertyName(OpenAPI openAPI) {
+        openAPI.getPaths().forEach((path, pathItem) -> processPathItem(pathItem));
+    }
+
+    private void processPathItem(PathItem pathItem) {
+        pathItem.readOperationsMap().forEach((method, operation) -> processOperationWithInlineObjectSchema(operation));
+    }
+
+    private void processOperationWithInlineObjectSchema(Operation operation) {
+        if (Objects.nonNull(operation.getRequestBody())) {
+            updateInlineObjectInContent(operation.getRequestBody().getContent());
+        }
+        processParametersWithInlineObjectSchema(operation.getParameters());
+        processResponsesWithInlineObjectSchema(operation.getResponses());
+    }
+
+    private void processParametersWithInlineObjectSchema(List<Parameter> parameters) {
+        if (Objects.isNull(parameters)) {
+            return;
+        }
+
+        for (Parameter parameter : parameters) {
+            if (Objects.nonNull(parameter.getSchema())) {
+                updateInlineObjectSchema(parameter.getSchema());
+            }
+        }
+    }
+
+    private void processResponsesWithInlineObjectSchema(Map<String, ApiResponse> responses) {
+        responses.forEach((status, response) -> {
+            if (Objects.nonNull(response.getContent())) {
+                updateInlineObjectInContent(response.getContent());
+            }
+        });
+    }
+
+    private void updateInlineObjectSchema(Schema<?> schema) {
+        if (Objects.isNull(schema)) {
+            return;
+        }
+        handleInlineObjectSchemaInComposedSchema(schema);
+        handleInlineObjectSchema(schema);
+        handleInlineObjectSchemaItems(schema);
+        handleInlineObjectSchemaInAdditionalProperties(schema);
+        handleInlineObjectSchemaProperties(schema);
+    }
+
+    private void handleInlineObjectSchemaInComposedSchema(Schema<?> schema) {
+        if (schema instanceof ComposedSchema composedSchema) {
+            processSubSchemas(composedSchema.getAllOf());
+            processSubSchemas(composedSchema.getAnyOf());
+            processSubSchemas(composedSchema.getOneOf());
+        }
+    }
+
+    private void processSubSchemas(List<Schema> subSchemas) {
+        if (Objects.nonNull(subSchemas)) {
+            subSchemas.forEach(this::updateInlineObjectSchema);
+        }
+    }
+
+    private static void handleInlineObjectSchema(Schema<?> schema) {
+        if (isInlineObjectSchema(schema)) {
+            Map<String, Schema> properties = schema.getProperties();
+            if (Objects.nonNull(properties) && !properties.isEmpty()) {
+                schema.setProperties(getPropertiesWithBallerinaNameExtension(properties));
+            }
+        }
+    }
+
+    private static boolean isInlineObjectSchema(Schema<?> schema) {
+        return schema instanceof ObjectSchema ||
+                (Objects.isNull(schema.getType()) && Objects.isNull(schema.get$ref()) &&
+                        Objects.nonNull(schema.getProperties()));
+    }
+
+    private void handleInlineObjectSchemaItems(Schema<?> schema) {
+        if (Objects.nonNull(schema.getItems())) {
+            updateInlineObjectSchema(schema.getItems());
+        }
+    }
+
+    private void handleInlineObjectSchemaInAdditionalProperties(Schema<?> schema) {
+        if (schema.getAdditionalProperties() instanceof Schema) {
+            updateInlineObjectSchema((Schema) schema.getAdditionalProperties());
+        }
+    }
+
+    private void handleInlineObjectSchemaProperties(Schema<?> schema) {
+        if (Objects.nonNull(schema.getProperties())) {
+            schema.getProperties().values().forEach(this::updateInlineObjectSchema);
+        }
+    }
+
+    private void updateInlineObjectInContent(Map<String, io.swagger.v3.oas.models.media.MediaType> content) {
+        for (Map.Entry<String, io.swagger.v3.oas.models.media.MediaType> entry : content.entrySet()) {
+            Schema schema = entry.getValue().getSchema();
+            updateInlineObjectSchema(schema);
+        }
     }
 
     private static void modifyOASWithObjectPropertyName(OpenAPI openapi) {
@@ -338,7 +441,7 @@ public class OASModifier {
         }
 
         if (Objects.nonNull(propertySchema.get$ref())) {
-            Schema refSchema = new Schema<>();
+            Schema<Object> refSchema = new Schema<>();
             refSchema.set$ref(propertySchema.get$ref());
             propertySchema.set$ref(null);
             propertySchema.addAllOfItem(refSchema);
