@@ -4,7 +4,7 @@ _Owners_: @SachinAkash01
 _Reviewers_: @lnash94 @TharmiganK   
 _Created_: 2023/10/25  
 _Updated_: 2023/10/31  
-_Issue_: [#5087]( https://github.com/ballerina-platform/ballerina-library/issues/5087)
+_Issue_: [#4788](https://github.com/ballerina-platform/ballerina-library/issues/4788)
 
 ## Summary
 This proposal is to introduce the capabilities to support HATEOAS (Hypermedia As The Engine Of Application State) links 
